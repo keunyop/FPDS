@@ -43,7 +43,7 @@ function FooterContent() {
             <Link href={dashboardHref} className="inline-flex min-h-11 items-center gap-3">
               <PublicMark className="text-background" />
               <PublicWordmark
-                className="text-lg font-semibold tracking-[-0.035em] text-background"
+                className="text-xl font-semibold tracking-[-0.04em] text-background"
                 eyeClassName="text-background"
               />
             </Link>
@@ -78,7 +78,7 @@ export function PublicFooter() {
 
 function FooterLink({ children, href }: Readonly<{ children: React.ReactNode; href: string }>) {
   return (
-    <Link className="inline-flex min-h-11 min-w-12 items-center justify-center text-background/70 transition-colors hover:text-background" href={href}>
+    <Link className="inline-flex min-h-11 min-w-12 items-center justify-center whitespace-nowrap text-background/70 transition-colors hover:text-background" href={href}>
       {children}
     </Link>
   );

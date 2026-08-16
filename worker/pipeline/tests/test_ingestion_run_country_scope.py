@@ -31,12 +31,38 @@ class _RecordingRunner:
 
     def __call__(self, command, sql: str) -> str:
         self.calls.append((list(command), sql))
-        if "FROM pg_tables" in sql:
+        if "FROM pg_tables" in sql or "FROM information_schema.tables" in sql:
             return "public\n"
         return ""
 
 
 class IngestionRunCountryScopeTests(unittest.TestCase):
+    def test_ai_stage_schema_resolution_accepts_compatibility_views(self) -> None:
+        repository_factories = [
+            lambda runner: PsqlExtractionRepository(
+                ExtractionDatabaseConfig(database_url="postgresql://test", schema="public"),
+                command_runner=runner,
+            ),
+            lambda runner: PsqlNormalizationRepository(
+                NormalizationDatabaseConfig(database_url="postgresql://test", schema="public"),
+                command_runner=runner,
+            ),
+            lambda runner: PsqlValidationRoutingRepository(
+                ValidationRoutingDatabaseConfig(database_url="postgresql://test", schema="public"),
+                command_runner=runner,
+            ),
+        ]
+
+        for factory in repository_factories:
+            with self.subTest(factory=factory):
+                runner = _RecordingRunner()
+                repository = factory(runner)
+
+                self.assertEqual(repository.active_schema, "public")
+                schema_sql = runner.calls[0][1]
+                self.assertIn("FROM information_schema.tables", schema_sql)
+                self.assertIn("llm_usage_record", schema_sql)
+
     def test_country_scope_normalizes_one_country_and_rejects_mixed_runs(self) -> None:
         self.assertEqual(require_single_country_code(["us", "US"]), "US")
         with self.assertRaisesRegex(ValueError, "exactly one country_code"):

@@ -1,0 +1,41 @@
+{
+  "registry_version": "2026-08-15-v1",
+  "bank_code": "VANCITY",
+  "country_code": "CA",
+  "product_type": "savings",
+  "source_language": "en",
+  "allowed_domains": ["vancity.com"],
+  "entry_source_id": "VANCITY-SAV-001",
+  "sources": [
+    {
+      "source_id": "VANCITY-SAV-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Vancity personal account lineup and savings product discovery",
+      "url": "https://www.vancity.com/bank/accounts",
+      "expected_fields": ["product_name", "standard_rate", "monthly_fee", "minimum_balance"]
+    },
+    {
+      "source_id": "VANCITY-SAV-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Jumpstart High Interest Savings detail source",
+      "url": "https://www.vancity.com/bank/accounts/jumpstart-high-interest",
+      "expected_fields": ["product_name", "standard_rate", "monthly_fee", "minimum_balance"]
+    },
+    {
+      "source_id": "VANCITY-SAV-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Vancity account rates supporting evidence",
+      "url": "https://www.vancity.com/rates/accounts",
+      "expected_fields": ["standard_rate", "base_12_month_rate", "public_display_rate"]
+    }
+  ]
+}

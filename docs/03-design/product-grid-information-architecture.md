@@ -403,6 +403,37 @@ mark in Section 10.15 without changing Home or catalog behavior:
   decorative illustration or motion.
 - EN/KO/JA metadata and customer-facing brand references use `Bankoom`.
 
+### 10.18 Calm-Density and Centered-Eye Refinement
+
+Product Owner direction later on `2026-08-15` refines the Public visual and
+information hierarchy without changing approved financial meaning:
+
+- each pupil is centered in its circular eye; the shell mark grows from the
+  earlier compact treatment and the desktop/tablet Bankoom wordmark uses a
+  stronger title scale. The wordmark remains hidden at exact `390px` so the
+  mark, three primary navigation actions, and country control fit without
+  overflow;
+- Home removes repeated kicker/family/evidence explanations, keeps one concise
+  thesis and compact snapshot facts, and gives the dual Top 5 regions more
+  deliberate separation. Desktop ranking rows keep rate and official-bank
+  action on one scan line; mobile rows stack them;
+- catalog list cards show one primary metric and no more than two essential
+  supporting facts. Optional customer tags and highlight badges remain
+  available to comparison/detail but do not compete with list scanning;
+- the selection bar states the selected count directly and removes decorative
+  capacity indicators and repeated guidance;
+- Korean prose uses word-preserving breaks, Japanese prose uses strict line
+  breaking, and compact nav/filter/action/rate/freshness labels do not split
+  internally. Bounded sort rails and data tables may scroll internally, but
+  the document must not overflow;
+- shared product formatting is owned by one Public presentation module so list,
+  comparison, and detail do not drift in currency, rate, term, transaction,
+  redeemability, or security wording;
+- product/filter/detail reads revalidate after five minutes and aggregate
+  summary/ranking/scatter reads after fifteen minutes, matching the approved
+  cache-refresh strategy. The API timeout and localized unavailable states
+  remain unchanged.
+
 ## 11. Follow-On Items
 
 | Area | Follow-Up |

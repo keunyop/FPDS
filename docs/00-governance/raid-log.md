@@ -31,7 +31,7 @@ Rules:
 | R-002 | High | Open | PDF-heavy sources can still produce unstable parse quality and weak field extraction. | Preserve raw artifacts, keep supporting-merge and manual review options available, and verify PDF-heavy banks explicitly. | AI/Data |
 | R-003 | High | Open | BX-PF environment or contract readiness can still delay true publish readiness. | Keep interface-first behavior, mock-safe dev posture, and explicit pending or retry semantics until live readiness is confirmed. | Product Owner, Backend |
 | R-004 | Medium | Open | Public aggregate refresh, snapshot freshness, and canonical truth can drift if queue or retry behavior regresses. | Keep dashboard health visibility, retry flow, and latest-successful serving fallback in place. | Backend |
-| R-005 | Medium | Open | LLM, browser automation, source collection, and queue-remediation costs may grow faster than expected during cross-bank hardening. | Keep official grounding to one call per detail candidate plus one bounded residual-review attempt, cap autopilot candidates per run, reuse completed assessments, persist usage, and monitor the Usage dashboard before widening the cap. | Product Owner, Backend |
+| R-005 | Medium | Open | LLM, browser automation, source collection, and queue-remediation costs may grow faster than expected during cross-bank hardening. | Keep official grounding to one call per detail candidate plus one bounded residual-review attempt, cap autopilot candidates per run, reuse completed assessments, and inspect bounded model/run metadata plus operational health before widening the cap. | Product Owner, Backend |
 | R-006 | High | Open | Delivery capacity remains tight relative to ongoing data, UI, QA, and docs work. | Keep slices small, protect scope boundaries, and avoid reopening settled baselines without clear value. | Product Owner, Tech Lead |
 
 ---
@@ -62,7 +62,7 @@ Rules:
 | ID | Priority | State | Dependency | Impacted Work | Current Handling | Owner |
 |---|---|---|---|---|---|---|
 | D-001 | High | Monitoring | BX-PF access, contract confidence, and production environment readiness | publish readiness, Gate D, release operations | Keep Phase 1 work interface-first until live readiness is explicit. | Product Owner, Backend |
-| D-002 | High | Monitoring | Stable access to bank websites and PDFs | collection quality, parsing, evidence capture | Keep bounded fetching, registry governance, and source-specific hardening active. | AI/Data |
+| D-002 | High | Monitoring | Stable access to bank websites and PDFs | collection quality, parsing, evidence capture | Keep bounded fetching, registry governance, and source-specific hardening active. Browser-enabled domains use format-aware DOM discovery and PDF/DOM snapshot fallback only on the validated official URL and exact bank allowlist; non-product corporate reports remain excluded. Preserve structured CMS identity/condition relationships where flattening loses meaning, and hard-block explicitly dated rate evidence older than the governed five-year safety ceiling. | AI/Data |
 | D-003 | Medium | Open | Domain review bandwidth for taxonomy and field interpretation edge cases | normalization quality, validation rules, public semantics | Escalate only when bank-specific ambiguity blocks canonical decisions. | Product Owner |
 | D-004 | Medium | Open | Phase 2 external API policy and tenant model remain undecided | later API work only | Leave this closed out of current Phase 1 implementation unless scope changes. | Product Owner, Backend |
 
@@ -86,4 +86,6 @@ If an item is no longer shaping decisions, remove it.
 |---|---|
 | 2026-08-08 | Updated I-001 for cross-page lending disclosure capture after Chase/Citi comparison-quality RCA; approval and Public projection now fail closed on incomplete comparison contracts |
 | 2026-08-09 | Added country-product profile mitigation to R-001 and moved I-001 to Monitoring after exact-product lending/CD supporting merge was implemented |
+| 2026-08-15 | Updated D-002 for format-aware browser recovery after Vancity `429` RCA and aligned R-005 with bounded post-`0040` observability |
+| 2026-08-15 | Updated D-002 for Vancity structured-CMS evidence preservation and materially stale dated-rate blocking |
 | 2026-04-22 | Rewrote the RAID log as a short current-baseline document and removed stale closed design-stage items from the default path |

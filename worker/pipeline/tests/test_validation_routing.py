@@ -24,6 +24,48 @@ _GOLDEN_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "golden" / "canada_b
 
 
 class ValidationRoutingServiceTests(unittest.TestCase):
+    def test_explicitly_obsolete_rate_date_remains_hard_review_blocked(self) -> None:
+        runtime_notes: list[str] = []
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "VANCITY",
+                "product_family": "lending",
+                "product_type": "line-of-credit",
+                "subtype_code": "other",
+                "product_name": "Personaline",
+                "currency": "CAD",
+                "source_language": "en",
+                "field_mapping_metadata": {
+                    "interest_rate": {
+                        "official_evidence_quote": (
+                            "Personaline (max. $5,000) Rates (APR) as of 2002‑01‑05 17.75%."
+                        )
+                    }
+                },
+            },
+            candidate_payload={
+                "status": "active",
+                "last_verified_at": "2026-08-16T00:00:00+00:00",
+                "interest_rate": 17.75,
+                "credit_limit_text": "Maximum $5,000",
+                "security_requirement": "Unsecured",
+            },
+            field_evidence_links=[
+                _evidence("product_name", "Personaline", "chunk-name"),
+                _evidence("interest_rate", "17.75", "chunk-rate"),
+                _evidence("credit_limit_text", "Maximum $5,000", "chunk-limit"),
+                _evidence("security_requirement", "Unsecured", "chunk-security"),
+            ],
+            runtime_notes=runtime_notes,
+            taxonomy_registry={},
+            dynamic_product_type=True,
+            expected_fields=["interest_rate", "credit_limit_text", "security_requirement"],
+        )
+
+        self.assertIn("inconsistent_cross_field_logic", issues)
+        self.assertTrue(any("2002-01-05" in note for note in runtime_notes))
+
     def test_heloc_cannot_publish_from_mortgage_profile(self) -> None:
         runtime_notes: list[str] = []
         issues = _compute_validation_issue_codes(

@@ -25,7 +25,7 @@ export function PublicFreshness({
   return (
     <div
       className={cn(
-        "inline-flex min-h-11 min-w-0 max-w-full items-center gap-2.5 rounded-full border px-3.5 py-2 text-sm",
+        "inline-flex min-h-11 min-w-0 max-w-full items-center gap-2.5 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm",
         status === "fresh" && "border-verification/20 bg-verification-soft text-verification",
         status === "stale" && "border-warning/25 bg-warning-soft text-warning",
         status === "unavailable" && "border-destructive/20 bg-destructive/5 text-destructive",

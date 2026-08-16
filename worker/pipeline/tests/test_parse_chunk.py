@@ -30,11 +30,47 @@ class ParseChunkServiceTests(unittest.TestCase):
             content_type="text/html",
         )
 
-        self.assertEqual(PARSER_VERSION, "fpds-parse-chunk-v3")
+        self.assertEqual(PARSER_VERSION, "fpds-parse-chunk-v4")
         self.assertIn("Advantage Savings", artifact.full_text)
         self.assertIn("$8 monthly maintenance fee", artifact.full_text)
         self.assertEqual(artifact.parser_metadata["structured_component_section_count"], 2)
         self.assertTrue(any(segment.anchor_type == "structured_component" for segment in artifact.segments))
+
+    def test_html_parser_preserves_accessible_boolean_icons_in_comparison_tables(self) -> None:
+        artifact = parse_snapshot_bytes(
+            body=b"""
+            <html><body><main><h1>Line of credit options</h1>
+              <table>
+                <tr><th></th><th>Creditline</th><th>Personaline</th></tr>
+                <tr><td>Can be secured</td><td><img alt="Check"></td><td><img alt="X"></td></tr>
+              </table>
+            </main></body></html>
+            """,
+            content_type="text/html",
+        )
+
+        self.assertIn("Can be secured\nCheck\nX", artifact.full_text)
+
+    def test_html_parser_keeps_sitecore_condition_values_bound_to_product_name(self) -> None:
+        payload = {
+            "__typename": "AccountProduct",
+            "Title": {"jsonValue": {"value": "Essential"}},
+            "MonthlyFee": {"jsonValue": {"value": 9.75}},
+            "MinBalanceForFeeWaiver": {"jsonValue": {"value": 1500}},
+            "IncludedTransactions": {"jsonValue": {"value": 25}},
+        }
+        artifact = parse_snapshot_bytes(
+            body=(
+                "<html><body><main><h1>Accounts</h1></main>"
+                f'<script type="application/json">{json.dumps(payload)}</script>'
+                "</body></html>"
+            ).encode(),
+            content_type="text/html",
+        )
+
+        self.assertIn("Essential - Monthly Fee: 9.75", artifact.full_text)
+        self.assertIn("Essential - Min Balance For Fee Waiver: 1500", artifact.full_text)
+        self.assertIn("Essential - Included Transactions: 25", artifact.full_text)
 
     def test_html_snapshot_preserves_heading_only_rate_and_leaf_rate_card_values(self) -> None:
         temp_path = _prepare_workspace_temp_dir("parse-chunk-rate-card")

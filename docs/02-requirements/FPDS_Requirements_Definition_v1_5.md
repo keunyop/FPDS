@@ -357,6 +357,15 @@ action is an official bank product-page action when a safe public
 `product_url` exists. It opens in a new tab without opener access. A missing
 URL produces no fabricated or fallback external destination.
 
+Product Owner clarification on `2026-08-15` supersedes the dense list-card
+presentation implied by the minimum field list above. A catalog card leads
+with one primary comparison metric and shows at most two essential supporting
+facts from the resolved country-product profile. Optional target-customer tags
+and highlight badges are not required on the list card; approved facts remain
+available in comparison and detail. Result-set freshness remains visible near
+the catalog heading. This changes presentation only and does not alter the
+approved projection, comparison meaning, or publication gate.
+
 ### FR-PUB-005 Filtering
 사용자는 다음 필터를 사용할 수 있어야 하며, 필터 라벨은 선택된 locale에 따라 표시되어야 한다.
 
@@ -446,6 +455,14 @@ name and brand mark in the identity acceptance above. The Public title is
 bank products, with the same simple code-native geometry used by the shell and
 favicon. `FPDS` remains the internal platform/runtime name. Ranking, catalog,
 comparison, localization, and publication behavior are unchanged.
+
+Product Owner refinement later on `2026-08-15` centers each pupil within its
+eye, increases the visual scale of the shell mark and desktop/tablet wordmark,
+and establishes a calmer Public information hierarchy. Home retains its
+factual snapshot and equal Deposit/Loan Top 5 semantics while removing
+repeated labels and explanatory copy. EN/KO/JA controls and compact action
+labels must not wrap internally; Korean and Japanese prose must wrap on
+language-appropriate boundaries without document-level horizontal overflow.
 
 ### FR-PUB-010 Comparative Scatter Plot
 insight dashboard는 상품 간 trade-off를 보여주는 scatter plot 또는 동등한 comparative chart를 제공해야 한다.

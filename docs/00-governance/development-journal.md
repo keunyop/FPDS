@@ -1454,3 +1454,163 @@ Read before coding:
   external launch actions and are not performed by this code slice.
 - Next step: confirm the production domain/DNS and repeat the same brand smoke
   against the deployment candidate.
+
+## 2026-08-15 - Bankoom Public Experience Refinement
+
+- WBS: `5.33`
+- Status: done
+- Goal: audit and improve the Public experience across design, UI/UX, source
+  structure, rendering performance, brand scale, logo geometry, trilingual
+  wrapping, and the information density of Home and product catalogs.
+- Outcome: the paired-eye mark is larger and both pupils are centered; the
+  desktop/tablet Bankoom wordmark uses a stronger title scale. Home now has a
+  shorter thesis, a compact snapshot, less repeated family/evidence copy, more
+  deliberate section spacing, and lighter one-line desktop ranking rows.
+  Catalog cards remove optional customer/highlight labels and keep one primary
+  plus at most two essential supporting metrics. The comparison selection bar
+  now communicates count directly without decorative capacity indicators.
+- Localization and accessibility: Korean and Japanese use language-aware line
+  breaking, while compact navigation, controls, rates, freshness, and external
+  actions stay intact. Exact `390px` retains a mark-only header so primary
+  navigation and country selection fit. Existing focus, reduced-motion,
+  semantic heading, bounded internal-scroll, and minimum-target behavior remain.
+- Structure and performance: product metric/label/formatting logic is
+  centralized in `public-product-presentation.ts`, removing nearly 500 lines
+  of local comparison/detail formatting and label code. Public
+  product/filter/detail reads now
+  revalidate at five minutes and dashboard aggregate reads at fifteen minutes,
+  while the eight-second unavailable-state timeout remains.
+- Scope: no API contract, canonical product, Review state, publication rule,
+  financial calculation, raw evidence boundary, or personalized recommendation
+  behavior changed.
+- Key files: Public shared mark/favicon/header/footer/navigation, Home and
+  catalog/comparison/detail surfaces, locale/global styles, Public API client,
+  shared presentation module, Public README, requirements, IA/metric baseline,
+  decision `D-050`, and WBS `5.33`.
+- Verification:
+  - Public `pnpm run typecheck` passed
+  - Public `pnpm run build` passed, including all static/dynamic routes and
+    `/icon.svg`
+  - production-rendered Home passed at `1440px` EN, `768px` KO, and exact
+    `390px` JA; Deposit, Credit Card, Loan, selected comparison, Deposit detail,
+    Loan detail, and Methodology were also checked across representative
+    EN/KO/JA desktop/tablet/mobile states
+  - all checked documents matched their viewport widths; intentional mobile
+    sort rails and term-rate tables remained bounded internal scrollers
+  - final exact-390px Japanese Home had no overflow, undersized target, browser
+    exception, long motion, or awkward snapshot-label split
+- Known issue: domain registration and formal trademark clearance remain
+  external launch actions. The mark-only exact-390px header is intentional;
+  the full wordmark appears from the existing tablet-capable breakpoint.
+- Next step: repeat the responsive/browser smoke against the deployment
+  candidate after production domain and API-origin configuration are finalized.
+
+## 2026-08-15 - Vancity Collection Failure Recovery
+
+- WBS: `5.34`
+- Status: done
+- Goal: account for the failed/partial Vancity Admin collection history,
+  correct each reusable cause without weakening source or publication safety,
+  and recollect only Vancity's active Canadian Product Type coverage.
+- Root cause:
+  - the seven `failed` runs from 2026-07-23 were persisted operator
+    cancellations, not bank transport failures
+  - later 2026-07-24, 2026-07-28, and initial 2026-08-15 attempts completed
+    with `partial_completion_flag=true` and zero selected sources because
+    Vancity returned HTTP `429` to direct HTTPS clients; the existing browser
+    path produced PDF only and could not serve HTML homepage discovery
+  - Admin homepage/companion discovery constructed fetch policies directly,
+    so it bypassed environment browser settings even after Vancity was added
+  - once discovery recovered, extraction exposed a separate post-migration
+    issue: migration `0040` replaced `llm_usage_record` with a discard-only
+    compatibility view, while AI-stage schema discovery inspected physical
+    tables only and therefore rejected the valid `public` schema
+  - a retired `Vancity-2024-Climate-Report.pdf` had also been admitted as
+    generic supporting evidence for three lending scopes; its `404` made those
+    otherwise healthy runs partial even though it contained no product facts
+- Outcome: fetch policy now requests browser DOM for HTML-only discovery and
+  browser PDF for stored snapshots, loads environment browser settings while
+  retaining the exact current bank allowlist, and closes direct HTTP error
+  responses. Vancity is in the default browser-enabled domain set. Extraction,
+  normalization, and validation/routing schema checks use
+  `information_schema.tables` so base tables and `0040` compatibility views
+  are both valid relations. Annual/climate disclosures are excluded from
+  product-supporting discovery.
+- Vancity-only execution:
+  - every launch and targeted retry was constrained to `country_code=CA` and
+    `bank_code=VANCITY`; no other bank was included
+  - the effective latest runs cover `chequing`, `credit-card`, `gic`,
+    `line-of-credit`, `mortgage`, `personal-loan`, and `savings`
+  - all seven runs are `completed` with no error or partial flag; `36/36`
+    selected sources succeeded, using 29 `browser_pdf_fallback` snapshots and
+    seven direct HTTPS snapshots
+  - 42 generated Vancity sources remain active; the three climate-report rows
+    are inactive with `superseded_by_homepage_catalog_generation` lineage
+- Downstream audit: the effective runs produced 23 candidates. Existing policy
+  approved four and left 19 in Review; 22 candidates have validation errors
+  and one passed. Three Review tasks were approved by normal automation, one
+  pass candidate was promoted without a Review task, and 19 tasks remain
+  queued. No manual canonical or Review decision was made. The four promoted
+  products (two credit cards and two mortgages) are active in canonical data
+  and visible in the fresh Canadian Public snapshot
+  `agg_Z5YXEFgOh6KyVHq0`; the latest Public projection contains no incomplete
+  comparison product.
+- Key files: format-aware discovery fetch policy and tests, Admin source
+  catalog generation and exclusions, AI-stage persistence schema resolution,
+  example environments, discovery/API/pipeline READMEs, source-registry and
+  bounded-retention policies, decision `D-051`, RAID, and WBS `5.34`.
+- Verification:
+  - Discovery full suite: 56 tests passed
+  - source-catalog and collection-runner API suites: 182 tests passed
+  - extraction, normalization, validation/routing, and country-scope pipeline
+    suites: 348 tests passed
+  - live exact-bank Admin fetch returned browser-rendered Vancity DOM while
+    preserving `allowed_domains=(vancity.com)`
+  - shared-dev final audit confirmed seven terminal runs, `36/36` successful
+    sources, zero source failures, zero partial flags, and four promoted
+    product IDs present in the latest Public API response
+- Known issue: direct non-browser Vancity requests still receive `429`, so
+  collection depends on the bounded local browser and has higher capture cost.
+  The 19 queued candidates are expected evidence/essential-field review work,
+  not failed collection runs, and remain non-public.
+- Next step: monitor Vancity under RAID `D-002` and process the 19 Review tasks
+  only through the existing evidence-led operator workflow.
+
+## 2026-08-16 - Vancity Coverage Recovery Pause Checkpoint
+
+- WBS: `5.35`
+- Status: in progress; intentionally paused by the Product Owner
+- Outcome to date: mapped Vancity's current official product hubs and detail
+  routes across all seven active Product Types, expanded the curated registry
+  to 60 rows including the official insured-mortgage route, and implemented
+  evidence-bounded discovery, extraction, grounding, and validation fixes for
+  Vancity's structured CMS, multi-product pages, comparison tables, stale rate
+  support, deposit-only ceilings, and mortgage qualification rates.
+- Data safety: no Review item was manually approved and no canonical/Public
+  fact was directly edited. Every collection launch remained constrained to
+  `country_code=CA` and `bank_code=VANCITY`.
+- Latest completed comparison baseline:
+  `collection_xQrVsioO6c2IcvcX` / `corr_LHaKVlpvuPzAxNF1`; seven completed,
+  zero failed/partial, 46 candidates, 17 approved, 29 in Review, 32 Review
+  tasks, and validation 14 pass / 32 error.
+- Active background collection at pause:
+  `collection_pC4G-nfcCpkakYrE` / `corr_syRk20gX8Sf7uoUd`. Its five requested
+  Vancity runs were last observed as `started` with no error/partial result;
+  chequing had reached extraction and the serial runner had not yet produced
+  candidates. It was deliberately not terminated because forced termination
+  can leave run state stuck at `started`. Audit this exact collection before
+  considering any relaunch.
+- Verification completed before the pause:
+  - discovery full suite: 60 tests passed
+  - API source-catalog full suite: 160 tests passed
+  - worker pipeline full suite: 435 tests passed
+- Resume entrypoint: read root startup docs and `goal.md`, then perform a
+  one-second status check of `collection_pC4G-nfcCpkakYrE` using
+  `tmp/fpds_admin_collection_goal_tool.py wait`. When terminal, inspect the
+  detailed per-Product-Type summary, canonical promotion, Review reasons, and
+  latest Public aggregate before making another code or collection decision.
+- Remaining completion work: terminal collection audit; targeted follow-up
+  only if grounded blockers remain; Public aggregate verification; final
+  affected test rerun; `git diff --check`; tracked test-artifact restoration;
+  ignored research-helper cleanup; final documentation/WBS update; and removal
+  of `goal.md` only after all acceptance criteria pass.

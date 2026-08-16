@@ -60,6 +60,11 @@ _STRUCTURED_PRICING_KEYS = {
     "minimumdeposit",
     "minimumopeningdeposit",
     "monthlyfee",
+    "minbalanceforfeewaiver",
+    "includedtransactions",
+    "pertransactionfee",
+    "creditlimit",
+    "loanamount",
     "openingdeposit",
     "penalty",
     "purchaseapr",
@@ -526,10 +531,12 @@ class _LinkExtractor(HTMLParser):
         self._text_parts = []
 
     def _append_link(self, href: str, anchor_text: str) -> None:
+        href_path = urlparse(href).path.lower()
         if (
             not href
             or href.startswith("#")
             or href.startswith(IGNORED_SCHEMES)
+            or href_path.startswith(("/public-sites/", "/sitecore/"))
             or "{" in href
             or "}" in href
             or len(self.links) >= _STRUCTURED_LINK_MAX
@@ -574,20 +581,23 @@ class _LinkExtractor(HTMLParser):
             node, parent_key, inherited_label = stack.pop()
             node_count += 1
             if isinstance(node, dict):
-                label = next(
-                    (
-                        str(node[key])
-                        for key in _STRUCTURED_LABEL_KEYS
-                        if isinstance(node.get(key), str) and str(node[key]).strip()
-                    ),
-                    inherited_label,
-                )
+                label = _structured_node_label(node, inherited_label)
+                normalized_node_keys = {
+                    re.sub(r"[^a-z0-9]", "", str(key).lower())
+                    for key in node
+                }
                 for key, item in node.items():
                     normalized_key = str(key).lower()
                     if isinstance(item, str) and (
                         normalized_key in _STRUCTURED_LINK_KEYS
                         or (normalized_key == "path" and str(parent_key or "").lower() == "learnmore")
                     ):
+                        if normalized_key == "url" and "href" in normalized_node_keys:
+                            # Headless CMS link envelopes often expose both a
+                            # public href and an internal content-tree URL.
+                            # Prefer the public route and never score the CMS
+                            # alias as a second source.
+                            continue
                         self._append_link(item.strip(), label)
                     elif isinstance(item, (dict, list)):
                         stack.append((item, str(key), label))
@@ -675,16 +685,17 @@ class _StructuredTextExtractor(HTMLParser):
 
     def _extract_structured_payload_text(self, payload: Any) -> None:
         node_count = 0
-        stack: list[Any] = [payload]
+        stack: list[tuple[Any, str]] = [(payload, "")]
         while (
             stack
             and node_count < _STRUCTURED_NODE_MAX
             and len(self.sections) < _STRUCTURED_TEXT_MAX
             and self._total_chars < _STRUCTURED_TEXT_TOTAL_CHARS
         ):
-            node = stack.pop()
+            node, inherited_label = stack.pop()
             node_count += 1
             if isinstance(node, dict):
+                product_label = _structured_node_label(node, inherited_label)
                 pricing_label = next(
                     (
                         _strip_embedded_html(str(node[key]))
@@ -701,8 +712,30 @@ class _StructuredTextExtractor(HTMLParser):
                     normalized_key = re.sub(r"[^a-z0-9]", "", str(key).lower())
                     if isinstance(item, str) and normalized_key in _STRUCTURED_TEXT_KEYS:
                         self._append(item)
+                    elif (
+                        isinstance(item, dict)
+                        and normalized_key in _STRUCTURED_TEXT_KEYS
+                        and (wrapped_value := _structured_wrapped_scalar(item)) is not None
+                    ):
+                        if normalized_key in {"title", "name", "headline", "productname", "accountname", "cardname"}:
+                            self._append(str(wrapped_value))
+                        elif product_label:
+                            self._append(
+                                f"{product_label} - {_humanize_structured_key(str(key))}: {wrapped_value}"
+                            )
+                        else:
+                            self._append(str(wrapped_value))
                     elif isinstance(item, str) and normalized_key in _STRUCTURED_PRICING_KEYS:
                         self._append(f"{_humanize_structured_key(str(key))}: {item}")
+                    elif (
+                        isinstance(item, dict)
+                        and normalized_key in _STRUCTURED_PRICING_KEYS
+                        and (wrapped_value := _structured_wrapped_scalar(item)) is not None
+                    ):
+                        prefix = f"{product_label} - " if product_label else ""
+                        self._append(
+                            f"{prefix}{_humanize_structured_key(str(key))}: {wrapped_value}"
+                        )
                     elif (
                         isinstance(item, (str, int, float))
                         and pricing_label
@@ -710,9 +743,13 @@ class _StructuredTextExtractor(HTMLParser):
                     ):
                         self._append(f"{pricing_label}: {item}")
                     elif isinstance(item, (dict, list)):
-                        stack.append(item)
+                        stack.append((item, product_label))
             elif isinstance(node, list):
-                stack.extend(item for item in reversed(node) if isinstance(item, (dict, list)))
+                stack.extend(
+                    (item, inherited_label)
+                    for item in reversed(node)
+                    if isinstance(item, (dict, list))
+                )
 
     def _append(self, value: str) -> None:
         text = _strip_embedded_html(value)
@@ -741,3 +778,50 @@ def _humanize_structured_key(value: str) -> str:
     separated = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", value)
     separated = re.sub(r"[_-]+", " ", separated)
     return " ".join(separated.split())
+
+
+def _structured_node_label(node: dict[str, Any], inherited_label: str = "") -> str:
+    """Read ordinary and CMS-wrapped labels without binding to one vendor.
+
+    Sitecore and similar headless CMS payloads commonly represent a product
+    title as `Title: {`jsonValue`: {`value`: `Essential`}}` while the sibling
+    link is nested several objects deeper. Preserving that label is what turns
+    a generic `Details` CTA into an exact-product source relationship.
+    """
+
+    normalized_items = {
+        re.sub(r"[^a-z0-9]", "", str(key).lower()): value
+        for key, value in node.items()
+    }
+    for key in _STRUCTURED_LABEL_KEYS:
+        value = _structured_wrapped_scalar(normalized_items.get(key))
+        if value is not None and str(value).strip():
+            return _strip_embedded_html(str(value))
+    for key in ("productname", "accountname", "cardname"):
+        value = _structured_wrapped_scalar(normalized_items.get(key))
+        if value is not None and str(value).strip():
+            return _strip_embedded_html(str(value))
+    return inherited_label
+
+
+def _structured_wrapped_scalar(value: Any) -> str | int | float | None:
+    """Unwrap bounded headless-CMS `value`/`jsonValue` scalar envelopes."""
+
+    current = value
+    for _ in range(5):
+        if isinstance(current, (str, int, float)) and not isinstance(current, bool):
+            return current
+        if not isinstance(current, dict):
+            return None
+        normalized = {
+            re.sub(r"[^a-z0-9]", "", str(key).lower()): item
+            for key, item in current.items()
+        }
+        if "jsonvalue" in normalized:
+            current = normalized["jsonvalue"]
+            continue
+        if "value" in normalized:
+            current = normalized["value"]
+            continue
+        return None
+    return None

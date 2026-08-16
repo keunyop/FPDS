@@ -88,16 +88,15 @@ export function DashboardSurface({
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
-      <div className="flex flex-col gap-8 md:gap-12">
-        <section className="border-y border-foreground/15 py-8 md:py-12">
-          <div className="grid gap-9 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.62fr)] lg:items-center">
+      <div className="flex flex-col gap-10 md:gap-14">
+        <section className="border-y border-foreground/15 py-10 md:py-14">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.62fr)] lg:items-center">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold tracking-[0.08em] text-verification">{designCopy.homeKicker}</p>
-              <h1 className="text-balance mt-4 max-w-4xl font-display text-[clamp(2.4rem,6vw,5rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground">
+              <h1 className="text-balance max-w-4xl font-display text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground">
                 {designCopy.homeTitle}
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">{designCopy.homeBody}</p>
-              <div className="mt-6 flex flex-wrap gap-2.5">
+              <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">{designCopy.homeBody}</p>
+              <div className="mt-7 flex flex-wrap gap-2.5">
                 <Button asChild size="lg" className="min-h-12 rounded-full px-5">
                   <Link href={productsHref}>
                     <PiggyBank className="size-4" aria-hidden="true" />
@@ -150,7 +149,7 @@ export function DashboardSurface({
           </section>
         ) : null}
 
-        <section className="grid items-start gap-6 lg:grid-cols-2" aria-label={copy.dashboard.rateSnapshotsLabel}>
+        <section className="grid items-start gap-8 lg:grid-cols-2" aria-label={copy.dashboard.rateSnapshotsLabel}>
           <ProductTopFive
             accent="deposit"
             emptyText={copy.dashboard.depositTopEmpty}
@@ -221,8 +220,8 @@ function SnapshotSummary({
   const copy = getPublicMessages(locale);
   const designCopy = getPublicDesignCopy(locale);
   return (
-    <aside className="min-w-0 border-y border-foreground/20 bg-card/55 px-1 py-5 md:px-5" aria-label={designCopy.publicSnapshot}>
-      <div className="flex flex-col items-start gap-3 border-b border-border pb-4 sm:flex-row sm:justify-between">
+    <aside className="min-w-0 border-y border-foreground/20 bg-card/55 px-4 py-4 md:px-5" aria-label={designCopy.publicSnapshot}>
+      <div className="flex flex-col items-start gap-3 border-b border-border pb-4 min-[460px]:flex-row min-[460px]:items-center min-[460px]:justify-between">
         <div>
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{designCopy.publicSnapshot}</p>
           <p className="mt-2 font-mono text-xs text-foreground">{date}</p>
@@ -230,16 +229,15 @@ function SnapshotSummary({
         <PublicFreshness compact freshness={freshness} locale={locale} />
       </div>
       <div className="grid grid-cols-2 divide-x divide-border">
-        <div className="py-5 pr-4">
+        <div className="py-4 pr-4">
           <p className="font-display text-4xl font-semibold tracking-[-0.05em] tabular-nums">{products}</p>
           <p className="mt-1 text-xs text-muted-foreground">{copy.dashboard.visibleProducts}</p>
         </div>
-        <div className="py-5 pl-4">
+        <div className="py-4 pl-4">
           <p className="font-display text-4xl font-semibold tracking-[-0.05em] tabular-nums">{banks}</p>
           <p className="mt-1 text-xs text-muted-foreground">{copy.dashboard.banksInScope}</p>
         </div>
       </div>
-      <p className="border-t border-border pt-4 text-xs leading-5 text-muted-foreground">{designCopy.evidenceBoundary}</p>
     </aside>
   );
 }
@@ -278,19 +276,17 @@ function ProductTopFive({
   const iconClass = accent === "loan" ? "bg-loan/10 text-loan" : "bg-primary/10 text-primary";
   const metricClass = accent === "loan" ? "border-loan" : "border-primary";
   const rowClass = accent === "loan" ? "divide-loan/15" : "divide-primary/15";
-  const familyLabel = accent === "loan" ? copy.nav.loan : copy.nav.products;
   const FamilyIcon = accent === "loan" ? Landmark : PiggyBank;
 
   return (
     <article className={`overflow-hidden border border-t-4 bg-card/70 ${articleClass}`} aria-labelledby={headingId}>
-      <div className={`min-h-[10.5rem] border-b border-border px-4 py-6 md:px-5 ${headerClass}`}>
+      <div className={`border-b border-border px-4 py-5 md:px-5 md:py-6 ${headerClass}`}>
         <div className="flex items-start gap-3">
           <span className={`grid size-9 shrink-0 place-items-center rounded-full ${iconClass}`} aria-hidden="true">
             <FamilyIcon className="size-4.5" />
           </span>
           <div className="min-w-0">
-            <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${accentClass}`}>{familyLabel}</p>
-            <h2 id={headingId} className="mt-1 text-2xl font-semibold tracking-[-0.025em] text-foreground">{title}</h2>
+            <h2 id={headingId} className="text-2xl font-semibold tracking-[-0.025em] text-foreground">{title}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{subtitle}</p>
           </div>
         </div>
@@ -302,7 +298,7 @@ function ProductTopFive({
       ) : products.length ? (
         <ol className={`grid divide-y ${rowClass}`}>
           {products.map((product, index) => (
-            <li className="grid grid-cols-[1.5rem_auto_minmax(0,1fr)] items-center gap-x-3 px-4 py-4 md:px-5" key={product.product_id}>
+            <li className="grid grid-cols-[1.25rem_auto_minmax(0,1fr)] items-center gap-x-3 px-4 py-4 sm:grid-cols-[1.25rem_auto_minmax(0,1fr)_auto_auto] md:px-5" key={product.product_id}>
               <span className="text-sm font-semibold text-muted-foreground tabular-nums">{index + 1}</span>
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
               <div className="min-w-0">
@@ -311,13 +307,13 @@ function ProductTopFive({
                 </Link>
                 <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
               </div>
-              <div className="col-start-3 mt-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="col-start-3 mt-2 flex flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
                 <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${copy.grid.metricDisplayRate} ${formatMetricValue(product.card_display_rate, "percent", filters.locale)}`}>
                   {formatMetricValue(product.card_display_rate, "percent", filters.locale)}
                 </span>
                 {product.product_url ? (
                   <a
-                    className="inline-flex min-h-11 items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
+                    className="inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium text-primary hover:text-primary/80"
                     href={product.product_url}
                     target="_blank"
                     rel="noopener noreferrer"

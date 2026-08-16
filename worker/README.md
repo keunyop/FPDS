@@ -25,9 +25,10 @@ Runtime invariants:
 - HTML discovery reads ordinary anchors plus bounded JSON component links from
   `data-*` attributes and non-executable `application/json` or
   `application/ld+json` scripts. The same official-domain and product-boundary
-  checks apply to every recovered URL. Parser version `fpds-parse-chunk-v3`
+  checks apply to every recovered URL. Parser version `fpds-parse-chunk-v4`
   also retains bounded component/script text as `structured_component`
-  evidence when the visible HTML shell hides the product copy
+  evidence when the visible HTML shell hides the product copy, and preserves
+  accessible Check/X values used as boolean cells in comparison tables
 - validation treats both deterministic `multi_product_family_overview` and AI
   `hub_page_not_detail` discovery evidence as an ambiguous product boundary;
   either condition routes a candidate to Review rather than auto-validating a

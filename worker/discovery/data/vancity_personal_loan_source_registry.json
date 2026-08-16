@@ -1,0 +1,111 @@
+{
+  "registry_version": "2026-08-15-v1",
+  "bank_code": "VANCITY",
+  "country_code": "CA",
+  "product_type": "personal-loan",
+  "source_language": "en",
+  "allowed_domains": ["vancity.com"],
+  "entry_source_id": "VANCITY-PL-001",
+  "sources": [
+    {
+      "source_id": "VANCITY-PL-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Vancity personal loans and lines of credit lineup discovery",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Personal Loan detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/personal-loan",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Fair and Fast Loan detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/fair-fast-loan",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Planet-Wise Renovation Loan detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/planet-wise-renovation",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Planet-Wise Transportation Loan detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/planet-wise-transportation",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Co-op Home Loan detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/co-op-home",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity RRSP Loan detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/rrsp-loan",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Credential Recognition or Update Loan detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/credential-recognition-update",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-009",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Work-to-own Loan detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/co-op-worker",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "loan_amount_text", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-PL-010",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Vancity loans and lines of credit rates supporting evidence",
+      "url": "https://www.vancity.com/rates/loans-lines-of-credit",
+      "expected_fields": ["interest_rate", "interest_rate_summary", "term_length_text"]
+    }
+  ]
+}

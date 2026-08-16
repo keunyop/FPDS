@@ -156,6 +156,25 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         self.assertTrue(savings.complete)
         self.assertTrue(gic.complete)
 
+    def test_canadian_no_fee_chequing_does_not_invent_fee_waiver_balance(self) -> None:
+        no_fee = comparison_quality(
+            country_code="CA",
+            product_type="chequing",
+            expected_fields=[],
+            candidate_payload={"monthly_fee": 0, "included_transactions": 40},
+        )
+        fee_bearing = comparison_quality(
+            country_code="CA",
+            product_type="chequing",
+            expected_fields=[],
+            candidate_payload={"monthly_fee": 9.75, "included_transactions": 25},
+        )
+
+        self.assertTrue(no_fee.complete)
+        self.assertNotIn("minimum_balance", no_fee.assessed_fields)
+        self.assertFalse(fee_bearing.complete)
+        self.assertEqual(fee_bearing.missing_fields, ("minimum_balance",))
+
     def test_line_of_credit_requires_security_fact(self) -> None:
         quality = comparison_quality(
             product_type="line-of-credit",

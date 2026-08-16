@@ -4,6 +4,7 @@ import json
 import os
 import socket
 import unittest
+import urllib.error
 from pathlib import Path
 from unittest.mock import patch
 
@@ -140,6 +141,38 @@ class UrlUtilsTests(unittest.TestCase):
             ],
         )
 
+    def test_extract_links_associates_sitecore_wrapped_product_title_with_details_link(self) -> None:
+        payload = {
+            "componentName": "ProductCard",
+            "fields": {
+                "Title": {"jsonValue": {"value": "Essential Chequing"}},
+                "Link": {
+                    "jsonValue": {
+                        "value": {
+                            "text": "Details",
+                            "url": "/public-sites/www/Home/Bank/Accounts/Essential",
+                            "href": "/bank/accounts/essential",
+                        }
+                    }
+                },
+            },
+        }
+        html = f'<script type="application/json">{json.dumps(payload)}</script>'
+
+        links = extract_links(html, base_url="https://www.vancity.com/bank/accounts")
+
+        self.assertIn(
+            (
+                "https://www.vancity.com/bank/accounts/essential",
+                "Essential Chequing",
+            ),
+            [(link.normalized_url, link.anchor_text) for link in links],
+        )
+        self.assertNotIn(
+            "https://www.vancity.com/public-sites/www/Home/Bank/Accounts/Essential",
+            [link.normalized_url for link in links],
+        )
+
     def test_extract_structured_text_sections_reads_component_copy(self) -> None:
         payload = {
             "title": "Advantage Savings",
@@ -192,6 +225,30 @@ class UrlUtilsTests(unittest.TestCase):
             ],
         )
 
+    def test_extract_structured_text_sections_preserves_sitecore_product_condition_context(self) -> None:
+        payload = {
+            "__typename": "AccountProduct",
+            "Title": {"jsonValue": {"value": "Essential"}},
+            "Description": {"jsonValue": {"value": "Get 25 Everyday Transactions per month."}},
+            "MonthlyFee": {"jsonValue": {"value": 9.75}},
+            "MinBalanceForFeeWaiver": {"jsonValue": {"value": 1500}},
+            "IncludedTransactions": {"jsonValue": {"value": 25}},
+            "PerTransactionFee": {"jsonValue": {"value": 1.25}},
+        }
+        html = f'<script type="application/json">{json.dumps(payload)}</script>'
+
+        self.assertEqual(
+            extract_structured_text_sections(html),
+            [
+                "Essential",
+                "Essential - Description: Get 25 Everyday Transactions per month.",
+                "Essential - Monthly Fee: 9.75",
+                "Essential - Min Balance For Fee Waiver: 1500",
+                "Essential - Included Transactions: 25",
+                "Essential - Per Transaction Fee: 1.25",
+            ],
+        )
+
 
 class FetchPolicyTests(unittest.TestCase):
     def test_from_env_default_browser_allowlist_covers_known_dynamic_rate_hosts(self) -> None:
@@ -211,6 +268,8 @@ class FetchPolicyTests(unittest.TestCase):
                 "www.simplii.com",
                 "tangerine.ca",
                 "www.tangerine.ca",
+                "vancity.com",
+                "www.vancity.com",
                 "bankofamerica.com",
                 "capitalone.com",
                 "chase.com",
@@ -222,6 +281,10 @@ class FetchPolicyTests(unittest.TestCase):
                 "usbank.com",
                 "wellsfargo.com",
             ),
+        )
+        self.assertEqual(
+            policy.browser_dom_snapshot_domains,
+            ("vancity.com", "www.vancity.com"),
         )
 
     def test_from_env_merges_extra_allowed_domains(self) -> None:
@@ -251,6 +314,7 @@ class FetchPolicyTests(unittest.TestCase):
                 "FPDS_SOURCE_FETCH_ALLOWLIST": "bmo.com",
                 "FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS": "bmo.com,www.bmo.com",
                 "FPDS_SOURCE_BROWSER_FALLBACK_TIMEOUT_SECONDS": "150",
+                "FPDS_SOURCE_BROWSER_DOM_SNAPSHOT_DOMAINS": "vancity.com,www.vancity.com",
                 "FPDS_SOURCE_BROWSER_EXECUTABLE": r"C:\Browsers\msedge.exe",
             },
             clear=False,
@@ -259,7 +323,22 @@ class FetchPolicyTests(unittest.TestCase):
 
         self.assertEqual(policy.browser_fallback_domains, ("bmo.com", "www.bmo.com"))
         self.assertEqual(policy.browser_fallback_timeout_seconds, 150)
+        self.assertEqual(policy.browser_dom_snapshot_domains, ("vancity.com", "www.vancity.com"))
         self.assertEqual(policy.browser_executable, r"C:\Browsers\msedge.exe")
+
+    def test_from_env_preserves_explicit_bank_fetch_boundary_with_browser_policy(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "FPDS_SOURCE_FETCH_ALLOWLIST": "td.com,tdcanadatrust.com",
+                "FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS": "vancity.com,www.vancity.com",
+            },
+            clear=False,
+        ):
+            policy = DiscoveryFetchPolicy.from_env(allowed_domains=("Vancity.com",))
+
+        self.assertEqual(policy.allowed_domains, ("vancity.com",))
+        self.assertEqual(policy.browser_fallback_domains, ("vancity.com", "www.vancity.com"))
 
     def test_default_browser_fallback_covers_observed_dynamic_rate_domains(self) -> None:
         with patch.dict(os.environ, {}, clear=True):
@@ -278,6 +357,8 @@ class FetchPolicyTests(unittest.TestCase):
                 "www.simplii.com",
                 "tangerine.ca",
                 "www.tangerine.ca",
+                "vancity.com",
+                "www.vancity.com",
                 "bankofamerica.com",
                 "capitalone.com",
                 "chase.com",
@@ -356,6 +437,74 @@ class FetchPolicyTests(unittest.TestCase):
         ):
             with self.assertRaises(ValueError):
                 fetch_text("https://www.bmo.com/main/personal/test/", policy)
+
+    def test_fetch_text_uses_browser_html_fallback_for_eligible_429(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("vancity.com",),
+            block_private_networks=False,
+            browser_fallback_domains=("vancity.com",),
+            browser_fallback_timeout_seconds=30,
+            browser_executable=r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        )
+        temp_dir = _prepare_workspace_temp_dir("fetch-browser-html-fallback")
+
+        class _FakeOpener:
+            def open(self, request, timeout):
+                del timeout
+                raise urllib.error.HTTPError(request.full_url, 429, "Too Many Requests", None, None)
+
+        def fake_browser_run(command, capture_output, text, timeout, check, encoding, errors):
+            del capture_output, text, timeout, check, encoding, errors
+            self.assertIn("--dump-dom", command)
+            self.assertFalse(any(str(arg).startswith("--print-to-pdf=") for arg in command))
+            return _CompletedProcess(
+                returncode=0,
+                stdout="<!doctype html><html><body><a href='/bank/accounts'>Accounts</a></body></html>",
+                stderr="",
+            )
+
+        with (
+            patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=_FakeOpener()),
+            patch(
+                "worker.discovery.fpds_discovery.fetch.tempfile.TemporaryDirectory",
+                return_value=_TemporaryDirectoryStub(temp_dir),
+            ),
+            patch("worker.discovery.fpds_discovery.fetch.subprocess.run", side_effect=fake_browser_run),
+        ):
+            html = fetch_text("https://www.vancity.com/", policy)
+
+        self.assertIn("/bank/accounts", html)
+
+    def test_fetch_response_uses_configured_browser_dom_for_vancity_snapshot(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("vancity.com",),
+            block_private_networks=False,
+            browser_fallback_domains=("vancity.com",),
+            browser_dom_snapshot_domains=("vancity.com",),
+        )
+
+        class _FakeOpener:
+            def open(self, request, timeout):
+                del timeout
+                raise urllib.error.HTTPError(request.full_url, 429, "Too Many Requests", None, None)
+
+        rendered = FetchedResponse(
+            body=b"<html><body>Essential - minimum balance 1500</body></html>",
+            final_url="https://www.vancity.com/bank/accounts/essential",
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html", "x-fpds-fetch-method": "browser_html_fallback"},
+            fetched_at="2026-08-15T00:00:00+00:00",
+            redirect_count=0,
+        )
+        with (
+            patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=_FakeOpener()),
+            patch("worker.discovery.fpds_discovery.fetch._fetch_response_via_browser", return_value=rendered) as browser,
+        ):
+            response = fetch_response("https://www.vancity.com/bank/accounts/essential", policy)
+
+        self.assertEqual(response.content_type, "text/html")
+        self.assertEqual(browser.call_args.kwargs["output_format"], "html")
 
     def test_rate_page_without_numeric_rates_requests_bounded_browser_rendering(self) -> None:
         policy = DiscoveryFetchPolicy(

@@ -10,7 +10,7 @@
   "candidate_run_id": "run-3603",
   "normalization_model_execution_id": "modelexec-normalize-001",
   "validation_model_execution_id": "modelexec-3172f4c93249d4af",
-  "started_at": "2026-08-07T04:49:38.890425+00:00",
+  "started_at": "2026-08-16T06:51:46.779573+00:00",
   "routing_config": {
     "routing_mode": "prototype",
     "auto_approve_min_confidence": 1.0,
@@ -19,12 +19,12 @@
       "conflicting_evidence",
       "required_field_missing"
     ],
-    "ai_auto_approve_min_verified_ratio": 0.8
+    "ai_auto_approve_min_verified_ratio": 1.0
   },
   "collection_ai_assessment": {
     "required": false,
     "eligible": true,
-    "threshold": 0.8,
+    "threshold": 1.0,
     "assessed_fields": [],
     "verified_fields": [],
     "unverified_fields": [],
@@ -58,6 +58,7 @@
       "product_name": "TD ePremium Savings Account",
       "standard_rate": 1.25,
       "monthly_fee": 0.0,
+      "minimum_balance": 0.0,
       "interest_payment_frequency": "monthly"
     },
     "field_mapping_metadata": {}
@@ -69,7 +70,7 @@
     "model_execution_id": "modelexec-normalize-001",
     "candidate_state": "in_review",
     "validation_status": "pass",
-    "source_confidence": 0.8258,
+    "source_confidence": 0.8658,
     "review_reason_code": "manual_sampling_review",
     "country_code": "CA",
     "bank_code": "TD",
@@ -87,15 +88,30 @@
       "product_name": "TD ePremium Savings Account",
       "standard_rate": 1.25,
       "monthly_fee": 0.0,
+      "minimum_balance": 0.0,
       "interest_payment_frequency": "monthly"
     },
     "field_mapping_metadata": {}
   },
   "field_evidence_links": [
     {
+      "field_name": "product_name",
+      "candidate_value": "TD ePremium Savings Account",
+      "evidence_chunk_id": "chunk-name",
+      "source_document_id": "src-001",
+      "citation_confidence": 0.8
+    },
+    {
       "field_name": "monthly_fee",
       "candidate_value": "0.0",
       "evidence_chunk_id": "chunk-fee",
+      "source_document_id": "src-001",
+      "citation_confidence": 0.8
+    },
+    {
+      "field_name": "minimum_balance",
+      "candidate_value": "0.0",
+      "evidence_chunk_id": "chunk-balance",
       "source_document_id": "src-001",
       "citation_confidence": 0.8
     },

@@ -12,7 +12,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v3"
+PARSER_VERSION = "fpds-parse-chunk-v4"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -39,6 +39,13 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript", "svg"]):
         tag.decompose()
+    for image in soup.find_all("img"):
+        alt_text = _normalize_text(str(image.get("alt") or ""))
+        if image.find_parent("table") is not None and alt_text.casefold() in {"check", "x"}:
+            # Comparison tables often encode boolean product conditions only
+            # as accessible Check/X images. Preserve those meanings in the
+            # evidence stream instead of silently dropping the table values.
+            image.replace_with(alt_text)
 
     sections: list[_RawSegment] = []
     fallback_text = ""

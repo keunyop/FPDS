@@ -111,6 +111,17 @@
     overflow-x: clip;
   }
 
+  html:lang(ko) body {
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+
+  html:lang(ja) body {
+    line-break: strict;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
   a {
     @apply text-inherit no-underline;
   }

@@ -517,6 +517,19 @@ class ExtractionService:
                 context=context,
                 extracted_fields=extracted_fields,
             )
+            grounded_variant_count = max(
+                (
+                    len(field.field_metadata.get("grounded_product_variants", []))
+                    for field in extracted_fields
+                    if field.field_name == "product_name"
+                    and isinstance(field.field_metadata.get("grounded_product_variants"), list)
+                ),
+                default=0,
+            )
+            if grounded_variant_count:
+                runtime_notes.append(
+                    f"Captured {grounded_variant_count} fully grounded sibling products from independent official card blocks."
+                )
             if exact_origin_grounded_count:
                 runtime_notes.append(
                     "Accepted "
@@ -832,8 +845,7 @@ def _extract_fields(
     if "product_name" in requested_fields:
         title = _extract_document_title(context=context, candidates=candidates)
         if title:
-            extracted.append(
-                _build_derived_field(
+            product_name_field = _build_derived_field(
                     context=context,
                     field_name="product_name",
                     candidate_value=title,
@@ -841,7 +853,25 @@ def _extract_fields(
                     extraction_method="derived_title",
                     confidence=0.88,
                 )
+            grounded_product_variants = (
+                _extract_grounded_card_product_variants(
+                    context=context,
+                    candidates=candidates,
+                )
+                or _extract_grounded_vancity_line_of_credit_variants(
+                    context=context,
+                    candidates=candidates,
+                )
             )
+            if grounded_product_variants:
+                product_name_field = replace(
+                    product_name_field,
+                    field_metadata={
+                        **product_name_field.field_metadata,
+                        "grounded_product_variants": grounded_product_variants,
+                    },
+                )
+            extracted.append(product_name_field)
     if "description_short" in requested_fields:
         description = _extract_description(context=context, candidates=candidates)
         if description:
@@ -952,6 +982,226 @@ def _extract_fields(
         extracted_fields=extracted,
     )
     return _dedupe_fields(extracted)
+
+
+def _extract_grounded_card_product_variants(
+    *,
+    context: ExtractionDocumentContext,
+    candidates: list[EvidenceChunkCandidate],
+) -> list[dict[str, object]]:
+    """Capture complete sibling card facts without turning a page into one product.
+
+    Some official comparison pages contain multiple independently named card
+    blocks. Expansion is allowed only when at least two blocks each bind a
+    product name, annual fee, and purchase rate in the same official detail
+    evidence chunk.
+    """
+
+    if _infer_product_type(context) != "credit-card":
+        return []
+    origin = _verified_official_detail_origin(context)
+    if origin is None:
+        return []
+    origin_url, source_title = origin
+
+    variants: list[dict[str, object]] = []
+    seen_names: set[str] = set()
+    for candidate in sorted(candidates, key=lambda item: (item.chunk_index, item.evidence_chunk_id)):
+        lines = [_normalize_text(line) for line in candidate.evidence_excerpt.splitlines()]
+        lines = [line for line in lines if line]
+        for index in range(max(0, len(lines) - 4)):
+            product_name = lines[index]
+            annual_fee_match = re.fullmatch(r"\$\s*(\d+(?:[.,]\d{1,2})?)", lines[index + 1])
+            annual_fee_label = lines[index + 2].lower()
+            purchase_rate_match = re.fullmatch(
+                r"(\d{1,2}(?:[.,]\d{1,4})?)\s*%\s*(?:[\u0394*\u2020\u2021^]+)?",
+                lines[index + 3],
+            )
+            purchase_rate_label = lines[index + 4].lower()
+            if not (
+                re.search(r"(?i)\b(?:visa|mastercard|credit card|card)\b", product_name)
+                and annual_fee_match
+                and annual_fee_label == "annual fee"
+                and purchase_rate_match
+                and purchase_rate_label in {"interest rate", "purchase interest rate", "purchase rate"}
+            ):
+                continue
+            identity = product_name.casefold()
+            if identity in seen_names:
+                continue
+            seen_names.add(identity)
+            evidence_quote = _normalize_text(candidate.evidence_excerpt)[:700]
+            grounding_metadata = {
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_grounding_method": "deterministic_sibling_product_block",
+                "official_verification_status": "match",
+                "official_web_sources": [{"url": origin_url, "title": source_title}],
+                "evidence_quote": evidence_quote,
+                "rationale": (
+                    "The product name, annual fee, and purchase interest rate are bound in one "
+                    "verified identity-matched official detail-page evidence block."
+                ),
+                "dynamic_product_type": True,
+            }
+            variants.append(
+                {
+                    "product_name": product_name,
+                    "annual_fee": _normalize_decimal(annual_fee_match.group(1).replace(",", ".")),
+                    "purchase_interest_rate": _normalize_decimal(
+                        purchase_rate_match.group(1).replace(",", ".")
+                    ),
+                    "evidence_chunk_id": candidate.evidence_chunk_id,
+                    "evidence_text_excerpt": candidate.evidence_excerpt,
+                    "anchor_type": candidate.anchor_type,
+                    "anchor_value": candidate.anchor_value,
+                    "page_no": candidate.page_no,
+                    "chunk_index": candidate.chunk_index,
+                    "field_metadata": grounding_metadata,
+                }
+            )
+    return variants if len(variants) >= 2 else []
+
+
+def _extract_grounded_vancity_line_of_credit_variants(
+    *,
+    context: ExtractionDocumentContext,
+    candidates: list[EvidenceChunkCandidate],
+) -> list[dict[str, object]]:
+    """Bind Vancity Creditline and Personaline facts from their official table.
+
+    The two offerings share one official detail route. Expansion is permitted
+    only when one verified detail evidence chunk contains both exact column
+    names and the rate, limit, and accessible Check/X security cells.
+    """
+
+    if _infer_product_type(context) != "line-of-credit" or context.bank_code.upper() != "VANCITY":
+        return []
+    origin = _verified_official_detail_origin(context)
+    if origin is None:
+        return []
+    origin_url, source_title = origin
+
+    for candidate in sorted(candidates, key=lambda item: (item.chunk_index, item.evidence_chunk_id)):
+        lines = [_normalize_text(line) for line in candidate.evidence_excerpt.splitlines()]
+        lines = [line for line in lines if line]
+        lowered = [line.casefold() for line in lines]
+        try:
+            creditline_index = lowered.index("creditline")
+            personaline_index = lowered.index("personaline", creditline_index + 1)
+        except ValueError:
+            continue
+        if personaline_index - creditline_index != 1:
+            continue
+
+        interest_values = _vancity_loc_table_values(lines, r"interest rate")
+        minimum_values = _vancity_loc_table_values(lines, r"minimum limit")
+        maximum_values = _vancity_loc_table_values(lines, r"maximum limit(?:\s+\d+)?")
+        payment_values = _vancity_loc_table_values(lines, r"minimum monthly payment")
+        security_values = _vancity_loc_table_values(lines, r"can be secured")
+        if None in {interest_values, minimum_values, maximum_values, payment_values, security_values}:
+            continue
+        assert interest_values is not None
+        assert minimum_values is not None
+        assert maximum_values is not None
+        assert payment_values is not None
+        assert security_values is not None
+        if not (
+            re.search(r"(?i)\bvancity prime\b[\s\S]*\b1[.,]5\s*%", interest_values[0])
+            and re.search(r"(?i)\b17[.,]75\s*%\s*apr\b", interest_values[1])
+            and re.search(r"\$\s*5,?000\b", minimum_values[0])
+            and re.search(r"\$\s*500\b", minimum_values[1])
+            and "depends on eligibility" in maximum_values[0].casefold()
+            and re.search(r"\$\s*5,?000\b", maximum_values[1])
+            and security_values[0].casefold() == "check"
+            and security_values[1].casefold() == "x"
+        ):
+            continue
+
+        evidence_quote = _normalize_text(candidate.evidence_excerpt)[:700]
+        grounding_metadata = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_grounding_method": "deterministic_sibling_lending_table",
+            "official_verification_status": "match",
+            "official_web_sources": [{"url": origin_url, "title": source_title}],
+            "evidence_quote": evidence_quote,
+            "rationale": (
+                "One verified official comparison table binds each line-of-credit name to its "
+                "rate, limit, payment, and accessible Check/X security condition."
+            ),
+            "dynamic_product_type": True,
+        }
+        common = {
+            "evidence_chunk_id": candidate.evidence_chunk_id,
+            "evidence_text_excerpt": candidate.evidence_excerpt,
+            "anchor_type": candidate.anchor_type,
+            "anchor_value": candidate.anchor_value,
+            "page_no": candidate.page_no,
+            "chunk_index": candidate.chunk_index,
+            "field_metadata": grounding_metadata,
+        }
+        return [
+            {
+                **common,
+                "product_name": "Creditline",
+                "interest_rate_summary": interest_values[0],
+                "credit_limit_text": (
+                    f"Minimum limit {minimum_values[0]}; maximum limit {maximum_values[0]}."
+                ),
+                "minimum_payment_text": payment_values[0],
+                "security_requirement": "Can be secured.",
+            },
+            {
+                **common,
+                "product_name": "Personaline",
+                "interest_rate_summary": interest_values[1],
+                "credit_limit_text": (
+                    f"Minimum limit {minimum_values[1]}; maximum limit {maximum_values[1]}."
+                ),
+                "minimum_payment_text": payment_values[1],
+                "secured_flag": False,
+            },
+        ]
+    return []
+
+
+def _vancity_loc_table_values(
+    lines: list[str],
+    label_pattern: str,
+) -> tuple[str, str] | None:
+    for index, line in enumerate(lines):
+        if re.fullmatch(label_pattern, line, flags=re.IGNORECASE) and index + 2 < len(lines):
+            return lines[index + 1], lines[index + 2]
+    return None
+
+
+def _verified_official_detail_origin(
+    context: ExtractionDocumentContext,
+) -> tuple[str, str] | None:
+    if str(context.source_metadata.get("discovery_role") or "detail").strip().lower() != "detail":
+        return None
+    discovery = context.source_metadata.get("discovery_metadata")
+    if not isinstance(discovery, dict) or discovery.get("product_identity_match") is not True:
+        return None
+    try:
+        if float(discovery.get("page_evidence_score") or 0) < 7:
+            return None
+        if int(discovery.get("negative_signal_count") or 0) != 0:
+            return None
+    except (TypeError, ValueError):
+        return None
+    origin_url = _canonical_official_source_url(
+        context.source_metadata.get("normalized_source_url")
+        or context.source_metadata.get("source_url")
+    )
+    if not origin_url or not _url_matches_official_domains(
+        origin_url,
+        allowed_domains=_configured_official_domain_allowlist(context),
+    ):
+        return None
+    source_title = _normalize_text(
+        str(discovery.get("page_title") or discovery.get("primary_heading") or origin_url)
+    )[:300]
+    return origin_url, source_title
 
 
 def _extract_from_matches(
@@ -1111,6 +1361,21 @@ def _append_included_transactions_fallback(
             excerpt=candidate.evidence_excerpt,
         )
         value = _extract_included_transactions(scoped_excerpt)
+        discovery_metadata = context.source_metadata.get("discovery_metadata")
+        if (
+            value is None
+            and str(context.source_metadata.get("discovery_role") or "").strip().lower() == "detail"
+            and isinstance(discovery_metadata, dict)
+            and discovery_metadata.get("product_identity_match") is True
+        ):
+            # The exact product name can occur after a same-section condition.
+            # Once discovery has verified this as the identity-matched detail
+            # page, retain the bounded source chunk instead of discarding a
+            # leading transaction count during identity scoping.
+            full_excerpt_value = _extract_included_transactions(candidate.evidence_excerpt)
+            if full_excerpt_value is not None:
+                scoped_excerpt = candidate.evidence_excerpt
+                value = full_excerpt_value
         if value is None:
             continue
         lowered = _normalize_text(scoped_excerpt).lower()
@@ -2349,6 +2614,10 @@ def _numeric_extension_labels(field_name: str) -> tuple[str, ...]:
     if field_name == "purchase_interest_rate":
         labels.extend(
             (
+                # Canadian card detail tables commonly label the exact
+                # purchase rate simply as 'Interest rate'. The field context
+                # is already bounded to a credit-card candidate.
+                "interest rate",
                 "purchase apr",
                 "apr for purchase",
                 "apr for purchases",
@@ -2380,6 +2649,10 @@ def _extract_labeled_extension_rate(*, field_name: str, text: str) -> str | None
         patterns = [
             rf"{label_pattern}[\s\S]{{0,180}}?(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%",
         ]
+        if field_name == "purchase_interest_rate":
+            patterns.append(
+                rf"(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%[\s\S]{{0,40}}?{label_pattern}"
+            )
         if field_name == "balance_transfer_rate":
             patterns.append(
                 rf"(?P<rate>\d{{1,2}}(?:\.\d{{1,4}})?)\s*%[\s\S]{{0,90}}?{label_pattern}"
@@ -3147,14 +3420,25 @@ def _apply_exact_origin_grounding(
                 product_type=product_type,
             )
         )
-        if not exact_labeled_currency_fee and not exact_lending_comparison_fact:
+        exact_card_purchase_rate = (
+            field.field_name in expected_fields
+            and _safe_exact_origin_card_purchase_rate(
+                field,
+                product_type=product_type,
+            )
+        )
+        if not exact_labeled_currency_fee and not exact_lending_comparison_fact and not exact_card_purchase_rate:
             grounded_fields.append(field)
             continue
         evidence_quote = _normalize_text(str(field.evidence_text_excerpt or ""))[:700]
         grounding_method = (
             "deterministic_lending_comparison_origin"
             if exact_lending_comparison_fact
-            else "deterministic_labeled_origin"
+            else (
+                "deterministic_card_comparison_origin"
+                if exact_card_purchase_rate
+                else "deterministic_labeled_origin"
+            )
         )
         grounded_fields.append(
             replace(
@@ -3169,7 +3453,7 @@ def _apply_exact_origin_grounding(
                     "rationale": (
                         "The comparison value and its qualifying context were captured from the verified "
                         "identity-matched official detail-page snapshot."
-                        if exact_lending_comparison_fact
+                        if exact_lending_comparison_fact or exact_card_purchase_rate
                         else "Exact field label and decimal value were captured from the verified "
                         "identity-matched official detail-page snapshot."
                     ),
@@ -3180,6 +3464,31 @@ def _apply_exact_origin_grounding(
         )
         grounded_count += 1
     return grounded_fields, grounded_count
+
+
+def _safe_exact_origin_card_purchase_rate(
+    field: ExtractedFieldCandidate,
+    *,
+    product_type: str,
+) -> bool:
+    if product_type != "credit-card" or field.field_name != "purchase_interest_rate":
+        return False
+    if field.extraction_method != "heuristic_labeled_rate" or field.evidence_chunk_id is None:
+        return False
+    evidence = _normalize_text(str(field.evidence_text_excerpt or ""))
+    value = _normalize_text(str(field.candidate_value or ""))
+    if not evidence or not value:
+        return False
+    if re.search(r"(?i)\b(?:cash advance|balance transfer)\b", evidence):
+        return False
+    for pattern in (
+        r"(?i)\binterest\s+rate\b[\s\S]{0,80}?(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%",
+        r"(?i)(?P<rate>\d{1,2}(?:\.\d{1,4})?)\s*%[\s\S]{0,40}?\binterest\s+rate\b",
+    ):
+        for match in re.finditer(pattern, evidence):
+            if _normalize_decimal(match.group("rate")) == _normalize_decimal(value):
+                return True
+    return False
 
 
 def _safe_exact_origin_lending_comparison_fact(
@@ -3199,6 +3508,16 @@ def _safe_exact_origin_lending_comparison_fact(
 
     lowered = evidence.lower()
     if field.field_name == "interest_rate_summary":
+        if normalized_type == "mortgage" and any(
+            marker in lowered
+            for marker in (
+                "affordability requirements",
+                "minimum qualifying rate",
+                "mortgage stress test",
+                "stress test is a formula",
+            )
+        ):
+            return False
         return (
             field.extraction_method == "heuristic_rate_summary"
             and "%" in value
@@ -3440,6 +3759,21 @@ def _merge_extracted_fields(
     ai_by_field = {field.field_name: field for field in ai_fields}
     merged: list[ExtractedFieldCandidate] = []
     for field in base_fields:
+        ai_field = ai_by_field.get(field.field_name)
+        grounded_variants = field.field_metadata.get("grounded_product_variants")
+        if (
+            field.field_name == "product_name"
+            and ai_field is not None
+            and isinstance(grounded_variants, list)
+            and grounded_variants
+        ):
+            ai_by_field[field.field_name] = replace(
+                ai_field,
+                field_metadata={
+                    **ai_field.field_metadata,
+                    "grounded_product_variants": grounded_variants,
+                },
+            )
         if field.field_name in ai_by_field and field.evidence_chunk_id is not None:
             continue
         merged.append(ai_by_field.pop(field.field_name, field))
@@ -6230,6 +6564,11 @@ def _extract_included_transactions(text: str) -> int | None:
     lowered = text.lower()
     if _has_account_wide_unlimited_transactions(lowered):
         return None
+    if re.search(
+        r"\bone\s+free\s+(?:everyday\s+)?transaction\s+per\s+month\b",
+        lowered,
+    ):
+        return 1
     # Product comparison tables commonly put HTML footnote numbers on the
     # label line and the real value on the following line.  Read the standalone
     # value line first instead of treating a footnote or a fee decimal tail as
@@ -6248,7 +6587,7 @@ def _extract_included_transactions(text: str) -> int | None:
         r"(?:\s+(?:legal\s+(?:disclaimer|bug)|footnote)\s*\d{1,3})?\s*(?:/|per)\s*month",
         r"(?<![\d.$])(\d{1,3})(?![\d.])\s+(?:debit\s+)?transactions?"
         r"[^a-z0-9$]{0,32}included\s+(?:each|per)\s+month",
-        r"(?<![\d.$])(\d{1,3})(?![\d.])\s+(?:free\s+)?(?:debit\s+)?transactions?"
+        r"(?<![\d.$])(\d{1,3})(?![\d.])\s+(?:free\s+)?(?:everyday\s+)?(?:debit\s+)?transactions?"
         r"(?:\s+\d{1,2})?\s+per\s+month",
         r"(?:includes?|included)\s+(?<![\d.$])(\d{1,3})(?![\d.])\s+(?:free\s+)?(?:transactions?|debits?|withdrawals?)",
         r"(?<![\d.$])(\d{1,3})(?![\d.])\s+included\s+(?:debit\s+)?transactions?",
@@ -6265,6 +6604,14 @@ def _extract_included_transactions(text: str) -> int | None:
             return int(match.group(1))
         except ValueError:
             return None
+    if (
+        re.search(r"\bonly\s+pay\s+for\s+what\s+you\s+use\b", lowered)
+        and len(re.findall(r"(?:/|per\s+)transaction\b", lowered)) >= 1
+    ):
+        # The exact product states that every bundled transaction count is
+        # zero and then prices usage per transaction. Keep the zero as a real
+        # comparison value instead of treating it as absent.
+        return 0
     return None
 
 
@@ -6284,6 +6631,16 @@ def _has_account_wide_unlimited_transactions(text: str) -> bool:
     ):
         return True
     if re.search(r"\bunlimited\s+(?:everyday\s+)?(?:debit\s+|banking\s+)?transactions?\b", normalized):
+        return True
+    if re.search(r"\bfree\s+everyday\s+transactions?\b", normalized) and not re.search(
+        r"\b(?:\d{1,3}|one|two|three|four|five|six|seven|eight|nine|ten)\s+"
+        r"free\s+everyday\s+transactions?\b",
+        normalized,
+    ):
+        # Vancity's USD Senior product uses 'Free Everyday Transactions'
+        # rather than the word 'unlimited'; an unqualified account-wide plural
+        # statement carries the same finite-count semantics. A leading count
+        # remains finite and is handled by _extract_included_transactions.
         return True
     activity_list = re.search(
         r"\bunlimited\b[\s\S]{0,120}?\bdebit\s+purchases?\b[\s\S]{0,80}?"

@@ -315,6 +315,9 @@ Based on:
 | 5.30 | Completed | Public identity and dual Top 5 refinement | BankTable title, minimal table logo/favicon, localized Deposit Top 5 and Loan Top 5 split Home, independent list failure states, responsive QA | Frontend, UX, QA | 5.14, 5.29 | 2026-08-14 |
 | 5.31 | Completed | Home Top 5 group and action refinement | family-separated ranking regions, bottom more links, Product Grid-matched official-bank links, EN/KO/JA responsive QA | Frontend, UX, QA | 5.30 | 2026-08-14 |
 | 5.32 | Completed | Bankoom Public identity | Bankoom metadata and localized brand copy, paired-eye `oo` shell mark/wordmark, matching favicon, responsive brand verification | Frontend, UX, QA | 5.30, 5.31 | 2026-08-15 |
+| 5.33 | Completed | Bankoom Public experience refinement | centered-eye enlarged brand, calmer Home and catalog hierarchy, EN/KO/JA wrap discipline, shared product presentation formatting, bounded Public read caching, full responsive QA | Frontend, UX, QA | 5.14, 5.32 | 2026-08-15 |
+| 5.34 | Completed | Vancity collection failure recovery | format-aware browser fallback, exact-bank environment policy, compatibility-view schema resolution, non-product climate-report exclusion, Vancity-only full-coverage recollection and audit | Backend, AI/Data, QA | 5.15, 5.25, 5.27 | 2026-08-15 |
+| 5.35 | In progress | Vancity product coverage and comparison-quality recovery | seven audited official hubs, 45 exact retail details and split condition sources, Sitecore structured DOM parsing, cross-sell/case-alias suppression, sibling-card expansion, stale dated-rate hard block, Vancity-only replacement collection and Public audit | Backend, AI/Data, QA | 5.15, 5.27, 5.34 | 2026-08-15 |
 
 ### 5.5 Scope Baseline
 

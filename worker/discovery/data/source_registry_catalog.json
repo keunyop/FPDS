@@ -1,5 +1,5 @@
 {
-  "catalog_version": "2026-04-13",
+  "catalog_version": "2026-08-15-vancity-v1",
   "country_code": "CA",
   "registries": [
     {
@@ -76,6 +76,41 @@
       "bank_code": "CIBC",
       "product_type": "gic",
       "registry_path": "cibc_gic_source_registry.json"
+    },
+    {
+      "bank_code": "VANCITY",
+      "product_type": "chequing",
+      "registry_path": "vancity_chequing_source_registry.json"
+    },
+    {
+      "bank_code": "VANCITY",
+      "product_type": "savings",
+      "registry_path": "vancity_savings_source_registry.json"
+    },
+    {
+      "bank_code": "VANCITY",
+      "product_type": "gic",
+      "registry_path": "vancity_gic_source_registry.json"
+    },
+    {
+      "bank_code": "VANCITY",
+      "product_type": "credit-card",
+      "registry_path": "vancity_credit_card_source_registry.json"
+    },
+    {
+      "bank_code": "VANCITY",
+      "product_type": "mortgage",
+      "registry_path": "vancity_mortgage_source_registry.json"
+    },
+    {
+      "bank_code": "VANCITY",
+      "product_type": "personal-loan",
+      "registry_path": "vancity_personal_loan_source_registry.json"
+    },
+    {
+      "bank_code": "VANCITY",
+      "product_type": "line-of-credit",
+      "registry_path": "vancity_line_of_credit_source_registry.json"
     }
   ]
 }

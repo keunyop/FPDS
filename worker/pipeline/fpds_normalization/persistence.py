@@ -562,9 +562,9 @@ COMMIT;
         preferred = self.config.schema
         sql = """
 SELECT COALESCE((
-    SELECT schemaname
-    FROM pg_tables
-    WHERE tablename IN (
+    SELECT table_schema
+    FROM information_schema.tables
+    WHERE table_name IN (
         'bank',
         'ingestion_run',
         'run_source_item',
@@ -574,15 +574,15 @@ SELECT COALESCE((
         'normalized_candidate',
         'field_evidence_link'
     )
-    GROUP BY schemaname
-    HAVING count(DISTINCT tablename) = 8
+    GROUP BY table_schema
+    HAVING count(DISTINCT table_name) = 8
     ORDER BY
         CASE
-            WHEN schemaname = :'preferred_schema' THEN 0
-            WHEN schemaname = 'public' THEN 1
+            WHEN table_schema = :'preferred_schema' THEN 0
+            WHEN table_schema = 'public' THEN 1
             ELSE 2
         END,
-        schemaname
+        table_schema
     LIMIT 1
 ), '');
 """

@@ -66,7 +66,7 @@ export function PublicCountryMenu() {
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={`${copy.label}: ${formatPublicCountryName(countryCode, locale)}`}
-          className="h-11 max-w-44 rounded-full border-border bg-card px-3 text-xs shadow-sm"
+          className="h-11 max-w-44 whitespace-nowrap rounded-full border-border bg-card px-3 text-xs shadow-sm"
           size="sm"
           variant="outline"
         >

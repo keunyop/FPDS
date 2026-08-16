@@ -1,0 +1,101 @@
+{
+  "registry_version": "2026-08-15-v1",
+  "bank_code": "VANCITY",
+  "country_code": "CA",
+  "product_type": "gic",
+  "source_language": "en",
+  "allowed_domains": ["vancity.com"],
+  "entry_source_id": "VANCITY-GIC-001",
+  "sources": [
+    {
+      "source_id": "VANCITY-GIC-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Vancity term deposit and GIC lineup discovery",
+      "url": "https://www.vancity.com/invest/term-deposit-gic",
+      "expected_fields": ["product_name", "standard_rate", "term_length_text", "minimum_deposit", "redeemable_flag", "non_redeemable_flag"]
+    },
+    {
+      "source_id": "VANCITY-GIC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Escalating term deposit detail source",
+      "url": "https://www.vancity.com/invest/term-deposit-gic/escalating",
+      "expected_fields": ["product_name", "standard_rate", "term_length_text", "minimum_deposit", "redeemable_flag"]
+    },
+    {
+      "source_id": "VANCITY-GIC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Cashable term deposit detail source",
+      "url": "https://www.vancity.com/invest/term-deposit-gic/cashable",
+      "expected_fields": ["product_name", "standard_rate", "term_length_text", "minimum_deposit", "redeemable_flag"]
+    },
+    {
+      "source_id": "VANCITY-GIC-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Non-redeemable term deposit detail source",
+      "url": "https://www.vancity.com/invest/term-deposit-gic/non-redeemable",
+      "expected_fields": ["product_name", "standard_rate", "term_length_text", "minimum_deposit", "non_redeemable_flag"]
+    },
+    {
+      "source_id": "VANCITY-GIC-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity RRSP RRIF Convertible term deposit detail source",
+      "url": "https://www.vancity.com/invest/term-deposit-gic/rrsp-rrif-convertible",
+      "expected_fields": ["product_name", "standard_rate", "term_length_text", "minimum_deposit", "redeemable_flag"]
+    },
+    {
+      "source_id": "VANCITY-GIC-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity US Dollar Redeemable term deposit detail source",
+      "url": "https://www.vancity.com/invest/term-deposit-gic/us-dollar-redeemable",
+      "expected_fields": ["product_name", "standard_rate", "term_length_text", "minimum_deposit", "redeemable_flag"]
+    },
+    {
+      "source_id": "VANCITY-GIC-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Index-linked term deposit detail source",
+      "url": "https://www.vancity.com/invest/term-deposit-gic/index-linked",
+      "expected_fields": ["product_name", "interest_rate_summary", "term_length_text", "minimum_deposit", "non_redeemable_flag"]
+    },
+    {
+      "source_id": "VANCITY-GIC-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Impact Term Deposit detail source",
+      "url": "https://www.vancity.com/invest/term-deposit-gic/impact-term-deposit",
+      "expected_fields": ["product_name", "interest_rate_summary", "term_length_text", "minimum_deposit", "redeemable_flag", "non_redeemable_flag"]
+    },
+    {
+      "source_id": "VANCITY-GIC-009",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Vancity term deposit and GIC rates supporting evidence",
+      "url": "https://www.vancity.com/rates/term-deposit-gic",
+      "expected_fields": ["standard_rate", "interest_rate_summary", "term_rate_table", "term_length_text"]
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "registry_version": "2026-08-15-v1",
+  "bank_code": "VANCITY",
+  "country_code": "CA",
+  "product_type": "chequing",
+  "source_language": "en",
+  "allowed_domains": ["vancity.com"],
+  "entry_source_id": "VANCITY-CHQ-001",
+  "sources": [
+    {
+      "source_id": "VANCITY-CHQ-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Vancity personal account lineup and chequing product discovery",
+      "url": "https://www.vancity.com/bank/accounts",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "included_transactions", "unlimited_transactions_flag"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Essential chequing detail source",
+      "url": "https://www.vancity.com/bank/accounts/essential",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "included_transactions"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Essential Plus chequing detail source",
+      "url": "https://www.vancity.com/bank/accounts/essential-plus",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "unlimited_transactions_flag"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Pay as you go chequing detail source",
+      "url": "https://www.vancity.com/bank/accounts/pay-as-you-go",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "included_transactions"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Total Chequing detail source",
+      "url": "https://www.vancity.com/bank/accounts/total-chequing",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "unlimited_transactions_flag"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Access Chequing detail source",
+      "url": "https://www.vancity.com/bank/accounts/access-chequing",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "included_transactions"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Chequing Plus Seniors detail source",
+      "url": "https://www.vancity.com/bank/accounts/chequing-plus-seniors",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "unlimited_transactions_flag"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Chequing Plus Youth detail source",
+      "url": "https://www.vancity.com/bank/accounts/chequing-plus-youth",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "unlimited_transactions_flag"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-009",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity USD Chequing detail source",
+      "url": "https://www.vancity.com/bank/accounts/usd-chequing",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "included_transactions"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-010",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity USD Senior Chequing detail source",
+      "url": "https://www.vancity.com/bank/accounts/usd-chequing-plus-seniors",
+      "expected_fields": ["product_name", "monthly_fee", "minimum_balance", "unlimited_transactions_flag"]
+    },
+    {
+      "source_id": "VANCITY-CHQ-011",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Vancity account rates supporting evidence",
+      "url": "https://www.vancity.com/rates/accounts",
+      "expected_fields": ["monthly_fee", "minimum_balance", "included_transactions", "unlimited_transactions_flag"]
+    }
+  ]
+}

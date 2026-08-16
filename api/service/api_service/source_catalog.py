@@ -94,6 +94,8 @@ _EXCLUDED_LINK_KEYWORDS = (
     "privacy",
     "accessibility",
     "annual-report",
+    "climate-report",
+    "climate-disclosure",
     "investor-relations",
     "modern slavery",
     "modern_slavery",
@@ -1887,6 +1889,20 @@ def _materialize_sources_for_catalog_item(
         discovery_notes.append(
             f"Deactivated {hard_scope_excluded_count} previously generated detail source(s) with deterministic hard-scope exclusions."
         )
+    case_alias_count = _deactivate_case_alias_generated_detail_sources(
+        connection,
+        bank_code=bank_code,
+        product_type=product_type,
+        selected_normalized_urls=[
+            str(item.get("normalized_url") or "")
+            for item in generated_rows
+            if str(item.get("discovery_role") or "") == "detail"
+        ],
+    )
+    if case_alias_count:
+        discovery_notes.append(
+            f"Deactivated {case_alias_count} previously generated case-only detail URL alias(es)."
+        )
     persisted_rows = _upsert_source_registry_rows(connection, generated_rows) if generated_rows else []
     _persist_source_catalog_usage_records(
         connection,
@@ -1987,7 +2003,7 @@ def _generate_existing_detail_companion_rows(
         detail_rows=existing_detail_rows,
         country_code=country_code,
         product_type=discovery_product_type,
-        fetch_policy=DiscoveryFetchPolicy(allowed_domains=allowed_domains),
+        fetch_policy=DiscoveryFetchPolicy.from_env(allowed_domains=allowed_domains),
         hostname=hostname,
         allowed_domains=allowed_domains,
         page_html_by_url={},
@@ -2513,7 +2529,7 @@ def _required_coverage_quote(value: Any) -> str:
 
 def _require_exact_quote_on_page(*, url: str, quote: str) -> None:
     host = _normalized_hostname(urlparse(url).hostname or "")
-    html_text = fetch_text(url, DiscoveryFetchPolicy(allowed_domains=(host,)))
+    html_text = fetch_text(url, DiscoveryFetchPolicy.from_env(allowed_domains=(host,)))
     page_text = _collapse_whitespace(
         html_lib.unescape(re.sub(r"<[^>]+>", " ", html_text))
     ).lower()
@@ -2692,6 +2708,73 @@ def _deactivate_hard_scope_excluded_generated_detail_sources(
             "updated_at": utc_now(),
             "change_reason": "hard_scope_exclusion:" + ",".join(sorted(exclusion_reasons)),
             "source_ids": sorted(set(excluded_ids)),
+        },
+    )
+    return max(0, int(result.rowcount or 0))
+
+
+def _deactivate_case_alias_generated_detail_sources(
+    connection: Connection,
+    *,
+    bank_code: str,
+    product_type: str,
+    selected_normalized_urls: list[str],
+) -> int:
+    """Deactivate stale generated paths that differ only by URL casing.
+
+    A currently selected and page-validated detail URL is authoritative for
+    this collection slice. Keeping an older AUTO detail with the same
+    case-folded URL creates duplicate candidates on case-insensitive bank
+    sites even when their rendered HTML has small dynamic differences.
+    """
+
+    selected = {
+        normalize_source_url(item)
+        for item in selected_normalized_urls
+        if str(item).strip()
+    }
+    selected_by_fold = {item.casefold(): item for item in selected}
+    if not selected_by_fold:
+        return 0
+    rows = connection.execute(
+        """
+        SELECT source_id, normalized_url
+        FROM source_registry_item
+        WHERE bank_code = %(bank_code)s
+          AND product_type = ANY(%(product_type_scope)s)
+          AND discovery_role = 'detail'
+          AND status = 'active'
+          AND seed_source_flag = false
+          AND source_id LIKE 'AUTO-%%'
+        """,
+        {
+            "bank_code": bank_code,
+            "product_type_scope": _product_type_scope_codes(product_type),
+        },
+    ).fetchall()
+    alias_ids = sorted(
+        str(row["source_id"])
+        for row in rows
+        if (
+            str(row.get("normalized_url") or "").casefold() in selected_by_fold
+            and str(row.get("normalized_url") or "")
+            != selected_by_fold[str(row.get("normalized_url") or "").casefold()]
+        )
+    )
+    if not alias_ids:
+        return 0
+    result = connection.execute(
+        """
+        UPDATE source_registry_item
+        SET
+            status = 'inactive',
+            updated_at = %(updated_at)s,
+            change_reason = 'superseded_case_only_url_alias'
+        WHERE source_id = ANY(%(source_ids)s)
+        """,
+        {
+            "updated_at": utc_now(),
+            "source_ids": alias_ids,
         },
     )
     return max(0, int(result.rowcount or 0))
@@ -2928,7 +3011,7 @@ def _generate_sources_from_homepage(
         normalized_coverage_source_url=normalized_coverage_source_url,
         coverage_source_metadata=coverage_source_metadata,
     )
-    fetch_policy = DiscoveryFetchPolicy(allowed_domains=allowed_domains)
+    fetch_policy = DiscoveryFetchPolicy.from_env(allowed_domains=allowed_domains)
     detail_links: list[tuple[int, Any]] = []
     supporting_links: list[tuple[int, Any]] = []
     pdf_links: list[tuple[int, Any]] = []
@@ -2973,6 +3056,13 @@ def _generate_sources_from_homepage(
             normalized_url=link.normalized_url,
             anchor_text=link.anchor_text,
         )
+        if _is_product_type_rate_page(
+            product_type=discovery_product_type,
+            normalized_url=link.normalized_url,
+            anchor_text=link.anchor_text,
+        ):
+            supporting_links.append((max(score, 1), link))
+            continue
         if _is_product_fact_support_link(
             normalized_url=link.normalized_url,
             anchor_text=link.anchor_text,
@@ -3096,6 +3186,13 @@ def _generate_sources_from_homepage(
                 parent_url=normalized_page_url,
                 seed_entry_url=seed_entry_url,
             )
+            if _is_product_type_rate_page(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
+                supporting_links.append((max(score, 1), link))
+                continue
             if _is_product_fact_support_link(
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
@@ -3151,6 +3248,13 @@ def _generate_sources_from_homepage(
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
             )
+            if _is_product_type_rate_page(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
+                supporting_links.append((max(score, 1), link))
+                continue
             if _is_product_fact_support_link(
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
@@ -4770,19 +4874,56 @@ def _dedupe_detail_rows_by_product_identity(rows: list[dict[str, Any]]) -> tuple
 def _suppress_family_overviews_when_named_details_exist(
     rows: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[str]]:
+    def is_verified_vancity_gic_seed_detail(row: dict[str, Any], metadata: dict[str, Any]) -> bool:
+        return (
+            str(row.get("bank_code") or "").upper() == "VANCITY"
+            and str(row.get("product_type") or "").lower() == "gic"
+            and metadata.get("candidate_origin") == "seed_detail_hint"
+            and metadata.get("product_identity_match") is True
+            and int(metadata.get("page_evidence_score") or 0) >= 7
+            and int(metadata.get("negative_signal_count") or 0) == 0
+        )
+
     def is_family_overview(row: dict[str, Any]) -> bool:
         metadata = row.get("discovery_metadata") if isinstance(row.get("discovery_metadata"), dict) else {}
         page_reasons = _coerce_reason_codes(metadata.get("page_evidence_reason_codes") or [])
         ai_reasons = _coerce_reason_codes(metadata.get("ai_reason_codes") or [])
+        if "multi_product_family_overview" in page_reasons and is_verified_vancity_gic_seed_detail(row, metadata):
+            # Named official product pages often end with an "Explore other
+            # products" cross-sell section. The generic overview detector sees
+            # those sibling headings, but a curated detail hint with strong
+            # identity evidence remains a product page rather than a hub.
+            return False
         return "multi_product_family_overview" in page_reasons or (
             metadata.get("ai_predicted_role") == "supporting_html"
             and "hub_page_not_detail" in ai_reasons
         )
 
-    named_rows = [row for row in rows if not is_family_overview(row)]
+    normalized_rows: list[dict[str, Any]] = []
+    for row in rows:
+        metadata = row.get("discovery_metadata") if isinstance(row.get("discovery_metadata"), dict) else {}
+        page_reasons = _coerce_reason_codes(metadata.get("page_evidence_reason_codes") or [])
+        if (
+            "multi_product_family_overview" not in page_reasons
+            or not is_verified_vancity_gic_seed_detail(row, metadata)
+        ):
+            normalized_rows.append(row)
+            continue
+        normalized_metadata = dict(metadata)
+        for reason_key in ("selection_reason_codes", "page_evidence_reason_codes"):
+            normalized_metadata[reason_key] = [
+                code
+                for code in _coerce_reason_codes(metadata.get(reason_key) or [])
+                if code != "multi_product_family_overview"
+            ]
+        normalized_row = dict(row)
+        normalized_row["discovery_metadata"] = normalized_metadata
+        normalized_rows.append(normalized_row)
+
+    named_rows = [row for row in normalized_rows if not is_family_overview(row)]
     if not named_rows:
-        return rows, []
-    family_rows = [row for row in rows if is_family_overview(row)]
+        return normalized_rows, []
+    family_rows = [row for row in normalized_rows if is_family_overview(row)]
     return named_rows, [str(row.get("normalized_url") or "") for row in family_rows if row.get("normalized_url")]
 
 
@@ -6055,6 +6196,12 @@ def _link_is_relevant_supporting_source(
     fingerprint = f"{normalized_url} {anchor_text}".lower()
     signal_product_type = discovery_product_type or product_type
     normalized_path = urlparse(normalized_url).path.lower().rstrip("/")
+    if _is_product_type_rate_page(
+        product_type=signal_product_type,
+        normalized_url=normalized_url,
+        anchor_text=anchor_text,
+    ):
+        return True
     generic_deposit_rate_page = (
         _canonical_product_type_code(signal_product_type) in {"savings", "gic"}
         and normalized_path.rsplit("/", 1)[-1] in {"rate", "rates", "interest-rate", "interest-rates"}
@@ -6132,6 +6279,12 @@ def _supporting_source_is_bounded_to_selected_details(
     parsed = urlparse(normalized_url)
     path = parsed.path.lower().rstrip("/")
     path_tail = path.rsplit("/", 1)[-1]
+    if _is_product_type_rate_page(
+        product_type=canonical_type,
+        normalized_url=normalized_url,
+        anchor_text=anchor_text,
+    ):
+        return True
     rate_page = (
         path_tail in {"rate", "rates", "interest-rate", "interest-rates", "apr"}
         or path_tail.endswith(("-rate", "-rates", "-apr"))
@@ -6184,6 +6337,44 @@ def _supporting_source_is_bounded_to_selected_details(
         ):
             return True
     return False
+
+
+def _is_product_type_rate_page(
+    *,
+    product_type: str,
+    normalized_url: str,
+    anchor_text: str,
+) -> bool:
+    """Recognize an official rate route whose path names the product family.
+
+    Some banks use `/rates/accounts` or `/rates/loans-lines-of-credit` rather
+    than a terminal `rates` slug. These pages are comparison evidence, not
+    standalone product details, and must be retained for every applicable
+    product type without admitting a generic or cross-product rate page.
+    """
+
+    parsed = urlparse(normalized_url)
+    path = parsed.path.lower().rstrip("/")
+    segments = {segment for segment in path.split("/") if segment}
+    fingerprint = f"{path} {anchor_text}".lower()
+    has_rate_route = (
+        "rates" in segments
+        or "rate" in segments
+        or path.endswith(("-rate", "-rates", "/interest-rate", "/interest-rates", "/apr"))
+    )
+    if not has_rate_route:
+        return False
+    canonical_type = _canonical_product_type_code(product_type)
+    markers = {
+        "chequing": ("account", "accounts", "chequing", "checking"),
+        "savings": ("account", "accounts", "saving", "savings"),
+        "gic": ("gic", "term-deposit", "term deposit", "guaranteed-investment"),
+        "credit-card": ("credit-card", "credit card", "cards"),
+        "mortgage": ("mortgage", "mortgages"),
+        "personal-loan": ("personal-loan", "personal loan", "loans-lines-of-credit", "loans lines of credit"),
+        "line-of-credit": ("line-of-credit", "line of credit", "lines-of-credit", "loans-lines-of-credit"),
+    }.get(canonical_type, ())
+    return bool(markers) and any(marker in fingerprint for marker in markers)
 
 
 def _is_product_fact_support_link(*, normalized_url: str, anchor_text: str, product_score: int) -> bool:
@@ -6568,7 +6759,16 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         return "other_product_type"
     if any(keyword in fingerprint for keyword in ("investor", "investors", "shareholder", "shareholders")):
         return "non_product_or_investor_page"
-    if any(keyword in fingerprint for keyword in _REGISTERED_PLAN_WRAPPER_KEYWORDS):
+    registered_plan_signal = any(
+        keyword in fingerprint for keyword in _REGISTERED_PLAN_WRAPPER_KEYWORDS
+    )
+    explicit_registered_underlying_product = (
+        canonical_type == "personal-loan"
+        and any(marker in source_path for marker in ("/rrsp-loan", "/registered-retirement-loan"))
+        or canonical_type == "gic"
+        and any(marker in source_path for marker in ("/term-deposit-gic/", "/gic/", "/gics/"))
+    )
+    if registered_plan_signal and not explicit_registered_underlying_product:
         return "registered_plan_wrapper"
     if _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
         return "other_product_type"

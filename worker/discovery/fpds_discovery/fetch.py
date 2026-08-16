@@ -12,7 +12,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Union
+from typing import Literal, Union
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 
@@ -45,17 +45,30 @@ class DiscoveryFetchPolicy:
     user_agent: str = "FPDS/0.1 source-discovery"
     max_redirects: int = 5
     browser_fallback_domains: tuple[str, ...] = ()
+    browser_dom_snapshot_domains: tuple[str, ...] = ()
     browser_fallback_timeout_seconds: int = 120
     browser_executable: str | None = None
 
     @classmethod
-    def from_env(cls, *, extra_allowed_domains: tuple[str, ...] | list[str] = ()) -> "DiscoveryFetchPolicy":
-        raw_allowlist = os.getenv("FPDS_SOURCE_FETCH_ALLOWLIST", "td.com,tdcanadatrust.com")
-        allowlist = [
-            domain.strip().lower()
-            for domain in raw_allowlist.split(",")
-            if domain.strip()
-        ]
+    def from_env(
+        cls,
+        *,
+        extra_allowed_domains: tuple[str, ...] | list[str] = (),
+        allowed_domains: tuple[str, ...] | list[str] | None = None,
+    ) -> "DiscoveryFetchPolicy":
+        if allowed_domains is None:
+            raw_allowlist = os.getenv("FPDS_SOURCE_FETCH_ALLOWLIST", "td.com,tdcanadatrust.com")
+            allowlist = [
+                domain.strip().lower()
+                for domain in raw_allowlist.split(",")
+                if domain.strip()
+            ]
+        else:
+            allowlist = [
+                str(domain).strip().lower()
+                for domain in allowed_domains
+                if str(domain).strip()
+            ]
         allowlist.extend(
             domain.strip().lower()
             for domain in extra_allowed_domains
@@ -74,6 +87,7 @@ class DiscoveryFetchPolicy:
                 "bmo.com,www.bmo.com,cibc.com,www.cibc.com,"
                 "rbcroyalbank.com,www.rbcroyalbank.com,"
                 "simplii.com,www.simplii.com,tangerine.ca,www.tangerine.ca,"
+                "vancity.com,www.vancity.com,"
                 "bankofamerica.com,capitalone.com,chase.com,citi.com,marcus.com,"
                 "pnc.com,td.com,truist.com,usbank.com,wellsfargo.com"
             ),
@@ -82,6 +96,17 @@ class DiscoveryFetchPolicy:
             dict.fromkeys(
                 domain.strip().lower()
                 for domain in raw_browser_domains.split(",")
+                if domain.strip()
+            )
+        )
+        raw_dom_snapshot_domains = os.getenv(
+            "FPDS_SOURCE_BROWSER_DOM_SNAPSHOT_DOMAINS",
+            "vancity.com,www.vancity.com",
+        )
+        browser_dom_snapshot_domains = tuple(
+            dict.fromkeys(
+                domain.strip().lower()
+                for domain in raw_dom_snapshot_domains.split(",")
                 if domain.strip()
             )
         )
@@ -96,13 +121,14 @@ class DiscoveryFetchPolicy:
             block_private_networks=block_private,
             timeout_seconds=timeout_seconds,
             browser_fallback_domains=browser_fallback_domains,
+            browser_dom_snapshot_domains=browser_dom_snapshot_domains,
             browser_fallback_timeout_seconds=browser_fallback_timeout_seconds,
             browser_executable=browser_executable,
         )
 
 
 def fetch_text(url: str, policy: DiscoveryFetchPolicy) -> str:
-    response = fetch_response(url, policy)
+    response = fetch_response(url, policy, browser_fallback_format="html")
     normalized_content_type = response.content_type.lower().strip()
     if not normalized_content_type.startswith(("text/html", "application/xhtml+xml")):
         raise ValueError(f"Text fetch expected HTML content but received {response.content_type} for {url}")
@@ -114,8 +140,18 @@ def fetch_bytes(url: str, policy: DiscoveryFetchPolicy) -> bytes:
     return fetch_response(url, policy).body
 
 
-def fetch_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
+def fetch_response(
+    url: str,
+    policy: DiscoveryFetchPolicy,
+    *,
+    browser_fallback_format: Literal["pdf", "html"] | None = None,
+) -> FetchedResponse:
     normalized_url = validate_fetch_url(url, policy)
+    resolved_browser_format = _resolve_browser_fallback_format(
+        normalized_url,
+        policy,
+        requested_format=browser_fallback_format,
+    )
     redirect_handler = _AllowlistRedirectHandler(policy)
     opener = urllib.request.build_opener(redirect_handler)
     request = urllib.request.Request(
@@ -143,7 +179,11 @@ def fetch_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
             )
             if _should_try_browser_rendered_rate_fallback(fetched_response, policy):
                 try:
-                    return _fetch_response_via_browser(final_url, policy)
+                    return _fetch_response_via_browser(
+                        final_url,
+                        policy,
+                        output_format=resolved_browser_format,
+                    )
                 except Exception as exc:
                     # A successful, auditable direct snapshot is still preferable
                     # to turning a best-effort rendering enhancement into a source
@@ -163,14 +203,47 @@ def fetch_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
                     )
             return fetched_response
     except urllib.error.HTTPError as exc:
-        if _should_try_browser_fallback(normalized_url, policy, exc):
-            return _fetch_response_via_browser(normalized_url, policy)
-        error_cls = NonRetryableFetchError if exc.code == 404 else ValueError
-        raise error_cls(f"HTTP fetch failed with status {exc.code} for {normalized_url}") from exc
+        try:
+            if _should_try_browser_fallback(normalized_url, policy, exc):
+                return _fetch_response_via_browser(
+                    normalized_url,
+                    policy,
+                    output_format=resolved_browser_format,
+                )
+            error_cls = NonRetryableFetchError if exc.code == 404 else ValueError
+            raise error_cls(f"HTTP fetch failed with status {exc.code} for {normalized_url}") from exc
+        finally:
+            exc.close()
     except Exception as exc:
         if _should_try_browser_fallback(normalized_url, policy, exc):
-            return _fetch_response_via_browser(normalized_url, policy)
+            return _fetch_response_via_browser(
+                normalized_url,
+                policy,
+                output_format=resolved_browser_format,
+            )
         raise
+
+
+def _resolve_browser_fallback_format(
+    url: str,
+    policy: DiscoveryFetchPolicy,
+    *,
+    requested_format: Literal["pdf", "html"] | None,
+) -> Literal["pdf", "html"]:
+    if requested_format is not None:
+        return requested_format
+    hostname = str(urlparse(url).hostname or "").lower()
+    if (
+        hostname
+        and policy.browser_dom_snapshot_domains
+        and host_matches_allowed_domains(hostname, policy.browser_dom_snapshot_domains)
+    ):
+        # Vancity's rendered DOM contains exact Sitecore product-card fields.
+        # A browser PDF visually captures the page but corrupts or disconnects
+        # those values during text extraction, so configured hosts retain DOM
+        # as the auditable snapshot payload.
+        return "html"
+    return "pdf"
 
 
 def validate_fetch_url(url: str, policy: DiscoveryFetchPolicy) -> str:
@@ -346,7 +419,12 @@ def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy
     return not has_numeric_rate
 
 
-def _fetch_response_via_browser(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
+def _fetch_response_via_browser(
+    url: str,
+    policy: DiscoveryFetchPolicy,
+    *,
+    output_format: Literal["pdf", "html"] = "pdf",
+) -> FetchedResponse:
     browser_executable = _resolve_browser_executable(policy.browser_executable)
     if browser_executable is None:
         raise RuntimeError(
@@ -380,6 +458,9 @@ def _fetch_response_via_browser(url: str, policy: DiscoveryFetchPolicy) -> Fetch
             f"--print-to-pdf={output_path}",
             url,
         ]
+        if output_format == "html":
+            command = [arg for arg in command if not arg.startswith("--print-to-pdf=")]
+            command.insert(-1, "--dump-dom")
         completed = subprocess.run(
             command,
             capture_output=True,
@@ -392,6 +473,27 @@ def _fetch_response_via_browser(url: str, policy: DiscoveryFetchPolicy) -> Fetch
         if completed.returncode != 0:
             stderr = completed.stderr.strip() or completed.stdout.strip() or "unknown browser error"
             raise RuntimeError(f"Browser fallback fetch failed for {url}: {stderr}")
+        if output_format == "html":
+            body = completed.stdout.encode("utf-8")
+            if not body.strip() or not re.search(
+                br"<!doctype\s+html|<html(?:\s|>)",
+                body,
+                flags=re.IGNORECASE,
+            ):
+                raise RuntimeError(f"Browser fallback fetch did not produce an HTML document for {url}.")
+            return FetchedResponse(
+                body=body,
+                final_url=url,
+                content_type="text/html",
+                status_code=200,
+                headers={
+                    "content-type": "text/html; charset=utf-8",
+                    "x-fpds-fetch-method": "browser_html_fallback",
+                    "x-fpds-browser-executable": Path(browser_executable).name,
+                },
+                fetched_at=datetime.now(UTC).isoformat(),
+                redirect_count=0,
+            )
         if not output_path.exists():
             raise RuntimeError(f"Browser fallback fetch did not produce a PDF snapshot for {url}.")
         body = output_path.read_bytes()

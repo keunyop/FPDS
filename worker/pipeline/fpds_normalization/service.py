@@ -37,6 +37,7 @@ from .models import (
     NormalizationResult,
     NormalizationSourceResult,
 )
+from .grounded_product_expansion import expand_grounded_product_inputs
 from .product_profile_expansion import expand_profile_product_inputs, should_suppress_unprofiled_profile_input
 from .storage import NormalizationStorageConfig
 
@@ -132,6 +133,19 @@ class NormalizationService:
         partial_completion_flag = False
 
         for item in inputs:
+            grounded_product_items = expand_grounded_product_inputs(item)
+            if grounded_product_items:
+                for candidate_item in grounded_product_items:
+                    result = self._normalize_single_input(
+                        run_id=run_id,
+                        item=candidate_item,
+                        correlation_id=correlation_id,
+                        request_id=request_id,
+                    )
+                    source_results.append(result)
+                    if result.normalization_action == "failed":
+                        partial_completion_flag = True
+                continue
             expanded_items = expand_profile_product_inputs(item)
             if not expanded_items and should_suppress_unprofiled_profile_input(item):
                 continue
@@ -867,13 +881,23 @@ def _compute_validation_issue_codes(
             continue
         contract = field_contract(field_name)
         is_rate = field_name in _RATE_FIELDS or (contract is not None and contract.unit == "percentage_points")
+        is_annual_deposit_rate = field_name in _RATE_FIELDS or (
+            product_type_family in {"chequing", "savings", "gic"}
+            and contract is not None
+            and contract.unit == "percentage_points"
+            and field_name != "highest_rate"
+        )
         is_fee = field_name in _FEE_FIELDS or (
             contract is not None and contract.unit == "currency_amount" and field_name.endswith("_fee")
         )
-        if is_rate and (
+        if is_annual_deposit_rate and (
             decimal_value < Decimal("0")
             or canonical_deposit_rate_suppression_reason(value=decimal_value) is not None
         ):
+            issues.append("invalid_numeric_range")
+        if field_name == "highest_rate" and not (Decimal("0") <= decimal_value <= Decimal("100")):
+            issues.append("invalid_numeric_range")
+        if is_rate and not is_annual_deposit_rate and field_name != "highest_rate" and decimal_value >= Decimal("100"):
             issues.append("invalid_numeric_range")
         if not is_rate and decimal_value < 0:
             issues.append("invalid_numeric_range")
@@ -2913,6 +2937,7 @@ def _clean_product_context_fields(
             field_name=field_name,
             value=value,
             context=evidence_context,
+            product_type_family=product_type_family,
         ) or _dynamic_numeric_value_is_ungrounded(
             field_name=field_name,
             value=value,
@@ -2947,6 +2972,9 @@ def _clean_product_context_fields(
             value=value,
             context=evidence_context,
             product_type_family=product_type_family,
+            official_grounding_metadata=dict(
+                (field_mapping_metadata or {}).get(field_name) or {}
+            ),
         ) or _looks_like_unsupported_security_value(
             field_name=field_name,
             context=evidence_context,
@@ -3758,6 +3786,7 @@ def _looks_like_credit_card_field_mismatch(
     value: object,
     context: str,
     product_type_family: str | None,
+    official_grounding_metadata: dict[str, object] | None = None,
 ) -> bool:
     if product_type_family != "credit-card":
         return False
@@ -3778,6 +3807,28 @@ def _looks_like_credit_card_field_mismatch(
             numeric_value = float(value)
         except (TypeError, ValueError):
             return True
+        grounding = official_grounding_metadata or {}
+        if (
+            field_name == "purchase_interest_rate"
+            and grounding.get("official_grounding_contract_version")
+            == "collection-official-grounding-v2"
+            and grounding.get("official_verification_status") == "match"
+            and grounding.get("official_grounding_method")
+            in {
+                "deterministic_card_comparison_origin",
+                "deterministic_sibling_product_block",
+            }
+            and not re.search(r"(?:cash\s+advance|balance\s+transfer)", context, flags=re.IGNORECASE)
+        ):
+            expected = Decimal(str(numeric_value))
+            for observed in re.finditer(r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%", context):
+                if _as_decimal(observed.group(1)) != expected:
+                    continue
+                window = context[
+                    max(0, observed.start() - 45):min(len(context), observed.end() + 45)
+                ]
+                if re.search(r"\binterest\s+rate\b", window, flags=re.IGNORECASE):
+                    return False
         labels = {
             "purchase_interest_rate": r"(?:purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\)|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
             "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
@@ -3814,7 +3865,13 @@ def _looks_like_non_value_rate(*, field_name: str, value: str) -> bool:
     return not re.search(r"(?:\d|%|\bprime\b)", normalized_value, flags=re.IGNORECASE)
 
 
-def _looks_like_non_rate_numeric_context(*, field_name: str, value: object, context: str) -> bool:
+def _looks_like_non_rate_numeric_context(
+    *,
+    field_name: str,
+    value: object,
+    context: str,
+    product_type_family: str | None = None,
+) -> bool:
     normalized_field = field_name.strip().lower()
     if not (normalized_field.endswith("_rate") or normalized_field in {"rate", "mortgage_rate", "interest_rate"}):
         return False
@@ -3822,10 +3879,13 @@ def _looks_like_non_rate_numeric_context(*, field_name: str, value: object, cont
         return False
     if field_name in {"interest_rate", "mortgage_rate"} and _is_reference_rate_margin_only(context):
         return True
-    return (
-        canonical_deposit_rate_suppression_reason(value=value, context=context) is not None
-        or _looks_like_unresolved_placeholder(context)
-    )
+    suppression_reason = canonical_deposit_rate_suppression_reason(value=value, context=context)
+    if (
+        suppression_reason == "implausible_annual_deposit_rate"
+        and product_type_family in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}
+    ):
+        suppression_reason = None
+    return suppression_reason is not None or _looks_like_unresolved_placeholder(context)
 
 
 def _dynamic_numeric_value_is_ungrounded(

@@ -1,0 +1,51 @@
+{
+  "registry_version": "2026-08-15-v1",
+  "bank_code": "VANCITY",
+  "country_code": "CA",
+  "product_type": "line-of-credit",
+  "source_language": "en",
+  "allowed_domains": ["vancity.com"],
+  "entry_source_id": "VANCITY-LOC-001",
+  "sources": [
+    {
+      "source_id": "VANCITY-LOC-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Vancity personal loans and lines of credit lineup discovery",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "credit_limit_text", "secured_flag", "security_requirement"]
+    },
+    {
+      "source_id": "VANCITY-LOC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Line of Credit detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/line-of-credit",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "credit_limit_text", "secured_flag", "security_requirement"]
+    },
+    {
+      "source_id": "VANCITY-LOC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Home Equity Line of Credit detail source",
+      "url": "https://www.vancity.com/borrow/loans-lines-of-credit/heloc",
+      "expected_fields": ["product_name", "interest_rate", "interest_rate_summary", "credit_limit_text", "secured_flag", "security_requirement", "collateral_text"]
+    },
+    {
+      "source_id": "VANCITY-LOC-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Vancity loans and lines of credit rates supporting evidence",
+      "url": "https://www.vancity.com/rates/loans-lines-of-credit",
+      "expected_fields": ["interest_rate", "interest_rate_summary", "credit_limit_text"]
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "registry_version": "2026-08-16-v2",
+  "bank_code": "VANCITY",
+  "country_code": "CA",
+  "product_type": "mortgage",
+  "source_language": "en",
+  "allowed_domains": ["vancity.com"],
+  "entry_source_id": "VANCITY-MTG-001",
+  "sources": [
+    {
+      "source_id": "VANCITY-MTG-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Vancity residential mortgage lineup discovery",
+      "url": "https://www.vancity.com/borrow/mortgages",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Fixed-term Fixed-rate Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/fixed-term-fixed-rate",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Open-term Fixed-rate Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/open-term-fixed-rate",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Fixed-term Variable-rate Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/fixed-term-variable",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Open-term Variable-rate Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/open-term-variable",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Mixer Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/mixer-mortgage",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Construction Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/construction-mortgage",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Multiplex Construction Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/multiplex-construction-mortgage",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-009",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Laneway House Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/laneway-mortgage",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-010",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity First Nation Land Home Loan detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/indigenous",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-011",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity Planet-Wise Teardown Financing detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/planet-wise-teardown-financing",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-012",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity FlexPath Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/flexpath",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-014",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity 5-year Fixed-term Fixed-rate Insured Mortgage detail source",
+      "url": "https://www.vancity.com/borrow/mortgages/5-year-fixed-term-fixed-rate-insured",
+      "expected_fields": ["product_name", "mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-MTG-013",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Vancity residential mortgage rates supporting evidence",
+      "url": "https://www.vancity.com/rates/mortgages",
+      "expected_fields": ["mortgage_rate", "interest_rate_summary", "rate_type", "term_length_text"]
+    }
+  ]
+}

@@ -7,8 +7,22 @@ import { InterestCalculator } from "@/components/fpds/public/interest-calculator
 import { PublicFreshness } from "@/components/fpds/public/public-freshness";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { getIntlLocale, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
+import { getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import type { PublicProduct, PublicProductDetailResponse } from "@/lib/public-api";
+import {
+  buildPublicProductMetrics,
+  formatPublicCurrency as formatCurrency,
+  formatPublicPurchaseRate as formatPurchaseRate,
+  formatPublicRate as formatRate,
+  formatPublicRedeemability as formatRedeemability,
+  formatPublicSecurity as formatSecurity,
+  formatPublicTerm as formatTerm,
+  formatPublicTransactions as formatTransactions,
+  getCardLabel as cardLabel,
+  getEssentialLabel as essentialLabel,
+  getLoanLabel as loanLabel,
+  getMarketLabel as marketTextLabel
+} from "@/lib/public-product-presentation";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
 
@@ -107,7 +121,7 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
             <div className="flex flex-wrap gap-2 lg:justify-end">
               {product.product_url ? (
                 <Button asChild>
-                  <a href={product.product_url} target="_blank" rel="noreferrer">
+                  <a href={product.product_url} target="_blank" rel="noopener noreferrer">
                     {copy.detail.officialPage}
                     <ExternalLink className="size-4" aria-hidden="true" />
                   </a>
@@ -210,62 +224,7 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
 }
 
 function buildMetricCards(product: PublicProduct, locale: string): DetailFact[] {
-  const copy = getPublicMessages(locale);
-
-  if (product.product_type === "chequing") {
-    return [
-      { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) },
-      { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance ?? product.minimum_deposit, product.currency, locale) },
-      product.country_code === "US"
-        ? { label: marketTextLabel("feeWaiver", locale), value: product.fee_waiver_condition ?? copy.common.notDisclosed }
-        : { label: essentialLabel("transactions", locale), value: formatTransactions(product, locale) }
-    ];
-  }
-
-  if (product.product_type === "gic") {
-    return [
-      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
-      { label: copy.grid.metricTerm, value: formatProductTerm(product, locale) },
-      { label: copy.grid.metricMinDeposit, value: formatCurrency(product.minimum_deposit, product.currency, locale) }
-    ];
-  }
-
-  if (product.product_type === "credit-card") {
-    return [
-      { label: cardLabel("annualFee", locale), value: formatCurrency(product.annual_fee, product.currency, locale) },
-      { label: cardLabel("purchaseRate", locale), value: formatPurchaseRate(product, locale) }
-    ];
-  }
-
-  if (product.product_type === "mortgage") {
-    return [
-      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
-      { label: loanLabel("rateType", locale), value: product.rate_type ?? copy.common.notDisclosed },
-      { label: loanLabel("term", locale), value: formatProductTerm(product, locale) }
-    ];
-  }
-
-  if (product.product_type === "personal-loan") {
-    return [
-      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
-      { label: essentialLabel("loanAmount", locale), value: product.loan_amount_text ?? copy.common.notDisclosed },
-      { label: loanLabel("term", locale), value: formatProductTerm(product, locale) }
-    ];
-  }
-
-  if (product.product_type === "line-of-credit") {
-    return [
-      { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
-      { label: essentialLabel("creditLimit", locale), value: product.credit_limit_text ?? copy.common.notDisclosed },
-      { label: essentialLabel("security", locale), value: formatSecurity(product, locale) }
-    ];
-  }
-
-  return [
-    { label: copy.grid.metricDisplayRate, value: formatProductRate(product, locale) },
-    { label: copy.grid.metricMonthlyFee, value: formatCurrency(product.public_display_fee, product.currency, locale) },
-    { label: copy.grid.metricMinBalance, value: formatCurrency(product.minimum_balance, product.currency, locale) },
-  ];
+  return buildPublicProductMetrics(product, locale).slice(0, 3);
 }
 
 function buildDetailFacts(product: PublicProduct, locale: string) {
@@ -325,113 +284,11 @@ function buildDetailFacts(product: PublicProduct, locale: string) {
   return facts;
 }
 
-function formatProductRate(product: PublicProduct, locale: string) {
-  if (product.public_display_rate !== null) {
-    return formatRate(product.public_display_rate, locale);
-  }
-  if (product.country_code === "US" && product.product_type === "mortgage" && product.interest_rate_summary) {
-    return product.interest_rate_summary;
-  }
-  return product.mortgage_rate
-    ?? product.interest_rate
-    ?? product.interest_rate_summary
-    ?? getPublicMessages(locale).common.notDisclosed;
-}
-
-function marketTextLabel(field: "earlyWithdrawalPenalty" | "feeWaiver", locale: string) {
-  const labels = {
-    en: { earlyWithdrawalPenalty: "Early withdrawal penalty", feeWaiver: "Fee waiver / qualifying activity" },
-    ko: { earlyWithdrawalPenalty: "중도 인출 위약금", feeWaiver: "수수료 면제 조건" },
-    ja: { earlyWithdrawalPenalty: "中途解約ペナルティ", feeWaiver: "手数料免除条件" }
-  };
-  return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
-}
-
-function essentialLabel(field: "creditLimit" | "loanAmount" | "redeemability" | "security" | "transactions", locale: string) {
-  const labels = {
-    en: { creditLimit: "Credit limit", loanAmount: "Loan amount", redeemability: "Redeemability", security: "Security", transactions: "Included transactions" },
-    ko: { creditLimit: "신용 한도", loanAmount: "대출 금액", redeemability: "중도해지 가능 여부", security: "담보 여부", transactions: "포함 거래 횟수" },
-    ja: { creditLimit: "利用限度額", loanAmount: "借入額", redeemability: "中途解約可否", security: "担保", transactions: "無料取引回数" }
-  };
-  return labels[locale as keyof typeof labels]?.[field] ?? labels.en[field];
-}
-
-function formatTransactions(product: PublicProduct, locale: string) {
-  if (product.unlimited_transactions_flag === true) {
-    return locale === "ko" ? "무제한" : locale === "ja" ? "無制限" : "Unlimited";
-  }
-  if (product.included_transactions !== null) {
-    const count = new Intl.NumberFormat(getIntlLocale(locale)).format(product.included_transactions);
-    return locale === "ko" ? `월 ${count}회` : locale === "ja" ? `月${count}回` : `${count} / month`;
-  }
-  return getPublicMessages(locale).common.notDisclosed;
-}
-
-function formatRedeemability(product: PublicProduct, locale: string) {
-  const redeemable = product.redeemable_flag ?? (product.non_redeemable_flag === null ? null : !product.non_redeemable_flag);
-  if (redeemable === null) {
-    return getPublicMessages(locale).common.notDisclosed;
-  }
-  if (redeemable) {
-    return locale === "ko" ? "중도해지 가능" : locale === "ja" ? "中途解約可能" : "Redeemable";
-  }
-  return locale === "ko" ? "중도해지 불가" : locale === "ja" ? "中途解約不可" : "Non-redeemable";
-}
-
-function formatSecurity(product: PublicProduct, locale: string) {
-  const stated = product.security_requirement ?? product.collateral_text;
-  if (stated) {
-    return stated;
-  }
-  if (product.secured_flag === null) {
-    return getPublicMessages(locale).common.notDisclosed;
-  }
-  if (product.secured_flag) {
-    return locale === "ko" ? "담보 필요" : locale === "ja" ? "担保あり" : "Secured";
-  }
-  return locale === "ko" ? "무담보" : locale === "ja" ? "無担保" : "Unsecured";
-}
-
-function formatProductTerm(product: PublicProduct, locale: string) {
-  if (product.term_length_text) {
-    return product.term_length_text;
-  }
-  if (product.term_length_days !== null) {
-    return formatTerm(product.term_length_days, locale);
-  }
-  const firstRow = product.term_rate_table[0];
-  if (product.term_rate_table.length === 1 && firstRow) {
-    return firstRow.term_label ?? formatTerm(firstRow.term_length_days, locale);
-  }
-  if (product.term_rate_table.length > 1) {
-    return locale === "ko" ? `${product.term_rate_table.length}개 기간` : locale === "ja" ? `${product.term_rate_table.length}期間` : `${product.term_rate_table.length} terms`;
-  }
-  return getPublicMessages(locale).common.notDisclosed;
-}
-
 function addFact(facts: DetailFact[], label: string, value: string | null, locale = "en") {
   const notDisclosed = getPublicMessages(locale).common.notDisclosed;
   if (value && value.trim() && value !== notDisclosed) {
     facts.push({ label, value });
   }
-}
-
-function loanLabel(key: "amortization" | "back" | "loanAmount" | "payment" | "prepayment" | "rate" | "rateType" | "term", locale: string) {
-  const labels = {
-    en: { amortization: "Amortization", back: "Back to loan list", loanAmount: "Loan amount / credit limit", payment: "Payment frequency", prepayment: "Prepayment", rate: "Interest rate", rateType: "Rate type", term: "Term" },
-    ko: { amortization: "상환 기간", back: "대출 목록으로", loanAmount: "대출 금액 / 한도", payment: "상환 주기", prepayment: "중도상환", rate: "금리", rateType: "금리 유형", term: "기간" },
-    ja: { amortization: "償却期間", back: "ローン一覧に戻る", loanAmount: "借入額 / 利用限度額", payment: "返済頻度", prepayment: "繰上返済", rate: "金利", rateType: "金利タイプ", term: "期間" }
-  };
-  return labels[locale as keyof typeof labels]?.[key] ?? labels.en[key];
-}
-
-function cardLabel(key: "annualFee" | "back" | "purchaseRate", locale: string) {
-  const labels = {
-    en: { annualFee: "Annual fee", back: "Back to credit card list", purchaseRate: "Purchase interest rate" },
-    ko: { annualFee: "연회비", back: "신용카드 목록으로", purchaseRate: "구매 금리" },
-    ja: { annualFee: "年会費", back: "クレジットカード一覧に戻る", purchaseRate: "ショッピング金利" }
-  };
-  return labels[locale as keyof typeof labels]?.[key] ?? labels.en[key];
 }
 
 function TermRateTable({
@@ -524,70 +381,6 @@ function detailLabel(key: string, locale: string) {
     return jaLabels[key] ?? labels[key] ?? key;
   }
   return labels[key] ?? key;
-}
-
-function formatCurrency(value: number | null, currency: string, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (value === null || !Number.isFinite(value)) {
-    return copy.common.notDisclosed;
-  }
-  const safeCurrency = normalizeCurrency(currency);
-  return new Intl.NumberFormat(getIntlLocale(locale), {
-    style: "currency",
-    currency: safeCurrency,
-    maximumFractionDigits: Number.isInteger(value) ? 0 : 2
-  }).format(value);
-}
-
-function formatRate(value: number | null, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (value === null || !Number.isFinite(value)) {
-    return copy.common.notDisclosed;
-  }
-  return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
-}
-
-function formatPurchaseRate(product: PublicProduct, locale: string) {
-  return product.purchase_interest_rate_summary ?? formatRate(product.purchase_interest_rate, locale);
-}
-
-function normalizeCurrency(currency: string) {
-  const normalized = currency.trim().toUpperCase();
-  return /^[A-Z]{3}$/.test(normalized) ? normalized : "CAD";
-}
-
-function formatTerm(termLengthDays: number | null, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (termLengthDays === null || !Number.isFinite(termLengthDays)) {
-    return copy.common.notDisclosed;
-  }
-  if (termLengthDays % 365 === 0) {
-    const years = termLengthDays / 365;
-    if (locale === "ko") {
-      return `${years}년`;
-    }
-    if (locale === "ja") {
-      return `${years}年`;
-    }
-    return `${years} year${years === 1 ? "" : "s"}`;
-  }
-  if (termLengthDays % 30 === 0) {
-    const months = Math.round(termLengthDays / 30);
-    if (locale === "ko") {
-      return `${months}개월`;
-    }
-    if (locale === "ja") {
-      return `${months}か月`;
-    }
-    return `${months} month${months === 1 ? "" : "s"}`;
-  }
-  if (locale === "ko") {
-    return `${termLengthDays}일`;
-  }
-  if (locale === "ja") {
-    return `${termLengthDays}日`;
-  }
-  return `${termLengthDays} days`;
 }
 
 function formatIsoDate(value: string | null) {

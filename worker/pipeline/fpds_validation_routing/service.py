@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
 from hashlib import sha256
 import json
@@ -50,6 +50,7 @@ _RATE_FIELDS = _ANNUAL_RATE_FIELDS | {"highest_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
 _MAX_MONTHLY_OR_TRANSACTION_FEE = Decimal("500")
 _MAX_ANNUAL_CARD_FEE = Decimal("2000")
+_MAX_EXPLICIT_RATE_EVIDENCE_AGE_YEARS = 5
 _MORTGAGE_SCENARIO_MARKER_GROUPS = (
     ("down payment",),
     ("loan of $", "loan amount"),
@@ -572,6 +573,19 @@ def _compute_validation_issue_codes(
                 f"Suppressed publication confidence for `{field_name}` because no direct field evidence link exists."
             )
 
+    stale_rate_evidence = _materially_stale_rate_evidence(
+        candidate_record=candidate_record,
+        candidate_payload=candidate_payload,
+    )
+    if stale_rate_evidence:
+        issues.add("inconsistent_cross_field_logic")
+        runtime_notes.append(
+            "Suppressed publication confidence for explicitly dated rate evidence older than "
+            f"{_MAX_EXPLICIT_RATE_EVIDENCE_AGE_YEARS} years: "
+            + ", ".join(f"{field_name} as of {as_of_date}" for field_name, as_of_date in stale_rate_evidence)
+            + "."
+        )
+
     public_display_rate = _as_decimal(
         candidate_payload.get("public_display_rate"), field_name="public_display_rate"
     )
@@ -816,6 +830,58 @@ def _qualified_savings_rate_is_preserved(
     if not summary:
         return False
     return all(any(marker in summary for marker in alternatives) for alternatives in required_groups)
+
+
+def _materially_stale_rate_evidence(
+    *,
+    candidate_record: dict[str, object],
+    candidate_payload: dict[str, object],
+    reference_date: date | None = None,
+) -> list[tuple[str, str]]:
+    """Return rate fields whose own evidence publishes a clearly obsolete as-of date."""
+
+    active_date = reference_date or datetime.now(UTC).date()
+    try:
+        cutoff = active_date.replace(year=active_date.year - _MAX_EXPLICIT_RATE_EVIDENCE_AGE_YEARS)
+    except ValueError:
+        cutoff = active_date.replace(
+            year=active_date.year - _MAX_EXPLICIT_RATE_EVIDENCE_AGE_YEARS,
+            day=28,
+        )
+    raw_mappings = candidate_record.get("field_mapping_metadata")
+    mappings = raw_mappings if isinstance(raw_mappings, dict) else {}
+    stale: list[tuple[str, str]] = []
+    for field_name, value in candidate_payload.items():
+        if value is None or value == "":
+            continue
+        contract = field_contract(field_name)
+        if contract is None or contract.unit != "percentage_points":
+            continue
+        raw_mapping = mappings.get(field_name)
+        mapping = raw_mapping if isinstance(raw_mapping, dict) else {}
+        evidence = " ".join(
+            str(
+                mapping.get("official_evidence_quote")
+                or mapping.get("evidence_quote")
+                or ""
+            ).split()
+        )
+        if not evidence:
+            continue
+        for match in re.finditer(
+            r"\brates?\b[^.;:\n]{0,45}?\bas\s+of\s+"
+            r"(\d{4})[-\u2010-\u2015](\d{1,2})[-\u2010-\u2015](\d{1,2})\b",
+            evidence,
+            flags=re.IGNORECASE,
+        ):
+            try:
+                as_of_date = date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+            except ValueError:
+                continue
+            if as_of_date < cutoff:
+                stale.append((field_name, as_of_date.isoformat()))
+                break
+    return stale
 
 
 def _has_any_savings_rate(candidate_payload: dict[str, object]) -> bool:

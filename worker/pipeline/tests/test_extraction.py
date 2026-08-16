@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 from pathlib import Path
 from shutil import rmtree
@@ -36,6 +37,8 @@ from worker.pipeline.fpds_extraction.service import (
     _extract_eligibility_text,
     _extract_early_withdrawal_penalty,
     _extract_fee_waiver_condition,
+    _extract_grounded_card_product_variants,
+    _extract_grounded_vancity_line_of_credit_variants,
     _field_evidence_semantic_score,
     _extract_from_matches,
     _extract_interest_calculation_method,
@@ -54,7 +57,10 @@ from worker.pipeline.fpds_extraction.service import (
     _infer_currency,
     _looks_like_navigation_description,
     _looks_like_non_product_summary,
+    _merge_extracted_fields,
     _resolve_field_names,
+    _safe_exact_origin_card_purchase_rate,
+    _safe_exact_origin_lending_comparison_fact,
     _uses_dynamic_product_type,
     _validated_field_sources,
 )
@@ -62,6 +68,58 @@ from worker.pipeline.fpds_extraction.storage import ExtractionStorageConfig, bui
 
 
 class ExtractionServiceTests(unittest.TestCase):
+    def test_official_ai_product_name_keeps_grounded_sibling_card_variants(self) -> None:
+        variant = {
+            "product_name": "enviro Visa* Classic card for students",
+            "annual_fee": "0.00",
+            "purchase_interest_rate": "19.50",
+        }
+        base = ExtractedFieldCandidate(
+            field_name="product_name",
+            candidate_value="Student Visa cards",
+            value_type="string",
+            confidence=0.88,
+            extraction_method="derived_title",
+            source_document_id="src-student",
+            source_snapshot_id="snap-student",
+            evidence_chunk_id=None,
+            evidence_text_excerpt=None,
+            anchor_type=None,
+            anchor_value=None,
+            page_no=None,
+            chunk_index=None,
+            field_metadata={"grounded_product_variants": [variant]},
+        )
+        ai = replace(
+            base,
+            candidate_value="enviro Visa* Classic card for students",
+            extraction_method="openai_official_grounding",
+            evidence_chunk_id="chunk-student",
+            evidence_text_excerpt="enviro Visa* Classic card for students",
+            field_metadata={"official_verification_status": "match"},
+        )
+
+        merged = _merge_extracted_fields(base_fields=[base], ai_fields=[ai])
+
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0].candidate_value, "enviro Visa* Classic card for students")
+        self.assertEqual(merged[0].field_metadata["grounded_product_variants"], [variant])
+        self.assertEqual(merged[0].field_metadata["official_verification_status"], "match")
+
+    def test_vancity_generic_card_interest_rate_is_purchase_rate(self) -> None:
+        for evidence in (
+            "Annual fee $0 Interest rate 19.50% Supplementary cards $0.",
+            "enviro Visa Classic card\n$0\nannual fee\n19.50 %\ninterest rate\nApply now",
+        ):
+            with self.subTest(evidence=evidence):
+                self.assertEqual(
+                    _extract_labeled_extension_rate(
+                        field_name="purchase_interest_rate",
+                        text=evidence,
+                    ),
+                    "19.50",
+                )
+
     def test_us_purchase_apr_labels_extract_numeric_rate_and_full_range_summary(self) -> None:
         evidence = (
             "Annual Percentage Rate (APR) for Purchases: 19.49% to 27.49%, "
@@ -270,6 +328,122 @@ class ExtractionServiceTests(unittest.TestCase):
         self.assertEqual(ungrounded_count, 0)
         self.assertNotIn("official_grounding_contract_version", ungrounded[0].field_metadata)
 
+    def test_exact_generic_card_interest_rate_is_grounded_only_without_other_rate_types(self) -> None:
+        field = ExtractedFieldCandidate(
+            field_name="purchase_interest_rate",
+            candidate_value="19.50",
+            value_type="decimal",
+            confidence=0.82,
+            extraction_method="heuristic_labeled_rate",
+            source_document_id="src-card",
+            source_snapshot_id="snap-card",
+            evidence_chunk_id="chunk-card",
+            evidence_text_excerpt="enviro Visa Classic card\n$0\nannual fee\n19.50 %\ninterest rate",
+            anchor_type="section",
+            anchor_value="enviro-visa-classic-card",
+            page_no=None,
+            chunk_index=7,
+            field_metadata={},
+        )
+
+        self.assertTrue(_safe_exact_origin_card_purchase_rate(field, product_type="credit-card"))
+        self.assertFalse(
+            _safe_exact_origin_card_purchase_rate(
+                replace(
+                    field,
+                    evidence_text_excerpt=(
+                        "Purchase interest rate 19.50%. Cash advance interest rate 21.50%."
+                    ),
+                ),
+                product_type="credit-card",
+            )
+        )
+
+    def test_verified_official_card_blocks_capture_two_grounded_products(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-CC-002",
+            parsed_document_id="parsed-vancity-student",
+            source_document_id="src-vancity-student",
+            snapshot_id="snap-vancity-student",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "credit-card",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"],
+                "normalized_source_url": "https://www.vancity.com/bank/credit-cards/student-visa",
+                "official_domain_allowlist": ["vancity.com"],
+                "discovery_metadata": {
+                    "page_title": "Student Visa - Vancity",
+                    "primary_heading": "enviro Visa Classic cards for students",
+                    "product_identity_match": True,
+                    "page_evidence_score": 11,
+                    "negative_signal_count": 0,
+                },
+            },
+        )
+        excerpts = (
+            (
+                "enviro Visa* Classic card for students\n$0\nannual fee\n19.5 % Δ\ninterest rate\nApply now",
+                "enviro-visa-classic-card-for-students",
+            ),
+            (
+                "enviro Visa* Classic low interest for students\n$50\nannual fee\n11.25 % Δ\ninterest rate\nApply now",
+                "enviro-visa-classic-low-interest-for-students",
+            ),
+        )
+        candidates = [
+            EvidenceChunkCandidate(
+                evidence_chunk_id=f"chunk-student-{index}",
+                parsed_document_id=context.parsed_document_id,
+                chunk_index=index,
+                anchor_type="section",
+                anchor_value=anchor,
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=excerpt,
+                retrieval_metadata={},
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                bank_code=context.bank_code,
+                country_code=context.country_code,
+                source_type=context.source_type,
+            )
+            for index, (excerpt, anchor) in enumerate(excerpts, start=7)
+        ]
+
+        variants = _extract_grounded_card_product_variants(context=context, candidates=candidates)
+
+        self.assertEqual([item["annual_fee"] for item in variants], ["0.00", "50.00"])
+        self.assertEqual([item["purchase_interest_rate"] for item in variants], ["19.50", "11.25"])
+        self.assertEqual(
+            variants[0]["field_metadata"]["official_grounding_method"],
+            "deterministic_sibling_product_block",
+        )
+
+        unverified_context = ExtractionDocumentContext(
+            **{
+                **context.__dict__,
+                "source_metadata": {
+                    **context.source_metadata,
+                    "discovery_metadata": {
+                        **context.source_metadata["discovery_metadata"],
+                        "product_identity_match": False,
+                    },
+                },
+            }
+        )
+        self.assertEqual(
+            _extract_grounded_card_product_variants(
+                context=unverified_context,
+                candidates=candidates,
+            ),
+            [],
+        )
+
     def test_exact_lending_comparison_facts_are_grounded_from_verified_official_origin(self) -> None:
         context = ExtractionDocumentContext(
             source_id="AUTO-BANK-LOAN-001",
@@ -349,6 +523,86 @@ class ExtractionServiceTests(unittest.TestCase):
             )
         )
 
+    def test_vancity_loc_table_expands_only_with_bound_security_icons(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-LOC-002",
+            parsed_document_id="parsed-vancity-loc",
+            source_document_id="src-vancity-loc",
+            snapshot_id="snap-vancity-loc",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "line-of-credit",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "normalized_source_url": "https://www.vancity.com/borrow/loans-lines-of-credit/line-of-credit",
+                "official_domain_allowlist": ["vancity.com"],
+                "discovery_metadata": {
+                    "page_title": "Line of credit | Vancity",
+                    "primary_heading": "Line of credit (LOC)",
+                    "product_identity_match": True,
+                    "page_evidence_score": 10,
+                    "negative_signal_count": 0,
+                },
+            },
+        )
+        excerpt = """Line of credit options.
+Creditline
+Personaline
+Interest rate
+As low as Vancity Prime + 1.5% To discuss your rate, talk to us
+17.75% APR
+Minimum monthly payment
+Interest only
+5% of outstanding amount
+Minimum limit
+$5,000
+$500
+Maximum limit 1
+Depends on eligibility
+$5,000
+Can be secured
+Check
+X"""
+        candidate = EvidenceChunkCandidate(
+            evidence_chunk_id="chunk-vancity-loc-table",
+            parsed_document_id=context.parsed_document_id,
+            chunk_index=5,
+            anchor_type="section",
+            anchor_value="line-of-credit-options",
+            page_no=None,
+            source_language="en",
+            evidence_excerpt=excerpt,
+            retrieval_metadata={},
+            source_document_id=context.source_document_id,
+            source_snapshot_id=context.snapshot_id,
+            bank_code=context.bank_code,
+            country_code=context.country_code,
+            source_type=context.source_type,
+        )
+
+        variants = _extract_grounded_vancity_line_of_credit_variants(
+            context=context,
+            candidates=[candidate],
+        )
+
+        self.assertEqual([variant["product_name"] for variant in variants], ["Creditline", "Personaline"])
+        self.assertEqual(variants[0]["security_requirement"], "Can be secured.")
+        self.assertIs(variants[1]["secured_flag"], False)
+        self.assertEqual(
+            variants[0]["field_metadata"]["official_grounding_method"],
+            "deterministic_sibling_lending_table",
+        )
+        self.assertEqual(
+            _extract_grounded_vancity_line_of_credit_variants(
+                context=context,
+                candidates=[replace(candidate, evidence_excerpt=excerpt.replace("Check\nX", ""))],
+            ),
+            [],
+        )
+
     def test_numeric_apr_summary_preserves_disclosed_qualifiers(self) -> None:
         summary = _extract_interest_rate_summary(
             "Citi Personal Loan APR can be as low as 9.99% or as high as 17.49%. "
@@ -358,6 +612,34 @@ class ExtractionServiceTests(unittest.TestCase):
         self.assertIn("9.99%", summary or "")
         self.assertIn("17.49%", summary or "")
         self.assertIn("Rates as of", summary or "")
+
+    def test_mortgage_stress_test_rate_is_not_grounded_as_product_rate(self) -> None:
+        field = ExtractedFieldCandidate(
+            field_name="interest_rate_summary",
+            candidate_value=(
+                "Affordability is assessed using the contractual mortgage rate plus 2%, "
+                "or the OSFI Minimum Qualifying Rate of 5.25%."
+            ),
+            value_type="string",
+            confidence=0.9,
+            extraction_method="heuristic_rate_summary",
+            source_document_id="src-construction",
+            source_snapshot_id="snap-construction",
+            evidence_chunk_id="chunk-stress-test",
+            evidence_text_excerpt=(
+                "The mortgage stress test is a formula. Your affordability requirements use the "
+                "greater of the contractual mortgage rate plus 2%, or the OSFI Minimum Qualifying Rate 5.25%."
+            ),
+            anchor_type="section",
+            anchor_value="affordability",
+            page_no=None,
+            chunk_index=10,
+            field_metadata={},
+        )
+
+        self.assertFalse(
+            _safe_exact_origin_lending_comparison_fact(field, product_type="mortgage")
+        )
 
     def test_masked_mortgage_template_is_not_an_interest_rate_summary(self) -> None:
         summary = _extract_interest_rate_summary(
@@ -2681,6 +2963,59 @@ class ExtractionServiceTests(unittest.TestCase):
         self.assertEqual(extracted[0].candidate_value, 12)
         self.assertEqual(extracted[0].evidence_chunk_id, "chunk-day-transactions")
 
+    def test_identity_matched_detail_keeps_leading_vancity_transaction_count(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-CHQ-009",
+            parsed_document_id="parsed-usd-chequing",
+            source_document_id="src-usd-chequing",
+            snapshot_id="snap-usd-chequing",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "chequing",
+                "product_name": "USD Chequing",
+                "discovery_role": "detail",
+                "discovery_metadata": {"product_identity_match": True},
+            },
+        )
+        candidates = [
+            EvidenceChunkCandidate(
+                evidence_chunk_id="chunk-usd-chequing-perks",
+                parsed_document_id="parsed-usd-chequing",
+                chunk_index=1,
+                anchor_type="section",
+                anchor_value="perks-to-keep-your-money-in-motion",
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=(
+                    "Perks to keep your money in motion. One free Everyday Transaction per month, "
+                    "including Everyday In-Person, Cheque or Pre-Authorized Payments. Easy transfers "
+                    "between your Canadian and US dollar accounts. Mobile currency exchange for "
+                    "transfers with a USD Chequing account. Monthly fee None."
+                ),
+                retrieval_metadata={},
+                source_document_id="src-usd-chequing",
+                source_snapshot_id="snap-usd-chequing",
+                bank_code="VANCITY",
+                country_code="CA",
+                source_type="html",
+            )
+        ]
+        extracted: list[ExtractedFieldCandidate] = []
+
+        _append_included_transactions_fallback(
+            context=context,
+            candidates=candidates,
+            requested_fields={"included_transactions"},
+            extracted_fields=extracted,
+        )
+
+        self.assertEqual(len(extracted), 1)
+        self.assertEqual(extracted[0].candidate_value, 1)
+        self.assertIn("One free Everyday Transaction", extracted[0].evidence_text_excerpt)
+
     def test_comparison_table_footnotes_do_not_become_transaction_counts(self) -> None:
         context = ExtractionDocumentContext(
             source_id="AUTO-BANK-CHQ-BASIC",
@@ -2763,6 +3098,58 @@ class ExtractionServiceTests(unittest.TestCase):
 
     def test_included_transactions_accepts_legal_marker_before_per_month(self) -> None:
         self.assertEqual(_extract_included_transactions("6 Debits legal disclaimer 1 / Month"), 6)
+
+    def test_included_transactions_recovers_vancity_everyday_and_zero_count_wording(self) -> None:
+        cases = (
+            ("40 free Everyday Transactions per month.", 40),
+            ("One free Everyday Transaction per month.", 1),
+            (
+                "Only pay for what you use. Everyday In-Person Transactions "
+                "70 cents/transaction.",
+                0,
+            ),
+        )
+
+        for evidence, expected in cases:
+            with self.subTest(evidence=evidence):
+                self.assertEqual(_extract_included_transactions(evidence), expected)
+
+    def test_free_everyday_transactions_is_unlimited_only_without_a_count(self) -> None:
+        unlimited, *_ = _extract_candidate_value(
+            context=ExtractionDocumentContext(
+                source_id="VANCITY-CHQ-010",
+                parsed_document_id="parsed-usd-senior",
+                source_document_id="src-usd-senior",
+                snapshot_id="snap-usd-senior",
+                bank_code="VANCITY",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={"product_type": "chequing", "product_name": "USD Chequing Plus for seniors"},
+            ),
+            field_name="unlimited_transactions_flag",
+            excerpt="Free Everyday Transactions, including in-person, cheque and pre-authorized payments.",
+            anchor_value="perks",
+        )
+        finite, *_ = _extract_candidate_value(
+            context=ExtractionDocumentContext(
+                source_id="VANCITY-CHQ-006",
+                parsed_document_id="parsed-access",
+                source_document_id="src-access",
+                snapshot_id="snap-access",
+                bank_code="VANCITY",
+                country_code="CA",
+                source_type="html",
+                source_language="en",
+                source_metadata={"product_type": "chequing", "product_name": "Access Chequing"},
+            ),
+            field_name="unlimited_transactions_flag",
+            excerpt="40 free Everyday Transactions per month.",
+            anchor_value="perks",
+        )
+
+        self.assertTrue(unlimited)
+        self.assertFalse(finite)
 
     def test_application_and_program_copy_is_not_product_eligibility(self) -> None:
         self.assertIsNone(

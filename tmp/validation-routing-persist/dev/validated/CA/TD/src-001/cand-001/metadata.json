@@ -8,7 +8,7 @@
   "metadata_storage_key": "dev/validated/CA/TD/src-001/cand-001/metadata.json",
   "validation_status": "pass",
   "validation_issue_codes": [],
-  "source_confidence": 0.8258,
+  "source_confidence": 0.8658,
   "candidate_state": "in_review",
   "review_reason_code": "manual_sampling_review",
   "queue_reason_codes": [
@@ -21,7 +21,7 @@
   "collection_ai_assessment": {
     "required": false,
     "eligible": true,
-    "threshold": 0.8,
+    "threshold": 1.0,
     "assessed_fields": [],
     "verified_fields": [],
     "unverified_fields": [],

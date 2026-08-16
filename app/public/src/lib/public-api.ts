@@ -221,17 +221,19 @@ type PublicApiEnvelope<T> = {
 };
 
 const PUBLIC_DATA_FETCH_TIMEOUT_MS = 8000;
+const PUBLIC_DASHBOARD_REVALIDATE_SEC = 900;
+const PUBLIC_PRODUCTS_REVALIDATE_SEC = 300;
 
 export function getPublicApiOrigin() {
   return process.env.FPDS_PUBLIC_API_ORIGIN ?? "http://localhost:4000";
 }
 
 export async function fetchPublicProducts(searchParams: URLSearchParams): Promise<PublicProductsResponse> {
-  return fetchPublicData<PublicProductsResponse>("/api/public/products", searchParams);
+  return fetchPublicData<PublicProductsResponse>("/api/public/products", searchParams, PUBLIC_PRODUCTS_REVALIDATE_SEC);
 }
 
 export async function fetchPublicProductDetail(productId: string, searchParams: URLSearchParams): Promise<PublicProductDetailResponse> {
-  return fetchPublicData<PublicProductDetailResponse>(`/api/public/products/${encodeURIComponent(productId)}`, searchParams);
+  return fetchPublicData<PublicProductDetailResponse>(`/api/public/products/${encodeURIComponent(productId)}`, searchParams, PUBLIC_PRODUCTS_REVALIDATE_SEC);
 }
 
 export async function fetchPublicFilters(searchParams: URLSearchParams): Promise<PublicFiltersResponse> {
@@ -247,7 +249,7 @@ export async function fetchPublicFilters(searchParams: URLSearchParams): Promise
     term_buckets: Array<{ code: string; label: string; count: number }>;
     applied_filters: Record<string, unknown>;
     freshness: PublicFreshness;
-  }>("/api/public/filters", searchParams);
+  }>("/api/public/filters", searchParams, PUBLIC_PRODUCTS_REVALIDATE_SEC);
 
   return {
     countries: payload.countries,
@@ -265,18 +267,18 @@ export async function fetchPublicFilters(searchParams: URLSearchParams): Promise
 }
 
 export async function fetchPublicDashboardSummary(searchParams: URLSearchParams): Promise<PublicDashboardSummaryResponse> {
-  return fetchPublicData<PublicDashboardSummaryResponse>("/api/public/dashboard-summary", searchParams);
+  return fetchPublicData<PublicDashboardSummaryResponse>("/api/public/dashboard-summary", searchParams, PUBLIC_DASHBOARD_REVALIDATE_SEC);
 }
 
 export async function fetchPublicDashboardRankings(searchParams: URLSearchParams): Promise<PublicDashboardRankingsResponse> {
-  return fetchPublicData<PublicDashboardRankingsResponse>("/api/public/dashboard-rankings", searchParams);
+  return fetchPublicData<PublicDashboardRankingsResponse>("/api/public/dashboard-rankings", searchParams, PUBLIC_DASHBOARD_REVALIDATE_SEC);
 }
 
 export async function fetchPublicDashboardScatter(searchParams: URLSearchParams): Promise<PublicDashboardScatterResponse> {
-  return fetchPublicData<PublicDashboardScatterResponse>("/api/public/dashboard-scatter", searchParams);
+  return fetchPublicData<PublicDashboardScatterResponse>("/api/public/dashboard-scatter", searchParams, PUBLIC_DASHBOARD_REVALIDATE_SEC);
 }
 
-async function fetchPublicData<T>(path: string, searchParams?: URLSearchParams): Promise<T> {
+async function fetchPublicData<T>(path: string, searchParams: URLSearchParams | undefined, revalidateSeconds: number): Promise<T> {
   const url = new URL(path, getPublicApiOrigin());
   if (searchParams) {
     url.search = searchParams.toString();
@@ -286,7 +288,7 @@ async function fetchPublicData<T>(path: string, searchParams?: URLSearchParams):
   const timeout = setTimeout(() => controller.abort(), PUBLIC_DATA_FETCH_TIMEOUT_MS);
 
   const response = await fetch(url, {
-    cache: "no-store",
+    next: { revalidate: revalidateSeconds },
     signal: controller.signal,
   }).finally(() => clearTimeout(timeout));
 

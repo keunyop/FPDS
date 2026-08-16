@@ -6,7 +6,7 @@ platform with separate authenticated Admin and anonymous Public experiences.
 
 The repository is currently `product-implementation-in-progress`.
 
-As of `2026-08-13`:
+As of `2026-08-15`:
 - `Gate A` passed on `2026-04-06`
 - `Gate B` passed on `2026-04-11`
 - `Gate C` passed on `2026-04-13`
@@ -129,6 +129,8 @@ As of `2026-08-13`:
 - `WBS 5.25` continuous collection-to-Public automation is complete with scheduled CA/US catalog collection, bounded failure recovery and Review reconciliation, aggregate restart, scheduler identity metadata, and a first-class Public credit-card catalog
 - `WBS 5.27` bounded operational storage is complete: standalone audit/usage storage, evidence embeddings, and redundant dashboard snapshot tables are removed; linked/latest/active evidence and bounded operational metadata are retained; shared dev was compacted without changing the latest Public projection
 - `WBS 5.28` numeric Public catalog card rates are complete: cards derive a customer-favorable explicit lending rate from the current approved projection, rate sorting uses the same value, and full source-language qualifications remain on comparison/detail without recollection
+- `WBS 5.33` Bankoom Public experience refinement is complete: the larger centered-eye brand, calmer Home and catalog hierarchy, EN/KO/JA wrap rules, shared comparison/detail presentation formatting, bounded server read caching, and production-rendered responsive QA now form the current Public baseline
+- `WBS 5.34` Vancity collection recovery is complete: browser-rendered DOM now recovers allowlisted HTML discovery from direct `429` responses, AI stages recognize migration `0040` compatibility views, non-product climate reports are excluded, and all seven Vancity scopes were recollected with `36/36` sources successful
 - the live admin runtime now uses a compact evidence-operations design: a deep operational frame and real-data Attention Rail lead into problem-first Review, failure-first Runs, registry workflows, sticky decisions, chronology, cost/anomaly observability, and Public-snapshot health; safe visible auto-refresh, route recovery, accessible dialogs/tables, semantic state tokens, anonymous Login/Signup, and desktop/mobile route navigation share one B2B interaction baseline
 - the client-handoff simplification now exposes Overview, Review, Runs, and Banks as direct daily work on desktop and mobile, keeps secondary tools in one labeled sidebar group, progressively discloses advanced filters and technical Review context, and removes stale scaffolds, generated artifacts, unreachable UI modules, and numbered handoff-facing vendor filenames without changing live routes or API contracts
 

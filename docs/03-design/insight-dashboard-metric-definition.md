@@ -272,6 +272,19 @@ Implemented Home ranking visual/action refinement on `2026-08-14`:
 - This presentation-only change does not alter eligibility, ordering, count,
   request boundaries, endpoint contracts, or financial meaning.
 
+Implemented Home calm-density refinement on `2026-08-15`:
+
+- The visible snapshot is one compact region containing freshness, active
+  product count, and bank count; repeated provenance/evidence explanations are
+  removed while `/methodology` keeps the complete boundary.
+- Deposit and Loan Top 5 headers no longer repeat a separate family label in
+  addition to their localized title. Their ordering, five-row cap, product
+  eligibility, and independent unavailable states are unchanged.
+- Desktop rows keep the rate and safe official-bank action on one scan line;
+  small-screen rows stack those elements without document-level overflow.
+- This is a hierarchy and responsive-copy change only. Snapshot formulas,
+  endpoint contracts, freshness semantics, and evidence privacy are unchanged.
+
 ### 6.3 Ranking Row Baseline
 
 Each ranking row must expose:

@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 
-MARKET_PROFILE_VERSION = "2026-08-12-v2"
+MARKET_PROFILE_VERSION = "2026-08-16-v3"
 
 
 @dataclass(frozen=True)
@@ -80,7 +80,15 @@ def _requirement(
 _DEFAULT_REQUIREMENTS: dict[str, tuple[ComparisonRequirement, ...]] = {
     "chequing": (
         _requirement("monthly_fee", "monthly_fee", "public_display_fee"),
-        _requirement("minimum_balance", "minimum_balance"),
+        # For Canadian chequing products this field represents the positive
+        # balance threshold that waives a monthly fee. A genuinely no-fee
+        # account has no fee-waiver threshold to publish, so requiring one
+        # would turn an inapplicable fact into a false missing-value review.
+        _requirement(
+            "minimum_balance",
+            "minimum_balance",
+            required_when="positive_monthly_fee",
+        ),
         _requirement("transactions", "included_transactions", "unlimited_transactions_flag"),
     ),
     "savings": (

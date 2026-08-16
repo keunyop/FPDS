@@ -6,7 +6,7 @@ import { ProductCompareWorkspace } from "@/components/fpds/public/product-compar
 import { PublicFreshness } from "@/components/fpds/public/public-freshness";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { formatPublicMessage, getIntlLocale, getPublicCatalogCopy, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
+import { formatPublicMessage, getIntlLocale, getPublicCatalogCopy, getPublicMessages } from "@/lib/public-locale";
 import { type PublicFilterOption, type PublicFiltersResponse, type PublicProductsResponse } from "@/lib/public-api";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
@@ -27,7 +27,6 @@ type SortOption = {
 
 export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, filters, products }: ProductGridSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
-  const designCopy = getPublicDesignCopy(filters.locale);
   const catalogCopy = getPublicCatalogCopy(filters.locale, catalog);
   const catalogPath: CatalogPath = catalog === "loan" ? "/loans" : catalog === "card" ? "/cards" : "/products";
   const clearHref = buildCatalogHref(catalogPath, {
@@ -99,10 +98,8 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
               <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">{catalogCopy.description}</p>
             </div>
             <div className="flex flex-col items-start gap-3 lg:items-end">
-              <p className="font-mono text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">{formatPublicMessage(copy.grid.productCount, { count: formatCount(products.total_items, filters.locale) })}</span>
-                <span className="mx-2" aria-hidden="true">/</span>
-                {designCopy.verified}
+              <p className="whitespace-nowrap font-mono text-xs font-semibold text-foreground">
+                {formatPublicMessage(copy.grid.productCount, { count: formatCount(products.total_items, filters.locale) })}
               </p>
               <PublicFreshness freshness={products.freshness} locale={filters.locale} />
             </div>
@@ -253,7 +250,7 @@ function DiscoveryToolbar({
         {activeChips.length ? (
           activeChips.map((chip) => (
             <Link
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+              className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
               href={chip.href}
               key={`${chip.group}-${chip.value}`}
             >
@@ -298,7 +295,7 @@ function SortLink({ active, children, href }: { active: boolean; children: React
     <Link
       aria-current={active ? "page" : undefined}
       className={cn(
-        "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+        "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
         active ? "border-foreground bg-foreground text-background" : "border-border bg-card/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
       )}
       href={href}

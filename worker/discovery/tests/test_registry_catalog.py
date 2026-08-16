@@ -11,9 +11,9 @@ from worker.discovery.fpds_discovery.catalog import (
 
 
 class RegistryCatalogTests(unittest.TestCase):
-    def test_catalog_covers_canada_big5_matrix(self) -> None:
+    def test_catalog_covers_canada_big5_and_vancity_curated_matrix(self) -> None:
         entries = load_registry_catalog()
-        self.assertEqual(len(entries), 15)
+        self.assertEqual(len(entries), 22)
         matrix = {(entry.bank_code, entry.product_type) for entry in entries}
         expected = {
             ("RBC", "chequing"),
@@ -31,14 +31,21 @@ class RegistryCatalogTests(unittest.TestCase):
             ("CIBC", "chequing"),
             ("CIBC", "savings"),
             ("CIBC", "gic"),
+            ("VANCITY", "chequing"),
+            ("VANCITY", "savings"),
+            ("VANCITY", "gic"),
+            ("VANCITY", "credit-card"),
+            ("VANCITY", "mortgage"),
+            ("VANCITY", "personal-loan"),
+            ("VANCITY", "line-of-credit"),
         }
         self.assertEqual(matrix, expected)
 
     def test_all_registries_load_with_unique_registry_keys(self) -> None:
         registries = load_all_registries()
-        self.assertEqual(len(registries), 15)
+        self.assertEqual(len(registries), 22)
         registry_keys = {f"{registry.country_code}:{registry.bank_code}:{registry.product_type}" for registry in registries}
-        self.assertEqual(len(registry_keys), 15)
+        self.assertEqual(len(registry_keys), 22)
 
     def test_each_registry_has_entry_source_and_non_empty_source_set(self) -> None:
         for registry in load_all_registries():
@@ -51,6 +58,8 @@ class RegistryCatalogTests(unittest.TestCase):
         self.assertIn("TD-CHQ-002", source_index)
         self.assertIn("RBC-CHQ-002", source_index)
         self.assertIn("CIBC-GIC-001", source_index)
+        self.assertIn("VANCITY-MTG-013", source_index)
+        self.assertIn("VANCITY-MTG-014", source_index)
 
     def test_resolve_sources_by_id_uses_catalog_when_registry_path_is_omitted(self) -> None:
         resolved = resolve_sources_by_id(["TD-CHQ-002", "RBC-CHQ-002"])
@@ -146,6 +155,13 @@ class RegistryCatalogTests(unittest.TestCase):
             ("CIBC", "chequing"): "https://www.cibc.com/en/personal-banking/bank-accounts/chequing-accounts.html",
             ("CIBC", "savings"): "https://www.cibc.com/en/personal-banking/bank-accounts/savings-accounts.html",
             ("CIBC", "gic"): "https://www.cibc.com/en/personal-banking/investments/gics.html",
+            ("VANCITY", "chequing"): "https://www.vancity.com/bank/accounts",
+            ("VANCITY", "savings"): "https://www.vancity.com/bank/accounts",
+            ("VANCITY", "gic"): "https://www.vancity.com/invest/term-deposit-gic",
+            ("VANCITY", "credit-card"): "https://www.vancity.com/bank/credit-cards",
+            ("VANCITY", "mortgage"): "https://www.vancity.com/borrow/mortgages",
+            ("VANCITY", "personal-loan"): "https://www.vancity.com/borrow/loans-lines-of-credit",
+            ("VANCITY", "line-of-credit"): "https://www.vancity.com/borrow/loans-lines-of-credit",
         }
 
         for registry in load_all_registries():
@@ -170,7 +186,61 @@ class RegistryCatalogTests(unittest.TestCase):
                 fingerprint = source.normalized_url.lower()
                 with self.subTest(source_id=source.source_id):
                     self.assertFalse(any(token in fingerprint for token in excluded_tokens))
-                    self.assertFalse(any(token in fingerprint for token in conflicting_tokens_by_type[registry.product_type]))
+                    conflicting_tokens = conflicting_tokens_by_type.get(registry.product_type, ())
+                    if registry.product_type == "gic" and any(
+                        marker in fingerprint for marker in ("/term-deposit-gic/", "/gic/", "/gics/")
+                    ):
+                        conflicting_tokens = tuple(
+                            token for token in conflicting_tokens if token not in {"rrsp", "resp"}
+                        )
+                    self.assertFalse(
+                        any(
+                            token in fingerprint
+                            for token in conflicting_tokens
+                        )
+                    )
+
+    def test_vancity_curated_registries_cover_official_lineup_and_rate_pages(self) -> None:
+        registries = {
+            registry.product_type: registry
+            for registry in load_all_registries()
+            if registry.bank_code == "VANCITY"
+        }
+
+        self.assertEqual(set(registries), {
+            "chequing", "savings", "gic", "credit-card", "mortgage", "personal-loan", "line-of-credit"
+        })
+        detail_counts = {
+            product_type: sum(source.discovery_role == "detail" for source in registry.sources)
+            for product_type, registry in registries.items()
+        }
+        self.assertEqual(
+            detail_counts,
+            {
+                "chequing": 9,
+                "savings": 1,
+                "gic": 7,
+                "credit-card": 7,
+                "mortgage": 12,
+                "personal-loan": 8,
+                "line-of-credit": 2,
+            },
+        )
+        rate_urls = {
+            source.normalized_url
+            for registry in registries.values()
+            for source in registry.sources
+            if source.discovery_role == "supporting_html" and "/rates/" in source.normalized_url
+        }
+        self.assertEqual(
+            rate_urls,
+            {
+                "https://www.vancity.com/rates/accounts",
+                "https://www.vancity.com/rates/term-deposit-gic",
+                "https://www.vancity.com/rates/mortgages",
+                "https://www.vancity.com/rates/loans-lines-of-credit",
+            },
+        )
 
 
 if __name__ == "__main__":

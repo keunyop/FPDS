@@ -156,6 +156,9 @@ What `WBS 3.6` stores today:
 - generic supporting merge maps horizontal comparison-table columns to the target product identity, keeps recurring fees separate from conditional zero outcomes and balance thresholds, preserves material balance-tier summaries, and supplements only explicit account-wide unlimited-transaction facts
 - normalization reduces broad fee tables and repeated application controls to decision-ready transaction rules and channels, and removes audience cross-sells, switching-service CTAs, award copy, and incomplete fragments from product descriptions
 - normalized candidates retain concise `field_notes` for qualified comparable values and preserve the actual supporting source document id on each merged `field_evidence_link`
+- an identity-matched official Vancity card page may expand into multiple candidates only when each sibling product block independently binds its exact product name, annual fee, and purchase rate to the same bounded evidence chunk. The shared Vancity LOC page may likewise expand `Creditline` and `Personaline` only when one official table binds both names to their rate, limit, payment, and accessible Check/X security cells. Resolved variants replace the composite candidate; incomplete or mixed blocks remain unsplit and Review-bound
+- the annual-deposit plausibility ceiling is scoped to deposit Product Types, so valid card, mortgage, personal-loan, and line-of-credit borrowing rates are not discarded as implausible deposit yields; the existing non-interest percentage and unresolved-placeholder guards still apply
+- mortgage affordability and stress-test examples, including an OSFI Minimum Qualifying Rate, cannot ground a customer product rate; they stay contextual underwriting evidence rather than a comparable mortgage offer
 - static Golden product profiles are fixture-only and require explicit `product_profile_expansion_mode=fixture`; live collection cannot use them to replace evidence or bypass validation
 
 Current boundary:
@@ -197,6 +200,7 @@ Current boundary:
 
 Reliability note:
 - DB-backed worker stages now run `psql` with `ON_ERROR_STOP=1` so SQL errors abort the stage instead of being reported as false-positive success
+- extraction, normalization, and validation/routing resolve their required DB relations through `information_schema.tables`, which includes both base tables and the discard-only compatibility views retained by migration `0040`; a removed physical usage ledger therefore cannot make an otherwise valid runtime schema appear missing
 - percentage fields now require their exact numeric `%` token in the linked evidence excerpt; market/index returns, fund metrics, FX/conversion percentages, calculator scenarios, and unresolved dynamic templates are omitted instead of becoming deposit rates
 - rate extraction distinguishes regular, time/eligibility-limited promotional totals, and ongoing conditional bonus totals. Public display may use the grounded advertised total, while the standard field remains the regular rate and ambiguous components stay review-routed
 - monthly/public fee values require direct base-fee wording and must agree when both are present; conditional waivers, maxima, transaction charges, and adjacent-product fees cannot be promoted into the monthly scalar

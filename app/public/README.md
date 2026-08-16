@@ -32,17 +32,22 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 
 The Public visual system uses a warm flat canvas, deep ink typography,
 evergreen verification states, maple selection emphasis, and ochre Loan cues.
-The code-native Bankoom mark uses the paired `oo` as two outward-looking eyes
-that scan products side by side. The same paired-eye geometry is shared by the
-shell and app icon. Generic dashboard-card repetition, decorative gradients,
-synthetic scores, and recommendation language are avoided.
+The code-native Bankoom mark uses the paired `oo` as two centered eyes. The
+larger shell mark and wordmark remain a single compact brand unit, and the same
+centered-eye geometry is shared by the app icon. Generic dashboard-card
+repetition, decorative gradients, synthetic scores, and recommendation
+language are avoided.
 
-Home uses real snapshot values rather than invented illustration data. Catalog
-cards are product-family-aware records with visible institution identity, one
-primary metric, up to two supporting facts, a Compare control, and an official
-bank-page action when `product_url` is available. The product name still opens
-the internal detail route. The metrics follow the resolved country-product
-essential contract.
+Home uses real snapshot values rather than invented illustration data. Its
+snapshot summary and dual Top 5 lists avoid repeated family labels, internal
+evidence explanations, and competing header actions. Catalog cards are
+product-family-aware records with visible institution identity, one primary
+metric, up to two essential supporting facts, a Compare control, and an
+official bank-page action when `product_url` is available. Optional audience
+tags and highlight badges stay off list cards so they do not compete with the
+comparison facts; approved detail remains available on comparison and product
+detail. The product name still opens the internal detail route. The metrics
+follow the resolved country-product essential contract.
 Canada shows Chequing fee/balance/transactions and GIC
 rate/term/minimum-deposit/redeemability. US Checking shows
 fee/opening-or-minimum-balance/fee-waiver activity, US CDs show
@@ -93,6 +98,9 @@ market profiles and fixtures are registered.
 - Source-derived institution and product content remains in its source language;
   FPDS-owned navigation, labels, freshness, methodology, and safety copy are
   localized.
+- Korean body copy keeps words together, Japanese copy follows strict line
+  breaking, and compact navigation, filter, action, rate, and freshness labels
+  remain on one line. Purposeful body and heading wrapping is still allowed.
 - Loading, unavailable/error, empty, stale, fresh, and missing-value states use
   the same visual vocabulary across Home, catalogs, comparison, detail, and
   Methodology.
@@ -107,7 +115,10 @@ market profiles and fixtures are registered.
 Public data comes from `GET /api/public/countries`, `GET /api/public/products`,
 `GET /api/public/products/:productId`, `GET /api/public/filters`, and the public
 dashboard endpoints. Reads use a short server-side timeout so a slow API renders
-the localized unavailable state instead of leaving navigation pending.
+the localized unavailable state instead of leaving navigation pending. Public
+product and filter reads use a five-minute server revalidation window; summary,
+ranking, and scatter reads use fifteen minutes, matching their aggregate
+refresh cadence while preserving snapshot freshness metadata in the UI.
 
 Verified bank logo assets live under `public/bank-logos/` or use approved
 official URLs in the `BankLogo` mapping. A failed image falls back to an

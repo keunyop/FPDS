@@ -13,6 +13,7 @@ from worker.pipeline.fpds_normalization.models import (
     NormalizationExtractedField,
     NormalizationInput,
 )
+from worker.pipeline.fpds_normalization.grounded_product_expansion import expand_grounded_product_inputs
 from worker.pipeline.fpds_normalization.persistence import (
     NormalizationDatabaseConfig,
     PsqlNormalizationRepository,
@@ -69,6 +70,258 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_vancity_exact_origin_generic_interest_label_keeps_purchase_rate(self) -> None:
+        self.assertFalse(
+            _looks_like_credit_card_field_mismatch(
+                field_name="purchase_interest_rate",
+                value=19.5,
+                context="Annual fee $0 Interest rate 19.50% Supplementary cards $0.",
+                product_type_family="credit-card",
+                official_grounding_metadata={
+                    "official_grounding_contract_version": "collection-official-grounding-v2",
+                    "official_verification_status": "match",
+                    "official_grounding_method": "deterministic_card_comparison_origin",
+                },
+            )
+        )
+
+    def test_grounded_sibling_card_blocks_expand_to_distinct_products(self) -> None:
+        base = _build_input()
+        source_url = "https://www.vancity.com/bank/credit-cards/student-visa"
+        variants = []
+        for index, (name, fee, rate) in enumerate(
+            (
+                ("enviro Visa* Classic card for students", "0.00", "19.50"),
+                ("enviro Visa* Classic low interest for students", "50.00", "11.25"),
+            ),
+            start=7,
+        ):
+            excerpt = f"{name}\n${fee}\nannual fee\n{rate} %\ninterest rate"
+            variants.append(
+                {
+                    "product_name": name,
+                    "annual_fee": fee,
+                    "purchase_interest_rate": rate,
+                    "evidence_chunk_id": f"chunk-student-{index}",
+                    "evidence_text_excerpt": excerpt,
+                    "anchor_type": "section",
+                    "anchor_value": f"student-card-{index}",
+                    "page_no": None,
+                    "chunk_index": index,
+                    "field_metadata": {
+                        "official_grounding_contract_version": "collection-official-grounding-v2",
+                        "official_grounding_method": "deterministic_sibling_product_block",
+                        "official_verification_status": "match",
+                        "official_web_sources": [{"url": source_url, "title": "Student Visa - Vancity"}],
+                        "evidence_quote": excerpt,
+                        "rationale": "One official card block binds the name, annual fee, and rate.",
+                    },
+                }
+            )
+        item = replace(
+            base,
+            source_id="VANCITY-CC-002",
+            bank_code="VANCITY",
+            source_metadata={
+                "product_type": "credit-card",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "normalized_source_url": source_url,
+            },
+            schema_context={"product_family": "lending", "product_type": "credit-card"},
+            extracted_fields=[
+                replace(field, candidate_value="lending") if field.field_name == "product_family" else
+                replace(field, candidate_value="credit-card") if field.field_name == "product_type" else
+                replace(field, candidate_value="VANCITY") if field.field_name == "bank_code" else
+                replace(
+                    field,
+                    candidate_value="enviro Visa Classic cards for students",
+                    field_metadata={"grounded_product_variants": variants},
+                ) if field.field_name == "product_name" else field
+                for field in base.extracted_fields
+                if field.field_name not in {"monthly_fee", "standard_rate", "interest_payment_frequency"}
+            ],
+            evidence_links=[],
+        )
+
+        expanded = expand_grounded_product_inputs(item)
+
+        self.assertEqual(len(expanded), 2)
+        self.assertEqual(
+            [next(field.candidate_value for field in value.extracted_fields if field.field_name == "product_name") for value in expanded],
+            [
+                "enviro Visa* Classic card for students",
+                "enviro Visa* Classic low interest for students",
+            ],
+        )
+        self.assertEqual(
+            [next(field.candidate_value for field in value.extracted_fields if field.field_name == "purchase_interest_rate") for value in expanded],
+            ["19.50", "11.25"],
+        )
+        self.assertEqual(len({value.candidate_key for value in expanded}), 2)
+        self.assertTrue(
+            all(
+                next(
+                    field.field_metadata.get("official_verification_status")
+                    for field in value.extracted_fields
+                    if field.field_name == "annual_fee"
+                ) == "match"
+                for value in expanded
+            )
+        )
+        temp_path = _prepare_workspace_temp_dir("normalization-grounded-card-variants")
+        try:
+            service = NormalizationService(
+                storage_config=NormalizationStorageConfig(
+                    driver="filesystem",
+                    env_prefix="dev",
+                    normalization_object_prefix="normalized",
+                    retention_class="hot",
+                    filesystem_root=str(temp_path),
+                ),
+                object_store=build_object_store(
+                    NormalizationStorageConfig(
+                        driver="filesystem",
+                        env_prefix="dev",
+                        normalization_object_prefix="normalized",
+                        retention_class="hot",
+                        filesystem_root=str(temp_path),
+                    )
+                ),
+            )
+            with patch(
+                "worker.pipeline.fpds_normalization.service.llm_provider_configured",
+                return_value=False,
+            ):
+                result = service.normalize_inputs(run_id="run-vancity-student", inputs=[item])
+
+            self.assertEqual(len(result.source_results), 2)
+            payloads = [value.normalized_candidate_record["candidate_payload"] for value in result.source_results]
+            self.assertEqual([payload["annual_fee"] for payload in payloads], [0.0, 50.0])
+            self.assertEqual([payload["purchase_interest_rate"] for payload in payloads], [19.5, 11.25])
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
+    def test_grounded_vancity_loc_table_expands_and_resolves_family_boundary(self) -> None:
+        base = _build_input()
+        source_url = "https://www.vancity.com/borrow/loans-lines-of-credit/line-of-credit"
+        excerpt = (
+            "Creditline Personaline Interest rate As low as Vancity Prime + 1.5% 17.75% APR "
+            "Minimum limit $5,000 $500 Maximum limit Depends on eligibility $5,000 "
+            "Can be secured Check X"
+        )
+        grounding = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_grounding_method": "deterministic_sibling_lending_table",
+            "official_verification_status": "match",
+            "official_web_sources": [{"url": source_url, "title": "Line of credit - Vancity"}],
+            "evidence_quote": excerpt,
+            "rationale": "One official comparison table binds each variant and its conditions.",
+        }
+        common = {
+            "evidence_chunk_id": "chunk-vancity-loc-table",
+            "evidence_text_excerpt": excerpt,
+            "anchor_type": "section",
+            "anchor_value": "line-of-credit-options",
+            "page_no": None,
+            "chunk_index": 5,
+            "field_metadata": grounding,
+        }
+        variants = [
+            {
+                **common,
+                "product_name": "Creditline",
+                "interest_rate_summary": "As low as Vancity Prime + 1.5%",
+                "credit_limit_text": "Minimum limit $5,000; maximum depends on eligibility.",
+                "minimum_payment_text": "Interest only",
+                "security_requirement": "Can be secured.",
+            },
+            {
+                **common,
+                "product_name": "Personaline",
+                "interest_rate_summary": "17.75% APR",
+                "credit_limit_text": "Minimum limit $500; maximum limit $5,000.",
+                "minimum_payment_text": "5% of outstanding amount",
+                "secured_flag": False,
+            },
+        ]
+        item = replace(
+            base,
+            source_id="VANCITY-LOC-002",
+            bank_code="VANCITY",
+            source_metadata={
+                "product_type": "line-of-credit",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "normalized_source_url": source_url,
+                "discovery_metadata": {
+                    "selection_reason_codes": ["multi_product_family_overview"],
+                    "page_evidence_reason_codes": ["multi_product_family_overview"],
+                },
+            },
+            schema_context={"product_family": "lending", "product_type": "line-of-credit"},
+            extracted_fields=[
+                replace(field, candidate_value="lending") if field.field_name == "product_family" else
+                replace(field, candidate_value="line-of-credit") if field.field_name == "product_type" else
+                replace(field, candidate_value="VANCITY") if field.field_name == "bank_code" else
+                replace(
+                    field,
+                    candidate_value="Line of credit (LOC)",
+                    field_metadata={"grounded_product_variants": variants},
+                ) if field.field_name == "product_name" else field
+                for field in base.extracted_fields
+                if field.field_name not in {"monthly_fee", "standard_rate", "interest_payment_frequency"}
+            ],
+            evidence_links=[],
+        )
+
+        expanded = expand_grounded_product_inputs(item)
+
+        self.assertEqual(len(expanded), 2)
+        self.assertEqual(
+            [next(field.candidate_value for field in value.extracted_fields if field.field_name == "product_name") for value in expanded],
+            ["Creditline", "Personaline"],
+        )
+        self.assertEqual(
+            next(field.candidate_value for field in expanded[1].extracted_fields if field.field_name == "secured_flag"),
+            False,
+        )
+        self.assertNotIn(
+            "multi_product_family_overview",
+            expanded[0].source_metadata["discovery_metadata"]["selection_reason_codes"],
+        )
+        self.assertIn(
+            "grounded_product_variants_resolved",
+            expanded[0].source_metadata["discovery_metadata"]["selection_reason_codes"],
+        )
+        temp_path = _prepare_workspace_temp_dir("normalization-grounded-vancity-loc-variants")
+        try:
+            config = NormalizationStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                normalization_object_prefix="normalized",
+                retention_class="hot",
+                filesystem_root=str(temp_path),
+            )
+            service = NormalizationService(
+                storage_config=config,
+                object_store=build_object_store(config),
+            )
+            with patch(
+                "worker.pipeline.fpds_normalization.service.llm_provider_configured",
+                return_value=False,
+            ):
+                result = service.normalize_inputs(run_id="run-vancity-loc", inputs=[item])
+
+            self.assertEqual(len(result.source_results), 2)
+            payloads = [value.normalized_candidate_record["candidate_payload"] for value in result.source_results]
+            self.assertEqual([payload["product_name"] for payload in payloads], ["Creditline", "Personaline"])
+            self.assertEqual(payloads[0]["security_requirement"], "Can be secured.")
+            self.assertIs(payloads[1]["secured_flag"], False)
+            self.assertEqual(payloads[1]["interest_rate_summary"], "17.75% APR")
+        finally:
+            rmtree(temp_path, ignore_errors=True)
+
     def test_us_purchase_apr_label_is_valid_credit_card_rate_evidence(self) -> None:
         self.assertFalse(
             _looks_like_credit_card_field_mismatch(
@@ -946,6 +1199,24 @@ class NormalizationServiceTests(unittest.TestCase):
             candidate_payload={"annual_fee": 599.0},
             evidence_links=[],
         )
+        self.assertNotIn("invalid_numeric_range", issues)
+
+    def test_official_personal_loan_apr_is_not_checked_as_a_deposit_yield(self) -> None:
+        issues = _compute_validation_issue_codes(
+            product_type="personal-loan",
+            product_type_family="personal-loan",
+            subtype_code="personal-loan",
+            product_name="Vancity Fair and Fast Loan",
+            country_code="CA",
+            bank_code="VANCITY",
+            product_family="lending",
+            source_language="en",
+            currency="CAD",
+            candidate_payload={"interest_rate": 19.0},
+            evidence_links=[],
+            dynamic_product_type=True,
+        )
+
         self.assertNotIn("invalid_numeric_range", issues)
 
     def test_profile_specific_numeric_extensions_share_rate_and_fee_range_guards(self) -> None:

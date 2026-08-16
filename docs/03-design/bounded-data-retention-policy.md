@@ -66,7 +66,10 @@ The following are no longer physical tables:
 views with discard-only write triggers. Current writers use plain inserts that
 these views absorb while guaranteeing that no rows are stored; pre-`0040`
 processes that still use `ON CONFLICT` must be drained before migration. The
-Admin Audit and Usage routes and pages are removed.
+Admin Audit and Usage routes and pages are removed. Runtime schema discovery
+must therefore treat both base tables and compatibility views as eligible
+relations; checking physical tables alone is not a valid post-`0040` readiness
+test.
 
 Evidence retrieval uses the metadata-scored path. Public dashboard metrics,
 rankings, and scatter data are derived at request time from the latest retained

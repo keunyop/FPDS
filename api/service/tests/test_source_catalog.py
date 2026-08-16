@@ -21,6 +21,7 @@ from api_service.source_catalog import (
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
     _candidate_promotes_to_detail,
+    _deactivate_case_alias_generated_detail_sources,
     _deactivate_hard_scope_excluded_generated_detail_sources,
     _deactivate_rejected_generated_detail_sources,
     _dedupe_detail_rows_by_product_identity,
@@ -33,6 +34,7 @@ from api_service.source_catalog import (
     _authoritative_catalog_detail_bonus,
     _ai_supporting_source_is_relevant,
     _invoke_openai_parallel_scorer,
+    _is_product_type_rate_page,
     _link_is_relevant_supporting_source,
     _looks_like_credit_card_detail_path,
     _looks_like_secondary_catalog_hub,
@@ -115,6 +117,35 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_homepage_generation_loads_browser_policy_without_widening_bank_domains(self) -> None:
+        bounded_policy = SimpleNamespace(
+            allowed_domains=("vancity.com",),
+            browser_fallback_domains=("vancity.com", "www.vancity.com"),
+        )
+        with (
+            patch(
+                "api_service.source_catalog.DiscoveryFetchPolicy.from_env",
+                return_value=bounded_policy,
+            ) as policy_factory,
+            patch("api_service.source_catalog.fetch_text", return_value="<html><body></body></html>") as fetch,
+            patch("api_service.source_catalog._load_seed_entry_url", return_value=None),
+            patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
+            patch("api_service.source_catalog._load_seed_supporting_hints", return_value=[]),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="VANCITY",
+                bank_name="Vancity",
+                country_code="CA",
+                product_type="savings",
+                product_type_definition=_product_type_definition("savings"),
+                homepage_url="https://www.vancity.com/",
+                source_language="en",
+            )
+
+        policy_factory.assert_called_once_with(allowed_domains=("vancity.com",))
+        self.assertIs(fetch.call_args.args[1], bounded_policy)
+        self.assertEqual(result.detail_source_ids, [])
+
     def test_shared_bank_domain_rejects_explicit_other_country_route(self) -> None:
         self.assertTrue(
             _url_country_scope_conflicts(
@@ -775,6 +806,14 @@ class SourceCatalogTests(unittest.TestCase):
             )
         )
 
+    def test_climate_report_pdf_is_not_product_supporting_evidence(self) -> None:
+        self.assertTrue(
+            _has_excluded_link_signal(
+                normalized_url="https://annualreport.examplebank.ca/_doc/Example-2024-Climate-Report.pdf",
+                anchor_text="2024 Climate Report",
+            )
+        )
+
     def test_singular_article_route_is_out_of_product_candidate_scope(self) -> None:
         self.assertEqual(
             _source_scope_exclusion_reason(
@@ -1303,6 +1342,66 @@ class SourceCatalogTests(unittest.TestCase):
         retained, suppressed_urls = _suppress_family_overviews_when_named_details_exist([family])
 
         self.assertEqual(retained, [family])
+        self.assertEqual(suppressed_urls, [])
+
+    def test_verified_seed_detail_survives_cross_sell_family_overview_signal(self) -> None:
+        named_seed = {
+            "bank_code": "VANCITY",
+            "product_type": "gic",
+            "normalized_url": "https://www.vancity.com/invest/term-deposit-gic/escalating",
+            "discovery_metadata": {
+                "candidate_origin": "seed_detail_hint",
+                "product_identity_match": True,
+                "page_evidence_score": 10,
+                "negative_signal_count": 0,
+                "page_evidence_reason_codes": [
+                    "product_identity_signal",
+                    "multi_product_family_overview",
+                ],
+            },
+        }
+        other_named = {
+            "normalized_url": "https://www.vancity.com/invest/term-deposit-gic/impact-term-deposit",
+            "discovery_metadata": {"page_evidence_reason_codes": ["product_identity_signal"]},
+        }
+
+        retained, suppressed_urls = _suppress_family_overviews_when_named_details_exist(
+            [named_seed, other_named]
+        )
+
+        self.assertEqual(
+            retained[0]["discovery_metadata"]["page_evidence_reason_codes"],
+            ["product_identity_signal"],
+        )
+        self.assertNotIn(
+            "multi_product_family_overview",
+            retained[0]["discovery_metadata"]["selection_reason_codes"],
+        )
+        self.assertEqual(retained[1], other_named)
+        self.assertEqual(suppressed_urls, [])
+
+    def test_verified_vancity_loc_keeps_real_multi_option_boundary_signal(self) -> None:
+        loc_seed = {
+            "bank_code": "VANCITY",
+            "product_type": "line-of-credit",
+            "normalized_url": "https://www.vancity.com/borrow/loans-lines-of-credit/line-of-credit",
+            "discovery_metadata": {
+                "candidate_origin": "seed_detail_hint",
+                "product_identity_match": True,
+                "page_evidence_score": 10,
+                "negative_signal_count": 0,
+                "selection_reason_codes": ["multi_product_family_overview"],
+                "page_evidence_reason_codes": ["multi_product_family_overview"],
+            },
+        }
+
+        retained, suppressed_urls = _suppress_family_overviews_when_named_details_exist([loc_seed])
+
+        self.assertEqual(retained, [loc_seed])
+        self.assertIn(
+            "multi_product_family_overview",
+            retained[0]["discovery_metadata"]["selection_reason_codes"],
+        )
         self.assertEqual(suppressed_urls, [])
 
     def test_extract_allowed_links_accepts_www_and_apex_aliases_only(self) -> None:
@@ -2274,6 +2373,57 @@ class SourceCatalogTests(unittest.TestCase):
         rates_row = next(item for item in result.rows if item["normalized_url"] == rates_url)
         self.assertEqual(rates_row["discovery_role"], "supporting_html")
         self.assertEqual(rates_row["discovery_metadata"]["selection_path"], "deterministic_supporting_fallback")
+
+    def test_product_type_rate_page_recognizes_vancity_family_routes_without_cross_product_leakage(self) -> None:
+        cases = (
+            ("chequing", "https://www.vancity.com/rates/accounts"),
+            ("savings", "https://www.vancity.com/rates/accounts"),
+            ("gic", "https://www.vancity.com/rates/term-deposit-gic"),
+            ("mortgage", "https://www.vancity.com/rates/mortgages"),
+            ("personal-loan", "https://www.vancity.com/rates/loans-lines-of-credit"),
+            ("line-of-credit", "https://www.vancity.com/rates/loans-lines-of-credit"),
+        )
+        for product_type, url in cases:
+            with self.subTest(product_type=product_type):
+                self.assertTrue(
+                    _is_product_type_rate_page(
+                        product_type=product_type,
+                        normalized_url=url,
+                        anchor_text="See all rates",
+                    )
+                )
+
+        self.assertFalse(
+            _is_product_type_rate_page(
+                product_type="mortgage",
+                normalized_url="https://www.vancity.com/rates/accounts",
+                anchor_text="Account interest rates",
+            )
+        )
+
+    def test_registered_plan_wrapper_rule_keeps_exact_underlying_gic_and_rrsp_loan_products(self) -> None:
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="gic",
+                fingerprint=(
+                    "https://www.vancity.com/invest/term-deposit-gic/rrsp-rrif-convertible "
+                    "RRSP/RRIF convertible term deposit"
+                ),
+            )
+        )
+        self.assertIsNone(
+            _source_scope_exclusion_reason(
+                product_type="personal-loan",
+                fingerprint="https://www.vancity.com/borrow/loans-lines-of-credit/rrsp-loan RRSP loan",
+            )
+        )
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="gic",
+                fingerprint="https://www.examplebank.ca/investing/rrsp Registered Retirement Savings Plan",
+            ),
+            "registered_plan_wrapper",
+        )
 
     def test_homepage_discovery_promotes_json_script_routes_across_banks_and_product_types(self) -> None:
         cases = (
@@ -3341,6 +3491,10 @@ class SourceCatalogTests(unittest.TestCase):
                 "api_service.source_catalog._deactivate_hard_scope_excluded_generated_detail_sources",
                 return_value=0,
             ),
+            patch(
+                "api_service.source_catalog._deactivate_case_alias_generated_detail_sources",
+                return_value=0,
+            ),
         ):
             result = _materialize_sources_for_catalog_item(
                 connection,
@@ -3508,6 +3662,10 @@ class SourceCatalogTests(unittest.TestCase):
             ) as upsert_rows,
             patch(
                 "api_service.source_catalog._deactivate_hard_scope_excluded_generated_detail_sources",
+                return_value=0,
+            ),
+            patch(
+                "api_service.source_catalog._deactivate_case_alias_generated_detail_sources",
                 return_value=0,
             ),
         ):
@@ -4254,6 +4412,37 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("seed_source_flag = false", sql)
         self.assertIn("source_id LIKE 'AUTO-%%'", sql)
         self.assertEqual(len(params["normalized_urls"]), 2)
+
+    def test_deactivates_stale_generated_case_only_detail_alias(self) -> None:
+        connection = _QueuedConnection(
+            [
+                [
+                    {
+                        "source_id": "AUTO-VANCITY-CRE-old",
+                        "normalized_url": "https://www.vancity.com/Bank/Credit-cards/enviro-Infinite",
+                    },
+                    {
+                        "source_id": "AUTO-VANCITY-CRE-other",
+                        "normalized_url": "https://www.vancity.com/bank/credit-cards/enviro-gold",
+                    },
+                ],
+                1,
+            ]
+        )
+
+        count = _deactivate_case_alias_generated_detail_sources(
+            connection,
+            bank_code="VANCITY",
+            product_type="credit-card",
+            selected_normalized_urls=[
+                "https://www.vancity.com/bank/credit-cards/enviro-infinite",
+            ],
+        )
+
+        self.assertEqual(count, 1)
+        update_sql, update_params = connection.calls[1]
+        self.assertIn("superseded_case_only_url_alias", update_sql)
+        self.assertEqual(update_params["source_ids"], ["AUTO-VANCITY-CRE-old"])
 
     def test_deactivates_existing_generated_detail_with_hard_retail_scope_exclusion(self) -> None:
         connection = _QueuedConnection(
@@ -5420,6 +5609,23 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("bank.status = 'active'", migration_sql)
         self.assertIn("product_type_registry.status = 'active'", migration_sql)
         self.assertIn("ON CONFLICT (bank_code, country_code, product_type) DO UPDATE", migration_sql)
+
+    def test_vancity_route_migration_pins_all_seven_official_product_hubs(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        migration_sql = (
+            repo_root / "db" / "migrations" / "0041_vancity_official_product_routes.sql"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("product_owner_directed_official_site_audit", migration_sql)
+        self.assertIn("https://www.vancity.com/bank/accounts", migration_sql)
+        self.assertIn("https://www.vancity.com/bank/credit-cards", migration_sql)
+        self.assertIn("https://www.vancity.com/invest/term-deposit-gic", migration_sql)
+        self.assertIn("https://www.vancity.com/borrow/mortgages", migration_sql)
+        self.assertIn("https://www.vancity.com/borrow/loans-lines-of-credit", migration_sql)
+        for product_type in (
+            "chequing", "savings", "gic", "credit-card", "mortgage", "personal-loan", "line-of-credit"
+        ):
+            self.assertIn(f"('{product_type}',", migration_sql)
 
     def test_coverage_evidence_migration_is_additive_and_auditable(self) -> None:
         repo_root = Path(__file__).resolve().parents[3]

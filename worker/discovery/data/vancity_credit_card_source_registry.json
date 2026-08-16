@@ -1,0 +1,101 @@
+{
+  "registry_version": "2026-08-15-v1",
+  "bank_code": "VANCITY",
+  "country_code": "CA",
+  "product_type": "credit-card",
+  "source_language": "en",
+  "allowed_domains": ["vancity.com"],
+  "entry_source_id": "VANCITY-CC-001",
+  "sources": [
+    {
+      "source_id": "VANCITY-CC-001",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "entry",
+      "purpose": "Vancity personal credit card lineup discovery",
+      "url": "https://www.vancity.com/bank/credit-cards",
+      "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"]
+    },
+    {
+      "source_id": "VANCITY-CC-002",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity enviro Visa Classic student cards detail source",
+      "url": "https://www.vancity.com/bank/credit-cards/student-visa",
+      "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"]
+    },
+    {
+      "source_id": "VANCITY-CC-003",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity enviro Visa Infinite Low Interest detail source",
+      "url": "https://www.vancity.com/bank/credit-cards/enviro-infinite-low-interest-vancity-rewards",
+      "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"]
+    },
+    {
+      "source_id": "VANCITY-CC-004",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity enviro Visa Classic detail source",
+      "url": "https://www.vancity.com/bank/credit-cards/enviro-classic",
+      "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"]
+    },
+    {
+      "source_id": "VANCITY-CC-005",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity enviro Visa Infinite Privilege detail source",
+      "url": "https://www.vancity.com/bank/credit-cards/enviro-visa-infinite-privilege",
+      "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"]
+    },
+    {
+      "source_id": "VANCITY-CC-006",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity enviro Visa Infinite detail source",
+      "url": "https://www.vancity.com/bank/credit-cards/enviro-infinite",
+      "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"]
+    },
+    {
+      "source_id": "VANCITY-CC-007",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity enviro Visa Gold detail source",
+      "url": "https://www.vancity.com/bank/credit-cards/enviro-gold",
+      "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"]
+    },
+    {
+      "source_id": "VANCITY-CC-008",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "detail",
+      "purpose": "Vancity enviro Visa Classic Low Interest detail source",
+      "url": "https://www.vancity.com/bank/credit-cards/enviro-classic-low-interest-vancity-rewards",
+      "expected_fields": ["product_name", "annual_fee", "purchase_interest_rate"]
+    },
+    {
+      "source_id": "VANCITY-CC-009",
+      "priority": "P1",
+      "seed_source_flag": true,
+      "source_type": "html",
+      "discovery_role": "supporting_html",
+      "purpose": "Vancity credit card agreements and disclosure supporting evidence",
+      "url": "https://www.vancity.com/bank/credit-cards/manage-your-credit-card/credit-card-agreements",
+      "expected_fields": ["annual_fee", "purchase_interest_rate"]
+    }
+  ]
+}

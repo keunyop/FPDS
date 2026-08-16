@@ -34,7 +34,7 @@ export function PublicNav() {
             key={item.href}
             href={href}
             className={cn(
-              "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full px-2.5 font-medium transition-colors first:hidden sm:first:inline-flex lg:px-3.5",
+              "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-2.5 font-medium transition-colors first:hidden sm:first:inline-flex lg:px-3.5",
               active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >

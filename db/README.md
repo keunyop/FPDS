@@ -90,6 +90,9 @@ Files:
   discard-only rolling-deployment views for the two obsolete log writers; and
   installs bounded evidence, model execution, aggregate, auth, and run JSON
   retention
+- `migrations/0041_vancity_official_product_routes.sql`: pins Vancity's seven
+  active retail Product Types to the audited official account, card, GIC,
+  mortgage, and consumer-lending hubs before exact-product seed expansion
 
 How to apply when a database is available:
 
@@ -129,6 +132,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0037_us_pricing_companion_scope_cle
 psql $env:FPDS_DATABASE_URL -f db/migrations/0038_us_cross_product_support_cleanup.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0039_us_credit_card_apr_range_contract.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0040_bounded_operational_storage.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_routes.sql
 ```
 
 Notes:
