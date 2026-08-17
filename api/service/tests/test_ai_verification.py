@@ -263,6 +263,34 @@ class AiVerificationTests(TestCase):
             "exact_official_detail_lending_comparison",
         )
 
+    def test_authoritative_field_evidence_accepts_exact_card_purchase_rate(self):
+        detail = _detail()
+        detail["candidate"].update({"product_type": "credit-card", "product_family": "lending"})
+        detail["candidate"]["candidate_payload"]["purchase_interest_rate"] = 19.5
+        detail["candidate"]["field_mapping_metadata"] = {
+            "purchase_interest_rate": {
+                "normalized_value": 19.5,
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_grounding_method": "deterministic_card_comparison_origin",
+                "official_verification_status": "match",
+                "official_evidence_quote": "Annual fee $0 Interest rate 19.50%",
+                "official_web_sources": [
+                    {"url": "https://bank.example/credit-cards/classic", "title": "Classic card"}
+                ],
+            }
+        }
+
+        evidence = authoritative_field_evidence(
+            detail,
+            field_names=["purchase_interest_rate"],
+            allowed_domains=["bank.example"],
+        )
+
+        self.assertEqual(
+            evidence["purchase_interest_rate"]["basis"],
+            "exact_official_detail_card_purchase_rate",
+        )
+
     def test_normalize_official_domains_keeps_registered_hosts_only(self):
         self.assertEqual(
             normalize_official_domains(

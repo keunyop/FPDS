@@ -56,6 +56,7 @@ from worker.pipeline.fpds_normalization.service import (
     _rate_field_suppression_reason,
     _rate_evidence_is_account_context,
     _refine_product_name_from_source_metadata,
+    _resolve_gic_redeemability_flags,
     _suppress_unverified_dynamic_fields,
     _suppress_uncombined_savings_rate_boost,
 )
@@ -64,12 +65,94 @@ from worker.pipeline.fpds_normalization.storage import (
     build_object_store,
 )
 from worker.pipeline.fpds_normalization.supporting_merge import (
+    _extract_generic_gic_rate_values,
+    _explicit_target_gic_minimum,
     merge_supporting_artifacts,
     supporting_source_ids_for_target,
 )
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def test_hyphenated_index_linked_gic_is_not_misclassified_from_renewal_copy(self) -> None:
+        subtype, source_label = _infer_subtype_code(
+            product_type="gic",
+            country_code="CA",
+            currency="CAD",
+            candidate_payload={
+                "product_name": "Index-linked term deposit (ILTD)",
+                "eligibility_text": (
+                    "At maturity the proceeds may renew into a 12-Month Cashable Term."
+                ),
+            },
+        )
+
+        self.assertEqual(subtype, "market_linked")
+        self.assertIsNone(source_label)
+
+    def test_vancity_index_linked_pdf_minimum_binds_only_to_exact_product(self) -> None:
+        excerpt = (
+            "Index-linked term deposit (ILTD) Agreement: Terms and Conditions. "
+            "This ILTD is not redeemable until the Maturity Date. Minimum deposit is $1,000."
+        )
+
+        self.assertEqual(
+            str(
+                _explicit_target_gic_minimum(
+                    excerpt,
+                    terms=("index-linked term deposit (iltd)", "index linked"),
+                )
+            ),
+            "1000",
+        )
+        self.assertIsNone(
+            _explicit_target_gic_minimum(
+                excerpt,
+                terms=("cashable term deposit",),
+            )
+        )
+
+    def test_vancity_escalating_schedule_does_not_treat_iso_date_as_term(self) -> None:
+        values = _extract_generic_gic_rate_values(
+            "The Vancity 3-Year Escalating Term Deposit. Rates as of 2026\u201108\u201114 "
+            "Year 1 2.90 % Year 2 3.25 % Year 3 4.20 %"
+        )
+
+        self.assertEqual(
+            [(row["term_label"], row["rate"]) for row in values["term_rate_table"]],
+            [("1 year", "2.90"), ("2 year", "3.25"), ("3 year", "4.20")],
+        )
+
+    def test_gic_exact_non_redeemable_evidence_overrides_noisy_redeemable_subtype(self) -> None:
+        payload = {
+            "product_name": "Index-linked term deposit (ILTD)",
+            "redeemable_flag": True,
+            "non_redeemable_flag": True,
+        }
+        normalized = {"redeemable_flag": True, "non_redeemable_flag": True}
+        mappings = {
+            "redeemable_flag": {"normalized_value": True},
+            "non_redeemable_flag": {
+                "normalized_value": True,
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_verification_status": "match",
+                "official_evidence_quote": "Cannot be redeemed before maturity date",
+            },
+        }
+        notes: list[str] = []
+
+        _resolve_gic_redeemability_flags(
+            product_type_family="gic",
+            subtype_code="redeemable",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized,
+            field_mapping_metadata=mappings,
+            runtime_notes=notes,
+        )
+
+        self.assertIs(payload["redeemable_flag"], False)
+        self.assertIs(payload["non_redeemable_flag"], True)
+        self.assertEqual(mappings["non_redeemable_flag"]["source_signal"], "non_redeemable")
+
     def test_vancity_exact_origin_generic_interest_label_keeps_purchase_rate(self) -> None:
         self.assertFalse(
             _looks_like_credit_card_field_mismatch(

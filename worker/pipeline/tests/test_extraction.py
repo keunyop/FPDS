@@ -34,11 +34,13 @@ from worker.pipeline.fpds_extraction.service import (
     _extract_deposit_insurance,
     _extract_description,
     _extract_document_title,
+    _extract_fields,
     _extract_eligibility_text,
     _extract_early_withdrawal_penalty,
     _extract_fee_waiver_condition,
     _extract_grounded_card_product_variants,
     _extract_grounded_vancity_line_of_credit_variants,
+    _ground_exact_detail_product_name,
     _field_evidence_semantic_score,
     _extract_from_matches,
     _extract_interest_calculation_method,
@@ -58,6 +60,7 @@ from worker.pipeline.fpds_extraction.service import (
     _looks_like_navigation_description,
     _looks_like_non_product_summary,
     _merge_extracted_fields,
+    _prefer_vancity_ev_rate_evidence,
     _resolve_field_names,
     _safe_exact_origin_card_purchase_rate,
     _safe_exact_origin_lending_comparison_fact,
@@ -347,6 +350,12 @@ class ExtractionServiceTests(unittest.TestCase):
         )
 
         self.assertTrue(_safe_exact_origin_card_purchase_rate(field, product_type="credit-card"))
+        self.assertTrue(
+            _safe_exact_origin_card_purchase_rate(
+                replace(field, extraction_method="heuristic_labeled_rate_fallback"),
+                product_type="credit-card",
+            )
+        )
         self.assertFalse(
             _safe_exact_origin_card_purchase_rate(
                 replace(
@@ -380,8 +389,9 @@ class ExtractionServiceTests(unittest.TestCase):
                     "page_title": "Student Visa - Vancity",
                     "primary_heading": "enviro Visa Classic cards for students",
                     "product_identity_match": True,
-                    "page_evidence_score": 11,
+                    "page_evidence_score": 4,
                     "negative_signal_count": 0,
+                    "selection_reason_codes": ["seed_hint_alignment", "product_identity_signal"],
                 },
             },
         )
@@ -552,8 +562,10 @@ class ExtractionServiceTests(unittest.TestCase):
 Creditline
 Personaline
 Interest rate
-As low as Vancity Prime + 1.5% To discuss your rate, talk to us
-17.75% APR
+As low as Vancity Prime + 1.5 % 2 To discuss your rate, talk to us
+%
+17.75 % APR 2
+%
 Minimum monthly payment
 Interest only
 5% of outstanding amount
@@ -602,6 +614,387 @@ X"""
             ),
             [],
         )
+
+    def test_ai_match_preserves_deterministic_exact_origin_method(self) -> None:
+        base = ExtractedFieldCandidate(
+            field_name="purchase_interest_rate",
+            candidate_value="19.50",
+            value_type="decimal",
+            confidence=0.9,
+            extraction_method="heuristic_labeled_rate",
+            source_document_id="src-card",
+            source_snapshot_id="snap-card",
+            evidence_chunk_id="chunk-card",
+            evidence_text_excerpt="Annual fee $0 Interest rate 19.50%",
+            anchor_type="section",
+            anchor_value="features",
+            page_no=None,
+            chunk_index=1,
+            field_metadata={
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_verification_status": "match",
+                "official_grounding_method": "deterministic_card_comparison_origin",
+            },
+        )
+        ai = replace(
+            base,
+            confidence=0.99,
+            extraction_method="openai_official_grounding",
+            field_metadata={
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_verification_status": "match",
+                "official_web_sources": [{"url": "https://www.vancity.com/bank/credit-cards/enviro-classic"}],
+                "evidence_quote": "Interest rate 19.50%",
+            },
+        )
+
+        merged = _merge_extracted_fields(base_fields=[base], ai_fields=[ai])
+
+        self.assertEqual(
+            merged[0].field_metadata["official_grounding_method"],
+            "deterministic_card_comparison_origin",
+        )
+
+    def test_ai_does_not_replace_exact_detail_h1_with_disclosure_name(self) -> None:
+        base = ExtractedFieldCandidate(
+            field_name="product_name",
+            candidate_value="Low-interest enviro Visa Classic card with Vancity Rewards",
+            value_type="string",
+            confidence=0.95,
+            extraction_method="derived_title",
+            source_document_id="src-card",
+            source_snapshot_id="snap-card",
+            evidence_chunk_id="chunk-h1",
+            evidence_text_excerpt="Low-interest enviro Visa Classic card with Vancity Rewards",
+            anchor_type="section",
+            anchor_value="low-interest-enviro-visa-classic",
+            page_no=None,
+            chunk_index=0,
+            field_metadata={
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_verification_status": "match",
+                "official_grounding_method": "deterministic_detail_h1",
+            },
+        )
+        ai = replace(
+            base,
+            candidate_value="enviro Visa Classic card with Low Interest Rate plus Vancity Rewards",
+            extraction_method="openai_official_grounding",
+            field_metadata={"official_verification_status": "mismatch"},
+        )
+
+        merged = _merge_extracted_fields(base_fields=[base], ai_fields=[ai])
+
+        self.assertEqual(merged, [base])
+
+    def test_exact_detail_h1_creates_direct_product_name_evidence(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-GIC-004",
+            parsed_document_id="parsed-vancity-gic",
+            source_document_id="src-vancity-gic",
+            snapshot_id="snap-vancity-gic",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "gic",
+                "discovery_role": "detail",
+                "expected_fields": ["product_name"],
+                "normalized_source_url": "https://www.vancity.com/invest/term-deposit-gic/non-redeemable",
+                "official_domain_allowlist": ["vancity.com"],
+                "discovery_metadata": {
+                    "page_title": "Non-redeemable term deposits - Vancity",
+                    "primary_heading": "Non-redeemable term deposits",
+                    "product_identity_match": True,
+                    "page_evidence_score": 9,
+                    "negative_signal_count": 0,
+                },
+            },
+        )
+        candidate = EvidenceChunkCandidate(
+            evidence_chunk_id="chunk-gic-h1",
+            parsed_document_id=context.parsed_document_id,
+            chunk_index=0,
+            anchor_type="section",
+            anchor_value="non-redeemable-term-deposits",
+            page_no=None,
+            source_language="en",
+            evidence_excerpt="Non-redeemable term deposits\nEarn more when you lock in your cash.",
+            retrieval_metadata={},
+            source_document_id=context.source_document_id,
+            source_snapshot_id=context.snapshot_id,
+            bank_code=context.bank_code,
+            country_code=context.country_code,
+            source_type=context.source_type,
+        )
+
+        fields = _extract_fields(
+            context=context,
+            candidates=[candidate],
+            matches=[],
+            requested_fields=["product_name"],
+        )
+        product_name = next(field for field in fields if field.field_name == "product_name")
+
+        self.assertEqual(product_name.evidence_chunk_id, "chunk-gic-h1")
+        self.assertEqual(
+            product_name.field_metadata["official_grounding_method"],
+            "deterministic_detail_h1",
+        )
+
+    def test_exact_detail_h1_replaces_generic_credit_card_title(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-CC-008",
+            parsed_document_id="parsed-vancity-card",
+            source_document_id="src-vancity-card",
+            snapshot_id="snap-vancity-card",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "credit-card",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "expected_fields": ["product_name"],
+                "normalized_source_url": (
+                    "https://www.vancity.com/bank/credit-cards/"
+                    "enviro-classic-low-interest-vancity-rewards"
+                ),
+                "official_domain_allowlist": ["vancity.com"],
+                "discovery_metadata": {
+                    "page_title": "Credit Card",
+                    "primary_heading": "Low-interest enviro Visa Classic card with Vancity Rewards",
+                    "product_identity_match": True,
+                    "page_evidence_score": 7,
+                    "negative_signal_count": 0,
+                },
+            },
+        )
+        candidate = EvidenceChunkCandidate(
+            evidence_chunk_id="chunk-card-h1",
+            parsed_document_id=context.parsed_document_id,
+            chunk_index=0,
+            anchor_type="section",
+            anchor_value="low-interest-enviro-visa-classic",
+            page_no=None,
+            source_language="en",
+            evidence_excerpt=(
+                "Low-interest enviro Visa Classic card with Vancity Rewards\n"
+                "A lower purchase interest rate."
+            ),
+            retrieval_metadata={},
+            source_document_id=context.source_document_id,
+            source_snapshot_id=context.snapshot_id,
+            bank_code=context.bank_code,
+            country_code=context.country_code,
+            source_type=context.source_type,
+        )
+        field = ExtractedFieldCandidate(
+            field_name="product_name",
+            candidate_value="Credit Card",
+            value_type="string",
+            confidence=0.88,
+            extraction_method="derived_title",
+            source_document_id=context.source_document_id,
+            source_snapshot_id=context.snapshot_id,
+            evidence_chunk_id=None,
+            evidence_text_excerpt=None,
+            anchor_type=None,
+            anchor_value=None,
+            page_no=None,
+            chunk_index=None,
+            field_metadata={},
+        )
+
+        grounded = _ground_exact_detail_product_name(
+            context=context,
+            candidates=[candidate],
+            field=field,
+        )
+
+        self.assertEqual(
+            grounded.candidate_value,
+            "Low-interest enviro Visa Classic card with Vancity Rewards",
+        )
+        self.assertEqual(grounded.evidence_chunk_id, "chunk-card-h1")
+
+    def test_vancity_ev_curated_detail_grounds_prime_spread_and_amount(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-PL-005",
+            parsed_document_id="parsed-vancity-ev",
+            source_document_id="src-vancity-ev",
+            snapshot_id="snap-vancity-ev",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "personal-loan",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "expected_fields": ["product_name", "interest_rate_summary", "loan_amount_text"],
+                "normalized_source_url": (
+                    "https://www.vancity.com/borrow/loans-lines-of-credit/planet-wise-transportation"
+                ),
+                "official_domain_allowlist": ["vancity.com"],
+                "discovery_metadata": {
+                    "primary_heading": "Planet-Wise transportation loan - electric vehicle (EV) loan",
+                    "product_identity_match": False,
+                    "page_evidence_score": 3,
+                    "negative_signal_count": 0,
+                    "selection_reason_codes": [
+                        "seed_hint_alignment",
+                        "structured_component_evidence",
+                    ],
+                },
+            },
+        )
+        evidence = (
+            "Electric vehicle\nEV loan to purchase any new or used electric vehicle\n"
+            "Max. term: 10 years\nMax. amount: based on how you qualify\n"
+            "Pricing: Vancity Prime Rate +1 %"
+        )
+        fields = [
+            ExtractedFieldCandidate(
+                field_name="interest_rate_summary",
+                candidate_value="Pricing: Vancity Prime Rate +1 %",
+                value_type="string",
+                confidence=0.8,
+                extraction_method="heuristic_rate_summary",
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                evidence_chunk_id="chunk-ev-pricing",
+                evidence_text_excerpt=evidence,
+                anchor_type="section",
+                anchor_value="electric-vehicle",
+                page_no=None,
+                chunk_index=7,
+                field_metadata={},
+            ),
+            ExtractedFieldCandidate(
+                field_name="loan_amount_text",
+                candidate_value="Borrow from $1,500 and up",
+                value_type="string",
+                confidence=0.8,
+                extraction_method="heuristic_text",
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                evidence_chunk_id="chunk-ev-amount",
+                evidence_text_excerpt="EV loan. Borrow from $1,500 and up.",
+                anchor_type="section",
+                anchor_value="electric-vehicle",
+                page_no=None,
+                chunk_index=0,
+                field_metadata={},
+            ),
+        ]
+
+        grounded, count = _apply_exact_origin_grounding(context=context, extracted_fields=fields)
+
+        self.assertEqual(count, 2)
+        self.assertTrue(
+            all(
+                field.field_metadata["official_grounding_method"]
+                == "deterministic_lending_comparison_origin"
+                for field in grounded
+            )
+        )
+
+    def test_vancity_ev_rate_prefers_ev_section_over_two_wheeler_section(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-PL-005",
+            parsed_document_id="parsed-vancity-ev",
+            source_document_id="src-vancity-ev",
+            snapshot_id="snap-vancity-ev",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "personal-loan",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "expected_fields": ["interest_rate_summary"],
+                "normalized_source_url": (
+                    "https://www.vancity.com/borrow/loans-lines-of-credit/planet-wise-transportation"
+                ),
+                "official_domain_allowlist": ["vancity.com"],
+                "discovery_metadata": {
+                    "primary_heading": "Planet-Wise transportation loan - electric vehicle (EV) loan",
+                    "product_identity_match": False,
+                    "page_evidence_score": 3,
+                    "negative_signal_count": 0,
+                    "selection_reason_codes": [
+                        "seed_hint_alignment",
+                        "structured_component_evidence",
+                    ],
+                },
+            },
+        )
+        candidates = [
+            EvidenceChunkCandidate(
+                evidence_chunk_id=f"chunk-{anchor}",
+                parsed_document_id=context.parsed_document_id,
+                chunk_index=index,
+                anchor_type="section",
+                anchor_value=anchor,
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=excerpt,
+                retrieval_metadata={},
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                bank_code=context.bank_code,
+                country_code=context.country_code,
+                source_type=context.source_type,
+            )
+            for index, anchor, excerpt in (
+                (
+                    6,
+                    "two-wheelers",
+                    "Two-wheelers\nMax. term: 5 years\nPricing: Vancity Prime Rate +1 %",
+                ),
+                (
+                    7,
+                    "electric-vehicle",
+                    (
+                        "Electric vehicle\nEV loan to purchase any new or used electric vehicle\n"
+                        "Max. term: 10 years\nMax. amount: based on how you qualify\n"
+                        "Pricing: Vancity Prime Rate +1 %"
+                    ),
+                ),
+            )
+        ]
+        fields = [
+            ExtractedFieldCandidate(
+                field_name="interest_rate_summary",
+                candidate_value="Pricing: Vancity Prime Rate +1%",
+                value_type="string",
+                confidence=0.8,
+                extraction_method="heuristic_rate_summary",
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                evidence_chunk_id="chunk-two-wheelers",
+                evidence_text_excerpt=candidates[0].evidence_excerpt,
+                anchor_type="section",
+                anchor_value="two-wheelers",
+                page_no=None,
+                chunk_index=6,
+                field_metadata={},
+            )
+        ]
+
+        _prefer_vancity_ev_rate_evidence(
+            context=context,
+            candidates=candidates,
+            requested_fields=["interest_rate_summary"],
+            extracted_fields=fields,
+        )
+
+        self.assertEqual(fields[0].evidence_chunk_id, "chunk-electric-vehicle")
+        self.assertEqual(fields[0].anchor_value, "electric-vehicle")
 
     def test_numeric_apr_summary_preserves_disclosed_qualifiers(self) -> None:
         summary = _extract_interest_rate_summary(
@@ -1732,6 +2125,16 @@ X"""
                 text="$795 annual fee; $195 for each authorized user.",
             ),
             "795.00",
+        )
+        self.assertEqual(
+            _extract_labeled_extension_fee(
+                field_name="annual_fee",
+                text=(
+                    "Annual Vancity Rewards value $123 Annual fee - $0 "
+                    "Total yearly benefits value after fees $123"
+                ),
+            ),
+            "0.00",
         )
         self.assertIsNone(
             _extract_labeled_extension_fee(

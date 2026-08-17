@@ -636,6 +636,15 @@ def authoritative_field_evidence(
                 or "%" in str(candidate_payload.get(field_name) or "")
             )
         )
+        exact_card_purchase_rate = (
+            product_type == "credit-card"
+            and field_name == "purchase_interest_rate"
+            and grounding_method in {
+                "deterministic_card_comparison_origin",
+                "deterministic_sibling_product_block",
+            }
+            and "%" in str(metadata.get("official_evidence_quote") or "")
+        )
         sources = [
             source
             for source in _source_list(metadata.get("official_web_sources"))
@@ -646,7 +655,7 @@ def authoritative_field_evidence(
         ]
         if (
             metadata.get("official_grounding_contract_version") != "collection-official-grounding-v2"
-            or not (exact_fee or exact_lending_fact)
+            or not (exact_fee or exact_lending_fact or exact_card_purchase_rate)
             or metadata.get("official_verification_status") != "match"
             or not str(metadata.get("official_evidence_quote") or "").strip()
             or not sources
@@ -659,7 +668,11 @@ def authoritative_field_evidence(
             "basis": (
                 "exact_official_detail_lending_comparison"
                 if exact_lending_fact
-                else "exact_official_detail_labeled_fee"
+                else (
+                    "exact_official_detail_card_purchase_rate"
+                    if exact_card_purchase_rate
+                    else "exact_official_detail_labeled_fee"
+                )
             ),
             "candidate_value": candidate_payload.get(field_name),
             "source_url": str(source.get("url") or ""),

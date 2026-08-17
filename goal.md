@@ -134,3 +134,89 @@ improved without weakening approval safety.
    Bankoom Public worktree changes.
 6. Update the journal and WBS only from verified terminal results. Delete this
    file only when every acceptance criterion above is satisfied.
+
+## Pause Checkpoint - 2026-08-16 (Continuation)
+
+### Verified Outcome Before This Pause
+
+- The earlier collection collection_pC4G-nfcCpkakYrE completed five Vancity
+  runs without failure or partial state and produced 33 candidates: 15
+  approved and 18 in Review.
+- Collection collection_bkk5K_e2ZD5Lh1ij / corr_V8lD6f9ClZcTfDAE completed
+  all five requested Vancity runs without failure or partial state:
+  - Chequing: 9 candidates, all 9 approved
+  - Credit card: 8 candidates, 5 approved and 3 in Review
+  - GIC: 7 candidates, 6 approved and 1 in Review
+  - Line of credit: 3 candidates, all 3 in Review before the final
+    deterministic sibling-boundary validation fix
+  - Personal loan: 8 candidates, 2 approved and 6 in Review
+  - Total: 35 candidates, 22 approved, 13 in Review; validation 21 pass / 14
+    error; 14 Review tasks; zero failed/partial runs
+- Approved results include both student card variants, six current GIC
+  products plus the Index-linked product, the exact Personal Loan, and the
+  Planet-Wise EV loan. Products without a current exact public comparison fact
+  remain in Review by design.
+
+### Additional Fixes Completed During The Audit
+
+- Cards now prefer a fee after its exact label, retain bounded fallback
+  purchase-rate grounding, and preserve an exact detail H1 over longer
+  offer/agreement naming returned by AI grounding.
+- The official Index-linked terms PDF supplies the exact $1,000 minimum only
+  to the ILTD. ISO dates no longer contaminate escalating schedules,
+  decisive non-redeemable wording resolves conflicting flags, and hyphenated
+  index-linked identity yields subtype market_linked before unrelated
+  Cashable renewal copy.
+- Creditline and Personaline skip standalone percent rows and split into the
+  correct rate, limit, and security columns. A multi-product page may pass
+  only when all required line-of-credit fields use the official deterministic
+  sibling-table contract and one evidence chunk.
+- The EV loan's Prime + 1% link now prefers the exact Electric Vehicle section
+  over the adjacent Two-wheelers section.
+- API Review AI accepts persisted exact deterministic Vancity card purchase
+  rates as authoritative fallback evidence.
+- Verification after final code changes: extraction + normalization +
+  validation/routing 370 passed; earlier worker pipeline full suite 442
+  passed; API source-catalog/runner/AI suites 208 passed.
+
+### Active Background Collection At Pause
+
+- Do not launch another collection until this exact one is terminal and
+  audited.
+- Collection: collection_g6Bdzbm3utaEA8s2
+- Correlation: corr_VOQHNiY7-kdwn8HA
+- Scope: country_code=CA, bank_code=VANCITY; only credit-card, gic,
+  line-of-credit, and personal-loan. Chequing was not rerun because all nine
+  candidates approved.
+- Last observed state: four runs started, zero candidates, zero Review tasks,
+  no error summary, and no partial flag; all were at serial
+  source_catalog_collection.
+- Run IDs:
+  - run_20260817_032504_vancity_credit-card_collect_zHKBnEO4
+  - run_20260817_032504_vancity_gic_collect_i3kCBBvg
+  - run_20260817_032504_vancity_line-of-credit_collect_ROxdS5_m
+  - run_20260817_032504_vancity_personal-loan_collect_vQAQNHNQ
+- The runner was not terminated because forced termination can leave runs
+  stuck in started.
+
+### Resume From Here
+
+1. Read the startup documents, this checkpoint, and the latest journal entry.
+2. Poll collection_g6Bdzbm3utaEA8s2 once. If it is not terminal, do not edit
+   or launch another collection; wait for this runner.
+3. At terminal, obtain full and per-type summaries and verify:
+   - Classic card annual fee $0 and purchase rate 19.50%
+   - Gold card annual fee $99 and purchase rate 19.50%
+   - Low-interest Classic exact H1 and 11.25%
+   - Index-linked GIC subtype market_linked, minimum $1,000, 3 or 5 years,
+     redeemable false, non-redeemable true, and no fictitious 14-year row
+   - Creditline and Personaline approval while no-rate HELOC remains Review
+   - EV rate anchor electric-vehicle, Prime + 1%, amount from $1,500, and
+     maximum term 10 years
+4. Compare with collection_bkk5K_e2ZD5Lh1ij and
+   collection_pC4G-nfcCpkakYrE, then verify canonical promotions and the latest
+   Public API/aggregate. Do not manually approve Review tasks or directly edit
+   canonical/Public facts.
+5. Run final suites and git diff --check, restore tracked test/aggregate
+   artifacts, inspect the diff, update WBS/journal from terminal results, and
+   remove goal.md only after all acceptance criteria pass.

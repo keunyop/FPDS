@@ -17,6 +17,12 @@ _TERM_RATE_ROW_RE = re.compile(
     r"(?P<rate>(?<![\d.,])\d{1,2}(?:\.\d{1,4})?)\s*%",
     re.IGNORECASE,
 )
+_YEAR_FIRST_RATE_ROW_RE = re.compile(
+    r"\byear\s+(?P<year>\d{1,2})\b"
+    r"(?P<body>[^%\n\r]{0,80}?)"
+    r"(?P<rate>(?<![\d.,])\d{1,2}(?:\.\d{1,4})?)\s*%",
+    re.IGNORECASE,
+)
 _BALANCE_LINE_RE = re.compile(r"^\$[0-9,]")
 _WHITESPACE_RE = re.compile(r"\s+")
 _MONTH_RE = re.compile(r"\b(month|months|monthly|next month)\b", re.IGNORECASE)
@@ -861,6 +867,7 @@ def _build_generic_gic_rate_supplement(
         target_source_id=target_source_id,
         support_source_id=support_source_id,
         matches=matches,
+        terms=terms,
         existing_fields=existing_fields,
     )
 
@@ -937,6 +944,7 @@ def _build_generic_gic_minimum_supplement(
     target_source_id: str,
     support_source_id: str,
     matches: list[dict[str, object]],
+    terms: tuple[str, ...],
     existing_fields: dict[str, dict[str, object]],
 ) -> dict[str, dict[str, dict[str, object]] | list[str]]:
     """Merge only an explicit product-wide GIC minimum; never infer one from fees or examples."""
@@ -947,8 +955,9 @@ def _build_generic_gic_minimum_supplement(
         (
             item
             for item in matches
-            if _explicit_product_wide_gic_minimum(
-                str(item.get("evidence_text_excerpt") or "")
+            if _gic_support_minimum(
+                str(item.get("evidence_text_excerpt") or ""),
+                terms=terms,
             )
             is not None
         ),
@@ -956,9 +965,8 @@ def _build_generic_gic_minimum_supplement(
     )
     if match is None:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
-    minimum = _explicit_product_wide_gic_minimum(
-        str(match.get("evidence_text_excerpt") or "")
-    )
+    excerpt = str(match.get("evidence_text_excerpt") or "")
+    minimum = _gic_support_minimum(excerpt, terms=terms)
     if minimum is None:
         return {"field_updates": {}, "evidence_updates": {}, "runtime_notes": []}
     return _build_generic_field_updates(
@@ -994,6 +1002,36 @@ def _explicit_product_wide_gic_minimum(excerpt: str) -> Decimal | None:
         if match is not None:
             return _to_decimal(match.group("amount").replace(",", ""))
     return None
+
+
+def _explicit_target_gic_minimum(excerpt: str, *, terms: tuple[str, ...]) -> Decimal | None:
+    """Accept a minimum only when the support excerpt names the exact target product."""
+
+    normalized = _normalize_text(excerpt).lower()
+    distinctive_terms = [
+        _normalize_text(term).lower()
+        for term in terms
+        if len(_normalize_text(term).split()) >= 3
+        and any(marker in _normalize_text(term).lower() for marker in ("gic", "term deposit", "iltd"))
+    ]
+    if not distinctive_terms or not any(term in normalized for term in distinctive_terms):
+        return None
+    match = re.search(
+        r"\bminimum\s+(?:deposit|investment)\s+(?:of|is|:)?\s*\$\s*"
+        r"(?P<amount>\d[\d,]*(?:\.\d{1,2})?)",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    return _to_decimal(match.group("amount").replace(",", ""))
+
+
+def _gic_support_minimum(excerpt: str, *, terms: tuple[str, ...]) -> Decimal | None:
+    product_wide = _explicit_product_wide_gic_minimum(excerpt)
+    if product_wide is not None:
+        return product_wide
+    return _explicit_target_gic_minimum(excerpt, terms=terms)
 
 
 def _aggregate_gic_family_rate_matches(
@@ -1631,8 +1669,24 @@ def _extract_generic_rate_values(excerpt: str) -> dict[str, str]:
 def _extract_generic_gic_rate_values(excerpt: str) -> dict[str, object]:
     rows: list[dict[str, object]] = []
     seen_terms: set[str] = set()
-    for match in _TERM_RATE_ROW_RE.finditer(_WHITESPACE_RE.sub(" ", excerpt)):
-        term_label = _normalize_text(match.group("term"))
+    normalized_excerpt = _WHITESPACE_RE.sub(" ", excerpt)
+    # An ISO effective date immediately before a Year 1 schedule used to be
+    # flattened into "14 Year 1 2.90%", producing a fictitious 14-year term.
+    normalized_excerpt = re.sub(
+        r"\b\d{4}[\u2010-\u2015-]\d{2}[\u2010-\u2015-]\d{2}\b",
+        " ",
+        normalized_excerpt,
+    )
+    term_matches = [
+        (match, _normalize_text(match.group("term")))
+        for match in _TERM_RATE_ROW_RE.finditer(normalized_excerpt)
+    ]
+    term_matches.extend(
+        (match, f"{int(match.group('year'))} year")
+        for match in _YEAR_FIRST_RATE_ROW_RE.finditer(normalized_excerpt)
+    )
+    term_matches.sort(key=lambda item: item[0].start())
+    for match, term_label in term_matches:
         if term_label in seen_terms:
             continue
         rate = _to_decimal(match.group("rate"))

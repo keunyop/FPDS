@@ -4995,7 +4995,18 @@ def _infer_subtype_code(
             return "package", None
         return "standard", None
     if product_type == "gic":
-        if any(token in text for token in ("market linked", "market smart", "index linked", "equity linked")):
+        if any(
+            token in text
+            for token in (
+                "market linked",
+                "market-linked",
+                "market smart",
+                "index linked",
+                "index-linked",
+                "equity linked",
+                "equity-linked",
+            )
+        ):
             return "market_linked", None
         if "non-redeemable" in text or "non redeemable" in text or "non-cashable" in text or "non cashable" in text:
             return "non_redeemable", None
@@ -5019,7 +5030,10 @@ def _resolve_gic_redeemability_flags(
     if not (_truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag"))):
         return
 
-    signal = _gic_redeemability_signal(subtype_code=subtype_code, candidate_payload=candidate_payload)
+    signal = _gic_redeemability_evidence_signal(field_mapping_metadata) or _gic_redeemability_signal(
+        subtype_code=subtype_code,
+        candidate_payload=candidate_payload,
+    )
     if signal == "redeemable":
         _set_gic_redeemability_flags(
             redeemable=True,
@@ -5066,6 +5080,41 @@ def _gic_redeemability_signal(*, subtype_code: str | None, candidate_payload: di
     if any(token in signal_text for token in ("redeemable", "cashable", "flexible gic")):
         return "redeemable"
     return None
+
+
+def _gic_redeemability_evidence_signal(
+    field_mapping_metadata: dict[str, object],
+) -> str | None:
+    """Prefer decisive product-level official wording over a noisy inferred subtype."""
+
+    signals: set[str] = set()
+    for field_name in ("redeemable_flag", "non_redeemable_flag"):
+        metadata = field_mapping_metadata.get(field_name)
+        if not isinstance(metadata, dict):
+            continue
+        if metadata.get("official_grounding_contract_version") != "collection-official-grounding-v2":
+            continue
+        if metadata.get("official_verification_status") not in {"match", "mismatch"}:
+            continue
+        quote = _normalize_text(str(metadata.get("official_evidence_quote") or "")).lower()
+        if not quote:
+            continue
+        if re.search(
+            r"\b(?:cannot|may not|not)\s+(?:be\s+)?(?:negotiated,\s+transferred\s+or\s+)?redeem(?:ed|able)"
+            r"|\bnon[- ]redeemable\b"
+            r"|\bnot\s+redeemable\s+until\b",
+            quote,
+        ):
+            signals.add("non_redeemable")
+        elif (
+            field_name == "redeemable_flag"
+            and re.search(
+                r"\b(?:cash out|withdraw funds?|redeem)\b.{0,80}\b(?:anniversar|maturity|any time|without penalty)\b",
+                quote,
+            )
+        ):
+            signals.add("redeemable")
+    return next(iter(signals)) if len(signals) == 1 else None
 
 
 def _set_gic_redeemability_flags(

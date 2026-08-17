@@ -1,5 +1,5 @@
 {
-  "registry_version": "2026-08-15-v1",
+  "registry_version": "2026-08-16-v2",
   "bank_code": "VANCITY",
   "country_code": "CA",
   "product_type": "gic",
@@ -96,6 +96,16 @@
       "purpose": "Vancity term deposit and GIC rates supporting evidence",
       "url": "https://www.vancity.com/rates/term-deposit-gic",
       "expected_fields": ["standard_rate", "interest_rate_summary", "term_rate_table", "term_length_text"]
+    },
+    {
+      "source_id": "VANCITY-GIC-010",
+      "priority": "P0",
+      "seed_source_flag": true,
+      "source_type": "pdf",
+      "discovery_role": "supporting_pdf",
+      "purpose": "Vancity Index-linked term deposit terms supporting evidence",
+      "url": "https://cdn.vancity.com/v1/media/edge/images/vancouverci5821-vancity9f0e-prod943f-e9a1/media/Project/public-sites/www/Invest/Term-Deposit-GIC/Index-at-Linked/ILTD-Terms-and-Conditions.pdf",
+      "expected_fields": ["minimum_deposit", "term_length_text", "non_redeemable_flag"]
     }
   ]
 }

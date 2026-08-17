@@ -1614,3 +1614,47 @@ Read before coding:
   affected test rerun; `git diff --check`; tracked test-artifact restoration;
   ignored research-helper cleanup; final documentation/WBS update; and removal
   of `goal.md` only after all acceptance criteria pass.
+
+## 2026-08-16 - Vancity Coverage Recovery Continuation Pause
+
+- WBS: 5.35
+- Status: in progress; intentionally paused by the Product Owner
+- Completed execution: Vancity-only collection
+  collection_bkk5K_e2ZD5Lh1ij completed five runs with zero failure/partial
+  state and produced 35 candidates: 22 approved and 13 in Review. Chequing
+  approved 9/9, cards 5/8, GICs 6/7, line of credit 0/3 before the final
+  sibling-boundary fix, and personal loans 2/8.
+- Quality outcome:
+  - exact card H1s and student variants are retained; deterministic purchase
+    rates survive AI merge and Review-AI fallback
+  - Vancity calculator copy can no longer turn $123 rewards value into a
+    no-fee card's annual fee
+  - the official ILTD terms PDF supplies the exact $1,000 minimum, ISO dates
+    no longer create a 14-year GIC row, and decisive non-redeemable evidence
+    wins over noisy subtype inference
+  - Creditline and Personaline bind separately to their official rate, limit,
+    and security columns; the final validator exception requires all
+    comparison fields, one evidence chunk, official sources, and the
+    deterministic sibling-table contract
+  - the EV loan is approved with Prime + 1%, amount from $1,500, and maximum
+    10-year term; its rate link now prefers the Electric Vehicle section
+  - products lacking exact public comparison facts remain in Review; no
+    Review task was manually approved and no canonical/Public fact was
+    directly edited
+- Key files: Vancity GIC registry, extraction service, supporting merge and
+  normalization, validation routing, API AI verification, and focused tests.
+- Verification:
+  - latest extraction + normalization + validation/routing suites: 370 passed
+  - earlier continuation worker pipeline full suite: 442 passed
+  - API source catalog, collection runner, and AI suites: 208 passed
+  - first post-fix collection: five completed, zero failed/partial
+- Active background recollection at pause:
+  collection_g6Bdzbm3utaEA8s2 / corr_VOQHNiY7-kdwn8HA, limited to Vancity
+  credit card, GIC, line of credit, and personal loan. Exact run IDs and resume
+  checks are in root goal.md. Last observed state was four started runs at
+  serial source-catalog collection, zero candidates, zero Review tasks, and no
+  errors. It was not force-terminated because that can strand run state.
+- Next step: poll and audit that exact collection before any new launch,
+  compare per-type approval/Review outcomes, verify canonical and Public
+  projections, then complete final tests, artifact cleanup, diff check,
+  WBS/journal closure, and goal.md removal only if all criteria pass.

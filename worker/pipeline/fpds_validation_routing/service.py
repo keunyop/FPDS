@@ -489,7 +489,13 @@ def _compute_validation_issue_codes(
             ]
             if str(code).strip()
         }
-        if discovery_reason_codes.intersection({"multi_product_family_overview", "hub_page_not_detail"}):
+        if (
+            discovery_reason_codes.intersection({"multi_product_family_overview", "hub_page_not_detail"})
+            and not _has_deterministic_sibling_lending_boundary(
+                candidate_record=candidate_record,
+                field_evidence_links=field_evidence_links,
+            )
+        ):
             issues.add("ambiguous_product_boundary")
 
     required_identity = {
@@ -766,6 +772,55 @@ def _compute_validation_issue_codes(
         issues.add("partial_source_failure")
 
     return sorted(issues)
+
+
+def _has_deterministic_sibling_lending_boundary(
+    *,
+    candidate_record: dict[str, object],
+    field_evidence_links: list[ValidationEvidenceLink],
+) -> bool:
+    """Accept only fully column-bound line-of-credit sibling expansions."""
+
+    product_type = str(candidate_record.get("product_type") or "").strip().lower().replace("_", "-")
+    if product_type not in {"line-of-credit", "loc"}:
+        return False
+    raw_mappings = candidate_record.get("field_mapping_metadata")
+    mappings = raw_mappings if isinstance(raw_mappings, dict) else {}
+    required_fields = {"product_name", "interest_rate_summary", "credit_limit_text"}
+    security_fields = {"security_requirement", "secured_flag"}
+    available_security = {
+        field_name
+        for field_name in security_fields
+        if isinstance(mappings.get(field_name), dict)
+    }
+    if not available_security:
+        return False
+    checked_fields = required_fields | {sorted(available_security)[0]}
+    evidence_by_field = {
+        str(link.field_name): link
+        for link in field_evidence_links
+        if str(link.field_name) in checked_fields and str(link.candidate_value).strip()
+    }
+    if set(evidence_by_field) != checked_fields:
+        return False
+    chunk_ids: set[str] = set()
+    for field_name in checked_fields:
+        mapping = mappings.get(field_name)
+        if not isinstance(mapping, dict):
+            return False
+        if (
+            mapping.get("official_grounding_contract_version") != "collection-official-grounding-v2"
+            or mapping.get("official_grounding_method") != "deterministic_sibling_lending_table"
+            or mapping.get("official_verification_status") != "match"
+            or not list(mapping.get("official_web_sources") or [])
+        ):
+            return False
+        mapping_chunk_id = str(mapping.get("evidence_chunk_id") or "")
+        link_chunk_id = str(evidence_by_field[field_name].evidence_chunk_id or "")
+        if not mapping_chunk_id or mapping_chunk_id != link_chunk_id:
+            return False
+        chunk_ids.add(mapping_chunk_id)
+    return len(chunk_ids) == 1
 
 
 def _rate_scenario_is_preserved(

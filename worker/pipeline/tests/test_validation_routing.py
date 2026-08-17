@@ -24,6 +24,79 @@ _GOLDEN_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "golden" / "canada_b
 
 
 class ValidationRoutingServiceTests(unittest.TestCase):
+    def test_deterministic_line_of_credit_columns_override_family_page_boundary(self) -> None:
+        chunk_id = "chunk-vancity-line-of-credit-table"
+        official_source = {
+            "url": "https://www.vancity.com/borrow/loans-lines-of-credit/line-of-credit",
+            "title": "Line of credit",
+        }
+
+        def grounded() -> dict[str, object]:
+            return {
+                "evidence_chunk_id": chunk_id,
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_grounding_method": "deterministic_sibling_lending_table",
+                "official_verification_status": "match",
+                "official_web_sources": [official_source],
+            }
+
+        payload = {
+            "status": "active",
+            "last_verified_at": "2026-08-17T00:00:00+00:00",
+            "bank_name": "Vancity",
+            "product_name": "Creditline",
+            "interest_rate_summary": "As low as Vancity Prime + 1.5%",
+            "credit_limit_text": "Minimum limit $5,000; maximum depends on eligibility.",
+            "security_requirement": "Can be secured.",
+        }
+        issues = _compute_validation_issue_codes(
+            candidate_record={
+                "country_code": "CA",
+                "bank_code": "VANCITY",
+                "product_family": "lending",
+                "product_type": "line-of-credit",
+                "subtype_code": "line-of-credit",
+                "product_name": "Creditline",
+                "currency": "CAD",
+                "source_language": "en",
+                "field_mapping_metadata": {
+                    field_name: grounded()
+                    for field_name in (
+                        "product_name",
+                        "interest_rate_summary",
+                        "credit_limit_text",
+                        "security_requirement",
+                    )
+                },
+            },
+            candidate_payload=payload,
+            field_evidence_links=[
+                _evidence(field_name, str(payload[field_name]), chunk_id)
+                for field_name in (
+                    "product_name",
+                    "interest_rate_summary",
+                    "credit_limit_text",
+                    "security_requirement",
+                )
+            ],
+            runtime_notes=[],
+            taxonomy_registry={},
+            dynamic_product_type=True,
+            expected_fields=[
+                "product_name",
+                "interest_rate_summary",
+                "credit_limit_text",
+                "security_requirement",
+            ],
+            source_metadata={
+                "discovery_metadata": {
+                    "selection_reason_codes": ["multi_product_family_overview"],
+                }
+            },
+        )
+
+        self.assertNotIn("ambiguous_product_boundary", issues)
+
     def test_explicitly_obsolete_rate_date_remains_hard_review_blocked(self) -> None:
         runtime_notes: list[str] = []
         issues = _compute_validation_issue_codes(
