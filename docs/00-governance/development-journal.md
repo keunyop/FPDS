@@ -1658,3 +1658,88 @@ Read before coding:
   compare per-type approval/Review outcomes, verify canonical and Public
   projections, then complete final tests, artifact cleanup, diff check,
   WBS/journal closure, and goal.md removal only if all criteria pass.
+
+## 2026-08-20 - Vancity Coverage Recovery Final Audit Checkpoint
+
+- WBS: 5.35
+- Status: in progress; collection-quality recovery is verified, while two
+  exact canonical/Public deactivations await explicit Product Owner authority.
+- Collection outcome:
+  - final Vancity card run
+    collection_c2bKGp1SUqpSI2r0 / corr_oYsFXoYX6iZN8zQJ completed without
+    failure or partial state and approved all eight exact cards
+  - latest safe coverage is chequing 9/9, cards 8/8, GICs 6/7, lines of
+    credit 2/3, and personal loans 3/8
+  - the remaining Review items lack an exact current public comparison fact or
+    contain an intentionally non-scalar condition; no Review item was manually
+    approved and every launch remained limited to Vancity in Canada
+- Quality fixes:
+  - retained exact detail/sibling product identities and exact deterministic
+    values through AI merge and normalization
+  - separated card purchase rates from adjacent rewards, cash-advance,
+    balance-transfer, and deposit-rate numeric context
+  - bound the Planet-Wise EV amount and rate evidence to the exact EV section
+  - suppressed Escalating GIC redeemability when cash-out and conversion rights
+    differ by account scope, including a Review-AI restoration guard
+  - retained source continuity in Review/canonical lookup, allowed only fully
+    grounded one-chunk Creditline/Personaline sibling-table promotion, and
+    allowed newer approved exact-name candidates to supersede older Review
+    tasks
+- Review audit: 16 Vancity tasks remain queued/deferred. Fourteen are genuine
+  safe gaps: one Escalating GIC, one HELOC, seven mortgages, and five personal
+  loans. Two are stale: an old combined student-card family and an old
+  US-dollar redeemable GIC candidate whose exact replacements are approved.
+- Public/canonical audit:
+  - exact current cards are active with verified names and values, including
+    Classic $0 / 19.50% and Gold $99 / 19.50%
+  - prod__eKASmTjodHuonf4 (cand-fff352021249cbc9) remains an active generic
+    duplicate of the exact student low-interest card
+  - prod_uGjaqi6V-kGTUoM4 (cand-2d4f710f1a1c9a60) remains active with the
+    unsafe scalar redeemable_flag=true; the latest safe Escalating candidate
+    cand-fff2b456f306ff10 omits that scalar and remains in Review
+- Verification: worker pipeline full suite 452 passed; API service full
+  suite 412 passed; tracked test-generated fixtures and aggregate log content
+  restored after testing.
+- Decision required: explicitly authorize audited deactivation of only the two
+  canonical/candidate pairs above. After authorization, verify the refreshed
+  CA Public projection, resolve the two stale Review tasks through the audited
+  workflow, run final diff checks, and close WBS 5.35/goal.md only when all
+  acceptance criteria pass.
+
+## 2026-08-20 - Vancity Coverage Recovery Completed
+
+- WBS: 5.35
+- Status: completed after explicit Product Owner authorization for the two
+  exact canonical safety remediations and the CA Public refresh.
+- Audited remediation:
+  - candidate cand-fff352021249cbc9 was rejected with reason
+    duplicate_generic_canonical_replaced and canonical product
+    prod__eKASmTjodHuonf4 was changed to inactive
+  - candidate cand-2d4f710f1a1c9a60 was rejected with reason
+    mixed_account_scope_redeemability and canonical product
+    prod_uGjaqi6V-kGTUoM4 was changed to inactive
+  - each action emitted its candidate audit event and canonical Discontinued
+    change event; no other candidate, product, bank, or country was remediated
+- Public refresh:
+  - the two actions coalesced into CA request
+    aggreq_1zAX6DXMN2vNS9tz
+  - snapshot agg_Mr-u6biHMK1jbtTj completed at
+    2026-08-20T13:20:53.371523+00:00 with stale_flag=false and no error
+  - active Public rows changed from 113 to 111, exactly matching the two
+    approved deactivations; the snapshot retains both products as inactive
+    audit history while the Public API excludes them
+  - exact replacement prod_Gl4AJToJBwc0LFX5 remains active as
+    enviro Visa Classic low interest for students at $50 and 11.25%
+  - all eight exact Vancity card product IDs remain active with their expected
+    names, annual fees, and purchase interest rates
+- Final verification:
+  - aggregate audit: 183 projection rows, 111 active, 72 inactive, 27
+    intentionally excluded incomplete-comparison rows
+  - worker pipeline full suite: 452 passed
+  - API service full suite: 412 passed
+  - git diff --check passed and tracked test/refresh artifacts were restored
+- Known non-public follow-up: 14 genuine Vancity evidence-gap Review tasks and
+  two identified stale Review tasks remain safely outside Public. Exact-name
+  reruns now supersede ordinary stale tasks; the old combined two-product
+  student-card task is intentionally not auto-collapsed because that would
+  weaken the multi-product boundary.

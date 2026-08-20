@@ -265,7 +265,7 @@ def promote_auto_validated_candidates(
                 {"candidate_id": candidate_id, "skip_reason": non_product_source_reason, "action": "rejected"}
             )
             continue
-        if _has_ambiguous_product_boundary(row.get("source_metadata")):
+        if _has_ambiguous_product_boundary(row):
             reason_code = "ambiguous_product_boundary"
             review_task_id = _queue_candidate_for_review(
                 connection,
@@ -438,6 +438,7 @@ def _load_candidate_rows(
             nc.candidate_id,
             nc.run_id,
             NULL::text AS product_id,
+            nc.source_document_id,
             nc.country_code,
             nc.bank_code,
             nc.product_family,
@@ -451,6 +452,7 @@ def _load_candidate_rows(
             nc.validation_issue_codes,
             nc.source_confidence,
             nc.candidate_payload,
+            nc.field_mapping_metadata,
             validation_ai.collection_ai_assessment,
             sd.source_metadata ->> 'discovery_role' AS discovery_role,
             sd.source_metadata AS source_metadata
@@ -491,7 +493,8 @@ def _load_candidate_rows(
     return [dict(row) for row in rows]
 
 
-def _has_ambiguous_product_boundary(source_metadata: object) -> bool:
+def _has_ambiguous_product_boundary(row: dict[str, Any]) -> bool:
+    source_metadata = row.get("source_metadata")
     metadata = source_metadata if isinstance(source_metadata, dict) else {}
     discovery_metadata = metadata.get("discovery_metadata")
     if not isinstance(discovery_metadata, dict):
@@ -504,7 +507,46 @@ def _has_ambiguous_product_boundary(source_metadata: object) -> bool:
         ]
         if str(code).strip()
     }
-    return bool(reason_codes.intersection({"multi_product_family_overview", "hub_page_not_detail"}))
+    has_boundary_signal = bool(
+        reason_codes.intersection({"multi_product_family_overview", "hub_page_not_detail"})
+    )
+    return has_boundary_signal and not _has_deterministic_sibling_lending_boundary(row)
+
+
+def _has_deterministic_sibling_lending_boundary(row: dict[str, Any]) -> bool:
+    product_type = str(row.get("product_type") or "").strip().lower().replace("_", "-")
+    if product_type not in {"line-of-credit", "loc"}:
+        return False
+    payload = _coerce_mapping(row.get("candidate_payload"))
+    mappings = _coerce_mapping(row.get("field_mapping_metadata"))
+    required_fields = {"product_name", "interest_rate_summary", "credit_limit_text"}
+    if any(payload.get(field_name) in {None, ""} for field_name in required_fields):
+        return False
+    available_security = [
+        field_name
+        for field_name in ("security_requirement", "secured_flag")
+        if payload.get(field_name) not in {None, ""}
+    ]
+    if not available_security:
+        return False
+    checked_fields = required_fields | {available_security[0]}
+    chunk_ids: set[str] = set()
+    for field_name in checked_fields:
+        mapping = _coerce_mapping(mappings.get(field_name))
+        if (
+            mapping.get("official_grounding_contract_version")
+            != "collection-official-grounding-v2"
+            or mapping.get("official_grounding_method")
+            != "deterministic_sibling_lending_table"
+            or mapping.get("official_verification_status") != "match"
+            or not list(mapping.get("official_web_sources") or [])
+        ):
+            return False
+        chunk_id = str(mapping.get("evidence_chunk_id") or "")
+        if not chunk_id:
+            return False
+        chunk_ids.add(chunk_id)
+    return len(chunk_ids) == 1
 
 
 def _requires_collection_ai_grounding(row: dict[str, Any]) -> bool:
@@ -581,6 +623,7 @@ def _review_row_from_candidate(row: dict[str, Any]) -> dict[str, Any]:
         "candidate_id": str(row["candidate_id"]),
         "run_id": str(row["run_id"]),
         "product_id": row.get("product_id"),
+        "source_document_id": row.get("source_document_id"),
         "review_state": "auto_validated",
         "country_code": str(row["country_code"]),
         "bank_code": str(row["bank_code"]),

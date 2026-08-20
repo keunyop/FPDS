@@ -45,6 +45,75 @@ class _FailingAuditConnection:
 
 
 class ReviewDetailTests(unittest.TestCase):
+    def test_current_product_lookup_uses_unique_product_name_source_continuity(self) -> None:
+        current_product = {
+            "product_id": "prod-existing",
+            "product_name": "Credit Card",
+            "product_type": "credit-card",
+        }
+        cursor = MagicMock()
+        cursor.fetchall.return_value = [current_product]
+        connection = MagicMock()
+        connection.execute.return_value = cursor
+
+        result = _find_current_product(
+            connection,
+            review_row={
+                "product_id": None,
+                "run_id": "run-vancity-card",
+                "source_document_id": "src-vancity-infinite-privilege",
+                "country_code": "CA",
+                "bank_code": "VANCITY",
+                "product_family": "lending",
+                "product_type": "credit-card",
+                "product_name": "enviro Visa Infinite Privilege card",
+            },
+        )
+
+        self.assertEqual(result, current_product)
+        sql, params = connection.execute.call_args.args
+        self.assertIn("fel.field_name = 'product_name'", sql)
+        self.assertIn("COUNT(", sql)
+        self.assertEqual(params["run_id"], "run-vancity-card")
+        self.assertEqual(
+            params["source_document_id"],
+            "src-vancity-infinite-privilege",
+        )
+
+    def test_current_product_lookup_rejects_shared_multi_product_source_continuity(self) -> None:
+        source_cursor = MagicMock()
+        source_cursor.fetchall.return_value = [
+            {"product_id": "prod-student-standard"},
+            {"product_id": "prod-student-low-interest"},
+        ]
+        name_cursor = MagicMock()
+        name_cursor.fetchone.return_value = None
+        connection = MagicMock()
+        connection.execute.side_effect = [source_cursor, name_cursor]
+
+        result = _find_current_product(
+            connection,
+            review_row={
+                "product_id": None,
+                "run_id": "run-vancity-card",
+                "source_document_id": "src-vancity-student-cards",
+                "country_code": "CA",
+                "bank_code": "VANCITY",
+                "product_family": "lending",
+                "product_type": "credit-card",
+                "product_name": "enviro Visa Classic low interest for students",
+            },
+        )
+
+        self.assertIsNone(result)
+        self.assertEqual(connection.execute.call_count, 2)
+        fallback_sql, fallback_params = connection.execute.call_args.args
+        self.assertIn("regexp_replace(lower(cp.product_name)", fallback_sql)
+        self.assertEqual(
+            fallback_params["product_name"],
+            "enviro Visa Classic low interest for students",
+        )
+
     def test_current_product_lookup_uses_comparison_identity_name(self) -> None:
         cursor = MagicMock()
         cursor.fetchone.return_value = None

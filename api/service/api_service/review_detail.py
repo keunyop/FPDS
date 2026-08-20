@@ -1355,6 +1355,7 @@ def _load_locked_review_task(connection: Connection, *, review_task_id: str) -> 
             rt.product_id,
             rt.review_state,
             rt.queue_reason_code,
+            nc.source_document_id,
             nc.country_code,
             nc.bank_code,
             nc.product_family,
@@ -1423,6 +1424,64 @@ def _find_current_product(
         ).fetchone()
         if product_row:
             return product_row
+
+    source_document_id = _string_or_none(review_row.get("source_document_id"))
+    run_id = _string_or_none(review_row.get("run_id"))
+    if source_document_id and run_id:
+        source_matches = connection.execute(
+            """
+            SELECT DISTINCT
+                cp.product_id,
+                cp.status,
+                cp.current_version_no,
+                cp.product_name,
+                cp.product_type,
+                cp.subtype_code,
+                cp.last_verified_at,
+                cp.last_changed_at,
+                pv.normalized_payload
+            FROM canonical_product AS cp
+            JOIN product_version AS pv
+              ON pv.product_id = cp.product_id
+             AND pv.version_no = cp.current_version_no
+            WHERE cp.country_code = %(country_code)s
+              AND cp.bank_code = %(bank_code)s
+              AND cp.product_family = %(product_family)s
+              AND cp.product_type = %(product_type)s
+              AND (
+                    SELECT COUNT(
+                        DISTINCT regexp_replace(
+                            lower(source_candidate.product_name),
+                            '[^a-z0-9]+',
+                            '',
+                            'g'
+                        )
+                    )
+                    FROM normalized_candidate AS source_candidate
+                    WHERE source_candidate.run_id = %(run_id)s
+                      AND source_candidate.source_document_id = %(source_document_id)s
+              ) = 1
+              AND EXISTS (
+                    SELECT 1
+                    FROM field_evidence_link AS fel
+                    WHERE fel.product_version_id = pv.product_version_id
+                      AND fel.field_name = 'product_name'
+                      AND fel.source_document_id = %(source_document_id)s
+              )
+            ORDER BY cp.last_verified_at DESC NULLS LAST, cp.product_id ASC
+            LIMIT 2
+            """,
+            {
+                "country_code": review_row["country_code"],
+                "bank_code": review_row["bank_code"],
+                "product_family": review_row["product_family"],
+                "product_type": review_row["product_type"],
+                "run_id": run_id,
+                "source_document_id": source_document_id,
+            },
+        ).fetchall()
+        if len(source_matches) == 1:
+            return source_matches[0]
 
     return connection.execute(
         """

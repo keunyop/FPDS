@@ -628,11 +628,12 @@ def _persist_end_to_end_source_summary(*, run_id: str, summary: dict[str, Any]) 
 def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any]) -> int:
     """Leave one active task per exact logical product after a newer rerun.
 
-    This coalesces detail-source tasks with the same logical name. It also
-    accepts an exact source-URL match when the new run produced only one active
-    review candidate for that URL, allowing an authoritative name correction to
-    replace the stale task without collapsing a multi-product page. It does not
-    approve or reject the product proposal itself.
+    This coalesces detail-source tasks with the same logical name after either
+    an approved candidate or an active Review candidate replaces them. It also
+    accepts an exact source-URL match when the new run produced only one
+    replacement candidate for that URL, allowing an authoritative name
+    correction to replace the stale task without collapsing a multi-product
+    page. It does not approve or reject the product proposal itself.
     """
     decided_at = datetime.now(UTC)
     settings = Settings.from_env()
@@ -664,12 +665,21 @@ def _supersede_stale_logical_reviews_for_run(*, run_id: str, plan: dict[str, Any
                     ) AS new_source_candidate_count,
                     nc.created_at
                 FROM normalized_candidate AS nc
-                JOIN review_task AS rt
-                  ON rt.candidate_id = nc.candidate_id
                 JOIN source_document AS sd
                   ON sd.source_document_id = nc.source_document_id
                 WHERE nc.run_id = %(run_id)s
-                  AND rt.review_state IN ('queued', 'deferred')
+                  AND (
+                    nc.candidate_state = 'approved'
+                    OR (
+                        nc.candidate_state = 'in_review'
+                        AND EXISTS (
+                            SELECT 1
+                            FROM review_task AS current_rt
+                            WHERE current_rt.candidate_id = nc.candidate_id
+                              AND current_rt.review_state IN ('queued', 'deferred')
+                        )
+                    )
+                  )
                   AND COALESCE(sd.source_metadata ->> 'discovery_role', 'unknown') = 'detail'
                 ORDER BY
                     nc.country_code,

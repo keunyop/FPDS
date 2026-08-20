@@ -39,6 +39,7 @@ from worker.pipeline.fpds_normalization.service import (
     _extract_rate_percentages,
     _find_dynamic_numeric_evidence_context,
     _infer_target_customer_tags,
+    _is_exact_grounded_product_identity,
     _dynamic_numeric_value_is_ungrounded,
     _field_is_comparison_calculator_copy,
     _infer_subtype_code,
@@ -153,20 +154,153 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertIs(payload["non_redeemable_flag"], True)
         self.assertEqual(mappings["non_redeemable_flag"]["source_signal"], "non_redeemable")
 
+    def test_omits_gic_redeemability_when_account_scopes_have_different_rights(self) -> None:
+        payload = {
+            "product_name": "Escalating term deposits",
+            "redeemable_flag": True,
+            "non_redeemable_flag": False,
+        }
+        normalized = {
+            "redeemable_flag": True,
+            "non_redeemable_flag": False,
+        }
+        mappings = {
+            "redeemable_flag": {"normalized_value": True},
+            "non_redeemable_flag": {"normalized_value": False},
+        }
+        evidence = (
+            "3-year escalating term deposit Non-registered accounts, TFSA "
+            "On the first and second anniversary, you can cash out your investment. "
+            "3-year escalating term deposit RRSP, FHSA, RRIF, RESP, and RDSP "
+            "On the first and second anniversary, you can switch to any investment option."
+        )
+        notes: list[str] = []
+
+        _resolve_gic_redeemability_flags(
+            product_type_family="gic",
+            subtype_code="other",
+            candidate_payload=payload,
+            normalized_values_for_links=normalized,
+            field_mapping_metadata=mappings,
+            runtime_notes=notes,
+            evidence_context_by_field={
+                "redeemable_flag": evidence,
+                "non_redeemable_flag": evidence,
+            },
+        )
+
+        self.assertNotIn("redeemable_flag", payload)
+        self.assertNotIn("non_redeemable_flag", payload)
+        self.assertEqual(
+            mappings["redeemable_flag"]["suppressed_reason"],
+            "mixed_account_scope_redeemability",
+        )
+
     def test_vancity_exact_origin_generic_interest_label_keeps_purchase_rate(self) -> None:
+        grounding = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "deterministic_card_comparison_origin",
+            "official_web_sources": [
+                {"url": "https://www.vancity.com/bank/credit-cards/enviro-classic"}
+            ],
+            "official_evidence_quote": "Annual fee $0 Interest rate 19.50%.",
+        }
         self.assertFalse(
             _looks_like_credit_card_field_mismatch(
                 field_name="purchase_interest_rate",
                 value=19.5,
                 context="Annual fee $0 Interest rate 19.50% Supplementary cards $0.",
                 product_type_family="credit-card",
+                official_grounding_metadata=grounding,
+            )
+        )
+        self.assertFalse(
+            _looks_like_non_rate_numeric_context(
+                field_name="purchase_interest_rate",
+                value=19.5,
+                context=(
+                    "Earn 1 point for every $2 spent. Annual fee $0 "
+                    "Interest rate 19.50% Supplementary cards $0."
+                ),
+                product_type_family="credit-card",
+                official_grounding_metadata=grounding,
+            )
+        )
+
+    def test_vancity_exact_origin_rate_ignores_unrelated_later_transfer_copy(self) -> None:
+        self.assertFalse(
+            _looks_like_credit_card_field_mismatch(
+                field_name="purchase_interest_rate",
+                value=19.5,
+                context=(
+                    "Annual fee $0 Interest rate 19.50% Supplementary cards $0. "
+                    + "Travel and purchase coverage details. " * 8
+                    + "Balance transfer balances may carry interest rates as high as 29.9%."
+                ),
+                product_type_family="credit-card",
                 official_grounding_metadata={
                     "official_grounding_contract_version": "collection-official-grounding-v2",
                     "official_verification_status": "match",
                     "official_grounding_method": "deterministic_card_comparison_origin",
+                    "official_web_sources": [
+                        {"url": "https://www.vancity.com/bank/credit-cards/enviro-classic"}
+                    ],
+                    "official_evidence_quote": "Interest rate 19.50%.",
                 },
             )
         )
+
+    def test_official_ai_card_rate_requires_exact_local_label_quote(self) -> None:
+        grounding = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": None,
+            "official_web_sources": [
+                {
+                    "url": (
+                        "https://www.vancity.com/bank/credit-cards/"
+                        "enviro-infinite-low-interest-vancity-rewards"
+                    )
+                }
+            ],
+            "official_evidence_quote": "Interest rate\n11.25 % \u0394",
+        }
+        context = (
+            "Low interest rate Reward points Annual fee $145 "
+            "Interest rate 11.25% Supplementary cards $0."
+        )
+
+        self.assertFalse(
+            _looks_like_credit_card_field_mismatch(
+                field_name="purchase_interest_rate",
+                value=11.25,
+                context=context,
+                product_type_family="credit-card",
+                official_grounding_metadata=grounding,
+            )
+        )
+        self.assertFalse(
+            _looks_like_non_rate_numeric_context(
+                field_name="purchase_interest_rate",
+                value=11.25,
+                context=context,
+                product_type_family="credit-card",
+                official_grounding_metadata=grounding,
+            )
+        )
+
+    def test_exact_detail_h1_is_a_protected_dynamic_product_identity(self) -> None:
+        field = replace(
+            _field("product_name", "enviro\u2122 Visa Infinite Privilege* card", "string", 0.95),
+            field_metadata={
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_verification_status": "match",
+                "official_grounding_method": "deterministic_detail_h1",
+            },
+        )
+
+        self.assertTrue(_is_exact_grounded_product_identity(field))
 
     def test_grounded_sibling_card_blocks_expand_to_distinct_products(self) -> None:
         base = _build_input()
@@ -272,14 +406,45 @@ class NormalizationServiceTests(unittest.TestCase):
                     )
                 ),
             )
-            with patch(
-                "worker.pipeline.fpds_normalization.service.llm_provider_configured",
-                return_value=False,
+            with (
+                patch(
+                    "worker.pipeline.fpds_normalization.service.llm_provider_configured",
+                    return_value=True,
+                ),
+                patch(
+                    "worker.pipeline.fpds_normalization.service.configured_model_id",
+                    return_value="gpt-5.6-luna",
+                ),
+                patch(
+                    "worker.pipeline.fpds_normalization.service.invoke_openai_json_schema",
+                    return_value=(
+                        {
+                            "summary": "AI returned the source page's generic family title.",
+                            "product_name": "Credit Card",
+                            "subtype_code": "other",
+                            "source_subtype_label": "Credit Card",
+                            "normalized_fields": [],
+                        },
+                        {
+                            "model_id": "gpt-5.6-luna",
+                            "prompt_tokens": 10,
+                            "completion_tokens": 5,
+                            "provider_request_id": "response-test",
+                        },
+                    ),
+                ),
             ):
                 result = service.normalize_inputs(run_id="run-vancity-student", inputs=[item])
 
             self.assertEqual(len(result.source_results), 2)
             payloads = [value.normalized_candidate_record["candidate_payload"] for value in result.source_results]
+            self.assertEqual(
+                [payload["product_name"] for payload in payloads],
+                [
+                    "enviro Visa* Classic card for students",
+                    "enviro Visa* Classic low interest for students",
+                ],
+            )
             self.assertEqual([payload["annual_fee"] for payload in payloads], [0.0, 50.0])
             self.assertEqual([payload["purchase_interest_rate"] for payload in payloads], [19.5, 11.25])
         finally:

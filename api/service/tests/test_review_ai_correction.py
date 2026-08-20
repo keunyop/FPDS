@@ -380,6 +380,35 @@ class ReviewAiCorrectionTests(TestCase):
         self.assertFalse(any(sql.startswith("UPDATE normalized_candidate") for sql, _ in connection.calls))
         self.assertFalse(any("INSERT INTO audit_event" in sql for sql, _ in connection.calls))
 
+    def test_does_not_restore_mixed_scope_gic_redeemability_suppression(self):
+        connection = _RecordingConnection()
+        verification = connection.row["execution_metadata"]["verification_result"]
+        verification["fields"][0].update(
+            {
+                "field_name": "redeemable_flag",
+                "proposed_value": True,
+            }
+        )
+        verification["proposed_corrections"] = {"redeemable_flag": True}
+        connection.row["field_mapping_metadata"]["redeemable_flag"] = {
+            "normalized_value": None,
+            "suppressed_reason": "mixed_account_scope_redeemability",
+            "normalization_method": "gic_mixed_scope_safety",
+        }
+
+        result = apply_review_ai_corrections(
+            connection,
+            review_task_id="review-001",
+            model_execution_id="modelexec-001",
+            actor={"actor_type": "system", "role": "admin"},
+            request_context={"request_id": "batch-001"},
+        )
+
+        self.assertFalse(result["applied"])
+        self.assertEqual(result["changed_fields"], [])
+        self.assertFalse(any(sql.startswith("UPDATE normalized_candidate") for sql, _ in connection.calls))
+        self.assertFalse(any("INSERT INTO audit_event" in sql for sql, _ in connection.calls))
+
     def test_ignores_correction_without_exact_evidence_quote(self):
         connection = _RecordingConnection()
         verification = connection.row["execution_metadata"]["verification_result"]

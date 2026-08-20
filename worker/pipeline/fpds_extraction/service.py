@@ -968,6 +968,12 @@ def _extract_fields(
         requested_fields=requested_fields,
         extracted_fields=extracted,
     )
+    _append_gic_redeemability_fallback(
+        context=scoped_context,
+        candidates=candidates,
+        requested_fields=requested_fields,
+        extracted_fields=extracted,
+    )
     _append_purchase_apr_summary_fallback(
         context=scoped_context,
         candidates=candidates,
@@ -981,6 +987,12 @@ def _extract_fields(
         extracted_fields=extracted,
     )
     _prefer_vancity_ev_rate_evidence(
+        context=scoped_context,
+        candidates=candidates,
+        requested_fields=requested_fields,
+        extracted_fields=extracted,
+    )
+    _prefer_vancity_ev_loan_amount_evidence(
         context=scoped_context,
         candidates=candidates,
         requested_fields=requested_fields,
@@ -1049,6 +1061,62 @@ def _prefer_vancity_ev_rate_evidence(
                 page_no=candidate.page_no,
                 chunk_index=candidate.chunk_index,
                 field_metadata={"vancity_ev_exact_section": True},
+            )
+        )
+        return
+
+
+def _prefer_vancity_ev_loan_amount_evidence(
+    *,
+    context: ExtractionDocumentContext,
+    candidates: list[EvidenceChunkCandidate],
+    requested_fields: set[str] | list[str],
+    extracted_fields: list[ExtractedFieldCandidate],
+) -> None:
+    """Keep the EV product minimum linked to its exact page summary."""
+
+    if (
+        "loan_amount_text" not in requested_fields
+        or context.bank_code.upper() != "VANCITY"
+        or context.source_id != "VANCITY-PL-005"
+        or _infer_product_type(context) != "personal-loan"
+        or _verified_official_detail_origin(context) is None
+    ):
+        return
+    for candidate in sorted(candidates, key=lambda item: (item.chunk_index, item.evidence_chunk_id)):
+        evidence = _normalize_text(candidate.evidence_excerpt)
+        lowered = evidence.lower()
+        amount_match = re.search(
+            r"(?i)\bborrow\s+from\s*(?P<amount>\$\s*\d[\d,]*(?:\.\d{1,2})?)\s+and\s+up\b",
+            evidence,
+        )
+        if not (
+            "planet-wise" in lowered
+            and "electric vehicle" in lowered
+            and "ev" in lowered
+            and amount_match is not None
+        ):
+            continue
+        amount = re.sub(r"\s+", "", amount_match.group("amount"))
+        extracted_fields[:] = [
+            field for field in extracted_fields if field.field_name != "loan_amount_text"
+        ]
+        extracted_fields.append(
+            ExtractedFieldCandidate(
+                field_name="loan_amount_text",
+                candidate_value=f"From {amount} and up",
+                value_type="string",
+                confidence=0.92,
+                extraction_method="heuristic_text",
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                evidence_chunk_id=candidate.evidence_chunk_id,
+                evidence_text_excerpt=candidate.evidence_excerpt,
+                anchor_type=candidate.anchor_type,
+                anchor_value=candidate.anchor_value,
+                page_no=candidate.page_no,
+                chunk_index=candidate.chunk_index,
+                field_metadata={"vancity_ev_exact_summary": True},
             )
         )
         return
@@ -2018,6 +2086,86 @@ def _append_labeled_numeric_extension_fallback(
                 page_no=match.page_no,
                 chunk_index=match.chunk_index,
                 field_metadata={"labeled_numeric_extension_fallback": True},
+            )
+        )
+
+
+def _append_gic_redeemability_fallback(
+    *,
+    context: ExtractionDocumentContext,
+    candidates: list[EvidenceChunkCandidate],
+    requested_fields: set[str] | list[str],
+    extracted_fields: list[ExtractedFieldCandidate],
+) -> None:
+    """Recover an exact product-level non-redeemability statement."""
+
+    missing = {
+        field_name
+        for field_name in ("redeemable_flag", "non_redeemable_flag")
+        if field_name in requested_fields
+        and not any(field.field_name == field_name for field in extracted_fields)
+    }
+    origin = _verified_official_detail_origin(context)
+    if not missing or _infer_product_type(context) != "gic" or origin is None:
+        return
+
+    ranked: list[tuple[int, int, EvidenceChunkCandidate, str]] = []
+    for candidate in candidates:
+        if _mentions_named_other_product_without_target(
+            context=context,
+            excerpt=candidate.evidence_excerpt,
+        ):
+            continue
+        scoped_excerpt, identity_score = _scope_excerpt_to_product_identity(
+            context=context,
+            excerpt=candidate.evidence_excerpt,
+        )
+        if identity_score <= 0 or not re.search(
+            r"(?i)\b(?:cannot\s+be\s+redeemed\s+before|"
+            r"(?:is\s+)?not\s+redeemable\s+until|"
+            r"may\s+not\s+be(?:\s+negotiated,\s+transferred\s+or)?\s+redeemed\s+until|"
+            r"non[- ]redeemable)\b",
+            scoped_excerpt,
+        ):
+            continue
+        ranked.append((identity_score, -candidate.chunk_index, candidate, scoped_excerpt))
+    if not ranked:
+        return
+
+    ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    _, _, match, evidence = ranked[0]
+    source_url, source_title = origin
+    values = {
+        "redeemable_flag": False,
+        "non_redeemable_flag": True,
+    }
+    for field_name in sorted(missing):
+        extracted_fields.append(
+            ExtractedFieldCandidate(
+                field_name=field_name,
+                candidate_value=values[field_name],
+                value_type="boolean",
+                confidence=0.92,
+                extraction_method="heuristic_flag",
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                evidence_chunk_id=match.evidence_chunk_id,
+                evidence_text_excerpt=evidence,
+                anchor_type=match.anchor_type,
+                anchor_value=match.anchor_value,
+                page_no=match.page_no,
+                chunk_index=match.chunk_index,
+                field_metadata={
+                    "official_grounding_contract_version": "collection-official-grounding-v2",
+                    "official_verification_status": "match",
+                    "official_web_sources": [{"url": source_url, "title": source_title}],
+                    "evidence_quote": _normalize_text(evidence)[:700],
+                    "rationale": (
+                        "The identity-matched official detail page explicitly states that "
+                        "the product cannot be redeemed before maturity."
+                    ),
+                    "official_grounding_method": "deterministic_gic_non_redeemability_origin",
+                },
             )
         )
 
@@ -3983,26 +4131,31 @@ def _merge_extracted_fields(
             == "collection-official-grounding-v2"
             and str(field.field_metadata.get("official_grounding_method") or "").startswith("deterministic_")
             and ai_field.field_metadata.get("official_verification_status") == "match"
-            and field.evidence_chunk_id == ai_field.evidence_chunk_id
-            and _stringify_candidate_value(field.candidate_value)
-            == _stringify_candidate_value(ai_field.candidate_value)
+            and _equivalent_candidate_values(field, ai_field)
         ):
-            # AI verification may confirm an already deterministic exact-page
-            # value. Keep the narrower origin method so downstream ambiguity
-            # checks can distinguish a generic label such as "Interest rate"
-            # from an unsupported purchase-rate guess.
-            ai_by_field[field.field_name] = replace(
-                ai_field,
-                field_metadata={
-                    **ai_field.field_metadata,
-                    "official_grounding_method": field.field_metadata["official_grounding_method"],
-                },
-            )
+            # AI verification may confirm the same value from a broader
+            # agreement or disclosure chunk. Keep the narrower deterministic
+            # detail-page field and its context so downstream ambiguity checks
+            # do not mistake adjacent cash-advance copy for the purchase rate.
+            ai_by_field[field.field_name] = field
         if field.field_name in ai_by_field and field.evidence_chunk_id is not None:
             continue
         merged.append(ai_by_field.pop(field.field_name, field))
     merged.extend(ai_by_field.values())
     return _dedupe_fields(merged)
+
+
+def _equivalent_candidate_values(
+    first: ExtractedFieldCandidate,
+    second: ExtractedFieldCandidate,
+) -> bool:
+    if first.value_type == second.value_type == "decimal":
+        return _normalize_decimal(str(first.candidate_value)) == _normalize_decimal(
+            str(second.candidate_value)
+        )
+    return _stringify_candidate_value(first.candidate_value) == _stringify_candidate_value(
+        second.candidate_value
+    )
 
 
 def _extract_official_fields_with_ai(

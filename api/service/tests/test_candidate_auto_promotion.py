@@ -4,7 +4,11 @@ from datetime import UTC, datetime
 import unittest
 from unittest.mock import patch
 
-from api_service.candidate_auto_promotion import promote_auto_validated_candidates
+from api_service.candidate_auto_promotion import (
+    _has_ambiguous_product_boundary,
+    _review_row_from_candidate,
+    promote_auto_validated_candidates,
+)
 
 
 class _Cursor:
@@ -73,6 +77,14 @@ def _candidate_row(*, validation_issue_codes: list[str] | None = None) -> dict[s
 
 
 class CandidateAutoPromotionTests(unittest.TestCase):
+    def test_review_row_preserves_source_document_identity(self) -> None:
+        candidate = _candidate_row()
+        candidate["source_document_id"] = "src-detail-001"
+
+        review_row = _review_row_from_candidate(candidate)
+
+        self.assertEqual(review_row["source_document_id"], "src-detail-001")
+
     def test_dynamic_candidate_without_persisted_ai_assessment_returns_to_review(self) -> None:
         invalid_assessments = [
             None,
@@ -266,6 +278,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
             [
                 _policy_rows(),
                 [candidate],
+                [],
                 None,
                 None,
                 None,
@@ -363,6 +376,57 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         self.assertEqual(result["skipped_items"][0]["skip_reason"], "ambiguous_product_boundary")
         self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
         self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
+
+    def test_fully_grounded_sibling_loc_resolves_family_page_boundary(self) -> None:
+        candidate = _candidate_row()
+        candidate.update(
+            {
+                "product_family": "lending",
+                "product_type": "line-of-credit",
+                "product_name": "Creditline",
+                "source_metadata": {
+                    "discovery_metadata": {
+                        "page_evidence_reason_codes": ["multi_product_family_overview"]
+                    }
+                },
+                "candidate_payload": {
+                    "product_name": "Creditline",
+                    "interest_rate_summary": "As low as Vancity Prime + 1.5%",
+                    "credit_limit_text": "Minimum limit $5,000; maximum depends on eligibility.",
+                    "security_requirement": "Can be secured.",
+                    "status": "active",
+                },
+            }
+        )
+        chunk_id = "chunk-vancity-loc-table"
+        candidate["field_mapping_metadata"] = {
+            field_name: {
+                "evidence_chunk_id": chunk_id,
+                "official_grounding_contract_version": "collection-official-grounding-v2",
+                "official_grounding_method": "deterministic_sibling_lending_table",
+                "official_verification_status": "match",
+                "official_web_sources": [
+                    {
+                        "url": (
+                            "https://www.vancity.com/borrow/"
+                            "loans-lines-of-credit/line-of-credit"
+                        )
+                    }
+                ],
+            }
+            for field_name in (
+                "product_name",
+                "interest_rate_summary",
+                "credit_limit_text",
+                "security_requirement",
+            )
+        }
+
+        self.assertFalse(_has_ambiguous_product_boundary(candidate))
+        candidate["field_mapping_metadata"]["credit_limit_text"]["evidence_chunk_id"] = (
+            "chunk-other"
+        )
+        self.assertTrue(_has_ambiguous_product_boundary(candidate))
 
     def test_ai_identified_family_hub_is_queued_before_canonical_promotion(self) -> None:
         candidate = _candidate_row()

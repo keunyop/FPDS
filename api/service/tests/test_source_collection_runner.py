@@ -73,6 +73,8 @@ class SourceCollectionRunnerTests(unittest.TestCase):
 
         self.assertEqual(count, 1)
         supersede_sql = connection.execute.call_args_list[0].args[0]
+        self.assertIn("nc.candidate_state = 'approved'", supersede_sql)
+        self.assertIn("current_rt.review_state IN ('queued', 'deferred')", supersede_sql)
         self.assertIn("new_source_candidate_count = 1", supersede_sql)
         self.assertIn("sd.normalized_source_url = newest.normalized_source_url", supersede_sql)
         audit_sql, audit_params = connection.execute.call_args_list[1].args

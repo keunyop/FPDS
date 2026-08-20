@@ -516,8 +516,16 @@ def _normalize_candidate(
                 ),
             }
         if dynamic_payload.get("product_name") not in {None, ""}:
-            product_name = _coalesce_string(dynamic_payload.get("product_name"), product_name)
-            candidate_payload["product_name"] = product_name
+            dynamic_product_name = _coalesce_string(dynamic_payload.get("product_name"))
+            product_name_field = extracted_by_field.get("product_name")
+            exact_grounded_identity = _is_exact_grounded_product_identity(product_name_field)
+            if exact_grounded_identity and dynamic_product_name != product_name:
+                runtime_notes.append(
+                    "Preserved the exact grounded product name instead of an AI-normalized family name."
+                )
+            else:
+                product_name = _coalesce_string(dynamic_product_name, product_name)
+                candidate_payload["product_name"] = product_name
         if dynamic_usage:
             normalization_meta = {
                 "agent_name": "fpds-dynamic-product-normalizer",
@@ -751,6 +759,7 @@ def _normalize_candidate(
         candidate_payload=candidate_payload,
         normalized_values_for_links=normalized_values_for_links,
         field_mapping_metadata=field_mapping_metadata,
+        evidence_context_by_field=evidence_context_by_field,
         runtime_notes=runtime_notes,
     )
     candidate_payload["target_customer_tags"] = _infer_target_customer_tags(candidate_payload)
@@ -830,6 +839,25 @@ def _normalize_candidate(
         evidence_links=evidence_links_for_output,
     )
     return candidate_record, field_evidence_link_records, runtime_notes, normalization_meta
+
+
+def _is_exact_grounded_product_identity(
+    field: NormalizationExtractedField | None,
+) -> bool:
+    if field is None:
+        return False
+    metadata = field.field_metadata
+    return bool(
+        metadata.get("official_grounding_contract_version")
+        == "collection-official-grounding-v2"
+        and metadata.get("official_verification_status") == "match"
+        and metadata.get("official_grounding_method")
+        in {
+            "deterministic_detail_h1",
+            "deterministic_sibling_product_block",
+            "deterministic_sibling_lending_table",
+        }
+    )
 
 
 def _compute_validation_issue_codes(
@@ -2938,6 +2966,9 @@ def _clean_product_context_fields(
             value=value,
             context=evidence_context,
             product_type_family=product_type_family,
+            official_grounding_metadata=dict(
+                (field_mapping_metadata or {}).get(field_name) or {}
+            ),
         ) or _dynamic_numeric_value_is_ungrounded(
             field_name=field_name,
             value=value,
@@ -3808,27 +3839,13 @@ def _looks_like_credit_card_field_mismatch(
         except (TypeError, ValueError):
             return True
         grounding = official_grounding_metadata or {}
-        if (
-            field_name == "purchase_interest_rate"
-            and grounding.get("official_grounding_contract_version")
-            == "collection-official-grounding-v2"
-            and grounding.get("official_verification_status") == "match"
-            and grounding.get("official_grounding_method")
-            in {
-                "deterministic_card_comparison_origin",
-                "deterministic_sibling_product_block",
-            }
-            and not re.search(r"(?:cash\s+advance|balance\s+transfer)", context, flags=re.IGNORECASE)
+        if _has_exact_official_card_purchase_rate(
+            field_name=field_name,
+            value=numeric_value,
+            context=context,
+            official_grounding_metadata=grounding,
         ):
-            expected = Decimal(str(numeric_value))
-            for observed in re.finditer(r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%", context):
-                if _as_decimal(observed.group(1)) != expected:
-                    continue
-                window = context[
-                    max(0, observed.start() - 45):min(len(context), observed.end() + 45)
-                ]
-                if re.search(r"\binterest\s+rate\b", window, flags=re.IGNORECASE):
-                    return False
+            return False
         labels = {
             "purchase_interest_rate": r"(?:purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\)|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
             "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
@@ -3871,6 +3888,7 @@ def _looks_like_non_rate_numeric_context(
     value: object,
     context: str,
     product_type_family: str | None = None,
+    official_grounding_metadata: dict[str, object] | None = None,
 ) -> bool:
     normalized_field = field_name.strip().lower()
     if not (normalized_field.endswith("_rate") or normalized_field in {"rate", "mortgage_rate", "interest_rate"}):
@@ -3881,11 +3899,79 @@ def _looks_like_non_rate_numeric_context(
         return True
     suppression_reason = canonical_deposit_rate_suppression_reason(value=value, context=context)
     if (
+        product_type_family == "credit-card"
+        and _has_exact_official_card_purchase_rate(
+            field_name=field_name,
+            value=value,
+            context=context,
+            official_grounding_metadata=official_grounding_metadata or {},
+        )
+    ):
+        suppression_reason = None
+    if (
         suppression_reason == "implausible_annual_deposit_rate"
         and product_type_family in {"credit-card", "mortgage", "personal-loan", "line-of-credit"}
     ):
         suppression_reason = None
     return suppression_reason is not None or _looks_like_unresolved_placeholder(context)
+
+
+def _has_exact_official_card_purchase_rate(
+    *,
+    field_name: str,
+    value: object,
+    context: str,
+    official_grounding_metadata: dict[str, object],
+) -> bool:
+    if (
+        field_name != "purchase_interest_rate"
+        or official_grounding_metadata.get("official_grounding_contract_version")
+        != "collection-official-grounding-v2"
+        or official_grounding_metadata.get("official_verification_status") != "match"
+    ):
+        return False
+    sources = official_grounding_metadata.get("official_web_sources")
+    if not (
+        isinstance(sources, list)
+        and any(
+            isinstance(source, dict) and str(source.get("url") or "").strip()
+            for source in sources
+        )
+    ):
+        return False
+    expected = _as_decimal(value)
+    if expected is None:
+        return False
+    quote = str(
+        official_grounding_metadata.get("official_evidence_quote")
+        or official_grounding_metadata.get("evidence_quote")
+        or ""
+    )
+    evidence_values = [quote]
+    if official_grounding_metadata.get("official_grounding_method") in {
+        "deterministic_card_comparison_origin",
+        "deterministic_sibling_product_block",
+    }:
+        evidence_values.append(context)
+    for evidence in evidence_values:
+        if not evidence:
+            continue
+        for observed in re.finditer(r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%", evidence):
+            if _as_decimal(observed.group(1)) != expected:
+                continue
+            window = evidence[
+                max(0, observed.start() - 70):min(len(evidence), observed.end() + 70)
+            ]
+            if (
+                re.search(r"\binterest\s+rate\b", window, flags=re.IGNORECASE)
+                and not re.search(
+                    r"\b(?:cash\s+advance|balance\s+transfer)\b",
+                    window,
+                    flags=re.IGNORECASE,
+                )
+            ):
+                return True
+    return False
 
 
 def _dynamic_numeric_value_is_ungrounded(
@@ -5024,8 +5110,26 @@ def _resolve_gic_redeemability_flags(
     normalized_values_for_links: dict[str, object],
     field_mapping_metadata: dict[str, object],
     runtime_notes: list[str],
+    evidence_context_by_field: dict[str, str] | None = None,
 ) -> None:
     if product_type_family != "gic":
+        return
+    if _gic_redeemability_is_mixed_by_account_scope(evidence_context_by_field or {}):
+        for field_name in ("redeemable_flag", "non_redeemable_flag"):
+            candidate_payload.pop(field_name, None)
+            normalized_values_for_links.pop(field_name, None)
+            metadata = dict(field_mapping_metadata.get(field_name) or {})
+            metadata.update(
+                {
+                    "normalized_value": None,
+                    "normalization_method": "gic_mixed_scope_safety",
+                    "suppressed_reason": "mixed_account_scope_redeemability",
+                }
+            )
+            field_mapping_metadata[field_name] = metadata
+        runtime_notes.append(
+            "Omitted product-level GIC redeemability because cash-out and conversion rights differ by account scope."
+        )
         return
     if not (_truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag"))):
         return
@@ -5061,6 +5165,33 @@ def _resolve_gic_redeemability_flags(
     runtime_notes.append(
         "Resolved conflicting GIC redeemability flags from product-level subtype, name, or tag signals instead of broad family-page evidence."
     )
+
+
+def _gic_redeemability_is_mixed_by_account_scope(
+    evidence_context_by_field: dict[str, str],
+) -> bool:
+    context = _normalize_text(
+        " ".join(
+            evidence_context_by_field.get(field_name, "")
+            for field_name in ("redeemable_flag", "non_redeemable_flag")
+        )
+    ).lower()
+    if not context:
+        return False
+    has_cash_out_scope = bool(
+        re.search(
+            r"\b(?:non[- ]registered accounts?|tfsa)\b[\s\S]{0,240}?\bcash out\b",
+            context,
+        )
+    )
+    has_conversion_scope = bool(
+        re.search(
+            r"\b(?:rrsp|fhsa|rrif|resp|rdsp)\b[\s\S]{0,240}?"
+            r"\b(?:switch|convert)\s+to\s+(?:any\s+)?(?:investment|deposit)",
+            context,
+        )
+    )
+    return has_cash_out_scope and has_conversion_scope
 
 
 def _gic_redeemability_signal(*, subtype_code: str | None, candidate_payload: dict[str, object]) -> str | None:

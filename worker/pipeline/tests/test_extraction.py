@@ -60,6 +60,7 @@ from worker.pipeline.fpds_extraction.service import (
     _looks_like_navigation_description,
     _looks_like_non_product_summary,
     _merge_extracted_fields,
+    _prefer_vancity_ev_loan_amount_evidence,
     _prefer_vancity_ev_rate_evidence,
     _resolve_field_names,
     _safe_exact_origin_card_purchase_rate,
@@ -638,8 +639,13 @@ X"""
         )
         ai = replace(
             base,
+            candidate_value="19.5",
             confidence=0.99,
             extraction_method="openai_official_grounding",
+            evidence_chunk_id="chunk-card-agreement",
+            evidence_text_excerpt=(
+                "Purchase interest rate 19.50%. Cash advance interest rate 21.50%."
+            ),
             field_metadata={
                 "official_grounding_contract_version": "collection-official-grounding-v2",
                 "official_verification_status": "match",
@@ -654,6 +660,8 @@ X"""
             merged[0].field_metadata["official_grounding_method"],
             "deterministic_card_comparison_origin",
         )
+        self.assertEqual(merged[0].candidate_value, "19.50")
+        self.assertEqual(merged[0].evidence_chunk_id, "chunk-card")
 
     def test_ai_does_not_replace_exact_detail_h1_with_disclosure_name(self) -> None:
         base = ExtractedFieldCandidate(
@@ -995,6 +1003,115 @@ X"""
 
         self.assertEqual(fields[0].evidence_chunk_id, "chunk-electric-vehicle")
         self.assertEqual(fields[0].anchor_value, "electric-vehicle")
+
+    def test_vancity_ev_amount_prefers_exact_product_summary(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-PL-005",
+            parsed_document_id="parsed-vancity-ev",
+            source_document_id="src-vancity-ev",
+            snapshot_id="snap-vancity-ev",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "personal-loan",
+                "product_type_dynamic": True,
+                "discovery_role": "detail",
+                "expected_fields": ["loan_amount_text"],
+                "normalized_source_url": (
+                    "https://www.vancity.com/borrow/loans-lines-of-credit/planet-wise-transportation"
+                ),
+                "official_domain_allowlist": ["vancity.com"],
+                "discovery_metadata": {
+                    "primary_heading": (
+                        "Planet-Wise transportation loan - electric vehicle (EV) loan"
+                    ),
+                    "product_identity_match": False,
+                    "page_evidence_score": 3,
+                    "negative_signal_count": 0,
+                    "selection_reason_codes": [
+                        "seed_hint_alignment",
+                        "structured_component_evidence",
+                    ],
+                },
+            },
+        )
+        candidates = [
+            EvidenceChunkCandidate(
+                evidence_chunk_id=f"chunk-{anchor}",
+                parsed_document_id=context.parsed_document_id,
+                chunk_index=index,
+                anchor_type="section",
+                anchor_value=anchor,
+                page_no=None,
+                source_language="en",
+                evidence_excerpt=excerpt,
+                retrieval_metadata={},
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                bank_code=context.bank_code,
+                country_code=context.country_code,
+                source_type=context.source_type,
+            )
+            for index, anchor, excerpt in (
+                (
+                    0,
+                    "planet-wise-transportation-loan-electric-vehicle-ev-loan",
+                    (
+                        "Planet-Wise transportation loan - electric vehicle (EV) loan\n"
+                        "Fuel your sustainable travel choices.\nBorrow\nFrom $1,500 and up\n"
+                        "Best part\nGet preferred rates for choosing the planet"
+                    ),
+                ),
+                (
+                    7,
+                    "electric-vehicle",
+                    (
+                        "Electric vehicle\nEV loan to purchase any new or used electric vehicle\n"
+                        "Max. term: 10 years\nMax. amount: based on how you qualify\n"
+                        "Pricing: Vancity Prime Rate +1 %"
+                    ),
+                ),
+            )
+        ]
+        fields = [
+            ExtractedFieldCandidate(
+                field_name="loan_amount_text",
+                candidate_value="Max. amount: based on how you qualify",
+                value_type="string",
+                confidence=0.55,
+                extraction_method="heuristic_text",
+                source_document_id=context.source_document_id,
+                source_snapshot_id=context.snapshot_id,
+                evidence_chunk_id="chunk-electric-vehicle",
+                evidence_text_excerpt=candidates[1].evidence_excerpt,
+                anchor_type="section",
+                anchor_value="electric-vehicle",
+                page_no=None,
+                chunk_index=7,
+                field_metadata={},
+            )
+        ]
+
+        _prefer_vancity_ev_loan_amount_evidence(
+            context=context,
+            candidates=candidates,
+            requested_fields=["loan_amount_text"],
+            extracted_fields=fields,
+        )
+
+        self.assertEqual(fields[0].candidate_value, "From $1,500 and up")
+        self.assertEqual(fields[0].evidence_chunk_id, "chunk-planet-wise-transportation-loan-electric-vehicle-ev-loan")
+        grounded, count = _apply_exact_origin_grounding(
+            context=context,
+            extracted_fields=fields,
+        )
+        self.assertEqual(count, 1)
+        self.assertEqual(
+            grounded[0].field_metadata["official_grounding_method"],
+            "deterministic_lending_comparison_origin",
+        )
 
     def test_numeric_apr_summary_preserves_disclosed_qualifiers(self) -> None:
         summary = _extract_interest_rate_summary(
@@ -4634,6 +4751,76 @@ X"""
 
         self.assertFalse(redeemable)
         self.assertTrue(non_redeemable)
+
+    def test_exact_gic_detail_recovers_explicit_non_redeemability_flags(self) -> None:
+        context = ExtractionDocumentContext(
+            source_id="VANCITY-GIC-007",
+            parsed_document_id="parsed-vancity-iltd",
+            source_document_id="src-vancity-iltd",
+            snapshot_id="snap-vancity-iltd",
+            bank_code="VANCITY",
+            country_code="CA",
+            source_type="html",
+            source_language="en",
+            source_metadata={
+                "product_type": "gic",
+                "discovery_role": "detail",
+                "expected_fields": [
+                    "product_name",
+                    "redeemable_flag",
+                    "non_redeemable_flag",
+                ],
+                "normalized_source_url": (
+                    "https://www.vancity.com/invest/term-deposit-gic/index-linked"
+                ),
+                "official_domain_allowlist": ["vancity.com"],
+                "discovery_metadata": {
+                    "primary_heading": "Index-linked term deposit (ILTD)",
+                    "product_identity_match": True,
+                    "page_evidence_score": 8,
+                    "negative_signal_count": 0,
+                },
+            },
+        )
+        candidate = EvidenceChunkCandidate(
+            evidence_chunk_id="chunk-vancity-iltd-h1",
+            parsed_document_id=context.parsed_document_id,
+            chunk_index=0,
+            anchor_type="section",
+            anchor_value="index-linked-term-deposit-iltd",
+            page_no=None,
+            source_language="en",
+            evidence_excerpt=(
+                "Index-linked term deposit (ILTD)\n"
+                "Term length\n3 or 5 years\n"
+                "Risk\nLow risk. Principal is protected. Cannot be redeemed before maturity date"
+            ),
+            retrieval_metadata={},
+            source_document_id=context.source_document_id,
+            source_snapshot_id=context.snapshot_id,
+            bank_code=context.bank_code,
+            country_code=context.country_code,
+            source_type=context.source_type,
+        )
+
+        fields = _extract_fields(
+            context=context,
+            candidates=[candidate],
+            matches=[],
+            requested_fields=[
+                "product_name",
+                "redeemable_flag",
+                "non_redeemable_flag",
+            ],
+        )
+        by_name = {field.field_name: field for field in fields}
+
+        self.assertFalse(by_name["redeemable_flag"].candidate_value)
+        self.assertTrue(by_name["non_redeemable_flag"].candidate_value)
+        self.assertEqual(
+            by_name["redeemable_flag"].field_metadata["official_grounding_method"],
+            "deterministic_gic_non_redeemability_origin",
+        )
 
     def test_gic_placeholders_and_navigation_do_not_create_false_product_fields(self) -> None:
         context = ExtractionDocumentContext(

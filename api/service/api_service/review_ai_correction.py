@@ -13,6 +13,9 @@ if TYPE_CHECKING:
 
 ACTIVE_REVIEW_STATES = {"queued", "deferred"}
 AUTO_APPROVAL_THRESHOLD = 1.0
+AI_CORRECTION_PROTECTED_SUPPRESSION_REASONS = {
+    "mixed_account_scope_redeemability",
+}
 
 
 def assess_review_ai_auto_approval(
@@ -288,6 +291,13 @@ def apply_review_ai_corrections(
         for field_name, value in normalized_corrections.items()
         if field_name in eligible_fields
         and eligible_fields[field_name].get("proposed_value") == value
+        and str(
+            _mapping(_mapping(row.get("field_mapping_metadata")).get(field_name)).get(
+                "suppressed_reason"
+            )
+            or ""
+        )
+        not in AI_CORRECTION_PROTECTED_SUPPRESSION_REASONS
     }
     if not normalized_corrections:
         return {
