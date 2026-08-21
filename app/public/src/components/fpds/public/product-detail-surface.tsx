@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
+import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { InterestCalculator } from "@/components/fpds/public/interest-calculator";
 import { PublicFreshness } from "@/components/fpds/public/public-freshness";
 import { Button } from "@/components/ui/button";
@@ -192,6 +193,8 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
             </aside>
           </div>
         </section>
+
+        <PublicInformationNotice locale={filters.locale} />
       </div>
     </main>
   );

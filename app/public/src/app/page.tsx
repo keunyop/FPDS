@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { buildPublicHref, parseProductGridPageFilters } from "@/lib/public-query";
+import { buildPublicHref, parseDashboardPageFilters } from "@/lib/public-query";
 
 type HomePageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -8,6 +8,6 @@ type HomePageProps = {
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const filters = parseProductGridPageFilters(resolvedSearchParams);
+  const filters = parseDashboardPageFilters(resolvedSearchParams);
   redirect(buildPublicHref("/dashboard", filters));
 }

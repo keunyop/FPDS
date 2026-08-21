@@ -387,12 +387,13 @@ hierarchy without changing Section 10.15 ranking semantics:
   product-detail navigation, responsive stacking, and evidence/privacy
   boundaries remain unchanged.
 
-### 10.17 Bankoom Identity and Paired-Eye Mark
+### 10.17 Bankoompare Identity and Paired-Eye Mark
 
-Product Owner direction on `2026-08-15` supersedes the customer-facing name and
-mark in Section 10.15 without changing Home or catalog behavior:
+Product Owner direction on `2026-08-20` supersedes the earlier
+customer-facing name in Section 10.15 without changing Home or catalog
+behavior:
 
-- `Bankoom` is the customer-facing Public name; `FPDS` remains the internal
+- `Bankoompare` is the customer-facing Public name; `FPDS` remains the internal
   platform/runtime identity.
 - The paired `oo` is the defining brand feature. Two simple circular eyes look
   outward to represent scanning two sides of a bank-product comparison.
@@ -401,15 +402,17 @@ mark in Section 10.15 without changing Home or catalog behavior:
   on the existing evergreen field.
 - The mark stays code-native, flat, legible at small sizes, and free of
   decorative illustration or motion.
-- EN/KO/JA metadata and customer-facing brand references use `Bankoom`.
+- EN/KO/JA metadata and customer-facing brand references use `Bankoompare`.
 
 ### 10.18 Calm-Density and Centered-Eye Refinement
 
-Product Owner direction later on `2026-08-15` refines the Public visual and
-information hierarchy without changing approved financial meaning:
+Product Owner direction on `2026-08-15`, refined on `2026-08-20`,
+defines the Public visual and information hierarchy without changing approved
+financial meaning:
 
-- each pupil is centered in its circular eye; the shell mark grows from the
-  earlier compact treatment and the desktop/tablet Bankoom wordmark uses a
+- each pupil is centered in its circular eye, and the two outlined eyes keep a
+  small visible gap; the shell mark grows from the earlier compact treatment
+  and the desktop/tablet Bankoompare wordmark uses a
   stronger title scale. The wordmark remains hidden at exact `390px` so the
   mark, three primary navigation actions, and country control fit without
   overflow;
@@ -433,6 +436,57 @@ information hierarchy without changing approved financial meaning:
   summary/ranking/scatter reads after fifteen minutes, matching the approved
   cache-refresh strategy. The API timeout and localized unavailable states
   remain unchanged.
+
+### 10.19 Bankoompare Discovery, Sort, and View Refinement
+
+Product Owner direction on `2026-08-20` strengthens the customer-facing
+comparison language and catalog browsing behavior:
+
+- Bankoompare Home and catalog headlines, taglines, metadata, and supporting
+  descriptions invite users to look into bank products and compare facts.
+- Home owns only locale and country scope. It ignores bank, Product Type,
+  customer-tag, amount, fee, term, sort, pagination, and catalog-view query
+  state carried from Deposit, Credit Card, or Loan.
+- Deposit opens with `display_rate desc`, Credit Card with
+  `annual_fee asc`, and Loan with `display_rate asc`. Catalogs expose no
+  separate Default sort action.
+- The sort rail ends with accessible Grid and List icon controls. Grid keeps
+  the existing type-aware product cards; List uses compact rows whose active
+  sort value is the dominant fact while product detail, Compare, and available
+  official-bank actions remain reachable.
+- Catalog view mode is URL state and remains stable when the user changes
+  filters, sort, or pagination. Mobile keeps the sort/view rail internally
+  scrollable without widening the document.
+
+### 10.20 Instant Catalog Search, Continuous Loading, and Information Notice
+
+Product Owner direction on 2026-08-20 supersedes the visible catalog
+pagination behavior in Section 10.19:
+
+- Deposit, Credit Card, and Loan Search conditions start with one localized
+  text field. The q value matches the public bank name or source-derived
+  product name case-insensitively as a literal substring; wildcard characters
+  have no special meaning and no private evidence is searched.
+- Text input uses a short debounce. Search, bank/Product Type/tag checkboxes,
+  and applicable bucket selects immediately update URL-backed result state
+  without an Apply button. Any condition change restarts at the first result
+  page. Home still drops all catalog search/filter state.
+- Catalogs server-render the first bounded API page. When an intersection
+  sentinel approaches the viewport, the client requests the next page through
+  a same-origin Public route, appends unseen product IDs, and repeats until
+  has_next_page is false. Filter/sort changes abort stale requests and reset
+  the list. Loading, completion, error, and retry states are localized and
+  announced; Previous/Next controls are removed.
+- Grid/List presentation and up-to-four comparison remain available as the
+  list grows. View changes do not change the API scope, and additional-page
+  loading does not alter canonical, aggregate, or ranking semantics.
+- Home and every product detail use one EN/KO/JA information notice. It
+  identifies AI-assisted public-source collection, the non-advertising and
+  no-compensation boundary, best efforts to remain current, possible
+  point-of-application changes, and the requirement to verify information and
+  conditions on the institution's official website before applying.
+- Raw evidence, Review state, personalized advice, scoring, and application
+  submission remain outside Public.
 
 ## 11. Follow-On Items
 

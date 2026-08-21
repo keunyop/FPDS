@@ -52,6 +52,9 @@ const COVERAGE_COPY = {
       "Operators only choose which product families FPDS should cover. Source URLs are generated during collect from the bank homepage, not entered manually here.",
     noCoverage: "No coverage has been added for this bank yet.",
     generatedSources: (count: number) => `${count} generated source(s) currently available for this coverage.`,
+    firstPrecisionRequired: "First collection · precision source discovery required",
+    precisionRediscovery: "Precision source rediscovery",
+    precisionRediscoveryHelp: "Search again for new or changed product and evidence pages before collection.",
     latestNote: "Latest note",
     viewSources: "View sources",
     collect: "Collect",
@@ -76,11 +79,12 @@ const COVERAGE_COPY = {
     collectApiFailed: "Collection could not be started. Check the admin API and try again.",
     queued: (productType: string) => `${productType} collection was queued.`,
     queuedDetail:
-      "Homepage discovery and source collection are now running on the server in the background.",
+      "Precision source discovery and source collection are now running on the server in the background.",
+    standardQueuedDetail: "Collection is using the current active source scope without precision rediscovery.",
     openRuns:
       "Open Runs after a short refresh to inspect no-detail, timeout, or collection outcomes.",
     noDetail: (productType: string) =>
-      `${productType} homepage discovery completed, but no detail sources were identified for collection.`,
+      `${productType} precision source discovery completed, but no detail sources were identified for collection.`,
     materialized: (count: number) => `Materialized ${count} source row(s).`,
     started: (productType: string) => `${productType} collection started.`,
   },
@@ -91,6 +95,9 @@ const COVERAGE_COPY = {
       "운영자는 FPDS가 다룰 상품군만 선택합니다. Source URL은 여기서 직접 입력하지 않고, collect 중 은행 홈페이지에서 생성됩니다.",
     noCoverage: "아직 이 은행에 추가된 coverage가 없습니다.",
     generatedSources: (count: number) => `현재 이 coverage에 생성된 source ${count}개가 있습니다.`,
+    firstPrecisionRequired: "최초 수집 · 정밀 source 탐색 필수",
+    precisionRediscovery: "정밀 source 재탐색",
+    precisionRediscoveryHelp: "수집 전에 새 상품 또는 변경된 상품·근거 페이지를 다시 찾습니다.",
     latestNote: "최근 메모",
     viewSources: "소스 보기",
     collect: "Collect",
@@ -114,10 +121,11 @@ const COVERAGE_COPY = {
     collectFailed: "Collection을 시작할 수 없습니다.",
     collectApiFailed: "Collection을 시작할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
     queued: (productType: string) => `${productType} collection이 대기열에 등록되었습니다.`,
-    queuedDetail: "Homepage discovery와 source collection이 서버 백그라운드에서 실행 중입니다.",
+    queuedDetail: "정밀 source 탐색과 source collection이 서버 백그라운드에서 실행 중입니다.",
+    standardQueuedDetail: "정밀 재탐색 없이 현재 활성 source 범위로 collection을 실행합니다.",
     openRuns: "잠시 후 Runs에서 no-detail, timeout, collection 결과를 확인하세요.",
     noDetail: (productType: string) =>
-      `${productType} homepage discovery가 완료되었지만 collection할 detail source를 찾지 못했습니다.`,
+      `${productType} 정밀 source 탐색이 완료되었지만 collection할 detail source를 찾지 못했습니다.`,
     materialized: (count: number) => `Source row ${count}개를 생성했습니다.`,
     started: (productType: string) => `${productType} collection이 시작되었습니다.`,
   },
@@ -128,6 +136,9 @@ const COVERAGE_COPY = {
       "オペレーターは FPDS が扱う商品ファミリーだけを選択します。Source URL はここで手入力せず、collect 中に銀行ホームページから生成されます。",
     noCoverage: "この銀行にはまだ coverage が追加されていません。",
     generatedSources: (count: number) => `この coverage で現在 ${count} 件の source が生成されています。`,
+    firstPrecisionRequired: "初回収集 · 精密 source 探索が必須",
+    precisionRediscovery: "精密 source 再探索",
+    precisionRediscoveryHelp: "収集前に新規・変更済みの商品ページと根拠ページを再探索します。",
     latestNote: "最新メモ",
     viewSources: "ソースを見る",
     collect: "Collect",
@@ -151,10 +162,11 @@ const COVERAGE_COPY = {
     collectFailed: "Collection を開始できません。",
     collectApiFailed: "Collection を開始できません。Admin APIを確認してから再試行してください。",
     queued: (productType: string) => `${productType} collection をキューに追加しました。`,
-    queuedDetail: "Homepage discovery と source collection はサーバー上でバックグラウンド実行中です。",
+    queuedDetail: "精密 source 探索と source collection はサーバー上でバックグラウンド実行中です。",
+    standardQueuedDetail: "精密再探索を行わず、現在の有効な source 範囲で collection を実行します。",
     openRuns: "少し待ってから Runs で no-detail、timeout、collection の結果を確認してください。",
     noDetail: (productType: string) =>
-      `${productType} homepage discovery は完了しましたが、collection 対象の detail source は見つかりませんでした。`,
+      `${productType} 精密 source 探索は完了しましたが、collection 対象の detail source は見つかりませんでした。`,
     materialized: (count: number) => `${count} 件の source row を生成しました。`,
     started: (productType: string) => `${productType} collection を開始しました。`,
   },
@@ -199,6 +211,7 @@ export function BankCoverageSection({
   });
   const [createPending, setCreatePending] = useState(false);
   const [collectingId, setCollectingId] = useState<string | null>(null);
+  const [precisionRediscoveryIds, setPrecisionRediscoveryIds] = useState<string[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -266,6 +279,9 @@ export function BankCoverageSection({
         },
         body: JSON.stringify({
           catalog_item_ids: [item.catalog_item_id],
+          precision_rediscovery:
+            item.has_completed_collection
+            && precisionRediscoveryIds.includes(item.catalog_item_id),
         }),
       });
       const payload = (await response.json()) as {
@@ -331,6 +347,32 @@ export function BankCoverageSection({
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     {copy.generatedSources(item.generated_source_count)}
                   </p>
+                  {item.has_completed_collection ? (
+                    <label className="mt-3 flex max-w-full items-start gap-2 text-sm text-foreground">
+                      <input
+                        checked={precisionRediscoveryIds.includes(item.catalog_item_id)}
+                        className="mt-0.5 size-4 shrink-0 accent-primary"
+                        onChange={(event) => {
+                          setPrecisionRediscoveryIds((current) =>
+                            event.target.checked
+                              ? [...new Set([...current, item.catalog_item_id])]
+                              : current.filter((value) => value !== item.catalog_item_id),
+                          );
+                        }}
+                        type="checkbox"
+                      />
+                      <span>
+                        <span className="font-medium">{copy.precisionRediscovery}</span>
+                        <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+                          {copy.precisionRediscoveryHelp}
+                        </span>
+                      </span>
+                    </label>
+                  ) : (
+                    <p className="mt-3 text-xs font-medium text-primary">
+                      {copy.firstPrecisionRequired}
+                    </p>
+                  )}
                   {item.change_reason ? (
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
                       {copy.latestNote}: {item.change_reason}
@@ -502,7 +544,11 @@ function buildSingleCoverageCollectMessage(
   const label = formatProductType(productType, labelMap);
 
   if (payload?.workflow_state === "queued") {
-    return copy.queued(label);
+    const mode = payload.groups?.[0]?.source_coverage_mode;
+    return [
+      copy.queued(label),
+      mode === "standard" ? copy.standardQueuedDetail : copy.queuedDetail,
+    ].join(" ");
   }
 
   const materializedItem = payload?.materialized_items?.[0];

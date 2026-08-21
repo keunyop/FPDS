@@ -379,6 +379,18 @@ approved projection, comparison meaning, or publication gate.
 - 신규/변경 상태(optional if available)
 - 언어
 
+Product Owner clarification on 2026-08-20: Deposit, Credit Card, and Loan
+Search conditions include a single localized search field that matches public
+bank name or product name case-insensitively by literal substring. Text input
+is briefly debounced and every search, checkbox, and select change applies
+without an Apply action. The resulting URL remains shareable and starts from
+the first result page.
+
+Catalog results initially render one bounded API page and automatically append
+the next page when the user reaches the end of the list. Duplicate product IDs
+must not be appended. Loading, completion, failure, and retry states are
+accessible and localized; Previous/Next controls are not shown.
+
 ### FR-PUB-006 Sorting
 사용자는 다음 기준으로 정렬할 수 있어야 한다.
 
@@ -498,6 +510,16 @@ chart와 ranking은 선택된 product type의 의미에 맞게 달라져야 한�
 ### FR-PUB-017 Translation Fallback
 UI 번역 리소스 또는 설정 라벨이 불완전한 경우 시스템은 정의된 fallback 순서(권장: selected locale → English → source language 또는 default locale)에 따라 안전하게 표시해야 한다. 단, 상품명/상품설명/상품조건 등 source-derived 상품정보는 번역하지 않고 수집된 source language 값을 그대로 표시할 수 있어야 한다.
 
+### FR-PUB-018 AI-Assisted Information Notice
+
+Home and every product detail must show an EN/KO/JA information notice stating
+that visible facts are collected and organized from public materials with
+AI-agent assistance and are not financial-product advertising. It must also
+state that the content is independently produced for information purposes
+without compensation from the displayed financial institutions, that
+Bankoompare works to keep it current, and that rates, fees, eligibility, and
+other terms may change. Users must be directed to reconfirm the product and
+conditions on the financial institution's official website before applying.
 
 ---
 
@@ -630,6 +652,17 @@ Current Phase 1 source-registry admin note:
 - `/admin/source-catalog` may remain as a compatibility route, but it is no longer the preferred primary operator workflow.
 - operators may launch collection per bank coverage item from the bank detail modal.
 - operators may also multi-select banks from the bank list and bulk-launch collection across all attached coverage items.
+- a bank/Product Type with no completed collection must run bounded precision
+  source coverage discovery before fact collection. Completion is determined
+  from server-side completed ingestion history with a non-empty source scope,
+  not from a browser flag or generated-source count.
+- after that first completed collection, Banks must let the operator choose
+  whether to repeat precision source discovery or collect from the current
+  active source scope. A mixed bulk selection forces first-time items to
+  precision and applies the shared option only to completed items.
+- a requested standard collection with no remaining active detail source must
+  fail safe into precision discovery rather than closing or collecting only
+  supporting sources.
 
 ### FR-ADM-017 Deferred Dynamic Product Type Management
 FPDS should support an operator-managed product type registry, not only a fixed hard-coded product-type list.
@@ -642,6 +675,13 @@ Minimum later capability:
 - homepage-first discovery should use a bounded hybrid scoring model: deterministic link candidate generation plus AI parallel scoring over those candidates, rather than relying on AI only after heuristic failure
 - product type `description` should be treated as a first-class discovery input for semantic matching, not only as a source of derived keywords
 - page-level evidence scoring should validate title, heading, and early body signals before a candidate URL is promoted to a generated `detail` source
+- precision discovery may reuse active official registry entry/detail URLs as
+  bounded seeds, including inspection of at most a fixed number of existing
+  detail pages for newly linked sibling products. Every discovered URL still
+  passes exact official-domain/verified-brand, country, source-language,
+  Product Type, page-evidence, and product-boundary gates.
+- precision discovery records seed, fetched-page, candidate, promoted,
+  rejected, and bounded-limit telemetry on the ingestion run.
 
 Current boundary:
 - this capability is now implemented in live `WBS 5.16` for the admin registry and collection pipeline
@@ -894,6 +934,10 @@ operator-defined Product Types, not only to dynamic fallback types.
   transferred, wound down, or discontinued deactivates stale coverage and
   completes cleanly as `product_not_currently_offered`; mere absence or an
   uncertain answer remains reviewable/Partial and must not be treated as proof.
+- precision source coverage expansion is not an unrestricted crawl: homepage,
+  verified coverage, configured registry, primary/secondary hub, existing
+  detail, HTML/PDF candidate, and companion expansion each retain explicit
+  caps and the selected bank's safe-fetch policy.
 
 ### FR-AI-009 Collection and Existing Review Queue AI Correction and Threshold Approval
 
@@ -1486,8 +1530,9 @@ Later follow-on requirement:
 2. Admin creates or edits a bank profile if needed
 3. Admin adds one or more bank-owned coverage items for the desired product types
 4. Admin starts collection either from a single bank coverage item or from a multi-bank bank-list bulk selection
-6. System materializes or refreshes generated source rows for the selected catalog scope
-7. System records the selected source scope for the run
+5. System checks completed collection history per bank/Product Type. First-time items use precision discovery; completed items use the operator's precision-rediscovery choice.
+6. Precision mode materializes or refreshes generated source rows from bounded verified homepage, coverage, registry, hub, and sibling-detail seeds. Standard mode reuses the current active source scope; if no active detail remains, it falls back to precision mode.
+7. System records the selected source scope, effective coverage mode, and coverage telemetry for the run
 8. System fetches, parses, extracts, normalizes, and validates the selected scope
 9. `normalized_candidate` rows are persisted
 10. Review tasks are created when validation/confidence rules require them

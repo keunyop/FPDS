@@ -3242,6 +3242,60 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(group["source_catalog_product_type"], "saving")
         self.assertIn("_bmo_saving_collect_", group["run_id"])
 
+    def test_collection_plan_forces_first_collection_precision_and_makes_completed_items_optional(self) -> None:
+        rows = [
+            {
+                "catalog_item_id": "catalog-ca-atl-chequing",
+                "bank_code": "ATL",
+                "bank_name": "Atlas Bank",
+                "country_code": "CA",
+                "product_type": "chequing",
+                "homepage_url": "https://www.atlasbank.ca/",
+                "normalized_homepage_url": "https://www.atlasbank.ca/",
+                "source_language": "en",
+                "has_completed_collection": False,
+            },
+            {
+                "catalog_item_id": "catalog-ca-atl-savings",
+                "bank_code": "ATL",
+                "bank_name": "Atlas Bank",
+                "country_code": "CA",
+                "product_type": "savings",
+                "homepage_url": "https://www.atlasbank.ca/",
+                "normalized_homepage_url": "https://www.atlasbank.ca/",
+                "source_language": "en",
+                "has_completed_collection": True,
+            },
+        ]
+
+        standard_plan = _build_source_catalog_collection_plan(
+            rows=rows,
+            actor={"user_id": "usr-001", "email": "admin@example.com", "role": "admin"},
+            request_context={"request_id": "req-001"},
+            collection_id="collection-standard",
+            correlation_id="corr-standard",
+            precision_rediscovery=False,
+        )
+        forced_plan = _build_source_catalog_collection_plan(
+            rows=rows,
+            actor={"user_id": "usr-001", "email": "admin@example.com", "role": "admin"},
+            request_context={"request_id": "req-002"},
+            collection_id="collection-precision",
+            correlation_id="corr-precision",
+            precision_rediscovery=True,
+        )
+
+        self.assertEqual(
+            [group["source_coverage_mode"] for group in standard_plan["groups"]],
+            ["precision", "standard"],
+        )
+        self.assertEqual(
+            [group["source_coverage_mode"] for group in forced_plan["groups"]],
+            ["precision", "precision"],
+        )
+        self.assertFalse(standard_plan["precision_rediscovery_requested"])
+        self.assertTrue(forced_plan["precision_rediscovery_requested"])
+
     def test_delete_bank_profile_removes_catalog_and_generated_sources_when_unused_downstream(self) -> None:
         connection = _QueuedConnection(
             [
@@ -3388,6 +3442,8 @@ class SourceCatalogTests(unittest.TestCase):
                 "normalized_homepage_url": "https://www.atlasbank.ca",
                 "coverage_source_url": None,
                 "coverage_source_metadata": {},
+                "has_completed_collection": False,
+                "source_coverage_mode": "precision",
                 "selected_source_ids": [],
                 "target_source_ids": [],
                 "included_source_ids": [],
@@ -3426,7 +3482,7 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(params["diff_summary"], "Updated bank profile `BMO`: Homepage URL.")
 
     def test_materialize_sources_for_catalog_item_regenerates_from_bank_homepage(self) -> None:
-        connection = _QueuedConnection([None])
+        connection = _QueuedConnection([[], None])
 
         with (
             patch(
@@ -3513,8 +3569,11 @@ class SourceCatalogTests(unittest.TestCase):
         generate_sources.assert_called_once()
         upsert_rows.assert_called_once()
         self.assertEqual(upsert_rows.call_args.args[1][0]["source_id"], "AUTO-BMO-CHQ-001")
-        self.assertEqual(len(connection.calls), 1)
-        sql, params = connection.calls[0]
+        self.assertEqual(len(connection.calls), 2)
+        seed_sql, seed_params = connection.calls[0]
+        self.assertIn("discovery_role IN ('entry', 'detail')", seed_sql)
+        self.assertEqual(seed_params["country_code"], "CA")
+        sql, params = connection.calls[1]
         self.assertIn("UPDATE source_registry_item", sql)
         self.assertIn("discovery_role <> 'detail'", sql)
         self.assertIn("status <> 'removed'", sql)
@@ -3522,7 +3581,7 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("chequing", params["product_type_scope"])
 
     def test_materialize_sources_persists_homepage_ai_usage_for_run_detail(self) -> None:
-        connection = _QueuedConnection([None, None, None])
+        connection = _QueuedConnection([[], None, None, None])
 
         with (
             patch(
@@ -3600,7 +3659,7 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("openai-homepage-parallel-scoring", usage_call["usage_metadata"])
 
     def test_materialize_sources_dedupes_same_scope_and_prefers_detail(self) -> None:
-        connection = _QueuedConnection([None])
+        connection = _QueuedConnection([[], None])
 
         with (
             patch(
@@ -3688,7 +3747,7 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(upserted_rows[0]["source_id"], "AUTO-BMO-CHQ-detail")
 
     def test_materialize_sources_preserves_existing_detail_scope_when_no_detail_is_discovered(self) -> None:
-        connection = _QueuedConnection([])
+        connection = _QueuedConnection([[]])
 
         with (
             patch(
@@ -3737,7 +3796,8 @@ class SourceCatalogTests(unittest.TestCase):
             country_code="CA",
             product_type="chequing",
         )
-        self.assertEqual(connection.calls, [])
+        self.assertEqual(len(connection.calls), 1)
+        self.assertIn("discovery_role IN ('entry', 'detail')", connection.calls[0][0])
 
     def test_start_source_catalog_collection_queues_background_work_before_detail_outcome_is_known(self) -> None:
         connection = _QueuedConnection(
@@ -4103,6 +4163,111 @@ class SourceCatalogTests(unittest.TestCase):
         detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
         self.assertIn(detail_url, {item["normalized_url"] for item in detail_rows})
         self.assertTrue(any("secondary product-category hub" in note for note in result.discovery_notes))
+
+    def test_precision_discovery_uses_existing_official_detail_to_find_new_sibling_product(self) -> None:
+        homepage_url = "https://www.examplebank.ca/"
+        existing_detail_url = "https://www.examplebank.ca/accounts/everyday-chequing"
+        sibling_detail_url = "https://www.examplebank.ca/accounts/value-chequing"
+        external_detail_url = "https://products.unrelated.example/accounts/foreign-chequing"
+        pages = {
+            homepage_url: "<html><body><p>Welcome</p></body></html>",
+            existing_detail_url: (
+                "<html><head><title>Everyday Chequing Account</title></head><body>"
+                "<h1>Everyday Chequing Account</h1><p>$10 monthly fee and 25 transactions.</p>"
+                '<a href="/accounts/value-chequing">Value Chequing Account</a>'
+                "</body></html>"
+            ),
+            sibling_detail_url: (
+                "<html><head><title>Value Chequing Account</title></head><body>"
+                "<h1>Value Chequing Account</h1><p>$4 monthly fee and 12 transactions.</p>"
+                "</body></html>"
+            ),
+        }
+
+        def fake_fetch(url: str, _policy: object) -> str:
+            return pages[url]
+
+        scores = {
+            existing_detail_url: AiParallelCandidateScore(
+                candidate_url=existing_detail_url,
+                predicted_role="detail",
+                relevance_score=9.0,
+                confidence_band="high",
+                reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+                short_rationale="Existing official individual chequing product.",
+            ),
+            sibling_detail_url: AiParallelCandidateScore(
+                candidate_url=sibling_detail_url,
+                predicted_role="detail",
+                relevance_score=9.0,
+                confidence_band="high",
+                reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+                short_rationale="Newly linked official individual chequing product.",
+            ),
+        }
+        strong_evidence = PageEvidenceAssessment(
+            page_evidence_score=8,
+            page_evidence_reason_codes=["title_semantic_match", "detail_page_layout_signal", "pricing_or_feature_signal"],
+            page_title="Chequing Account",
+            primary_heading="Chequing Account",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+        )
+
+        with (
+            patch("api_service.source_catalog.fetch_text", side_effect=fake_fetch),
+            patch("api_service.source_catalog._load_seed_entry_url", return_value=None),
+            patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
+            patch("api_service.source_catalog._load_seed_supporting_hints", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(scores=scores, notes=["Scored precision registry candidates."]),
+            ),
+            patch("api_service.source_catalog._score_page_evidence", return_value=strong_evidence),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="EXAMPLE",
+                bank_name="Example Bank",
+                country_code="CA",
+                product_type="chequing",
+                product_type_definition=_product_type_definition("chequing"),
+                homepage_url=homepage_url,
+                source_language="en",
+                registry_seed_rows=[
+                    {
+                        "source_id": "EXAMPLE-CHQ-001",
+                        "source_name": "Everyday Chequing Account",
+                        "source_url": existing_detail_url,
+                        "normalized_url": existing_detail_url,
+                        "discovery_role": "detail",
+                        "priority": "P1",
+                        "expected_fields": ["product_name", "monthly_fee"],
+                    },
+                    {
+                        "source_id": "EXTERNAL-CHQ-001",
+                        "source_name": "Foreign Chequing Account",
+                        "source_url": external_detail_url,
+                        "normalized_url": external_detail_url,
+                        "discovery_role": "detail",
+                        "priority": "P1",
+                        "expected_fields": ["product_name"],
+                    },
+                ],
+            )
+
+        detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
+        detail_urls = {item["normalized_url"] for item in detail_rows}
+        self.assertEqual(detail_urls, {existing_detail_url, sibling_detail_url})
+        self.assertEqual(
+            next(item for item in detail_rows if item["normalized_url"] == existing_detail_url)["source_id"],
+            "EXAMPLE-CHQ-001",
+        )
+        self.assertEqual(result.discovery_metrics["registry_seed_count"], 1)
+        self.assertEqual(result.discovery_metrics["registry_seed_rejected_count"], 1)
+        self.assertEqual(result.discovery_metrics["registry_detail_page_fetched_count"], 1)
+        self.assertEqual(result.discovery_metrics["promoted_detail_source_count"], 2)
+        self.assertTrue(any("newly linked sibling products" in note for note in result.discovery_notes))
 
     def test_secondary_catalog_hub_detection_is_plural_and_excludes_operational_pages(self) -> None:
         self.assertTrue(

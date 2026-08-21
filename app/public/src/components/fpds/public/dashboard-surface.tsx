@@ -2,6 +2,7 @@ import { ArrowRight, CreditCard, ExternalLink, FilterX, Landmark, PiggyBank, Ref
 import Link from "next/link";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
+import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { PublicFreshness, formatSnapshotDate } from "@/components/fpds/public/public-freshness";
 import { PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
 import { Button } from "@/components/ui/button";
@@ -87,15 +88,15 @@ export function DashboardSurface({
   const snapshotDate = formatSnapshotDate(summary.freshness.refreshed_at, copy.common.noDate);
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
-      <div className="flex flex-col gap-10 md:gap-14">
+    <main className="mx-auto min-w-0 w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
+      <div className="flex min-w-0 flex-col gap-10 md:gap-14">
         <section className="border-y border-foreground/15 py-10 md:py-14">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.62fr)] lg:items-center">
-            <div className="max-w-3xl">
-              <h1 className="text-balance max-w-4xl font-display text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground">
+          <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.62fr)] lg:items-center">
+            <div className="min-w-0 max-w-3xl">
+              <h1 className="text-balance max-w-4xl font-display text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground [overflow-wrap:anywhere]">
                 {designCopy.homeTitle}
               </h1>
-              <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">{designCopy.homeBody}</p>
+              <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground [overflow-wrap:anywhere] md:text-lg">{designCopy.homeBody}</p>
               <div className="mt-7 flex flex-wrap gap-2.5">
                 <Button asChild size="lg" className="min-h-12 rounded-full px-5">
                   <Link href={productsHref}>
@@ -149,7 +150,7 @@ export function DashboardSurface({
           </section>
         ) : null}
 
-        <section className="grid items-start gap-8 lg:grid-cols-2" aria-label={copy.dashboard.rateSnapshotsLabel}>
+        <section className="grid min-w-0 items-start gap-8 lg:grid-cols-2" aria-label={copy.dashboard.rateSnapshotsLabel}>
           <ProductTopFive
             accent="deposit"
             emptyText={copy.dashboard.depositTopEmpty}
@@ -199,6 +200,8 @@ export function DashboardSurface({
             </Card>
           </section>
         ) : null}
+
+        <PublicInformationNotice locale={filters.locale} />
       </div>
     </main>
   );
@@ -279,7 +282,7 @@ function ProductTopFive({
   const FamilyIcon = accent === "loan" ? Landmark : PiggyBank;
 
   return (
-    <article className={`overflow-hidden border border-t-4 bg-card/70 ${articleClass}`} aria-labelledby={headingId}>
+    <article className={`min-w-0 overflow-hidden border border-t-4 bg-card/70 ${articleClass}`} aria-labelledby={headingId}>
       <div className={`border-b border-border px-4 py-5 md:px-5 md:py-6 ${headerClass}`}>
         <div className="flex items-start gap-3">
           <span className={`grid size-9 shrink-0 place-items-center rounded-full ${iconClass}`} aria-hidden="true">
@@ -298,16 +301,16 @@ function ProductTopFive({
       ) : products.length ? (
         <ol className={`grid divide-y ${rowClass}`}>
           {products.map((product, index) => (
-            <li className="grid grid-cols-[1.25rem_auto_minmax(0,1fr)] items-center gap-x-3 px-4 py-4 sm:grid-cols-[1.25rem_auto_minmax(0,1fr)_auto_auto] md:px-5" key={product.product_id}>
+            <li className="grid min-w-0 grid-cols-[1.25rem_auto_minmax(0,1fr)] items-center gap-x-3 px-4 py-4 sm:grid-cols-[1.25rem_auto_minmax(0,1fr)_auto_auto] md:px-5" key={product.product_id}>
               <span className="text-sm font-semibold text-muted-foreground tabular-nums">{index + 1}</span>
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
               <div className="min-w-0">
-                <Link className="inline-flex min-h-11 items-center break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, product.product_id)}>
+                <Link className="flex min-h-11 min-w-0 items-center text-sm font-semibold text-foreground hover:text-primary [overflow-wrap:anywhere]" href={buildProductDetailHref(filters, product.product_id)}>
                   {product.product_name}
                 </Link>
                 <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
               </div>
-              <div className="col-start-3 mt-2 flex flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
+              <div className="col-start-3 mt-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
                 <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${copy.grid.metricDisplayRate} ${formatMetricValue(product.card_display_rate, "percent", filters.locale)}`}>
                   {formatMetricValue(product.card_display_rate, "percent", filters.locale)}
                 </span>

@@ -1,6 +1,7 @@
 export type PublicScopeFilters = {
   locale: string;
   countryCode: string;
+  searchQuery: string;
   bankCodes: string[];
   productTypes: string[];
   targetCustomerTags: string[];
@@ -14,6 +15,7 @@ export type ProductGridPageFilters = PublicScopeFilters & {
   catalogProductTypes: string[];
   sortBy: string;
   sortOrder: "asc" | "desc";
+  viewMode: "grid" | "list";
   page: number;
 };
 
@@ -28,7 +30,6 @@ export const LOAN_PRODUCT_TYPES = ["mortgage", "personal-loan", "line-of-credit"
 export const CARD_PRODUCT_TYPES = ["credit-card"] as const;
 
 const SORT_OPTIONS = new Set([
-  "default",
   "bank_name",
   "product_name",
   "display_rate",
@@ -39,14 +40,9 @@ const SORT_OPTIONS = new Set([
   "last_changed_at"
 ]);
 
+const VIEW_MODES = new Set(["grid", "list"]);
 const SUPPORTED_LOCALES = new Set(["en", "ko", "ja"]);
 export const DEFAULT_PUBLIC_COUNTRY_CODE = "CA";
-const SUPPORTED_AXIS_PRESETS = new Set([
-  "chequing_fee_vs_minimum_balance",
-  "savings_rate_vs_minimum_balance",
-  "gic_rate_vs_minimum_deposit",
-  "gic_term_vs_rate"
-]);
 
 type PageSearchParams = Record<string, string | string[] | undefined>;
 type SearchParamsReader = {
@@ -58,14 +54,18 @@ type PublicHrefState = PublicScopeFilters &
   Partial<{
     sortBy: string;
     sortOrder: "asc" | "desc";
+    viewMode: "grid" | "list";
     page: number;
     axisPreset: string;
   }>;
 
 export function parseProductGridPageFilters(searchParams: PageSearchParams, catalogProductTypes: readonly string[] = []): ProductGridPageFilters {
   const locale = firstValue(searchParams.locale).toLowerCase();
-  const sortBy = firstValue(searchParams.sort_by).toLowerCase();
+  const requestedSortBy = firstValue(searchParams.sort_by).toLowerCase();
   const sortOrder = firstValue(searchParams.sort_order).toLowerCase();
+  const viewMode = firstValue(searchParams.view).toLowerCase();
+  const defaultSort = getCatalogDefaultSort(catalogProductTypes);
+  const sortBy = SORT_OPTIONS.has(requestedSortBy) ? requestedSortBy : defaultSort.sortBy;
 
   const parsedScope = parsePublicScopeFilters(searchParams);
   const allowedTypes = new Set(catalogProductTypes);
@@ -78,18 +78,29 @@ export function parseProductGridPageFilters(searchParams: PageSearchParams, cata
     productTypes: selectedProductTypes,
     catalogProductTypes: [...catalogProductTypes],
     locale: SUPPORTED_LOCALES.has(locale) ? locale : "en",
-    sortBy: SORT_OPTIONS.has(sortBy) ? sortBy : "default",
-    sortOrder: sortOrder === "asc" ? "asc" : "desc",
-    page: positiveInteger(firstValue(searchParams.page)) ?? 1
+    sortBy,
+    sortOrder: sortOrder === "asc" || sortOrder === "desc"
+      ? sortOrder
+      : getDefaultSortOrder(sortBy, catalogProductTypes),
+    viewMode: VIEW_MODES.has(viewMode) ? viewMode as "grid" | "list" : "grid",
+    page: 1
   };
 }
 
 export function parseDashboardPageFilters(searchParams: PageSearchParams): DashboardPageFilters {
-  const axisPreset = firstValue(searchParams.axis_preset).toLowerCase();
+  const globalScope = parsePublicScopeFilters(searchParams);
 
   return {
-    ...parsePublicScopeFilters(searchParams),
-    axisPreset: SUPPORTED_AXIS_PRESETS.has(axisPreset) ? axisPreset : ""
+    ...globalScope,
+    searchQuery: "",
+    bankCodes: [],
+    productTypes: [],
+    targetCustomerTags: [],
+    feeBucket: "",
+    minimumBalanceBucket: "",
+    minimumDepositBucket: "",
+    termBucket: "",
+    axisPreset: ""
   };
 }
 
@@ -123,6 +134,9 @@ export function buildScopedFilterSearchParams(filters: PublicScopeFilters) {
   const params = new URLSearchParams();
   params.set("locale", filters.locale);
   params.set("country_code", filters.countryCode);
+  if (filters.searchQuery) {
+    params.set("q", filters.searchQuery);
+  }
 
   for (const bankCode of filters.bankCodes) {
     params.append("bank_code", bankCode);
@@ -159,37 +173,43 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
   if (state.countryCode !== DEFAULT_PUBLIC_COUNTRY_CODE) {
     params.set("country_code", state.countryCode);
   }
-  for (const bankCode of state.bankCodes) {
-    params.append("bank_code", bankCode);
-  }
-  for (const productType of state.productTypes) {
-    params.append("product_type", productType);
-  }
-  for (const tag of state.targetCustomerTags) {
-    params.append("target_customer_tag", tag);
-  }
-  if (state.feeBucket) {
-    params.set("fee_bucket", state.feeBucket);
-  }
-  if (state.minimumBalanceBucket) {
-    params.set("minimum_balance_bucket", state.minimumBalanceBucket);
-  }
-  if (state.minimumDepositBucket) {
-    params.set("minimum_deposit_bucket", state.minimumDepositBucket);
-  }
-  if (state.termBucket) {
-    params.set("term_bucket", state.termBucket);
+  if (path !== "/dashboard") {
+    if (state.searchQuery) {
+      params.set("q", state.searchQuery);
+    }
+    for (const bankCode of state.bankCodes) {
+      params.append("bank_code", bankCode);
+    }
+    for (const productType of state.productTypes) {
+      params.append("product_type", productType);
+    }
+    for (const tag of state.targetCustomerTags) {
+      params.append("target_customer_tag", tag);
+    }
+    if (state.feeBucket) {
+      params.set("fee_bucket", state.feeBucket);
+    }
+    if (state.minimumBalanceBucket) {
+      params.set("minimum_balance_bucket", state.minimumBalanceBucket);
+    }
+    if (state.minimumDepositBucket) {
+      params.set("minimum_deposit_bucket", state.minimumDepositBucket);
+    }
+    if (state.termBucket) {
+      params.set("term_bucket", state.termBucket);
+    }
   }
 
-  if (path === "/products" || path === "/cards" || path === "/loans") {
-    if (state.sortBy && state.sortBy !== "default") {
+  const carriesCatalogState = path === "/products" || path === "/cards" || path === "/loans" || path.startsWith("/products/");
+  if (carriesCatalogState) {
+    if (state.sortBy) {
       params.set("sort_by", state.sortBy);
     }
     if (state.sortOrder && state.sortOrder !== "desc") {
       params.set("sort_order", state.sortOrder);
     }
-    if (state.page && state.page > 1) {
-      params.set("page", String(state.page));
+    if (state.viewMode === "list") {
+      params.set("view", "list");
     }
   }
 
@@ -205,6 +225,7 @@ export function buildScopedPublicHrefFromSearchParams(path: PublicRoutePath, sea
   return buildPublicHref(path, {
     locale: normalizeLocaleValue(searchParams.get("locale") ?? ""),
     countryCode: normalizeCountryCodeValue(searchParams.get("country_code") ?? ""),
+    searchQuery: normalizeSearchQueryValue(searchParams.get("q") ?? ""),
     bankCodes: normalizeMultiValues(searchParams.getAll("bank_code"), true),
     productTypes: normalizeMultiValues(searchParams.getAll("product_type")),
     targetCustomerTags: normalizeMultiValues(searchParams.getAll("target_customer_tag")),
@@ -235,6 +256,7 @@ function parsePublicScopeFilters(searchParams: PageSearchParams): PublicScopeFil
   return {
     locale: normalizeLocaleValue(firstValue(searchParams.locale)),
     countryCode: normalizeCountryCodeValue(firstValue(searchParams.country_code)),
+    searchQuery: normalizeSearchQueryValue(firstValue(searchParams.q)),
     bankCodes: normalizeMultiValues(multiValue(searchParams.bank_code), true),
     productTypes: normalizeMultiValues(multiValue(searchParams.product_type)),
     targetCustomerTags: normalizeMultiValues(multiValue(searchParams.target_customer_tag)),
@@ -253,6 +275,10 @@ function normalizeLocaleValue(value: string) {
 export function normalizeCountryCodeValue(value: string) {
   const countryCode = value.trim().toUpperCase();
   return /^[A-Z]{2}$/.test(countryCode) ? countryCode : DEFAULT_PUBLIC_COUNTRY_CODE;
+}
+
+function normalizeSearchQueryValue(value: string) {
+  return value.trim().replace(/\s+/g, " ").slice(0, 120);
 }
 
 function normalizeScalarValue(value: string) {
@@ -294,4 +320,21 @@ function positiveInteger(value: string) {
   }
 
   return parsed;
+}
+
+function getCatalogDefaultSort(catalogProductTypes: readonly string[]) {
+  if (catalogProductTypes.includes("credit-card")) {
+    return { sortBy: "annual_fee", sortOrder: "asc" as const };
+  }
+  if (catalogProductTypes.some((productType) => LOAN_PRODUCT_TYPES.includes(productType as typeof LOAN_PRODUCT_TYPES[number]))) {
+    return { sortBy: "display_rate", sortOrder: "asc" as const };
+  }
+  return { sortBy: "display_rate", sortOrder: "desc" as const };
+}
+
+function getDefaultSortOrder(sortBy: string, catalogProductTypes: readonly string[]): "asc" | "desc" {
+  if (sortBy === "display_rate") {
+    return getCatalogDefaultSort(catalogProductTypes).sortOrder;
+  }
+  return sortBy === "last_changed_at" ? "desc" : "asc";
 }

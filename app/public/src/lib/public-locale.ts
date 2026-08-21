@@ -105,7 +105,9 @@ type PublicMessages = {
     metricRateNote: string;
     ascending: string;
     descending: string;
-    sortDefault: string;
+    viewMode: string;
+    gridView: string;
+    listView: string;
     sortDisplayRate: string;
     sortAnnualFee: string;
     sortMonthlyFee: string;
@@ -228,8 +230,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   en: {
     localeName: "English",
     shell: {
-      brand: "Bankoom",
-      tagline: ""
+      brand: "Bankoompare",
+      tagline: "Look into bank products. Compare the facts."
     },
     nav: {
       dashboard: "Home",
@@ -263,9 +265,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     grid: {
       pageTitle: "Deposits",
-      pageDescription: "Compare chequing, savings, and GIC products in the selected country.",
-      title: "Compare deposits",
-      description: "Chequing, savings, and GIC products from the latest public snapshot.",
+      pageDescription: "Look into chequing, savings, and GIC products across banks.",
+      title: "Compare deposit products across banks",
+      description: "Look into rates, fees, and entry requirements from the latest public snapshot.",
       currentScope: "Current scope",
       productCount: "{count} products",
       snapshotUpdated: "Snapshot {date}",
@@ -298,7 +300,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       metricRateNote: "Rate note",
       ascending: "Ascending",
       descending: "Descending",
-      sortDefault: "Default",
+      viewMode: "View",
+      gridView: "Grid view",
+      listView: "List view",
       sortDisplayRate: "Interest rate",
       sortAnnualFee: "Annual fee",
       sortMonthlyFee: "Monthly fee",
@@ -323,8 +327,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "Home",
-      pageDescription: "Compare reviewed deposit, credit card, and loan facts.",
-      title: "Bank products, side by side",
+      pageDescription: "Look into reviewed deposit, credit card, and loan facts across banks.",
+      title: "Look into bank products. Compare what matters.",
       description: "",
       marketGreeting: "Compare {products} deposit products from {banks} banks in the latest public snapshot.",
       kpiSubtitle: "Deposit market snapshot",
@@ -392,7 +396,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "Clear",
       remove: "Remove",
       emptyTitle: "No products selected yet.",
-      emptyBody: "Use Compare on any product card to compare published facts. Bankoom does not score eligibility or submit applications.",
+      emptyBody: "Use Compare on any product card to compare published facts. Bankoompare does not score eligibility or submit applications.",
       tableProduct: "Product",
       tableWhy: "Why compare",
       entryAmount: "Entry amount",
@@ -425,7 +429,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "Evidence boundary",
-          body: "Raw evidence, source excerpts, and internal review traces are not exposed on Bankoom."
+          body: "Raw evidence, source excerpts, and internal review traces are not exposed on Bankoompare."
         },
         {
           title: "Comparison and rankings",
@@ -441,8 +445,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ko: {
     localeName: "한국어",
     shell: {
-      brand: "Bankoom",
-      tagline: ""
+      brand: "Bankoompare",
+      tagline: "은행 상품을 들여다보고, 사실을 비교하세요."
     },
     nav: {
       dashboard: "홈",
@@ -476,9 +480,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     grid: {
       pageTitle: "예금",
-      pageDescription: "선택한 국가의 입출금, 저축, GIC 상품을 비교합니다.",
-      title: "예금 비교",
-      description: "최신 공개 스냅샷의 입출금, 저축, GIC 상품입니다.",
+      pageDescription: "은행별 입출금, 저축, GIC 상품을 살펴보고 비교합니다.",
+      title: "은행별 예금 상품 비교",
+      description: "최신 공개 스냅샷에서 금리·수수료·가입 조건을 살펴보세요.",
       currentScope: "현재 범위",
       productCount: "{count}개 상품",
       snapshotUpdated: "스냅샷 {date}",
@@ -504,15 +508,17 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       metricMonthlyFee: "월 수수료",
       metricMinBalance: "최소 잔액",
       metricMinDeposit: "최소 예치금",
-      metricDisplayRate: "표시 금리",
+      metricDisplayRate: "금리",
       metricTerm: "기간",
       metricKeyDetail: "핵심 정보",
       metricLastChange: "최근 변경",
       metricRateNote: "금리 메모",
       ascending: "오름차순",
       descending: "내림차순",
-      sortDefault: "기본",
-      sortDisplayRate: "표시 금리",
+      viewMode: "보기 방식",
+      gridView: "그리드 보기",
+      listView: "리스트 보기",
+      sortDisplayRate: "금리",
       sortAnnualFee: "연회비",
       sortMonthlyFee: "월 수수료",
       sortMinimumBalance: "최소 잔액",
@@ -536,8 +542,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "홈",
-      pageDescription: "검토된 예금, 신용카드, 대출 상품 정보를 비교합니다.",
-      title: "은행 상품을, 한눈에 비교하세요",
+      pageDescription: "여러 은행의 검토된 예금·신용카드·대출 정보를 살펴보고 비교합니다.",
+      title: "은행 상품을 들여다보고, 중요한 차이를 비교하세요.",
       description: "",
       marketGreeting: "최신 공개 스냅샷에서 {banks}개 은행의 예금 상품 {products}개를 비교하세요.",
       kpiSubtitle: "예금 시장 스냅샷",
@@ -605,7 +611,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "비우기",
       remove: "제거",
       emptyTitle: "아직 선택한 상품이 없습니다.",
-      emptyBody: "상품 카드의 비교 버튼으로 공개된 정보를 나란히 보세요. Bankoom은 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
+      emptyBody: "상품 카드의 비교 버튼으로 공개된 정보를 나란히 보세요. Bankoompare는 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
       tableProduct: "상품",
       tableWhy: "비교 이유",
       entryAmount: "가입 금액",
@@ -638,7 +644,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "증거 경계",
-          body: "원문 증거, 출처 발췌, 내부 검토 이력은 Bankoom에 공개하지 않습니다."
+          body: "원문 증거, 출처 발췌, 내부 검토 이력은 Bankoompare에 공개하지 않습니다."
         },
         {
           title: "비교와 순위",
@@ -654,8 +660,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ja: {
     localeName: "日本語",
     shell: {
-      brand: "Bankoom",
-      tagline: ""
+      brand: "Bankoompare",
+      tagline: "銀行商品を見比べて、事実を比較。"
     },
     nav: {
       dashboard: "ホーム",
@@ -689,9 +695,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     grid: {
       pageTitle: "預金",
-      pageDescription: "選択した国の当座、普通預金、GIC 商品を比較します。",
-      title: "預金を比較",
-      description: "最新の公開スナップショットにある当座、普通預金、GIC 商品です。",
+      pageDescription: "銀行ごとの当座、普通預金、GIC 商品を見比べます。",
+      title: "銀行ごとに預金商品を比較",
+      description: "最新の公開スナップショットで金利・手数料・利用条件を確認できます。",
       currentScope: "現在の範囲",
       productCount: "{count} 件の商品",
       snapshotUpdated: "スナップショット {date}",
@@ -717,15 +723,17 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       metricMonthlyFee: "月額手数料",
       metricMinBalance: "最低残高",
       metricMinDeposit: "最低預入額",
-      metricDisplayRate: "表示金利",
+      metricDisplayRate: "金利",
       metricTerm: "期間",
       metricKeyDetail: "要点",
       metricLastChange: "最近の変更",
       metricRateNote: "金利メモ",
       ascending: "昇順",
       descending: "降順",
-      sortDefault: "標準",
-      sortDisplayRate: "表示金利",
+      viewMode: "表示方法",
+      gridView: "グリッド表示",
+      listView: "リスト表示",
+      sortDisplayRate: "金利",
       sortAnnualFee: "年会費",
       sortMonthlyFee: "月額手数料",
       sortMinimumBalance: "最低残高",
@@ -749,8 +757,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "ホーム",
-      pageDescription: "レビュー済みの預金、クレジットカード、ローン情報を比較します。",
-      title: "銀行商品を、ひと目で",
+      pageDescription: "複数の銀行の確認済み預金・クレジットカード・ローン情報を見比べます。",
+      title: "銀行商品を見比べて、大切な違いを確かめる。",
       description: "",
       marketGreeting: "最新の公開スナップショットで {banks} 行の預金商品 {products} 件を比較できます。",
       kpiSubtitle: "預金市場スナップショット",
@@ -818,7 +826,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "クリア",
       remove: "削除",
       emptyTitle: "まだ商品が選択されていません。",
-      emptyBody: "商品カードの比較ボタンで公開情報を並べて確認できます。Bankoom は加入可能性の採点や申込代行を行いません。",
+      emptyBody: "商品カードの比較ボタンで公開情報を並べて確認できます。Bankoompare は加入可能性の採点や申込代行を行いません。",
       tableProduct: "商品",
       tableWhy: "比較理由",
       entryAmount: "加入金額",
@@ -851,7 +859,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "証拠の境界",
-          body: "原文証拠、ソース抜粋、内部レビュー履歴は Bankoom では公開しません。"
+          body: "原文証拠、ソース抜粋、内部レビュー履歴は Bankoompare では公開しません。"
         },
         {
           title: "比較とランキング",
@@ -870,7 +878,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   en: {
     asOf: "As of",
     availableFacts: "Available product facts",
-    compareBoundary: "Bankoom compares published facts. It does not choose a product for you.",
+    compareBoundary: "Bankoompare compares published facts. It does not choose a product for you.",
     compareDifferences: "Differences are emphasized only where a public field is available.",
     coverage: "Current coverage",
     cardCoverage: "Credit cards",
@@ -878,11 +886,11 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "Raw evidence and internal review traces stay private.",
     fresh: "Current snapshot",
     freshness: "Snapshot freshness",
-    homeBody: "Compare reviewed rates, fees, and key terms—then confirm current details with the bank.",
+    homeBody: "Compare reviewed rates, fees, and key terms across banks—then confirm the latest details with the bank.",
     homeKicker: "Reviewed public product data",
-    homeTitle: "Bank products, side by side.",
+    homeTitle: "Look into bank products. Compare what matters.",
     loanCoverage: "Mortgage, personal loan and line of credit",
-    methodologyIntro: "How official product facts become comparable public records—and where Bankoom stops.",
+    methodologyIntro: "How official product facts become comparable public records—and where Bankoompare stops.",
     methodologySteps: [
       { label: "01", title: "Official source", body: "Product facts begin with public institution sources." },
       { label: "02", title: "Reviewed record", body: "Only approved public fields enter the comparable product record." },
@@ -906,7 +914,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   ko: {
     asOf: "기준일",
     availableFacts: "확인 가능한 상품 정보",
-    compareBoundary: "Bankoom은 공개된 사실을 비교하며, 사용자 대신 상품을 선택하지 않습니다.",
+    compareBoundary: "Bankoompare는 공개된 사실을 비교하며, 사용자 대신 상품을 선택하지 않습니다.",
     compareDifferences: "공개 필드가 있는 항목만 차이를 강조합니다.",
     coverage: "현재 제공 범위",
     cardCoverage: "신용카드",
@@ -914,11 +922,11 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "원문 증거와 내부 검토 이력은 공개하지 않습니다.",
     fresh: "최신 스냅샷",
     freshness: "스냅샷 최신성",
-    homeBody: "검토된 금리·수수료·핵심 조건을 비교하고, 최신 정보는 은행에서 확인하세요.",
+    homeBody: "여러 은행의 검토된 금리·수수료·핵심 조건을 한곳에서 비교하고, 최신 정보는 은행에서 확인하세요.",
     homeKicker: "검토된 공개 상품 데이터",
-    homeTitle: "은행 상품을, 한눈에 비교하세요.",
+    homeTitle: "은행 상품을 들여다보고, 중요한 차이를 비교하세요.",
     loanCoverage: "모기지·개인대출·신용한도",
-    methodologyIntro: "공식 상품 정보가 비교 가능한 공개 기록이 되는 과정과 Bankoom의 정보 제공 경계입니다.",
+    methodologyIntro: "공식 상품 정보가 비교 가능한 공개 기록이 되는 과정과 Bankoompare의 정보 제공 경계입니다.",
     methodologySteps: [
       { label: "01", title: "공식 출처", body: "금융기관이 공개한 상품 정보에서 기록이 시작됩니다." },
       { label: "02", title: "검토된 기록", body: "승인된 공개 필드만 비교 가능한 상품 기록에 포함됩니다." },
@@ -942,7 +950,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   ja: {
     asOf: "基準日",
     availableFacts: "確認できる商品情報",
-    compareBoundary: "Bankoom は公開された事実を比較し、利用者の代わりに商品を選びません。",
+    compareBoundary: "Bankoompare は公開された事実を比較し、利用者の代わりに商品を選びません。",
     compareDifferences: "公開項目がある場合だけ差を強調します。",
     coverage: "現在の掲載範囲",
     cardCoverage: "クレジットカード",
@@ -950,11 +958,11 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "原文証拠と内部レビュー履歴は公開しません。",
     fresh: "最新スナップショット",
     freshness: "スナップショットの鮮度",
-    homeBody: "確認済みの金利・手数料・主な条件を比べ、最新情報は銀行で確認してください。",
+    homeBody: "複数の銀行の確認済み金利・手数料・主な条件をひとつの場所で比べ、最新情報は銀行で確認してください。",
     homeKicker: "レビュー済み公開商品データ",
-    homeTitle: "銀行商品を、ひと目で。",
+    homeTitle: "銀行商品を見比べて、大切な違いを確かめる。",
     loanCoverage: "住宅ローン・個人ローン・与信枠",
-    methodologyIntro: "公式商品情報が比較可能な公開レコードになる流れと、Bankoom の情報提供範囲です。",
+    methodologyIntro: "公式商品情報が比較可能な公開レコードになる流れと、Bankoompare の情報提供範囲です。",
     methodologySteps: [
       { label: "01", title: "公式ソース", body: "金融機関が公開した商品情報からレコードが始まります。" },
       { label: "02", title: "レビュー済みレコード", body: "承認された公開項目だけが比較可能な商品レコードに入ります。" },
@@ -1001,52 +1009,52 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
     if (normalizePublicLocale(locale) === "ko") {
       return {
         pageTitle: "신용카드",
-        pageDescription: "선택한 국가의 검증된 신용카드 상품을 비교합니다.",
-        title: "신용카드 비교",
-        description: "최신 공개 스냅샷의 연회비와 구매 금리를 비교합니다.",
+        pageDescription: "은행별 검증된 신용카드 상품을 살펴보고 비교합니다.",
+        title: "은행별 신용카드 비교",
+        description: "최신 공개 스냅샷에서 연회비와 구매 금리를 살펴보세요.",
         coverage: designCopy.cardCoverage,
       };
     }
     if (normalizePublicLocale(locale) === "ja") {
       return {
         pageTitle: "クレジットカード",
-        pageDescription: "選択した国の検証済みクレジットカード商品を比較します。",
-        title: "クレジットカードを比較",
-        description: "最新の公開スナップショットで年会費とショッピング金利を比較します。",
+        pageDescription: "銀行ごとの確認済みクレジットカード商品を見比べます。",
+        title: "銀行ごとにクレジットカードを比較",
+        description: "最新の公開スナップショットで年会費とショッピング金利を確認できます。",
         coverage: designCopy.cardCoverage,
       };
     }
     return {
       pageTitle: "Credit Cards",
-      pageDescription: "Compare verified credit card products in the selected country.",
-      title: "Compare credit cards",
-      description: "Annual fees and purchase interest rates from the latest public snapshot.",
+      pageDescription: "Look into verified credit card products across banks.",
+      title: "Compare credit cards across banks",
+      description: "Look into annual fees and purchase interest rates from the latest public snapshot.",
       coverage: designCopy.cardCoverage,
     };
   }
   if (normalizePublicLocale(locale) === "ko") {
     return {
       pageTitle: "대출",
-      pageDescription: "선택한 국가의 대출 상품 카탈로그입니다.",
-      title: "대출 상품",
-      description: "최신 공개 스냅샷에서 활성 모기지, 개인 대출, 신용한도 대출 상품을 조회합니다.",
+      pageDescription: "은행별 모기지·개인대출·신용한도 상품을 살펴보고 비교합니다.",
+      title: "은행별 대출 상품 비교",
+      description: "최신 공개 스냅샷에서 금리와 주요 대출 조건을 살펴보세요.",
       coverage: designCopy.loanCoverage,
     };
   }
   if (normalizePublicLocale(locale) === "ja") {
     return {
       pageTitle: "ローン",
-      pageDescription: "選択した国のローン商品のカタログです。",
-      title: "ローン商品",
-      description: "最新の公開スナップショットから、有効な住宅ローン、個人ローン、ライン・オブ・クレジット商品を絞り込みます。",
+      pageDescription: "銀行ごとの住宅ローン・個人ローン・与信枠商品を見比べます。",
+      title: "銀行ごとにローン商品を比較",
+      description: "最新の公開スナップショットで金利と主なローン条件を確認できます。",
       coverage: designCopy.loanCoverage,
     };
   }
   return {
     pageTitle: "Loans",
-    pageDescription: "Compare mortgage, personal loan, and line of credit products in the selected country.",
-    title: "Compare loans",
-    description: "Mortgage, personal loan, and line of credit products from the latest public snapshot.",
+    pageDescription: "Look into mortgage, personal loan, and line of credit products across banks.",
+    title: "Compare loans across banks",
+    description: "Look into interest rates and key loan terms from the latest public snapshot.",
     coverage: designCopy.loanCoverage,
   };
 }
@@ -1054,6 +1062,91 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
 export function normalizePublicLocale(locale: string): PublicLocale {
   return locale === "ko" || locale === "ja" ? locale : "en";
 }
+
+type PublicDiscoveryCopy = {
+  allProductsLoaded: string;
+  loadMoreError: string;
+  loadingMore: string;
+  retryLoadMore: string;
+  searchChip: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  updatingResults: string;
+};
+
+type PublicInformationNoticeCopy = {
+  paragraphs: string[];
+  title: string;
+};
+
+const PUBLIC_DISCOVERY_COPY: Record<PublicLocale, PublicDiscoveryCopy> = {
+  en: {
+    allProductsLoaded: "All {count} products are loaded.",
+    loadMoreError: "More products could not be loaded.",
+    loadingMore: "Loading more products…",
+    retryLoadMore: "Try again",
+    searchChip: "Search: {query}",
+    searchLabel: "Search bank or product",
+    searchPlaceholder: "Bank or product name",
+    updatingResults: "Updating results…"
+  },
+  ko: {
+    allProductsLoaded: "상품 {count}개를 모두 불러왔습니다.",
+    loadMoreError: "추가 상품을 불러오지 못했습니다.",
+    loadingMore: "상품을 더 불러오는 중…",
+    retryLoadMore: "다시 시도",
+    searchChip: "검색: {query}",
+    searchLabel: "은행 또는 상품 검색",
+    searchPlaceholder: "은행명 또는 상품명",
+    updatingResults: "검색 결과를 반영하는 중…"
+  },
+  ja: {
+    allProductsLoaded: "全{count}商品を読み込みました。",
+    loadMoreError: "追加の商品を読み込めませんでした。",
+    loadingMore: "商品をさらに読み込み中…",
+    retryLoadMore: "再試行",
+    searchChip: "検索: {query}",
+    searchLabel: "銀行または商品を検索",
+    searchPlaceholder: "銀行名または商品名",
+    updatingResults: "検索結果を更新中…"
+  }
+};
+
+const PUBLIC_INFORMATION_NOTICE_COPY: Record<PublicLocale, PublicInformationNoticeCopy> = {
+  en: {
+    title: "Information notice",
+    paragraphs: [
+      "The information on this page is collected and organized from public sources with the help of AI agents. It is not a financial product advertisement.",
+      "Bankoompare independently created this content for information purposes without compensation from the financial institutions shown, and works to keep it current.",
+      "Rates, fees, eligibility, and other terms may change by the time you apply. Before applying, confirm the product information and conditions on the financial institution’s official website."
+    ]
+  },
+  ko: {
+    title: "정보 이용 안내",
+    paragraphs: [
+      "본 페이지의 정보는 AI 에이전트를 활용해 공개 자료를 수집·정리한 것으로, 금융상품 광고가 아닙니다.",
+      "표시된 금융회사와의 대가 관계 없이 정보 제공을 목적으로 자체 제작했으며, 최신 정보 반영을 위해 노력하고 있습니다.",
+      "금리·수수료·가입 조건 등은 신청 시점에 달라질 수 있습니다. 신청 전 해당 금융회사의 공식 홈페이지에서 상품 정보와 이용 조건을 반드시 다시 확인해 주세요."
+    ]
+  },
+  ja: {
+    title: "情報利用に関するご案内",
+    paragraphs: [
+      "本ページの情報は、AI エージェントを活用して公開資料を収集・整理したもので、金融商品の広告ではありません。",
+      "掲載する金融機関から対価を受けず、情報提供を目的として独自に作成しており、最新情報の反映に努めています。",
+      "金利・手数料・申込条件などは申込時点で変わる場合があります。申込前に、金融機関の公式サイトで商品情報と利用条件を必ず再確認してください。"
+    ]
+  }
+};
+
+export function getPublicDiscoveryCopy(locale: string): PublicDiscoveryCopy {
+  return PUBLIC_DISCOVERY_COPY[normalizePublicLocale(locale)];
+}
+
+export function getPublicInformationNotice(locale: string): PublicInformationNoticeCopy {
+  return PUBLIC_INFORMATION_NOTICE_COPY[normalizePublicLocale(locale)];
+}
+
 
 export function getIntlLocale(locale: string) {
   switch (normalizePublicLocale(locale)) {

@@ -86,6 +86,7 @@ class SourceCatalogWriteRequest(BaseModel):
 
 class SourceCatalogCollectionRequest(BaseModel):
     catalog_item_ids: list[str] = Field(default_factory=list, min_length=1)
+    precision_rediscovery: bool = False
 
 
 class ProductTypeWriteRequest(BaseModel):

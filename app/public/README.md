@@ -3,7 +3,7 @@
 This package is the anonymous FPDS market view and product catalog. It presents
 only review-approved public projections; raw evidence, review state, and private
 source traces remain inside FPDS Admin. Its customer-facing identity is
-`Bankoom`; `FPDS` remains the internal platform/runtime name.
+`Bankoompare`; `FPDS` remains the internal platform/runtime name.
 
 ## Runtime Routes
 
@@ -17,6 +17,9 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
   recommendation. The two groups use distinct Deposit/Loan family rails,
   labels, and icons; catalog navigation is a text-style more link below each
   list rather than a competing header button.
+  Home always reads the full selected-country snapshot: bank, Product Type,
+  customer-tag, amount, fee, term, sort, page, and catalog-view query state
+  from a Deposit, Credit Card, or Loan screen does not narrow Home.
 - `/products` is the Deposit catalog for review-approved `chequing`, `savings`,
   and `gic` products.
 - `/cards` is the Credit Card catalog for review-approved `credit-card`
@@ -32,9 +35,10 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 
 The Public visual system uses a warm flat canvas, deep ink typography,
 evergreen verification states, maple selection emphasis, and ochre Loan cues.
-The code-native Bankoom mark uses the paired `oo` as two centered eyes. The
-larger shell mark and wordmark remain a single compact brand unit, and the same
-centered-eye geometry is shared by the app icon. Generic dashboard-card
+The code-native Bankoompare mark uses the paired `oo` as two centered eyes
+with a small visible gap. The larger shell mark and wordmark remain a single
+compact brand unit, and the same centered-eye geometry is shared by the app
+icon. Generic dashboard-card
 repetition, decorative gradients, synthetic scores, and recommendation
 language are avoided.
 
@@ -58,8 +62,28 @@ reference-rate components and qualification percentages are excluded. The
 complete assumption-bearing rate/APR summary remains visible in comparison and
 product detail. Savings, Personal Loan, and Line of Credit likewise use their
 market profile. Incomplete governed products are excluded during aggregate
-refresh. Filters are progressively
-disclosed and sort controls stay close to the results.
+refresh. Filters are progressively disclosed and sort controls stay close to
+the results. Deposit opens at Interest rate descending, Credit Card at Annual
+fee ascending, and Loan at Interest rate ascending; there is no separate
+Default sort choice.
+Every catalog Search conditions panel includes one localized bank-or-product
+search field. Its bounded q value matches institution or product names
+case-insensitively as a literal substring. Typing is debounced briefly;
+search, checkbox, and select changes update the shareable URL and filtered
+results without an Apply action.
+
+Catalogs server-render the first 20 products. An intersection sentinel requests
+only the next API page through /api/public/products, appends unseen product
+IDs, and continues when the end of the expanded list is reached. The loader,
+completion state, error message, and retry action are localized and announced
+accessibly. Previous/Next controls and page URL state are not part of the
+catalog experience.
+
+The sort rail ends with accessible Grid and List controls. Grid retains the
+type-aware comparison cards. List presents one compact product row and
+emphasizes the value for the active sort while retaining product detail,
+Compare, and available official-bank actions. The view mode is catalog-local
+URL state and remains in place while filters, sort, or additional pages load.
 
 Home ranking rows reuse the same text-style official-bank action as catalog
 cards, including the external-link icon and safe new-tab attributes. They do
@@ -78,6 +102,14 @@ amount or limit, and security when those fields are approved by the resolved
 market profile. For country-specific overrides, optional Admin candidate copy
 outside that profile is not projected to Public. Masked/template rates and
 unrelated percentages never qualify as displayable rate facts.
+
+Home and every product detail show the same localized information notice:
+Public facts are collected and organized from public materials with AI-agent
+assistance, are not financial-product advertising, and are independently
+provided without compensation from the displayed institutions. The notice
+also states that Bankoompare works to keep information current and that users
+must reconfirm current product information and conditions on the institution's
+official website before applying.
 
 The header uses a compact country selector backed by countries represented in
 their latest completed active public snapshots. Country changes reset
@@ -123,7 +155,7 @@ refresh cadence while preserving snapshot freshness metadata in the UI.
 Verified bank logo assets live under `public/bank-logos/` or use approved
 official URLs in the `BankLogo` mapping. A failed image falls back to an
 unframed, accessible bank-code mark while retaining the institution name for
-assistive technology. The Bankoom shell mark is implemented in
+assistive technology. The Bankoompare shell mark is implemented in
 `public-mark.tsx`; `src/app/icon.svg` is the matching favicon/app icon.
 
 ## Verification

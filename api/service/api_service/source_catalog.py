@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 import hashlib
 import html as html_lib
@@ -426,6 +426,8 @@ _DISCOVERY_DETAIL_COMPANION_MAX = 48
 _DISCOVERY_DETAIL_COMPANION_PER_DETAIL_MAX = 2
 _DISCOVERY_HUB_PAGE_MAX = 5
 _DISCOVERY_SECONDARY_HUB_PAGE_MAX = 8
+_DISCOVERY_REGISTRY_SEED_MAX = 48
+_DISCOVERY_REGISTRY_DETAIL_PAGE_MAX = 12
 _AI_DISCOVERY_MAX_CANDIDATES = 48
 _PAGE_EVIDENCE_MAX_CANDIDATES = 32
 _AUTHORITATIVE_CATALOG_DETAIL_BONUS = 6
@@ -483,6 +485,7 @@ class HomepageSourceGenerationResult:
     model_execution_records: tuple[dict[str, Any], ...] = ()
     usage_records: tuple[dict[str, Any], ...] = ()
     rejected_detail_urls: tuple[str, ...] = ()
+    discovery_metrics: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -492,6 +495,7 @@ class CatalogItemMaterializationResult:
     detail_source_ids: list[str]
     model_execution_records: tuple[dict[str, Any], ...] = ()
     usage_records: tuple[dict[str, Any], ...] = ()
+    discovery_metrics: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -666,16 +670,27 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             sci.coverage_source_url,
             sci.normalized_coverage_source_url,
             sci.coverage_source_metadata,
-            COUNT(DISTINCT sri.source_id) AS generated_source_count
+            COUNT(DISTINCT sri.source_id) AS generated_source_count,
+            EXISTS (
+                SELECT 1
+                FROM ingestion_run AS completed_run
+                WHERE completed_run.run_state = 'completed'
+                  AND completed_run.source_scope_count > 0
+                  AND completed_run.country_code = sci.country_code
+                  AND COALESCE(completed_run.run_metadata ->> 'bank_code', '') = sci.bank_code
+                  AND COALESCE(completed_run.run_metadata ->> 'product_type', '') = sci.product_type
+            ) AS has_completed_collection
         FROM source_registry_catalog_item AS sci
         LEFT JOIN source_registry_item AS sri
             ON sri.bank_code = sci.bank_code
+           AND sri.country_code = sci.country_code
            AND sri.product_type = sci.product_type
         WHERE sci.bank_code = ANY(%(bank_codes)s)
           AND sci.country_code = %(country_code)s
         GROUP BY
             sci.catalog_item_id,
             sci.bank_code,
+            sci.country_code,
             sci.product_type,
             sci.status,
             sci.coverage_source_url,
@@ -695,6 +710,7 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
                 "coverage_source_url": item.get("coverage_source_url"),
                 "coverage_source_metadata": _mapping(item.get("coverage_source_metadata")),
                 "generated_source_count": int(item["generated_source_count"] or 0),
+                "has_completed_collection": bool(item.get("has_completed_collection", False)),
             }
         )
 
@@ -1179,7 +1195,16 @@ def load_source_catalog_list(connection: Connection, *, filters: SourceCatalogFi
             b.logo_url,
             b.logo_alt_text,
             b.source_language,
-            COUNT(DISTINCT sri.source_id) AS generated_source_count
+            COUNT(DISTINCT sri.source_id) AS generated_source_count,
+            EXISTS (
+                SELECT 1
+                FROM ingestion_run AS completed_run
+                WHERE completed_run.run_state = 'completed'
+                  AND completed_run.source_scope_count > 0
+                  AND completed_run.country_code = sci.country_code
+                  AND COALESCE(completed_run.run_metadata ->> 'bank_code', '') = sci.bank_code
+                  AND COALESCE(completed_run.run_metadata ->> 'product_type', '') = sci.product_type
+            ) AS has_completed_collection
         FROM source_registry_catalog_item AS sci
         JOIN bank AS b
             ON b.bank_code = sci.bank_code
@@ -1270,7 +1295,16 @@ def load_source_catalog_detail(connection: Connection, *, catalog_item_id: str) 
             b.logo_url,
             b.logo_alt_text,
             b.source_language,
-            COUNT(DISTINCT sri.source_id) AS generated_source_count
+            COUNT(DISTINCT sri.source_id) AS generated_source_count,
+            EXISTS (
+                SELECT 1
+                FROM ingestion_run AS completed_run
+                WHERE completed_run.run_state = 'completed'
+                  AND completed_run.source_scope_count > 0
+                  AND completed_run.country_code = sci.country_code
+                  AND COALESCE(completed_run.run_metadata ->> 'bank_code', '') = sci.bank_code
+                  AND COALESCE(completed_run.run_metadata ->> 'product_type', '') = sci.product_type
+            ) AS has_completed_collection
         FROM source_registry_catalog_item AS sci
         JOIN bank AS b
             ON b.bank_code = sci.bank_code
@@ -1586,6 +1620,7 @@ def start_source_catalog_collection(
     actor: dict[str, Any],
     request_context: dict[str, Any],
     retry_of_run_id: str | None = None,
+    precision_rediscovery: bool = False,
 ) -> dict[str, Any]:
     if not catalog_item_ids:
         raise SourceRegistryError(status_code=400, code="source_catalog_selection_required", message="Select at least one source catalog item.")
@@ -1605,7 +1640,16 @@ def start_source_catalog_collection(
             b.bank_name,
             b.homepage_url,
             b.normalized_homepage_url,
-            b.source_language
+            b.source_language,
+            EXISTS (
+                SELECT 1
+                FROM ingestion_run AS completed_run
+                WHERE completed_run.run_state = 'completed'
+                  AND completed_run.source_scope_count > 0
+                  AND completed_run.country_code = sci.country_code
+                  AND COALESCE(completed_run.run_metadata ->> 'bank_code', '') = sci.bank_code
+                  AND COALESCE(completed_run.run_metadata ->> 'product_type', '') = sci.product_type
+            ) AS has_completed_collection
         FROM source_registry_catalog_item AS sci
         JOIN bank AS b
             ON b.bank_code = sci.bank_code
@@ -1629,6 +1673,7 @@ def start_source_catalog_collection(
         request_context=request_context,
         collection_id=collection_id,
         correlation_id=correlation_id,
+        precision_rediscovery=precision_rediscovery,
     )
     run_trigger_type = (
         "scheduled_source_collection"
@@ -1662,6 +1707,11 @@ def start_source_catalog_collection(
             "catalog_item_ids": list(catalog_item_ids),
             "run_ids": [str(group["run_id"]) for group in plan["groups"]],
             "retry_of_run_id": retry_of_run_id,
+            "precision_rediscovery_requested": precision_rediscovery,
+            "source_coverage_modes": {
+                str(group["catalog_item_id"]): str(group["source_coverage_mode"])
+                for group in plan["groups"]
+            },
         },
     )
     _launch_source_catalog_collection_runner(plan)
@@ -1675,6 +1725,7 @@ def _build_source_catalog_collection_plan(
     request_context: dict[str, Any],
     collection_id: str,
     correlation_id: str,
+    precision_rediscovery: bool = False,
 ) -> dict[str, Any]:
     triggered_by = str(actor.get("email") or actor.get("display_name") or actor.get("user_id") or "admin")
     actor_payload = {
@@ -1688,6 +1739,12 @@ def _build_source_catalog_collection_plan(
     for row in rows:
         original_product_type = str(row["product_type"])
         product_type = _canonical_product_type_code(original_product_type)
+        has_completed_collection = bool(row.get("has_completed_collection", False))
+        source_coverage_mode = (
+            "precision"
+            if precision_rediscovery or not has_completed_collection
+            else "standard"
+        )
         groups.append(
             {
                 "run_id": _build_source_catalog_collection_run_id(
@@ -1706,6 +1763,8 @@ def _build_source_catalog_collection_plan(
                 "normalized_homepage_url": str(row.get("normalized_homepage_url") or row["homepage_url"]),
                 "coverage_source_url": row.get("coverage_source_url"),
                 "coverage_source_metadata": _mapping(row.get("coverage_source_metadata")),
+                "has_completed_collection": has_completed_collection,
+                "source_coverage_mode": source_coverage_mode,
                 "selected_source_ids": [],
                 "target_source_ids": [],
                 "included_source_ids": [],
@@ -1723,6 +1782,7 @@ def _build_source_catalog_collection_plan(
             else "admin_source_catalog_collection"
         ),
         "triggered_by": triggered_by,
+        "precision_rediscovery_requested": precision_rediscovery,
         "actor": actor_payload,
         "groups": groups,
     }
@@ -1773,6 +1833,8 @@ def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog
                 "country_code": str(group["country_code"]),
                 "product_type": str(group["product_type"]),
                 "source_language": str(group["source_language"]),
+                "has_completed_collection": bool(group.get("has_completed_collection", False)),
+                "source_coverage_mode": str(group.get("source_coverage_mode") or "precision"),
                 "target_source_ids": [],
                 "included_source_ids": [],
             }
@@ -1797,6 +1859,12 @@ def _materialize_sources_for_catalog_item(
     original_product_type = str(row["product_type"])
     product_type = _canonical_product_type_code(original_product_type)
     product_type_definition = require_product_type_definition(connection, product_type_code=product_type, active_only=False)
+    registry_seed_rows = _load_existing_precision_discovery_seeds(
+        connection,
+        bank_code=bank_code,
+        country_code=str(row["country_code"]),
+        product_type=product_type,
+    )
     generation_result = _generate_sources_from_homepage(
         bank_code=bank_code,
         bank_name=str(row["bank_name"]),
@@ -1810,6 +1878,7 @@ def _materialize_sources_for_catalog_item(
         run_id=run_id,
         correlation_id=correlation_id,
         request_id=request_id,
+        registry_seed_rows=registry_seed_rows,
     )
     if not generation_result.detail_source_ids:
         existing_detail_rows = _load_existing_detail_rows_for_companion_discovery(
@@ -1840,6 +1909,7 @@ def _materialize_sources_for_catalog_item(
                 model_execution_records=generation_result.model_execution_records,
                 usage_records=generation_result.usage_records,
                 rejected_detail_urls=generation_result.rejected_detail_urls,
+                discovery_metrics=generation_result.discovery_metrics,
             )
     generated_rows = _dedupe_generated_source_rows(generation_result.rows)
     discovery_notes = list(generation_result.discovery_notes)
@@ -1915,7 +1985,49 @@ def _materialize_sources_for_catalog_item(
         detail_source_ids=list(generation_result.detail_source_ids),
         model_execution_records=generation_result.model_execution_records,
         usage_records=generation_result.usage_records,
+        discovery_metrics=generation_result.discovery_metrics,
     )
+
+
+def _load_existing_precision_discovery_seeds(
+    connection: Connection,
+    *,
+    bank_code: str,
+    country_code: str,
+    product_type: str,
+) -> list[dict[str, Any]]:
+    rows = connection.execute(
+        """
+        SELECT
+            source_id,
+            source_name,
+            source_url,
+            normalized_url,
+            discovery_role,
+            priority,
+            source_language,
+            expected_fields
+        FROM source_registry_item
+        WHERE bank_code = %(bank_code)s
+          AND country_code = %(country_code)s
+          AND product_type = ANY(%(product_type_scope)s)
+          AND status = 'active'
+          AND source_type = 'html'
+          AND discovery_role IN ('entry', 'detail')
+        ORDER BY
+            CASE discovery_role WHEN 'entry' THEN 0 ELSE 1 END,
+            priority,
+            source_id
+        LIMIT %(row_limit)s
+        """,
+        {
+            "bank_code": bank_code,
+            "country_code": country_code,
+            "product_type_scope": _product_type_scope_codes(product_type),
+            "row_limit": _DISCOVERY_REGISTRY_SEED_MAX,
+        },
+    ).fetchall()
+    return [dict(item) for item in rows]
 
 
 def _load_existing_detail_rows_for_companion_discovery(
@@ -2989,6 +3101,7 @@ def _generate_sources_from_homepage(
     run_id: str | None = None,
     correlation_id: str | None = None,
     request_id: str | None = None,
+    registry_seed_rows: list[dict[str, Any]] | None = None,
 ) -> HomepageSourceGenerationResult:
     product_type = _canonical_product_type_code(product_type)
     product_type_definition = localize_product_type_definition(
@@ -3017,6 +3130,11 @@ def _generate_sources_from_homepage(
     pdf_links: list[tuple[int, Any]] = []
     hub_pages: list[tuple[int, str, str]] = []
     secondary_hub_pages: list[tuple[int, str, str]] = []
+    registry_detail_pages: list[tuple[int, str, str]] = []
+    registry_detail_hints: list[dict[str, Any]] = []
+    registry_entry_seed_count = 0
+    registry_detail_seed_count = 0
+    rejected_registry_seed_count = 0
     discovery_notes: list[str] = []
     if discovery_product_type != product_type:
         discovery_notes.append(
@@ -3029,6 +3147,11 @@ def _generate_sources_from_homepage(
         homepage_html = ""
         homepage_fetch_error = str(exc)
         discovery_notes.append(f"Homepage fetch was unavailable: {homepage_fetch_error}")
+    prefetched_page_html_by_url: dict[str, str] = (
+        {normalized_homepage_url: homepage_html}
+        if homepage_html
+        else {}
+    )
 
     homepage_links = _extract_allowed_links(
         html_text=homepage_html,
@@ -3151,15 +3274,98 @@ def _generate_sources_from_homepage(
         )
         hub_pages.append((max(seed_score, 1) + 100, seed_entry_url, seed_entry_url))
 
+    for registry_seed in registry_seed_rows or []:
+        raw_seed_url = str(registry_seed.get("source_url") or registry_seed.get("normalized_url") or "").strip()
+        if not raw_seed_url:
+            rejected_registry_seed_count += 1
+            continue
+        try:
+            normalized_seed_url = normalize_source_url(raw_seed_url)
+        except (TypeError, ValueError):
+            rejected_registry_seed_count += 1
+            continue
+        seed_hostname = urlparse(normalized_seed_url).hostname or ""
+        seed_role = str(registry_seed.get("discovery_role") or "").strip().lower()
+        seed_fingerprint = f"{normalized_seed_url} {registry_seed.get('source_name') or ''}".lower()
+        if (
+            seed_role not in {"entry", "detail"}
+            or infer_source_type(normalized_seed_url) != "html"
+            or not seed_hostname
+            or not host_matches_allowed_domains(seed_hostname, allowed_domains)
+            or _url_country_scope_conflicts(country_code=country_code, normalized_url=normalized_seed_url)
+            or _url_locale_conflicts_source_language(
+                normalized_url=normalized_seed_url,
+                source_language=source_language,
+            )
+            or (
+                seed_role == "entry"
+                and _has_excluded_link_signal(
+                    normalized_url=normalized_seed_url,
+                    anchor_text=str(registry_seed.get("source_name") or ""),
+                )
+            )
+            or _source_scope_exclusion_reason(
+                product_type=discovery_product_type,
+                fingerprint=seed_fingerprint,
+            )
+        ):
+            rejected_registry_seed_count += 1
+            continue
+        seed_score = max(
+            1,
+            _score_product_link(
+                product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=normalized_seed_url,
+                anchor_text=str(registry_seed.get("source_name") or ""),
+            ),
+        )
+        if seed_role == "entry":
+            registry_entry_seed_count += 1
+            hub_pages.append((seed_score + 500, normalized_seed_url, raw_seed_url))
+            continue
+        registry_detail_seed_count += 1
+        registry_detail_pages.append((seed_score, normalized_seed_url, raw_seed_url))
+        registry_detail_hints.append(
+            {
+                "source_id": str(registry_seed.get("source_id") or ""),
+                "source_name": str(registry_seed.get("source_name") or ""),
+                "source_url": raw_seed_url,
+                "normalized_url": normalized_seed_url,
+                "priority": str(registry_seed.get("priority") or "P1"),
+                "expected_fields": [
+                    str(item)
+                    for item in (registry_seed.get("expected_fields") or [])
+                    if str(item).strip()
+                ],
+            }
+        )
+    if registry_entry_seed_count or registry_detail_seed_count:
+        discovery_notes.append(
+            "Precision coverage reused "
+            f"{registry_entry_seed_count} active registry entry seed(s) and "
+            f"{registry_detail_seed_count} active registry detail seed(s)."
+        )
+    if rejected_registry_seed_count:
+        discovery_notes.append(
+            f"Excluded {rejected_registry_seed_count} registry seed(s) that failed official-domain, country, language, or Product Type scope checks."
+        )
+
     unique_hub_pages = _dedupe_page_candidates(hub_pages)
-    for _score, normalized_page_url, resolved_page_url in unique_hub_pages[:_DISCOVERY_HUB_PAGE_MAX]:
+    selected_hub_pages = unique_hub_pages[:_DISCOVERY_HUB_PAGE_MAX]
+    primary_hub_page_attempt_count = 0
+    primary_hub_page_fetched_count = 0
+    for _score, normalized_page_url, resolved_page_url in selected_hub_pages:
         if normalized_page_url == normalized_homepage_url:
             continue
+        primary_hub_page_attempt_count += 1
         try:
             page_html = fetch_text(resolved_page_url, fetch_policy)
         except Exception as exc:
             discovery_notes.append(f"Hub page fetch was unavailable for {normalized_page_url}: {exc}")
             continue
+        primary_hub_page_fetched_count += 1
+        prefetched_page_html_by_url[normalized_page_url] = page_html
         for link in _extract_allowed_links(
             html_text=page_html,
             base_url=resolved_page_url,
@@ -3215,20 +3421,104 @@ def _generate_sources_from_homepage(
             ):
                 secondary_hub_pages.append((max(score, 1), link.normalized_url, link.resolved_url))
 
+    visited_primary_hub_urls = {
+        normalized_homepage_url,
+        *(item[1] for item in selected_hub_pages),
+    }
+    registry_detail_page_attempt_count = 0
+    registry_detail_page_fetched_count = 0
+    unique_registry_detail_pages = _dedupe_page_candidates(registry_detail_pages)
+    selected_registry_detail_pages = unique_registry_detail_pages[:_DISCOVERY_REGISTRY_DETAIL_PAGE_MAX]
+    for _score, normalized_page_url, resolved_page_url in selected_registry_detail_pages:
+        if normalized_page_url in visited_primary_hub_urls:
+            continue
+        registry_detail_page_attempt_count += 1
+        try:
+            page_html = fetch_text(resolved_page_url, fetch_policy)
+        except Exception as exc:
+            discovery_notes.append(
+                f"Registry detail seed fetch was unavailable for {normalized_page_url}: {exc}"
+            )
+            continue
+        registry_detail_page_fetched_count += 1
+        prefetched_page_html_by_url[normalized_page_url] = page_html
+        for link in _extract_allowed_links(
+            html_text=page_html,
+            base_url=resolved_page_url,
+            hostname=hostname,
+            allowed_domains=allowed_domains,
+        ):
+            if link.normalized_url == normalized_page_url:
+                continue
+            fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
+            if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
+                continue
+            if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
+                continue
+            if _source_scope_exclusion_reason(product_type=discovery_product_type, fingerprint=fingerprint):
+                continue
+            score = _score_product_link(
+                product_type=discovery_product_type,
+                product_type_definition=product_type_definition,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            )
+            if _is_product_type_rate_page(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
+                supporting_links.append((max(score, 1), link))
+                continue
+            if _is_product_fact_support_link(
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+                product_score=score,
+            ):
+                supporting_links.append((max(score, 1), link))
+                continue
+            if link.source_type == "pdf":
+                if score > 0 or any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
+                    pdf_links.append((score, link))
+                continue
+            if score > 0:
+                detail_links.append((score, link))
+            elif any(keyword in fingerprint for keyword in _SUPPORTING_KEYWORDS):
+                supporting_links.append((1, link))
+            if _looks_like_secondary_catalog_hub(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
+                secondary_hub_pages.append((max(score, 1), link.normalized_url, link.resolved_url))
+    if registry_detail_page_fetched_count:
+        discovery_notes.append(
+            f"Inspected {registry_detail_page_fetched_count} existing detail page(s) for newly linked sibling products and evidence routes."
+        )
+    if len(unique_registry_detail_pages) > len(selected_registry_detail_pages):
+        discovery_notes.append(
+            "Registry detail-page expansion reached its bounded "
+            f"{_DISCOVERY_REGISTRY_DETAIL_PAGE_MAX}-page precision limit."
+        )
+
     visited_hub_urls = {normalized_homepage_url, *(item[1] for item in unique_hub_pages)}
+    visited_hub_urls.update(item[1] for item in selected_registry_detail_pages)
     expanded_secondary_hub_count = 0
+    secondary_hub_page_attempt_count = 0
     for _score, normalized_page_url, resolved_page_url in _dedupe_page_candidates(secondary_hub_pages)[
         :_DISCOVERY_SECONDARY_HUB_PAGE_MAX
     ]:
         if normalized_page_url in visited_hub_urls:
             continue
         visited_hub_urls.add(normalized_page_url)
+        secondary_hub_page_attempt_count += 1
         try:
             page_html = fetch_text(resolved_page_url, fetch_policy)
         except Exception as exc:
             discovery_notes.append(f"Secondary hub page fetch was unavailable for {normalized_page_url}: {exc}")
             continue
         expanded_secondary_hub_count += 1
+        prefetched_page_html_by_url[normalized_page_url] = page_html
         for link in _extract_allowed_links(
             html_text=page_html,
             base_url=resolved_page_url,
@@ -3275,8 +3565,9 @@ def _generate_sources_from_homepage(
             f"Expanded {expanded_secondary_hub_count} bounded secondary product-category hub page(s) for detail coverage."
         )
 
-    unique_detail_links = _dedupe_scored_links(detail_links)[:_DISCOVERY_DETAIL_LINK_MAX]
-    unique_supporting_links = [
+    all_unique_detail_links = _dedupe_scored_links(detail_links)
+    unique_detail_links = all_unique_detail_links[:_DISCOVERY_DETAIL_LINK_MAX]
+    all_relevant_supporting_links = [
         item
         for item in _dedupe_scored_links(supporting_links)
         if _link_is_relevant_supporting_source(
@@ -3286,14 +3577,19 @@ def _generate_sources_from_homepage(
             normalized_url=item[1].normalized_url,
             anchor_text=item[1].anchor_text,
         )
-    ][:_DISCOVERY_SUPPORTING_LINK_MAX]
-    unique_pdf_links = _dedupe_scored_links(pdf_links)[:_DISCOVERY_PDF_LINK_MAX]
-    seed_detail_hints = _load_seed_detail_hints(
-        bank_code=bank_code,
-        bank_name=bank_name,
-        normalized_homepage_url=normalized_homepage_url,
-        product_type=discovery_product_type,
-    )
+    ]
+    unique_supporting_links = all_relevant_supporting_links[:_DISCOVERY_SUPPORTING_LINK_MAX]
+    all_unique_pdf_links = _dedupe_scored_links(pdf_links)
+    unique_pdf_links = all_unique_pdf_links[:_DISCOVERY_PDF_LINK_MAX]
+    seed_detail_hints = [
+        *registry_detail_hints,
+        *_load_seed_detail_hints(
+            bank_code=bank_code,
+            bank_name=bank_name,
+            normalized_homepage_url=normalized_homepage_url,
+            product_type=discovery_product_type,
+        ),
+    ]
     seed_supporting_hints = _load_seed_supporting_hints(
         bank_code=bank_code,
         bank_name=bank_name,
@@ -3378,7 +3674,7 @@ def _generate_sources_from_homepage(
     )
     discovery_notes.extend(ai_result.notes)
     page_evidence_by_url: dict[str, PageEvidenceAssessment] = {}
-    page_html_by_url: dict[str, str] = {}
+    page_html_by_url: dict[str, str] = dict(prefetched_page_html_by_url)
     detail_rows, rejected_detail_urls, detail_notes = _promote_detail_candidates(
         bank_code=bank_code,
         bank_name=bank_name,
@@ -3805,6 +4101,43 @@ def _generate_sources_from_homepage(
         ),
         usage_records=tuple(item for item in [ai_result.usage_record] if item is not None),
         rejected_detail_urls=tuple(rejected_detail_urls),
+        discovery_metrics={
+            "mode": "precision",
+            "homepage_fetch_succeeded": bool(homepage_html),
+            "registry_seed_count": registry_entry_seed_count + registry_detail_seed_count,
+            "registry_entry_seed_count": registry_entry_seed_count,
+            "registry_detail_seed_count": registry_detail_seed_count,
+            "registry_seed_rejected_count": rejected_registry_seed_count,
+            "primary_hub_page_candidate_count": len(unique_hub_pages),
+            "primary_hub_page_attempt_count": primary_hub_page_attempt_count,
+            "primary_hub_page_fetched_count": primary_hub_page_fetched_count,
+            "registry_detail_page_candidate_count": len(unique_registry_detail_pages),
+            "registry_detail_page_attempt_count": registry_detail_page_attempt_count,
+            "registry_detail_page_fetched_count": registry_detail_page_fetched_count,
+            "secondary_hub_page_candidate_count": len(_dedupe_page_candidates(secondary_hub_pages)),
+            "secondary_hub_page_attempt_count": secondary_hub_page_attempt_count,
+            "secondary_hub_page_fetched_count": expanded_secondary_hub_count,
+            "detail_link_candidate_count": len(all_unique_detail_links),
+            "supporting_link_candidate_count": len(all_relevant_supporting_links),
+            "pdf_link_candidate_count": len(all_unique_pdf_links),
+            "validated_html_candidate_count": len(html_candidates),
+            "ai_scored_candidate_count": len(ai_result.scores),
+            "promoted_detail_source_count": len(detail_source_ids),
+            "promoted_supporting_source_count": sum(
+                1
+                for item in source_rows
+                if str(item.get("discovery_role") or "") in {"supporting_html", "supporting_pdf", "linked_pdf"}
+            ),
+            "rejected_detail_candidate_count": len(rejected_detail_urls),
+            "limits_reached": {
+                "primary_hubs": len(unique_hub_pages) > len(selected_hub_pages),
+                "registry_detail_pages": len(unique_registry_detail_pages) > len(selected_registry_detail_pages),
+                "secondary_hubs": len(_dedupe_page_candidates(secondary_hub_pages)) > _DISCOVERY_SECONDARY_HUB_PAGE_MAX,
+                "detail_links": len(all_unique_detail_links) > _DISCOVERY_DETAIL_LINK_MAX,
+                "supporting_links": len(all_relevant_supporting_links) > _DISCOVERY_SUPPORTING_LINK_MAX,
+                "pdf_links": len(all_unique_pdf_links) > _DISCOVERY_PDF_LINK_MAX,
+            },
+        },
     )
 
 
@@ -7070,6 +7403,7 @@ def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
             "product_type": str(item["product_type"]),
             "status": str(item["status"]),
             "generated_source_count": int(item.get("generated_source_count") or 0),
+            "has_completed_collection": bool(item.get("has_completed_collection", False)),
         }
         for item in (row.get("catalog_items") or [])
     ]
@@ -7110,6 +7444,7 @@ def _serialize_source_catalog_row(row: dict[str, Any], *, bank_row: dict[str, An
         "logo_alt_text": bank_row.get("logo_alt_text"),
         "source_language": str(bank_row.get("source_language") or "en"),
         "generated_source_count": generated_source_count,
+        "has_completed_collection": bool(row.get("has_completed_collection", False)),
         "change_reason": row.get("change_reason"),
         "created_at": _serialize_datetime(row.get("created_at")),
         "updated_at": _serialize_datetime(row.get("updated_at")),

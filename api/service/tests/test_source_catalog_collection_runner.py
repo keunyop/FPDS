@@ -524,6 +524,151 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
         run_group.assert_called_once_with(plan=prepared_plan, group=prepared_plan["groups"][0])
         self.assertFalse(any("run_state" in params for _sql, params in connection.calls))
 
+    def test_completed_standard_collection_reuses_active_scope_without_rediscovery(self) -> None:
+        connection = _Connection()
+        plan = {
+            "collection_id": "collection-standard",
+            "correlation_id": "corr-standard",
+            "request_id": "req-standard",
+            "precision_rediscovery_requested": False,
+            "actor": {"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
+            "groups": [],
+        }
+        group = {
+            "run_id": "run-standard",
+            "catalog_item_id": "catalog-ca-td-savings",
+            "bank_code": "TD",
+            "bank_name": "TD Bank",
+            "country_code": "CA",
+            "product_type": "savings",
+            "source_language": "en",
+            "homepage_url": "https://www.td.com/ca/en/personal-banking",
+            "normalized_homepage_url": "https://www.td.com/ca/en/personal-banking",
+            "has_completed_collection": True,
+            "source_coverage_mode": "standard",
+        }
+        prepared_plan = {
+            "triggered_by": "admin@example.com",
+            "groups": [{"run_id": "run-standard"}],
+        }
+        active_scope = {
+            "collection_source_ids": ["TD-SAV-001", "TD-SAV-RATES"],
+            "target_source_ids": ["TD-SAV-001"],
+        }
+
+        with (
+            patch("api_service.source_catalog_collection_runner.Settings.from_env"),
+            patch("api_service.source_catalog_collection_runner.open_connection", return_value=_ConnectionContext(connection)),
+            patch("api_service.source_catalog_collection_runner._materialize_sources_for_catalog_item") as materialize,
+            patch(
+                "api_service.source_catalog_collection_runner._load_active_collection_scope",
+                return_value=active_scope,
+            ),
+            patch(
+                "api_service.source_catalog_collection_runner.prepare_source_collection",
+                return_value={"plan": prepared_plan},
+            ) as prepare_collection,
+            patch("api_service.source_catalog_collection_runner._insert_collection_run_row"),
+            patch("api_service.source_catalog_collection_runner.source_collection_runner._run_group") as run_group,
+        ):
+            source_catalog_collection_runner._run_group(plan=plan, group=group)
+
+        materialize.assert_not_called()
+        self.assertEqual(
+            prepare_collection.call_args.kwargs["source_ids"],
+            ["TD-SAV-001", "TD-SAV-RATES"],
+        )
+        metadata_call = next(
+            params
+            for sql, params in connection.calls
+            if "SET run_metadata = run_metadata ||" in sql
+        )
+        metadata = json.loads(str(metadata_call["run_metadata"]))
+        self.assertEqual(metadata["source_coverage_mode"], "standard")
+        self.assertEqual(metadata["discovery_status"], "reused_existing_detail_scope")
+        self.assertEqual(metadata["source_coverage_metrics"]["reused_detail_source_count"], 1)
+        run_group.assert_called_once_with(plan=prepared_plan, group=prepared_plan["groups"][0])
+
+    def test_standard_collection_forces_precision_fallback_when_active_details_are_missing(self) -> None:
+        connection = _Connection()
+        plan = {
+            "collection_id": "collection-fallback",
+            "correlation_id": "corr-fallback",
+            "request_id": "req-fallback",
+            "precision_rediscovery_requested": False,
+            "actor": {"user_id": "usr-001", "role": "admin", "email": "admin@example.com"},
+            "groups": [],
+        }
+        group = {
+            "run_id": "run-fallback",
+            "catalog_item_id": "catalog-ca-atl-chequing",
+            "bank_code": "ATL",
+            "bank_name": "Atlas Bank",
+            "country_code": "CA",
+            "product_type": "chequing",
+            "source_language": "en",
+            "homepage_url": "https://www.atlasbank.ca/",
+            "normalized_homepage_url": "https://www.atlasbank.ca/",
+            "has_completed_collection": True,
+            "source_coverage_mode": "standard",
+        }
+        prepared_plan = {
+            "triggered_by": "admin@example.com",
+            "groups": [{"run_id": "run-fallback"}],
+        }
+        refreshed_scope = {
+            "collection_source_ids": ["AUTO-ATL-CHQ-NEW"],
+            "target_source_ids": ["AUTO-ATL-CHQ-NEW"],
+        }
+
+        with (
+            patch("api_service.source_catalog_collection_runner.Settings.from_env"),
+            patch("api_service.source_catalog_collection_runner.open_connection", return_value=_ConnectionContext(connection)),
+            patch(
+                "api_service.source_catalog_collection_runner._materialize_sources_for_catalog_item",
+                return_value=CatalogItemMaterializationResult(
+                    generated_rows=[
+                        {
+                            "source_id": "AUTO-ATL-CHQ-NEW",
+                            "discovery_role": "detail",
+                            "status": "active",
+                        }
+                    ],
+                    discovery_notes=["Precision discovery recovered a current detail source."],
+                    detail_source_ids=["AUTO-ATL-CHQ-NEW"],
+                    discovery_metrics={"mode": "precision", "promoted_detail_source_count": 1},
+                ),
+            ) as materialize,
+            patch(
+                "api_service.source_catalog_collection_runner._load_active_collection_scope",
+                side_effect=[
+                    {"collection_source_ids": [], "target_source_ids": []},
+                    refreshed_scope,
+                    refreshed_scope,
+                ],
+            ),
+            patch(
+                "api_service.source_catalog_collection_runner.prepare_source_collection",
+                return_value={"plan": prepared_plan},
+            ),
+            patch("api_service.source_catalog_collection_runner._insert_collection_run_row"),
+            patch("api_service.source_catalog_collection_runner.source_collection_runner._run_group"),
+        ):
+            source_catalog_collection_runner._run_group(plan=plan, group=group)
+
+        materialize.assert_called_once()
+        metadata_call = next(
+            params
+            for sql, params in connection.calls
+            if "SET run_metadata = run_metadata ||" in sql
+        )
+        metadata = json.loads(str(metadata_call["run_metadata"]))
+        self.assertEqual(metadata["source_coverage_mode"], "precision_fallback")
+        self.assertEqual(metadata["source_coverage_metrics"]["promoted_detail_source_count"], 1)
+        self.assertTrue(
+            any("precision source rediscovery was forced" in note for note in metadata["discovery_notes"])
+        )
+
     def test_run_group_reuses_precreated_run_id_for_background_source_collection(self) -> None:
         connection = _Connection()
         plan = {

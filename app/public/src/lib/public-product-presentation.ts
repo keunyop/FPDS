@@ -109,6 +109,29 @@ export function buildPublicProductMetrics(
   ];
 }
 
+export function buildPublicSortMetric(product: PublicProduct, locale: string, sortBy: string): PublicProductMetric {
+  const copy = getPublicMessages(locale);
+
+  switch (sortBy) {
+    case "annual_fee":
+      return { label: getCardLabel("annualFee", locale), value: formatPublicCurrency(product.annual_fee, product.currency, locale) };
+    case "monthly_fee":
+      return { label: copy.grid.metricMonthlyFee, value: formatPublicCurrency(product.public_display_fee, product.currency, locale) };
+    case "minimum_balance":
+      return { label: copy.grid.metricMinBalance, value: formatPublicCurrency(product.minimum_balance, product.currency, locale) };
+    case "minimum_deposit":
+      return { label: copy.grid.metricMinDeposit, value: formatPublicCurrency(product.minimum_deposit, product.currency, locale) };
+    case "bank_name":
+      return { label: copy.grid.sortBankName, value: product.bank_name };
+    case "product_name":
+      return { label: copy.grid.sortProductName, value: product.product_name };
+    case "last_changed_at":
+      return { label: copy.grid.metricLastChange, value: product.last_changed_at?.slice(0, 10) ?? copy.common.notDisclosed };
+    default:
+      return { label: copy.grid.metricDisplayRate, value: formatPublicRate(product.card_display_rate, locale) };
+  }
+}
+
 export function formatPublicCurrency(value: number | null, currency: string, locale: string) {
   if (value === null || !Number.isFinite(value)) {
     return getPublicMessages(locale).common.notDisclosed;

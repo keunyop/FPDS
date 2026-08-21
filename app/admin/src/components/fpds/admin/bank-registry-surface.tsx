@@ -62,6 +62,8 @@ const BANK_COPY = {
     bankList: "Bank list",
     collecting: "Collecting...",
     collectSelected: (count: number) => `Collect selected${count > 0 ? ` (${count})` : ""}`,
+    rediscoverCompleted: "Rediscover completed",
+    firstTimePrecision: "First-time items: precision required",
     selectAllBanks: "Select all visible banks",
     bank: "Bank",
     code: "Code",
@@ -97,6 +99,8 @@ const BANK_COPY = {
     bankList: "은행 목록",
     collecting: "수집 중...",
     collectSelected: (count: number) => `선택 항목 수집${count > 0 ? ` (${count})` : ""}`,
+    rediscoverCompleted: "완료 항목 정밀 재탐색",
+    firstTimePrecision: "최초 항목: 정밀 탐색 필수",
     selectAllBanks: "표시된 은행 모두 선택",
     bank: "은행",
     code: "코드",
@@ -132,6 +136,8 @@ const BANK_COPY = {
     bankList: "銀行一覧",
     collecting: "収集中...",
     collectSelected: (count: number) => `選択項目を収集${count > 0 ? ` (${count})` : ""}`,
+    rediscoverCompleted: "完了項目を精密再探索",
+    firstTimePrecision: "初回項目：精密探索必須",
     selectAllBanks: "表示中の銀行をすべて選択",
     bank: "銀行",
     code: "コード",
@@ -173,6 +179,7 @@ export function BankRegistrySurface({
   const productTypeLabelMap = useMemo(() => buildAdminProductTypeLabelMap(productTypes), [productTypes]);
   const [selectedBankCodes, setSelectedBankCodes] = useState<string[]>([]);
   const [bulkPending, setBulkPending] = useState(false);
+  const [bulkPrecisionRediscovery, setBulkPrecisionRediscovery] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const selectedCatalogItems = useMemo(
@@ -183,6 +190,11 @@ export function BankRegistrySurface({
     [banks.items, selectedBankCodes],
   );
   const selectedCoverageCount = selectedCatalogItems.length;
+  const selectedCompletedCoverageCount = selectedCatalogItems.filter(
+    (item) => item.has_completed_collection,
+  ).length;
+  const selectedFirstTimeCoverageCount =
+    selectedCoverageCount - selectedCompletedCoverageCount;
   const allVisibleSelected = banks.items.length > 0 && banks.items.every((item) => selectedBankCodes.includes(item.bank_code));
   const detailModalOpen = bankDialogOpen && Boolean(bankDialogDetail);
   useEffect(() => {
@@ -197,6 +209,12 @@ export function BankRegistrySurface({
     setBankDialogOpen(Boolean(activeBankCode && activeBankDetail));
     setBankDialogDetail(activeBankDetail);
   }, [activeBankCode, activeBankDetail]);
+
+  useEffect(() => {
+    if (selectedCompletedCoverageCount === 0) {
+      setBulkPrecisionRediscovery(false);
+    }
+  }, [selectedCompletedCoverageCount]);
 
   function syncUrlWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
     const href = buildAdminHref("/admin/banks", params, locale);
@@ -341,6 +359,7 @@ export function BankRegistrySurface({
         },
         body: JSON.stringify({
           catalog_item_ids: catalogItemIds,
+          precision_rediscovery: bulkPrecisionRediscovery,
         }),
       });
       const payload = (await response.json()) as {
@@ -360,6 +379,7 @@ export function BankRegistrySurface({
         }),
       );
       setSelectedBankCodes([]);
+      setBulkPrecisionRediscovery(false);
       router.refresh();
     } catch {
       setError(copy.collectApiFailed);
@@ -414,6 +434,22 @@ export function BankRegistrySurface({
             <button className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" onClick={openAddModal} type="button">
               {copy.addBank}
             </button>
+            {selectedFirstTimeCoverageCount > 0 ? (
+              <span className="inline-flex h-10 items-center whitespace-nowrap rounded-md bg-primary/10 px-3 text-xs font-medium text-primary">
+                {copy.firstTimePrecision}
+              </span>
+            ) : null}
+            {selectedCompletedCoverageCount > 0 ? (
+              <label className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border border-border bg-background px-3 text-sm text-foreground">
+                <input
+                  checked={bulkPrecisionRediscovery}
+                  className="size-4 accent-primary"
+                  onChange={(event) => setBulkPrecisionRediscovery(event.target.checked)}
+                  type="checkbox"
+                />
+                <span>{copy.rediscoverCompleted}</span>
+              </label>
+            ) : null}
             <button
                className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
               disabled={bulkPending || selectedCoverageCount === 0}
@@ -566,13 +602,26 @@ function buildBulkCollectMessage({
   selectedCoverageCount: number;
 }) {
   if (payload?.workflow_state === "queued") {
+    const precisionCount = payload.groups.filter(
+      (group) => group.source_coverage_mode === "precision",
+    ).length;
+    const standardCount = payload.groups.length - precisionCount;
     if (locale === "ko") {
-      return `Collection이 대기열에 등록되었습니다. ${payload.run_ids.length}개 run이 생성되었습니다.`;
+      return [
+        `Collection이 대기열에 등록되었습니다. ${payload.run_ids.length}개 run이 생성되었습니다.`,
+        `정밀 탐색 ${precisionCount}개 · 현재 source 사용 ${standardCount}개.`,
+      ].join(" ");
     }
     if (locale === "ja") {
-      return `Collection をキューに登録しました。${payload.run_ids.length}件の run を作成しました。`;
+      return [
+        `Collection をキューに登録しました。${payload.run_ids.length}件の run を作成しました。`,
+        `精密探索 ${precisionCount}件 · 現在の source を使用 ${standardCount}件。`,
+      ].join(" ");
     }
-    return `Collection queued. ${payload.run_ids.length} ${payload.run_ids.length === 1 ? "run" : "runs"} created.`;
+    return [
+      `Collection queued. ${payload.run_ids.length} ${payload.run_ids.length === 1 ? "run" : "runs"} created.`,
+      `Precision discovery ${precisionCount} · current sources ${standardCount}.`,
+    ].join(" ");
   }
 
   const materializedItems = payload?.materialized_items ?? [];
@@ -590,7 +639,7 @@ function buildBulkCollectMessage({
   if (!payload?.run_ids?.length || readyCount === 0) {
     if (locale === "ko") {
       return [
-        `${selectedBankCount}개 은행, ${selectedCoverageCount}개 coverage item의 homepage discovery가 완료됐지만 collection 대상 detail source를 찾지 못했습니다.`,
+        `${selectedBankCount}개 은행, ${selectedCoverageCount}개 coverage item의 정밀 source 탐색이 완료됐지만 collection 대상 detail source를 찾지 못했습니다.`,
         `${generatedCount}개 source row를 materialize했습니다.`,
         firstNote,
       ]
@@ -599,7 +648,7 @@ function buildBulkCollectMessage({
     }
     if (locale === "ja") {
       return [
-        `${selectedBankCount}件の銀行、${selectedCoverageCount}件の coverage item の homepage discovery は完了しましたが、collection 対象の detail source は見つかりませんでした。`,
+        `${selectedBankCount}件の銀行、${selectedCoverageCount}件の coverage item の精密 source 探索は完了しましたが、collection 対象の detail source は見つかりませんでした。`,
         `${generatedCount}件の source row を materialize しました。`,
         firstNote,
       ]
@@ -607,7 +656,7 @@ function buildBulkCollectMessage({
         .join(" ");
     }
     return [
-      `Homepage discovery completed for ${selectedBankCount} bank(s) across ${selectedCoverageCount} coverage item(s), but no detail sources were identified for collection.`,
+      `Precision source discovery completed for ${selectedBankCount} bank(s) across ${selectedCoverageCount} coverage item(s), but no detail sources were identified for collection.`,
       `Materialized ${generatedCount} source row(s).`,
       firstNote,
     ]
@@ -710,6 +759,7 @@ function buildPreviewBankDetail(bank: BankItem): BankDetailResponse {
       logo_alt_text: bank.logo_alt_text,
       source_language: bank.source_language,
       generated_source_count: item.generated_source_count,
+      has_completed_collection: item.has_completed_collection,
       change_reason: null,
       created_at: null,
       updated_at: null,

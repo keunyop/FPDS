@@ -1743,3 +1743,220 @@ Read before coding:
   reruns now supersede ordinary stale tasks; the old combined two-product
   student-card task is intentionally not auto-collapsed because that would
   weaken the multi-product boundary.
+
+## 2026-08-20 - Bankoompare Public Brand Refinement
+
+- Status: completed the Product Owner-requested Public title and paired-eye
+  mark refinement without changing FPDS internal naming or product behavior.
+- Outcome:
+  - renamed the customer-facing Public wordmark, accessible brand name,
+    metadata, and EN/KO/JA brand references from Bankoom to Bankoompare
+  - retained the emphasized paired `oo` while extending the wordmark as
+    Bank + `oo` + mpare
+  - separated the two outlined eye circles by a small visible gap and kept each
+    pupil exactly centered; the shell mark and app icon use the same scaled
+    geometry
+  - preserved the exact 390px behavior that hides the longer wordmark while
+    retaining the mark, primary navigation, and country control
+- Key files: Public mark and app icon, layout metadata, locale resources,
+  Public README, and Product Grid identity baseline.
+- Verification:
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build`: passed
+  - rendered header inspected at 390px, 768px, and 1440px; no wordmark wrapping
+    or header overflow was observed
+  - legacy customer-facing `Bankoom` references: none in Public runtime
+    or the active Product Grid identity baseline
+- Known issues: none for this refinement. Temporary browser profiles and
+  screenshots used for visual QA were removed after inspection.
+
+## 2026-08-20 - First-Collection Precision Source Coverage
+
+- WBS: 5.36
+- Status: completed the Product Owner-requested first-versus-subsequent source
+  coverage behavior without changing Review, approval, or Public publication.
+- Server contract:
+  - a bank/Product Type has completed collection only when server-side
+    `ingestion_run` history contains a completed run with a non-empty source
+    scope; generated-source count and browser state do not qualify
+  - first collection is forced to `precision`, while completed items use
+    `standard` current-source collection unless the operator requests
+    `precision_rediscovery`
+  - mixed bulk requests force only first-time items; a standard run whose
+    active detail scope disappeared is changed to `precision_fallback`
+- Precision coverage:
+  - reuses verified homepage/coverage routes and eligible active official
+    registry entry/detail rows
+  - inspects at most 12 existing detail pages for newly linked sibling
+    products and exact evidence routes
+  - retains exact domain/verified-brand, country, source-language, SSRF,
+    Product Type, page-evidence, product-boundary, companion, Review, and
+    publication gates
+  - records seed rejection/reuse, page attempts/successes, candidate,
+    promoted/rejected, and reached-limit telemetry in run metadata
+- Admin UX:
+  - first-time coverage cards clearly show that precision discovery is
+    required
+  - completed cards expose a per-item precision-rediscovery checkbox
+  - bank-list bulk collection exposes one completed-item option while keeping
+    first-time selections visibly mandatory; queued EN/KO/JA feedback reports
+    precision versus current-source item counts
+  - narrow layouts keep the new short labels intact inside wrapping toolbars,
+    and coverage cards retain their existing column-first mobile layout
+- Regression coverage:
+  - mixed first/completed plan resolution
+  - official existing-detail sibling discovery and external-domain rejection
+  - standard active-scope reuse without materialization
+  - missing-detail precision fallback with operator-visible run reason
+- Verification:
+  - source catalog and runner suite: 176 passed
+  - API service full suite: 416 passed
+  - Admin `pnpm run typecheck`: passed
+  - Admin `pnpm run build`: passed
+  - `git diff --check`: passed before final documentation closeout
+- Operations: no live bank collection, canonical mutation, Review decision, or
+  Public refresh was run for this implementation slice.
+
+## 2026-08-20 - RBC Collection Scope Audit and Pending Work Cancellation
+
+- Status: operational investigation and requested cancellation completed; no
+  product-behavior fix or completed-data rollback was authorized or applied.
+- Scope finding: operator collection `collection_T7ROyyx3YehA9Twa` contained
+  exactly seven `RBC` Product Type groups and no other bank. The operator had
+  requested precision rediscovery for completed items; first-time RBC items
+  were independently forced to precision by the server contract.
+- Concurrent work: scheduler collection `collection_2C4inSKiDWSvtOWG` started
+  one minute earlier and covered Alterna and BMO. This separate automation run,
+  not the RBC selection payload, explains the visible cross-bank activity. A
+  second scheduler plan, `collection_rWBBNtB-dv3V5MA9`, was created after the
+  first scheduler plan completed.
+- Completed automation outcome: the first scheduler plan created 20 candidates
+  across Alterna/BMO and promoted four products; 15 BMO candidates remained in
+  active Review. The second plan completed two additional Alterna candidates
+  into Review before its four remaining BMO runs were cancelled.
+- RBC outcome: the detached collection runner continued after the API server
+  was stopped. All seven RBC runs reached terminal state by 20:03 Vancouver
+  time: 41 candidates, 16 approved/promoted products, 25 candidates still in
+  Review, and one no-detail partial Mortgage run. No completed RBC result was
+  rolled back.
+- Root cause: scheduler due-item selection looks only at runs whose current
+  `run_metadata.pipeline_stage` remains `source_catalog_collection`. A normal
+  run advances that field through snapshot, parse, extraction, normalization,
+  and validation, so its recent terminal result is excluded from the scheduler
+  cadence query and the same coverage can appear immediately due again.
+- Cancellation: no collection runner/API process remained. The four BMO runs
+  still persisted as `started` under `collection_rWBBNtB-dv3V5MA9` were changed
+  to terminal `failed` with `operator_cancelled=true`, an explicit Product
+  Owner cancellation reason, and preserved run history. The affected scopes
+  were BMO Chequing, Credit Card, GIC, and Line of Credit.
+- Verification: after a stability interval, nonterminal ingestion runs `0`,
+  queued/started aggregate refresh requests `0`, and FPDS API/collection runner
+  processes `0`.
+- Known risk: `COLLECTION_AUTOMATION_ENABLED` remains `true`, and the runtime
+  defaults its scheduler switch to enabled. A broad automation pause was not
+  applied because it exceeds cancellation of current work. Until the due-item
+  defect is fixed or a separate pause is approved, restarting the API can
+  recreate broad scheduled collection work.
+
+## 2026-08-20 - Automatic Collection Scheduler Paused
+
+- Status: completed by explicit Product Owner instruction; automatic scheduler
+  work remains disabled until a later explicit re-enablement instruction.
+- Runtime: `.env.dev` now sets
+  `FPDS_AUTOMATION_SCHEDULER_ENABLED=false`, so an API restart does not create
+  the collection-automation scheduler task. Manual Admin collection remains
+  available.
+- Database policy: active `COLLECTION_AUTOMATION_ENABLED` version `2` resolves
+  to `false`; the former enabled version is inactive. The new policy preserves
+  the Product Owner request, pause time, and re-enable boundary.
+- Race cleanup: API startup immediately before the pause created scheduler plan
+  `collection_ItwximlkzJAsgtnI`. Alterna Chequing completed before termination;
+  the active Alterna GIC runner and four queued BMO runs were stopped and closed
+  as `failed` with `operator_cancelled=true`. No completed data was rolled back.
+- Runtime continuity: the old API/runner process tree was stopped and the API
+  was restarted successfully on port `4000` with the scheduler flag forced
+  false. `/healthz` returned `200`.
+- Verification: active DB policy `false`; nonterminal ingestion runs `0`;
+  queued/started aggregate requests `0`; collection runner processes `0`; and
+  no scheduler advisory lock.
+- Re-enable rule: do not reactivate either runtime or DB switch until the
+  Product Owner explicitly requests it. Correct the scheduler due-item defect
+  and run its regression coverage before normal automation is restored.
+
+## 2026-08-20 - Bankoompare Public Discovery Refinement
+
+- Status: completed the requested Public copy, Home-scope, catalog-sort, and
+  Grid/List presentation refinement without changing financial data or APIs.
+- Brand copy: EN/KO/JA metadata, footer tagline, Home hero, and Deposit,
+  Credit Card, and Loan catalog headings now reinforce Bankoompare as a place
+  to look into bank products and compare grounded facts across banks.
+- Home scope: Home parsing and Home links retain only `locale` and
+  `country_code`; bank, Product Type, customer tag, amount, fee, term, sort,
+  page, axis, and catalog-view state from product screens no longer narrow
+  Home.
+- Catalog sort: Deposit now opens at `display_rate desc`, Credit Card at
+  `annual_fee asc`, and Loan at `display_rate asc`. The visible Default
+  option and legacy `sort_by=default` parsing path were removed.
+- View modes: accessible localized Grid/List icon controls now end the sort
+  rail. Grid retains the existing comparison cards; List renders compact rows
+  whose active sort value is visually dominant while Compare, detail, and
+  available official-bank actions remain reachable.
+  Catalog sort, page, and view state also travels through product detail and
+  back; rendered Credit Card HTML confirmed `annual_fee asc` plus List.
+- Responsive follow-up: long Japanese headings and source-derived product
+  names receive bounded wrapping, and Home/list containers now keep narrow
+  content from widening the document. The mobile sort/view rail remains an
+  intentionally bounded horizontal scroller.
+- Runtime checks: rendered HTML confirmed clean Home scope links, no active
+  Home scope section, Deposit Interest rate active with Grid, Credit Card
+  Annual fee active with List, Loan Interest rate active, and no Default sort.
+- Verification:
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build`: passed
+  - headless Chrome captures checked Home and catalogs at `1440px` and
+    `390px` in EN/KO/JA; a filtered Home request retained the full 126-product,
+    15-bank snapshot shown by the current local aggregate
+  - `git diff --check`: passed before journal closeout
+- Boundaries: no Admin, collection, canonical-data, Review, publish, or public
+  API mutation was performed. Automatic collection scheduling remains disabled.
+
+## 2026-08-20 - Public Instant Search, Infinite Loading, and Information Notice
+
+- Status: completed the requested Deposit, Credit Card, and Loan discovery
+  behavior plus Home/detail information notice without changing canonical
+  financial data, Review state, or publication gates.
+- Search API: public products and filters now accept a bounded q, normalize
+  whitespace, and match public bank or product names case-insensitively with
+  literal contains semantics. Percent and underscore remain literal. Applied
+  responses expose the normalized q; regression covers bank-name,
+  product-name, case, whitespace, wildcard-literal, and option-count behavior.
+- Instant conditions: every catalog includes a localized bank-or-product
+  search field. Search input is debounced 350ms; checkbox and select changes
+  update the shareable URL immediately. Apply was removed, filter changes start
+  at page 1, and Home continues to discard catalog search/filter state.
+- Continuous results: catalogs render the first 20 products and use a
+  same-origin Public route plus an IntersectionObserver sentinel to load and
+  deduplicate later API pages. Stale requests are aborted on scope changes;
+  localized loading/completion/error/retry states replace Previous/Next.
+  Grid/List and comparison remain available over appended rows.
+- Trust notice: a shared EN/KO/JA Home/detail notice identifies AI-agent
+  assistance, non-advertising, no compensation from displayed institutions,
+  update efforts, change risk, and required official-site verification before
+  applying.
+- Runtime verification: API was restarted on port 4000 only after confirming
+  the .env.dev scheduler flag was false; /healthz returned ok. Live API
+  searches returned seven Royal Bank deposit products for q=royal and one
+  product for q=Signature No Limit.
+- Verification:
+  - Public-products unit suite: 12 passed
+  - API standalone regression suite: 11 passed
+  - API package compile: passed
+  - Public pnpm run typecheck: passed
+  - Public pnpm run build: passed
+  - headless Chrome at exact 390px and 1440px: instant text search, instant RBC
+    checkbox, 20-to-64 product automatic loading, all three search fields,
+    Home/detail notice, and no horizontal overflow passed
+  - rendered HTML: no Apply or Previous/Next controls; same-origin next-page
+    proxy returned the standard public envelope
+- Operations: automatic collection scheduling remains disabled. No collection,
+  Review, canonical, aggregate-refresh, or publish operation was launched.

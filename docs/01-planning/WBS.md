@@ -318,6 +318,7 @@ Based on:
 | 5.33 | Completed | Bankoom Public experience refinement | centered-eye enlarged brand, calmer Home and catalog hierarchy, EN/KO/JA wrap discipline, shared product presentation formatting, bounded Public read caching, full responsive QA | Frontend, UX, QA | 5.14, 5.32 | 2026-08-15 |
 | 5.34 | Completed | Vancity collection failure recovery | format-aware browser fallback, exact-bank environment policy, compatibility-view schema resolution, non-product climate-report exclusion, Vancity-only full-coverage recollection and audit | Backend, AI/Data, QA | 5.15, 5.25, 5.27 | 2026-08-15 |
 | 5.35 | Completed | Vancity product coverage and comparison-quality recovery | seven audited official hubs, 45 exact retail details and split condition sources, Sitecore structured DOM parsing, exact sibling-product grounding, mixed-account-scope suppression, Vancity-only replacement collection, audited canonical remediation, and verified CA Public refresh | Backend, AI/Data, QA | 5.15, 5.27, 5.34 | 2026-08-20 |
+| 5.36 | Completed | first/subsequent precision source coverage | server-owned completed-history mode resolution, first-run precision discovery, bounded active-registry sibling sweep, run telemetry, optional EN/KO/JA rediscovery controls, current-scope standard collection, and missing-detail precision fallback | Backend, Frontend, AI/Data, QA | 5.15, 5.16, 5.25, 5.35 | 2026-08-20 |
 
 ### 5.5 Scope Baseline
 

@@ -1030,6 +1030,7 @@ async def launch_source_catalog_collection(request: Request, payload: SourceCata
         result = start_source_catalog_collection(
             connection,
             catalog_item_ids=payload.catalog_item_ids,
+            precision_rediscovery=payload.precision_rediscovery,
             actor=actor,
             request_context={
                 "request_id": request.state.request_id,
@@ -1148,6 +1149,7 @@ async def public_products(
     minimum_balance_bucket: str | None = None,
     minimum_deposit_bucket: str | None = None,
     term_bucket: str | None = None,
+    q: Annotated[str | None, Query(max_length=120)] = None,
     sort_by: str = "default",
     sort_order: Literal["asc", "desc"] = "desc",
     page: Annotated[int, Query(ge=1)] = 1,
@@ -1164,6 +1166,7 @@ async def public_products(
         minimum_balance_bucket=minimum_balance_bucket,
         minimum_deposit_bucket=minimum_deposit_bucket,
         term_bucket=term_bucket,
+        search_query=q,
         sort_by=sort_by,
         sort_order=sort_order,
         page=page,
@@ -1233,8 +1236,9 @@ async def public_filters(
     minimum_balance_bucket: str | None = None,
     minimum_deposit_bucket: str | None = None,
     term_bucket: str | None = None,
+    q: Annotated[str | None, Query(max_length=120)] = None,
 ) -> JSONResponse:
-    filters = normalize_public_products_query(
+    query = normalize_public_products_query(
         locale=locale,
         country_code=country_code,
         bank_codes=bank_code,
@@ -1245,15 +1249,20 @@ async def public_filters(
         minimum_balance_bucket=minimum_balance_bucket,
         minimum_deposit_bucket=minimum_deposit_bucket,
         term_bucket=term_bucket,
+        search_query=q,
         sort_by="default",
         sort_order="desc",
         page=1,
         page_size=20,
-    ).filters
+    )
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
-        payload = load_public_filters(connection, filters=filters)
-    return _success(payload, request, meta_extra={"locale": filters.locale})
+        payload = load_public_filters(
+            connection,
+            filters=query.filters,
+            search_query=query.search_query,
+        )
+    return _success(payload, request, meta_extra={"locale": query.filters.locale})
 
 
 @app.get("/api/public/countries")

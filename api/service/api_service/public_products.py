@@ -69,6 +69,7 @@ _REFERENCE_RANGE_PREFIX_PATTERN = re.compile(
 @dataclass(frozen=True)
 class PublicProductsQuery:
     filters: PublicQueryFilters
+    search_query: str | None
     sort_by: str
     sort_order: str
     page: int
@@ -87,6 +88,7 @@ def normalize_public_products_query(
     minimum_balance_bucket: str | None,
     minimum_deposit_bucket: str | None,
     term_bucket: str | None,
+    search_query: str | None = None,
     sort_by: str | None,
     sort_order: str | None,
     page: int,
@@ -113,6 +115,7 @@ def normalize_public_products_query(
             minimum_deposit_bucket=minimum_deposit_bucket,
             term_bucket=term_bucket,
         ),
+        search_query=_normalize_name_search(search_query),
         sort_by=normalized_sort_by,
         sort_order=normalized_sort_order,
         page=page,
@@ -126,7 +129,7 @@ def load_public_products(connection, *, query: PublicProductsQuery) -> dict[str,
     if not snapshot:
         return {
             "items": [],
-            "applied_filters": applied_filters_payload(query.filters),
+            "applied_filters": _applied_filters(query.filters, search_query=query.search_query),
             "sort": {"sort_by": query.sort_by, "sort_order": query.sort_order},
             "freshness": freshness,
             "page": query.page,
@@ -141,7 +144,10 @@ def load_public_products(connection, *, query: PublicProductsQuery) -> dict[str,
         snapshot_id=str(snapshot["snapshot_id"]),
         country_code=query.filters.country_code,
     )
-    filtered_rows = apply_public_filters(rows, filters=query.filters)
+    filtered_rows = _apply_name_search(
+        apply_public_filters(rows, filters=query.filters),
+        search_query=query.search_query,
+    )
     sorted_rows = _sort_rows(filtered_rows, query=query)
     total_items = len(sorted_rows)
     total_pages = (total_items + query.page_size - 1) // query.page_size if total_items else 0
@@ -149,7 +155,7 @@ def load_public_products(connection, *, query: PublicProductsQuery) -> dict[str,
 
     return {
         "items": [_serialize_product_row(row, locale=query.filters.locale) for row in page_rows],
-        "applied_filters": applied_filters_payload(query.filters),
+        "applied_filters": _applied_filters(query.filters, search_query=query.search_query),
         "sort": {"sort_by": query.sort_by, "sort_order": query.sort_order},
         "freshness": freshness,
         "page": query.page,
@@ -186,7 +192,13 @@ def load_public_product_detail(connection, *, product_id: str, filters: PublicQu
     }
 
 
-def load_public_filters(connection, *, filters: PublicQueryFilters) -> dict[str, Any]:
+def load_public_filters(
+    connection,
+    *,
+    filters: PublicQueryFilters,
+    search_query: str | None = None,
+) -> dict[str, Any]:
+    normalized_search_query = _normalize_name_search(search_query)
     countries = load_available_public_countries(connection)
     snapshot = load_latest_public_snapshot(connection, country_code=filters.country_code)
     freshness = build_freshness_payload(snapshot, cache_ttl_sec=300)
@@ -201,7 +213,7 @@ def load_public_filters(connection, *, filters: PublicQueryFilters) -> dict[str,
             "minimum_balance_buckets": [],
             "minimum_deposit_buckets": [],
             "term_buckets": [],
-            "applied_filters": applied_filters_payload(filters),
+            "applied_filters": _applied_filters(filters, search_query=normalized_search_query),
             "freshness": freshness,
         }
 
@@ -210,7 +222,10 @@ def load_public_filters(connection, *, filters: PublicQueryFilters) -> dict[str,
         snapshot_id=str(snapshot["snapshot_id"]),
         country_code=filters.country_code,
     )
-    filtered_rows = apply_public_filters(rows, filters=filters)
+    filtered_rows = _apply_name_search(
+        apply_public_filters(rows, filters=filters),
+        search_query=normalized_search_query,
+    )
     locale = filters.locale
     return {
         "countries": countries,
@@ -236,9 +251,34 @@ def load_public_filters(connection, *, filters: PublicQueryFilters) -> dict[str,
         "minimum_balance_buckets": _count_bucket_options(filtered_rows, field_name="minimum_balance_bucket", locale=locale),
         "minimum_deposit_buckets": _count_bucket_options(filtered_rows, field_name="minimum_deposit_bucket", locale=locale),
         "term_buckets": _count_bucket_options(filtered_rows, field_name="term_bucket", locale=locale),
-        "applied_filters": applied_filters_payload(filters),
+        "applied_filters": _applied_filters(filters, search_query=normalized_search_query),
         "freshness": freshness,
     }
+
+
+def _normalize_name_search(value: str | None) -> str | None:
+    normalized = " ".join((value or "").strip().split())
+    return normalized[:120] or None
+
+
+def _apply_name_search(
+    rows: list[dict[str, Any]],
+    *,
+    search_query: str | None,
+) -> list[dict[str, Any]]:
+    if not search_query:
+        return rows
+    needle = search_query.casefold()
+    return [
+        row
+        for row in rows
+        if needle in str(row.get("bank_name") or "").casefold()
+        or needle in str(row.get("product_name") or "").casefold()
+    ]
+
+
+def _applied_filters(filters: PublicQueryFilters, *, search_query: str | None) -> dict[str, Any]:
+    return {**applied_filters_payload(filters), "q": search_query}
 
 
 def load_available_public_countries(connection) -> list[dict[str, Any]]:

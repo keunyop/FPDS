@@ -13,7 +13,10 @@ The shell puts four daily tasks first:
    guarded decision.
 3. **Runs** — find failed or partial collection work and inspect or retry it.
 4. **Banks** — add banks manually or through grounded AI research, manage
-   coverage, and launch collection.
+   coverage, and launch collection. A bank/Product Type with no completed run
+   always performs precision source discovery. Completed items expose an
+   optional precision-rediscovery checkbox; leaving it off collects from the
+   current active source scope.
 
 Before entering the workspace, the operator selects an enabled working country
 on the login form. The API persists that ISO alpha-2 code in the server-side
@@ -74,6 +77,10 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 - Do not expose evidence, review state, or private source traces to Public.
 - Keep `/admin/source-catalog/*` proxy handlers: Banks collection uses them even
   though the matching page routes redirect.
+- Treat `has_completed_collection` as server-owned history. The UI may request
+  precision rediscovery for completed items, but it must not provide a way to
+  bypass required first-time discovery. Mixed bulk selections apply the option
+  only to completed items.
 - Keep `data-admin-dirty` and mutation-pending signals so automatic refresh
   pauses during edits, dialogs, and writes.
 

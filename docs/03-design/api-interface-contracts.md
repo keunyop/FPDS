@@ -1,4 +1,4 @@
-﻿# FPDS API and Interface Contracts
+# FPDS API and Interface Contracts
 
 Version: 1.0
 Date: 2026-04-01
@@ -177,6 +177,7 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 |---|---|---|
 | `locale` | string | `en`, `ko`, `ja`, default locale fallback 허용 |
 | `country_code` | string | Phase 1 baseline은 `CA` |
+| q | string | products/filters endpoint 전용, 최대 120자; bank/product name literal substring |
 | `bank_code` | string or repeated | multi-select 허용 |
 | `product_type` | string or repeated | `chequing`, `savings`, `gic` |
 | `subtype_code` | string or repeated | optional |
@@ -197,6 +198,13 @@ Country rules:
   user geolocation inference
 - product, detail, filter, summary, ranking, and scatter reads use the latest
   completed snapshot for the same country
+
+Name-search rules:
+- q is trimmed, internal whitespace is collapsed, and matching is
+  case-insensitive against only public bank_name and product_name
+- matching uses literal contains semantics; user-entered percent and
+  underscore do not become wildcards, and evidence/private fields are never
+  searched
 
 ### 4.3 `GET /api/public/products`
 

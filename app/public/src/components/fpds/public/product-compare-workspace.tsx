@@ -1,14 +1,14 @@
 "use client";
 
-import { Check, ExternalLink, GitCompareArrows, Plus, X } from "lucide-react";
+import { Check, ExternalLink, GitCompareArrows, LoaderCircle, Plus, RefreshCw, X } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { Button } from "@/components/ui/button";
-import { getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
-import type { PublicProduct } from "@/lib/public-api";
-import { buildPublicProductMetrics } from "@/lib/public-product-presentation";
+import { formatPublicMessage, getPublicDesignCopy, getPublicDiscoveryCopy, getPublicMessages } from "@/lib/public-locale";
+import type { PublicProduct, PublicProductsResponse } from "@/lib/public-api";
+import { buildPublicProductMetrics, buildPublicSortMetric } from "@/lib/public-product-presentation";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
 
@@ -16,17 +16,126 @@ const MAX_COMPARE_PRODUCTS = 4;
 
 type ProductCompareWorkspaceProps = {
   filters: ProductGridPageFilters;
+  initialProducts: PublicProductsResponse;
   locale: string;
-  products: PublicProduct[];
+  productsQuery: string;
 };
 
-export function ProductCompareWorkspace({ filters, locale, products }: ProductCompareWorkspaceProps) {
+type ProductPresentationProps = {
+  compareDisabled: boolean;
+  filters: ProductGridPageFilters;
+  locale: string;
+  onToggle: () => void;
+  product: PublicProduct;
+  selected: boolean;
+};
+
+type PublicProductsEnvelope = {
+  data: PublicProductsResponse;
+};
+
+type LoadState = "idle" | "loading" | "error";
+
+export function ProductCompareWorkspace({
+  filters,
+  initialProducts,
+  locale,
+  productsQuery
+}: ProductCompareWorkspaceProps) {
   const copy = getPublicMessages(locale);
+  const discoveryCopy = getPublicDiscoveryCopy(locale);
+  const [products, setProducts] = useState<PublicProduct[]>(initialProducts.items);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [nextPage, setNextPage] = useState(initialProducts.page + 1);
+  const [hasNextPage, setHasNextPage] = useState(initialProducts.has_next_page);
+  const [loadState, setLoadState] = useState<LoadState>("idle");
+  const requestRef = useRef<AbortController | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const selectedProducts = useMemo(
     () => selectedIds.map((productId) => products.find((product) => product.product_id === productId)).filter((product): product is PublicProduct => Boolean(product)),
     [products, selectedIds]
   );
+
+  useEffect(() => {
+    requestRef.current?.abort();
+    requestRef.current = null;
+    setProducts(initialProducts.items);
+    setSelectedIds([]);
+    setNextPage(initialProducts.page + 1);
+    setHasNextPage(initialProducts.has_next_page);
+    setLoadState("idle");
+  }, [productsQuery]);
+
+  useEffect(() => {
+    return () => requestRef.current?.abort();
+  }, []);
+
+  const loadMore = useCallback(async () => {
+    if (!hasNextPage || loadState === "loading") {
+      return;
+    }
+
+    const controller = new AbortController();
+    requestRef.current?.abort();
+    requestRef.current = controller;
+    setLoadState("loading");
+
+    try {
+      const params = new URLSearchParams(productsQuery);
+      params.set("page", String(nextPage));
+      const response = await fetch(`/api/public/products?${params.toString()}`, {
+        cache: "no-store",
+        signal: controller.signal
+      });
+      if (!response.ok) {
+        throw new Error("More public products could not be loaded.");
+      }
+
+      const envelope = await response.json() as PublicProductsEnvelope;
+      const nextProducts = envelope.data;
+      if (nextProducts.page !== nextPage) {
+        throw new Error("The public products page did not match the requested page.");
+      }
+
+      setProducts((current) => {
+        const existingIds = new Set(current.map((product) => product.product_id));
+        return [
+          ...current,
+          ...nextProducts.items.filter((product) => !existingIds.has(product.product_id))
+        ];
+      });
+      setNextPage(nextProducts.page + 1);
+      setHasNextPage(nextProducts.has_next_page);
+      setLoadState("idle");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+      setLoadState("error");
+    } finally {
+      if (requestRef.current === controller) {
+        requestRef.current = null;
+      }
+    }
+  }, [hasNextPage, loadState, nextPage, productsQuery]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasNextPage || loadState === "error") {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          void loadMore();
+        }
+      },
+      { rootMargin: "320px 0px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, loadMore, loadState]);
 
   function toggleProduct(productId: string) {
     setSelectedIds((current) => {
@@ -71,29 +180,130 @@ export function ProductCompareWorkspace({ filters, locale, products }: ProductCo
         />
       ) : null}
 
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <section className={cn("grid", filters.viewMode === "list" ? "gap-2" : "gap-5 md:grid-cols-2 xl:grid-cols-3")}>
         {products.map((product) => {
           const selected = selectedIds.includes(product.product_id);
           const compareDisabled = !selected && selectedIds.length >= MAX_COMPARE_PRODUCTS;
-          return (
-            <ProductCompareCard
-              compareDisabled={compareDisabled}
-              filters={filters}
+          const presentationProps = {
+            compareDisabled,
+            filters,
+            locale,
+            onToggle: () => toggleProduct(product.product_id),
+            product,
+            selected
+          };
+
+          return filters.viewMode === "list" ? (
+            <ProductCompareListItem
+              {...presentationProps}
               key={product.product_id}
-              locale={locale}
-              onToggle={() => toggleProduct(product.product_id)}
-              product={product}
-              selected={selected}
+            />
+          ) : (
+            <ProductCompareCard
+              {...presentationProps}
+              key={product.product_id}
             />
           );
         })}
       </section>
+
+      <div className="flex min-h-16 items-center justify-center border-t border-border pt-4" ref={sentinelRef}>
+        {loadState === "loading" ? (
+          <p className="inline-flex items-center gap-2 text-sm text-muted-foreground" role="status">
+            <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            {discoveryCopy.loadingMore}
+          </p>
+        ) : loadState === "error" ? (
+          <div className="flex flex-wrap items-center justify-center gap-3" role="alert">
+            <p className="text-sm text-muted-foreground">{discoveryCopy.loadMoreError}</p>
+            <Button onClick={() => void loadMore()} size="sm" type="button" variant="outline">
+              <RefreshCw className="size-4" aria-hidden="true" />
+              {discoveryCopy.retryLoadMore}
+            </Button>
+          </div>
+        ) : !hasNextPage ? (
+          <p className="text-xs text-muted-foreground" role="status">{formatPublicMessage(discoveryCopy.allProductsLoaded, { count: initialProducts.total_items })}</p>
+        ) : null}
+      </div>
+
       <p className="sr-only" aria-live="polite">
         {selectedProducts.length
           ? copy.compare.selectedCount.replace("{count}", String(selectedProducts.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))
           : copy.compare.emptyTitle}
       </p>
     </section>
+  );
+}
+
+function ProductCompareListItem({
+  compareDisabled,
+  filters,
+  locale,
+  onToggle,
+  product,
+  selected
+}: ProductPresentationProps) {
+  const copy = getPublicMessages(locale);
+  const sortMetric = buildPublicSortMetric(product, locale, filters.sortBy);
+  const detailHref = buildProductDetailHref(filters, product.product_id);
+
+  return (
+    <article
+      className={cn(
+        "relative overflow-hidden border border-foreground/15 bg-card/80 transition-colors hover:border-foreground/30",
+        "before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-verification/55",
+        product.product_family === "lending" && "before:bg-loan/70",
+        selected && "border-maple/45 before:bg-maple"
+      )}
+    >
+      <div className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_minmax(8.5rem,auto)_auto] sm:items-center sm:px-5">
+        <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
+          <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
+          <div className="min-w-0">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="truncate text-xs font-medium text-muted-foreground">{product.bank_name}</span>
+              <span className="whitespace-nowrap rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                {product.product_type_label}
+              </span>
+            </div>
+            <h2 className="mt-0.5 text-sm font-semibold leading-snug text-foreground sm:text-base">
+              <Link className="flex min-h-11 min-w-0 items-center hover:text-primary [overflow-wrap:anywhere]" href={detailHref}>
+                {product.product_name}
+              </Link>
+            </h2>
+          </div>
+        </div>
+
+        <dl className={cn(
+          "border-l-2 pl-3",
+          product.product_family === "lending" ? "border-loan" : "border-primary",
+          selected && "border-maple"
+        )}>
+          <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{sortMetric.label}</dt>
+          <dd className={cn(
+            "mt-1 max-w-64 break-words font-display text-xl font-semibold leading-tight tracking-[-0.03em] text-primary tabular-nums",
+            product.product_family === "lending" && "text-loan",
+            selected && "text-maple"
+          )}>
+            {sortMetric.value}
+          </dd>
+        </dl>
+
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <Button aria-pressed={selected} className="min-h-11 rounded-full px-4" disabled={compareDisabled} onClick={onToggle} size="sm" type="button" variant={selected ? "default" : "outline"}>
+            {selected ? <Check className="size-4" aria-hidden="true" /> : <Plus className="size-4" aria-hidden="true" />}
+            {selected ? copy.compare.selected : copy.compare.select}
+          </Button>
+          {product.product_url ? (
+            <a className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap px-1 text-sm font-medium text-primary hover:text-primary/80" href={product.product_url} target="_blank" rel="noopener noreferrer">
+              {copy.common.bankPage}
+              <ExternalLink className="size-3.5" aria-hidden="true" />
+            </a>
+          ) : null}
+        </div>
+      </div>
+      {compareDisabled ? <p className="px-4 pb-3 text-xs leading-5 text-muted-foreground sm:px-5">{copy.compare.limit}</p> : null}
+    </article>
   );
 }
 
@@ -104,14 +314,7 @@ function ProductCompareCard({
   onToggle,
   product,
   selected
-}: {
-  compareDisabled: boolean;
-  filters: ProductGridPageFilters;
-  locale: string;
-  onToggle: () => void;
-  product: PublicProduct;
-  selected: boolean;
-}) {
+}: ProductPresentationProps) {
   const copy = getPublicMessages(locale);
   const metrics = buildPublicProductMetrics(product, locale, "card").slice(0, 3);
   const [primaryMetric, ...secondaryMetrics] = metrics;

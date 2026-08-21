@@ -10,10 +10,10 @@ export function PublicMark({ className = "" }: { className?: string }) {
       )}
     >
       <svg className="h-7 w-9" viewBox="0 0 32 24" fill="none">
-        <circle cx="10" cy="12" r="7" stroke="currentColor" strokeWidth="2.5" />
-        <circle cx="22" cy="12" r="7" stroke="currentColor" strokeWidth="2.5" />
-        <circle cx="10" cy="12" r="2" fill="currentColor" />
-        <circle cx="22" cy="12" r="2" fill="currentColor" />
+        <circle cx="8.75" cy="12" r="6.5" stroke="currentColor" strokeWidth="2.5" />
+        <circle cx="23.25" cy="12" r="6.5" stroke="currentColor" strokeWidth="2.5" />
+        <circle cx="8.75" cy="12" r="2" fill="currentColor" />
+        <circle cx="23.25" cy="12" r="2" fill="currentColor" />
       </svg>
     </span>
   );
@@ -27,9 +27,9 @@ export function PublicWordmark({
   eyeClassName?: string;
 }) {
   return (
-    <span aria-label="Bankoom" className={cn("inline-flex items-baseline whitespace-nowrap", className)}>
+    <span aria-label="Bankoompare" className={cn("inline-flex items-baseline whitespace-nowrap", className)}>
       <span aria-hidden="true">
-        Bank<span className={eyeClassName}>oo</span>m
+        Bank<span className={eyeClassName}>oo</span>mpare
       </span>
     </span>
   );

@@ -751,6 +751,8 @@ export type SourceCollectionLaunchResponse = {
     country_code: string;
     product_type: string;
     source_language: string;
+    has_completed_collection?: boolean;
+    source_coverage_mode?: "precision" | "standard" | "precision_fallback";
     target_source_ids: string[];
     included_source_ids: string[];
   }>;
@@ -777,6 +779,7 @@ export type BankItem = {
     product_type: string;
     status: string;
     generated_source_count: number;
+    has_completed_collection: boolean;
   }>;
   generated_source_count: number;
 };
@@ -811,6 +814,7 @@ export type BankDetailResponse = {
     logo_alt_text: string | null;
     source_language: string;
     generated_source_count: number;
+    has_completed_collection: boolean;
     change_reason: string | null;
     created_at: string | null;
     updated_at: string | null;
@@ -862,6 +866,7 @@ export type SourceCatalogItem = {
   logo_alt_text: string | null;
   source_language: string;
   generated_source_count: number;
+  has_completed_collection: boolean;
   change_reason: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -916,7 +921,12 @@ export type SourceCatalogCollectionLaunchResponse = SourceCollectionLaunchRespon
     collection_source_ids: string[];
     target_source_ids: string[];
     discovery_notes: string[];
-    discovery_status: "detail_sources_ready" | "no_detail_sources_discovered";
+    discovery_status:
+      | "detail_sources_ready"
+      | "preserved_existing_detail_scope"
+      | "reused_existing_detail_scope"
+      | "no_detail_sources_discovered"
+      | "product_not_currently_offered";
   }>;
   workflow_state?: "queued" | "completed";
   queued_catalog_item_count?: number;

@@ -9,17 +9,14 @@ import { PublicMark, PublicWordmark } from "@/components/fpds/public/public-mark
 import { getPublicMessages, normalizePublicLocale, type PublicLocale } from "@/lib/public-locale";
 import { buildScopedPublicHrefFromSearchParams } from "@/lib/public-query";
 
-const FOOTER_COPY: Record<PublicLocale, { brandNote: string; legalNote: string }> = {
+const FOOTER_COPY: Record<PublicLocale, { legalNote: string }> = {
   en: {
-    brandNote: "Reviewed bank products, in one place.",
     legalNote: "Information may change. Confirm rates and conditions on the bank's official page."
   },
   ko: {
-    brandNote: "검토된 은행 상품을 한곳에서 비교하세요.",
     legalNote: "정보는 변경될 수 있습니다. 가입 전 은행 공식 페이지에서 금리와 조건을 확인하세요."
   },
   ja: {
-    brandNote: "レビュー済みの銀行商品をひとつの場所で比較。",
     legalNote: "情報は変更される場合があります。申込前に銀行の公式ページで金利と条件を確認してください。"
   }
 };
@@ -47,7 +44,7 @@ function FooterContent() {
                 eyeClassName="text-background"
               />
             </Link>
-            <p className="mt-1 text-sm text-background/65">{footerCopy.brandNote}</p>
+            <p className="mt-1 text-sm text-background/65">{copy.shell.tagline}</p>
           </div>
 
           <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-background" aria-label={copy.nav.footerLabel}>

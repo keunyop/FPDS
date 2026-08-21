@@ -155,6 +155,15 @@ Current live workflow note:
 - `/admin/banks` is now the primary operator-owned surface for bank setup, bank-owned coverage management, and collection launch.
 - `/admin/source-catalog` may still exist as a compatibility route, but it is no longer the preferred primary workflow.
 - bank list bulk collect is allowed as long as the action resolves to the underlying bank-plus-product coverage items.
+- a bank/Product Type without a completed ingestion run carrying a non-empty
+  source scope always performs precision discovery; generated source count
+  alone is not completion
+- after completion, single and bulk Banks collection accept an explicit
+  precision-rediscovery option. Completed items default to current active
+  source reuse, while first-time items in the same bulk request stay precision
+- standard reuse is valid only with an active `detail` source. If the scope
+  was removed or became empty before execution, the runner forces precision
+  discovery and records that fallback
 
 Current AI bank-onboarding note:
 - an `admin` may request `1` to `10` missing banks for the authenticated
@@ -246,6 +255,15 @@ Current live product-type onboarding note:
   are filtered before fetch or merge.
 - Source collection plans and extraction artifacts must carry `product_family` from the product type registry so lending candidates are not normalized as deposits.
 - Known Big 5 seed entry URLs are authoritative for homepage-first collection. When a bank has approved seed registry rows, collection must materialize the `entry` row from that official product-list URL rather than from a homepage-discovered hub.
+- Precision discovery may reuse active DB registry `entry` and `detail`
+  rows after official-domain, country, source-language, and Product Type
+  validation. It may inspect at most 12 existing detail pages for current
+  sibling-product links, and every resulting candidate still requires normal
+  page-evidence and product-boundary validation
+- precision run metadata must expose reused/rejected seed counts, attempted
+  and successful hub/detail page counts, candidate and promoted/rejected
+  counts, and every reached cap; this telemetry is operational context, not
+  public evidence
 - Discovery must reject investor/shareholder pages, registered-plan wrapper pages such as TFSA/RRSP/RESP/FHSA packaging, and links whose URL or visible title clearly belongs to another product type before promoting generated source rows.
 - A source-catalog collect should merge newly generated source rows with existing active detail rows for the same bank/product scope so a partial discovery pass does not accidentally shrink candidate-producing coverage.
 - A successful rediscovery should deactivate only explicitly rejected, non-seed, automatically generated detail rows in the same bank/Product Type scope. It must preserve seed rows and candidates whose page fetch was unavailable, so stale false-positive details leave collection scope without treating transient fetch failures as deletion evidence.

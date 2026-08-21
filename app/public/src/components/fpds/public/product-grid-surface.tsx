@@ -1,14 +1,15 @@
-import { ArrowDownUp, ChevronDown, RefreshCw, SlidersHorizontal, X } from "lucide-react";
+import { ArrowDownUp, ChevronDown, LayoutGrid, List, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { InstantFilterForm } from "@/components/fpds/public/instant-filter-form";
 import { ProductCompareWorkspace } from "@/components/fpds/public/product-compare-workspace";
 import { PublicFreshness } from "@/components/fpds/public/public-freshness";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { formatPublicMessage, getIntlLocale, getPublicCatalogCopy, getPublicMessages } from "@/lib/public-locale";
+import { formatPublicMessage, getIntlLocale, getPublicCatalogCopy, getPublicDiscoveryCopy, getPublicMessages } from "@/lib/public-locale";
 import { type PublicFilterOption, type PublicFiltersResponse, type PublicProductsResponse } from "@/lib/public-api";
-import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
+import { buildProductsSearchParams, buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
 
 type ProductGridSurfaceProps = {
@@ -27,10 +28,12 @@ type SortOption = {
 
 export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, filters, products }: ProductGridSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
+  const discoveryCopy = getPublicDiscoveryCopy(filters.locale);
   const catalogCopy = getPublicCatalogCopy(filters.locale, catalog);
   const catalogPath: CatalogPath = catalog === "loan" ? "/loans" : catalog === "card" ? "/cards" : "/products";
   const clearHref = buildCatalogHref(catalogPath, {
     ...filters,
+    searchQuery: "",
     bankCodes: [],
     productTypes: [],
     targetCustomerTags: [],
@@ -66,7 +69,6 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
   const selectedTypes = new Set(filters.productTypes);
   const gicOnly = selectedTypes.size === 1 && selectedTypes.has("gic");
   const isDeposit = catalog === "deposit";
-  const pagination = buildPagination(products, filters, catalogPath);
   const sortOptions: SortOption[] = catalog === "loan"
     ? [
         { value: "display_rate", label: copy.grid.sortDisplayRate, order: "asc" },
@@ -94,8 +96,8 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
               <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.16em] ${catalog === "deposit" ? "text-deposit" : "text-loan"}`}>
                 {catalogCopy.coverage}
               </p>
-              <h1 className="text-balance mt-3 font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground md:text-6xl">{catalogCopy.title}</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">{catalogCopy.description}</p>
+              <h1 className="text-balance mt-3 max-w-full font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground [overflow-wrap:anywhere] md:text-6xl">{catalogCopy.title}</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere] md:text-base">{catalogCopy.description}</p>
             </div>
             <div className="flex flex-col items-start gap-3 lg:items-end">
               <p className="whitespace-nowrap font-mono text-xs font-semibold text-foreground">
@@ -119,10 +121,28 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
               <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
             </summary>
             <CardContent className="border-t border-border/70 px-4 py-4 sm:px-5">
-              <form action={catalogPath} className="grid gap-4">
+              <InstantFilterForm action={catalogPath} pendingMessage={discoveryCopy.updatingResults}>
                 <input name="locale" type="hidden" value={filters.locale} />
+                <input name="country_code" type="hidden" value={filters.countryCode} />
                 <input name="sort_by" type="hidden" value={filters.sortBy} />
                 <input name="sort_order" type="hidden" value={filters.sortOrder} />
+                {filters.viewMode === "list" ? <input name="view" type="hidden" value="list" /> : null}
+
+                <label className="grid max-w-2xl gap-1.5">
+                  <span className="text-sm font-medium text-foreground">{discoveryCopy.searchLabel}</span>
+                  <span className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                    <input
+                      className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                      defaultValue={filters.searchQuery}
+                      key={filters.searchQuery || "empty-search"}
+                      maxLength={120}
+                      name="q"
+                      placeholder={discoveryCopy.searchPlaceholder}
+                      type="search"
+                    />
+                  </span>
+                </label>
 
                 <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
                   <FilterGroup label={copy.grid.banks}>
@@ -170,13 +190,12 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
                   </div>
                 ) : null}
 
-                <div className="flex flex-col-reverse gap-2 border-t border-border/70 pt-4 sm:flex-row sm:justify-end">
+                <div className="flex justify-end border-t border-border/70 pt-4">
                   <Button asChild type="button" variant="outline">
                     <Link href={clearHref}>{copy.common.clearFilters}</Link>
                   </Button>
-                  <Button className="sm:min-w-24" type="submit">{copy.common.applyFilters}</Button>
                 </div>
-              </form>
+              </InstantFilterForm>
             </CardContent>
           </details>
         </section>
@@ -190,7 +209,12 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
         />
 
         {products.items.length ? (
-          <ProductCompareWorkspace filters={filters} locale={filters.locale} products={products.items} />
+          <ProductCompareWorkspace
+            filters={filters}
+            initialProducts={products}
+            locale={filters.locale}
+            productsQuery={buildProductsSearchParams(filters).toString()}
+          />
         ) : (
           <Card className="border-dashed">
             <CardHeader>
@@ -204,26 +228,6 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
             </CardContent>
           </Card>
         )}
-
-        {pagination ? (
-          <nav className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3" aria-label={copy.common.pageLabel}>
-            <p className="text-sm text-muted-foreground tabular-nums">
-              {copy.common.pageLabel} {products.page} / {products.total_pages}
-            </p>
-            <div className="flex gap-2">
-              <Button asChild variant="outline">
-                <Link aria-disabled={!pagination.hasPrevious} className={cn(!pagination.hasPrevious && "pointer-events-none opacity-50")} href={pagination.previousHref}>
-                  {copy.common.previous}
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link aria-disabled={!pagination.hasNext} className={cn(!pagination.hasNext && "pointer-events-none opacity-50")} href={pagination.nextHref}>
-                  {copy.common.next}
-                </Link>
-              </Button>
-            </div>
-          </nav>
-        ) : null}
       </div>
     </main>
   );
@@ -273,9 +277,6 @@ function DiscoveryToolbar({
           <ArrowDownUp className="size-3.5" aria-hidden="true" />
           {copy.grid.sortBy}
         </span>
-        <SortLink active={filters.sortBy === "default"} href={buildCatalogHref(catalogPath, { ...filters, page: 1, sortBy: "default", sortOrder: "desc" })}>
-          {copy.grid.sortDefault}
-        </SortLink>
         {options.map((option) => (
           <SortLink
             active={filters.sortBy === option.value}
@@ -285,6 +286,23 @@ function DiscoveryToolbar({
             {option.label}
           </SortLink>
         ))}
+        <span className="ml-1 h-6 w-px shrink-0 bg-border" aria-hidden="true" />
+        <div className="flex shrink-0 items-center rounded-lg border border-border bg-card/60 p-0.5" role="group" aria-label={copy.grid.viewMode}>
+          <ViewLink
+            active={filters.viewMode === "grid"}
+            href={buildCatalogHref(catalogPath, { ...filters, viewMode: "grid" })}
+            label={copy.grid.gridView}
+          >
+            <LayoutGrid className="size-4" aria-hidden="true" />
+          </ViewLink>
+          <ViewLink
+            active={filters.viewMode === "list"}
+            href={buildCatalogHref(catalogPath, { ...filters, viewMode: "list" })}
+            label={copy.grid.listView}
+          >
+            <List className="size-4" aria-hidden="true" />
+          </ViewLink>
+        </div>
       </div>
     </section>
   );
@@ -299,6 +317,25 @@ function SortLink({ active, children, href }: { active: boolean; children: React
         active ? "border-foreground bg-foreground text-background" : "border-border bg-card/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
       )}
       href={href}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function ViewLink({ active, children, href, label }: { active: boolean; children: ReactNode; href: string; label: string }) {
+  return (
+    <Link
+      aria-current={active ? "page" : undefined}
+      aria-label={label}
+      className={cn(
+        "inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors",
+        active
+          ? "bg-foreground text-background"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      )}
+      href={href}
+      title={label}
     >
       {children}
     </Link>
@@ -333,7 +370,7 @@ function OptionGrid({
     <div className="grid max-h-52 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
       {options.map((option) => (
         <label
-          key={option.value}
+          key={[option.value, selectedValues.has(option.value)].join("-")}
           className={cn(
             "flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-sm transition-colors hover:bg-muted/70",
             selectedValues.has(option.value) ? "border-primary/40 bg-primary/5" : "border-border bg-background"
@@ -369,6 +406,7 @@ function SelectField({
       <select
         className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         defaultValue={value}
+        key={[name, value].join("-")}
         name={name}
       >
         <option value="">{getPublicMessages(locale).common.all}</option>
@@ -384,6 +422,15 @@ function SelectField({
 
 function buildActiveChips(filters: ProductGridPageFilters, filterOptions: PublicFiltersResponse, catalogPath: CatalogPath) {
   const chips: Array<{ group: string; href: string; label: string; value: string }> = [];
+
+  if (filters.searchQuery) {
+    chips.push({
+      group: "q",
+      href: buildCatalogHref(catalogPath, { ...filters, searchQuery: "", page: 1 }),
+      label: formatPublicMessage(getPublicDiscoveryCopy(filters.locale).searchChip, { query: filters.searchQuery }),
+      value: filters.searchQuery
+    });
+  }
 
   for (const bankCode of filters.bankCodes) {
     chips.push({
@@ -428,19 +475,6 @@ function addSingleChip(
   if (value) {
     chips.push({ group, href, label: findLabel(options, value), value });
   }
-}
-
-function buildPagination(products: PublicProductsResponse, filters: ProductGridPageFilters, catalogPath: CatalogPath) {
-  if (products.total_pages <= 1) {
-    return null;
-  }
-
-  return {
-    hasPrevious: products.page > 1,
-    hasNext: products.page < products.total_pages,
-    previousHref: buildCatalogHref(catalogPath, { ...filters, page: Math.max(1, products.page - 1) }),
-    nextHref: buildCatalogHref(catalogPath, { ...filters, page: Math.min(products.total_pages, products.page + 1) })
-  };
 }
 
 function buildCatalogHref(catalogPath: CatalogPath, filters: ProductGridPageFilters) {

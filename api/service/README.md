@@ -146,6 +146,14 @@ cd api/service
 ## Notes
 
 - Public read routes now use the latest successful `aggregate_refresh_run` snapshot and read from `public_product_projection`.
+- GET /api/public/products and GET /api/public/filters accept an optional q
+  value up to 120 characters. It is normalized for surrounding/repeated
+  whitespace and matches bank_name or product_name case-insensitively as a
+  literal substring; percent and underscore are ordinary characters, not
+  query wildcards. The normalized value is returned as applied_filters.q.
+- Public list pagination remains page/page_size API state so the web catalog
+  can load successive pages without exposing raw evidence or new data.
+
 - API lifespan starts one database-advisory-lock-elected collection scheduler
   when `FPDS_AUTOMATION_SCHEDULER_ENABLED=true`. Policy rows from migration
   `0035` control the weekly active-catalog cadence, six-scope batch size,
@@ -264,7 +272,21 @@ cd api/service
 - Bank create and update now accept homepage URLs without an explicit scheme by normalizing them to `https://...`, while still rejecting invalid non-http(s) values with a validation error instead of a server crash.
 - Bank delete now removes only the bank profile plus admin-managed coverage and generated-source rows; if collected source documents or downstream candidate/product history already exist, the API blocks deletion with a conflict response so operational history is not orphaned.
 - Existing bank homepage values are no longer auto-repaired from committed seed data during runtime reads or admin writes; reset and replay flows now preserve intentionally empty operator-managed state.
-- Source catalog collection now treats a catalog item as `bank homepage + product coverage`, regenerates `source_registry_item` rows from the bank homepage on each collect, and queues the homepage-discovery plus materialization work on a background API-side runner before the deeper worker stages continue.
+- Source catalog collection treats a catalog item as `bank homepage + product
+  coverage` and derives first-versus-subsequent behavior from completed
+  `ingestion_run` history with a non-empty source scope. First collection is
+  forced to bounded precision discovery. After completion,
+  `precision_rediscovery=false` reuses the current active source scope, while
+  `true` repeats precision materialization; a missing active detail forces a
+  precision fallback. The API queues this work on a background runner before
+  deeper worker stages continue.
+- Precision discovery reuses the verified homepage and coverage route plus
+  eligible active official registry entry/detail rows. It inspects no more
+  than 12 existing detail pages for newly linked sibling products and evidence
+  routes, while retaining all existing hub, candidate, domain, country,
+  source-language, SSRF, page-evidence, product-boundary, and companion caps.
+  Run metadata records the effective mode and seed/page/candidate/result/limit
+  telemetry.
 - AI-created coverage preserves its verified official `coverage_source_url` on
   the catalog row and gives that route first priority during bounded discovery.
   A separate consumer-brand domain is accepted only with exact official bank-
@@ -299,7 +321,10 @@ cd api/service
   that becomes unavailable only after discovery remains an explicit isolated
   partial-source failure.
 - Source catalog collect now creates `ingestion_run` rows immediately and returns a fast queued response so `/admin/banks` and compatibility source-catalog actions no longer wait on homepage discovery or candidate-page validation before responding.
-- Homepage-first collection still preserves the existing active detail scope when no replacement detail rows are found, and the queued background runner now reuses that preserved active detail scope for collection instead of incorrectly closing the run as a no-detail partial completion.
+- Precision collection preserves the existing active detail scope when no
+  replacement detail rows are found. Standard collection deliberately reuses
+  that scope without discovery, and the queued runner forces precision
+  fallback if the supposedly reusable scope has no active detail.
 - After promotion and Review AI, an in-run review candidate is automatically
   superseded when an exact same bank/family/type/subtype/name candidate in that
   run is already approved, preventing a second operator decision for the same
