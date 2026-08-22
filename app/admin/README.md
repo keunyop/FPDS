@@ -37,6 +37,16 @@ the global header. Login and Signup use the same EN/KO/JA dropdown pattern as a
 standalone control, and every locale change preserves the current route and
 non-locale query state.
 
+Review Detail follows one short decision path: candidate identity and three key
+facts, recommended action, source check, flagged fields, then the guarded
+decision. `Source check` is expanded initially because provenance is required
+for a safe review. Product facts, other collected fields, advanced overrides,
+decision notes, diff, evidence trace, and audit context remain available through
+collapsed disclosure. AI verification opens only for active verification or an
+attention state; its `Official sources` list stays collapsed until requested.
+This presentation does not change correction, CSRF, RBAC, audit, canonical, or
+publication boundaries.
+
 ## Code Map
 
 ```text

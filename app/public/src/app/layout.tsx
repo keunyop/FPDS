@@ -8,10 +8,10 @@ import { PublicLocaleSync } from "@/components/fpds/public/public-locale-sync";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  applicationName: "Bankoompare",
+  applicationName: "Bankompare",
   title: {
-    default: "Bankoompare — Look into bank products",
-    template: "%s — Bankoompare"
+    default: "Bankompare — Look into bank products",
+    template: "%s — Bankompare"
   },
   description: "Look into and compare reviewed deposit, credit card, and loan facts across banks."
 };

@@ -174,7 +174,7 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertEqual(diagnosis["category"], "suspect_fields")
         self.assertEqual(
             {item["issue_type"] for item in diagnosis["affected_fields"]},
-            {"unresolved_placeholder", "invalid_type", "cross_field_conflict"},
+            {"missing", "unresolved_placeholder", "invalid_type", "cross_field_conflict"},
         )
 
     def test_review_diagnosis_flags_masked_mortgage_rate_template(self) -> None:
@@ -204,10 +204,10 @@ class ReviewDetailTests(unittest.TestCase):
     def test_review_diagnosis_ignores_brand_suffix_when_checking_source_identity(self) -> None:
         diagnosis = build_review_diagnosis(
             source_role="detail",
-            expected_fields=["product_name", "mortgage_rate", "rate_type", "term_length_text"],
+            expected_fields=["product_name", "interest_rate_summary", "rate_type", "term_length_text"],
             candidate_payload={
                 "product_name": "CIBC Fixed-Rate Closed Mortgage",
-                "mortgage_rate": "Prime - 0.20%",
+                "interest_rate_summary": "Fixed mortgage rate 5.20%",
                 "rate_type": "Fixed",
                 "term_length_text": "5 years",
             },
@@ -294,7 +294,7 @@ class ReviewDetailTests(unittest.TestCase):
     def test_review_diagnosis_flags_lending_cross_product_and_cta_copy(self) -> None:
         diagnosis = build_review_diagnosis(
             source_role="detail",
-            expected_fields=["product_name", "interest_rate", "loan_amount_text"],
+            expected_fields=["product_name", "interest_rate_summary", "loan_amount_text"],
             candidate_payload={
                 "product_name": "See today's personal loan rates",
                 "fees_text": "Monthly fees Free",
@@ -313,7 +313,7 @@ class ReviewDetailTests(unittest.TestCase):
             {item["field_name"] for item in diagnosis["affected_fields"]},
             {
                 "product_name",
-                "interest_rate",
+                "interest_rate_summary",
                 "loan_amount_text",
                 "term_length_text",
                 "fees_text",

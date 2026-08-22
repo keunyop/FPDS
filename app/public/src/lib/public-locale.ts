@@ -230,7 +230,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   en: {
     localeName: "English",
     shell: {
-      brand: "Bankoompare",
+      brand: "Bankompare",
       tagline: "Look into bank products. Compare the facts."
     },
     nav: {
@@ -396,7 +396,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "Clear",
       remove: "Remove",
       emptyTitle: "No products selected yet.",
-      emptyBody: "Use Compare on any product card to compare published facts. Bankoompare does not score eligibility or submit applications.",
+      emptyBody: "Use Compare on any product card to compare published facts. Bankompare does not score eligibility or submit applications.",
       tableProduct: "Product",
       tableWhy: "Why compare",
       entryAmount: "Entry amount",
@@ -429,7 +429,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "Evidence boundary",
-          body: "Raw evidence, source excerpts, and internal review traces are not exposed on Bankoompare."
+          body: "Raw evidence, source excerpts, and internal review traces are not exposed on Bankompare."
         },
         {
           title: "Comparison and rankings",
@@ -445,7 +445,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ko: {
     localeName: "한국어",
     shell: {
-      brand: "Bankoompare",
+      brand: "Bankompare",
       tagline: "은행 상품을 들여다보고, 사실을 비교하세요."
     },
     nav: {
@@ -611,7 +611,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "비우기",
       remove: "제거",
       emptyTitle: "아직 선택한 상품이 없습니다.",
-      emptyBody: "상품 카드의 비교 버튼으로 공개된 정보를 나란히 보세요. Bankoompare는 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
+      emptyBody: "상품 카드의 비교 버튼으로 공개된 정보를 나란히 보세요. Bankompare는 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
       tableProduct: "상품",
       tableWhy: "비교 이유",
       entryAmount: "가입 금액",
@@ -644,7 +644,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "증거 경계",
-          body: "원문 증거, 출처 발췌, 내부 검토 이력은 Bankoompare에 공개하지 않습니다."
+          body: "원문 증거, 출처 발췌, 내부 검토 이력은 Bankompare에 공개하지 않습니다."
         },
         {
           title: "비교와 순위",
@@ -660,7 +660,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ja: {
     localeName: "日本語",
     shell: {
-      brand: "Bankoompare",
+      brand: "Bankompare",
       tagline: "銀行商品を見比べて、事実を比較。"
     },
     nav: {
@@ -826,7 +826,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "クリア",
       remove: "削除",
       emptyTitle: "まだ商品が選択されていません。",
-      emptyBody: "商品カードの比較ボタンで公開情報を並べて確認できます。Bankoompare は加入可能性の採点や申込代行を行いません。",
+      emptyBody: "商品カードの比較ボタンで公開情報を並べて確認できます。Bankompare は加入可能性の採点や申込代行を行いません。",
       tableProduct: "商品",
       tableWhy: "比較理由",
       entryAmount: "加入金額",
@@ -859,7 +859,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "証拠の境界",
-          body: "原文証拠、ソース抜粋、内部レビュー履歴は Bankoompare では公開しません。"
+          body: "原文証拠、ソース抜粋、内部レビュー履歴は Bankompare では公開しません。"
         },
         {
           title: "比較とランキング",
@@ -878,7 +878,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   en: {
     asOf: "As of",
     availableFacts: "Available product facts",
-    compareBoundary: "Bankoompare compares published facts. It does not choose a product for you.",
+    compareBoundary: "Bankompare compares published facts. It does not choose a product for you.",
     compareDifferences: "Differences are emphasized only where a public field is available.",
     coverage: "Current coverage",
     cardCoverage: "Credit cards",
@@ -890,7 +890,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     homeKicker: "Reviewed public product data",
     homeTitle: "Look into bank products. Compare what matters.",
     loanCoverage: "Mortgage, personal loan and line of credit",
-    methodologyIntro: "How official product facts become comparable public records—and where Bankoompare stops.",
+    methodologyIntro: "How official product facts become comparable public records—and where Bankompare stops.",
     methodologySteps: [
       { label: "01", title: "Official source", body: "Product facts begin with public institution sources." },
       { label: "02", title: "Reviewed record", body: "Only approved public fields enter the comparable product record." },
@@ -914,7 +914,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   ko: {
     asOf: "기준일",
     availableFacts: "확인 가능한 상품 정보",
-    compareBoundary: "Bankoompare는 공개된 사실을 비교하며, 사용자 대신 상품을 선택하지 않습니다.",
+    compareBoundary: "Bankompare는 공개된 사실을 비교하며, 사용자 대신 상품을 선택하지 않습니다.",
     compareDifferences: "공개 필드가 있는 항목만 차이를 강조합니다.",
     coverage: "현재 제공 범위",
     cardCoverage: "신용카드",
@@ -926,7 +926,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     homeKicker: "검토된 공개 상품 데이터",
     homeTitle: "은행 상품을 들여다보고, 중요한 차이를 비교하세요.",
     loanCoverage: "모기지·개인대출·신용한도",
-    methodologyIntro: "공식 상품 정보가 비교 가능한 공개 기록이 되는 과정과 Bankoompare의 정보 제공 경계입니다.",
+    methodologyIntro: "공식 상품 정보가 비교 가능한 공개 기록이 되는 과정과 Bankompare의 정보 제공 경계입니다.",
     methodologySteps: [
       { label: "01", title: "공식 출처", body: "금융기관이 공개한 상품 정보에서 기록이 시작됩니다." },
       { label: "02", title: "검토된 기록", body: "승인된 공개 필드만 비교 가능한 상품 기록에 포함됩니다." },
@@ -950,7 +950,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   ja: {
     asOf: "基準日",
     availableFacts: "確認できる商品情報",
-    compareBoundary: "Bankoompare は公開された事実を比較し、利用者の代わりに商品を選びません。",
+    compareBoundary: "Bankompare は公開された事実を比較し、利用者の代わりに商品を選びません。",
     compareDifferences: "公開項目がある場合だけ差を強調します。",
     coverage: "現在の掲載範囲",
     cardCoverage: "クレジットカード",
@@ -962,7 +962,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     homeKicker: "レビュー済み公開商品データ",
     homeTitle: "銀行商品を見比べて、大切な違いを確かめる。",
     loanCoverage: "住宅ローン・個人ローン・与信枠",
-    methodologyIntro: "公式商品情報が比較可能な公開レコードになる流れと、Bankoompare の情報提供範囲です。",
+    methodologyIntro: "公式商品情報が比較可能な公開レコードになる流れと、Bankompare の情報提供範囲です。",
     methodologySteps: [
       { label: "01", title: "公式ソース", body: "金融機関が公開した商品情報からレコードが始まります。" },
       { label: "02", title: "レビュー済みレコード", body: "承認された公開項目だけが比較可能な商品レコードに入ります。" },
@@ -1117,7 +1117,7 @@ const PUBLIC_INFORMATION_NOTICE_COPY: Record<PublicLocale, PublicInformationNoti
     title: "Information notice",
     paragraphs: [
       "The information on this page is collected and organized from public sources with the help of AI agents. It is not a financial product advertisement.",
-      "Bankoompare independently created this content for information purposes without compensation from the financial institutions shown, and works to keep it current.",
+      "Bankompare independently created this content for information purposes without compensation from the financial institutions shown, and works to keep it current.",
       "Rates, fees, eligibility, and other terms may change by the time you apply. Before applying, confirm the product information and conditions on the financial institution’s official website."
     ]
   },

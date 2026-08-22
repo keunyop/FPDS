@@ -41,6 +41,18 @@ class CanonicalDepositRateSafetyTests(unittest.TestCase):
             "non_annual_return_context",
         )
 
+    def test_td_foreign_atm_conversion_fee_is_not_a_savings_rate(self) -> None:
+        self.assertEqual(
+            canonical_deposit_rate_suppression_reason(
+                value="3.5",
+                context=(
+                    "Non-TD Foreign ATM Conversion Fee. For withdrawals in foreign currency, "
+                    "we add 3.5% after converting to Canadian dollars."
+                ),
+            ),
+            "non_annual_return_context",
+        )
+
     def test_atm_assessment_percentage_is_not_a_deposit_rate(self) -> None:
         self.assertEqual(
             canonical_deposit_rate_suppression_reason(

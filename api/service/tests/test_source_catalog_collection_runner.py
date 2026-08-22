@@ -52,7 +52,18 @@ class _ConnectionContext:
 
 
 class SourceCatalogCollectionRunnerTests(unittest.TestCase):
-    def test_active_scope_is_country_scoped_and_excludes_explicit_other_market_routes(self) -> None:
+    def test_failure_persistence_error_is_contained_for_next_group(self) -> None:
+        with patch(
+            "api_service.source_catalog_collection_runner._mark_run_finished",
+            side_effect=RuntimeError("temporary database DNS failure"),
+        ):
+            source_catalog_collection_runner._mark_run_failure_best_effort(
+                run_id="run-001",
+                run_metadata={"discovery_status": "materialization_failed"},
+                failure=RuntimeError("collection failed"),
+            )
+
+    def test_active_scope_excludes_other_country_and_language_routes(self) -> None:
         connection = _Connection(
             [
                 [
@@ -72,6 +83,14 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
                         "purpose": "detail",
                         "expected_fields": [],
                     },
+                    {
+                        "source_id": "AUTO-TBNA-ZH",
+                        "discovery_role": "detail",
+                        "source_name": "TD Chinese Chequing",
+                        "source_url": "https://zh.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/every-day-chequing-account",
+                        "purpose": "detail",
+                        "expected_fields": [],
+                    },
                 ]
             ]
         )
@@ -81,6 +100,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             bank_code="TBNA",
             country_code="US",
             product_type="chequing",
+            source_language="en",
         )
 
         self.assertEqual(scope["target_source_ids"], ["AUTO-TBNA-US"])
@@ -126,6 +146,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             bank_code="EX",
             country_code="US",
             product_type="credit-card",
+            source_language="en",
         )
 
         self.assertEqual(scope["target_source_ids"], ["CARD-DETAIL"])

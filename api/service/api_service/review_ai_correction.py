@@ -329,7 +329,7 @@ def apply_review_ai_corrections(
             "official_evidence_quote": str(verification_field.get("evidence_quote") or "")[:700],
             "ai_verification_corrected_at": corrected_at.isoformat(),
             "ai_verification_contract_version": str(
-                execution_metadata.get("verification_contract_version") or "review-ai-verification-v17"
+                execution_metadata.get("verification_contract_version") or "review-ai-verification-v19"
             ),
         }
 

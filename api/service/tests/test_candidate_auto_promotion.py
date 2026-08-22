@@ -163,7 +163,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         self.assertEqual(result["skipped_items"][0]["skip_reason"], "comparison_fields_missing")
         self.assertEqual(
             result["skipped_items"][0]["missing_fields"],
-            ["interest_rate", "loan_amount_text", "term_length_text"],
+            ["interest_rate_summary", "loan_amount_text", "term_length_text"],
         )
         self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
 

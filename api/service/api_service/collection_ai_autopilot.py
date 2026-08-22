@@ -372,7 +372,7 @@ def _load_latest_verification_execution(
         WHERE stage_name = 'ai_verification'
           AND execution_status = 'completed'
           AND execution_metadata ->> 'review_task_id' = %(review_task_id)s
-          AND execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v17'
+          AND execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v19'
           AND completed_at >= now() - interval '24 hours'
         ORDER BY started_at DESC, model_execution_id DESC
         LIMIT 1

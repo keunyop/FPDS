@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 
-MARKET_PROFILE_VERSION = "2026-08-16-v3"
+MARKET_PROFILE_VERSION = "2026-08-21-v4"
 
 
 @dataclass(frozen=True)
@@ -87,9 +87,16 @@ _DEFAULT_REQUIREMENTS: dict[str, tuple[ComparisonRequirement, ...]] = {
         _requirement(
             "minimum_balance",
             "minimum_balance",
+            "fee_waiver_condition",
             required_when="positive_monthly_fee",
         ),
-        _requirement("transactions", "included_transactions", "unlimited_transactions_flag"),
+        _requirement(
+            "transactions",
+            "included_transactions",
+            "unlimited_transactions_flag",
+            "transaction_fee",
+            "additional_transaction_fee",
+        ),
     ),
     "savings": (
         _requirement("ongoing_rate", "standard_rate", "base_12_month_rate", "public_display_rate"),
@@ -115,19 +122,19 @@ _DEFAULT_REQUIREMENTS: dict[str, tuple[ComparisonRequirement, ...]] = {
         _requirement("purchase_rate", "purchase_interest_rate"),
     ),
     "mortgage": (
-        _requirement("rate", "mortgage_rate", "interest_rate_summary"),
+        _requirement("rate", "interest_rate_summary", "mortgage_rate"),
         _requirement("rate_type", "rate_type"),
         _requirement("term", "term_length_text"),
     ),
     "personal-loan": (
-        _requirement("rate", "interest_rate", "interest_rate_summary"),
+        _requirement("rate", "interest_rate_summary", "interest_rate"),
         _requirement("amount", "loan_amount_text"),
         _requirement("term", "term_length_text"),
     ),
     "line-of-credit": (
-        _requirement("rate", "interest_rate", "interest_rate_summary"),
+        _requirement("rate", "interest_rate_summary", "interest_rate"),
         _requirement("limit", "credit_limit_text"),
-        _requirement("security", "secured_flag", "security_requirement", "collateral_text"),
+        _requirement("security", "security_requirement", "secured_flag", "collateral_text"),
     ),
 }
 

@@ -127,6 +127,7 @@ def main() -> int:
     launch_parser.add_argument("--only-bank", action="append", default=[])
     launch_parser.add_argument("--only-product-type", action="append", default=[])
     launch_parser.add_argument("--scope", action="append", default=[], help="Exact BANK:product-type scope; repeatable.")
+    launch_parser.add_argument("--precision-rediscovery", action="store_true")
 
     poll_parser = subparsers.add_parser("poll")
     poll_parser.add_argument("--collection-id", required=True)
@@ -691,6 +692,7 @@ def main() -> int:
                 only_product_types=args.only_product_type,
                 exact_scopes=args.scope,
                 country_code=args.country_code,
+                precision_rediscovery=args.precision_rediscovery,
             )
         )
         return 0
@@ -1771,6 +1773,7 @@ def launch_collection(
     only_product_types: list[str],
     exact_scopes: list[str] | None = None,
     country_code: str | None = None,
+    precision_rediscovery: bool = False,
 ) -> dict[str, Any]:
     only_bank_set = {item.strip().upper() for item in only_banks if item.strip()}
     only_product_type_set = {item.strip().lower() for item in only_product_types if item.strip()}
@@ -1808,6 +1811,7 @@ def launch_collection(
                 "ip_address": "127.0.0.1",
                 "user_agent": "codex-admin-collection-goal-tool",
             },
+            precision_rediscovery=precision_rediscovery,
         )
         result["catalog_scope"] = [
             {
@@ -2036,6 +2040,12 @@ def _artifact_counts(connection: Any) -> dict[str, int]:
     )
     counts = {}
     for table_name in table_names:
+        relation = connection.execute(
+            "SELECT to_regclass(%s) AS relation_name",
+            (f"public.{table_name}",),
+        ).fetchone()
+        if not relation or relation["relation_name"] is None:
+            continue
         row = connection.execute(f"SELECT COUNT(*) AS count FROM {table_name}").fetchone()
         counts[table_name] = int(row["count"] or 0)
     return counts

@@ -488,6 +488,65 @@ pagination behavior in Section 10.19:
 - Raw evidence, Review state, personalized advice, scoring, and application
   submission remain outside Public.
 
+### 10.21 Bankompare Identity and Comparison-Lens Mark
+
+Product Owner direction on `2026-08-21` supersedes the Public name and mark in
+Sections 10.17 and 10.18, plus the earlier brand reference in Section 10.19,
+without changing any Home, catalog, comparison, localization, data, or
+publication behavior:
+
+- `Bankompare` is the customer-facing Public name; `FPDS` remains the internal
+  platform/runtime identity.
+- The defining brand feature is the name's single `o`. The code-native mark
+  expresses it as one circular comparison lens split into two sides, with one
+  record point on each side to represent side-by-side product comparison.
+- The wordmark spells `Bankompare` exactly and emphasizes only that single
+  `o`; the spelling is never extended to fit the mark.
+- The shell mark and app icon share the same flat geometry. It remains legible
+  at small sizes, conveys its two-sided structure without color, and uses no
+  decorative illustration or motion.
+- EN/KO/JA metadata, accessible brand labels, and customer-facing brand
+  references use `Bankompare`. The compact-width rule continues to hide the
+  wordmark while retaining the mark at exact `390px`.
+
+### 10.22 Bankompare Monochrome Wordmark and Ledger-B Mark
+
+Product Owner direction on `2026-08-22` supersedes only the comparison-lens
+mark and single-letter wordmark emphasis in Section 10.21. The `Bankompare`
+name and all existing product behavior remain unchanged:
+
+- The wordmark renders `Bankompare` as one uninterrupted same-color word in
+  each context. No letter, including `o`, receives a separate brand color or
+  icon treatment.
+- The code-native mark is a ledger `B`: two rounded comparison-record rows
+  share one vertical spine, with one short data stroke inside each row. The
+  silhouette communicates the brand initial first and the record-comparison
+  idea second.
+- The Public shell uses the outlined mark in its contextual foreground color;
+  the app icon uses the same geometry in white on the established evergreen
+  field. The mark does not reuse the rejected eye, lens, or generic table
+  geometry.
+- The exact-`390px` header remains mark-only. Accessible link naming,
+  minimum-target sizing, EN/KO/JA behavior, and document-overflow rules remain
+  unchanged.
+
+### 10.23 Bankompare Global Product Globe Mark
+
+Product Owner direction later on `2026-08-22` supersedes only the ledger-`B`
+mark in Section 10.22. The `Bankompare` name and monochrome wordmark remain:
+
+- The code-native mark is a minimal globe built from one circular boundary,
+  one equator, and one closed meridian form. It stays recognizable in the
+  32px shell treatment and in the 64px app-icon source without extra detail.
+- The globe expresses the long-term goal of gathering comparable financial
+  products across world markets. It is a direction signal, not a claim that
+  unapproved countries are already collected or published.
+- The shell uses the globe in its contextual foreground color. The favicon
+  uses the same white geometry on the established evergreen field.
+- The wordmark remains one uninterrupted same-color `Bankompare` text node.
+  Exact-390px mark-only behavior, accessible naming, EN/KO/JA behavior, and
+  document-overflow rules remain unchanged.
+
 ## 11. Follow-On Items
 
 | Area | Follow-Up |

@@ -18,9 +18,13 @@ AUTHENTICATED_FLOW_KEYWORDS = ("easyweb", "login", "secureopen", "secure-open", 
 PERSONALIZED_DISCOVERY_KEYWORDS = ("discovery.td.com", "find-the-account", "recommend")
 _STRUCTURED_ATTRIBUTE_MAX_CHARS = 1_000_000
 _STRUCTURED_LINK_MAX = 256
+_STRUCTURED_DIRECT_LINK_MAX = 64
 _STRUCTURED_NODE_MAX = 20_000
 _STRUCTURED_SCRIPT_TYPES = {"application/json", "application/ld+json"}
 _STRUCTURED_SCRIPT_MAX_COUNT = 8
+_STRUCTURED_DIRECT_LINK_ATTRIBUTES = {
+    "data-carddescriptionurl": "data-cardname",
+}
 _STRUCTURED_LINK_KEYS = {
     "agreementurl",
     "disclosureurl",
@@ -473,6 +477,7 @@ class _LinkExtractor(HTMLParser):
         self._structured_script_parts: list[str] | None = None
         self._structured_script_chars = 0
         self._structured_script_count = 0
+        self._direct_link_count = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr_map = dict(attrs)
@@ -530,7 +535,7 @@ class _LinkExtractor(HTMLParser):
         self._current_href = None
         self._text_parts = []
 
-    def _append_link(self, href: str, anchor_text: str) -> None:
+    def _append_link(self, href: str, anchor_text: str, *, prefer_over_ordinary: bool = False) -> None:
         href_path = urlparse(href).path.lower()
         if (
             not href
@@ -539,7 +544,8 @@ class _LinkExtractor(HTMLParser):
             or href_path.startswith(("/public-sites/", "/sitecore/"))
             or "{" in href
             or "}" in href
-            or len(self.links) >= _STRUCTURED_LINK_MAX
+            or (len(self.links) >= _STRUCTURED_LINK_MAX and not prefer_over_ordinary)
+            or (prefer_over_ordinary and self._direct_link_count >= _STRUCTURED_DIRECT_LINK_MAX)
         ):
             return
         resolved_url = urljoin(self.base_url, href)
@@ -548,17 +554,41 @@ class _LinkExtractor(HTMLParser):
         except ValueError:
             return
 
-        self.links.append(
-            ExtractedLink(
-                href=href,
-                resolved_url=resolved_url,
-                normalized_url=normalized_url,
-                source_type=infer_source_type(normalized_url),
-                anchor_text=_strip_embedded_html(anchor_text),
-            )
+        link = ExtractedLink(
+            href=href,
+            resolved_url=resolved_url,
+            normalized_url=normalized_url,
+            source_type=infer_source_type(normalized_url),
+            anchor_text=_strip_embedded_html(anchor_text),
         )
+        if prefer_over_ordinary:
+            if any(
+                item.normalized_url == link.normalized_url
+                and item.anchor_text == link.anchor_text
+                for item in self.links[:self._direct_link_count]
+            ):
+                return
+            self.links.insert(self._direct_link_count, link)
+            self._direct_link_count += 1
+            if len(self.links) > _STRUCTURED_LINK_MAX:
+                self.links.pop()
+            return
+        self.links.append(link)
 
     def _extract_structured_attribute_links(self, attrs: list[tuple[str, str | None]]) -> None:
+        attr_map = {
+            str(name).lower(): (raw_value or "").strip()
+            for name, raw_value in attrs
+        }
+        for link_key, label_key in _STRUCTURED_DIRECT_LINK_ATTRIBUTES.items():
+            href = attr_map.get(link_key, "")
+            if href and len(href) <= _STRUCTURED_ATTRIBUTE_MAX_CHARS:
+                self._append_link(
+                    _canonicalize_structured_attribute_link(href),
+                    attr_map.get(label_key, ""),
+                    prefer_over_ordinary=True,
+                )
+
         for name, raw_value in attrs:
             value = (raw_value or "").strip()
             if (
@@ -607,6 +637,19 @@ class _LinkExtractor(HTMLParser):
                     for item in reversed(node)
                     if isinstance(item, (dict, list))
                 )
+
+
+def _canonicalize_structured_attribute_link(value: str) -> str:
+    """Convert a public CMS content-tree alias into its canonical web route."""
+
+    parsed = urlparse(value)
+    content_prefix = "/content/tdcom/"
+    if not parsed.path.lower().startswith(content_prefix):
+        return value
+    public_path = "/" + parsed.path[len(content_prefix):]
+    if public_path.lower().endswith(".html"):
+        public_path = public_path[:-5]
+    return parsed._replace(path=public_path).geturl()
 
 
 def _strip_embedded_html(value: str) -> str:

@@ -1864,6 +1864,7 @@ def _materialize_sources_for_catalog_item(
         bank_code=bank_code,
         country_code=str(row["country_code"]),
         product_type=product_type,
+        source_language=str(row.get("source_language") or "en"),
     )
     generation_result = _generate_sources_from_homepage(
         bank_code=bank_code,
@@ -1886,6 +1887,7 @@ def _materialize_sources_for_catalog_item(
             bank_code=bank_code,
             country_code=str(row["country_code"]),
             product_type=product_type,
+            source_language=str(row.get("source_language") or "en"),
         )
         companion_rows, companion_notes = _generate_existing_detail_companion_rows(
             bank_code=bank_code,
@@ -1954,6 +1956,7 @@ def _materialize_sources_for_catalog_item(
         bank_code=bank_code,
         country_code=str(row["country_code"]),
         product_type=product_type,
+        source_language=str(row.get("source_language") or "en"),
     )
     if hard_scope_excluded_count:
         discovery_notes.append(
@@ -1995,6 +1998,7 @@ def _load_existing_precision_discovery_seeds(
     bank_code: str,
     country_code: str,
     product_type: str,
+    source_language: str,
 ) -> list[dict[str, Any]]:
     rows = connection.execute(
         """
@@ -2018,16 +2022,21 @@ def _load_existing_precision_discovery_seeds(
             CASE discovery_role WHEN 'entry' THEN 0 ELSE 1 END,
             priority,
             source_id
-        LIMIT %(row_limit)s
         """,
         {
             "bank_code": bank_code,
             "country_code": country_code,
             "product_type_scope": _product_type_scope_codes(product_type),
-            "row_limit": _DISCOVERY_REGISTRY_SEED_MAX,
         },
     ).fetchall()
-    return [dict(item) for item in rows]
+    return [
+        dict(item)
+        for item in rows
+        if not _url_locale_conflicts_source_language(
+            normalized_url=str(item.get("normalized_url") or item.get("source_url") or ""),
+            source_language=source_language,
+        )
+    ][:_DISCOVERY_REGISTRY_SEED_MAX]
 
 
 def _load_existing_detail_rows_for_companion_discovery(
@@ -2036,6 +2045,7 @@ def _load_existing_detail_rows_for_companion_discovery(
     bank_code: str,
     country_code: str,
     product_type: str,
+    source_language: str,
 ) -> list[dict[str, Any]]:
     rows = connection.execute(
         """
@@ -2048,13 +2058,11 @@ def _load_existing_detail_rows_for_companion_discovery(
           AND discovery_role = 'detail'
           AND source_type = 'html'
         ORDER BY priority, source_id
-        LIMIT %(row_limit)s
         """,
         {
             "bank_code": bank_code,
             "country_code": country_code,
             "product_type_scope": _product_type_scope_codes(product_type),
-            "row_limit": _DISCOVERY_DETAIL_LINK_MAX,
         },
     ).fetchall()
     details: list[dict[str, Any]] = []
@@ -2065,12 +2073,19 @@ def _load_existing_detail_rows_for_companion_discovery(
             normalized_url=normalized_url,
         ):
             continue
+        if _url_locale_conflicts_source_language(
+            normalized_url=normalized_url,
+            source_language=source_language,
+        ):
+            continue
         details.append(
             {
                 "normalized_url": normalized_url,
                 "raw_url": str(row["source_url"]),
             }
         )
+        if len(details) >= _DISCOVERY_DETAIL_LINK_MAX:
+            break
     return details
 
 
@@ -2760,6 +2775,7 @@ def _deactivate_hard_scope_excluded_generated_detail_sources(
     bank_code: str,
     country_code: str,
     product_type: str,
+    source_language: str,
 ) -> int:
     rows = connection.execute(
         """
@@ -2799,7 +2815,14 @@ def _deactivate_hard_scope_excluded_generated_detail_sources(
                 country_code=country_code,
                 normalized_url=str(row.get("normalized_url") or ""),
             )
-            else _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint)
+            else (
+                "other_source_language_route"
+                if _url_locale_conflicts_source_language(
+                    normalized_url=str(row.get("normalized_url") or ""),
+                    source_language=source_language,
+                )
+                else _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint)
+            )
         )
         if reason is None:
             continue
@@ -3167,7 +3190,11 @@ def _generate_sources_from_homepage(
             )
     for link in homepage_links:
         fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
-        if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
+        if _has_excluded_product_discovery_link_signal(
+            product_type=discovery_product_type,
+            normalized_url=link.normalized_url,
+            anchor_text=link.anchor_text,
+        ):
             continue
         if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
             continue
@@ -3373,7 +3400,11 @@ def _generate_sources_from_homepage(
             allowed_domains=allowed_domains,
         ):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
-            if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
+            if _has_excluded_product_discovery_link_signal(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
                 continue
             if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
                 continue
@@ -3451,7 +3482,11 @@ def _generate_sources_from_homepage(
             if link.normalized_url == normalized_page_url:
                 continue
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
-            if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
+            if _has_excluded_product_discovery_link_signal(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
                 continue
             if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
                 continue
@@ -3501,7 +3536,7 @@ def _generate_sources_from_homepage(
             f"{_DISCOVERY_REGISTRY_DETAIL_PAGE_MAX}-page precision limit."
         )
 
-    visited_hub_urls = {normalized_homepage_url, *(item[1] for item in unique_hub_pages)}
+    visited_hub_urls = {normalized_homepage_url, *(item[1] for item in selected_hub_pages)}
     visited_hub_urls.update(item[1] for item in selected_registry_detail_pages)
     expanded_secondary_hub_count = 0
     secondary_hub_page_attempt_count = 0
@@ -3526,7 +3561,11 @@ def _generate_sources_from_homepage(
             allowed_domains=allowed_domains,
         ):
             fingerprint = f"{link.normalized_url} {link.anchor_text}".lower()
-            if _has_excluded_link_signal(normalized_url=link.normalized_url, anchor_text=link.anchor_text):
+            if _has_excluded_product_discovery_link_signal(
+                product_type=discovery_product_type,
+                normalized_url=link.normalized_url,
+                anchor_text=link.anchor_text,
+            ):
                 continue
             if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
                 continue
@@ -3566,6 +3605,27 @@ def _generate_sources_from_homepage(
         )
 
     all_unique_detail_links = _dedupe_scored_links(detail_links)
+    locale_mismatch_detail_candidate_count = sum(
+        1
+        for _, link in all_unique_detail_links
+        if _url_locale_conflicts_source_language(
+            normalized_url=link.normalized_url,
+            source_language=source_language,
+        )
+    )
+    all_unique_detail_links = [
+        item
+        for item in all_unique_detail_links
+        if not _url_locale_conflicts_source_language(
+            normalized_url=item[1].normalized_url,
+            source_language=source_language,
+        )
+    ]
+    if locale_mismatch_detail_candidate_count:
+        discovery_notes.append(
+            f"Excluded {locale_mismatch_detail_candidate_count} detail candidate(s) that conflicted "
+            "with the run source language before bounded candidate selection."
+        )
     unique_detail_links = all_unique_detail_links[:_DISCOVERY_DETAIL_LINK_MAX]
     all_relevant_supporting_links = [
         item
@@ -3576,6 +3636,22 @@ def _generate_sources_from_homepage(
             product_type_definition=product_type_definition,
             normalized_url=item[1].normalized_url,
             anchor_text=item[1].anchor_text,
+        )
+    ]
+    locale_mismatch_supporting_candidate_count = sum(
+        1
+        for _, link in all_relevant_supporting_links
+        if _url_locale_conflicts_source_language(
+            normalized_url=link.normalized_url,
+            source_language=source_language,
+        )
+    )
+    all_relevant_supporting_links = [
+        item
+        for item in all_relevant_supporting_links
+        if not _url_locale_conflicts_source_language(
+            normalized_url=item[1].normalized_url,
+            source_language=source_language,
         )
     ]
     unique_supporting_links = all_relevant_supporting_links[:_DISCOVERY_SUPPORTING_LINK_MAX]
@@ -3735,7 +3811,7 @@ def _generate_sources_from_homepage(
     promoted_detail_urls = {str(item["normalized_url"]) for item in detail_rows}
     promoted_supporting_urls: set[str] = set()
     unavailable_supporting_count = 0
-    locale_mismatch_supporting_count = 0
+    locale_mismatch_supporting_count = locale_mismatch_supporting_candidate_count
     if should_emit_context_rows:
         for companion in detail_companions:
             link = companion.link
@@ -4118,7 +4194,9 @@ def _generate_sources_from_homepage(
             "secondary_hub_page_attempt_count": secondary_hub_page_attempt_count,
             "secondary_hub_page_fetched_count": expanded_secondary_hub_count,
             "detail_link_candidate_count": len(all_unique_detail_links),
+            "source_language_mismatch_detail_candidate_count": locale_mismatch_detail_candidate_count,
             "supporting_link_candidate_count": len(all_relevant_supporting_links),
+            "source_language_mismatch_supporting_candidate_count": locale_mismatch_supporting_candidate_count,
             "pdf_link_candidate_count": len(all_unique_pdf_links),
             "validated_html_candidate_count": len(html_candidates),
             "ai_scored_candidate_count": len(ai_result.scores),
@@ -4802,7 +4880,12 @@ def _promote_detail_candidates(
             rejection_counts["source_language_mismatch"] += 1
             continue
         ai_score = ai_scores.get(candidate.normalized_url)
-        if ai_score and ai_score.predicted_role == "irrelevant" and not _candidate_is_seed_backed(candidate):
+        if (
+            ai_score
+            and ai_score.predicted_role == "irrelevant"
+            and not _candidate_is_seed_backed(candidate)
+            and candidate.heuristic_score <= 0
+        ):
             rejected_detail_urls.append(candidate.normalized_url)
             rejection_counts["ai_irrelevant"] += 1
             continue
@@ -5307,6 +5390,11 @@ def _candidate_promotes_to_detail(
                 ai_score=ai_score,
                 page_evidence=page_evidence,
             )
+            or _strong_named_page_overrides_ai_irrelevant(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=page_evidence,
+            )
         )
         if not named_detail_override:
             return False
@@ -5340,6 +5428,12 @@ def _candidate_promotes_to_detail(
     if candidate.supporting_signal and (ai_score is None or ai_score.predicted_role != "detail") and not strong_page_detail_signal:
         return False
     if ai_score is not None:
+        if _strong_named_page_overrides_ai_irrelevant(
+            candidate=candidate,
+            ai_score=ai_score,
+            page_evidence=page_evidence,
+        ):
+            return True
         if ai_score.predicted_role == "supporting_html" and strong_page_detail_signal:
             return _ai_supporting_override_allowed(ai_score)
         if ai_score.predicted_role != "detail":
@@ -5591,6 +5685,23 @@ def _candidate_has_strong_page_detail_signal(*, candidate: HomepageCandidate, pa
     return candidate.heuristic_score > 0 or "product_type_semantic_match" in reason_codes
 
 
+def _strong_named_page_overrides_ai_irrelevant(
+    *,
+    candidate: HomepageCandidate,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> bool:
+    return (
+        ai_score is not None
+        and ai_score.predicted_role == "irrelevant"
+        and _page_has_specific_singular_product_identity(page_evidence)
+        and _candidate_has_strong_page_detail_signal(
+            candidate=candidate,
+            page_evidence=page_evidence,
+        )
+    )
+
+
 def _ai_supporting_override_allowed(ai_score: AiParallelCandidateScore) -> bool:
     normalized_reason_codes = {str(item).strip().lower() for item in ai_score.reason_codes if str(item).strip()}
     has_veto = any(
@@ -5639,6 +5750,15 @@ def _build_detail_discovery_metadata(
                     if ai_score is not None
                     and ai_score.predicted_role == "supporting_html"
                     and _candidate_has_strong_page_detail_signal(candidate=candidate, page_evidence=page_evidence)
+                    else ""
+                ),
+                (
+                    "strong_named_page_ai_irrelevant_override"
+                    if _strong_named_page_overrides_ai_irrelevant(
+                        candidate=candidate,
+                        ai_score=ai_score,
+                        page_evidence=page_evidence,
+                    )
                     else ""
                 ),
                 (
@@ -5723,13 +5843,19 @@ def _seed_detail_has_hard_negative(page_evidence: PageEvidenceAssessment) -> boo
 
 
 def _url_locale_conflicts_source_language(*, normalized_url: str, source_language: str) -> bool:
-    """Reject a clearly different locale path from an otherwise allowed domain."""
+    """Reject a clearly different locale host or path from an allowed domain."""
 
     requested = str(source_language or "").strip().lower().replace("_", "-").split("-", 1)[0]
     if not requested:
         return False
     known_languages = {"en", "fr", "es", "de", "it", "pt", "zh", "ja", "ko"}
-    for segment in [item for item in urlparse(normalized_url).path.lower().split("/") if item][:3]:
+    parsed = urlparse(normalized_url)
+    hostname_labels = [item for item in str(parsed.hostname or "").lower().split(".") if item]
+    if hostname_labels:
+        host_locale = {"zt": "zh"}.get(hostname_labels[0], hostname_labels[0])
+        if host_locale in known_languages and host_locale != requested:
+            return True
+    for segment in [item for item in parsed.path.lower().split("/") if item][:3]:
         locale = segment.replace("_", "-").split("-", 1)[0]
         if locale in known_languages:
             return locale != requested
@@ -6830,7 +6956,15 @@ def _has_excluded_link_signal(*, normalized_url: str, anchor_text: str) -> bool:
         for part in (urlparse(normalized_url).path.lower(), urlparse(normalized_url).query.lower())
         if part
     )
-    if any(keyword in path_and_query for keyword in _EXCLUDED_LINK_KEYWORDS):
+    application_guide = any(
+        marker in path_and_query
+        for marker in ("application-guide", "application_checklist", "application-checklist")
+    )
+    if any(
+        keyword in path_and_query
+        for keyword in _EXCLUDED_LINK_KEYWORDS
+        if keyword != "application" or not application_guide
+    ):
         return True
     normalized_anchor = _collapse_whitespace(anchor_text).lower().strip(" .:-|")
     if not normalized_anchor:
@@ -6856,6 +6990,30 @@ def _has_excluded_link_signal(*, normalized_url: str, anchor_text: str) -> bool:
             r"open (?:an )?account|compare(?: now)?)\b",
             normalized_anchor,
         )
+    )
+
+
+def _has_excluded_product_discovery_link_signal(
+    *,
+    product_type: str,
+    normalized_url: str,
+    anchor_text: str,
+) -> bool:
+    normalized_anchor = _collapse_whitespace(anchor_text).lower().strip(" .:-|")
+    if (
+        normalized_anchor == "view offer"
+        and _looks_like_credit_card_detail_path(
+            product_type=product_type,
+            normalized_url=normalized_url,
+        )
+    ):
+        # Some official catalog cards use a generic acquisition CTA as the
+        # only anchor for an exact, named product detail route. The singular
+        # URL contract remains fail-closed for category and campaign pages.
+        return False
+    return _has_excluded_link_signal(
+        normalized_url=normalized_url,
+        anchor_text=anchor_text,
     )
 
 
@@ -7079,6 +7237,11 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         )
     ):
         return "non_consumer_business_page"
+    if canonical_type == "credit-card" and (
+        "/products/insurance/" in source_path
+        or "credit card payment protection" in normalized_fingerprint
+    ):
+        return "other_product_type"
     if canonical_type == "mortgage" and any(
         marker in normalized_fingerprint
         for marker in (

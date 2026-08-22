@@ -319,6 +319,10 @@ Based on:
 | 5.34 | Completed | Vancity collection failure recovery | format-aware browser fallback, exact-bank environment policy, compatibility-view schema resolution, non-product climate-report exclusion, Vancity-only full-coverage recollection and audit | Backend, AI/Data, QA | 5.15, 5.25, 5.27 | 2026-08-15 |
 | 5.35 | Completed | Vancity product coverage and comparison-quality recovery | seven audited official hubs, 45 exact retail details and split condition sources, Sitecore structured DOM parsing, exact sibling-product grounding, mixed-account-scope suppression, Vancity-only replacement collection, audited canonical remediation, and verified CA Public refresh | Backend, AI/Data, QA | 5.15, 5.27, 5.34 | 2026-08-20 |
 | 5.36 | Completed | first/subsequent precision source coverage | server-owned completed-history mode resolution, first-run precision discovery, bounded active-registry sibling sweep, run telemetry, optional EN/KO/JA rediscovery controls, current-scope standard collection, and missing-detail precision fallback | Backend, Frontend, AI/Data, QA | 5.15, 5.16, 5.25, 5.35 | 2026-08-20 |
+| 5.37 | Superseded | Bankompare Public identity | historical single-o comparison-lens treatment; customer name retained and visual treatment superseded by `5.38` | Frontend, UX, QA | 5.14, 5.33 | 2026-08-21 |
+| 5.38 | Superseded | Bankompare identity refinement | historical uninterrupted wordmark and ledger-B mark; wordmark retained and mark superseded by `5.39` | Frontend, UX, QA | 5.14, 5.37 | 2026-08-22 |
+| 5.39 | Completed | Bankompare global globe identity | simple globe shell mark and matching white-on-evergreen favicon, monochrome wordmark retention, responsive and build verification | Frontend, UX, QA | 5.14, 5.38 | 2026-08-22 |
+| 5.40 | Completed | Review Detail focused decision path | compact candidate facts, expanded source check, collapsed official sources and secondary diagnostics, simplified review/decision hierarchy, responsive and build verification | Frontend, UX, QA | 5.16, 5.25 | 2026-08-22 |
 
 ### 5.5 Scope Baseline
 

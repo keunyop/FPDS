@@ -67,7 +67,7 @@ class CollectionAutomationTests(TestCase):
         sql, params = connection.calls[0]
         self.assertEqual(params, {"limit": 200})
         self.assertIn("ir.run_state IN ('completed', 'failed', 'retried')", sql)
-        self.assertIn("review-ai-verification-v17", sql)
+        self.assertIn("review-ai-verification-v19", sql)
         self.assertIn("auto_approval_assessment", sql)
 
     def test_due_catalog_query_is_country_bank_type_scoped_and_bounded(self):

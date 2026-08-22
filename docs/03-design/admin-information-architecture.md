@@ -171,9 +171,10 @@ navigation item until a live route exists.
 - Review Queue and Runs keep common search controls visible and disclose state,
   sort, and date controls only when needed; Banks prioritizes coverage and
   collection over profile metadata
-- Review Detail keeps the recommendation and flagged fields visible while
-  product facts, source metadata, AI verification detail, full diff, evidence
-  trace, and audit context use progressive disclosure
+- Review Detail keeps compact identity facts, the recommendation, source check,
+  flagged fields, and decision visible; product facts, unaffected fields,
+  advanced edits, diff, evidence trace, and audit context use progressive
+  disclosure
 - dense relationships use joined summary bands, dividers, chronology, lifecycle
   strips, and bounded tables; cards are reserved for semantic groups
 - safe auto-refresh is part of the shell contract: its live/paused/last-refresh
@@ -294,16 +295,17 @@ Minimum panels:
 - action history
 
 Runtime decision refinement:
-- a product-style candidate summary appears before decision controls, reusing the Public detail hierarchy of identity, three product-family-specific metrics, product facts, and key conditions while clearly retaining the candidate state
+- the page header owns candidate identity; one compact band beneath it shows an optional description and three product-family-specific metrics without repeating the name, bank, or product type
 - the primary field list is the union of expected, collected, evidence-linked, and currently approved fields, with missing or suspect values first
 - each editable row shows the agent value, current effective value, inline correction control, and immediately expandable evidence
 - the recommended action is the primary decision control; alternatives remain available according to role and review state
 - arbitrary raw-field editing is an advanced fallback, not the default review path
 - explanatory copy stays short and does not repeat the same issue across multiple summary panels
 - only affected fields are expanded initially; all other collected fields remain editable in one collapsed group
-- source check shows confidence, evidence coverage, source role, and the source link without duplicating bank/product identity or AI rationale already available in diagnostic context
+- source check is expanded initially and shows only confidence, evidence coverage, source role, and the source link without duplicating bank/product identity or AI rationale
 - reason code and reviewer note are optional collapsed controls; the recommended decision actions remain immediately available
-- an AI verification band sits between candidate/source context and editable fields; it searches only registered official bank domains, separates match, mismatch, and unverified results, keeps official citations visible, and allows safe corrections to be staged individually or together
+- an AI verification disclosure sits between candidate/source context and editable fields; it opens for active verification, failure, or a result needing attention, separates match, mismatch, and unverified results, and allows safe corrections to be staged individually or together
+- the AI verification `Official sources` list is collapsed initially; field-level citations remain beside the compared field so a reviewer does not need to open the full source list for the primary correction path
 - AI verification is advisory evidence: running it does not alter review state, apply a candidate mutation, approve a product, or publish; the existing human edit-and-approve action remains the only persistence boundary
 
 ### 7.4 Source Registry Management

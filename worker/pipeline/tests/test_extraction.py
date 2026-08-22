@@ -1579,6 +1579,16 @@ X"""
             ),
             "5.00",
         )
+        self.assertEqual(
+            _extract_transaction_fee(
+                text="The fee is $1.25 US each transaction. Maintain $1,500 to pay no transaction fees."
+            ),
+            "1.25",
+        )
+        self.assertEqual(
+            _extract_transaction_fee(text="Transaction Fee 1 $1.25 U.S. each"),
+            "1.25",
+        )
 
     def test_non_balance_eligibility_fee_waiver_is_preserved(self) -> None:
         context = ExtractionDocumentContext(

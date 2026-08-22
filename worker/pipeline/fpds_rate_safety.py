@@ -78,6 +78,9 @@ _NON_ANNUAL_RETURN_MARKERS = (
     "interbank spot rate",
     "payment card company",
     "currency conversion fee",
+    "foreign atm conversion fee",
+    "foreign abm conversion fee",
+    "after converting to canadian dollars",
     "conversion markup",
     "fx markup",
     "atm convenience fee",
@@ -245,6 +248,12 @@ def canonical_deposit_rate_suppression_reason(
         return "non_annual_return_context"
     if re.search(
         r"\b\d{1,3}(?:\.\d+)?\s*%\s+(?:foreign\s+)?(?:transaction|conversion|atm|abm)(?:\s+\w+){0,4}\s+(?:fee|markup)\b",
+        normalized_context,
+    ):
+        return "non_annual_return_context"
+    if re.search(
+        r"\b(?:foreign\s+)?(?:atm|abm|currency)?(?:\s+\w+){0,4}\s+conversion\s+fee\b"
+        r"(?:\s+\w+){0,16}\s+\d{1,3}(?:\.\d+)?\s*%",
         normalized_context,
     ):
         return "non_annual_return_context"

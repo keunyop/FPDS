@@ -290,6 +290,66 @@ class NormalizationServiceTests(unittest.TestCase):
             )
         )
 
+    def test_official_td_interest_purchases_label_keeps_purchase_rate(self) -> None:
+        context = (
+            "Annual Fee $39 USD\n"
+            "Interest: Purchases 21.99%\n"
+            "Interest: Cash Advances 22.99%"
+        )
+        grounding = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": None,
+            "official_web_sources": [
+                {
+                    "url": (
+                        "https://www.td.com/ca/en/personal-banking/products/"
+                        "credit-cards/us-dollar/us-dollar-visa-card"
+                    )
+                }
+            ],
+            "official_evidence_quote": context,
+        }
+
+        self.assertFalse(
+            _looks_like_credit_card_field_mismatch(
+                field_name="purchase_interest_rate",
+                value=21.99,
+                context=context,
+                product_type_family="credit-card",
+                official_grounding_metadata=grounding,
+            )
+        )
+        self.assertFalse(
+            _looks_like_non_rate_numeric_context(
+                field_name="purchase_interest_rate",
+                value=21.99,
+                context=context,
+                product_type_family="credit-card",
+                official_grounding_metadata=grounding,
+            )
+        )
+
+    def test_official_card_purchase_rate_rejects_cash_advance_label(self) -> None:
+        context = "Cash Advance 22.99% Interest rate"
+        grounding = {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "deterministic_sibling_product_block",
+            "official_web_sources": [{"url": "https://www.bank.example/cards/card"}],
+            "official_evidence_quote": context,
+        }
+
+        self.assertTrue(
+            _looks_like_credit_card_field_mismatch(
+                field_name="purchase_interest_rate",
+                value=22.99,
+                context=context,
+                product_type_family="credit-card",
+                official_grounding_metadata=grounding,
+            )
+        )
+
     def test_exact_detail_h1_is_a_protected_dynamic_product_identity(self) -> None:
         field = replace(
             _field("product_name", "enviro\u2122 Visa Infinite Privilege* card", "string", 0.95),
@@ -2997,6 +3057,49 @@ class NormalizationServiceTests(unittest.TestCase):
         self.assertEqual(payload["purchase_interest_rate"], 21.75)
         self.assertEqual(payload["cash_advance_rate"], 22.49)
 
+    def test_credit_card_fallback_accepts_td_colon_rate_labels(self) -> None:
+        excerpt = (
+            "TD Cash Back Visa Infinite Card Annual Fee $139 "
+            "Interest: Purchases 21.99% Interest: Cash Advances 22.99%"
+        )
+        source_link = NormalizationEvidenceLink(
+            field_name="annual_fee",
+            candidate_value="139",
+            evidence_chunk_id="chunk-td-card-rates",
+            evidence_text_excerpt=excerpt,
+            source_document_id="source-td-card",
+            source_snapshot_id="snapshot-td-card",
+            citation_confidence=0.99,
+            model_execution_id="model-td-card",
+            anchor_type="section",
+            anchor_value="td-cash-back-visa-infinite-card",
+            page_no=None,
+            chunk_index=1,
+        )
+        payload: dict[str, object] = {
+            "product_name": "TD Cash Back Visa Infinite Card",
+            "annual_fee": 139.0,
+        }
+        normalized_values = dict(payload)
+        mapping_metadata: dict[str, object] = {}
+        evidence_links = [source_link]
+
+        _apply_credit_card_labeled_fallback(
+            product_type_family="credit-card",
+            candidate_payload=payload,
+            field_mapping_metadata=mapping_metadata,
+            normalized_values_for_links=normalized_values,
+            evidence_links_for_output=evidence_links,
+            runtime_notes=[],
+        )
+
+        self.assertEqual(payload["purchase_interest_rate"], 21.99)
+        self.assertEqual(payload["cash_advance_rate"], 22.99)
+        self.assertEqual(
+            mapping_metadata["purchase_interest_rate"]["normalization_method"],
+            "credit_card_labeled_rate_fallback",
+        )
+
     def test_lending_cleanup_rejects_rate_and_term_fields_from_unrelated_context(self) -> None:
         payload: dict[str, object] = {
             "product_name": "Example Mortgage",
@@ -4521,7 +4624,7 @@ class SupportingMergeTests(unittest.TestCase):
                     _match_dict(
                         field_name="rate_tiers",
                         anchor_value="td-every-day-savings-account",
-                        excerpt="TD Every Day Savings Account Total Daily Closing Balance $0 to $999.99 0.010%",
+                        excerpt="TD Every Day Savings Account Total Daily Closing Balance Interest Rate $0 to $999.99 0.010%",
                     )
                 ]
             }
@@ -4537,6 +4640,40 @@ class SupportingMergeTests(unittest.TestCase):
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.01")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "0.01")
         self.assertTrue(fields_by_name["standard_rate"]["field_metadata"]["generic_supporting_merge"])
+
+    def test_generic_savings_rate_merge_rejects_td_atm_conversion_fee(self) -> None:
+        merged = merge_supporting_artifacts(
+            target_source_id="AUTO-TD-SAV-every-day",
+            base_artifact={
+                "schema_context": {"product_type": "savings"},
+                "extracted_fields": [
+                    _field_dict("product_name", "TD Every Day Savings Account", "string", 0.88),
+                    _field_dict("monthly_fee", "0.00", "decimal", 0.83),
+                ],
+                "evidence_links": [],
+                "runtime_notes": [],
+            },
+            supporting_artifacts={
+                "AUTO-TD-SAV-fees": {
+                    "retrieval_result": {
+                        "matches": [
+                            _match_dict(
+                                field_name="interest_rate_summary",
+                                anchor_value="td-every-day-savings-account",
+                                excerpt=(
+                                    "TD Every Day Savings Account Non-TD Foreign ATM Conversion Fee. "
+                                    "We add 3.5% after converting to Canadian dollars."
+                                ),
+                            )
+                        ]
+                    }
+                }
+            },
+        )
+
+        fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
+        self.assertNotIn("standard_rate", fields_by_name)
+        self.assertNotIn("public_display_rate", fields_by_name)
 
     def test_generic_supporting_merge_preserves_grounded_lending_rate_summary(self) -> None:
         base_artifact = {
@@ -6080,7 +6217,8 @@ class SupportingMergeTests(unittest.TestCase):
         fields_by_name = {item["field_name"]: item for item in merged["extracted_fields"]}
         self.assertEqual(fields_by_name["standard_rate"]["candidate_value"], "0.65")
         self.assertEqual(fields_by_name["public_display_rate"]["candidate_value"], "1.50")
-        self.assertEqual(fields_by_name["promotional_rate"]["candidate_value"], "1.50")
+        self.assertNotIn("promotional_rate", fields_by_name)
+        self.assertEqual(fields_by_name["minimum_balance"]["candidate_value"], "500000.00")
         self.assertTrue(fields_by_name["tiered_rate_flag"]["candidate_value"])
         self.assertIn("$500,000.00 and over: 1.50% / 0.65%", fields_by_name["tier_definition_text"]["candidate_value"])
 
@@ -6165,6 +6303,7 @@ class SupportingMergeTests(unittest.TestCase):
 
         fields = {item["field_name"]: item["candidate_value"] for item in merged["extracted_fields"]}
         self.assertEqual(fields["standard_rate"], "0.45")
+        self.assertEqual(fields["minimum_balance"], "10000.00")
         self.assertTrue(fields["tiered_rate_flag"])
         self.assertIn("$0 to $9,999.99: 0.000%", fields["tier_definition_text"])
         self.assertIn("$10,000.00 to $49,999.99: 0.450%", fields["tier_definition_text"])

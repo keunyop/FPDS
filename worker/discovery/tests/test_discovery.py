@@ -105,6 +105,53 @@ class UrlUtilsTests(unittest.TestCase):
             ],
         )
 
+    def test_extract_links_reads_td_aem_card_description_route(self) -> None:
+        html = """
+        <div
+          data-cardName="TD Cash Back Visa Infinite* Card"
+          data-cardDescriptionUrl="/content/tdcom/ca/en/personal-banking/products/credit-cards/cash-back/cash-back-visa-infinite-card.html"
+          data-cardType="cc"
+        ></div>
+        """
+
+        links = extract_links(
+            html,
+            base_url="https://www.td.com/ca/en/personal-banking/products/credit-cards/cash-back",
+        )
+
+        self.assertEqual(
+            [(link.normalized_url, link.anchor_text) for link in links],
+            [
+                (
+                    "https://www.td.com/ca/en/personal-banking/products/credit-cards/cash-back/cash-back-visa-infinite-card",
+                    "TD Cash Back Visa Infinite* Card",
+                )
+            ],
+        )
+
+    def test_td_aem_card_description_route_survives_ordinary_link_cap(self) -> None:
+        ordinary_links = "".join(
+            f'<a href="/navigation/{index}">Navigation {index}</a>'
+            for index in range(300)
+        )
+        html = ordinary_links + """
+        <div
+          data-cardName="TD Cash Back Visa Infinite* Card"
+          data-cardDescriptionUrl="/content/tdcom/ca/en/personal-banking/products/credit-cards/cash-back/cash-back-visa-infinite-card.html"
+        ></div>
+        """
+
+        links = extract_links(html, base_url="https://www.td.com/")
+
+        self.assertLessEqual(len(links), 256)
+        self.assertIn(
+            (
+                "https://www.td.com/ca/en/personal-banking/products/credit-cards/cash-back/cash-back-visa-infinite-card",
+                "TD Cash Back Visa Infinite* Card",
+            ),
+            [(link.normalized_url, link.anchor_text) for link in links],
+        )
+
     def test_extract_links_reads_bounded_json_script_routes(self) -> None:
         payload = {
             "products": [

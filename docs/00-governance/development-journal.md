@@ -25,6 +25,136 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of `2026-08-21` (TD Credit Card precision publication proof, active):
+
+- final precision collection `collection_VU39TiCQ5NYprOMG` completed one TD
+  Credit Card run with 7/7 selected sources successful, no failed/partial run,
+  six English named-card candidates, and all six automatically approved
+- four candidates passed direct validation; Review AI v19 examined the two
+  validation-routed candidates and approved both, leaving zero active Review
+  candidate in this collection
+- the approved inventory includes TD Cash Back Visa Infinite, TD Cash Back
+  Visa, TD First Class Travel Visa Infinite, TD Rewards Visa, TD U.S. Dollar
+  Visa, and TD Aeroplan Visa Infinite; each has exact annual fee and purchase
+  rate evidence sufficient for the comparison contract
+- discovery excluded 22 conflicting-language detail candidates before bounded
+  selection, promoted six exact details, and retained no Chinese detail source;
+  the prior payment-protection insurance detail was hard-scope deactivated
+- the reusable final fixes additionally reserve bounded capacity for exact AEM
+  product attributes, permit `View offer` only for a singular card-detail URL,
+  exclude credit-card payment-protection insurance from product scope, and
+  recover TD's exact colon-formatted card rates when AI omits them
+- current focused verification is 168 API source-catalog tests, 36 worker
+  discovery tests, and 170 worker normalization tests; next refresh/read back
+  CA Public and audit the historical Chinese duplicate before full suites
+- CA Public snapshot `agg_i_hp6XF3yY8faniY` is fresh after explicit refresh.
+  All six final English cards and U.S. Daily Interest Chequing were read back
+  active with the expected comparison fields; the four featured cards expose
+  exact official annual fee and purchase rate values
+- historical Chinese candidate `cand-b293fb02a76bbf68` was retracted through
+  candidate-safety remediation, inactivating `prod_xTv0e57FN_qQ3LT1` with
+  audit/change events. The new Public snapshot returns no item for that product
+  while English Aeroplan `prod_45xFdESnoR7j5i1w` remains active
+- final full verification passed: 425 API tests and 522 worker tests. Tracked
+  test fixtures, aggregate-runner log lines, and bytecode noise were restored;
+  `git diff --check` passes and the automatic scheduler remains disabled
+
+As of `2026-08-21` (TD targeted precision diagnosis and hardening, active):
+
+- targeted precision collection `collection_cBlvixf9appwQxZh` is terminal with
+  both Chequing and Credit Card runs completed and no failed/partial run
+- Chequing produced six comparison-complete candidates and auto-approved all
+  six, including U.S. Daily Interest Chequing; Credit Card still produced only
+  TD U.S. Dollar Visa and retained it in Review for a missing normalized
+  `purchase_interest_rate`
+- the remaining card failure had three independent, reproducible causes: an
+  unselected primary category URL was incorrectly marked already visited before
+  secondary-hub expansion; TD's exact AEM card routes are stored in
+  `data-cardDescriptionUrl`; and normalization did not accept the official
+  `Interest: Purchases 21.99%` label even when AI extraction and official
+  grounding matched
+- discovery now expands only actually visited primary hubs, extracts TD's
+  bounded card-description attribute while canonicalizing the public route,
+  and keeps the existing application/offer exclusions; normalization accepts
+  exact purchase labels but still rejects cash-advance/balance-transfer labels
+- focused module verification passed: 166 API source-catalog tests, 35 worker
+  discovery tests, and 169 worker normalization tests
+- next run one fresh TD Credit Card precision recollection, poll through Review
+  AI and aggregate refresh, verify the named English card inventory and CA
+  Public readback, then continue the append-only historical duplicate audit;
+  keep the automatic scheduler disabled
+
+As of `2026-08-21` (TD precision recollection continuation, paused again):
+
+- resume-next step 1 is now complete:
+  `collection_EfMGx23KF2114R3C` reached terminal with seven completed runs,
+  33/33 selected sources successful, zero failed/partial runs, 23 candidates,
+  8 approvals, 13 active Review candidates, and 2 superseded candidates
+- Personal Loan retained two candidates in Review because the official
+  evidence still lacked a complete rate/amount/term contract; Savings
+  auto-promoted TD ePremium and TD Growth while TD Every Day remained Review
+  only for missing minimum-balance evidence. All three Review AI attempts
+  completed and did not invent unavailable facts
+- the next active step is the already scoped targeted precision recollection
+  for TD Chequing and Credit Card after confirming no runner is active
+- this block supersedes the older TD pause block below; `goal.md` contains the
+  authoritative detailed handoff and exact next commands/IDs
+- standard collection `collection_FsuYnsK5WtBDwyzw` is terminal across seven
+  types with 29 candidates: 7 approved, 20 in Review, and 2 superseded
+- reusable fixes now include active/reused-scope locale enforcement,
+  pre-cap English seed filtering, hard locale deactivation, best-effort runner
+  failure persistence after transient DB/DNS errors, and Review AI v19
+  requirement-level alternative selection
+- live precision collection `collection_EfMGx23KF2114R3C` was intentionally
+  left running: last poll was 5 completed / 2 started, 18 candidates, and 14
+  Review tasks; Personal Loan was extracting and Savings was still pending
+- precision Chequing excluded 22 locale-conflicting candidates and produced 5
+  approvals plus U.S. Daily Interest Chequing in Review; its official
+  `Transaction Fee 1 $1.25 U.S. each` layout is now parsed by a tested fix,
+  but requires a fresh targeted run
+- precision Credit Card excluded 56 locale-conflicting candidates and
+  auto-approved TD U.S. Dollar Visa, but an AI `irrelevant` preemption lost
+  three strong English named-card details; strong singular title/H1 plus
+  pricing evidence can now safely override that scorer error while category
+  pages remain blocked, also requiring a fresh targeted run
+- focused continuation verification passed: 180 API source-catalog/runner tests
+  and 191 worker extraction/approval tests
+- resume by polling the live collection to terminal, then run targeted precision
+  Chequing + Credit Card, verify CA Public, audit the historical Chinese
+  duplicate append-only, run full suites/diff checks, and delete `goal.md`
+  only when its acceptance criteria are complete; keep the automatic scheduler
+  disabled
+
+As of `2026-08-21` (TD Canada detailed-recollection hardening, paused):
+- Product Owner requested a pause after the reusable implementation and tests;
+  `goal.md` contains the full active handoff and must remain until final TD
+  precision recollection/Public readback is complete
+- prior TD collection `collection_VebpXs07e6atGGls` completed all seven
+  Product Types but produced 29 candidates with only 7 approved and 22 in
+  Review; AI did run, so the failure was traced to bounded discovery polluted
+  by `zh.td.com`/`zt.td.com`, scalar-first lending/security repair,
+  conversion-fee percentage confusion, and genuine inaccessible/ambiguous
+  official facts
+- discovery now removes conflicting source-language hosts/paths before its
+  bounded cap and retains a named official Credit Application Guide only as
+  supporting evidence; Review AI v18 applies candidate country/language to
+  consulted URLs and requests evidence-preserving lending/security alternatives
+- Canada Chequing now accepts exact non-balance fee waivers and product-wide
+  transaction fees; savings merge rejects unlabeled fee percentages, pairs a
+  tiered Public rate with its first qualifying balance, and keeps TD Growth's
+  ongoing Boosted Rate out of promotional fields
+- verification completed before pause: 586 focused tests, 418 full API tests,
+  and 516 full worker tests passed
+- explicit TD collection `collection_FsuYnsK5WtBDwyzw` is continuing in the
+  background with the database scheduler still disabled; last poll showed 1
+  completed and 6 started runs, 6 persisted candidates, 1 Review task, and no
+  reported errors
+- that launch used standard/reused-detail scope, so resume by auditing it to
+  terminal and then execute the actual Admin `Rediscover completed` precision
+  path for CA/TD Chequing, Savings, GIC, Credit Card, Line of Credit, Mortgage,
+  and Personal Loan; finish candidate/Public comparison and append-only audit
+  of historical Chinese duplicate `prod_xTv0e57FN_qQ3LT1`
+
 As of `2026-08-12` (US pricing-evidence follow-up):
 - official US bank UI review confirmed that required pricing is commonly split
   across a product hero or accordion, ZIP/state-specific tables, directly
@@ -1960,3 +2090,110 @@ Read before coding:
     proxy returned the standard public envelope
 - Operations: automatic collection scheduling remains disabled. No collection,
   Review, canonical, aggregate-refresh, or publish operation was launched.
+
+## 2026-08-21 - Bankompare Public Identity
+
+- WBS: `5.37`
+- Status: completed the Product Owner-requested customer-facing rename and
+  logo decision without changing the internal FPDS identity or product data.
+- Outcome:
+  - renamed Public metadata, accessible labels, EN/KO/JA brand references,
+    information notices, and the exact-spelling wordmark from `Bankoompare` to
+    `Bankompare`
+  - replaced the paired-eye mark, which conflicted with the new single-`o`
+    spelling, with one code-native comparison lens: a circular `o`, a central
+    split, and one record point on each side
+  - applied the same geometry to the shell mark and evergreen app icon while
+    preserving the mark-only exact-390px header behavior
+- Decision: `D-054`; `FPDS` remains the internal platform/runtime name and no
+  Home, catalog, comparison, API, localization, or publication behavior changed.
+- Key files: Public mark/icon, layout metadata, locale resources, Public
+  README, requirements, Product Grid IA, decision log, and WBS.
+- Verification:
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build`: passed
+  - production-rendered Home inspected at `1440px` EN, `768px` KO, and exact
+    `390px` JA; the mark and wordmark were visually clear at applicable widths
+  - measured document/body scroll width equaled the viewport at all three
+    widths; exact `390px` hid only the wordmark and kept every visible header
+    action within the viewport at a minimum `44px` target
+  - active Public runtime and README contain no stale `Bankoompare` or
+    `Bankoom` customer-facing references
+- Boundaries: no Admin, collection, canonical-data, Review, aggregate-refresh,
+  publish, or external write was performed. Automatic scheduling remains
+  disabled.
+
+## 2026-08-22 - Bankompare Ledger-B Identity Refinement
+
+- WBS: `5.38`; supersedes the rejected visual treatment from `5.37` while
+  retaining the approved `Bankompare` customer name.
+- Status: completed the Product Owner-requested logo and wordmark redesign
+  without changing internal FPDS naming or product behavior.
+- Design decision:
+  - removed the comparison-lens symbol and all single-letter color emphasis
+  - rendered `Bankompare` as one uninterrupted same-color text node with no
+    styled child letter
+  - selected a ledger `B` after considering lens, bank-pillar, BK-monogram,
+    table, and record-based concepts; two stacked rounded record rows share a
+    spine and carry one short data stroke each
+  - used the outlined geometry in the shell and the same solid white-on-
+    evergreen geometry in the app icon
+- Decision: `D-055`; the exact-390px mark-only header, EN/KO/JA behavior,
+  accessible naming, and every data/publication boundary remain unchanged.
+- Key files: Public mark, footer composition, app icon, Public README,
+  requirements, Product Grid IA, decision log, and WBS.
+- Verification:
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build`: passed, including static `/icon.svg`
+  - production-rendered Home visually inspected at `1440px` EN, `768px` KO,
+    and exact `390px` JA; the mark remained identifiable and the wordmark read
+    as one typographic unit at applicable widths
+  - rendered favicon inspected at `256px`; the two record rows and `B`
+    silhouette remained clear
+  - document/body scroll width equaled the viewport at all three widths;
+    exact `390px` retained every visible header action inside the viewport at
+    a minimum `44px` target, and the footer brand remained in bounds
+  - rendered wordmark text was exactly `Bankompare`, used one computed color,
+    and had zero styled child elements
+- Boundaries: no Admin, collection, canonical-data, Review, aggregate-refresh,
+  publish, or external write was performed. Automatic scheduling remains
+  disabled.
+
+## 2026-08-22 - Bankompare Globe and Focused Review Detail
+
+- WBS: `5.39`, `5.40`; supersedes only the rejected ledger-B mark in `5.38`
+  while retaining the approved `Bankompare` name and monochrome wordmark.
+- Status: completed the Product Owner-requested global globe identity and Admin
+  Review Detail simplification without changing product data or mutation rules.
+- Outcome:
+  - replaced the shell and favicon ledger-B geometry with one simple globe made
+    from a circular boundary, equator, and paired meridian form; the globe
+    signals the worldwide product direction without widening current market scope
+  - retained the one-color uninterrupted `Bankompare` title and exact-390px
+    mark-only header behavior
+  - reduced Review Detail to a compact identity/facts band, recommendation,
+    expanded source check, affected fields, and decision path
+  - collapsed product facts, unaffected fields, advanced overrides, decision
+    notes, diff, evidence/audit context, and AI `Official sources`; active or
+    attention-requiring AI verification still opens and keeps field citations
+    beside the compared value
+- Decisions: `D-056`, `D-057`; review authorization, CSRF, correction staging,
+  audit, canonical, aggregate-refresh, and publication boundaries are unchanged.
+- Key files: Public mark/app icon, Admin Review Detail surface, both boundary
+  READMEs, requirements, Public/Admin IA, UI override register, decision log,
+  and WBS.
+- Verification:
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build`: passed, including static `/icon.svg`
+  - Admin `pnpm run typecheck`: passed
+  - Admin `pnpm run build`: passed
+  - production-like local Public Home rendered at `1440px` EN, `768px` KO, and
+    exact `390px` JA; the globe remained clear in header/footer, the wordmark
+    stayed intact, and document/body width stayed within the viewport
+  - an isolated, non-persisting Review Detail fixture rendered at `1440px`,
+    `768px`, and exact `390px`; document/body width matched the viewport,
+    `Source check` was open, `Official sources` was closed, and all secondary
+    disclosure sections remained closed
+- Boundaries: the QA fixture and screenshots were removed after inspection. No
+  API, database, Review decision, canonical-data, aggregate-refresh, publish,
+  or external write was performed. Automatic scheduling remains disabled.

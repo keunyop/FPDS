@@ -77,8 +77,9 @@ class ProductTypeRegistryTests(unittest.TestCase):
 
         self.assertIn("included_transactions", fields)
         self.assertIn("minimum_balance", fields)
-        self.assertNotIn("transaction_fee", fields)
-        self.assertNotIn("fee_waiver_condition", fields)
+        self.assertIn("transaction_fee", fields)
+        self.assertIn("fee_waiver_condition", fields)
+        self.assertNotIn("eligibility_text", fields)
 
     def test_load_product_type_list_serializes_operator_managed_fields(self) -> None:
         connection = _QueuedConnection(

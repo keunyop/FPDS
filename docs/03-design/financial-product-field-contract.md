@@ -155,24 +155,34 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     profile prefers percentage-bearing `purchase_interest_rate_summary` and
     permits an exact fixed `purchase_interest_rate` only as an alternative;
     Canada retains `purchase_interest_rate`. Mortgages
-    require `mortgage_rate` or a percentage-bearing `interest_rate_summary`,
-    plus `rate_type` and `term_length_text`; personal loans require
-    `interest_rate` or a percentage-bearing APR/rate summary, plus
-    `loan_amount_text` and `term_length_text`; lines of credit require a numeric
-    rate or percentage-bearing rate/formula summary plus `credit_limit_text`.
+    require a percentage-bearing `interest_rate_summary` or `mortgage_rate`,
+    plus `rate_type` and `term_length_text`; personal loans require a
+    percentage-bearing APR/rate summary or `interest_rate`, plus
+    `loan_amount_text` and `term_length_text`; lines of credit require a
+    percentage-bearing rate/formula summary or scalar rate plus
+    `credit_limit_text` and an explicit security requirement/state.
     APR ranges, reference-rate formulas, and representative examples retain
     their source-language assumptions in `interest_rate_summary` rather than
     becoming one scalar. An unknown dynamic type fails closed until expected
     fields provide at least one percentage field and another decision field.
     Automatic promotion, human approval, and public projection each enforce the
     same completeness boundary.
+    For a fixed Canadian card rate, an exact adjacent official label such as
+    `Interest: Purchases 21.99%` may deterministically restore an AI-omitted
+    `purchase_interest_rate`. Cash-advance and balance-transfer labels are
+    separate field identities and cannot satisfy the purchase-rate contract.
 48. D-034 narrows current default collection to the following executable
-    essentials: Chequing = fee + minimum balance + included/unlimited
-    transactions; Savings = ongoing rate + fee + minimum balance; GIC = rate +
+    essentials: Chequing = fee +, when the fee is positive, an explicit balance
+    threshold or non-balance waiver + included/unlimited transactions or an
+    explicit product-wide per-transaction fee; Savings = ongoing rate + fee +
+    minimum balance; GIC = rate +
     term + minimum deposit + redeemability; Credit Card = annual fee + purchase
     rate; Mortgage = rate/qualified summary + rate type + term; Personal Loan =
     rate/APR summary + amount + term; Line of Credit = rate/formula summary +
     limit + security. Alternative fields satisfy one requirement, not several.
+    Review AI selects one preferred populated or missing field for each such
+    requirement; redundant populated alternatives never create additional
+    approval blockers.
     Explicit zero money values and explicit boolean states are valid facts when
     evidence-grounded. Default collection does not request optional copy.
 49. D-035 resolves that executable contract by `(country_code, product_type)`
@@ -200,12 +210,17 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     Country ownership is also a source boundary: an explicit route, locale,
     subdomain, or country-code TLD for another market is excluded from entry,
     detail, seed, and supporting evidence even when the parent official domain
-    is shared by both countries.
+    is shared by both countries. Language-specific hosts and paths are removed
+    before bounded discovery candidate selection so a sibling locale cannot
+    consume the detail/supporting-source cap. Review AI applies the same
+    candidate country and source-language boundary to every consulted result.
     Official detail, rate, fee, and disclosure documents may form one evidence
     bundle only when every merged field retains exact-product field-level
     evidence and its supporting source document id. Legal agreements,
     enrollment/service flows, calculators, and generic hubs are never
-    standalone product identities.
+    standalone product identities. A clearly identified official application
+    guide may be supporting evidence for amount, limit, term, or security facts,
+    but an application CTA or submission flow remains excluded.
     Source planning bounds that bundle before fetch: only selected-product
     descendants/companions, a Product-Type-compatible rate/APR page, or an
     essential-fact FAQ/disclosure that identifies the selected product may be
@@ -220,7 +235,14 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     a concrete numeric percentage locally to Rate, APR, APY, or an explicit
     reference-rate formula. Transaction, currency-conversion, point-of-sale,
     and ATM/ABM assessment-fee percentages are non-rate context and cannot
-    populate a deposit or lending rate. For a country-specific override, aggregate refresh
+    populate a deposit or lending rate. A savings fallback percentage must be
+    locally identified by an Interest Rate/APY label or structured rate-table
+    header. When Public displays the highest grounded savings tier, its
+    `minimum_balance` is the lowest balance that earns that displayed rate.
+    An ongoing monthly-qualified Boosted Rate is a conditional tier, not an
+    introductory promotion, and therefore does not set `promotional_rate`,
+    `introductory_rate_flag`, or `promotional_period_text`. For a
+    country-specific override, aggregate refresh
     projects only its comparison fields plus product identity, status,
     freshness, and official product link. Extra normalized copy remains in the
     private candidate/evidence record for audit but cannot leak navigation,

@@ -41,7 +41,6 @@ function FooterContent() {
               <PublicMark className="text-background" />
               <PublicWordmark
                 className="text-xl font-semibold tracking-[-0.04em] text-background"
-                eyeClassName="text-background"
               />
             </Link>
             <p className="mt-1 text-sm text-background/65">{copy.shell.tagline}</p>

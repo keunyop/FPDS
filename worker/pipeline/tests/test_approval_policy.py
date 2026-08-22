@@ -68,7 +68,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         )
 
         self.assertFalse(quality.complete)
-        self.assertEqual(quality.missing_fields, ("interest_rate",))
+        self.assertEqual(quality.missing_fields, ("interest_rate_summary",))
 
     def test_new_dynamic_type_fails_closed_without_rate_plus_decision_contract(self) -> None:
         quality = comparison_quality(
@@ -102,7 +102,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
 
         self.assertEqual(
             fields,
-            ["mortgage_rate", "rate_type", "term_length_text"],
+            ["interest_rate_summary", "rate_type", "term_length_text"],
         )
 
     def test_known_collection_contract_drops_optional_legacy_fields(self) -> None:
@@ -175,6 +175,45 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         self.assertFalse(fee_bearing.complete)
         self.assertEqual(fee_bearing.missing_fields, ("minimum_balance",))
 
+    def test_canadian_chequing_accepts_explicit_non_balance_waiver_or_transaction_fee(self) -> None:
+        minimum_account = comparison_quality(
+            country_code="CA",
+            product_type="chequing",
+            expected_fields=[],
+            candidate_payload={
+                "monthly_fee": 3.95,
+                "fee_waiver_condition": "Fee waived for eligible GIS, RDSP, Indigenous, or Newcomer customers.",
+                "included_transactions": 12,
+            },
+        )
+        us_dollar_account = comparison_quality(
+            country_code="CA",
+            product_type="chequing",
+            expected_fields=[],
+            candidate_payload={"monthly_fee": 0, "transaction_fee": 1.25},
+        )
+
+        self.assertTrue(minimum_account.complete)
+        self.assertIn("fee_waiver_condition", minimum_account.satisfied_fields)
+        self.assertTrue(us_dollar_account.complete)
+        self.assertIn("transaction_fee", us_dollar_account.satisfied_fields)
+
+    def test_repair_fields_do_not_reverify_populated_alternatives_for_same_requirement(self) -> None:
+        fields = dynamic_repair_fields(
+            country_code="CA",
+            product_type="chequing",
+            expected_fields=[],
+            candidate_payload={
+                "monthly_fee": 0,
+                "public_display_fee": 0,
+                "included_transactions": 0,
+                "unlimited_transactions_flag": False,
+                "minimum_balance": 1500,
+            },
+        )
+
+        self.assertEqual(fields, ["monthly_fee", "included_transactions"])
+
     def test_line_of_credit_requires_security_fact(self) -> None:
         quality = comparison_quality(
             product_type="line-of-credit",
@@ -183,7 +222,25 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         )
 
         self.assertFalse(quality.complete)
-        self.assertEqual(quality.missing_fields, ("secured_flag",))
+        self.assertEqual(quality.missing_fields, ("security_requirement",))
+
+    def test_canadian_line_of_credit_repair_prefers_evidence_preserving_fields(self) -> None:
+        self.assertEqual(
+            dynamic_repair_fields(
+                country_code="CA",
+                product_type="line-of-credit",
+                expected_fields=[
+                    "product_name",
+                    "interest_rate",
+                    "interest_rate_summary",
+                    "credit_limit_text",
+                    "secured_flag",
+                    "security_requirement",
+                ],
+                candidate_payload={"product_name": "TD Personal Line of Credit"},
+            ),
+            ["interest_rate_summary", "credit_limit_text", "security_requirement"],
+        )
 
     def test_us_checking_replaces_transaction_count_with_conditional_fee_waiver(self) -> None:
         no_fee = comparison_quality(

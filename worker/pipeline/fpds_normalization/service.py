@@ -2288,9 +2288,9 @@ def _apply_credit_card_labeled_fallback(
         return
 
     field_labels = {
-        "purchase_interest_rate": r"(?:current\s+interest\s+rate\s*\(\s*purchases?\s*\)|purchases?\s+(?:interest\s+)?rate|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
-        "balance_transfer_rate": r"(?:interest\s+rate\s*\(\s*balance\s+transfers?|balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
-        "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?)",
+        "purchase_interest_rate": r"(?:interest\s*:\s*purchases?|current\s+interest\s+rate\s*\(\s*purchases?\s*\)|purchases?\s+(?:interest\s+)?rate|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
+        "balance_transfer_rate": r"(?:interest\s*:\s*balance\s+transfers?|interest\s+rate\s*\(\s*balance\s+transfers?|balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
+        "cash_advance_rate": r"(?:interest\s*:\s*cash\s+advances?|cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?)",
     }
     supplemented: list[str] = []
     for field_name, label_pattern in field_labels.items():
@@ -3847,7 +3847,7 @@ def _looks_like_credit_card_field_mismatch(
         ):
             return False
         labels = {
-            "purchase_interest_rate": r"(?:purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\)|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
+            "purchase_interest_rate": r"(?:interest\s*:\s*purchases?|purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\)|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
             "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
             "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?)",
         }
@@ -3959,16 +3959,43 @@ def _has_exact_official_card_purchase_rate(
         for observed in re.finditer(r"(?<![\d.])(\d{1,3}(?:\.\d+)?)\s*%", evidence):
             if _as_decimal(observed.group(1)) != expected:
                 continue
-            window = evidence[
-                max(0, observed.start() - 70):min(len(evidence), observed.end() + 70)
-            ]
-            if (
-                re.search(r"\binterest\s+rate\b", window, flags=re.IGNORECASE)
-                and not re.search(
-                    r"\b(?:cash\s+advance|balance\s+transfer)\b",
-                    window,
+            prefix = evidence[max(0, observed.start() - 90):observed.start()]
+            purchase_labels = list(
+                re.finditer(
+                    r"(?:interest\s*:\s*purchases?|purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\)|purchase\s+apr|apr\s+for\s+purchases?)",
+                    prefix,
                     flags=re.IGNORECASE,
                 )
+            )
+            if purchase_labels:
+                local_prefix = prefix[purchase_labels[-1].start():]
+                if not re.search(
+                    r"\b(?:cash\s+advance|balance\s+transfer)\b",
+                    local_prefix,
+                    flags=re.IGNORECASE,
+                ):
+                    return True
+            generic_labels = list(
+                re.finditer(r"\binterest\s+rate\b", prefix, flags=re.IGNORECASE)
+            )
+            if generic_labels:
+                generic_label = generic_labels[-1]
+                local_prefix = prefix[max(0, generic_label.start() - 35):]
+                if not re.search(
+                    r"\b(?:cash\s+advance|balance\s+transfer)\b",
+                    local_prefix,
+                    flags=re.IGNORECASE,
+                ):
+                    return True
+            suffix = evidence[observed.end():min(len(evidence), observed.end() + 45)]
+            if re.match(
+                r"\s*(?:interest\s+rate|purchase\s+(?:interest\s+)?rate|purchase\s+apr)\b",
+                suffix,
+                flags=re.IGNORECASE,
+            ) and not re.search(
+                r"\b(?:cash\s+advance|balance\s+transfer)\b",
+                prefix[-45:],
+                flags=re.IGNORECASE,
             ):
                 return True
     return False

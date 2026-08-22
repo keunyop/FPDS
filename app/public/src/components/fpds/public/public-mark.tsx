@@ -9,28 +9,29 @@ export function PublicMark({ className = "" }: { className?: string }) {
         className
       )}
     >
-      <svg className="h-7 w-9" viewBox="0 0 32 24" fill="none">
-        <circle cx="8.75" cy="12" r="6.5" stroke="currentColor" strokeWidth="2.5" />
-        <circle cx="23.25" cy="12" r="6.5" stroke="currentColor" strokeWidth="2.5" />
-        <circle cx="8.75" cy="12" r="2" fill="currentColor" />
-        <circle cx="23.25" cy="12" r="2" fill="currentColor" />
+      <svg className="size-8" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="2.1" />
+        <path d="M3.5 12H20.5" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
+        <path
+          d="M12 3.5C9.78 5.76 8.55 8.67 8.55 12C8.55 15.33 9.78 18.24 12 20.5C14.22 18.24 15.45 15.33 15.45 12C15.45 8.67 14.22 5.76 12 3.5Z"
+          stroke="currentColor"
+          strokeWidth="2.1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </span>
   );
 }
 
 export function PublicWordmark({
-  className = "",
-  eyeClassName = "text-primary"
+  className = ""
 }: {
   className?: string;
-  eyeClassName?: string;
 }) {
   return (
-    <span aria-label="Bankoompare" className={cn("inline-flex items-baseline whitespace-nowrap", className)}>
-      <span aria-hidden="true">
-        Bank<span className={eyeClassName}>oo</span>mpare
-      </span>
+    <span className={cn("inline-flex items-baseline whitespace-nowrap", className)}>
+      Bankompare
     </span>
   );
 }

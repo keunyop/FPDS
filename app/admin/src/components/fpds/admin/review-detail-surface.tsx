@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Bot, Check, CirclePause, ExternalLink, Loader2, PencilLine, ShieldCheck, Sparkles, TriangleAlert, X } from "lucide-react";
+import { Check, CirclePause, ExternalLink, Loader2, PencilLine, ShieldCheck, Sparkles, TriangleAlert, X } from "lucide-react";
 
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
@@ -760,7 +760,7 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
   return (
     <section
       aria-busy={pendingAction || aiVerificationPending ? true : undefined}
-      className="grid gap-5"
+      className="grid gap-4"
       data-admin-dirty={hasUnsavedChanges ? "true" : undefined}
       data-admin-mutation-pending={pendingAction || aiVerificationPending ? "true" : undefined}
     >
@@ -804,7 +804,7 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
 
       <ReviewProductPresentation copy={copy} detail={detail} editableValues={editableValues} locale={locale} />
 
-      <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
         <DecisionRecommendationCard copy={copy} recommendation={recommendation} />
         <SourceDecisionCard copy={copy} detail={detail} locale={locale} />
       </div>
@@ -843,7 +843,9 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
         <article className="min-w-0 border-y border-border/80 bg-card/95 px-5 py-5">
-          <SectionHeading eyebrow={copy.reviewFields} title={issueReviewFields.length > 0 ? copy.fixFlaggedValues : copy.noFieldIssues} />
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
+            {issueReviewFields.length > 0 ? copy.fixFlaggedValues : copy.noFieldIssues}
+          </h2>
           {issueReviewFields.length > 0 ? (
             <div className="mt-4 divide-y divide-border/80">
               {issueReviewFields.map((item) => (
@@ -942,7 +944,7 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
             data-admin-dirty={hasUnsavedChanges ? "true" : undefined}
             data-admin-mutation-pending={pendingAction ? "true" : undefined}
           >
-            <SectionHeading eyebrow={copy.decision} title={copy.submitReviewAction} />
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">{copy.decision}</h2>
 
             {detail.available_actions.length === 0 ? (
               <p className="mt-5 text-sm leading-6 text-muted-foreground">
@@ -1068,20 +1070,12 @@ function AiVerificationPanel({
   const matchedFields = result?.fields.filter((field) => field.status === "match") ?? [];
 
   return (
-    <article
+    <div
       aria-busy={pending ? true : undefined}
-      className="border-y border-border/80 bg-card/95"
       data-admin-mutation-pending={pending ? "true" : undefined}
     >
       <div className="grid gap-4 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-            <Sparkles className="size-4" aria-hidden="true" />
-            {copy.aiVerification}
-          </div>
-          <h2 className="mt-2 text-lg font-semibold tracking-tight text-foreground">{copy.aiVerificationTitle}</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{copy.aiVerificationDescription}</p>
-        </div>
+        <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{copy.aiVerificationDescription}</p>
         <Button
           className="min-w-36"
           disabled={!verification.can_run || pending}
@@ -1199,11 +1193,11 @@ function AiVerificationPanel({
               ) : null}
 
               {attempt.sources.length > 0 ? (
-                <div className="mt-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                    {copy.aiOfficialSources}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                <details className="mt-4 rounded-lg border border-border/80 bg-background">
+                  <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground">
+                    {copy.aiOfficialSources} ({formatCount(locale, attempt.sources.length)})
+                  </summary>
+                  <div className="flex flex-wrap gap-2 border-t border-border/70 p-4">
                     {attempt.sources.map((source) => (
                       <a
                         className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-foreground hover:border-primary/50 hover:text-primary"
@@ -1217,13 +1211,13 @@ function AiVerificationPanel({
                       </a>
                     ))}
                   </div>
-                </div>
+                </details>
               ) : null}
             </>
           ) : null}
         </div>
       ) : null}
-    </article>
+    </div>
   );
 }
 
@@ -1360,43 +1354,29 @@ function ReviewProductPresentation({
   const product = buildReviewProductView(detail, editableValues, copy, locale);
 
   return (
-    <article className="overflow-hidden rounded-lg border border-border/80 bg-card/95 shadow-sm">
-      <div className="border-b border-border/80 bg-muted/20 p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-md border border-primary/20 bg-primary/5 px-2 py-1 text-xs font-medium text-primary">{copy.candidateProduct}</span>
-              <span className="rounded-md border border-border bg-background px-2 py-1 text-xs font-medium text-muted-foreground">
-                {product.typeLabel}
-              </span>
-              <span className="text-xs text-muted-foreground">{detail.candidate.bank_name}</span>
-            </div>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">{product.name}</h2>
-            {product.description ? <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{product.description}</p> : null}
-          </div>
-        </div>
-
-        <dl className="mt-5 grid overflow-hidden rounded-lg border border-border/80 bg-background sm:grid-cols-3 sm:divide-x sm:divide-border/80">
+    <article className="border-y border-border/80 bg-card/95">
+      <div className="px-5 py-4">
+        {product.description ? <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{product.description}</p> : null}
+        <dl className={cn("grid gap-4 sm:grid-cols-3", product.description ? "mt-4 border-t border-border/70 pt-4" : "")}>
           {product.metrics.map((metric, index) => (
             <ReviewMetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
           ))}
         </dl>
       </div>
 
-      <details>
-        <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground">{copy.candidateDetails}</summary>
-        <div className="grid gap-4 border-t border-border/80 p-5 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+      <details className="border-t border-border/80">
+        <summary className="cursor-pointer px-5 py-3 text-sm font-medium text-foreground">{copy.productFacts}</summary>
+        <div className="grid gap-6 border-t border-border/80 p-5 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
           <section>
-            <SectionHeading eyebrow={copy.candidateDetails} title={copy.productFacts} />
-            <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+            <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
               {product.facts.map((fact) => (
                 <ReviewProductFactRow key={fact.label} {...fact} />
               ))}
             </dl>
           </section>
-          <section className="rounded-lg border border-border/80 bg-muted/20 p-4">
-            <SectionHeading eyebrow={copy.reviewFocus} title={copy.keyConditions} />
-            <dl className="mt-4 grid gap-4">
+          <section>
+            <p className="text-sm font-semibold text-foreground">{copy.keyConditions}</p>
+            <dl className="mt-3 grid gap-4">
               {product.conditions.map((fact) => (
                 <ReviewProductFactRow key={fact.label} {...fact} />
               ))}
@@ -1410,9 +1390,9 @@ function ReviewProductPresentation({
 
 function ReviewMetricTile({ highlight, label, value }: { highlight?: boolean; label: string; value: string }) {
   return (
-    <div className={cn("min-h-24 p-3", highlight ? "bg-primary/5" : "bg-background/80")}>
+    <div className={cn("min-w-0", highlight ? "text-primary" : "")}>
       <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-2 break-words text-2xl font-semibold leading-tight text-foreground tabular-nums">{value}</dd>
+      <dd className="mt-1 break-words text-lg font-semibold leading-tight text-foreground tabular-nums">{value}</dd>
     </div>
   );
 }
@@ -1624,24 +1604,10 @@ function DecisionRecommendationCard({
   recommendation: Recommendation;
 }) {
   return (
-    <article className={cn("rounded-lg border p-5 shadow-sm", recommendationCardClasses(recommendation.tone))}>
-      <div className="flex items-start gap-3">
-        <Bot aria-hidden="true" className="mt-1 h-4 w-4 shrink-0" />
-        <div className="min-w-0">
-          <p className="text-sm font-medium">{copy.recommended}</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight">{recommendation.title}</h2>
-        </div>
-      </div>
-      <p className="mt-4 text-sm leading-6">{recommendation.headline}</p>
-      {recommendation.affectedFields.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {recommendation.affectedFields.map((field) => (
-            <span className="rounded-full bg-background/80 px-2.5 py-1 text-xs font-medium" key={field}>
-              {field}
-            </span>
-          ))}
-        </div>
-      ) : null}
+    <article className={cn("border-y px-5 py-4", recommendationCardClasses(recommendation.tone))}>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em]">{copy.recommended}</p>
+      <h2 className="mt-2 text-lg font-semibold tracking-tight">{recommendation.title}</h2>
+      <p className="mt-2 text-sm leading-6">{recommendation.headline}</p>
     </article>
   );
 }
@@ -1656,7 +1622,7 @@ function SourceDecisionCard({
   locale: AdminLocale;
 }) {
   return (
-    <details className="rounded-lg border border-border/80 bg-card/95 shadow-sm">
+    <details className="border-y border-border/80 bg-card/95" open>
       <summary className="cursor-pointer px-5 py-4 text-sm font-medium text-foreground">{copy.sourceCheck}</summary>
       <div className="border-t border-border/80 p-5">
         <dl className="grid gap-3 text-sm">
@@ -1730,11 +1696,6 @@ function FieldReviewRow({
           <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-medium", item.evidence_count > 0 ? "bg-success-soft text-success" : "bg-muted text-muted-foreground")}>
             {formatCount(locale, item.evidence_count)} {copy.evidence}
           </span>
-          {editable ? (
-            <span className="rounded-full bg-info-soft px-2.5 py-1 text-[11px] font-medium text-info">{copy.editable}</span>
-          ) : (
-            <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">{copy.readOnly}</span>
-          )}
         </div>
       </div>
 
@@ -1794,7 +1755,7 @@ function EvidenceTracePanel({
   onSelectField: (fieldName: string) => void;
 }) {
   return (
-    <details className="rounded-lg border border-border/80 bg-card/95 shadow-sm">
+    <details className="border-y border-border/80 bg-card/95">
       <summary className="cursor-pointer px-5 py-4 text-sm font-medium text-foreground">{copy.evidenceTrace}</summary>
       <div className="grid gap-5 border-t border-border/80 p-5 lg:grid-cols-[16rem_minmax(0,1fr)]">
         <div className="grid content-start gap-2">
@@ -1854,7 +1815,7 @@ function AuditContextPanel({
   locale: AdminLocale;
 }) {
   return (
-    <details className="rounded-lg border border-border/80 bg-card/95 shadow-sm">
+    <details className="border-y border-border/80 bg-card/95">
       <summary className="cursor-pointer px-5 py-4 text-sm font-medium text-foreground">{copy.auditContext}</summary>
       <div className="grid gap-5 border-t border-border/80 p-5 lg:grid-cols-3">
         <div>
@@ -1975,15 +1936,6 @@ function ModelExecutionCard({
         <MetaRow label={copy.started} value={formatTimestamp(item.started_at, locale)} />
         <MetaRow label={copy.completed} value={formatTimestamp(item.completed_at, locale)} />
       </dl>
-    </div>
-  );
-}
-
-function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold text-muted-foreground">{eyebrow}</p>
-      <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{title}</h2>
     </div>
   );
 }

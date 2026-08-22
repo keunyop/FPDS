@@ -221,7 +221,7 @@ def run_review_ai_verification(
         "candidate_id": str(review_task.get("candidate_id") or ""),
         "requested_by_user_id": _string_or_none(actor.get("user_id")),
         "allowed_domains": allowed_domains,
-        "verification_contract_version": "review-ai-verification-v17",
+        "verification_contract_version": "review-ai-verification-v19",
         "requested_field_names": requested_field_names,
         "approval_field_names": requested_field_names,
         "requested_field_count": len(requested_field_names),
@@ -256,6 +256,12 @@ def run_review_ai_verification(
         sources = _filter_sources_to_allowed_domains(
             _source_list(provider_metadata.get("web_search_sources")),
             allowed_domains=allowed_domains,
+            country_code=str(candidate.get("country_code") or ""),
+            source_language=str(
+                candidate.get("source_language")
+                or _mapping(detail.get("source_context")).get("source_language")
+                or ""
+            ),
         )
         verification_result = sanitize_ai_verification_result(
             raw_result=raw_result,
@@ -511,6 +517,11 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
             "bank_code": str(candidate.get("bank_code") or ""),
             "bank_name": str(candidate.get("bank_name") or ""),
             "country_code": str(candidate.get("country_code") or ""),
+            "source_language": str(
+                candidate.get("source_language")
+                or source_context.get("source_language")
+                or ""
+            ),
             "product_family": str(candidate.get("product_family") or ""),
             "product_type": str(candidate.get("product_type") or ""),
             "product_name": str(candidate.get("product_name") or ""),
@@ -520,7 +531,7 @@ def build_ai_verification_payload(*, detail: dict[str, Any], allowed_domains: li
         },
         "fields_to_verify": review_fields[:AI_VERIFICATION_MAX_FIELDS],
         "approval_policy": {
-            "contract_version": "review-ai-verification-v17",
+            "contract_version": "review-ai-verification-v19",
             "rule": "official product identity plus every product-type essential field",
             "empty_requested_fields_block_approval": True,
         },
@@ -1249,7 +1260,9 @@ def _verification_instructions() -> str:
     return (
         "You are the FPDS financial-product verification agent. You must use web search before answering. "
         "Search only the supplied official bank domain allowlist and verify the exact named product, not a "
-        "neighboring product, family overview, promotion landing page, calculator, or service flow. Compare "
+        "neighboring product, family overview, promotion landing page, calculator, or service flow. "
+        "Only use sources for the supplied product country and source language. Treat a different country route "
+        "or language-specific host/path as a different market even when it shares the registered bank domain. Compare "
         "each requested approval field with current official facts. A requested empty field is a mandatory repair target, not "
         "an optional omission. Never infer a missing value. Mark a field "
         "unverified when the exact current fact is absent, ambiguous, personalized, dynamic, expired, or belongs "
@@ -1342,11 +1355,18 @@ def _filter_sources_to_allowed_domains(
     sources: list[dict[str, str]],
     *,
     allowed_domains: list[str],
+    country_code: str = "",
+    source_language: str = "",
 ) -> list[dict[str, str]]:
     filtered = []
     for source in sources:
         url = _canonical_source_url(source.get("url"))
-        if not url or not _url_matches_allowed_domains(url, allowed_domains=allowed_domains):
+        if (
+            not url
+            or not _url_matches_allowed_domains(url, allowed_domains=allowed_domains)
+            or _url_country_scope_conflicts(url=url, country_code=country_code)
+            or _url_locale_conflicts(url=url, source_language=source_language)
+        ):
             continue
         filtered.append(
             {
@@ -1355,6 +1375,33 @@ def _filter_sources_to_allowed_domains(
             }
         )
     return _dedupe_sources(filtered)[:100]
+
+
+def _url_country_scope_conflicts(*, url: str, country_code: str) -> bool:
+    requested = str(country_code or "").strip().lower()
+    if requested not in {"ca", "us"}:
+        return False
+    segments = [segment for segment in urlsplit(url).path.lower().split("/") if segment][:3]
+    explicit_market = next((segment for segment in segments if segment in {"ca", "us"}), None)
+    return explicit_market is not None and explicit_market != requested
+
+
+def _url_locale_conflicts(*, url: str, source_language: str) -> bool:
+    requested = str(source_language or "").strip().lower().replace("_", "-").split("-", 1)[0]
+    if not requested:
+        return False
+    known_languages = {"en", "fr", "es", "de", "it", "pt", "zh", "ja", "ko"}
+    parsed = urlsplit(url)
+    hostname_labels = [label for label in str(parsed.hostname or "").lower().split(".") if label]
+    if hostname_labels:
+        host_locale = {"zt": "zh"}.get(hostname_labels[0], hostname_labels[0])
+        if host_locale in known_languages and host_locale != requested:
+            return True
+    for segment in [item for item in parsed.path.lower().split("/") if item][:3]:
+        locale = segment.replace("_", "-").split("-", 1)[0]
+        if locale in known_languages:
+            return locale != requested
+    return False
 
 
 def _url_matches_allowed_domains(url: str, *, allowed_domains: list[str]) -> bool:

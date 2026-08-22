@@ -7,6 +7,7 @@ from decimal import Decimal, InvalidOperation
 from worker.pipeline.fpds_rate_safety import (
     bounded_rate_evidence_context,
     canonical_deposit_rate_suppression_reason,
+    contains_explicit_rate_percentage,
     expired_promotional_offer_end_date,
 )
 
@@ -701,7 +702,23 @@ def _build_generic_savings_rate_supplement(
             "public_display_rate": _format_decimal(current_rate),
         } if current_rate is not None else {}
     else:
-        rate_values = _extract_generic_rate_values(str(match.get("evidence_text_excerpt", "")))
+        fallback_excerpt = str(match.get("evidence_text_excerpt", ""))
+        if not (
+            contains_explicit_rate_percentage(fallback_excerpt)
+            or _looks_like_explicit_savings_rate_table(fallback_excerpt)
+        ):
+            return {
+                "field_updates": {},
+                "evidence_updates": {},
+                "runtime_notes": [
+                    f"Ignored percentage-bearing savings support source `{support_source_id}` for `{target_source_id}` because the percentage was not locally identified as an interest rate."
+                ],
+            }
+        rate_values = (
+            _extract_growth_rate_values(fallback_excerpt)
+            if _looks_like_growth_rate_table(fallback_excerpt)
+            else _extract_generic_rate_values(fallback_excerpt)
+        )
     rate_excerpt = str(match.get("evidence_text_excerpt", ""))
     tier_summary = _extract_savings_balance_tier_summary(rate_excerpt)
     if tier_summary is not None:
@@ -717,6 +734,9 @@ def _build_generic_savings_rate_supplement(
                 rate_values["public_display_rate"] = highest_tier_rate
         rate_values["tier_definition_text"] = tier_summary
         rate_values["tiered_rate_flag"] = True
+        minimum_balance = _extract_minimum_balance_for_public_rate(rate_excerpt)
+        if minimum_balance is not None:
+            rate_values["minimum_balance"] = minimum_balance
     if not rate_values:
         return {
             "field_updates": {},
@@ -2044,6 +2064,11 @@ def _build_current_rate_supplement(
     if tier_summary is not None:
         rate_values["tier_definition_text"] = tier_summary
         rate_values["tiered_rate_flag"] = True
+        minimum_balance = _extract_minimum_balance_for_public_rate(
+            str(rate_table_match.get("evidence_text_excerpt", ""))
+        )
+        if minimum_balance is not None:
+            rate_values["minimum_balance"] = minimum_balance
 
     field_updates: dict[str, dict[str, object]] = {}
     evidence_updates: dict[str, dict[str, object]] = {}
@@ -2532,8 +2557,54 @@ def _extract_growth_rate_values(excerpt: str) -> dict[str, str]:
     return {
         "standard_rate": _format_decimal(standard_rate),
         "public_display_rate": _format_decimal(boosted_rate),
-        "promotional_rate": _format_decimal(boosted_rate),
     }
+
+
+def _looks_like_growth_rate_table(excerpt: str) -> bool:
+    normalized = _normalize_text(excerpt)
+    return "boosted rate" in normalized and "standard posted rate" in normalized
+
+
+def _looks_like_explicit_savings_rate_table(excerpt: str) -> bool:
+    normalized = _normalize_text(excerpt)
+    if "%" not in normalized:
+        return False
+    if _looks_like_growth_rate_table(excerpt):
+        return True
+    return bool(
+        re.search(r"\b(?:interest\s+rate|apy|annual\s+percentage\s+yield)\b", normalized)
+        and ("daily closing balance" in normalized or "savings" in normalized)
+    )
+
+
+def _extract_minimum_balance_for_public_rate(excerpt: str) -> str | None:
+    normalized = _normalize_text(excerpt)
+    balance_pattern = re.compile(
+        r"\$\s*(?P<lower>\d[\d,]*(?:\.\d+)?)\s+(?:to\s+\$?\s*\d[\d,]*(?:\.\d+)?|and\s+over)",
+        flags=re.IGNORECASE,
+    )
+    balance_matches = list(balance_pattern.finditer(normalized))
+    if not balance_matches:
+        return None
+    rows: list[tuple[Decimal, list[Decimal]]] = []
+    for index, balance_match in enumerate(balance_matches):
+        end = balance_matches[index + 1].start() if index + 1 < len(balance_matches) else len(normalized)
+        rates = [
+            value
+            for value in (
+                _to_decimal(match.group(1))
+                for match in _PERCENT_RE.finditer(normalized[balance_match.end() : end])
+            )
+            if value is not None
+        ][:2]
+        lower = _to_decimal(balance_match.group("lower").replace(",", ""))
+        if lower is not None and rates:
+            rows.append((lower, rates))
+    if not rows:
+        return None
+    highest_rate = max(rate for _, rates in rows for rate in rates)
+    qualifying_balances = [lower for lower, rates in rows if highest_rate in rates]
+    return _format_decimal(min(qualifying_balances)) if qualifying_balances else None
 
 
 def _extract_scotia_money_master_rate_values(excerpt: str) -> dict[str, str]:
@@ -2727,7 +2798,10 @@ def _cleanup_target_artifact(
             _remove_field(extracted_fields, evidence_links, "promotional_period_text")
             runtime_notes.append("Suppressed `promotional_period_text` because the extracted text described marketing copy rather than a bounded promotional period.")
 
-    if target_source_id == "TD-SAV-004":
+    product_name = str(
+        _field_record_map(extracted_fields).get("product_name", {}).get("candidate_value") or ""
+    )
+    if target_source_id == "TD-SAV-004" or "td growth savings" in _normalize_text(product_name):
         _apply_growth_qualification_cleanup(
             extracted_fields=extracted_fields,
             evidence_links=evidence_links,
@@ -2742,6 +2816,24 @@ def _apply_growth_qualification_cleanup(
     runtime_notes: list[str],
 ) -> None:
     fields = _field_record_map(extracted_fields)
+    growth_context = " ".join(
+        str(field.get("evidence_text_excerpt") or field.get("candidate_value") or "")
+        for field in fields.values()
+    ).lower()
+    if "boosted rate" in growth_context:
+        removed_promotion_fields = []
+        for field_name in ("promotional_rate", "introductory_rate_flag", "promotional_period_text"):
+            if field_name not in fields:
+                continue
+            _remove_field(extracted_fields, evidence_links, field_name)
+            removed_promotion_fields.append(field_name)
+        if removed_promotion_fields:
+            runtime_notes.append(
+                "Suppressed TD Growth promotion fields because its Boosted Rate is an ongoing monthly qualification tier, not a bounded introductory offer: "
+                + ", ".join(f"`{field_name}`" for field_name in removed_promotion_fields)
+                + "."
+            )
+        fields = _field_record_map(extracted_fields)
     boosted_field = fields.get("boosted_rate_eligibility")
     if boosted_field is None:
         return

@@ -45,7 +45,7 @@ class _RecordingConnection:
             "execution_metadata": {
                 "review_task_id": "review-001",
                 "candidate_id": "candidate-001",
-                "verification_contract_version": "review-ai-verification-v17",
+                "verification_contract_version": "review-ai-verification-v19",
                 "verification_result": {
                     "overall_status": "differences_found",
                     "fields": [

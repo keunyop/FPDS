@@ -476,6 +476,31 @@ repeated labels and explanatory copy. EN/KO/JA controls and compact action
 labels must not wrap internally; Korean and Japanese prose must wrap on
 language-appropriate boundaries without document-level horizontal overflow.
 
+Product Owner direction on `2026-08-21` supersedes only that Public name and
+mark. The customer-facing title is `Bankompare`, while `FPDS` remains the
+internal platform/runtime name. The single `o` is represented by one
+code-native circular comparison lens split into two sides with one record point
+on each side. The shell, exact-spelling wordmark, and favicon use the same flat,
+small-size-legible geometry. Ranking, catalog, comparison, localization,
+accessibility, publication, and responsive behavior are unchanged.
+
+Product Owner refinement on `2026-08-22` supersedes only that comparison-lens
+mark and its single-green-`o` wordmark treatment. `Bankompare` must render as
+one uninterrupted same-color word with no separately styled letter. The shell
+and favicon use one code-native ledger `B`: two stacked rounded record rows
+share a vertical spine and each contains a short data stroke. The established
+evergreen may identify the standalone mark, but it must not split the title.
+The exact-390px mark-only header and all product, localization, accessibility,
+data, and publication behavior remain unchanged.
+
+Later Product Owner direction on `2026-08-22` supersedes only the ledger-`B`
+mark. The shell and favicon must use one simple code-native globe composed of a
+circular boundary, equator, and paired meridian form. The globe represents the
+long-term direction of comparable worldwide financial-product coverage; it
+does not widen the currently approved country or publication scope. The
+uninterrupted same-color `Bankompare` wordmark, exact-390px mark-only header,
+localization, accessibility, data, and publication behavior remain unchanged.
+
 ### FR-PUB-010 Comparative Scatter Plot
 insight dashboard는 상품 간 trade-off를 보여주는 scatter plot 또는 동등한 comparative chart를 제공해야 한다.
 
@@ -517,7 +542,7 @@ that visible facts are collected and organized from public materials with
 AI-agent assistance and are not financial-product advertising. It must also
 state that the content is independently produced for information purposes
 without compensation from the displayed financial institutions, that
-Bankoompare works to keep it current, and that rates, fees, eligibility, and
+Bankompare works to keep it current, and that rates, fees, eligibility, and
 other terms may change. Users must be directed to reconfirm the product and
 conditions on the financial institution's official website before applying.
 
@@ -1456,6 +1481,17 @@ appears in either ranking header.
 - decision form
 - override diff preview
 - action history
+
+Current default disclosure and hierarchy:
+- lead with candidate identity, three key facts, recommended action, source
+  check, affected fields, and the guarded decision; do not repeat identity,
+  issue, or instruction copy across adjacent panels
+- keep `Source check` expanded initially
+- keep AI verification `Official sources`, full product facts, unaffected
+  collected fields, advanced overrides, decision notes, diff, field trace, and
+  audit/model history collapsed until requested
+- AI verification may open for an active run, failure, or result requiring
+  attention, but remains advisory and cannot bypass the separate review action
 
 ## 11.6 BX-PF Publish Monitor
 필수 기능:

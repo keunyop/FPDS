@@ -16,6 +16,7 @@ from api_service.source_catalog import (
     _materialize_sources_for_catalog_item,
     _product_type_scope_codes,
     _url_country_scope_conflicts,
+    _url_locale_conflicts_source_language,
     repair_catalog_coverage_route,
 )
 from api_service.source_registry import (
@@ -47,11 +48,8 @@ def main() -> int:
                 f"[source-catalog-runner] failed run {group['run_id']}: {exc}",
                 flush=True,
             )
-            _mark_run_finished(
+            _mark_run_failure_best_effort(
                 run_id=str(group["run_id"]),
-                run_state="failed",
-                partial_completion_flag=True,
-                error_summary=str(exc),
                 run_metadata=_catalog_run_metadata(
                     plan=plan,
                     group=group,
@@ -62,8 +60,32 @@ def main() -> int:
                     target_source_ids=[],
                     failure=exc,
                 ),
+                failure=exc,
             )
     return 0
+
+
+def _mark_run_failure_best_effort(
+    *,
+    run_id: str,
+    run_metadata: dict[str, Any],
+    failure: Exception,
+) -> None:
+    """Keep the multi-group runner alive when failure persistence is unavailable."""
+
+    try:
+        _mark_run_finished(
+            run_id=run_id,
+            run_state="failed",
+            partial_completion_flag=True,
+            error_summary=str(failure),
+            run_metadata=run_metadata,
+        )
+    except Exception as persistence_error:  # pragma: no cover - last-resort background resilience
+        print(
+            f"[source-catalog-runner] could not persist failure for {run_id}: {persistence_error}",
+            flush=True,
+        )
 
 
 def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
@@ -122,6 +144,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 bank_code=str(group["bank_code"]),
                 country_code=str(group["country_code"]),
                 product_type=str(group["product_type"]),
+                source_language=str(group["source_language"]),
             )
         if (
             source_coverage_mode == "standard"
@@ -162,6 +185,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 bank_code=str(group["bank_code"]),
                 country_code=str(group["country_code"]),
                 product_type=str(group["product_type"]),
+                source_language=str(group["source_language"]),
             )
             if source_coverage_mode == "precision_fallback":
                 materialized = type(materialized)(
@@ -253,6 +277,10 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 country_code=str(group["country_code"]),
                 normalized_url=str(item.get("normalized_url") or item.get("source_url") or ""),
             )
+            and not _url_locale_conflicts_source_language(
+                normalized_url=str(item.get("normalized_url") or item.get("source_url") or ""),
+                source_language=str(group["source_language"]),
+            )
         ]
         target_source_ids = [
             str(item["source_id"])
@@ -262,6 +290,10 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             and not _url_country_scope_conflicts(
                 country_code=str(group["country_code"]),
                 normalized_url=str(item.get("normalized_url") or item.get("source_url") or ""),
+            )
+            and not _url_locale_conflicts_source_language(
+                normalized_url=str(item.get("normalized_url") or item.get("source_url") or ""),
+                source_language=str(group["source_language"]),
             )
         ]
         generated_target_source_ids = list(target_source_ids)
@@ -273,6 +305,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 bank_code=str(group["bank_code"]),
                 country_code=str(group["country_code"]),
                 product_type=str(group["product_type"]),
+                source_language=str(group["source_language"]),
             )
         )
         collection_source_ids = _dedupe_preserve_order(
@@ -371,6 +404,7 @@ def _load_active_collection_scope(
     bank_code: str,
     country_code: str,
     product_type: str,
+    source_language: str,
 ) -> dict[str, list[str]]:
     product_type = _canonical_product_type_code(product_type)
     rows = connection.execute(
@@ -403,6 +437,7 @@ def _load_active_collection_scope(
             row,
             product_type=product_type,
             country_code=country_code,
+            source_language=source_language,
         )
     ]
     target_source_ids = [
@@ -413,6 +448,7 @@ def _load_active_collection_scope(
             row,
             product_type=product_type,
             country_code=country_code,
+            source_language=source_language,
         )
     ]
     return {
@@ -426,12 +462,18 @@ def _source_matches_active_product_scope(
     *,
     product_type: str,
     country_code: str,
+    source_language: str,
 ) -> bool:
     normalized_row = dict(row) if not isinstance(row, dict) else row
     source_url = str(normalized_row.get("source_url") or "")
     if _url_country_scope_conflicts(
         country_code=country_code,
         normalized_url=source_url,
+    ):
+        return False
+    if _url_locale_conflicts_source_language(
+        normalized_url=source_url,
+        source_language=source_language,
     ):
         return False
     fingerprint = " ".join(

@@ -319,7 +319,7 @@ def load_recoverable_collection_review_task_ids(connection: Any, *, limit: int) 
               WHERE me.stage_name = 'ai_verification'
                 AND me.execution_status = 'completed'
                 AND me.execution_metadata ->> 'review_task_id' = rt.review_task_id
-                AND me.execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v17'
+                AND me.execution_metadata ->> 'verification_contract_version' = 'review-ai-verification-v19'
                 AND me.execution_metadata ? 'auto_approval_assessment'
           )
         ORDER BY rt.created_at ASC, rt.review_task_id ASC

@@ -29,6 +29,11 @@ Runtime invariants:
   also retains bounded component/script text as `structured_component`
   evidence when the visible HTML shell hides the product copy, and preserves
   accessible Check/X values used as boolean cells in comparison tables
+- A bounded exact-product attribute such as `data-cardDescriptionUrl` is kept
+  ahead of ordinary navigation when the global link cap is reached. Known
+  public AEM content-tree aliases are converted to their canonical public path;
+  the recovered URL still passes the ordinary official-domain, locale,
+  Product-Type, page-evidence, and action-flow boundaries.
 - validation treats both deterministic `multi_product_family_overview` and AI
   `hub_page_not_detail` discovery evidence as an ambiguous product boundary;
   either condition routes a candidate to Review rather than auto-validating a
@@ -68,7 +73,10 @@ Runtime invariants:
   risk disclaimers are not deposit insurance.
 - current Deposit and Lending collection resolves identity plus comparison
   essentials from the versioned `(country_code, product_type)` profile in
-  `fpds_market_profile.py`. Canada retains fee/balance/transaction Chequing and
+  `fpds_market_profile.py`. Canada Chequing accepts an explicit non-balance
+  fee waiver when a positive-fee product has no balance waiver, and accepts an
+  explicit product-wide transaction fee when no included/unlimited count
+  exists. Canada otherwise retains fee/balance/transaction Chequing and
   rate/term/deposit/redeemability GIC semantics. US Checking uses fee,
   opening/minimum balance, and a conditional fee-waiver/qualifying-activity
   fact. US Savings additionally requires a complete waiver for a positive fee
@@ -83,7 +91,9 @@ Runtime invariants:
 - Country scope also applies to URLs, not only database rows. Explicit
   other-market paths/locales, subdomains, and country-code TLDs are excluded
   from entry, seed, detail, and supporting evidence even when both markets use
-  the same official parent domain.
+  the same official parent domain. Language-specific hosts and paths are
+  removed before bounded candidate selection, and Review AI applies the same
+  country/language boundary to consulted official sources.
 - Supporting-source planning is bounded before fetch to exact-product
   descendants/companions, Product-Type-compatible rate/APR pages, and relevant
   essential-fact FAQs/disclosures. Educational, servicing, application,
@@ -102,9 +112,14 @@ Runtime invariants:
   outside collection and Review by default. A partial-source or legacy
   confidence warning alone does not block a complete candidate; missing,
   contradictory, invalid, or ambiguously mapped essentials remain Review-bound.
+  When multiple fields are alternatives for one requirement, Review AI checks
+  only the preferred satisfied or missing field for that requirement; redundant
+  populated alternatives do not add approval blockers.
 - APR ranges, reference-rate formulas, and representative mortgage examples
   stay in `interest_rate_summary` with their disclosed assumptions instead of
-  being collapsed into a misleading scalar. Unknown dynamic types fail closed
+  being collapsed into a misleading scalar. Review repair prefers that summary
+  and explicit security prose before scalar rate/boolean alternatives. Unknown
+  dynamic types fail closed
   until their registry defines a percentage field plus another decision field.
 - US Personal Loan and vehicle-loan representative APR examples also retain
   any official model-year/vehicle-age, LTV, down-payment, credit,
@@ -115,6 +130,13 @@ Runtime invariants:
   concrete percentage adjacent to Rate, APR, APY, or an explicit reference-rate
   label; unrelated percentages such as down payment, transaction/conversion
   fees, or ATM/ABM assessment fees do not count.
+- savings supporting fallback requires a local Interest Rate/APY label or
+  structured rate-table header. Tiered savings stores the first balance that
+  earns the selected Public rate, and an ongoing qualification-based Boosted
+  Rate is not mislabeled as a bounded promotional rate.
+- Flattened account-fee rows may carry a footnote number and a currency marker
+  between an exact Transaction Fee label, amount, and `each`; that bounded
+  layout is still parsed as a per-transaction fee.
 - AI-grounded comparison prose uses field-specific safe bounds. Fee-waiver,
   penalty, tier, and qualified-rate text is retained as a complete condition or
   omitted for Review; it is never blindly sliced mid-word or mid-clause.
@@ -127,4 +149,7 @@ Runtime invariants:
   range and material creditworthiness/variable-rate qualification in
   `purchase_interest_rate_summary`; the qualified summary is the governing US
   card essential, and a scalar lower bound cannot replace it.
-  comparison, and detail rendering.
+- Fixed card-rate fallback accepts only an exact adjacent field label and
+  percentage. This includes `Interest: Purchases` and `Interest: Cash
+  Advances`; purchase, cash-advance, and balance-transfer labels remain
+  distinct so a nearby 22.99% cash rate cannot populate the purchase rate.

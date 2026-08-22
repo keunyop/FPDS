@@ -257,7 +257,13 @@ def dynamic_repair_fields(
     candidate_payload: Mapping[str, Any],
     country_code: str | None = None,
 ) -> list[str]:
-    """Return mandatory missing fields plus useful populated decision fields."""
+    """Return the selected satisfied field or missing field for each requirement.
+
+    Alternative canonical fields express the same customer decision fact. Once
+    one alternative satisfies that requirement, asking Review AI to verify all
+    populated alternatives makes a redundant display field an approval blocker
+    even though the essential comparison contract is complete.
+    """
 
     decision_fields = dynamic_decision_fields(
         product_type=product_type,
@@ -270,12 +276,6 @@ def dynamic_repair_fields(
         expected_fields=expected_fields,
         candidate_payload=candidate_payload,
     )
-    populated = [
-        field_name
-        for field_name in decision_fields
-        if is_populated(candidate_payload.get(field_name))
-    ]
-    requested = list(dict.fromkeys((*quality_fields, *populated)))
-    if requested:
-        return requested
+    if quality_fields:
+        return quality_fields
     return decision_fields[:1]

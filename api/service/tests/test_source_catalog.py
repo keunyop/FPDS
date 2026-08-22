@@ -20,6 +20,8 @@ from api_service.source_catalog import (
     _generate_existing_detail_companion_rows,
     _materialize_sources_for_catalog_item,
     _launch_source_catalog_collection_runner,
+    _load_existing_detail_rows_for_companion_discovery,
+    _load_existing_precision_discovery_seeds,
     _candidate_promotes_to_detail,
     _deactivate_case_alias_generated_detail_sources,
     _deactivate_hard_scope_excluded_generated_detail_sources,
@@ -31,6 +33,7 @@ from api_service.source_catalog import (
     _extract_allowed_links,
     _generate_bank_code,
     _has_excluded_link_signal,
+    _has_excluded_product_discovery_link_signal,
     _authoritative_catalog_detail_bonus,
     _ai_supporting_source_is_relevant,
     _invoke_openai_parallel_scorer,
@@ -650,6 +653,41 @@ class SourceCatalogTests(unittest.TestCase):
                 anchor_text="Start your mortgage application",
             )
         )
+        self.assertFalse(
+            _has_excluded_link_signal(
+                normalized_url="https://www.td.com/ca/en/personal-banking/products/loans-and-lines-of-credit/credit-application-guide",
+                anchor_text="Credit Application Guide",
+            )
+        )
+
+    def test_exact_card_detail_can_use_view_offer_without_opening_category_or_apply_flows(self) -> None:
+        detail_url = (
+            "https://www.td.com/ca/en/personal-banking/products/credit-cards/"
+            "aeroplan/aeroplan-visa-infinite-card"
+        )
+        self.assertFalse(
+            _has_excluded_product_discovery_link_signal(
+                product_type="credit-card",
+                normalized_url=detail_url,
+                anchor_text="View offer",
+            )
+        )
+        self.assertTrue(
+            _has_excluded_product_discovery_link_signal(
+                product_type="credit-card",
+                normalized_url=(
+                    "https://www.td.com/ca/en/personal-banking/products/credit-cards/aeroplan"
+                ),
+                anchor_text="View offer",
+            )
+        )
+        self.assertTrue(
+            _has_excluded_product_discovery_link_signal(
+                product_type="credit-card",
+                normalized_url=detail_url,
+                anchor_text="Apply now",
+            )
+        )
 
     def test_ai_supporting_source_rejects_low_relevance_general_advice(self) -> None:
         self.assertFalse(
@@ -1033,6 +1071,18 @@ class SourceCatalogTests(unittest.TestCase):
                     "non_consumer_business_page",
                 )
 
+    def test_credit_card_scope_rejects_payment_protection_insurance_product(self) -> None:
+        self.assertEqual(
+            _source_scope_exclusion_reason(
+                product_type="credit-card",
+                fingerprint=(
+                    "https://www.td.com/ca/en/personal-banking/products/insurance/"
+                    "td-credit-card-payment-protection TD Credit Card Payment Protection Plan"
+                ),
+            ),
+            "other_product_type",
+        )
+
     def test_authoritative_card_catalog_details_receive_budget_priority(self) -> None:
         detail_url = "https://www.examplebank.ca/credit-cards/all-credit-cards/dividend-visa-card.html"
         entry_url = "https://www.examplebank.ca/credit-cards/all-credit-cards.html"
@@ -1241,6 +1291,24 @@ class SourceCatalogTests(unittest.TestCase):
             _url_locale_conflicts_source_language(
                 normalized_url="https://example.test/ca/en/accounts/smart",
                 source_language="en-CA",
+            )
+        )
+        self.assertTrue(
+            _url_locale_conflicts_source_language(
+                normalized_url="https://zh.td.com/ca/en/personal-banking/products/credit-cards",
+                source_language="en",
+            )
+        )
+        self.assertTrue(
+            _url_locale_conflicts_source_language(
+                normalized_url="https://zt.td.com/ca/en/personal-banking/products/credit-cards",
+                source_language="en",
+            )
+        )
+        self.assertFalse(
+            _url_locale_conflicts_source_language(
+                normalized_url="https://www.td.com/ca/en/personal-banking/products/credit-cards",
+                source_language="en",
             )
         )
         self.assertTrue(
@@ -3795,6 +3863,7 @@ class SourceCatalogTests(unittest.TestCase):
             bank_code="BMO",
             country_code="CA",
             product_type="chequing",
+            source_language="en",
         )
         self.assertEqual(len(connection.calls), 1)
         self.assertIn("discovery_role IN ('entry', 'detail')", connection.calls[0][0])
@@ -4163,6 +4232,73 @@ class SourceCatalogTests(unittest.TestCase):
         detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
         self.assertIn(detail_url, {item["normalized_url"] for item in detail_rows})
         self.assertTrue(any("secondary product-category hub" in note for note in result.discovery_notes))
+
+    def test_unselected_primary_category_is_still_expanded_as_secondary_hub(self) -> None:
+        homepage_url = "https://www.examplebank.ca/"
+        entry_url = "https://www.examplebank.ca/personal/credit-cards"
+        category_url = "https://www.examplebank.ca/personal/credit-cards/cash-back"
+        detail_url = "https://www.examplebank.ca/personal/credit-cards/cash-back/dividend-visa-infinite-card"
+        pages = {
+            homepage_url: (
+                '<a href="/personal/credit-cards">Credit cards</a>'
+                '<a href="/personal/credit-cards/cash-back">Cash back credit cards</a>'
+            ),
+            entry_url: '<a href="/personal/credit-cards/cash-back">Cash back credit cards</a>',
+            category_url: (
+                '<a href="/personal/credit-cards/cash-back/dividend-visa-infinite-card">'
+                "Dividend Visa Infinite Card</a>"
+            ),
+            detail_url: (
+                "<html><head><title>Dividend Visa Infinite Card</title></head><body>"
+                "<h1>Dividend Visa Infinite Card</h1><p>$120 annual fee. Purchase interest rate 21.99%.</p>"
+                "</body></html>"
+            ),
+        }
+
+        def fake_fetch(url: str, _policy: object) -> str:
+            return pages[normalize_source_url(url)]
+
+        with (
+            patch("api_service.source_catalog.fetch_text", side_effect=fake_fetch),
+            patch("api_service.source_catalog._DISCOVERY_HUB_PAGE_MAX", 1),
+            patch("api_service.source_catalog._load_seed_entry_url", return_value=entry_url),
+            patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
+            patch("api_service.source_catalog._load_seed_supporting_hints", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(
+                    scores={
+                        detail_url: AiParallelCandidateScore(
+                            candidate_url=detail_url,
+                            predicted_role="detail",
+                            relevance_score=9.0,
+                            confidence_band="high",
+                            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+                            short_rationale="Official individual credit-card detail page.",
+                        )
+                    },
+                    notes=[],
+                ),
+            ),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="EXAMPLE",
+                bank_name="Example Bank",
+                country_code="CA",
+                product_type="credit-card",
+                product_type_definition=_product_type_definition("credit-card"),
+                homepage_url=homepage_url,
+                source_language="en",
+            )
+
+        detail_urls = {
+            item["normalized_url"]
+            for item in result.rows
+            if item["discovery_role"] == "detail"
+        }
+        self.assertIn(detail_url, detail_urls, (result.discovery_notes, result.rows))
+        self.assertEqual(result.discovery_metrics["primary_hub_page_fetched_count"], 1)
+        self.assertEqual(result.discovery_metrics["secondary_hub_page_fetched_count"], 1)
 
     def test_precision_discovery_uses_existing_official_detail_to_find_new_sibling_product(self) -> None:
         homepage_url = "https://www.examplebank.ca/"
@@ -4638,6 +4774,7 @@ class SourceCatalogTests(unittest.TestCase):
             bank_code="OAKEN",
             country_code="CA",
             product_type="gic",
+            source_language="en",
         )
 
         self.assertEqual(count, 1)
@@ -4645,6 +4782,80 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertIn("status = 'inactive'", update_sql)
         self.assertEqual(update_params["source_ids"], ["AUTO-OAKEN-GIC-commercial"])
         self.assertIn("non_consumer_business_page", update_params["change_reason"])
+
+    def test_deactivates_generated_detail_on_conflicting_language_route(self) -> None:
+        connection = _QueuedConnection(
+            [
+                [
+                    {
+                        "source_id": "AUTO-TD-CARD-zh",
+                        "normalized_url": "https://zh.td.com/ca/en/personal-banking/products/credit-cards/aeroplan-card",
+                        "source_name": "TD Aeroplan card",
+                        "discovery_metadata": {"primary_heading": "TD Aeroplan card"},
+                    }
+                ],
+                1,
+            ]
+        )
+
+        count = _deactivate_hard_scope_excluded_generated_detail_sources(
+            connection,
+            bank_code="TD",
+            country_code="CA",
+            product_type="credit-card",
+            source_language="en",
+        )
+
+        self.assertEqual(count, 1)
+        _update_sql, update_params = connection.calls[1]
+        self.assertEqual(update_params["source_ids"], ["AUTO-TD-CARD-zh"])
+        self.assertIn("other_source_language_route", update_params["change_reason"])
+
+    def test_existing_discovery_sources_filter_locale_before_bounded_selection(self) -> None:
+        chinese_rows = [
+            {
+                "source_id": f"AUTO-TD-CARD-ZH-{index}",
+                "source_name": "Chinese card",
+                "source_url": f"https://zh.td.com/ca/en/personal-banking/products/credit-cards/card-{index}",
+                "normalized_url": f"https://zh.td.com/ca/en/personal-banking/products/credit-cards/card-{index}",
+                "discovery_role": "detail",
+                "priority": "P1",
+                "source_language": "en",
+                "expected_fields": [],
+            }
+            for index in range(20)
+        ]
+        english_row = {
+            "source_id": "AUTO-TD-CARD-EN",
+            "source_name": "English card",
+            "source_url": "https://www.td.com/ca/en/personal-banking/products/credit-cards/aeroplan-visa-infinite-card",
+            "normalized_url": "https://www.td.com/ca/en/personal-banking/products/credit-cards/aeroplan-visa-infinite-card",
+            "discovery_role": "detail",
+            "priority": "P1",
+            "source_language": "en",
+            "expected_fields": [],
+        }
+
+        seed_rows = _load_existing_precision_discovery_seeds(
+            _QueuedConnection([[*chinese_rows, english_row]]),
+            bank_code="TD",
+            country_code="CA",
+            product_type="credit-card",
+            source_language="en",
+        )
+        detail_rows = _load_existing_detail_rows_for_companion_discovery(
+            _QueuedConnection([[*chinese_rows, english_row]]),
+            bank_code="TD",
+            country_code="CA",
+            product_type="credit-card",
+            source_language="en",
+        )
+
+        self.assertEqual([row["source_id"] for row in seed_rows], ["AUTO-TD-CARD-EN"])
+        self.assertEqual(
+            [row["normalized_url"] for row in detail_rows],
+            [english_row["normalized_url"]],
+        )
 
     def test_page_evidence_does_not_treat_product_cta_copy_as_negative(self) -> None:
         detail_html = """
@@ -4674,6 +4885,106 @@ class SourceCatalogTests(unittest.TestCase):
 
         self.assertGreaterEqual(result.page_evidence_score, 4)
         self.assertEqual(result.negative_signal_count, 0)
+
+    def test_strong_named_card_page_survives_ai_irrelevant_but_category_does_not(self) -> None:
+        named_url = "https://www.td.com/ca/en/personal-banking/products/credit-cards/travel-rewards/first-class-travel-visa-infinite-card"
+        category_url = "https://www.td.com/ca/en/personal-banking/products/credit-cards/travel-rewards"
+        candidates = [
+            HomepageCandidate(
+                normalized_url=named_url,
+                raw_url=named_url,
+                anchor_text="TD First Class Travel Visa Infinite Card",
+                source_type="html",
+                origin="homepage_or_hub_link",
+                heuristic_score=10,
+                supporting_signal=False,
+                seed_source_id=None,
+                source_name_hint=None,
+                priority_hint=None,
+                expected_fields_hint=[],
+            ),
+            HomepageCandidate(
+                normalized_url=category_url,
+                raw_url=category_url,
+                anchor_text="Travel Rewards Credit Cards",
+                source_type="html",
+                origin="homepage_or_hub_link",
+                heuristic_score=8,
+                supporting_signal=False,
+                seed_source_id=None,
+                source_name_hint=None,
+                priority_hint=None,
+                expected_fields_hint=[],
+            ),
+        ]
+        ai_scores = {
+            candidate.normalized_url: AiParallelCandidateScore(
+                candidate_url=candidate.normalized_url,
+                predicted_role="irrelevant",
+                relevance_score=2.0,
+                confidence_band="medium",
+                reason_codes=["insufficient_evidence"],
+                short_rationale="The parallel scorer did not recognize the product route.",
+            )
+            for candidate in candidates
+        }
+        named_evidence = PageEvidenceAssessment(
+            page_evidence_score=9,
+            page_evidence_reason_codes=[
+                "product_identity_signal",
+                "title_semantic_match",
+                "url_product_identity_signal",
+                "product_type_semantic_match",
+                "pricing_or_feature_signal",
+                "multi_product_family_overview",
+            ],
+            page_title="TD First Class Travel Visa Infinite Card | TD Canada Trust",
+            primary_heading="TD First Class Travel Visa Infinite Card",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+            product_identity_match=True,
+        )
+        category_evidence = PageEvidenceAssessment(
+            page_evidence_score=9,
+            page_evidence_reason_codes=[
+                "product_identity_signal",
+                "title_semantic_match",
+                "product_type_semantic_match",
+                "pricing_or_feature_signal",
+                "multi_product_family_overview",
+            ],
+            page_title="Travel Rewards Credit Cards | TD Canada Trust",
+            primary_heading="Travel Rewards Credit Cards",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+            product_identity_match=True,
+        )
+
+        with patch(
+            "api_service.source_catalog._score_page_evidence",
+            side_effect=[named_evidence, category_evidence],
+        ):
+            rows, rejected_urls, _notes = _promote_detail_candidates(
+                bank_code="TD",
+                bank_name="TD Bank",
+                country_code="CA",
+                product_type="credit-card",
+                discovery_product_type="credit-card",
+                product_type_definition=_product_type_definition("credit-card"),
+                source_language="en",
+                fetch_policy=SimpleNamespace(),
+                candidates=candidates,
+                ai_scores=ai_scores,
+            )
+
+        self.assertEqual([row["normalized_url"] for row in rows], [named_url])
+        self.assertIn(category_url, rejected_urls)
+        self.assertIn(
+            "strong_named_page_ai_irrelevant_override",
+            rows[0]["discovery_metadata"]["selection_reason_codes"],
+        )
 
     def test_seed_detail_source_is_promoted_when_page_evidence_fetch_is_unavailable(self) -> None:
         candidate = HomepageCandidate(
@@ -5063,7 +5374,7 @@ class SourceCatalogTests(unittest.TestCase):
         detail_rows = [item for item in result.rows if item["source_id"] in {"CIBC-CHQ-002", "CIBC-CHQ-003"}]
         self.assertTrue(all(item["discovery_metadata"]["selection_path"] == "seed_hint_ai_unavailable_low_page_evidence" for item in detail_rows))
         self.assertTrue(all(item["discovery_metadata"]["ai_unavailable"] for item in detail_rows))
-        self.assertTrue(all("fee_waiver_condition" not in item["expected_fields"] for item in detail_rows))
+        self.assertTrue(all("fee_waiver_condition" in item["expected_fields"] for item in detail_rows))
         self.assertTrue(all("included_transactions" in item["expected_fields"] for item in detail_rows))
         self.assertTrue(all("minimum_balance" in item["expected_fields"] for item in detail_rows))
         self.assertTrue(any("Deterministic homepage discovery fallback" in note for note in result.discovery_notes))

@@ -71,7 +71,7 @@ class CollectionAiAutopilotTests(TestCase):
 
         sql, params = connection.calls[0]
         self.assertEqual(params, {"review_task_id": "review-001"})
-        self.assertIn("review-ai-verification-v17", sql)
+        self.assertIn("review-ai-verification-v19", sql)
         self.assertIn("execution_status = 'completed'", sql)
         self.assertIn("interval '24 hours'", sql)
 

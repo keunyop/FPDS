@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from api_service.ai_verification import (
     AiVerificationError,
+    _filter_sources_to_allowed_domains,
     authoritative_field_evidence,
     authoritative_identity_evidence,
     build_ai_verification_payload,
@@ -306,6 +307,25 @@ class AiVerificationTests(TestCase):
             ["bank.example", "rates.bank.example"],
         )
 
+    def test_official_source_filter_enforces_candidate_market_and_language(self):
+        sources = [
+            {"url": "https://www.td.com/ca/en/personal-banking/products/borrowing", "title": "Canada English"},
+            {"url": "https://zh.td.com/ca/en/personal-banking/products/credit-cards", "title": "Chinese host"},
+            {"url": "https://zt.td.com/ca/en/personal-banking/products/credit-cards", "title": "Traditional Chinese host"},
+            {"url": "https://www.td.com/ca/fr/services-bancaires-personnels", "title": "Canada French"},
+            {"url": "https://www.td.com/us/en/personal-banking", "title": "United States"},
+        ]
+
+        self.assertEqual(
+            _filter_sources_to_allowed_domains(
+                sources,
+                allowed_domains=["td.com"],
+                country_code="CA",
+                source_language="en",
+            ),
+            [sources[0]],
+        )
+
     def test_registered_bank_domains_do_not_admit_unregistered_preferred_host(self):
         connection = _RecordingConnection()
         self.assertEqual(
@@ -394,7 +414,7 @@ class AiVerificationTests(TestCase):
             ["product_name", "annual_fee", "purchase_interest_rate_summary"],
         )
         self.assertTrue(payload["fields_to_verify"][2]["missing"])
-        self.assertEqual(payload["approval_policy"]["contract_version"], "review-ai-verification-v17")
+        self.assertEqual(payload["approval_policy"]["contract_version"], "review-ai-verification-v19")
 
     def test_build_payload_requests_only_the_preferred_missing_rate_alternative(self):
         detail = _detail()
@@ -425,7 +445,7 @@ class AiVerificationTests(TestCase):
             [item["field_name"] for item in payload["fields_to_verify"]],
             [
                 "product_name",
-                "mortgage_rate",
+                "interest_rate_summary",
                 "rate_type",
                 "term_length_text",
             ],
@@ -927,7 +947,7 @@ class AiVerificationTests(TestCase):
         )
         self.assertEqual(
             connection.execution_metadata["verification_contract_version"],
-            "review-ai-verification-v17",
+            "review-ai-verification-v19",
         )
         self.assertEqual(
             connection.execution_metadata["approval_field_names"],

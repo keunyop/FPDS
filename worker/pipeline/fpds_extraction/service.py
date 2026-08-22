@@ -6887,9 +6887,10 @@ def _extract_transaction_fee(*, text: str, require_additional: bool = False) -> 
         r"\badditional\s+(?:debit\s+)?transactions?(?:\s+\d{1,3})?\s+\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s+each\b",
         r"\badditional\s+(?:debit\s+)?transactions?[^$]{0,90}?\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s+per\s+transaction\b",
         r"\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s+(?:for\s+each|per)\s+additional\s+(?:debit\s+)?(?:transaction|withdrawal|transfer)\b",
-        r"\btransaction\s+fees?(?:\s+\d{1,3})?\s+\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s+each\b",
+        r"\btransaction\s+fees?(?:\s+\d{1,3})?\s+\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s*(?:u\.?s\.?\s*(?:dollars?)?|usd)?\s+each\b",
         r"\bfee\s+for\s+transactions?\s*[:|\-]?\s*\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s*(?:each|per\s+transaction)?\b",
         r"\btransactions?\s*[:|\-]?\s*\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s*(?:each|per\s+transaction)\b",
+        r"\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\s*(?:u\.?s\.?\s*(?:dollars?)?|usd)?\s*each\s+transaction\b",
         r"\b(?:withdrawal|transaction)\s*(?:fee)?\s*[:|\-]\s*\$\s*(?P<fee>\d[\d,]*(?:\.\d{1,2})?)\b",
     )
     for pattern in patterns:
