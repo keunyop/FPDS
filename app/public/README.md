@@ -191,6 +191,10 @@ repository-root FastAPI configuration cannot override this app in Git builds.
 Keep the `bankompare-public` Root Directory at `app/public`, its Framework
 Preset at Next.js, and **Include source files outside of the Root Directory**
 disabled. Public has no runtime dependency on files above its project root.
+The production build uses the supported Next.js Webpack opt-out because the
+current Next.js 16.2.3 Turbopack build can nondeterministically emit different
+server chunks to the same output path on Vercel. Development continues to use
+the default Turbopack path.
 
 ```powershell
 cd app/public

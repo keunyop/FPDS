@@ -2390,3 +2390,34 @@ Read before coding:
   - Production same-origin `/api/public/countries`: CA 142 and US 21
 - Boundaries: no API route, Public product behavior, financial data, database
   state, environment value, scheduler ownership, domain, or secret changed.
+
+## 2026-08-23 - Vercel Public Turbopack Collision Hardening
+
+- WBS: corrective follow-up to `5.42` (no new delivery scope).
+- Status: implementation and local verification complete; the next Git-triggered
+  Vercel build remains the production verification point.
+- Cause:
+  - the latest failed `bankompare-public` deployment and the immediately prior
+    successful deployment both resolved Next.js 16.2.3 and React 19.2.5
+  - the failed run stopped inside `next build` before compilation completed
+    because different Turbopack JavaScript and sourcemap assets were emitted to
+    the same `[root-of-the-server]` chunk paths
+  - the same baseline succeeded in the prior uncached deployment and in a local
+    build, confirming a nondeterministic Turbopack output collision rather than
+    a route, type, or application-data failure
+- Outcome:
+  - changed only the Public production build to the supported
+    `next build --webpack` opt-out; `next dev` continues to use Turbopack
+  - documented the temporary production-bundler boundary in the Public README
+  - retained the existing Next.js 16.2.3 lockfile and Vercel project isolation
+- Verification:
+  - inspected failed Production deployment logs: eight duplicate-output errors
+    across two server chunks and their sourcemaps
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build`: passed with `Next.js 16.2.3 (webpack)`, all ten
+    routes generated, and no Turbopack `[root-of-the-server]` output
+- Known issue: remote verification requires the corrective files to reach the
+  Git revision built by Vercel; no deployment or production alias changed in
+  this slice.
+- Boundaries: no Public route/UI behavior, financial data, API, database,
+  scheduler, environment value, domain, secret, or external deployment changed.
