@@ -547,6 +547,31 @@ mark in Section 10.22. The `Bankompare` name and monochrome wordmark remain:
   Exact-390px mark-only behavior, accessible naming, EN/KO/JA behavior, and
   document-overflow rules remain unchanged.
 
+### 10.24 Responsive Shell, Country Map, and Catalog Defaults
+
+Product Owner direction later on `2026-08-22` supersedes the compact header
+and Home snapshot-summary parts of Sections 10.18 and 10.23:
+
+- header and footer reduce only the whitespace between the globe and wordmark;
+  the mark geometry and uninterrupted monochrome wordmark do not change
+- exact `390px` retains both the globe and `Bankompare` wordmark; the
+  former mark-only rule is retired
+- below the desktop navigation breakpoint, one hamburger owns Home, Deposit,
+  Credit Card, Loan, and published-country selection. Desktop retains the
+  visible navigation and country selector
+- Home gives Deposit, Credit Card, and Loan equal initial action emphasis
+- the snapshot/freshness/count ledger is replaced by a simple code-native world
+  map and a localized list of every country plus published product count from
+  `GET /api/public/countries`; the map is a coverage summary, not a claim of
+  unsupported country availability
+- catalog view state has an implicit responsive mode when `view` is absent:
+  Grid at `768px` and wider, List below `768px`
+- clicking either view writes explicit `view=grid` or `view=list`; that
+  choice persists through filters and sorting and takes priority over the
+  responsive default
+- all menu, map, country-count, and view-control states retain EN/KO/JA labels,
+  visible focus, minimum touch targets, and bounded document width
+
 ## 11. Follow-On Items
 
 | Area | Follow-Up |

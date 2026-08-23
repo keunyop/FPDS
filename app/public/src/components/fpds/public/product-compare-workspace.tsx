@@ -49,12 +49,28 @@ export function ProductCompareWorkspace({
   const [nextPage, setNextPage] = useState(initialProducts.page + 1);
   const [hasNextPage, setHasNextPage] = useState(initialProducts.has_next_page);
   const [loadState, setLoadState] = useState<LoadState>("idle");
+  const [resolvedViewMode, setResolvedViewMode] = useState<"grid" | "list">(
+    filters.viewMode === "list" ? "list" : "grid"
+  );
   const requestRef = useRef<AbortController | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const selectedProducts = useMemo(
     () => selectedIds.map((productId) => products.find((product) => product.product_id === productId)).filter((product): product is PublicProduct => Boolean(product)),
     [products, selectedIds]
   );
+
+  useEffect(() => {
+    if (filters.viewMode !== "auto") {
+      setResolvedViewMode(filters.viewMode);
+      return;
+    }
+
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => setResolvedViewMode(media.matches ? "list" : "grid");
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [filters.viewMode]);
 
   useEffect(() => {
     requestRef.current?.abort();
@@ -180,7 +196,7 @@ export function ProductCompareWorkspace({
         />
       ) : null}
 
-      <section className={cn("grid", filters.viewMode === "list" ? "gap-2" : "gap-5 md:grid-cols-2 xl:grid-cols-3")}>
+      <section className={cn("grid", resolvedViewMode === "list" ? "gap-2" : "gap-5 md:grid-cols-2 xl:grid-cols-3")}>
         {products.map((product) => {
           const selected = selectedIds.includes(product.product_id);
           const compareDisabled = !selected && selectedIds.length >= MAX_COMPARE_PRODUCTS;
@@ -193,7 +209,7 @@ export function ProductCompareWorkspace({
             selected
           };
 
-          return filters.viewMode === "list" ? (
+          return resolvedViewMode === "list" ? (
             <ProductCompareListItem
               {...presentationProps}
               key={product.product_id}

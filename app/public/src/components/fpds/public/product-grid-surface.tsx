@@ -1,10 +1,11 @@
-import { ArrowDownUp, ChevronDown, LayoutGrid, List, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowDownUp, ChevronDown, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { InstantFilterForm } from "@/components/fpds/public/instant-filter-form";
 import { ProductCompareWorkspace } from "@/components/fpds/public/product-compare-workspace";
 import { PublicFreshness } from "@/components/fpds/public/public-freshness";
+import { ResponsiveCatalogViewToggle } from "@/components/fpds/public/responsive-catalog-view-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { formatPublicMessage, getIntlLocale, getPublicCatalogCopy, getPublicDiscoveryCopy, getPublicMessages } from "@/lib/public-locale";
@@ -126,7 +127,7 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
                 <input name="country_code" type="hidden" value={filters.countryCode} />
                 <input name="sort_by" type="hidden" value={filters.sortBy} />
                 <input name="sort_order" type="hidden" value={filters.sortOrder} />
-                {filters.viewMode === "list" ? <input name="view" type="hidden" value="list" /> : null}
+                {filters.viewMode !== "auto" ? <input name="view" type="hidden" value={filters.viewMode} /> : null}
 
                 <label className="grid max-w-2xl gap-1.5">
                   <span className="text-sm font-medium text-foreground">{discoveryCopy.searchLabel}</span>
@@ -287,22 +288,14 @@ function DiscoveryToolbar({
           </SortLink>
         ))}
         <span className="ml-1 h-6 w-px shrink-0 bg-border" aria-hidden="true" />
-        <div className="flex shrink-0 items-center rounded-lg border border-border bg-card/60 p-0.5" role="group" aria-label={copy.grid.viewMode}>
-          <ViewLink
-            active={filters.viewMode === "grid"}
-            href={buildCatalogHref(catalogPath, { ...filters, viewMode: "grid" })}
-            label={copy.grid.gridView}
-          >
-            <LayoutGrid className="size-4" aria-hidden="true" />
-          </ViewLink>
-          <ViewLink
-            active={filters.viewMode === "list"}
-            href={buildCatalogHref(catalogPath, { ...filters, viewMode: "list" })}
-            label={copy.grid.listView}
-          >
-            <List className="size-4" aria-hidden="true" />
-          </ViewLink>
-        </div>
+        <ResponsiveCatalogViewToggle
+          gridHref={buildCatalogHref(catalogPath, { ...filters, viewMode: "grid" })}
+          gridLabel={copy.grid.gridView}
+          groupLabel={copy.grid.viewMode}
+          listHref={buildCatalogHref(catalogPath, { ...filters, viewMode: "list" })}
+          listLabel={copy.grid.listView}
+          viewMode={filters.viewMode}
+        />
       </div>
     </section>
   );
@@ -317,25 +310,6 @@ function SortLink({ active, children, href }: { active: boolean; children: React
         active ? "border-foreground bg-foreground text-background" : "border-border bg-card/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
       )}
       href={href}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function ViewLink({ active, children, href, label }: { active: boolean; children: ReactNode; href: string; label: string }) {
-  return (
-    <Link
-      aria-current={active ? "page" : undefined}
-      aria-label={label}
-      className={cn(
-        "inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors",
-        active
-          ? "bg-foreground text-background"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-      )}
-      href={href}
-      title={label}
     >
       {children}
     </Link>

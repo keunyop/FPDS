@@ -285,6 +285,22 @@ Implemented Home calm-density refinement on `2026-08-15`:
 - This is a hierarchy and responsive-copy change only. Snapshot formulas,
   endpoint contracts, freshness semantics, and evidence privacy are unchanged.
 
+Implemented country-coverage map refinement later on `2026-08-22`:
+
+- The visible Public/Current snapshot, active-product count, and bank-count
+  ledger above is superseded on Home by a simple code-native world map and a
+  localized list of every published country with its product count from
+  `GET /api/public/countries`.
+- Home no longer renders `total_active_products` or `banks_in_scope` as
+  headline numbers. Their formulas and dashboard-summary API compatibility
+  remain unchanged for non-Home consumers.
+- Country counts remain latest-completed-public-snapshot counts, and the map
+  does not add unsupported countries, cross-country ranking, recommendation,
+  or evidence exposure.
+- Catalog result freshness and Methodology remain available on their owning
+  surfaces; this changes visible Home composition, not freshness calculation
+  or publication eligibility.
+
 ### 6.3 Ranking Row Baseline
 
 Each ranking row must expose:

@@ -501,6 +501,26 @@ does not widen the currently approved country or publication scope. The
 uninterrupted same-color `Bankompare` wordmark, exact-390px mark-only header,
 localization, accessibility, data, and publication behavior remain unchanged.
 
+Product Owner follow-up later on `2026-08-22` supersedes the exact-390px
+mark-only header and visible Home snapshot-ledger presentation above:
+
+- the globe and uninterrupted `Bankompare` wordmark remain visible together
+  on mobile, with slightly tighter mark-to-title spacing in both header and
+  footer
+- mobile Home, Deposit, Credit Card, Loan, and published-country selection
+  move into one hamburger menu; desktop keeps the visible primary navigation
+  and country selector
+- Home replaces the Public/Current snapshot, Visible products, and Banks count
+  ledger with a simple code-native world map plus every country and published
+  product count returned by `GET /api/public/countries`
+- the Home Deposit, Credit Card, and Loan actions have equal initial emphasis
+- when catalog `view` is absent, desktop defaults to Grid and mobile defaults
+  to List; explicit `view=grid` or `view=list` remains a shareable override
+  through filter and sort changes
+- the change does not alter country availability, aggregate formulas,
+  publication gates, financial facts, evidence boundaries, or recommendation
+  policy
+
 ### FR-PUB-010 Comparative Scatter Plot
 insight dashboard는 상품 간 trade-off를 보여주는 scatter plot 또는 동등한 comparative chart를 제공해야 한다.
 

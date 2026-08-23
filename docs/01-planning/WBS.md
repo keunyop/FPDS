@@ -323,6 +323,9 @@ Based on:
 | 5.38 | Superseded | Bankompare identity refinement | historical uninterrupted wordmark and ledger-B mark; wordmark retained and mark superseded by `5.39` | Frontend, UX, QA | 5.14, 5.37 | 2026-08-22 |
 | 5.39 | Completed | Bankompare global globe identity | simple globe shell mark and matching white-on-evergreen favicon, monochrome wordmark retention, responsive and build verification | Frontend, UX, QA | 5.14, 5.38 | 2026-08-22 |
 | 5.40 | Completed | Review Detail focused decision path | compact candidate facts, expanded source check, collapsed official sources and secondary diagnostics, simplified review/decision hierarchy, responsive and build verification | Frontend, UX, QA | 5.16, 5.25 | 2026-08-22 |
+| 5.41 | Completed | Vercel FastAPI Public-read deployment | repository-root FastAPI entrypoint, scheduler-disabled serverless runtime, separate Preview/Production auth secrets, Product Owner-approved temporary dev DB reuse, health and Public-read verification | Backend, DevOps, QA | 5.7, 5.8, 5.25 | 2026-08-22 |
+| 5.42 | Completed | Vercel Bankompare Public deployment | separate Next.js project with `app/public` Git root, deployed API-origin configuration, Production Home/BFF verification, protected Preview verification, aligned API Public origin/CORS | Frontend, DevOps, QA | 5.14, 5.39, 5.41 | 2026-08-22 |
+| 5.43 | Completed | responsive Public discovery refinement | tighter shell branding, mobile wordmark and unified navigation/country menu, public-country world map, equal Home catalog actions, desktop Grid/mobile List defaults with explicit URL overrides | Frontend, UX, QA | 5.14, 5.19, 5.39 | 2026-08-22 |
 
 ### 5.5 Scope Baseline
 

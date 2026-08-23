@@ -15,9 +15,11 @@ export type ProductGridPageFilters = PublicScopeFilters & {
   catalogProductTypes: string[];
   sortBy: string;
   sortOrder: "asc" | "desc";
-  viewMode: "grid" | "list";
+  viewMode: CatalogViewMode;
   page: number;
 };
+
+export type CatalogViewMode = "auto" | "grid" | "list";
 
 export type DashboardPageFilters = PublicScopeFilters & {
   axisPreset: string;
@@ -54,7 +56,7 @@ type PublicHrefState = PublicScopeFilters &
   Partial<{
     sortBy: string;
     sortOrder: "asc" | "desc";
-    viewMode: "grid" | "list";
+    viewMode: CatalogViewMode;
     page: number;
     axisPreset: string;
   }>;
@@ -82,7 +84,7 @@ export function parseProductGridPageFilters(searchParams: PageSearchParams, cata
     sortOrder: sortOrder === "asc" || sortOrder === "desc"
       ? sortOrder
       : getDefaultSortOrder(sortBy, catalogProductTypes),
-    viewMode: VIEW_MODES.has(viewMode) ? viewMode as "grid" | "list" : "grid",
+    viewMode: VIEW_MODES.has(viewMode) ? viewMode as "grid" | "list" : "auto",
     page: 1
   };
 }
@@ -208,8 +210,8 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
     if (state.sortOrder && state.sortOrder !== "desc") {
       params.set("sort_order", state.sortOrder);
     }
-    if (state.viewMode === "list") {
-      params.set("view", "list");
+    if (state.viewMode === "grid" || state.viewMode === "list") {
+      params.set("view", state.viewMode);
     }
   }
 

@@ -136,6 +136,54 @@ $env:FPDS_ENV_FILE=".env.dev"
 uv run --directory api/service uvicorn api_service.main:app --reload --host localhost --port 4000
 ```
 
+## Vercel API Deployment
+
+The repository root is the Vercel project root. Root `app.py` exposes the
+existing `api_service.main` FastAPI instance, root `pyproject.toml` and
+`uv.lock` install the complete runtime dependency set, and `.python-version`
+pins Python 3.12. Do not configure the Vercel project with `api/service` as its
+Root Directory.
+
+This first deployment is operated as a public-read API. When Vercel provides
+`VERCEL=1`, the entrypoint forcibly sets
+`FPDS_AUTOMATION_SCHEDULER_ENABLED=false` before importing the application.
+Collection, Review automation, and aggregate-refresh scheduling therefore stay
+outside request-scoped Vercel Functions. Existing authenticated Admin routes
+remain part of the FastAPI app, but no Admin web application is deployed in
+this slice.
+
+Configure these variables separately for Vercel Production and Preview; never
+upload or copy `.env.dev` as a production environment file:
+
+- `FPDS_ENV=prod`
+- `FPDS_DATABASE_URL` for the selected database; a separate production database
+  remains the default release posture
+- `FPDS_PUBLIC_WEB_ORIGIN` and `FPDS_ADMIN_WEB_ORIGIN`
+- `FPDS_PUBLIC_API_ORIGIN` and `FPDS_ADMIN_API_ORIGIN`
+- unique production `FPDS_ADMIN_SESSION_SECRET` and `FPDS_ADMIN_CSRF_SECRET`
+- `FPDS_COOKIE_SECURE=true`
+- `FPDS_AUTOMATION_SCHEDULER_ENABLED=false`
+
+After Vercel authentication and environment configuration:
+
+```powershell
+pnpm dlx vercel@latest link --yes --project bankompare-api
+pnpm dlx vercel@latest deploy --prod
+```
+
+Verify `/healthz` first, then one country-scoped `/api/public/products` request.
+Public reads require the production schema/migrations and a completed aggregate
+snapshot. A healthy process alone does not prove that its database projection
+is release-ready.
+
+Temporary operating exception (2026-08-22): the Product Owner explicitly
+authorized both Vercel environments to reuse the current development database
+while automatic refresh is paused. Only the database URL was registered as a
+sensitive Vercel variable; `.env.dev` was not uploaded, and Preview/Production
+use newly generated environment-specific session and CSRF secrets. Replace the
+shared database connection with a separate production database before this
+temporary coupling becomes release-critical.
+
 Run the standalone regression suite:
 
 ```powershell

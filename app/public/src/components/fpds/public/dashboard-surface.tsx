@@ -2,13 +2,14 @@ import { ArrowRight, CreditCard, ExternalLink, FilterX, Landmark, PiggyBank, Ref
 import Link from "next/link";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
+import { PublicCoverageMap } from "@/components/fpds/public/public-coverage-map";
 import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
-import { PublicFreshness, formatSnapshotDate } from "@/components/fpds/public/public-freshness";
 import { PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { getIntlLocale, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import {
+  type PublicCountriesResponse,
   type PublicDashboardScatterResponse,
   type PublicDashboardSummaryResponse,
   type PublicProductsResponse
@@ -17,6 +18,8 @@ import { buildPublicHref, type DashboardPageFilters } from "@/lib/public-query";
 
 type DashboardSurfaceProps = {
   apiUnavailable: boolean;
+  countries: PublicCountriesResponse | null;
+  countriesUnavailable: boolean;
   depositProducts: PublicProductsResponse | null;
   depositProductsUnavailable: boolean;
   filters: DashboardPageFilters;
@@ -28,6 +31,8 @@ type DashboardSurfaceProps = {
 
 export function DashboardSurface({
   apiUnavailable,
+  countries,
+  countriesUnavailable,
   depositProducts,
   depositProductsUnavailable,
   filters,
@@ -77,15 +82,12 @@ export function DashboardSurface({
     );
   }
 
-  const totalProducts = Number(getMetric(summary, "total_active_products")?.value ?? 0);
-  const banksInScope = Number(getMetric(summary, "banks_in_scope")?.value ?? 0);
   const activeChips = buildScopeChips(filters, summary);
   const rankedDeposits = (depositProducts?.items ?? [])
     .filter((product) => product.card_display_rate !== null && Number.isFinite(product.card_display_rate))
     .slice(0, 5);
   const rankedLoans = (loanProducts?.items ?? []).filter((product) => product.card_display_rate !== null && Number.isFinite(product.card_display_rate)).slice(0, 5);
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
-  const snapshotDate = formatSnapshotDate(summary.freshness.refreshed_at, copy.common.noDate);
 
   return (
     <main className="mx-auto min-w-0 w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
@@ -98,7 +100,7 @@ export function DashboardSurface({
               </h1>
               <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground [overflow-wrap:anywhere] md:text-lg">{designCopy.homeBody}</p>
               <div className="mt-7 flex flex-wrap gap-2.5">
-                <Button asChild size="lg" className="min-h-12 rounded-full px-5">
+                <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
                   <Link href={productsHref}>
                     <PiggyBank className="size-4" aria-hidden="true" />
                     {copy.nav.products}
@@ -126,12 +128,11 @@ export function DashboardSurface({
                 ) : null}
               </div>
             </div>
-            <SnapshotSummary
-              banks={formatCount(banksInScope, filters.locale)}
-              date={snapshotDate}
-              freshness={summary.freshness}
+            <PublicCoverageMap
+              countries={countries?.countries ?? []}
+              currentCountryCode={filters.countryCode}
               locale={filters.locale}
-              products={formatCount(totalProducts, filters.locale)}
+              unavailable={countriesUnavailable}
             />
           </div>
         </section>
@@ -204,44 +205,6 @@ export function DashboardSurface({
         <PublicInformationNotice locale={filters.locale} />
       </div>
     </main>
-  );
-}
-
-function SnapshotSummary({
-  banks,
-  date,
-  freshness,
-  locale,
-  products,
-}: {
-  banks: string;
-  date: string;
-  freshness: PublicDashboardSummaryResponse["freshness"];
-  locale: string;
-  products: string;
-}) {
-  const copy = getPublicMessages(locale);
-  const designCopy = getPublicDesignCopy(locale);
-  return (
-    <aside className="min-w-0 border-y border-foreground/20 bg-card/55 px-4 py-4 md:px-5" aria-label={designCopy.publicSnapshot}>
-      <div className="flex flex-col items-start gap-3 border-b border-border pb-4 min-[460px]:flex-row min-[460px]:items-center min-[460px]:justify-between">
-        <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{designCopy.publicSnapshot}</p>
-          <p className="mt-2 font-mono text-xs text-foreground">{date}</p>
-        </div>
-        <PublicFreshness compact freshness={freshness} locale={locale} />
-      </div>
-      <div className="grid grid-cols-2 divide-x divide-border">
-        <div className="py-4 pr-4">
-          <p className="font-display text-4xl font-semibold tracking-[-0.05em] tabular-nums">{products}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{copy.dashboard.visibleProducts}</p>
-        </div>
-        <div className="py-4 pl-4">
-          <p className="font-display text-4xl font-semibold tracking-[-0.05em] tabular-nums">{banks}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{copy.dashboard.banksInScope}</p>
-        </div>
-      </div>
-    </aside>
   );
 }
 
@@ -387,10 +350,6 @@ function addBucketChip(chips: Array<{ href: string; key: string; label: string }
   if (value) {
     chips.push({ href, key: `${key}-${value}`, label: formatBucketLabel(value) });
   }
-}
-
-function getMetric(summary: PublicDashboardSummaryResponse, metricKey: string) {
-  return summary.metrics.find((metric) => metric.metric_key === metricKey) ?? null;
 }
 
 function formatMetricValue(value: number | string | null, unit: string, locale: string) {

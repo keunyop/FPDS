@@ -2197,3 +2197,129 @@ Read before coding:
 - Boundaries: the QA fixture and screenshots were removed after inspection. No
   API, database, Review decision, canonical-data, aggregate-refresh, publish,
   or external write was performed. Automatic scheduling remains disabled.
+
+## 2026-08-22 - Vercel FastAPI Public-Read Deployment
+
+- WBS: `5.41` (`Completed`).
+- Status: FastAPI is deployed to Vercel Production and Preview with live Public
+  reads from the Product Owner-approved current development database.
+- Outcome:
+  - added the repository-root FastAPI entrypoint and retained the existing
+    `api_service.main` route contract
+  - forced `FPDS_AUTOMATION_SCHEDULER_ENABLED=false` whenever `VERCEL` is set,
+    even if another environment value tries to enable it
+  - pinned Vercel to Python 3.12 and consolidated FastAPI, psycopg, uvicorn,
+    and worker dependencies in the root `pyproject.toml`/`uv.lock`
+  - added upload and function-bundle exclusions for Public/Admin web builds,
+    local environments, tests, docs, storage, and temporary data
+  - created and linked the Vercel project `bankompare-api` to the existing
+    GitHub repository
+  - registered the current development database URL as a sensitive Preview and
+    Production variable by explicit Product Owner direction; `.env.dev` itself
+    and its auth secrets were not uploaded
+  - generated distinct 384-bit session and CSRF secrets for Preview and
+    Production and kept the scheduler disabled in both environments
+  - deployed the public Production alias and a protected Preview deployment
+- Decision: `D-058`. The first Vercel API period is Public-read oriented and
+  serves only existing completed snapshots; worker and refresh automation stay
+  outside Vercel.
+- Key files: root Vercel entrypoint/configuration, Python runtime manifests,
+  API README, environment strategy, decision/RAID logs, and WBS.
+- Verification:
+  - API unit suite: 425 tests passed
+  - root Vercel-mode import: app title and Public products route found;
+    scheduler remained false after an explicit attempted `true` override
+  - dependency metadata dry run: both repository Python packages resolved
+    before dependency consolidation
+  - clean-source `vercel build --yes`: passed with Python 3.12
+  - Production `/healthz`: `ok`
+  - Production `/api/public/countries`: CA 142 and US 21
+  - Production `/api/public/products?country_code=CA&page=1&page_size=1`: one
+    item returned from 142 total
+  - protected Preview `/healthz`: `ok` via authenticated Vercel request
+  - protected Preview `/api/public/countries`: CA 142 and US 21
+- Known issue / next step: Preview and Production now share the development
+  database, so traffic, development work, authenticated API writes, capacity,
+  and incident impact remain coupled. Keep Vercel Admin operations unused and
+  migrate Production to a separate database before this becomes
+  release-critical. Public data will remain at the latest completed snapshot
+  until an explicitly operated refresh occurs.
+
+## 2026-08-22 - Vercel Bankompare Public Deployment
+
+- WBS: `5.42` (`Completed`).
+- Status: Bankompare Public is deployed to separate Vercel Production and
+  protected Preview environments, both backed by the deployed Bankompare API.
+- Outcome:
+  - created `bankompare-public`, connected the existing GitHub repository, and
+    set its Git Root Directory to `app/public` with the Next.js preset
+  - set `FPDS_PUBLIC_API_ORIGIN=https://bankompare-api.vercel.app` for Public
+    Preview and Production without exposing an API credential to browser code
+  - retained the existing server-component and same-origin Public BFF model for
+    country and paginated product reads
+  - deployed the stable anonymous Production alias and a deployment-protected
+    Preview
+  - updated the FastAPI Preview/Production Public web and allowed-origin values
+    to `https://bankompare-public.vercel.app`, then redeployed both API targets
+  - added Public env example, upload exclusions, and repeatable deployment notes
+- Decision: `D-059`. No visual, localization, comparison, canonical-data,
+  collection, scheduler, or Admin web behavior changed.
+- Key files: Public README/env/ignore deployment files plus environment
+  strategy, decision/RAID logs, WBS, and journal.
+- Verification:
+  - Public `pnpm run typecheck`: passed
+  - Public production `pnpm run build` against deployed API: passed
+  - Vercel Production and Preview builds: passed with Next.js 16.2.3
+  - Production Home: HTTP 200 and rendered `Bankompare`
+  - Production `/api/public/countries`: CA 142 and US 21
+  - Production `/api/public/products?country_code=CA&page=1&page_size=1`: one
+    item returned from 142 total
+  - protected Preview `/api/public/countries`: CA 142 and US 21 through an
+    authenticated Vercel request
+  - API Production `/healthz`: HTTP 200 with
+    `Access-Control-Allow-Origin: https://bankompare-public.vercel.app`
+- Known issue / next step: anonymous Public reads now exercise the temporarily
+  shared development database through the API. Keep the current bounded cache,
+  scheduler-off posture, and no-Vercel-Admin operating rule until Production
+  moves to its own database. Custom-domain/DNS work remains out of scope.
+
+## 2026-08-22 - Responsive Public Discovery and Country Coverage
+
+- WBS: `5.43` (`Completed`).
+- Status: completed the Product Owner-requested Public shell, Home coverage,
+  and catalog-default refinement without changing product data or API meaning.
+- Outcome:
+  - tightened the globe-to-wordmark gap in header and footer and retained the
+    full `Bankompare` wordmark at exact `390px`
+  - replaced mobile product icons and the separate country control with one
+    hamburger containing Home, Deposit, Credit Card, Loan, and every published
+    country; desktop navigation remains visible
+  - replaced the Public/Current snapshot, Visible products, and Banks count
+    ledger with a simple code-native world map plus localized published product
+    counts from the existing public country catalog
+  - gave Deposit, Credit Card, and Loan equal Home action emphasis
+  - added an implicit responsive catalog view: Grid at `768px` and wider,
+    List below `768px`; explicit `view=grid` and `view=list` persist
+    through catalog filters and sorting
+- Decision: `D-060`. Country availability, aggregate formulas, canonical
+  data, publication gates, evidence privacy, and recommendation boundaries are
+  unchanged.
+- Key files: Public shell/mobile menu, country map, dashboard load/surface,
+  catalog query/view components, locale resources, Public README, requirements,
+  Public IA/metric design, decision log, and WBS.
+- Verification:
+  - Public `pnpm run typecheck`: passed twice, including final state
+  - Public `pnpm run build`: passed twice, including final production build
+  - local production-rendered Home checked at `1440px` EN, `768px` KO, and
+    exact `390px` JA with live CA/US published counts
+  - exact `390px` mobile menu contained localized Home, Deposit, Credit Card,
+    Loan, Canada, and United States entries; all menu items measured `44px`
+  - Deposit, Credit Card, and Loan all defaulted to List at `390px`; Deposit
+    defaulted to Grid at `768px` and `1440px`; explicit Grid/List overrides
+    rendered and persisted at the opposite form factor
+  - document width stayed within the viewport for every checked Home/catalog
+    state; a final network/browser-error rerun reported no failures
+  - `git diff --check`: passed before journal closeout
+- Boundaries: no Admin, collection, Review, canonical-data, aggregate-refresh,
+  publication, or external write was performed. The local QA API ran with the
+  automation scheduler explicitly disabled.

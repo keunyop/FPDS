@@ -9,8 +9,9 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 
 - `/` redirects to `/dashboard`.
 - `/dashboard` is the public Home view. Its first viewport pairs a short market
-  thesis with current product count, bank count, and freshness. Deposit, Credit
-  Card, and Loan are direct next actions. The main content places Deposit Top 5
+  thesis with a simple world map and the published product count for every
+  currently collected country. Deposit, Credit Card, and Loan are equal direct
+  next actions. The main content places Deposit Top 5
   on the left and Loan Top 5 on the right at desktop, stacking both lists below
   that breakpoint. Deposit uses the highest disclosed numeric rates; Loan uses
   the lowest disclosed numeric rates. Neither list is a personalized
@@ -47,7 +48,8 @@ repetition, decorative gradients, synthetic scores, and recommendation
 language are avoided.
 
 Home uses real snapshot values rather than invented illustration data. Its
-snapshot summary and dual Top 5 lists avoid repeated family labels, internal
+country coverage map reads the existing public country catalog, and its dual
+Top 5 lists avoid repeated family labels, internal
 evidence explanations, and competing header actions. Catalog cards are
 product-family-aware records with visible institution identity, one primary
 metric, up to two essential supporting facts, a Compare control, and an
@@ -88,6 +90,9 @@ type-aware comparison cards. List presents one compact product row and
 emphasizes the value for the active sort while retaining product detail,
 Compare, and available official-bank actions. The view mode is catalog-local
 URL state and remains in place while filters, sort, or additional pages load.
+When no `view` value is present, desktop starts in Grid and mobile starts in
+List. An explicit Grid or List choice overrides that responsive default and is
+preserved in subsequent catalog URLs.
 
 Home ranking rows reuse the same text-style official-bank action as catalog
 cards, including the external-link icon and safe new-tab attributes. They do
@@ -115,8 +120,11 @@ also states that Bankompare works to keep information current and that users
 must reconfirm current product information and conditions on the institution's
 official website before applying.
 
-The header uses a compact country selector backed by countries represented in
-their latest completed active public snapshots. Country changes reset
+The desktop header uses a compact country selector backed by countries
+represented in their latest completed active public snapshots. The mobile
+header keeps the globe and `Bankompare` wordmark visible and moves Home,
+Deposit, Credit Card, Loan, and country selection into one hamburger menu.
+Country changes reset
 country-owned bank and product filters rather than carrying invalid scope
 across markets. The current governed published and collection scope includes
 Canada and the United States; later countries remain fail-closed until their
@@ -171,9 +179,32 @@ pnpm run typecheck
 pnpm run build
 ```
 
+## Vercel Deployment
+
+Use `app/public` as the Vercel project root. The Public server components and
+same-origin BFF routes read the upstream API from `FPDS_PUBLIC_API_ORIGIN`; set
+it to `https://bankompare-api.vercel.app` for both Preview and Production.
+There is no browser-side database or private API credential.
+
+```powershell
+cd app/public
+pnpm dlx vercel@latest link --yes --project bankompare-public
+pnpm dlx vercel@latest env add FPDS_PUBLIC_API_ORIGIN production,preview `
+  --value https://bankompare-api.vercel.app --force --yes --no-sensitive
+pnpm dlx vercel@latest deploy --prod --yes
+pnpm dlx vercel@latest deploy --yes
+```
+
+Verify the Production Home and the same-origin `/api/public/countries` route.
+Preview deployments may require the Vercel deployment-protection bypass used by
+`vercel curl`. When the Public domain changes, update the FastAPI project's
+Public web-origin/CORS setting before enabling direct browser-to-API calls; the
+current Public client uses its own same-origin BFF for interactive reads.
+
 The current production-rendered baseline was checked at `1440px`, `768px`, and
 exact `390px` widths across Home, Deposit, Credit Card, Loan, selected
 comparison, Deposit detail, Loan detail, and Methodology in EN, KO, and JA. The
 checks cover document
 overflow, language metadata, heading structure, touch targets, browser errors,
-comparison selection, reduced motion, and the live aggregate snapshot.
+comparison selection, reduced motion, the mobile wordmark/menu, responsive
+Grid/List defaults, and the live aggregate snapshot.

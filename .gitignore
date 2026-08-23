@@ -7,8 +7,10 @@ harness-cleanup-audit.md
 __pycache__/
 *.pyc
 *.egg-info/
+build/
 node_modules/
 .next/
 *.tsbuildinfo
 /tmp/
 **/tmp/
+.vercel

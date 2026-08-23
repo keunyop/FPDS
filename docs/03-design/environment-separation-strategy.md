@@ -134,6 +134,37 @@ FPDS의 현재 공식 환경 모델은 아래 2개로 둔다.
 이 baseline은 vendor-neutral이다.
 PRD suggested stack의 `public/admin on Vercel`, `worker/storage/private integration on AWS`는 참고 방향으로만 본다.
 
+### 6.1 Current Vercel API and Public Slice
+
+- The first hosted boundary is the repository-root FastAPI app on Vercel.
+- Its immediate operating purpose is anonymous Public reads from the latest
+  completed aggregate snapshot. The existing authenticated Admin routes remain
+  in the same app, but Admin web is not deployed in this slice.
+- Vercel must force `FPDS_AUTOMATION_SCHEDULER_ENABLED=false`; collection,
+  Review automation, browser execution, and refresh orchestration remain in a
+  future long-running private worker boundary.
+- Vercel Preview and Production receive environment-specific variables through
+  Vercel configuration. Local `.env.dev` itself and its Admin secrets are not
+  deployment inputs.
+- Product Owner exception dated 2026-08-22: Preview and Production temporarily
+  reuse the current development database so the existing completed Public
+  snapshot can be served while collection is paused. The database URL is stored
+  as a sensitive Vercel variable, Vercel uses new environment-specific auth
+  secrets, and no scheduler runs there. This is an explicit temporary deviation
+  from Section 5.1, not a replacement for the environment-separation baseline.
+- Before the coupling becomes release-critical, replace the shared connection
+  with a separate production database containing the current schema and an
+  approved completed Public aggregate snapshot.
+- Bankompare Public is a separate Vercel project whose Git Root Directory is
+  `app/public`. Its Preview and Production server runtimes use
+  `FPDS_PUBLIC_API_ORIGIN=https://bankompare-api.vercel.app`.
+- Interactive browser reads use same-origin Public BFF routes; the BFF performs
+  the upstream API request. The API nevertheless allows the stable
+  `https://bankompare-public.vercel.app` Production origin so its CORS boundary
+  matches the deployed topology.
+- Public Production is anonymous. Public and API Preview deployments retain the
+  team's Vercel deployment protection.
+
 ---
 
 ## 7. BX-PF and Source Access Rules by Environment
@@ -186,3 +217,6 @@ PRD suggested stack의 `public/admin on Vercel`, `worker/storage/private integra
 |---|---|
 | 2026-04-01 | Initial environment separation strategy created for WBS 1.4.6 |
 | 2026-04-01 | Simplified baseline from `dev/stg/prod` to `dev/prod` for single-developer operating model |
+| 2026-08-22 | Bound the first Vercel FastAPI deployment to Public-read serving with automation disabled and production data/secrets separated from dev |
+| 2026-08-22 | Recorded the Product Owner-approved temporary reuse of the dev database while retaining separate Vercel auth secrets and the long-term production DB boundary |
+| 2026-08-22 | Added the separate Bankompare Public Vercel project, monorepo root, server-only API origin, same-origin BFF, and aligned API Public CORS topology |

@@ -37,7 +37,7 @@ function FooterContent() {
       <div className="mx-auto w-full max-w-7xl px-4 py-9 md:px-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <Link href={dashboardHref} className="inline-flex min-h-11 items-center gap-3">
+            <Link href={dashboardHref} className="inline-flex min-h-11 items-center gap-1.5">
               <PublicMark className="text-background" />
               <PublicWordmark
                 className="text-xl font-semibold tracking-[-0.04em] text-background"

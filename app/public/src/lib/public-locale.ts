@@ -1147,6 +1147,38 @@ export function getPublicInformationNotice(locale: string): PublicInformationNot
   return PUBLIC_INFORMATION_NOTICE_COPY[normalizePublicLocale(locale)];
 }
 
+type PublicCoverageCopy = {
+  description: string;
+  products: string;
+  title: string;
+  unavailable: string;
+};
+
+const PUBLIC_COVERAGE_COPY: Record<PublicLocale, PublicCoverageCopy> = {
+  en: {
+    title: "Current collection coverage",
+    description: "Published products by country",
+    products: "{count} products",
+    unavailable: "Country coverage is temporarily unavailable."
+  },
+  ko: {
+    title: "현재 수집 국가",
+    description: "국가별 공개 상품 수",
+    products: "상품 {count}개",
+    unavailable: "국가별 수집 현황을 불러올 수 없습니다."
+  },
+  ja: {
+    title: "現在の収集対象国",
+    description: "国別の公開商品数",
+    products: "{count} 件の商品",
+    unavailable: "国別の収集状況を読み込めません。"
+  }
+};
+
+export function getPublicCoverageCopy(locale: string): PublicCoverageCopy {
+  return PUBLIC_COVERAGE_COPY[normalizePublicLocale(locale)];
+}
+
 
 export function getIntlLocale(locale: string) {
   switch (normalizePublicLocale(locale)) {

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "fastapi",
+  "functions": {
+    "app.py": {
+      "excludeFiles": "{.agents/**,.codex/**,.git/**,.github/**,.githooks/**,.venv/**,.vercel/**,app/**,api/service/.venv/**,api/service/tests/**,build/**,db/**,docs/**,scripts/**,storage/**,tmp/**,worker/**/tests/**,**/__pycache__/**,**/*.pyc,**/*.egg-info/**}"
+    }
+  }
+}

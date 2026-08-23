@@ -110,6 +110,10 @@ export type PublicCountryOption = {
   count: number;
 };
 
+export type PublicCountriesResponse = {
+  countries: PublicCountryOption[];
+};
+
 export type PublicFiltersResponse = {
   countries: PublicCountryOption[];
   banks: PublicFilterOption[];
@@ -264,6 +268,14 @@ export async function fetchPublicFilters(searchParams: URLSearchParams): Promise
     applied_filters: payload.applied_filters,
     freshness: payload.freshness
   };
+}
+
+export async function fetchPublicCountries(): Promise<PublicCountriesResponse> {
+  return fetchPublicData<PublicCountriesResponse>(
+    "/api/public/countries",
+    undefined,
+    PUBLIC_PRODUCTS_REVALIDATE_SEC
+  );
 }
 
 export async function fetchPublicDashboardSummary(searchParams: URLSearchParams): Promise<PublicDashboardSummaryResponse> {
