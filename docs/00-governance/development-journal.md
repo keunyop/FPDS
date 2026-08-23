@@ -2323,3 +2323,36 @@ Read before coding:
 - Boundaries: no Admin, collection, Review, canonical-data, aggregate-refresh,
   publication, or external write was performed. The local QA API ran with the
   automation scheduler explicitly disabled.
+
+## 2026-08-23 - Vercel FastAPI Entrypoint Repair
+
+- WBS: corrective follow-up to `5.41` (no new delivery scope).
+- Status: repository fix is verified and ready to push; no Vercel deployment or
+  project mutation was performed in this slice.
+- Outcome:
+  - added `[tool.vercel] entrypoint = "app:app"` so current Vercel FastAPI
+    builds resolve the repository wrapper explicitly instead of relying on
+    static inference through its dynamic `api_service.main` import
+  - retained the repository root for `bankompare-api` and documented the
+    FastAPI-error diagnostic for a mis-rooted `bankompare-public` project,
+    whose Git Root Directory remains `app/public`
+  - hardened upload and function exclusions for local `node_modules` and
+    `.next` artifacts while keeping the function pattern below Vercel's
+    256-character configuration limit
+- Decision: no architecture or runtime-ownership decision changed; `D-058`
+  and `D-059` remain authoritative.
+- Key files: root `pyproject.toml`, `vercel.json`, `.vercelignore`, API and
+  Public deployment READMEs.
+- Verification:
+  - Vercel-mode root import: app title, `/healthz`, and
+    `/api/public/products` found; an attempted scheduler `true` override was
+    forced to `false`
+  - API full suite: 425 tests passed
+  - API standalone regression suite: 11 tests passed
+  - root `uv lock --check`: passed
+  - clean tracked-source `vercel build --prod --yes`: passed with Vercel CLI
+    59.5.0 and Python 3.12; generated `fastapi.func` routing covered all API
+    paths
+- Boundaries: no route, financial data, database state, environment variable,
+  scheduler ownership, Public UI behavior, deploy, promotion, or external write
+  changed.

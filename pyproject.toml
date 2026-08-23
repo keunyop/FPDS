@@ -17,6 +17,9 @@ dependencies = [
   "uvicorn>=0.30,<1",
 ]
 
+[tool.vercel]
+entrypoint = "app:app"
+
 [tool.setuptools]
 include-package-data = true
 

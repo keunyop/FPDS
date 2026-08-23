@@ -186,6 +186,11 @@ same-origin BFF routes read the upstream API from `FPDS_PUBLIC_API_ORIGIN`; set
 it to `https://bankompare-api.vercel.app` for both Preview and Production.
 There is no browser-side database or private API credential.
 
+If a Public Git build reports FastAPI entrypoint discovery, the project is
+building the repository root instead of this directory. Restore the
+`bankompare-public` Root Directory to `app/public` and keep its Framework
+Preset set to Next.js; do not point the Public project at root `app.py`.
+
 ```powershell
 cd app/public
 pnpm dlx vercel@latest link --yes --project bankompare-public

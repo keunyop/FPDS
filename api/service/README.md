@@ -144,6 +144,11 @@ existing `api_service.main` FastAPI instance, root `pyproject.toml` and
 pins Python 3.12. Do not configure the Vercel project with `api/service` as its
 Root Directory.
 
+Root `pyproject.toml` also declares
+`[tool.vercel] entrypoint = "app:app"`. Keep this explicit declaration even
+though `app.py` is a recognized filename: the wrapper imports the existing
+runtime package dynamically, so Vercel must not rely on static app discovery.
+
 This first deployment is operated as a public-read API. When Vercel provides
 `VERCEL=1`, the entrypoint forcibly sets
 `FPDS_AUTOMATION_SCHEDULER_ENABLED=false` before importing the application.
