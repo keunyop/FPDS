@@ -157,7 +157,10 @@ PRD suggested stack의 `public/admin on Vercel`, `worker/storage/private integra
   approved completed Public aggregate snapshot.
 - Bankompare Public is a separate Vercel project whose Git Root Directory is
   `app/public`. Its Preview and Production server runtimes use
-  `FPDS_PUBLIC_API_ORIGIN=https://bankompare-api.vercel.app`.
+  `FPDS_PUBLIC_API_ORIGIN=https://bankompare-api.vercel.app`. The app-local
+  `vercel.json` pins Next.js, and **Include source files outside of the Root
+  Directory** stays disabled so repository-root FastAPI configuration cannot
+  enter Public Git builds.
 - Interactive browser reads use same-origin Public BFF routes; the BFF performs
   the upstream API request. The API nevertheless allows the stable
   `https://bankompare-public.vercel.app` Production origin so its CORS boundary

@@ -2356,3 +2356,37 @@ Read before coding:
 - Boundaries: no route, financial data, database state, environment variable,
   scheduler ownership, Public UI behavior, deploy, promotion, or external write
   changed.
+
+## 2026-08-23 - Vercel Public Monorepo Isolation Repair
+
+- WBS: corrective follow-up to `5.42` (no new delivery scope).
+- Status: completed; `bankompare-public` is Ready in Production at its stable
+  alias after a successful Next.js build.
+- Cause:
+  - the first Git commit containing the repository-root FastAPI `vercel.json`
+    caused Public Git deployments to detect FastAPI
+  - the Public project had the correct `app/public` Root Directory and Next.js
+    preset, but `sourceFilesOutsideRootDirectory=true` remained enabled and
+    the app root had no project-local `vercel.json`
+  - the failed build log explicitly warned that `vercel.json` should exist
+    inside the configured Root Directory before reporting the missing FastAPI
+    entrypoint
+- Outcome:
+  - disabled source access outside the Public Root Directory in the live Vercel
+    project while retaining `app/public` and the Next.js preset
+  - added `app/public/vercel.json` with `framework=nextjs`, making the Public
+    deployment contract explicit and independent of the API root configuration
+  - deployed the corrected source to Production; the stable
+    `https://bankompare-public.vercel.app` alias now targets the Ready build
+- Verification:
+  - saved Vercel project settings: `rootDirectory=app/public`,
+    `framework=nextjs`, and `sourceFilesOutsideRootDirectory=false`
+  - Public `pnpm run typecheck`: passed
+  - clean monorepo Vercel build detected Next.js 16.2.3, compiled successfully,
+    passed TypeScript, and generated all 10 routes; Windows local output linking
+    then hit `EPERM`, while the authoritative remote Linux build completed
+  - Production deployment: Ready; Home returned HTTP 200 and rendered
+    `Bankompare`
+  - Production same-origin `/api/public/countries`: CA 142 and US 21
+- Boundaries: no API route, Public product behavior, financial data, database
+  state, environment value, scheduler ownership, domain, or secret changed.
