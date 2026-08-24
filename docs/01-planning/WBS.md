@@ -327,6 +327,8 @@ Based on:
 | 5.42 | Completed | Vercel Bankompare Public deployment | separate Next.js project with `app/public` Git root, deployed API-origin configuration, Production Home/BFF verification, protected Preview verification, aligned API Public origin/CORS | Frontend, DevOps, QA | 5.14, 5.39, 5.41 | 2026-08-22 |
 | 5.43 | Completed | responsive Public discovery refinement | tighter shell branding, mobile wordmark and unified navigation/country menu, public-country world map, equal Home catalog actions, desktop Grid/mobile List defaults with explicit URL overrides | Frontend, UX, QA | 5.14, 5.19, 5.39 | 2026-08-22 |
 | 5.44 | Completed | SwitchaBank Public identity and discovery copy | SwitchaBank metadata/wordmark, simple opposing-arrow switch mark and favicon, localized compare-then-switch Home hero/tagline, active brand-record alignment, responsive/build verification | Frontend, UX, QA | 5.14, 5.43 | 2026-08-23 |
+| 5.45 | Completed | SwitchaBank Vercel project rename | in-place API/Public project renames with IDs and Git boundaries preserved, local link refresh, active runbook/environment alignment, Production health and same-origin BFF verification | DevOps, Backend, Frontend, QA | 5.42, 5.44 | 2026-08-23 |
+| 5.46 | Completed | SwitchaBank Vercel deployment and domain migration | new API/Public Production deployments and stable domains, Preview/Production origin and CORS cutover, verified Home/BFF connectivity, explicitly approved legacy alias removal | DevOps, Backend, Frontend, QA | 5.45 | 2026-08-23 |
 
 ### 5.5 Scope Baseline
 

@@ -171,8 +171,14 @@ upload or copy `.env.dev` as a production environment file:
 
 After Vercel authentication and environment configuration:
 
+The Vercel project is `switchabank-api`. The 2026-08-23 project rename
+preserved its project ID. Its stable Production domain is now
+`https://switchabank-api.vercel.app`; the legacy `bankompare-api` stable,
+team, and main-branch aliases were removed after the SwitchaBank domain
+migration.
+
 ```powershell
-pnpm dlx vercel@latest link --yes --project bankompare-api
+pnpm dlx vercel@latest link --yes --project switchabank-api
 pnpm dlx vercel@latest deploy --prod
 ```
 

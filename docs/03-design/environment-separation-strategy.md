@@ -156,15 +156,20 @@ PRD suggested stack의 `public/admin on Vercel`, `worker/storage/private integra
   with a separate production database containing the current schema and an
   approved completed Public aggregate snapshot.
 - SwitchaBank Public is deployed through the existing separate
-  `bankompare-public` Vercel project whose Git Root Directory is
-  `app/public`. Its Preview and Production server runtimes use
-  `FPDS_PUBLIC_API_ORIGIN=https://bankompare-api.vercel.app`. The app-local
+  `switchabank-public` Vercel project whose Git Root Directory is
+  `app/public`; the API project is `switchabank-api`. Both names were
+  changed in place on 2026-08-23 with their project IDs and Git integration
+  preserved. Their stable Production domains are
+  `https://switchabank-public.vercel.app` and
+  `https://switchabank-api.vercel.app`; Public Preview and Production server
+  runtimes use
+  `FPDS_PUBLIC_API_ORIGIN=https://switchabank-api.vercel.app`. The app-local
   `vercel.json` pins Next.js, and **Include source files outside of the Root
   Directory** stays disabled so repository-root FastAPI configuration cannot
   enter Public Git builds.
 - Interactive browser reads use same-origin Public BFF routes; the BFF performs
   the upstream API request. The API nevertheless allows the stable
-  `https://bankompare-public.vercel.app` Production origin so its CORS boundary
+  `https://switchabank-public.vercel.app` Production origin so its CORS boundary
   matches the deployed topology.
 - Public Production is anonymous. Public and API Preview deployments retain the
   team's Vercel deployment protection.
@@ -224,3 +229,5 @@ PRD suggested stack의 `public/admin on Vercel`, `worker/storage/private integra
 | 2026-08-22 | Bound the first Vercel FastAPI deployment to Public-read serving with automation disabled and production data/secrets separated from dev |
 | 2026-08-22 | Recorded the Product Owner-approved temporary reuse of the dev database while retaining separate Vercel auth secrets and the long-term production DB boundary |
 | 2026-08-22 | Added the separate Bankompare Public Vercel project, monorepo root, server-only API origin, same-origin BFF, and aligned API Public CORS topology |
+| 2026-08-23 | Renamed the existing Vercel projects in place to `switchabank-api` and `switchabank-public`; retained project IDs, Git boundaries, assigned Production domains, and origin values |
+| 2026-08-23 | Migrated API/Public Production deployments, stable domains, Preview/Production origins, and CORS to `switchabank-*`; removed six legacy `bankompare-*` aliases after explicit approval |

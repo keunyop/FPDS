@@ -2461,3 +2461,95 @@ Read before coding:
 - Boundaries: no Admin behavior, API, financial data, database state,
   collection, scheduler, publication, environment value, Vercel project,
   deployment, domain, secret, or external write changed.
+
+## 2026-08-23 - SwitchaBank Vercel Project Rename
+
+- WBS: `5.45` (`Completed`).
+- Status: completed the Product Owner-requested in-place rename of both
+  existing Vercel projects.
+- Outcome:
+  - renamed `bankompare-api` to `switchabank-api` while retaining project ID
+    `prj_CyWm7Bby1p1J4nMuO6Ntb3uegnGf`
+  - renamed `bankompare-public` to `switchabank-public` while retaining
+    project ID `prj_tU5QSEqRIZ6V3a5Lz0g64tLgRQWl`
+  - preserved the API repository root, Public `app/public` root, framework
+    presets, Git integration, deployments, environment values, and deployment
+    protection
+  - refreshed both ignored local `.vercel/project.json` links to the new
+    project names without changing their IDs
+  - confirmed Vercel retained the separately assigned
+    `bankompare-api.vercel.app` and `bankompare-public.vercel.app`
+    Production domains; no alias/domain migration or redeploy was performed
+- Decision: `D-062`. Project naming now matches SwitchaBank, while domain
+  migration remains a separate Product Owner decision because it also affects
+  origin variables, CORS, aliases, and deployment sequencing.
+- Key files: API/Public deployment READMEs, environment separation strategy,
+  decision log, WBS, and journal.
+- Verification:
+  - Vercel project inspection reported both new names with their original
+    project IDs and unchanged root/framework settings
+  - the team project list contains `switchabank-api` and
+    `switchabank-public`
+  - API Production `/healthz`: HTTP 200 with
+    `Access-Control-Allow-Origin: https://bankompare-public.vercel.app`
+  - Public Production Home: HTTP 200 and rendered `SwitchaBank`
+  - Public same-origin `/api/public/countries`: HTTP 200 with CA 149 and US 21
+  - Public same-origin CA `/api/public/products?page=1&page_size=1`: HTTP 200
+    with one product item
+- Boundaries: no domain, alias, environment value, secret, deployment,
+  financial data, database state, scheduler, collection, publication, API
+  contract, or UI behavior changed.
+
+## 2026-08-23 - SwitchaBank Vercel Deployment and Domain Migration
+
+- WBS: `5.46` (`Completed`).
+- Status: completed the Product Owner-requested API/Public deployment and
+  Production-domain migration after the in-place project rename.
+- Outcome:
+  - updated API Production and Preview
+    `FPDS_ALLOWED_PUBLIC_ORIGINS`/`FPDS_PUBLIC_WEB_ORIGIN` to
+    `https://switchabank-public.vercel.app`
+  - updated API Production and Preview
+    `FPDS_PUBLIC_API_ORIGIN`/`FPDS_ADMIN_API_ORIGIN`, plus Public Production
+    and Preview `FPDS_PUBLIC_API_ORIGIN`, to
+    `https://switchabank-api.vercel.app`
+  - created Ready API deployment `dpl_EBFtngDSVBntEEHq6i4BrmMxk391` under
+    `switchabank-api`; Vercel shortened its generated URL to
+    `switchabank-6fhtrk2nm-kevins-projects-e2dcc34c.vercel.app`
+  - created Ready Public deployment `dpl_96RhJfEm86ZYgLL7PWDZEK6oPLDP` with
+    generated URL
+    `switchabank-public-1cdzgkxm5-kevins-projects-e2dcc34c.vercel.app`
+  - assigned `switchabank-api.vercel.app` and
+    `switchabank-public.vercel.app` as stable project domains
+  - after new-domain verification, removed the six legacy API/Public
+    `bankompare-*` stable, team, and main-branch aliases with explicit Product
+    Owner approval; historical generated deployments were not deleted
+- Deployment handling:
+  - the first two direct Public CLI deploy attempts failed before build because
+    the project Git Root Directory `app/public` was applied relative to an
+    already narrowed CLI upload; neither attempt changed Production
+  - the successful Public deployment used Vercel's supported redeploy path from
+    the prior Ready Production source, preserving the project Root Directory
+    and applying the updated environment value
+- Decision: `D-063`. The active operational identity is now SwitchaBank
+  across project, deployment, stable domain, upstream origin, and CORS
+  boundaries.
+- Key files: Public env example, API/Public deployment READMEs, environment
+  separation strategy, decision log, WBS, and journal.
+- Verification:
+  - API `https://switchabank-api.vercel.app/healthz`: HTTP 200 with
+    `Access-Control-Allow-Origin: https://switchabank-public.vercel.app`
+  - Public `https://switchabank-public.vercel.app/dashboard`: HTTP 200 with
+    `SwitchaBank` and the compare-then-switch hero
+  - Public same-origin countries BFF: HTTP 200 with CA 150 and US 21
+  - Public same-origin CA product BFF: HTTP 200 with one requested item
+  - Vercel alias listing contains the new SwitchaBank stable/team/main aliases
+    and no `bankompare-*` alias
+  - the removed legacy stable API and Public URLs both return HTTP 404
+- Known issue: Vercel CLI `project list` still reports the removed legacy
+  domains in its cached `Latest Production URL` column even though the alias
+  list no longer contains them and live HTTP requests return 404. No additional
+  Production redeploy was performed solely to refresh this display metadata.
+- Boundaries: no historical deployment was deleted and no product data,
+  database state, scheduler, collection, publication, API contract, or UI
+  behavior changed.

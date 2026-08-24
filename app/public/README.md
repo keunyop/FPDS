@@ -182,12 +182,18 @@ pnpm run build
 
 Use `app/public` as the Vercel project root. The Public server components and
 same-origin BFF routes read the upstream API from `FPDS_PUBLIC_API_ORIGIN`; set
-it to `https://bankompare-api.vercel.app` for both Preview and Production.
+it to `https://switchabank-api.vercel.app` for both Preview and Production.
 There is no browser-side database or private API credential.
+
+The Vercel project is `switchabank-public` and its stable Production domain is
+`https://switchabank-public.vercel.app`. The legacy `bankompare-public`
+stable, team, and main-branch aliases were removed after the 2026-08-23
+SwitchaBank domain migration; historical generated deployment URLs remain
+immutable Vercel records.
 
 The project-local `vercel.json` pins the framework to Next.js so the
 repository-root FastAPI configuration cannot override this app in Git builds.
-Keep the `bankompare-public` Root Directory at `app/public`, its Framework
+Keep the `switchabank-public` Root Directory at `app/public`, its Framework
 Preset at Next.js, and **Include source files outside of the Root Directory**
 disabled. Public has no runtime dependency on files above its project root.
 The production build uses the supported Next.js Webpack opt-out because the
@@ -197,9 +203,9 @@ the default Turbopack path.
 
 ```powershell
 cd app/public
-pnpm dlx vercel@latest link --yes --project bankompare-public
+pnpm dlx vercel@latest link --yes --project switchabank-public
 pnpm dlx vercel@latest env add FPDS_PUBLIC_API_ORIGIN production,preview `
-  --value https://bankompare-api.vercel.app --force --yes --no-sensitive
+  --value https://switchabank-api.vercel.app --force --yes --no-sensitive
 pnpm dlx vercel@latest deploy --prod --yes
 pnpm dlx vercel@latest deploy --yes
 ```
