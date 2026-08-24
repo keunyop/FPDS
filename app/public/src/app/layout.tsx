@@ -8,12 +8,12 @@ import { PublicLocaleSync } from "@/components/fpds/public/public-locale-sync";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  applicationName: "Bankompare",
+  applicationName: "SwitchaBank",
   title: {
-    default: "Bankompare — Look into bank products",
-    template: "%s — Bankompare"
+    default: "SwitchaBank — Compare banks. Switch smarter.",
+    template: "%s — SwitchaBank"
   },
-  description: "Look into and compare reviewed deposit, credit card, and loan facts across banks."
+  description: "Compare reviewed deposit, credit card, and loan facts across banks."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

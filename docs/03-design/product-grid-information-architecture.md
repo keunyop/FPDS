@@ -572,6 +572,29 @@ and Home snapshot-summary parts of Sections 10.18 and 10.23:
 - all menu, map, country-count, and view-control states retain EN/KO/JA labels,
   visible focus, minimum touch targets, and bounded document width
 
+### 10.25 SwitchaBank Identity and Switch-Led Discovery Copy
+
+Product Owner direction on `2026-08-23` supersedes the customer-facing name,
+globe mark, and discovery copy in Sections 10.23 and 10.24 without changing
+their responsive, country, catalog, data, or publication behavior:
+
+- `SwitchaBank` is the customer-facing Public identity; `FPDS` remains the
+  internal platform/runtime identity
+- the code-native mark is two opposing horizontal arrows with rounded strokes;
+  it reads as a switch between compared options and remains flat and legible at
+  shell and favicon sizes
+- the shell uses the mark in its contextual foreground color and the favicon
+  uses the same geometry in white on the established evergreen field
+- the wordmark is one uninterrupted same-color `SwitchaBank` text node and
+  stays visible beside the mark at exact `390px`
+- Home leads with the EN meaning `Compare banks. Compare products. Switch
+  smarter.`; KO and JA preserve the same compare-then-switch intent rather than
+  translating source-derived product content
+- supporting copy directs users to compare reviewed rates, fees, and key terms
+  side by side and confirm current details with the bank before switching
+- the copy must not declare a winner, promise a better outcome, score
+  suitability or eligibility, or submit an application
+
 ## 11. Follow-On Items
 
 | Area | Follow-Up |

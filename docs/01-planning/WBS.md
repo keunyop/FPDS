@@ -326,6 +326,7 @@ Based on:
 | 5.41 | Completed | Vercel FastAPI Public-read deployment | repository-root FastAPI entrypoint, scheduler-disabled serverless runtime, separate Preview/Production auth secrets, Product Owner-approved temporary dev DB reuse, health and Public-read verification | Backend, DevOps, QA | 5.7, 5.8, 5.25 | 2026-08-22 |
 | 5.42 | Completed | Vercel Bankompare Public deployment | separate Next.js project with `app/public` Git root, deployed API-origin configuration, Production Home/BFF verification, protected Preview verification, aligned API Public origin/CORS | Frontend, DevOps, QA | 5.14, 5.39, 5.41 | 2026-08-22 |
 | 5.43 | Completed | responsive Public discovery refinement | tighter shell branding, mobile wordmark and unified navigation/country menu, public-country world map, equal Home catalog actions, desktop Grid/mobile List defaults with explicit URL overrides | Frontend, UX, QA | 5.14, 5.19, 5.39 | 2026-08-22 |
+| 5.44 | Completed | SwitchaBank Public identity and discovery copy | SwitchaBank metadata/wordmark, simple opposing-arrow switch mark and favicon, localized compare-then-switch Home hero/tagline, active brand-record alignment, responsive/build verification | Frontend, UX, QA | 5.14, 5.43 | 2026-08-23 |
 
 ### 5.5 Scope Baseline
 

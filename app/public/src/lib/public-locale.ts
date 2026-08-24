@@ -230,8 +230,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   en: {
     localeName: "English",
     shell: {
-      brand: "Bankompare",
-      tagline: "Look into bank products. Compare the facts."
+      brand: "SwitchaBank",
+      tagline: "Compare clearly. Switch smarter."
     },
     nav: {
       dashboard: "Home",
@@ -265,9 +265,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     grid: {
       pageTitle: "Deposits",
-      pageDescription: "Look into chequing, savings, and GIC products across banks.",
+      pageDescription: "Compare chequing, savings, and GIC products across banks.",
       title: "Compare deposit products across banks",
-      description: "Look into rates, fees, and entry requirements from the latest public snapshot.",
+      description: "Compare rates, fees, and entry requirements from the latest public snapshot.",
       currentScope: "Current scope",
       productCount: "{count} products",
       snapshotUpdated: "Snapshot {date}",
@@ -327,8 +327,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "Home",
-      pageDescription: "Look into reviewed deposit, credit card, and loan facts across banks.",
-      title: "Look into bank products. Compare what matters.",
+      pageDescription: "Compare reviewed deposit, credit card, and loan facts across banks.",
+      title: "Compare banks. Compare products. Switch smarter.",
       description: "",
       marketGreeting: "Compare {products} deposit products from {banks} banks in the latest public snapshot.",
       kpiSubtitle: "Deposit market snapshot",
@@ -396,7 +396,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "Clear",
       remove: "Remove",
       emptyTitle: "No products selected yet.",
-      emptyBody: "Use Compare on any product card to compare published facts. Bankompare does not score eligibility or submit applications.",
+      emptyBody: "Use Compare on any product card to compare published facts. SwitchaBank does not score eligibility or submit applications.",
       tableProduct: "Product",
       tableWhy: "Why compare",
       entryAmount: "Entry amount",
@@ -429,7 +429,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "Evidence boundary",
-          body: "Raw evidence, source excerpts, and internal review traces are not exposed on Bankompare."
+          body: "Raw evidence, source excerpts, and internal review traces are not exposed on SwitchaBank."
         },
         {
           title: "Comparison and rankings",
@@ -445,8 +445,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ko: {
     localeName: "한국어",
     shell: {
-      brand: "Bankompare",
-      tagline: "은행 상품을 들여다보고, 사실을 비교하세요."
+      brand: "SwitchaBank",
+      tagline: "비교하고, 더 현명하게 바꾸세요."
     },
     nav: {
       dashboard: "홈",
@@ -480,9 +480,9 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     grid: {
       pageTitle: "예금",
-      pageDescription: "은행별 입출금, 저축, GIC 상품을 살펴보고 비교합니다.",
+      pageDescription: "은행별 입출금, 저축, GIC 상품을 비교합니다.",
       title: "은행별 예금 상품 비교",
-      description: "최신 공개 스냅샷에서 금리·수수료·가입 조건을 살펴보세요.",
+      description: "최신 공개 스냅샷에서 금리·수수료·가입 조건을 비교하세요.",
       currentScope: "현재 범위",
       productCount: "{count}개 상품",
       snapshotUpdated: "스냅샷 {date}",
@@ -542,8 +542,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "홈",
-      pageDescription: "여러 은행의 검토된 예금·신용카드·대출 정보를 살펴보고 비교합니다.",
-      title: "은행 상품을 들여다보고, 중요한 차이를 비교하세요.",
+      pageDescription: "여러 은행의 검토된 예금·신용카드·대출 정보를 비교합니다.",
+      title: "은행을 비교하고, 상품을 비교하고, 더 현명하게 바꾸세요.",
       description: "",
       marketGreeting: "최신 공개 스냅샷에서 {banks}개 은행의 예금 상품 {products}개를 비교하세요.",
       kpiSubtitle: "예금 시장 스냅샷",
@@ -611,7 +611,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "비우기",
       remove: "제거",
       emptyTitle: "아직 선택한 상품이 없습니다.",
-      emptyBody: "상품 카드의 비교 버튼으로 공개된 정보를 나란히 보세요. Bankompare는 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
+      emptyBody: "상품 카드의 비교 버튼으로 공개된 정보를 나란히 보세요. SwitchaBank는 가입 가능성 점수나 신청 대행을 제공하지 않습니다.",
       tableProduct: "상품",
       tableWhy: "비교 이유",
       entryAmount: "가입 금액",
@@ -644,7 +644,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "증거 경계",
-          body: "원문 증거, 출처 발췌, 내부 검토 이력은 Bankompare에 공개하지 않습니다."
+          body: "원문 증거, 출처 발췌, 내부 검토 이력은 SwitchaBank에 공개하지 않습니다."
         },
         {
           title: "비교와 순위",
@@ -660,8 +660,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
   ja: {
     localeName: "日本語",
     shell: {
-      brand: "Bankompare",
-      tagline: "銀行商品を見比べて、事実を比較。"
+      brand: "SwitchaBank",
+      tagline: "比べて、もっと賢く乗り換える。"
     },
     nav: {
       dashboard: "ホーム",
@@ -757,8 +757,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
     },
     dashboard: {
       pageTitle: "ホーム",
-      pageDescription: "複数の銀行の確認済み預金・クレジットカード・ローン情報を見比べます。",
-      title: "銀行商品を見比べて、大切な違いを確かめる。",
+      pageDescription: "複数の銀行の確認済み預金・クレジットカード・ローン情報を比較します。",
+      title: "銀行を比べる。商品を比べる。賢く乗り換える。",
       description: "",
       marketGreeting: "最新の公開スナップショットで {banks} 行の預金商品 {products} 件を比較できます。",
       kpiSubtitle: "預金市場スナップショット",
@@ -826,7 +826,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       clear: "クリア",
       remove: "削除",
       emptyTitle: "まだ商品が選択されていません。",
-      emptyBody: "商品カードの比較ボタンで公開情報を並べて確認できます。Bankompare は加入可能性の採点や申込代行を行いません。",
+      emptyBody: "商品カードの比較ボタンで公開情報を並べて確認できます。SwitchaBank は加入可能性の採点や申込代行を行いません。",
       tableProduct: "商品",
       tableWhy: "比較理由",
       entryAmount: "加入金額",
@@ -859,7 +859,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "証拠の境界",
-          body: "原文証拠、ソース抜粋、内部レビュー履歴は Bankompare では公開しません。"
+          body: "原文証拠、ソース抜粋、内部レビュー履歴は SwitchaBank では公開しません。"
         },
         {
           title: "比較とランキング",
@@ -878,7 +878,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   en: {
     asOf: "As of",
     availableFacts: "Available product facts",
-    compareBoundary: "Bankompare compares published facts. It does not choose a product for you.",
+    compareBoundary: "SwitchaBank compares published facts. It does not choose a product for you.",
     compareDifferences: "Differences are emphasized only where a public field is available.",
     coverage: "Current coverage",
     cardCoverage: "Credit cards",
@@ -886,11 +886,11 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "Raw evidence and internal review traces stay private.",
     fresh: "Current snapshot",
     freshness: "Snapshot freshness",
-    homeBody: "Compare reviewed rates, fees, and key terms across banks—then confirm the latest details with the bank.",
+    homeBody: "Review rates, fees, and key terms side by side—then confirm the latest details with the bank before you switch.",
     homeKicker: "Reviewed public product data",
-    homeTitle: "Look into bank products. Compare what matters.",
+    homeTitle: "Compare banks. Compare products. Switch smarter.",
     loanCoverage: "Mortgage, personal loan and line of credit",
-    methodologyIntro: "How official product facts become comparable public records—and where Bankompare stops.",
+    methodologyIntro: "How official product facts become comparable public records—and where SwitchaBank stops.",
     methodologySteps: [
       { label: "01", title: "Official source", body: "Product facts begin with public institution sources." },
       { label: "02", title: "Reviewed record", body: "Only approved public fields enter the comparable product record." },
@@ -914,7 +914,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   ko: {
     asOf: "기준일",
     availableFacts: "확인 가능한 상품 정보",
-    compareBoundary: "Bankompare는 공개된 사실을 비교하며, 사용자 대신 상품을 선택하지 않습니다.",
+    compareBoundary: "SwitchaBank는 공개된 사실을 비교하며, 사용자 대신 상품을 선택하지 않습니다.",
     compareDifferences: "공개 필드가 있는 항목만 차이를 강조합니다.",
     coverage: "현재 제공 범위",
     cardCoverage: "신용카드",
@@ -922,11 +922,11 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "원문 증거와 내부 검토 이력은 공개하지 않습니다.",
     fresh: "최신 스냅샷",
     freshness: "스냅샷 최신성",
-    homeBody: "여러 은행의 검토된 금리·수수료·핵심 조건을 한곳에서 비교하고, 최신 정보는 은행에서 확인하세요.",
+    homeBody: "여러 은행의 검토된 금리·수수료·핵심 조건을 나란히 비교하고, 바꾸기 전 최신 정보는 은행에서 확인하세요.",
     homeKicker: "검토된 공개 상품 데이터",
-    homeTitle: "은행 상품을 들여다보고, 중요한 차이를 비교하세요.",
+    homeTitle: "은행을 비교하고, 상품을 비교하고, 더 현명하게 바꾸세요.",
     loanCoverage: "모기지·개인대출·신용한도",
-    methodologyIntro: "공식 상품 정보가 비교 가능한 공개 기록이 되는 과정과 Bankompare의 정보 제공 경계입니다.",
+    methodologyIntro: "공식 상품 정보가 비교 가능한 공개 기록이 되는 과정과 SwitchaBank의 정보 제공 경계입니다.",
     methodologySteps: [
       { label: "01", title: "공식 출처", body: "금융기관이 공개한 상품 정보에서 기록이 시작됩니다." },
       { label: "02", title: "검토된 기록", body: "승인된 공개 필드만 비교 가능한 상품 기록에 포함됩니다." },
@@ -950,7 +950,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
   ja: {
     asOf: "基準日",
     availableFacts: "確認できる商品情報",
-    compareBoundary: "Bankompare は公開された事実を比較し、利用者の代わりに商品を選びません。",
+    compareBoundary: "SwitchaBank は公開された事実を比較し、利用者の代わりに商品を選びません。",
     compareDifferences: "公開項目がある場合だけ差を強調します。",
     coverage: "現在の掲載範囲",
     cardCoverage: "クレジットカード",
@@ -958,11 +958,11 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     evidenceBoundary: "原文証拠と内部レビュー履歴は公開しません。",
     fresh: "最新スナップショット",
     freshness: "スナップショットの鮮度",
-    homeBody: "複数の銀行の確認済み金利・手数料・主な条件をひとつの場所で比べ、最新情報は銀行で確認してください。",
+    homeBody: "複数の銀行の確認済み金利・手数料・主な条件を並べて比較し、乗り換える前に最新情報を銀行で確認してください。",
     homeKicker: "レビュー済み公開商品データ",
-    homeTitle: "銀行商品を見比べて、大切な違いを確かめる。",
+    homeTitle: "銀行を比べる。商品を比べる。賢く乗り換える。",
     loanCoverage: "住宅ローン・個人ローン・与信枠",
-    methodologyIntro: "公式商品情報が比較可能な公開レコードになる流れと、Bankompare の情報提供範囲です。",
+    methodologyIntro: "公式商品情報が比較可能な公開レコードになる流れと、SwitchaBank の情報提供範囲です。",
     methodologySteps: [
       { label: "01", title: "公式ソース", body: "金融機関が公開した商品情報からレコードが始まります。" },
       { label: "02", title: "レビュー済みレコード", body: "承認された公開項目だけが比較可能な商品レコードに入ります。" },
@@ -1009,9 +1009,9 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
     if (normalizePublicLocale(locale) === "ko") {
       return {
         pageTitle: "신용카드",
-        pageDescription: "은행별 검증된 신용카드 상품을 살펴보고 비교합니다.",
+        pageDescription: "은행별 검증된 신용카드 상품을 비교합니다.",
         title: "은행별 신용카드 비교",
-        description: "최신 공개 스냅샷에서 연회비와 구매 금리를 살펴보세요.",
+        description: "최신 공개 스냅샷에서 연회비와 구매 금리를 비교하세요.",
         coverage: designCopy.cardCoverage,
       };
     }
@@ -1026,18 +1026,18 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
     }
     return {
       pageTitle: "Credit Cards",
-      pageDescription: "Look into verified credit card products across banks.",
+      pageDescription: "Compare verified credit card products across banks.",
       title: "Compare credit cards across banks",
-      description: "Look into annual fees and purchase interest rates from the latest public snapshot.",
+      description: "Compare annual fees and purchase interest rates from the latest public snapshot.",
       coverage: designCopy.cardCoverage,
     };
   }
   if (normalizePublicLocale(locale) === "ko") {
     return {
       pageTitle: "대출",
-      pageDescription: "은행별 모기지·개인대출·신용한도 상품을 살펴보고 비교합니다.",
+      pageDescription: "은행별 모기지·개인대출·신용한도 상품을 비교합니다.",
       title: "은행별 대출 상품 비교",
-      description: "최신 공개 스냅샷에서 금리와 주요 대출 조건을 살펴보세요.",
+      description: "최신 공개 스냅샷에서 금리와 주요 대출 조건을 비교하세요.",
       coverage: designCopy.loanCoverage,
     };
   }
@@ -1052,9 +1052,9 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
   }
   return {
     pageTitle: "Loans",
-    pageDescription: "Look into mortgage, personal loan, and line of credit products across banks.",
+    pageDescription: "Compare mortgage, personal loan, and line of credit products across banks.",
     title: "Compare loans across banks",
-    description: "Look into interest rates and key loan terms from the latest public snapshot.",
+    description: "Compare interest rates and key loan terms from the latest public snapshot.",
     coverage: designCopy.loanCoverage,
   };
 }
@@ -1117,7 +1117,7 @@ const PUBLIC_INFORMATION_NOTICE_COPY: Record<PublicLocale, PublicInformationNoti
     title: "Information notice",
     paragraphs: [
       "The information on this page is collected and organized from public sources with the help of AI agents. It is not a financial product advertisement.",
-      "Bankompare independently created this content for information purposes without compensation from the financial institutions shown, and works to keep it current.",
+      "SwitchaBank independently created this content for information purposes without compensation from the financial institutions shown, and works to keep it current.",
       "Rates, fees, eligibility, and other terms may change by the time you apply. Before applying, confirm the product information and conditions on the financial institution’s official website."
     ]
   },

@@ -3,7 +3,7 @@
 This package is the anonymous FPDS market view and product catalog. It presents
 only review-approved public projections; raw evidence, review state, and private
 source traces remain inside FPDS Admin. Its customer-facing identity is
-`Bankompare`; `FPDS` remains the internal platform/runtime name.
+`SwitchaBank`; `FPDS` remains the internal platform/runtime name.
 
 ## Runtime Routes
 
@@ -36,12 +36,11 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 
 The Public visual system uses a warm flat canvas, deep ink typography,
 evergreen verification states, maple selection emphasis, and ochre Loan cues.
-The code-native Bankompare mark is a simple globe: one circular boundary, one
-equator, and a paired meridian form. It represents the long-term direction of
-bringing financial products from markets around the world into one comparable
-view without implying that every country is already available. The wordmark is
-one uninterrupted same-color name with no highlighted letter. The shell mark
-and white-on-evergreen app icon share the same geometry so the identity remains
+The code-native SwitchaBank mark is a simple pair of opposing horizontal
+arrows. It communicates comparing the current option with another and making a
+switch without introducing a literal bank, toggle, or decorative illustration.
+The wordmark is one uninterrupted same-color name. The shell mark and
+white-on-evergreen app icon share the same geometry so the identity remains
 clear at small sizes.
 Generic dashboard-card
 repetition, decorative gradients, synthetic scores, and recommendation
@@ -116,13 +115,13 @@ Home and every product detail show the same localized information notice:
 Public facts are collected and organized from public materials with AI-agent
 assistance, are not financial-product advertising, and are independently
 provided without compensation from the displayed institutions. The notice
-also states that Bankompare works to keep information current and that users
+also states that SwitchaBank works to keep information current and that users
 must reconfirm current product information and conditions on the institution's
 official website before applying.
 
 The desktop header uses a compact country selector backed by countries
 represented in their latest completed active public snapshots. The mobile
-header keeps the globe and `Bankompare` wordmark visible and moves Home,
+header keeps the switch mark and `SwitchaBank` wordmark visible and moves Home,
 Deposit, Credit Card, Loan, and country selection into one hamburger menu.
 Country changes reset
 country-owned bank and product filters rather than carrying invalid scope
@@ -167,7 +166,7 @@ refresh cadence while preserving snapshot freshness metadata in the UI.
 Verified bank logo assets live under `public/bank-logos/` or use approved
 official URLs in the `BankLogo` mapping. A failed image falls back to an
 unframed, accessible bank-code mark while retaining the institution name for
-assistive technology. The Bankompare shell mark is implemented in
+assistive technology. The SwitchaBank shell mark is implemented in
 `public-mark.tsx`; `src/app/icon.svg` is the matching favicon/app icon.
 
 ## Verification

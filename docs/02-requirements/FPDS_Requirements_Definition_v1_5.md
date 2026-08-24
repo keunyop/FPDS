@@ -521,6 +521,22 @@ mark-only header and visible Home snapshot-ledger presentation above:
   publication gates, financial facts, evidence boundaries, or recommendation
   policy
 
+Product Owner direction on `2026-08-23` supersedes only the customer-facing
+Public name, globe mark, and discovery copy above:
+
+- `SwitchaBank` is the customer-facing Public name; `FPDS` remains the internal
+  platform/runtime identity
+- the shell and favicon use one simple code-native switch mark made from two
+  opposing horizontal arrows; the uninterrupted wordmark remains one color
+- the Home hero communicates the shared EN/KO/JA meaning of “Compare banks.
+  Compare products. Switch smarter.” and the supporting copy connects
+  side-by-side facts to confirming current details before switching
+- this language invites comparison and switching without claiming a best
+  product, personalized suitability, eligibility, or an application outcome
+- the responsive shell, country map, catalog actions, rankings, product data,
+  publication gates, evidence boundary, and operational Vercel project names
+  remain unchanged
+
 ### FR-PUB-010 Comparative Scatter Plot
 insight dashboard는 상품 간 trade-off를 보여주는 scatter plot 또는 동등한 comparative chart를 제공해야 한다.
 
@@ -562,7 +578,7 @@ that visible facts are collected and organized from public materials with
 AI-agent assistance and are not financial-product advertising. It must also
 state that the content is independently produced for information purposes
 without compensation from the displayed financial institutions, that
-Bankompare works to keep it current, and that rates, fees, eligibility, and
+SwitchaBank works to keep it current, and that rates, fees, eligibility, and
 other terms may change. Users must be directed to reconfirm the product and
 conditions on the financial institution's official website before applying.
 

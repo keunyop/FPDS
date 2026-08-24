@@ -10,12 +10,17 @@ export function PublicMark({ className = "" }: { className?: string }) {
       )}
     >
       <svg className="size-8" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="2.1" />
-        <path d="M3.5 12H20.5" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" />
         <path
-          d="M12 3.5C9.78 5.76 8.55 8.67 8.55 12C8.55 15.33 9.78 18.24 12 20.5C14.22 18.24 15.45 15.33 15.45 12C15.45 8.67 14.22 5.76 12 3.5Z"
+          d="M4.5 7.5H19M15.5 4L19 7.5L15.5 11"
           stroke="currentColor"
-          strokeWidth="2.1"
+          strokeWidth="2.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M19.5 16.5H5M8.5 13L5 16.5L8.5 20"
+          stroke="currentColor"
+          strokeWidth="2.25"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -31,7 +36,7 @@ export function PublicWordmark({
 }) {
   return (
     <span className={cn("inline-flex items-baseline whitespace-nowrap", className)}>
-      Bankompare
+      SwitchaBank
     </span>
   );
 }

@@ -2421,3 +2421,43 @@ Read before coding:
   this slice.
 - Boundaries: no Public route/UI behavior, financial data, API, database,
   scheduler, environment value, domain, secret, or external deployment changed.
+
+## 2026-08-23 - SwitchaBank Public Identity and Discovery Copy
+
+- WBS: `5.44` (`Completed`).
+- Status: completed the Product Owner-requested Public rebrand and Home
+  discovery-copy refinement without changing product data or recommendation
+  boundaries.
+- Outcome:
+  - changed the customer-facing Public identity from `Bankompare` to
+    `SwitchaBank` across the shell, metadata, methodology, comparison, and
+    information-notice surfaces
+  - replaced the globe with a simple code-native switch mark composed of two
+    opposing horizontal arrows, including a matching white-on-evergreen favicon
+  - changed the English Home hero to `Compare banks. Compare products. Switch
+    smarter.` and aligned the Korean and Japanese hero/tagline meanings
+  - refined supporting copy around side-by-side review and checking current
+    bank terms before switching, while retaining explicit non-recommendation
+    language
+  - kept `FPDS` as the internal system name and retained the existing
+    `bankompare-public` / `bankompare-api` Vercel project names
+- Decision: `D-061`. The rebrand changes presentation and customer-facing
+  language only; canonical data, eligibility, ranking, publication, and
+  evidence boundaries are unchanged.
+- Key files: Public mark/favicon, metadata and EN/KO/JA locale resources,
+  Public README, requirements, Public IA, environment/RAID records, decision
+  log, and WBS.
+- Verification:
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build`: passed with Next.js 16.2.3 using the documented
+    webpack production path; all ten routes generated
+  - local production-rendered Home checked in Chrome at `1440px` EN,
+    `768px` KO, and exact `390px` JA
+  - every checked viewport rendered the localized title, two-path switch mark,
+    full `SwitchaBank` wordmark, localized Home link label, and hero; document
+    width stayed within the viewport
+  - active Public runtime and README search found no customer-facing
+    `Bankompare` reference
+- Boundaries: no Admin behavior, API, financial data, database state,
+  collection, scheduler, publication, environment value, Vercel project,
+  deployment, domain, secret, or external write changed.

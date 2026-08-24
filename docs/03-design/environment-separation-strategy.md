@@ -155,7 +155,8 @@ PRD suggested stack의 `public/admin on Vercel`, `worker/storage/private integra
 - Before the coupling becomes release-critical, replace the shared connection
   with a separate production database containing the current schema and an
   approved completed Public aggregate snapshot.
-- Bankompare Public is a separate Vercel project whose Git Root Directory is
+- SwitchaBank Public is deployed through the existing separate
+  `bankompare-public` Vercel project whose Git Root Directory is
   `app/public`. Its Preview and Production server runtimes use
   `FPDS_PUBLIC_API_ORIGIN=https://bankompare-api.vercel.app`. The app-local
   `vercel.json` pins Next.js, and **Include source files outside of the Root
