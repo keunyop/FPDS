@@ -2553,3 +2553,49 @@ Read before coding:
 - Boundaries: no historical deployment was deleted and no product data,
   database state, scheduler, collection, publication, API contract, or UI
   behavior changed.
+
+## 2026-08-24 - SwitchaBank Public Google Analytics Installation
+
+- WBS: `5.47` (`Completed`).
+- Status: consent-based GA4 is active on SwitchaBank Public Production and the
+  live tag, initial/SPA page views, privacy signals, and revocation path passed.
+- Outcome:
+  - added the Google tag across Public routes behind a validated
+    `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID`; an absent or invalid ID renders no tag,
+    measurement ID, consent prompt, or analytics footer control
+  - added EN/KO/JA allow/decline choices with 44px controls, local persistence,
+    a persistent footer entry, revocation, GA-cookie cleanup, and tag-free reload
+  - load Google Analytics only after a grant; advertising storage, advertising
+    user data, personalization, and Google signals remain denied
+  - disabled the tag's default page view and added deterministic initial and
+    Next.js client-route page views with the previous virtual URL as referrer
+  - documented the environment, consent, exact-once SPA measurement,
+    deployment, reporting verification, requirements, WBS, and decision contract
+- External changes:
+  - added `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` as a non-sensitive Production-only
+    value on the existing `switchabank-public` Vercel project
+  - deployed `dpl_E7mHEdUSykfF6ULhKJu25YbYkyKP` to Production; Vercel marked it
+    Ready and aliased it to `https://www.switchabank.com`
+  - retained the real measurement ID outside source control; no Preview value
+    or Google Analytics property setting was changed
+- Verification:
+  - Public `pnpm run typecheck`: passed after the final SPA implementation
+  - Public `pnpm run build` without an ID, with test ID `G-TEST123456`, and with
+    the supplied Production ID: passed
+  - production-rendered Chrome QA at `1440px` EN, `768px` KO, and exact
+    `390px` JA: localized copy, footer reopening, 44px controls, no horizontal
+    overflow, and zero browser errors
+  - fresh live browser before consent: zero Google requests, scripts, and cookies
+  - live allow: the expected Google tag and one initial `page_view` reached the
+    supplied stream; advertising/personalization request signals remained denied
+  - live `/dashboard` to `/products` client navigation: exactly one additional
+    `page_view` used the new location and previous virtual page as referrer
+  - live revocation and reload: consent persisted as denied with no Google
+    script, Google resource, or `_ga` cookie remaining
+  - `git diff --check`: passed after journal closeout
+- Limitation: Google Analytics property credentials were not available, so the
+  Realtime/DebugView reporting UI was not directly inspected; live browser
+  collect requests to the supplied stream were verified instead.
+- Boundaries: no Google Analytics property configuration, Preview environment,
+  Google Ads feature, non-page-view event, Admin/API, database, financial data,
+  collection, canonical state, or publication state changed.

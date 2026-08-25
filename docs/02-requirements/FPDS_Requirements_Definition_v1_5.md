@@ -582,6 +582,29 @@ SwitchaBank works to keep it current, and that rates, fees, eligibility, and
 other terms may change. Users must be directed to reconfirm the product and
 conditions on the financial institution's official website before applying.
 
+### FR-PUB-019 Consent-Based Public Analytics
+
+When a valid GA4 measurement ID is configured for the Public production build,
+SwitchaBank may collect aggregate page-view analytics across Public routes.
+
+- the Google tag must not load before the visitor explicitly allows analytics
+- EN/KO/JA controls must offer equally reachable allow and decline actions and
+  a persistent way to reopen the choice
+- declining must leave Google Analytics scripts and cookies unloaded; revoking
+  a prior grant must disable analytics and remove its first-party cookies
+- the consent choice may be stored locally in the browser but must not change
+  product data, filters, rankings, eligibility, or recommendation boundaries
+- advertising storage, advertising user data, personalization, remarketing,
+  and Google signals remain disabled
+- only aggregate page-view analytics is approved in this baseline; user IDs,
+  personally identifiable information, financial field values, and custom
+  product click or conversion events are not approved
+- the initial Public screen and each Next.js client-side route change must emit
+  exactly one page view with the current location; automatic and explicit SPA
+  page-view mechanisms must not run together
+- an absent or invalid measurement ID must fail closed with no tag and no
+  consent prompt
+
 ---
 
 ## 8.2 Admin Requirements
@@ -1908,6 +1931,7 @@ LLM 사용량과 비용은 agent/run 단위로 추적 가능해야 한다.
 - BX-PF 미연계 시 publish pending / retry / reconciliation 상태 추적 가능
 - LLM usage / cost dashboard 작동
 - monitoring / error tracking enabled
+- configured Public analytics respects EN/KO/JA consent and fail-closed tag loading
 - README and environment setup documented
 
 ## 18.3 Phase 2 Acceptance

@@ -169,6 +169,28 @@ unframed, accessible bank-code mark while retaining the institution name for
 assistive technology. The SwitchaBank shell mark is implemented in
 `public-mark.tsx`; `src/app/icon.svg` is the matching favicon/app icon.
 
+## Analytics and Consent
+
+Public GA4 is loaded with Next.js `Script` and is disabled unless the build
+receives a valid `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` in the `G-...` format. The ID
+is a public tag identifier, not a secret, but the real value still lives in the
+deployment environment rather than source control.
+
+When configured, a first visit shows localized EN/KO/JA analytics choices.
+Google scripts and `_ga` cookies load only after Allow; Decline leaves the tag
+unloaded. The footer keeps an Analytics choices control available, and revoking
+a prior grant denies analytics consent, removes GA cookies, and reloads without
+the tag. Advertising storage, advertising user data, personalization, and
+Google signals are denied. No user ID, financial value, product-click event, or
+conversion event is sent by the Public application.
+
+The integration disables the tag's default page view and sends one explicit
+`page_view` for the initial screen and each Next.js client-side navigation,
+including the previous virtual URL as the referrer. Keep GA4 Enhanced
+Measurement's `Page changes based on browser history events` option disabled to
+avoid duplicates. Verify live changes with Google Tag Assistant and the GA4
+Realtime or DebugView report.
+
 ## Verification
 
 Run from `app/public`:
@@ -185,11 +207,12 @@ same-origin BFF routes read the upstream API from `FPDS_PUBLIC_API_ORIGIN`; set
 it to `https://switchabank-api.vercel.app` for both Preview and Production.
 There is no browser-side database or private API credential.
 
-The Vercel project is `switchabank-public` and its stable Production domain is
-`https://switchabank-public.vercel.app`. The legacy `bankompare-public`
-stable, team, and main-branch aliases were removed after the 2026-08-23
-SwitchaBank domain migration; historical generated deployment URLs remain
-immutable Vercel records.
+The Vercel project is `switchabank-public`. Its customer Production domains are
+`https://switchabank.com` and `https://www.switchabank.com`; the underlying
+stable project domain remains `https://switchabank-public.vercel.app`. The
+legacy `bankompare-public` stable, team, and main-branch aliases were removed
+after the 2026-08-23 SwitchaBank domain migration; historical generated
+deployment URLs remain immutable Vercel records.
 
 The project-local `vercel.json` pins the framework to Next.js so the
 repository-root FastAPI configuration cannot override this app in Git builds.
@@ -206,11 +229,17 @@ cd app/public
 pnpm dlx vercel@latest link --yes --project switchabank-public
 pnpm dlx vercel@latest env add FPDS_PUBLIC_API_ORIGIN production,preview `
   --value https://switchabank-api.vercel.app --force --yes --no-sensitive
+pnpm dlx vercel@latest env add NEXT_PUBLIC_GOOGLE_ANALYTICS_ID production `
+  --value G-REPLACE_WITH_REAL_ID --force --yes --no-sensitive
 pnpm dlx vercel@latest deploy --prod --yes
 pnpm dlx vercel@latest deploy --yes
 ```
 
 Verify the Production Home and the same-origin `/api/public/countries` route.
+Because `NEXT_PUBLIC_*` values are embedded at build time, adding or changing
+the GA4 ID requires a new Production deployment. Do not configure the
+placeholder value or reuse the Production stream in Preview unless the Product
+Owner explicitly approves Preview traffic in the same Analytics property.
 Preview deployments may require the Vercel deployment-protection bypass used by
 `vercel curl`. When the Public domain changes, update the FastAPI project's
 Public web-origin/CORS setting before enabling direct browser-to-API calls; the

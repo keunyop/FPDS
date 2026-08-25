@@ -1179,6 +1179,42 @@ export function getPublicCoverageCopy(locale: string): PublicCoverageCopy {
   return PUBLIC_COVERAGE_COPY[normalizePublicLocale(locale)];
 }
 
+type PublicAnalyticsConsentCopy = {
+  allow: string;
+  choices: string;
+  decline: string;
+  description: string;
+  title: string;
+};
+
+const PUBLIC_ANALYTICS_CONSENT_COPY: Record<PublicLocale, PublicAnalyticsConsentCopy> = {
+  en: {
+    allow: 'Allow analytics',
+    choices: 'Analytics choices',
+    decline: 'Decline',
+    description: 'We use Google Analytics cookies to understand how SwitchaBank is used. Analytics is optional and does not change product results.',
+    title: 'Analytics choices'
+  },
+  ko: {
+    allow: '분석 허용',
+    choices: '분석 설정',
+    decline: '거부',
+    description: 'SwitchaBank 이용 방식을 이해하기 위해 Google Analytics 쿠키를 사용합니다. 분석은 선택 사항이며 상품 결과에 영향을 주지 않습니다.',
+    title: '분석 설정'
+  },
+  ja: {
+    allow: '解析を許可',
+    choices: 'アクセス解析の設定',
+    decline: '拒否',
+    description: 'SwitchaBank の利用状況を把握するため、Google Analytics の Cookie を使用します。解析は任意で、商品結果には影響しません。',
+    title: 'アクセス解析の設定'
+  }
+};
+
+export function getPublicAnalyticsConsentCopy(locale: string): PublicAnalyticsConsentCopy {
+  return PUBLIC_ANALYTICS_CONSENT_COPY[normalizePublicLocale(locale)];
+}
+
 
 export function getIntlLocale(locale: string) {
   switch (normalizePublicLocale(locale)) {

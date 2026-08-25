@@ -185,6 +185,20 @@ Rules:
 - `dev` may keep monitoring disabled during early scaffold work
 - `prod` should point at the real monitoring backend before release
 
+### 4.8 Public Analytics
+
+| Key | Meaning |
+|---|---|
+| `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` | optional non-sensitive GA4 web-stream measurement ID for the Public production build; valid values use the `G-...` format |
+
+Rules:
+- an absent or invalid value disables both the Google tag and analytics consent prompt
+- configure the Production stream only after the Product Owner supplies the exact ID; Preview remains unset unless separate traffic handling is approved
+- the value is embedded in the browser bundle at build time, so every change requires a new Public deployment
+- visitor consent is required before the tag loads; advertising and personalization signals remain denied
+- the Public integration disables the tag's default page view and emits one explicit event for the initial screen and each Next.js client-side navigation; keep Enhanced Measurement history-change page views disabled to prevent duplicates
+- verify Production activation with live browser requests plus Tag Assistant and GA4 Realtime or DebugView when property access is available
+
 ---
 
 ## 5. Placeholder Policy

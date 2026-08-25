@@ -329,6 +329,7 @@ Based on:
 | 5.44 | Completed | SwitchaBank Public identity and discovery copy | SwitchaBank metadata/wordmark, simple opposing-arrow switch mark and favicon, localized compare-then-switch Home hero/tagline, active brand-record alignment, responsive/build verification | Frontend, UX, QA | 5.14, 5.43 | 2026-08-23 |
 | 5.45 | Completed | SwitchaBank Vercel project rename | in-place API/Public project renames with IDs and Git boundaries preserved, local link refresh, active runbook/environment alignment, Production health and same-origin BFF verification | DevOps, Backend, Frontend, QA | 5.42, 5.44 | 2026-08-23 |
 | 5.46 | Completed | SwitchaBank Vercel deployment and domain migration | new API/Public Production deployments and stable domains, Preview/Production origin and CORS cutover, verified Home/BFF connectivity, explicitly approved legacy alias removal | DevOps, Backend, Frontend, QA | 5.45 | 2026-08-23 |
+| 5.47 | Completed | SwitchaBank Public Google Analytics | consent-gated GA4 across Public routes, EN/KO/JA choices and revocation, deterministic initial/SPA page views, advertising-signal denial, Production environment and deployment, live-domain network/cookie verification | Frontend, Product Owner, QA | 5.46 | 2026-08-24 |
 
 ### 5.5 Scope Baseline
 

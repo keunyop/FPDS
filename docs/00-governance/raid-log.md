@@ -93,4 +93,5 @@ If an item is no longer shaping decisions, remove it.
 | 2026-08-22 | Updated R-004 and added A-005 for the explicitly scheduler-disabled Vercel Public-read period |
 | 2026-08-22 | Added R-007 for the Product Owner-approved temporary dev database reuse by Vercel Preview and Production |
 | 2026-08-22 | Updated R-007 after the live Bankompare Public deployment began routing anonymous reads through the API-backed BFF |
+| 2026-08-24 | Added then removed D-005 after the Product Owner supplied the GA4 ID and Production deployment/live request verification completed |
 | 2026-04-22 | Rewrote the RAID log as a short current-baseline document and removed stale closed design-stage items from the default path |
