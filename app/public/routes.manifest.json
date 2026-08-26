@@ -22,6 +22,12 @@
       "resource_key": "public_navigation.products"
     },
     {
+      "route": "/cards",
+      "route_id": "public.cards",
+      "implementation_path": "src/app/cards/page.tsx",
+      "resource_key": "public_navigation.cards"
+    },
+    {
       "route": "/loans",
       "route_id": "public.loans",
       "implementation_path": "src/app/loans/page.tsx",
@@ -29,15 +35,29 @@
     },
     {
       "route": "/dashboard",
-      "route_id": "public.dashboard",
-      "implementation_path": "src/app/dashboard/page.tsx",
-      "resource_key": "public_navigation.dashboard"
+      "route_id": "public.dashboard_legacy",
+      "implementation_path": "next.config.ts",
+      "resource_key": "public_navigation.dashboard",
+      "redirect_to": "/",
+      "redirect_status": 308
     },
     {
       "route": "/methodology",
       "route_id": "public.methodology",
       "implementation_path": "src/app/methodology/page.tsx",
       "resource_key": "public_navigation.methodology"
+    },
+    {
+      "route": "/robots.txt",
+      "route_id": "public.seo.robots",
+      "implementation_path": "src/app/robots.ts",
+      "resource_key": "public_seo.robots"
+    },
+    {
+      "route": "/sitemap.xml",
+      "route_id": "public.seo.sitemap",
+      "implementation_path": "src/app/sitemap.ts",
+      "resource_key": "public_seo.sitemap"
     },
     {
       "route": "/api/public/countries",

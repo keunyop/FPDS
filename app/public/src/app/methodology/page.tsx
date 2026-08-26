@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { getPublicDesignCopy, getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
+import { getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import { buildPublicHref, parseDashboardPageFilters } from "@/lib/public-query";
+import { buildPublicPageMetadata } from "@/lib/public-seo";
 
 type MethodologyPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -11,13 +12,16 @@ type MethodologyPageProps = {
 
 export async function generateMetadata({ searchParams }: MethodologyPageProps): Promise<Metadata> {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const locale = normalizePublicLocale(typeof resolvedSearchParams.locale === "string" ? resolvedSearchParams.locale : "");
-  const copy = getPublicMessages(locale);
+  const filters = parseDashboardPageFilters(resolvedSearchParams);
+  const copy = getPublicMessages(filters.locale);
 
-  return {
+  return buildPublicPageMetadata({
     title: copy.methodology.pageTitle,
-    description: copy.methodology.pageDescription
-  };
+    description: copy.methodology.pageDescription,
+    path: "/methodology",
+    locale: filters.locale,
+    countryCode: filters.countryCode
+  });
 }
 
 export default async function MethodologyPage({ searchParams }: MethodologyPageProps) {
@@ -43,7 +47,7 @@ export default async function MethodologyPage({ searchParams }: MethodologyPageP
               <Link href={buildPublicHref("/loans", filters)}>{copy.nav.loan}</Link>
             </Button>
             <Button asChild className="rounded-full" variant="ghost">
-              <Link href={buildPublicHref("/dashboard", filters)}>{copy.nav.dashboard}</Link>
+              <Link href={buildPublicHref("/", filters)}>{copy.nav.dashboard}</Link>
             </Button>
           </div>
         </section>

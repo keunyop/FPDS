@@ -264,8 +264,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "Verified"
     },
     grid: {
-      pageTitle: "Deposits",
-      pageDescription: "Compare chequing, savings, and GIC products across banks.",
+      pageTitle: "Compare Bank Accounts & GICs",
+      pageDescription: "Compare reviewed chequing, savings, and GIC rates, fees, and entry requirements across banks.",
       title: "Compare deposit products across banks",
       description: "Compare rates, fees, and entry requirements from the latest public snapshot.",
       currentScope: "Current scope",
@@ -326,8 +326,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       whatToCheck: "What to check"
     },
     dashboard: {
-      pageTitle: "Home",
-      pageDescription: "Compare reviewed deposit, credit card, and loan facts across banks.",
+      pageTitle: "Compare Banks & Financial Products",
+      pageDescription: "Compare reviewed bank deposits, credit cards, and loans using SwitchaBank's latest public snapshots.",
       title: "Compare banks. Compare products. Switch smarter.",
       description: "",
       marketGreeting: "Compare {products} deposit products from {banks} banks in the latest public snapshot.",
@@ -410,8 +410,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       reasonFallback: "Comparable public fields are available."
     },
     methodology: {
-      pageTitle: "Methodology",
-      pageDescription: "Public data notes and metric boundaries.",
+      pageTitle: "Data Methodology",
+      pageDescription: "How SwitchaBank reviews, refreshes, and compares public bank product facts.",
       title: "Methodology",
       description: "What the public snapshot includes, excludes, and may leave unavailable.",
       sections: [
@@ -479,8 +479,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "검증"
     },
     grid: {
-      pageTitle: "예금",
-      pageDescription: "은행별 입출금, 저축, GIC 상품을 비교합니다.",
+      pageTitle: "은행 예금·GIC 비교",
+      pageDescription: "은행별로 검토된 입출금·저축·GIC의 금리, 수수료, 가입 조건을 비교합니다.",
       title: "은행별 예금 상품 비교",
       description: "최신 공개 스냅샷에서 금리·수수료·가입 조건을 비교하세요.",
       currentScope: "현재 범위",
@@ -541,8 +541,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       whatToCheck: "확인할 내용"
     },
     dashboard: {
-      pageTitle: "홈",
-      pageDescription: "여러 은행의 검토된 예금·신용카드·대출 정보를 비교합니다.",
+      pageTitle: "은행 및 금융상품 비교",
+      pageDescription: "SwitchaBank의 최신 공개 스냅샷에서 검토된 은행 예금·신용카드·대출 정보를 비교합니다.",
       title: "은행을 비교하고, 상품을 비교하고, 더 현명하게 바꾸세요.",
       description: "",
       marketGreeting: "최신 공개 스냅샷에서 {banks}개 은행의 예금 상품 {products}개를 비교하세요.",
@@ -625,8 +625,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       reasonFallback: "비교 가능한 공개 필드가 제공됩니다."
     },
     methodology: {
-      pageTitle: "방법론",
-      pageDescription: "공개 데이터 기준과 지표 경계입니다.",
+      pageTitle: "데이터 방법론",
+      pageDescription: "SwitchaBank가 공개 은행 상품 정보를 검토·갱신·비교하는 기준을 설명합니다.",
       title: "방법론",
       description: "공개 스냅샷에 포함되는 정보, 제외되는 정보, 정보가 없을 때의 기준입니다.",
       sections: [
@@ -694,8 +694,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       verifiedOn: "確認"
     },
     grid: {
-      pageTitle: "預金",
-      pageDescription: "銀行ごとの当座、普通預金、GIC 商品を見比べます。",
+      pageTitle: "銀行預金・GICを比較",
+      pageDescription: "銀行ごとの確認済み当座・普通預金・GICについて、金利・手数料・利用条件を比較します。",
       title: "銀行ごとに預金商品を比較",
       description: "最新の公開スナップショットで金利・手数料・利用条件を確認できます。",
       currentScope: "現在の範囲",
@@ -756,8 +756,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       whatToCheck: "確認ポイント"
     },
     dashboard: {
-      pageTitle: "ホーム",
-      pageDescription: "複数の銀行の確認済み預金・クレジットカード・ローン情報を比較します。",
+      pageTitle: "銀行・金融商品を比較",
+      pageDescription: "SwitchaBankの最新公開スナップショットで、確認済みの預金・クレジットカード・ローン情報を比較します。",
       title: "銀行を比べる。商品を比べる。賢く乗り換える。",
       description: "",
       marketGreeting: "最新の公開スナップショットで {banks} 行の預金商品 {products} 件を比較できます。",
@@ -840,8 +840,8 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
       reasonFallback: "比較可能な公開フィールドがあります。"
     },
     methodology: {
-      pageTitle: "データ基準",
-      pageDescription: "公開データの基準と指標の境界です。",
+      pageTitle: "データ方法論",
+      pageDescription: "SwitchaBankが公開銀行商品情報を確認・更新・比較する基準を説明します。",
       title: "データ基準",
       description: "公開スナップショットに含む情報、除外する情報、情報がない場合の扱いです。",
       sections: [
@@ -1008,8 +1008,8 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
   if (catalog === "card") {
     if (normalizePublicLocale(locale) === "ko") {
       return {
-        pageTitle: "신용카드",
-        pageDescription: "은행별 검증된 신용카드 상품을 비교합니다.",
+        pageTitle: "신용카드 비교",
+        pageDescription: "은행별 검증된 신용카드의 연회비와 구매 금리를 비교합니다.",
         title: "은행별 신용카드 비교",
         description: "최신 공개 스냅샷에서 연회비와 구매 금리를 비교하세요.",
         coverage: designCopy.cardCoverage,
@@ -1017,16 +1017,16 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
     }
     if (normalizePublicLocale(locale) === "ja") {
       return {
-        pageTitle: "クレジットカード",
-        pageDescription: "銀行ごとの確認済みクレジットカード商品を見比べます。",
+        pageTitle: "クレジットカードを比較",
+        pageDescription: "銀行ごとの確認済みクレジットカードについて、年会費とショッピング金利を比較します。",
         title: "銀行ごとにクレジットカードを比較",
         description: "最新の公開スナップショットで年会費とショッピング金利を確認できます。",
         coverage: designCopy.cardCoverage,
       };
     }
     return {
-      pageTitle: "Credit Cards",
-      pageDescription: "Compare verified credit card products across banks.",
+      pageTitle: "Compare Credit Cards",
+      pageDescription: "Compare reviewed credit card annual fees and purchase interest rates across banks.",
       title: "Compare credit cards across banks",
       description: "Compare annual fees and purchase interest rates from the latest public snapshot.",
       coverage: designCopy.cardCoverage,
@@ -1034,8 +1034,8 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
   }
   if (normalizePublicLocale(locale) === "ko") {
     return {
-      pageTitle: "대출",
-      pageDescription: "은행별 모기지·개인대출·신용한도 상품을 비교합니다.",
+      pageTitle: "대출·신용한도 비교",
+      pageDescription: "은행별 모기지·개인대출·신용한도의 검토된 금리와 주요 조건을 비교합니다.",
       title: "은행별 대출 상품 비교",
       description: "최신 공개 스냅샷에서 금리와 주요 대출 조건을 비교하세요.",
       coverage: designCopy.loanCoverage,
@@ -1043,16 +1043,16 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
   }
   if (normalizePublicLocale(locale) === "ja") {
     return {
-      pageTitle: "ローン",
-      pageDescription: "銀行ごとの住宅ローン・個人ローン・与信枠商品を見比べます。",
+      pageTitle: "ローン・与信枠を比較",
+      pageDescription: "銀行ごとの住宅ローン・個人ローン・与信枠について、確認済み金利と主な条件を比較します。",
       title: "銀行ごとにローン商品を比較",
       description: "最新の公開スナップショットで金利と主なローン条件を確認できます。",
       coverage: designCopy.loanCoverage,
     };
   }
   return {
-    pageTitle: "Loans",
-    pageDescription: "Compare mortgage, personal loan, and line of credit products across banks.",
+    pageTitle: "Compare Loans & Lines of Credit",
+    pageDescription: "Compare reviewed mortgage, personal loan, and line of credit rates and key terms across banks.",
     title: "Compare loans across banks",
     description: "Compare interest rates and key loan terms from the latest public snapshot.",
     coverage: designCopy.loanCoverage,

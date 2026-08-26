@@ -605,7 +605,27 @@ SwitchaBank may collect aggregate page-view analytics across Public routes.
 - an absent or invalid measurement ID must fail closed with no tag and no
   consent prompt
 
----
+### FR-PUB-020 Canonical Home and Search Discovery
+
+SwitchaBank Public must expose one stable, indexable production identity
+without changing the approved factual-comparison or private-evidence boundary.
+
+- `https://www.switchabank.com/` is the canonical Home and must render Home
+  content directly; the historical `/dashboard` route permanently redirects to
+  `/` while preserving query parameters
+- indexable Home, catalog, Methodology, and public product detail pages must
+  emit absolute canonical URLs and reciprocal EN/KO/JA alternates that preserve
+  the selected published country
+- catalog search, filter, sort, and view variants must canonicalize to the
+  clean locale/country catalog URL and remain `noindex,follow`
+- production must expose a crawlable `robots.txt` and a sitemap containing
+  clean static Public routes plus available public product details for active
+  published countries; Preview must remain non-indexable
+- public product details must use product-specific titles/descriptions and
+  public-only structured data, while missing product IDs return HTTP 404
+- Open Graph/Twitter output may describe the SwitchaBank comparison surface
+  but must not invent rates, rankings, recommendations, endorsements, or
+  private evidence
 
 ## 8.2 Admin Requirements
 

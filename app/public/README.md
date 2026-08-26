@@ -7,8 +7,7 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 
 ## Runtime Routes
 
-- `/` redirects to `/dashboard`.
-- `/dashboard` is the public Home view. Its first viewport pairs a short market
+- `/` is the canonical public Home view. Its first viewport pairs a short market
   thesis with a simple world map and the published product count for every
   currently collected country. Deposit, Credit Card, and Loan are equal direct
   next actions. The main content places Deposit Top 5
@@ -21,6 +20,8 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
   Home always reads the full selected-country snapshot: bank, Product Type,
   customer-tag, amount, fee, term, sort, page, and catalog-view query state
   from a Deposit, Credit Card, or Loan screen does not narrow Home.
+- `/dashboard` is a permanent compatibility redirect to `/`. Query parameters
+  are preserved, but all internal Home links and search metadata use the root.
 - `/products` is the Deposit catalog for review-approved `chequing`, `savings`,
   and `gic` products.
 - `/cards` is the Credit Card catalog for review-approved `credit-card`
@@ -191,6 +192,28 @@ Measurement's `Page changes based on browser history events` option disabled to
 avoid duplicates. Verify live changes with Google Tag Assistant and the GA4
 Realtime or DebugView report.
 
+## Search and Sharing
+
+The canonical production origin is `https://www.switchabank.com`. Root Home,
+catalog, Methodology, and public product detail pages emit absolute canonical
+URLs plus EN/KO/JA language alternates while retaining country-owned URL state.
+Catalog search, filter, sort, and view variants canonicalize to the clean
+country/locale catalog URL and use `noindex,follow` to avoid duplicate index
+surfaces.
+
+`https://www.switchabank.com/robots.txt` allows the anonymous site, excludes
+same-origin API paths, and points to
+`https://www.switchabank.com/sitemap.xml`. The sitemap includes clean static Public routes and
+available product detail URLs for each published country, with language
+alternates. Product details emit product-specific metadata and public-only
+`FinancialProduct`/breadcrumb structured data. A two-second product-detail
+proxy checks active-snapshot membership before streaming so missing products
+return HTTP 404; timeouts and broader API failures fall through to the honest
+noindex unavailable state. The code-native
+`https://www.switchabank.com/opengraph-image` supplies the shared Open
+Graph/Twitter preview without exposing private evidence or introducing
+financial claims.
+
 ## Verification
 
 Run from `app/public`:
@@ -235,7 +258,10 @@ pnpm dlx vercel@latest deploy --prod --yes
 pnpm dlx vercel@latest deploy --yes
 ```
 
-Verify the Production Home and the same-origin `/api/public/countries` route.
+Verify the Production root Home, the `/dashboard` permanent redirect,
+`https://www.switchabank.com/robots.txt`,
+`https://www.switchabank.com/sitemap.xml`, and the same-origin
+`/api/public/countries` route.
 Because `NEXT_PUBLIC_*` values are embedded at build time, adding or changing
 the GA4 ID requires a new Production deployment. Do not configure the
 placeholder value or reuse the Production stream in Preview unless the Product

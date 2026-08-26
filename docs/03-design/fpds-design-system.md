@@ -310,7 +310,7 @@ Typography direction:
 
 | Surface | Vendor Starting Point | FPDS-Owned Layer |
 |---|---|---|
-| `/dashboard` | public header and section rhythm | verified-record ledger, real snapshot thesis, coverage actions, rankings, composition, freshness |
+| `/` (legacy `/dashboard` redirects here) | public header and section rhythm | verified-record ledger, real snapshot thesis, coverage actions, rankings, composition, freshness |
 | `/products` | grid, toolbar, filter, and pagination patterns | Deposit identity, type-aware product records, shared scope, selection-led comparison |
 | `/cards` | shared catalog composition | credit-card identity, annual fee, purchase interest rate, selection-led comparison, review-approved public boundary |
 | `/loans` | shared catalog composition | lending scope, lending facts, Loan color cue, review-approved public boundary |

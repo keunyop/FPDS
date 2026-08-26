@@ -26,7 +26,7 @@ function HeaderContent() {
         <div className="flex min-w-0 items-center justify-between">
           <Link
             aria-label={`${copy.shell.brand} ${copy.nav.dashboard}`}
-            href={buildScopedPublicHrefFromSearchParams("/dashboard", searchParams)}
+            href={buildScopedPublicHrefFromSearchParams("/", searchParams)}
             className="flex min-h-11 min-w-0 items-center justify-start gap-1"
           >
             <PublicMark />

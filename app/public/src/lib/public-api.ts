@@ -224,6 +224,30 @@ type PublicApiEnvelope<T> = {
   data: T;
 };
 
+export class PublicApiError extends Error {
+  status: number;
+
+  constructor(path: string, status: number) {
+    super(`Failed to load public data from ${path} (${status}).`);
+    this.name = "PublicApiError";
+    this.status = status;
+  }
+}
+
+export function isPublicApiError(
+  error: unknown,
+  status?: number
+): error is PublicApiError {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const candidate = error as { name?: unknown; status?: unknown };
+  return candidate.name === "PublicApiError" &&
+    typeof candidate.status === "number" &&
+    (status === undefined || candidate.status === status);
+}
+
 const PUBLIC_DATA_FETCH_TIMEOUT_MS = 8000;
 const PUBLIC_DASHBOARD_REVALIDATE_SEC = 900;
 const PUBLIC_PRODUCTS_REVALIDATE_SEC = 300;
@@ -305,7 +329,7 @@ async function fetchPublicData<T>(path: string, searchParams: URLSearchParams | 
   }).finally(() => clearTimeout(timeout));
 
   if (!response.ok) {
-    throw new Error(`Failed to load public data from ${path}.`);
+    throw new PublicApiError(path, response.status);
   }
 
   const payload = (await response.json()) as PublicApiEnvelope<T>;

@@ -46,7 +46,7 @@ export function DashboardSurface({
   const productsHref = buildPublicHref("/products", { ...filters, page: 1 });
   const cardsHref = buildPublicHref("/cards", { ...filters, page: 1 });
   const loansHref = buildPublicHref("/loans", { ...filters, page: 1 });
-  const clearHref = buildPublicHref("/dashboard", {
+  const clearHref = buildPublicHref("/", {
     ...filters,
     bankCodes: [],
     productTypes: [],
@@ -68,7 +68,7 @@ export function DashboardSurface({
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             <Button asChild>
-              <Link href={buildPublicHref("/dashboard", filters)}>
+              <Link href={buildPublicHref("/", filters)}>
                 <RefreshCw className="size-4" aria-hidden="true" />
                 {copy.dashboard.retryDashboard}
               </Link>
@@ -319,29 +319,29 @@ function buildScopeChips(filters: DashboardPageFilters, summary: PublicDashboard
   for (const bankCode of filters.bankCodes) {
     chips.push({
       key: `bank-${bankCode}`,
-      href: buildPublicHref("/dashboard", { ...filters, bankCodes: filters.bankCodes.filter((value) => value !== bankCode), axisPreset: "" }),
+      href: buildPublicHref("/", { ...filters, bankCodes: filters.bankCodes.filter((value) => value !== bankCode), axisPreset: "" }),
       label: bankLabels.get(bankCode) ?? bankCode
     });
   }
   for (const productType of filters.productTypes) {
     chips.push({
       key: `type-${productType}`,
-      href: buildPublicHref("/dashboard", { ...filters, productTypes: filters.productTypes.filter((value) => value !== productType), axisPreset: "" }),
+      href: buildPublicHref("/", { ...filters, productTypes: filters.productTypes.filter((value) => value !== productType), axisPreset: "" }),
       label: productTypeLabels.get(productType) ?? productType
     });
   }
   for (const tag of filters.targetCustomerTags) {
     chips.push({
       key: `tag-${tag}`,
-      href: buildPublicHref("/dashboard", { ...filters, targetCustomerTags: filters.targetCustomerTags.filter((value) => value !== tag) }),
+      href: buildPublicHref("/", { ...filters, targetCustomerTags: filters.targetCustomerTags.filter((value) => value !== tag) }),
       label: formatBucketLabel(tag)
     });
   }
 
-  addBucketChip(chips, "fee", filters.feeBucket, buildPublicHref("/dashboard", { ...filters, feeBucket: "" }));
-  addBucketChip(chips, "balance", filters.minimumBalanceBucket, buildPublicHref("/dashboard", { ...filters, minimumBalanceBucket: "" }));
-  addBucketChip(chips, "deposit", filters.minimumDepositBucket, buildPublicHref("/dashboard", { ...filters, minimumDepositBucket: "" }));
-  addBucketChip(chips, "term", filters.termBucket, buildPublicHref("/dashboard", { ...filters, termBucket: "" }));
+  addBucketChip(chips, "fee", filters.feeBucket, buildPublicHref("/", { ...filters, feeBucket: "" }));
+  addBucketChip(chips, "balance", filters.minimumBalanceBucket, buildPublicHref("/", { ...filters, minimumBalanceBucket: "" }));
+  addBucketChip(chips, "deposit", filters.minimumDepositBucket, buildPublicHref("/", { ...filters, minimumDepositBucket: "" }));
+  addBucketChip(chips, "term", filters.termBucket, buildPublicHref("/", { ...filters, termBucket: "" }));
 
   return chips;
 }

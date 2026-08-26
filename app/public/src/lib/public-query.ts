@@ -25,7 +25,7 @@ export type DashboardPageFilters = PublicScopeFilters & {
   axisPreset: string;
 };
 
-export type PublicRoutePath = "/dashboard" | "/products" | "/cards" | "/loans" | "/methodology" | `/products/${string}`;
+export type PublicRoutePath = "/" | "/products" | "/cards" | "/loans" | "/methodology" | `/products/${string}`;
 
 export const DEPOSIT_PRODUCT_TYPES = ["chequing", "savings", "gic"] as const;
 export const LOAN_PRODUCT_TYPES = ["mortgage", "personal-loan", "line-of-credit"] as const;
@@ -175,7 +175,7 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
   if (state.countryCode !== DEFAULT_PUBLIC_COUNTRY_CODE) {
     params.set("country_code", state.countryCode);
   }
-  if (path !== "/dashboard") {
+  if (path !== "/") {
     if (state.searchQuery) {
       params.set("q", state.searchQuery);
     }
@@ -215,7 +215,7 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
     }
   }
 
-  if (path === "/dashboard" && state.axisPreset) {
+  if (path === "/" && state.axisPreset) {
     params.set("axis_preset", state.axisPreset);
   }
 

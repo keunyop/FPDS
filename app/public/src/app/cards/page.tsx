@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 
 import { ProductGridSurface } from "@/components/fpds/public/product-grid-surface";
-import { getPublicCatalogCopy, normalizePublicLocale } from "@/lib/public-locale";
+import { getPublicCatalogCopy } from "@/lib/public-locale";
 import { fetchPublicFilters, fetchPublicProducts } from "@/lib/public-api";
 import {
   buildProductsSearchParams,
   CARD_PRODUCT_TYPES,
   parseProductGridPageFilters
 } from "@/lib/public-query";
+import {
+  buildPublicPageMetadata,
+  hasNonCanonicalSearchParams
+} from "@/lib/public-seo";
 
 type CardCatalogPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -15,13 +19,17 @@ type CardCatalogPageProps = {
 
 export async function generateMetadata({ searchParams }: CardCatalogPageProps): Promise<Metadata> {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const locale = normalizePublicLocale(typeof resolvedSearchParams.locale === "string" ? resolvedSearchParams.locale : "");
-  const copy = getPublicCatalogCopy(locale, "card");
+  const filters = parseProductGridPageFilters(resolvedSearchParams, CARD_PRODUCT_TYPES);
+  const copy = getPublicCatalogCopy(filters.locale, "card");
 
-  return {
+  return buildPublicPageMetadata({
     title: copy.pageTitle,
-    description: copy.pageDescription
-  };
+    description: copy.pageDescription,
+    path: "/cards",
+    locale: filters.locale,
+    countryCode: filters.countryCode,
+    index: !hasNonCanonicalSearchParams(resolvedSearchParams)
+  });
 }
 
 export default async function CardCatalogPage({ searchParams }: CardCatalogPageProps) {

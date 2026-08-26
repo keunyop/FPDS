@@ -595,6 +595,25 @@ their responsive, country, catalog, data, or publication behavior:
 - the copy must not declare a winner, promise a better outcome, score
   suitability or eligibility, or submit an application
 
+### 10.26 Canonical Home and Search Discovery
+
+Product Owner direction on `2026-08-25` makes the production root the real
+Home rather than a streamed redirect shell:
+
+- `/` renders the existing Home composition directly and is the canonical
+  Home URL; `/dashboard` remains only as a permanent compatibility redirect
+- all shell, mobile, footer, Methodology, and Home-state links target `/`
+- locale and published-country variants use reciprocal canonical/hreflang
+  metadata; catalog filters, search, sort, and view state remain shareable but
+  do not create duplicate index surfaces
+- `robots.txt`, a public-product sitemap, product-specific detail metadata,
+  public-only structured data, and a code-native social preview establish the
+  search/share baseline
+- missing products return a real 404; API failure continues to render the
+  established honest unavailable state
+- no financial fact, product eligibility rule, ranking, recommendation,
+  evidence boundary, or publication gate changes
+
 ## 11. Follow-On Items
 
 | Area | Follow-Up |

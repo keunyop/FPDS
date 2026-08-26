@@ -84,7 +84,7 @@ Public surfaces should feel:
 
 Current public priority:
 - `/products`
-- `/dashboard`
+- `/` Home (with legacy `/dashboard` redirect)
 
 Public UI should emphasize:
 - filter clarity

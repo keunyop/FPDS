@@ -39,7 +39,7 @@ export function PublicMobileMenu() {
     icon: ComponentType<{ className?: string }>;
     label: string;
   }> = [
-    { href: "/dashboard", icon: House, label: copy.nav.dashboard },
+    { href: "/", icon: House, label: copy.nav.dashboard },
     { href: "/products", icon: Search, label: copy.nav.products },
     { href: "/cards", icon: CreditCard, label: copy.nav.card },
     { href: "/loans", icon: Landmark, label: copy.nav.loan }
@@ -64,7 +64,7 @@ export function PublicMobileMenu() {
       >
         <DropdownMenuLabel className="px-2 py-1.5">{copy.nav.primaryLabel}</DropdownMenuLabel>
         {navItems.map((item) => {
-          const active = pathname === item.href || (item.href === "/dashboard" && pathname === "/");
+          const active = pathname === item.href;
           const Icon = item.icon;
           return (
             <DropdownMenuItem asChild className="min-h-11 px-2.5" key={item.href}>

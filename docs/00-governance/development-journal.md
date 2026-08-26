@@ -2599,3 +2599,57 @@ Read before coding:
 - Boundaries: no Google Analytics property configuration, Preview environment,
   Google Ads feature, non-page-view event, Admin/API, database, financial data,
   collection, canonical state, or publication state changed.
+
+## 2026-08-25 - SwitchaBank Canonical Home and Public SEO
+
+- WBS: `5.48` (`Completed`).
+- Status: implementation and local production-runtime verification are
+  complete; no Vercel deployment, DNS change, or Search Console action was
+  performed in this slice.
+- Root cause:
+  - the live apex redirected to `https://www.switchabank.com/`, but the Next.js
+    root returned HTTP 200 with a streamed `NEXT_REDIRECT`/meta-refresh shell
+    targeting `/dashboard`
+  - because streaming had already started, a browser that did not finish the
+    client transition could remain on the empty root shell while direct
+    `/dashboard` navigation rendered normally
+  - the live `robots.txt` and `sitemap.xml` both returned 404 before this change
+- Outcome:
+  - `/` now renders the existing Home surface directly; `/dashboard` is a
+    permanent 308 compatibility redirect that preserves query parameters, and
+    all current internal Home links use `/`
+  - added absolute canonical, reciprocal EN/KO/JA plus `x-default`, Open Graph,
+    Twitter, robots, and localized page-title/description metadata; Home and
+    catalog display-state variants use clean canonicals and `noindex,follow`
+    where applicable
+  - added production/Preview-aware `robots.txt`, a published-country sitemap
+    with public product details, a web manifest, and a code-native 1200x630
+    social preview
+  - added public-only `WebSite`, `FinancialProduct`, and breadcrumb structured
+    data plus product/bank-specific detail metadata
+  - corrected the Public API's keyword-only 404 helper call and added a route
+    regression test; a two-second Next 16 product-detail proxy now checks only
+    active-snapshot membership before streaming so missing products return a
+    network-level 404 while API timeouts/failures retain the noindex unavailable
+    state
+  - aligned the Public README, route manifest, requirements, IA, design-system
+    references, metric definition, WBS, and active decision `D-065`
+- Verification:
+  - API `.venv\\Scripts\\python.exe -m unittest
+    tests.test_public_product_detail_route tests.test_public_products`: 13
+    tests passed
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build`: passed without warnings; generated `/`, legacy
+    `/dashboard`, `robots.txt`, `sitemap.xml`, `manifest.webmanifest`,
+    `opengraph-image`, and the product-detail Proxy
+  - local production HTTP checks against a scheduler-disabled API verified:
+    root 200 with no redirect token, `/dashboard?locale=ko` 308 to
+    `/?locale=ko`, canonical/hreflang/OG/WebSite metadata, robots 200, sitemap
+    200 with 190 URLs and product/language alternates, filtered catalog
+    `noindex,follow`, product-specific title/canonical/FinancialProduct data,
+    missing product 404/noindex, and PNG social preview 200
+  - route manifest JSON parse: passed
+  - `git diff --check`: passed before journal closeout
+- Boundaries: no visual layout, financial fact, product eligibility, ranking,
+  recommendation, raw evidence, database, collection, review, publication,
+  scheduler, Vercel environment, domain, or Production deployment changed.

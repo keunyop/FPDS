@@ -15,7 +15,7 @@ export function PublicNav() {
   const locale = normalizePublicLocale(searchParams.get("locale") ?? "");
   const copy = getPublicMessages(locale);
   const navItems: Array<{ href: PublicRoutePath; icon: ComponentType<{ className?: string }>; label: string }> = [
-    { href: "/dashboard", icon: House, label: copy.nav.dashboard },
+    { href: "/", icon: House, label: copy.nav.dashboard },
     { href: "/products", icon: Search, label: copy.nav.products },
     { href: "/cards", icon: CreditCard, label: copy.nav.card },
     { href: "/loans", icon: Landmark, label: copy.nav.loan }
@@ -24,7 +24,7 @@ export function PublicNav() {
   return (
     <nav className="flex max-w-full items-center gap-0.5 text-sm" aria-label={copy.nav.primaryLabel}>
       {navItems.map((item) => {
-        const active = item.href ? pathname === item.href || (item.href === "/dashboard" && pathname === "/") : false;
+        const active = pathname === item.href;
         const Icon = item.icon;
 
         const href = buildScopedPublicHrefFromSearchParams(item.href, searchParams);

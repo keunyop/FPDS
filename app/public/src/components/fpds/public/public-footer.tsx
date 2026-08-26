@@ -26,7 +26,7 @@ function FooterContent() {
   const locale = normalizePublicLocale(searchParams.get("locale") ?? "");
   const copy = getPublicMessages(locale);
   const footerCopy = FOOTER_COPY[locale];
-  const dashboardHref = buildScopedPublicHrefFromSearchParams("/dashboard", searchParams);
+  const dashboardHref = buildScopedPublicHrefFromSearchParams("/", searchParams);
   const productsHref = buildScopedPublicHrefFromSearchParams("/products", searchParams);
   const cardsHref = buildScopedPublicHrefFromSearchParams("/cards", searchParams);
   const loansHref = buildScopedPublicHrefFromSearchParams("/loans", searchParams);

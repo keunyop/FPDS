@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { DashboardSurface } from "@/components/fpds/public/dashboard-surface";
-import { getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
+import { getPublicMessages } from "@/lib/public-locale";
 import {
   fetchPublicCountries,
   fetchPublicDashboardScatter,
@@ -15,6 +15,10 @@ import {
   parseDashboardPageFilters,
   type DashboardPageFilters
 } from "@/lib/public-query";
+import {
+  buildPublicPageMetadata,
+  hasNonCanonicalSearchParams
+} from "@/lib/public-seo";
 
 type DashboardPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -22,13 +26,17 @@ type DashboardPageProps = {
 
 export async function generateMetadata({ searchParams }: DashboardPageProps): Promise<Metadata> {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const locale = normalizePublicLocale(typeof resolvedSearchParams.locale === "string" ? resolvedSearchParams.locale : "");
-  const copy = getPublicMessages(locale);
+  const filters = parseDashboardPageFilters(resolvedSearchParams);
+  const copy = getPublicMessages(filters.locale);
 
-  return {
-    title: copy.dashboard.pageTitle,
-    description: copy.dashboard.pageDescription
-  };
+  return buildPublicPageMetadata({
+    title: copy.dashboard.pageTitle + " — SwitchaBank",
+    description: copy.dashboard.pageDescription,
+    path: "/",
+    locale: filters.locale,
+    countryCode: filters.countryCode,
+    index: !hasNonCanonicalSearchParams(resolvedSearchParams)
+  });
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {

@@ -1215,10 +1215,10 @@ async def public_product_detail(
         payload = load_public_product_detail(connection, product_id=product_id, filters=filters)
     if payload is None:
         return _error(
-            404,
-            "not_found",
-            "Public product was not found in the latest active snapshot.",
-            request,
+            status_code=404,
+            code="not_found",
+            message="Public product was not found in the latest active snapshot.",
+            request=request,
         )
     return _success(payload, request, meta_extra={"locale": filters.locale, "product_id": product_id})
 
