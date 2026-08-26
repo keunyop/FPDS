@@ -56,7 +56,7 @@
     {
       "route": "/sitemap.xml",
       "route_id": "public.seo.sitemap",
-      "implementation_path": "src/app/sitemap.ts",
+      "implementation_path": "src/app/sitemap.xml/route.ts",
       "resource_key": "public_seo.sitemap"
     },
     {

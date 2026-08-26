@@ -1,5 +1,3 @@
-import type { MetadataRoute } from "next";
-
 import {
   fetchPublicCountries,
   fetchPublicProducts,
@@ -11,11 +9,20 @@ import {
   type PublicSeoPath
 } from "@/lib/public-seo";
 
+export const dynamic = "force-static";
 export const revalidate = 3600;
+
+type SitemapEntry = {
+  url: string;
+  lastModified?: string;
+  changeFrequency: "daily" | "weekly" | "monthly";
+  priority: number;
+  alternates: Record<string, string>;
+};
 
 const STATIC_ROUTES: Array<{
   path: PublicSeoPath;
-  changeFrequency: "daily" | "weekly" | "monthly";
+  changeFrequency: SitemapEntry["changeFrequency"];
   priority: number;
 }> = [
   { path: "/", changeFrequency: "daily", priority: 1 },
@@ -28,16 +35,24 @@ const STATIC_ROUTES: Array<{
 const SITEMAP_PAGE_SIZE = 100;
 const SITEMAP_PAGE_LIMIT = 50;
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export async function GET() {
+  const entries = await buildSitemapEntries();
+
+  return new Response(serializeSitemap(entries), {
+    headers: {
+      "Content-Type": "application/xml; charset=utf-8"
+    }
+  });
+}
+
+async function buildSitemapEntries(): Promise<SitemapEntry[]> {
   const countries = await loadPublishedCountryCodes();
   const staticEntries = countries.flatMap((countryCode) =>
     STATIC_ROUTES.map(({ path, changeFrequency, priority }) => ({
       url: buildPublicSeoUrl(path, "en", countryCode),
       changeFrequency,
       priority,
-      alternates: {
-        languages: buildPublicLanguageAlternates(path, countryCode)
-      }
+      alternates: buildPublicLanguageAlternates(path, countryCode)
     }))
   );
   const productResults = await Promise.allSettled(
@@ -87,9 +102,7 @@ async function loadCountryProducts(countryCode: string) {
   return products;
 }
 
-function productSitemapEntry(
-  product: PublicProduct
-): MetadataRoute.Sitemap[number] {
+function productSitemapEntry(product: PublicProduct): SitemapEntry {
   const path = (
     "/products/" + encodeURIComponent(product.product_id)
   ) as PublicSeoPath;
@@ -102,10 +115,44 @@ function productSitemapEntry(
     lastModified,
     changeFrequency: "weekly",
     priority: 0.7,
-    alternates: {
-      languages: buildPublicLanguageAlternates(path, product.country_code)
-    }
+    alternates: buildPublicLanguageAlternates(path, product.country_code)
   };
+}
+
+export function serializeSitemap(entries: SitemapEntry[]) {
+  const lines = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
+  ];
+
+  for (const entry of entries) {
+    lines.push("<url>", `<loc>${escapeXml(entry.url)}</loc>`);
+    for (const [language, href] of Object.entries(entry.alternates)) {
+      lines.push(
+        `<xhtml:link rel="alternate" hreflang="${escapeXml(language)}" href="${escapeXml(href)}" />`
+      );
+    }
+    if (entry.lastModified) {
+      lines.push(`<lastmod>${escapeXml(entry.lastModified)}</lastmod>`);
+    }
+    lines.push(
+      `<changefreq>${entry.changeFrequency}</changefreq>`,
+      `<priority>${entry.priority}</priority>`,
+      "</url>"
+    );
+  }
+
+  lines.push("</urlset>", "");
+  return lines.join("\n");
+}
+
+function escapeXml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 function normalizeLastModified(value: string | null) {
@@ -117,6 +164,6 @@ function normalizeLastModified(value: string | null) {
   return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
 }
 
-function deduplicateEntries(entries: MetadataRoute.Sitemap) {
+function deduplicateEntries(entries: SitemapEntry[]) {
   return [...new Map(entries.map((entry) => [entry.url, entry])).values()];
 }

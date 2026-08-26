@@ -203,9 +203,10 @@ surfaces.
 
 `https://www.switchabank.com/robots.txt` allows the anonymous site, excludes
 same-origin API paths, and points to
-`https://www.switchabank.com/sitemap.xml`. The sitemap includes clean static Public routes and
-available product detail URLs for each published country, with language
-alternates. Product details emit product-specific metadata and public-only
+`https://www.switchabank.com/sitemap.xml`. The explicitly XML-escaped sitemap
+includes clean static Public routes and available product detail URLs for each
+published country, with language alternates. Product details emit
+product-specific metadata and public-only
 `FinancialProduct`/breadcrumb structured data. A two-second product-detail
 proxy checks active-snapshot membership before streaming so missing products
 return HTTP 404; timeouts and broader API failures fall through to the honest

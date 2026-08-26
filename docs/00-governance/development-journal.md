@@ -2653,3 +2653,36 @@ Read before coding:
 - Boundaries: no visual layout, financial fact, product eligibility, ranking,
   recommendation, raw evidence, database, collection, review, publication,
   scheduler, Vercel environment, domain, or Production deployment changed.
+
+## 2026-08-25 - SwitchaBank Sitemap XML Escaping Correction
+
+- WBS: `5.48` follow-up correction.
+- Status: implementation and local XML-parser verification are complete; the
+  fix is not yet deployed to Production.
+- Root cause:
+  - the Production sitemap returned HTTP 200 but failed XML parsing at the
+    first KO/JA US alternate containing two query parameters
+  - Next.js 16.2.3's generated metadata route inserted alternate `href` values
+    directly into XML, leaving `&` unescaped instead of emitting `&amp;`
+  - the original `5.48` smoke check verified status, URL count, and alternate
+    presence but did not parse the response as XML
+- Outcome:
+  - replaced `src/app/sitemap.ts` with an explicit
+    `src/app/sitemap.xml/route.ts` response while retaining the same static,
+    country, public-product, locale, freshness, pagination, and deduplication
+    rules
+  - escape XML text and attribute characters before serializing location,
+    hreflang, alternate URL, and last-modified values
+  - aligned the Public route manifest and README with the explicit XML route
+- Verification:
+  - Public `pnpm run typecheck`: passed
+  - Public `pnpm run build` against the scheduler-disabled local API: passed
+  - local `/sitemap.xml`: HTTP 200 with
+    `application/xml; charset=utf-8`
+  - .NET XML DOM parse: passed for 190 URLs and 760 alternates
+  - the failing KO/US value is serialized with `&amp;country_code=US`, no raw
+    query-string ampersand remains, and the parsed `href` resolves to the
+    intended URL
+- Boundary: no canonical URL, country, product, financial data, publication,
+  scheduler, Vercel environment, domain, Search Console, or Production state
+  changed.
