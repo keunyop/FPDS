@@ -299,8 +299,9 @@ for comparison/detail presentation and source-language condition disclosure.
 | `minimum_deposit_buckets[]` | `{ code, label, count }` |
 | `term_buckets[]` | `{ code, label, count }` |
 
-The response also includes `countries[]` with stable `code` and active product
-`count` values from each country's latest completed public snapshot.
+The response also includes `countries[]` with stable `code`, active product
+`count`, and distinct active `bank_count` values from each country's latest
+completed public snapshot.
 
 ### 4.5A `GET /api/public/countries`
 
@@ -315,6 +316,7 @@ Response `data.countries[]`:
 |---|---|
 | `code` | uppercase ISO 3166-1 alpha-2 code |
 | `count` | active public product count in the latest completed snapshot |
+| `bank_count` | distinct active `bank_code` count in that same snapshot |
 
 Localized country names are presentation data generated from the stable ISO
 code at the Public UI boundary. FPDS does not maintain duplicate translated

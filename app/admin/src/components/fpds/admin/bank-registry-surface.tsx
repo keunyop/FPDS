@@ -12,6 +12,7 @@ import { BankAiOnboardingDialogContent } from "@/components/fpds/admin/bank-ai-o
 import { BankCreateDialogContent } from "@/components/fpds/admin/bank-create-dialog-content";
 import { BankDetailDialogContent } from "@/components/fpds/admin/bank-detail-dialog-content";
 import { BankLogoMark } from "@/components/fpds/admin/bank-logo-mark";
+import { Switch } from "@/components/ui/switch";
 import type {
   BankDetailResponse,
   BankAiOnboardingResponse,
@@ -62,8 +63,9 @@ const BANK_COPY = {
     bankList: "Bank list",
     collecting: "Collecting...",
     collectSelected: (count: number) => `Collect selected${count > 0 ? ` (${count})` : ""}`,
-    rediscoverCompleted: "Rediscover completed",
-    firstTimePrecision: "First-time items: precision required",
+    collectionMode: "Collection mode for completed items",
+    normalCollect: "Normal collect",
+    detailedCollect: "Detailed collect",
     selectAllBanks: "Select all visible banks",
     bank: "Bank",
     code: "Code",
@@ -99,8 +101,9 @@ const BANK_COPY = {
     bankList: "은행 목록",
     collecting: "수집 중...",
     collectSelected: (count: number) => `선택 항목 수집${count > 0 ? ` (${count})` : ""}`,
-    rediscoverCompleted: "완료 항목 정밀 재탐색",
-    firstTimePrecision: "최초 항목: 정밀 탐색 필수",
+    collectionMode: "완료 항목 수집 방식",
+    normalCollect: "일반 collect",
+    detailedCollect: "상세 collect",
     selectAllBanks: "표시된 은행 모두 선택",
     bank: "은행",
     code: "코드",
@@ -136,8 +139,9 @@ const BANK_COPY = {
     bankList: "銀行一覧",
     collecting: "収集中...",
     collectSelected: (count: number) => `選択項目を収集${count > 0 ? ` (${count})` : ""}`,
-    rediscoverCompleted: "完了項目を精密再探索",
-    firstTimePrecision: "初回項目：精密探索必須",
+    collectionMode: "完了項目の収集モード",
+    normalCollect: "通常 collect",
+    detailedCollect: "詳細 collect",
     selectAllBanks: "表示中の銀行をすべて選択",
     bank: "銀行",
     code: "コード",
@@ -179,22 +183,22 @@ export function BankRegistrySurface({
   const productTypeLabelMap = useMemo(() => buildAdminProductTypeLabelMap(productTypes), [productTypes]);
   const [selectedBankCodes, setSelectedBankCodes] = useState<string[]>([]);
   const [bulkPending, setBulkPending] = useState(false);
-  const [bulkPrecisionRediscovery, setBulkPrecisionRediscovery] = useState(false);
+  const [bulkDetailedCollection, setBulkDetailedCollection] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const selectedCatalogItems = useMemo(
     () =>
       banks.items
         .filter((item) => selectedBankCodes.includes(item.bank_code))
-        .flatMap((item) => item.catalog_items),
+        .flatMap((item) =>
+          item.catalog_items.filter((catalogItem) => catalogItem.status === "active"),
+        ),
     [banks.items, selectedBankCodes],
   );
   const selectedCoverageCount = selectedCatalogItems.length;
   const selectedCompletedCoverageCount = selectedCatalogItems.filter(
     (item) => item.has_completed_collection,
   ).length;
-  const selectedFirstTimeCoverageCount =
-    selectedCoverageCount - selectedCompletedCoverageCount;
   const allVisibleSelected = banks.items.length > 0 && banks.items.every((item) => selectedBankCodes.includes(item.bank_code));
   const detailModalOpen = bankDialogOpen && Boolean(bankDialogDetail);
   useEffect(() => {
@@ -212,7 +216,7 @@ export function BankRegistrySurface({
 
   useEffect(() => {
     if (selectedCompletedCoverageCount === 0) {
-      setBulkPrecisionRediscovery(false);
+      setBulkDetailedCollection(false);
     }
   }, [selectedCompletedCoverageCount]);
 
@@ -359,7 +363,7 @@ export function BankRegistrySurface({
         },
         body: JSON.stringify({
           catalog_item_ids: catalogItemIds,
-          precision_rediscovery: bulkPrecisionRediscovery,
+          precision_rediscovery: bulkDetailedCollection,
         }),
       });
       const payload = (await response.json()) as {
@@ -379,7 +383,7 @@ export function BankRegistrySurface({
         }),
       );
       setSelectedBankCodes([]);
-      setBulkPrecisionRediscovery(false);
+      setBulkDetailedCollection(false);
       router.refresh();
     } catch {
       setError(copy.collectApiFailed);
@@ -390,7 +394,7 @@ export function BankRegistrySurface({
   }
 
   return (
-    <section aria-busy={bulkPending} className="grid gap-5">
+    <section aria-busy={bulkPending} className="grid min-w-0 gap-5">
       <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
@@ -417,7 +421,7 @@ export function BankRegistrySurface({
         </form>
       </article>
 
-      <article className="border border-border bg-card">
+      <article className="min-w-0 border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-foreground">
@@ -434,21 +438,25 @@ export function BankRegistrySurface({
             <button className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" onClick={openAddModal} type="button">
               {copy.addBank}
             </button>
-            {selectedFirstTimeCoverageCount > 0 ? (
-              <span className="inline-flex h-10 items-center whitespace-nowrap rounded-md bg-primary/10 px-3 text-xs font-medium text-primary">
-                {copy.firstTimePrecision}
-              </span>
-            ) : null}
             {selectedCompletedCoverageCount > 0 ? (
-              <label className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border border-border bg-background px-3 text-sm text-foreground">
-                <input
-                  checked={bulkPrecisionRediscovery}
-                  className="size-4 accent-primary"
-                  onChange={(event) => setBulkPrecisionRediscovery(event.target.checked)}
-                  type="checkbox"
+              <div
+                aria-label={copy.collectionMode}
+                className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border border-border bg-background px-3 text-xs font-medium"
+                role="group"
+              >
+                <span className={bulkDetailedCollection ? "text-muted-foreground" : "text-foreground"}>
+                  {copy.normalCollect}
+                </span>
+                <Switch
+                  aria-label={copy.collectionMode}
+                  checked={bulkDetailedCollection}
+                  disabled={bulkPending}
+                  onCheckedChange={setBulkDetailedCollection}
                 />
-                <span>{copy.rediscoverCompleted}</span>
-              </label>
+                <span className={bulkDetailedCollection ? "text-foreground" : "text-muted-foreground"}>
+                  {copy.detailedCollect}
+                </span>
+              </div>
             ) : null}
             <button
                className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"

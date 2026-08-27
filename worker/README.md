@@ -34,10 +34,15 @@ Runtime invariants:
   public AEM content-tree aliases are converted to their canonical public path;
   the recovered URL still passes the ordinary official-domain, locale,
   Product-Type, page-evidence, and action-flow boundaries.
-- validation treats both deterministic `multi_product_family_overview` and AI
-  `hub_page_not_detail` discovery evidence as an ambiguous product boundary;
-  either condition routes a candidate to Review rather than auto-validating a
-  family page as one product
+- validation treats deterministic `multi_product_family_overview`, AI
+  `hub_page_not_detail`, and bounded
+  `verified_coverage_review_source` discovery evidence as ambiguous product
+  boundaries; each routes a candidate to Review rather than auto-validating a
+  family or review-only coverage page as one product. Historical
+  `verified_coverage_lending_review_source` evidence remains equivalent.
+- an HTTP 403 from an already SSRF-validated, allowlisted official HTML source
+  receives one bounded headless-browser snapshot attempt regardless of bank;
+  other transient browser fallback remains restricted to configured domains
 - market defaults are country-owned (`CA -> CAD`, `US -> USD`); an unknown
   country remains explicit instead of silently inheriting CAD
 - savings subtype inference compares the candidate currency with that country

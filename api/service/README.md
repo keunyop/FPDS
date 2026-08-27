@@ -119,6 +119,10 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0036_us_pricing_evidence_companions
 psql $env:FPDS_DATABASE_URL -f db/migrations/0037_us_pricing_companion_scope_cleanup.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0038_us_cross_product_support_cleanup.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0039_us_credit_card_apr_range_contract.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0040_bounded_operational_storage.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_routes.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_hardening.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
 ```
 
 Create the first operator account:
@@ -228,6 +232,9 @@ cd api/service
 - Public reads are country-scoped by bank-owned ISO alpha-2 codes.
   `/api/public/countries` and `countries[]` in `/api/public/filters` expose only
   countries with active products in their latest completed public snapshot.
+  Each country entry returns `code`, active product `count`, and
+  `bank_count`, the distinct active `bank_code` count from that same
+  snapshot.
 - Admin login requires an enabled `country_code`. The selected country is
   persisted on `admin_auth_session`, returned by the session endpoint, and is
   the server authority for country-owned Admin reads and writes.
@@ -340,6 +347,9 @@ cd api/service
   `true` repeats precision materialization; a missing active detail forces a
   precision fallback. The API queues this work on a background runner before
   deeper worker stages continue.
+- Collection launch accepts only active source-catalog items. Inactive coverage
+  is excluded by the Banks client and rejected again by the API so an old or
+  crafted request cannot restart deliberately disabled collection scope.
 - Precision discovery reuses the verified homepage and coverage route plus
   eligible active official registry entry/detail rows. It inspects no more
   than 12 existing detail pages for newly linked sibling products and evidence
@@ -375,6 +385,21 @@ cd api/service
   relaxed location-gate evidence threshold only with high AI support,
   structured product copy, title identity, and no hard product/service veto;
   ordinary homepage links retain the stricter threshold.
+- A verified coverage route for any Product Type may cross an otherwise
+  insufficient page-score or family-overview boundary only when deterministic
+  product semantics, pricing/feature evidence, and AI relevance all satisfy
+  the bounded contract with no hard veto. The route is marked
+  `verified_coverage_review_source`, remains ineligible for auto-promotion,
+  and must go through Review rather than being treated as a confidently
+  singular detail page. Historical
+  `verified_coverage_lending_review_source` metadata remains fail-closed.
+- When accessible discovery decisively produces no candidate-making detail
+  source, the run remains truthfully Partial and the exact catalog/source
+  scope is reversibly inactivated with
+  `structural_zero_detail_collection_result`. Manual and scheduled launch
+  queries reject that quarantined scope until an official coverage route or
+  active detail source is explicitly restored. Timeout, 408/425/429/5xx,
+  connection, and DNS evidence does not trip this structural circuit breaker.
 - US discovery keeps the canonical `chequing` and `gic` codes but uses
   country-local `checking` and certificate-of-deposit/CD vocabulary. Product
   links and evidence embedded in bounded JSON-valued `data-*` component
@@ -392,6 +417,11 @@ cd api/service
   the run source language are excluded before snapshot collection. A source
   that becomes unavailable only after discovery remains an explicit isolated
   partial-source failure.
+- Before precision materialization, the latest persisted attempt for each
+  supporting HTML/PDF/linked-PDF source is checked. A supporting source whose
+  latest attempt ended in terminal HTTP 404 is inactivated with reason
+  `terminal_404_supporting_source` and excluded from the next source plan;
+  primary detail failures remain visible and fail closed.
 - Source catalog collect now creates `ingestion_run` rows immediately and returns a fast queued response so `/admin/banks` and compatibility source-catalog actions no longer wait on homepage discovery or candidate-page validation before responding.
 - Precision collection preserves the existing active detail scope when no
   replacement detail rows are found. Standard collection deliberately reuses
@@ -416,6 +446,15 @@ cd api/service
 - Homepage, coverage-quote, and existing-detail companion discovery load browser settings from the selected environment while replacing the general fetch allowlist with the exact current bank domains. This preserves the Admin collection boundary instead of widening a single-bank collection to all configured source domains.
 - Product-supporting source discovery excludes annual/climate disclosure reports. These corporate reports are not exact-product pricing or terms evidence and cannot create recurring partial runs when an old report URL is retired.
 - Vancity's seven active Product Type catalog rows are pinned by migration `0041` to their audited official family hubs. The committed Vancity registries seed exact product-detail routes plus the separate account, GIC, mortgage, and consumer-lending rate pages; strongly verified Vancity GIC seed details ignore only the false family signal created by their cross-sell footer, while genuine multi-option pages such as LOC stay boundary-marked until evidence-grounded variant expansion. Case-only generated aliases are retired after the canonical route is revalidated.
+- Bridgewater, EQ Bank, and Fairstone no longer inherit all seven Product Types
+  merely because migration `0020` registered the bank. Migration `0042`
+  pins ten directly collectable official routes and makes eleven known
+  zero-detail or misclassified scopes inactive, including EQ's prepaid Card
+  under Credit Card and Fairstone group-only products without an attributable
+  consumer detail route. Existing source/run history remains available, while
+  inactive catalog rows and older sources cannot launch collection. EQ's
+  exact `Personal Account` name is recognized as a bank-specific chequing
+  discovery alias without changing the global chequing identity boundary.
 - Homepage-first discovery now uses bounded hybrid scoring over the candidate set instead of AI-only fallback after heuristic failure: deterministic candidate generation still happens first, but the API layer now runs AI parallel candidate scoring when configured, uses stronger product-type-description terms in heuristic scoring, validates tentative detail pages with page-level evidence scoring, and persists generated-source `discovery_metadata` for explainability.
 - Homepage scoring keeps the first `h1` as the primary product identity and stores later headings separately. Generic pages with multiple product variants carry `multi_product_family_overview`, refinance/renewal advice or servicing flows cannot become product details, and lending support links under unrelated account paths are dropped before evidence merging.
 - Page scoring uses the normalized official URL path as bounded identity

@@ -93,6 +93,16 @@ Files:
 - `migrations/0041_vancity_official_product_routes.sql`: pins Vancity's seven
   active retail Product Types to the audited official account, card, GIC,
   mortgage, and consumer-lending hubs before exact-product seed expansion
+- `migrations/0042_three_bank_partial_run_scope_hardening.sql`: replaces the
+  blanket Bridgewater/EQ/Fairstone Product Type baseline with ten verified
+  official retail routes, inactivates eleven known non-collectable catalog
+  scopes and any older active sources under them, and retains all run/source
+  history
+- `migrations/0043_generic_zero_detail_scope_quarantine.sql`: pins twelve
+  verified FNBC/Haventree/HomeEquity routes, inactivates nine exact unsupported
+  named-bank scopes, and generically quarantines any remaining migration-0020
+  blanket row with no coverage route, active detail source, or successful
+  non-empty collection; historical rows remain and reactivation is evidence-led
 
 How to apply when a database is available:
 
@@ -133,6 +143,8 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0038_us_cross_product_support_clean
 psql $env:FPDS_DATABASE_URL -f db/migrations/0039_us_credit_card_apr_range_contract.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0040_bounded_operational_storage.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_routes.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_hardening.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
 ```
 
 Notes:
@@ -141,7 +153,7 @@ Notes:
 - Prefer additive migrations, but use a reviewed destructive migration when a
   Product Owner storage decision explicitly removes nonessential telemetry.
 - Put extension-specific or vendor-specific migrations in later numbered files.
-- Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` only. `product_type_registry` is schema-only until later additive migrations; `0019_canada_lending_product_types.sql` registers the approved lending baseline, `0020_canada_recognized_banks_full_coverage.sql` expands the Canadian bank/logo baseline and source-catalog coverage, `0021_vancity_credit_union_full_coverage.sql` adds Vancity to that coverage set, and `0022_bank_logo_asset_refresh.sql` upgrades eligible favicon defaults to verified official logo assets. Future product types should still be registered through admin/operator DB writes or explicit approved migrations.
+- Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` only. `product_type_registry` is schema-only until later additive migrations; `0019_canada_lending_product_types.sql` registers the approved lending baseline, `0020_canada_recognized_banks_full_coverage.sql` expands the Canadian bank/logo baseline and source-catalog coverage, `0021_vancity_credit_union_full_coverage.sql` adds Vancity to that coverage set, and `0022_bank_logo_asset_refresh.sql` upgrades eligible favicon defaults to verified official logo assets. Migration `0043` then makes a fresh replay fail closed by inactivating blanket coverage that still lacks route, detail-source, or non-empty-run evidence. Future product types should still be registered through admin/operator DB writes or explicit approved migrations.
 - `country_registry` is the operational allowlist for Admin login. Adding a new
   country is an explicit enablement step and does not by itself authorize
   collection or release for that market.
@@ -180,3 +192,8 @@ Notes:
   audit/usage writes are discarded, evidence retrieval is metadata-only,
   Public dashboard datasets derive from the latest projection, and the API
   scheduler applies `fpds_apply_data_retention()` before each automation cycle.
+- Apply `0042` after `0020` and `0031`. It makes the recognized-bank
+  cross-product seed a bootstrap mechanism rather than current-offering
+  evidence for Bridgewater, EQ Bank, and Fairstone. Inactive rows and their
+  historical sources are retained but cannot enter manual or scheduled
+  collection until an operator supplies new attributable official evidence.

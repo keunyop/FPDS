@@ -468,6 +468,45 @@ class FetchPolicyTests(unittest.TestCase):
         self.assertEqual(response.headers["x-fpds-fetch-method"], "browser_pdf_fallback")
         self.assertTrue(response.body.startswith(b"%PDF-1.4"))
 
+    def test_fetch_response_uses_browser_fallback_for_403_on_any_allowlisted_official_domain(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=(),
+        )
+
+        class _FakeOpener:
+            def open(self, request, timeout):
+                del timeout
+                raise urllib.error.HTTPError(request.full_url, 403, "Forbidden", None, None)
+
+        rendered = FetchedResponse(
+            body=b"%PDF-1.4 allowlisted 403 fallback",
+            final_url="https://www.examplebank.ca/products/gic",
+            content_type="application/pdf",
+            status_code=200,
+            headers={"x-fpds-fetch-method": "browser_pdf_fallback"},
+            fetched_at="2026-08-26T00:00:00+00:00",
+            redirect_count=0,
+        )
+        with (
+            patch(
+                "worker.discovery.fpds_discovery.fetch.urllib.request.build_opener",
+                return_value=_FakeOpener(),
+            ),
+            patch(
+                "worker.discovery.fpds_discovery.fetch._fetch_response_via_browser",
+                return_value=rendered,
+            ) as browser,
+        ):
+            response = fetch_response(
+                "https://www.examplebank.ca/products/gic",
+                policy,
+            )
+
+        self.assertEqual(response, rendered)
+        browser.assert_called_once()
+
     def test_fetch_text_rejects_non_html_fallback_payloads(self) -> None:
         policy = DiscoveryFetchPolicy(allowed_domains=("bmo.com",), block_private_networks=False)
         with patch(

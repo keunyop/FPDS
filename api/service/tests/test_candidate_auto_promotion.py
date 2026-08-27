@@ -423,6 +423,11 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         }
 
         self.assertFalse(_has_ambiguous_product_boundary(candidate))
+        candidate["source_metadata"]["discovery_metadata"]["selection_reason_codes"] = [
+            "verified_coverage_review_source"
+        ]
+        self.assertTrue(_has_ambiguous_product_boundary(candidate))
+        candidate["source_metadata"]["discovery_metadata"]["selection_reason_codes"] = []
         candidate["field_mapping_metadata"]["credit_limit_text"]["evidence_chunk_id"] = (
             "chunk-other"
         )
@@ -435,6 +440,24 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         }
         connection = _Connection(
             [_policy_rows(), [candidate], None, {"review_task_id": "review-boundary"}, None]
+        )
+
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertEqual(result["skipped_items"][0]["skip_reason"], "ambiguous_product_boundary")
+        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+        self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
+
+    def test_verified_coverage_source_is_queued_before_canonical_promotion(self) -> None:
+        candidate = _candidate_row()
+        candidate["source_metadata"] = {
+            "discovery_metadata": {
+                "selection_reason_codes": ["verified_coverage_review_source"]
+            }
+        }
+        connection = _Connection(
+            [_policy_rows(), [candidate], None, {"review_task_id": "review-coverage"}, None]
         )
 
         result = promote_auto_validated_candidates(connection, run_id="run-001")

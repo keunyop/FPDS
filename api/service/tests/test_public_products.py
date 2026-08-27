@@ -95,15 +95,22 @@ class PublicProductsTests(unittest.TestCase):
             latest_attempt=None,
             rows=[],
             countries=[
-                {"code": "ca", "count": 14},
-                {"code": "US", "count": 8},
+                {"code": "ca", "count": 14, "bank_count": 5},
+                {"code": "US", "count": 8, "bank_count": 3},
             ],
         )
 
         countries = load_available_public_countries(connection)
 
-        self.assertEqual(countries, [{"code": "CA", "count": 14}, {"code": "US", "count": 8}])
+        self.assertEqual(
+            countries,
+            [
+                {"code": "CA", "count": 14, "bank_count": 5},
+                {"code": "US", "count": 8, "bank_count": 3},
+            ],
+        )
         self.assertIn("DISTINCT ON (country_code)", connection.calls[0][0])
+        self.assertIn("COUNT(DISTINCT projection.bank_code)", connection.calls[0][0])
         self.assertIn("projection.status = 'active'", connection.calls[0][0])
 
     def test_load_public_products_sorts_and_paginates_snapshot_rows(self) -> None:

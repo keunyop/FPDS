@@ -15,6 +15,7 @@ from api_service.source_catalog import (
     _has_unrelated_product_type_signal,
     _materialize_sources_for_catalog_item,
     _product_type_scope_codes,
+    _record_catalog_audit_event,
     _url_country_scope_conflicts,
     _url_locale_conflicts_source_language,
     repair_catalog_coverage_route,
@@ -86,6 +87,125 @@ def _mark_run_failure_best_effort(
             f"[source-catalog-runner] could not persist failure for {run_id}: {persistence_error}",
             flush=True,
         )
+
+
+def _no_detail_result_is_structural(discovery_notes: list[str]) -> bool:
+    normalized = " ".join(str(note).strip().lower() for note in discovery_notes if str(note).strip())
+    transient_markers = (
+        "timed out",
+        "timeout",
+        "fetch was unavailable",
+        "page evidence was unavailable",
+        "could not resolve",
+        "connection reset",
+        "temporary",
+        "http 408",
+        "http 425",
+        "http 429",
+        "http 500",
+        "http 502",
+        "http 503",
+        "http 504",
+    )
+    if any(marker in normalized for marker in transient_markers):
+        return False
+    return any(
+        marker in normalized
+        for marker in (
+            "detail rejection summary",
+            "candidate validation did not promote",
+            "no candidate-producing detail sources",
+            "no detail sources",
+        )
+    )
+
+
+def _quarantine_catalog_scope_after_no_detail(
+    connection: Any,
+    *,
+    plan: dict[str, Any],
+    group: dict[str, Any],
+    discovery_notes: list[str],
+) -> dict[str, Any]:
+    quarantined_at = datetime.now(UTC)
+    run_id = str(group["run_id"])
+    quarantine_metadata = {
+        "status": "quarantined",
+        "reason": "structural_zero_detail_collection_result",
+        "run_id": run_id,
+        "quarantined_at": quarantined_at.isoformat(),
+        "not_currently_offered_asserted": False,
+        "reactivation_requirement": "verified_coverage_route_or_active_detail_source",
+    }
+    connection.execute(
+        """
+        UPDATE source_registry_catalog_item
+        SET
+            status = 'inactive',
+            coverage_source_metadata = COALESCE(coverage_source_metadata, '{}'::jsonb)
+                || %(quarantine_metadata)s::jsonb,
+            change_reason = 'structural_zero_detail_scope_quarantined:' || %(run_id)s,
+            updated_at = %(updated_at)s
+        WHERE catalog_item_id = %(catalog_item_id)s
+          AND bank_code = %(bank_code)s
+          AND country_code = %(country_code)s
+          AND product_type = ANY(%(product_type_scope)s)
+          AND status = 'active'
+        """,
+        {
+            "quarantine_metadata": json.dumps(
+                {"collection_eligibility": quarantine_metadata},
+                ensure_ascii=True,
+            ),
+            "run_id": run_id,
+            "updated_at": quarantined_at,
+            "catalog_item_id": str(group["catalog_item_id"]),
+            "bank_code": str(group["bank_code"]),
+            "country_code": str(group["country_code"]),
+            "product_type_scope": _product_type_scope_codes(str(group["product_type"])),
+        },
+    )
+    connection.execute(
+        """
+        UPDATE source_registry_item
+        SET
+            status = 'inactive',
+            change_reason = 'catalog_scope_quarantined_after_zero_detail:' || %(run_id)s,
+            updated_at = %(updated_at)s
+        WHERE bank_code = %(bank_code)s
+          AND country_code = %(country_code)s
+          AND product_type = ANY(%(product_type_scope)s)
+          AND status = 'active'
+        """,
+        {
+            "run_id": run_id,
+            "updated_at": quarantined_at,
+            "bank_code": str(group["bank_code"]),
+            "country_code": str(group["country_code"]),
+            "product_type_scope": _product_type_scope_codes(str(group["product_type"])),
+        },
+    )
+    _record_catalog_audit_event(
+        connection,
+        actor=_actor_from_plan(plan),
+        request_context={"request_id": plan.get("request_id")},
+        event_type="source_catalog_scope_quarantined",
+        target_id=str(group["catalog_item_id"]),
+        target_type="source_registry_catalog_item",
+        diff_summary=(
+            "Inactivated a catalog scope after structural discovery produced no "
+            "candidate-producing detail source."
+        ),
+        metadata={
+            "bank_code": str(group["bank_code"]),
+            "country_code": str(group["country_code"]),
+            "product_type": str(group["product_type"]),
+            "run_id": run_id,
+            "discovery_notes": discovery_notes[:8],
+            **quarantine_metadata,
+        },
+    )
+    return quarantine_metadata
 
 
 def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
@@ -339,6 +459,16 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         )
 
         if not target_source_ids:
+            if _no_detail_result_is_structural(discovery_notes):
+                materialized_metadata = {
+                    **materialized_metadata,
+                    "catalog_scope_quarantine": _quarantine_catalog_scope_after_no_detail(
+                        connection,
+                        plan=plan,
+                        group=group,
+                        discovery_notes=discovery_notes,
+                    ),
+                }
             _mark_run_finished(
                 connection=connection,
                 run_id=str(group["run_id"]),

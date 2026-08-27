@@ -69,6 +69,8 @@ class CollectionAutomationTests(TestCase):
         self.assertIn("ir.run_state IN ('completed', 'failed', 'retried')", sql)
         self.assertIn("review-ai-verification-v19", sql)
         self.assertIn("auto_approval_assessment", sql)
+        self.assertIn("verified_coverage_review_source", sql)
+        self.assertIn("verified_coverage_lending_review_source", sql)
 
     def test_due_catalog_query_is_country_bank_type_scoped_and_bounded(self):
         connection = _QueryConnection(
@@ -91,6 +93,8 @@ class CollectionAutomationTests(TestCase):
         self.assertIn("country_registry", sql)
         self.assertIn("latest_started_at", sql)
         self.assertIn("latest_partial_completion_flag", sql)
+        self.assertIn("catalog_scope_quarantine,status", sql)
+        self.assertIn("active_detail.discovery_role = 'detail'", sql)
 
     def test_cycle_recovers_promotes_refreshes_and_starts_due_collection(self):
         connection = MagicMock()

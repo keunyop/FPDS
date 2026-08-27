@@ -324,6 +324,17 @@ def _should_try_browser_fallback(url: str, policy: DiscoveryFetchPolicy, exc: Ex
         return False
     if parsed.path.lower().endswith(".pdf"):
         return False
+    if (
+        isinstance(exc, urllib.error.HTTPError)
+        and exc.code == 403
+        and host_matches_allowed_domains(hostname, policy.allowed_domains)
+    ):
+        # Access-denied responses from an already SSRF-validated official
+        # source are a presentation-layer limitation, not evidence that the
+        # source or Product Type is absent. Allow one bounded browser attempt
+        # for any selected official domain instead of maintaining an
+        # institution-by-institution exception list.
+        return True
     if not policy.browser_fallback_domains:
         return False
     if not host_matches_allowed_domains(hostname, policy.browser_fallback_domains):

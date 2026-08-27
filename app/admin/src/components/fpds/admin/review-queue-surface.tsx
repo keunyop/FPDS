@@ -258,7 +258,7 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
             <label className="grid min-w-0 gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
               <input
-                className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/30"
+                className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.q}
                 name="q"
                 placeholder={copy.searchPlaceholder}
@@ -266,10 +266,10 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               />
             </label>
 
-            <label className="grid gap-1.5 text-sm">
+            <label className="grid min-w-0 gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.bank}</span>
               <select
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
+                className="h-10 w-full min-w-0 max-w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.bankCode}
                 name="bank_code"
               >
@@ -282,10 +282,10 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
               </select>
             </label>
 
-            <label className="grid gap-1.5 text-sm">
+            <label className="grid min-w-0 gap-1.5 text-sm">
               <span className="font-medium text-foreground">{copy.productType}</span>
               <select
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
+                className="h-10 w-full min-w-0 max-w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-3 focus:ring-ring/30"
                 defaultValue={filters.productType}
                 name="product_type"
               >

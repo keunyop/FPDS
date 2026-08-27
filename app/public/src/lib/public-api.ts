@@ -108,6 +108,7 @@ export type PublicFilterOption = {
 export type PublicCountryOption = {
   code: string;
   count: number;
+  bank_count?: number;
 };
 
 export type PublicCountriesResponse = {
@@ -300,6 +301,52 @@ export async function fetchPublicCountries(): Promise<PublicCountriesResponse> {
     undefined,
     PUBLIC_PRODUCTS_REVALIDATE_SEC
   );
+}
+
+export async function fetchPublicHomeCountries(locale: string): Promise<PublicCountriesResponse> {
+  const response = await fetchPublicCountries();
+  const countries = await Promise.all(
+    response.countries.map(async (country) => {
+      if (
+        typeof country.bank_count === "number" &&
+        Number.isFinite(country.bank_count)
+      ) {
+        return country;
+      }
+
+      const countryCode = country.code.trim().toUpperCase();
+      if (!/^[A-Z]{2}$/.test(countryCode) || country.count <= 0) {
+        return country;
+      }
+
+      const searchParams = new URLSearchParams();
+      searchParams.set("country_code", countryCode);
+      searchParams.set("locale", locale);
+
+      try {
+        const summary = await fetchPublicDashboardSummary(searchParams);
+        const metric = summary.metrics.find(
+          (candidate) => candidate.metric_key === "banks_in_scope"
+        );
+        const bankCount =
+          typeof metric?.value === "number" && Number.isFinite(metric.value)
+            ? Math.max(0, Math.trunc(metric.value))
+            : summary.breakdowns.products_by_bank.length;
+        return {
+          ...country,
+          code: countryCode,
+          bank_count: bankCount
+        };
+      } catch {
+        return country;
+      }
+    })
+  );
+
+  return {
+    ...response,
+    countries
+  };
 }
 
 export async function fetchPublicDashboardSummary(searchParams: URLSearchParams): Promise<PublicDashboardSummaryResponse> {

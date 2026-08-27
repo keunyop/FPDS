@@ -9,14 +9,20 @@ export function AdminMark({ className }: AdminMarkProps) {
     <span
       aria-hidden="true"
       className={cn(
-        "relative grid h-8 w-8 shrink-0 grid-rows-3 gap-1 border border-sidebar-border bg-sidebar-accent p-1.5",
+        "grid h-8 w-8 shrink-0 place-items-center rounded-[0.55rem] border border-sidebar-primary/25 bg-sidebar-primary text-sidebar-primary-foreground shadow-sm",
         className,
       )}
     >
-      <span className="h-px self-center bg-sidebar-foreground/55" />
-      <span className="h-px self-center bg-sidebar-primary" />
-      <span className="h-px self-center bg-sidebar-foreground/55" />
-      <span className="absolute -right-1 top-1 h-2 w-2 border border-sidebar bg-sidebar-primary" />
+      <svg className="size-5" fill="none" viewBox="0 0 24 24">
+        <path
+          d="M6.75 5.75h10.5M6.75 5.75v12.5M6.75 11.5h7.5"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.75"
+        />
+        <circle cx="17.25" cy="17.75" fill="currentColor" r="1.75" />
+      </svg>
     </span>
   );
 }

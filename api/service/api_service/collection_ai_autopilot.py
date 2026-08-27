@@ -93,6 +93,8 @@ def load_active_collection_review_task_ids(
               ) ?| ARRAY[
                   'multi_product_family_overview',
                   'hub_page_not_detail',
+                  'verified_coverage_review_source',
+                  'verified_coverage_lending_review_source',
                   'non_product_service_flow',
                   'non_product_editorial_page'
               ]
@@ -104,6 +106,8 @@ def load_active_collection_review_task_ids(
               ) ?| ARRAY[
                   'multi_product_family_overview',
                   'hub_page_not_detail',
+                  'verified_coverage_review_source',
+                  'verified_coverage_lending_review_source',
                   'non_product_service_flow',
                   'non_product_editorial_page'
               ]

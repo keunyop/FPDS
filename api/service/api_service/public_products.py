@@ -300,7 +300,8 @@ def load_available_public_countries(connection) -> list[dict[str, Any]]:
         )
         SELECT
             latest_completed.country_code AS code,
-            COUNT(projection.product_id)::integer AS count
+            COUNT(projection.product_id)::integer AS count,
+            COUNT(DISTINCT projection.bank_code)::integer AS bank_count
         FROM latest_completed
         JOIN public_product_projection AS projection
           ON projection.snapshot_id = latest_completed.snapshot_id
@@ -315,6 +316,7 @@ def load_available_public_countries(connection) -> list[dict[str, Any]]:
         {
             "code": str(row["code"]).upper(),
             "count": int(row["count"]),
+            "bank_count": int(row.get("bank_count") or 0),
         }
         for row in rows
     ]

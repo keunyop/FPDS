@@ -319,8 +319,8 @@ Purpose:
 - let operators start collection from bank-owned coverage items
 - let operators start bulk collection from the bank list across multiple banks' attached coverage items
 - make first-time precision source discovery mandatory per bank/Product Type,
-  while giving completed items a compact optional precision-rediscovery
-  checkbox for both single and bulk launch
+  while giving completed items one compact normal/detailed collection-mode
+  toggle for both single and bulk launch
 - reserve a later operator-managed product type surface for searchable product-type definitions that AI-assisted discovery can use
 
 `/admin/sources` minimum list behavior:
@@ -363,17 +363,18 @@ Rules:
   Type coverage. Collection, review, canonical approval, and Public release
   remain separate actions
 - `/admin/banks` also owns bank/product-type coverage editing and collection launch
-- coverage cards label first-time collection as precision-required. After a
-  server-confirmed completed non-empty run, the same card exposes a precision
-  rediscovery checkbox; off means current-source collection, not reduced
-  validation
-- the bank-list bulk toolbar shows the same completed-item checkbox only when
-  applicable and separately marks that first-time selections remain
-  precision-required. Controls stay in a wrapping toolbar, while each short
-  EN/KO/JA label remains intact at narrow widths
-- the API, not the checkbox, decides whether a catalog item has completed its
+- after a server-confirmed completed non-empty run, collection controls expose
+  one normal/detailed toggle; normal means current-source collection, not
+  reduced validation, while detailed requests precision rediscovery
+- the bank-list bulk toolbar shows that toggle only when completed selections
+  make it applicable. First-time precision remains server-enforced without a
+  separate toolbar helper, and controls wrap while short EN/KO/JA labels remain
+  intact at narrow widths
+- the API, not the toggle, decides whether a catalog item has completed its
   first collection and forces precision fallback if standard mode has no
   active detail source
+- inactive catalog items are omitted from bulk collection payloads and rejected
+  by the API even when a stale or crafted client request includes their IDs
 - `/admin/source-catalog` remains only as a compatibility redirect into the bank-owned workflow
 - `/admin/product-types` owns all product-type definitions as operator-managed DB rows and is the source of truth for bank coverage option search
 - product types without specialized parser support use the generic AI extraction/normalization fallback path and remain review-first rather than auto-publish
@@ -563,6 +564,7 @@ Minimum information:
 
 | Date | Change |
 |---|---|
+| 2026-08-26 | Replaced completed-item rediscovery checkboxes with normal/detailed collection toggles, removed the visible first-time helper, and recorded inactive-item and responsive containment rules |
 | 2026-08-20 | Added first-time precision-required and completed-item precision-rediscovery controls for single and bulk Banks collection |
 | 2026-07-30 | Standardized Banks list, AI-result, and detail-preview logos on one unframed fixed-footprint component |
 | 2026-07-30 | Added the Banks AI-onboarding action, modal/result hierarchy, and separation from product collection/publish workflows |

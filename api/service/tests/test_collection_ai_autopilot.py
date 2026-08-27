@@ -106,6 +106,8 @@ class CollectionAiAutopilotTests(TestCase):
         sql, params = connection.calls[0]
         self.assertEqual(params, {"run_id": "run-001", "limit": 1000})
         self.assertIn("hub_page_not_detail", sql)
+        self.assertIn("verified_coverage_review_source", sql)
+        self.assertIn("verified_coverage_lending_review_source", sql)
 
     def test_verifies_corrects_assesses_and_approves_eligible_review(self):
         first_execution = {

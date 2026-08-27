@@ -14,9 +14,9 @@ The shell puts four daily tasks first:
 3. **Runs** — find failed or partial collection work and inspect or retry it.
 4. **Banks** — add banks manually or through grounded AI research, manage
    coverage, and launch collection. A bank/Product Type with no completed run
-   always performs precision source discovery. Completed items expose an
-   optional precision-rediscovery checkbox; leaving it off collects from the
-   current active source scope.
+   always performs precision source discovery. Completed items expose a
+   normal/detailed collection toggle; normal collection uses the current active
+   source scope, while detailed collection requests precision rediscovery.
 
 Before entering the workspace, the operator selects an enabled working country
 on the login form. The API persists that ISO alpha-2 code in the server-side

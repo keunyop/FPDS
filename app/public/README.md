@@ -8,8 +8,9 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 ## Runtime Routes
 
 - `/` is the canonical public Home view. Its first viewport pairs a short market
-  thesis with a simple world map and the published product count for every
-  currently collected country. Deposit, Credit Card, and Loan are equal direct
+  thesis with an accurate locally served Equal Earth world map and the
+  published product and distinct-bank counts for every currently collected
+  country. Deposit, Credit Card, and Loan are equal direct
   next actions. The main content places Deposit Top 5
   on the left and Loan Top 5 on the right at desktop, stacking both lists below
   that breakpoint. Deposit uses the highest disclosed numeric rates; Loan uses
@@ -48,8 +49,16 @@ repetition, decorative gradients, synthetic scores, and recommendation
 language are avoided.
 
 Home uses real snapshot values rather than invented illustration data. Its
-country coverage map reads the existing public country catalog, and its dual
-Top 5 lists avoid repeated family labels, internal
+country coverage map reads the existing public country catalog and renders
+active product and distinct-bank totals from the same completed snapshot.
+Home prefers the country response's `bank_count`. During a staggered API/UI
+rollout, if an older cached country response omits that field, Home derives the
+count from the established unfiltered `banks_in_scope` dashboard summary for
+that country. Each compatibility lookup is isolated so a failed fallback does
+not hide the country or its product count, and the fallback stops issuing
+extra requests once the country endpoint supplies `bank_count`.
+
+The dual Top 5 lists avoid repeated family labels, internal
 evidence explanations, and competing header actions. Catalog cards are
 product-family-aware records with visible institution identity, one primary
 metric, up to two essential supporting facts, a Compare control, and an
@@ -169,6 +178,13 @@ official URLs in the `BankLogo` mapping. A failed image falls back to an
 unframed, accessible bank-code mark while retaining the institution name for
 assistive technology. The SwitchaBank shell mark is implemented in
 `public-mark.tsx`; `src/app/icon.svg` is the matching favicon/app icon.
+
+The Home map geometry in `public/world-map-equal-earth.svg` is a local static
+asset generated from [Natural Earth](https://www.naturalearthdata.com/downloads/)
+1:110m land data under its
+[public-domain terms](https://www.naturalearthdata.com/about/terms-of-use/)
+through `world-atlas` and the Equal Earth projection. It does not load an
+external map service or tracking script at runtime.
 
 ## Analytics and Consent
 

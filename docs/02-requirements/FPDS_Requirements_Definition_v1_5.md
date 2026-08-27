@@ -511,8 +511,10 @@ mark-only header and visible Home snapshot-ledger presentation above:
   move into one hamburger menu; desktop keeps the visible primary navigation
   and country selector
 - Home replaces the Public/Current snapshot, Visible products, and Banks count
-  ledger with a simple code-native world map plus every country and published
-  product count returned by `GET /api/public/countries`
+  ledger with an accurate locally hosted code-native Equal Earth world map plus
+  every country and its published product and distinct-bank counts returned by
+  `GET /api/public/countries`; the local geometry uses commercially safe
+  public-domain map data and no external runtime map service
 - the Home Deposit, Credit Card, and Loan actions have equal initial emphasis
 - when catalog `view` is absent, desktop defaults to Grid and mobile defaults
   to List; explicit `view=grid` or `view=list` remains a shareable override
@@ -1611,6 +1613,29 @@ Current live admin behavior:
   server-session country
 - bank detail can add more coverage and launch per-coverage collection
 - bank list can multi-select banks and bulk-launch collection across all attached coverage items
+- only active catalog coverage may enter manual or scheduled collection; an
+  inactive row remains visible for governance/history but a stale or crafted
+  launch request must fail closed
+- recognized-bank cross-product bootstrap rows are not current-offering
+  evidence. After an exact Product Owner-directed official-site and repeated-run
+  audit, a scope with no directly attributable current retail detail route may
+  be inactivated together with its older active sources, without deleting
+  historical runs or claiming that a group-level product is discontinued
+- directly collectable scopes should retain a verified official Product Type
+  detail or hub URL so precision discovery does not depend on homepage
+  navigation order or generic hub limits
+- any legacy blanket coverage row with no verified route, active detail source,
+  or successful non-empty collection must remain inactive until evidence is
+  added; this eligibility rule applies across banks and Product Types
+- a structurally conclusive zero-detail run remains Partial for truthful run
+  history but must atomically quarantine its exact catalog/source scope so the
+  same work is not selected again. Transient timeout, connection, DNS,
+  throttling, and upstream 5xx evidence must remain retryable and must not be
+  interpreted as product absence
+- a verified official coverage page may cross the bounded low-page-score or
+  family-overview discovery boundary for any Product Type only as
+  `verified_coverage_review_source`; candidate validation, auto-promotion,
+  canonical, and publication paths must keep that evidence Review-only
 
 Later follow-on requirement:
 - operator-managed product type onboarding should exist as a separate management surface
@@ -1647,11 +1672,14 @@ Later follow-on requirement:
 4. Admin starts collection either from a single bank coverage item or from a multi-bank bank-list bulk selection
 5. System checks completed collection history per bank/Product Type. First-time items use precision discovery; completed items use the operator's precision-rediscovery choice.
 6. Precision mode materializes or refreshes generated source rows from bounded verified homepage, coverage, registry, hub, and sibling-detail seeds. Standard mode reuses the current active source scope; if no active detail remains, it falls back to precision mode.
-7. System records the selected source scope, effective coverage mode, and coverage telemetry for the run
-8. System fetches, parses, extracts, normalizes, and validates the selected scope
-9. `normalized_candidate` rows are persisted
-10. Review tasks are created when validation/confidence rules require them
-11. Admin drills into generated Sources, Runs, and Review surfaces to inspect the outcome
+7. If accessible discovery conclusively returns no candidate-producing detail
+   source, the system records the Partial result and inactivates that exact
+   catalog/source scope until a verified route or active detail source is added
+8. System records the selected source scope, effective coverage mode, and coverage telemetry for the run
+9. System fetches, parses, extracts, normalizes, and validates the selected scope
+10. `normalized_candidate` rows are persisted
+11. Review tasks are created when validation/confidence rules require them
+12. Admin drills into generated Sources, Runs, and Review surfaces to inspect the outcome
 
 ## 12.3A Deferred Dynamic Product Type Onboarding Workflow
 1. Admin opens a dedicated product type management surface

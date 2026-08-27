@@ -2686,3 +2686,290 @@ Read before coding:
 - Boundary: no canonical URL, country, product, financial data, publication,
   scheduler, Vercel environment, domain, Search Console, or Production state
   changed.
+
+## 2026-08-26 - Admin Collection Controls and Alterna/B2B Partial-Run Hardening
+
+- WBS: `5.49` (`Completed`).
+- Status: Admin UI refinements, recurrence prevention, exact registry
+  remediation, regression coverage, and responsive verification are complete.
+- Root cause:
+  - B2B Mortgage run
+    `run_20260826_045009_b2b_mortgage_collect_z7EDsBrx` completed partially
+    because linked PDF source `AUTO-B2B-MOR-a0f9ad3c88` returned HTTP 404; the
+    same exact source had already failed on 2026-08-20 and precision discovery
+    could re-add it because only discovered supporting HTML was reachability
+    filtered
+  - Alterna Mortgage's current verified official Homebuying route had strong
+    product/attribute evidence but no matching H1, so its page-evidence score
+    stopped at `3` and the safe detail threshold rejected it
+  - Alterna Line of Credit's current verified Borrowing route describes both
+    Personal Loan and Personal Line of Credit, so the family-page boundary
+    correctly rejected it even though the route is official and relevant
+  - no current official Alterna Bank or B2B Bank Credit Card product route was
+    verified; Alterna's official Visa Debit page explicitly distinguishes its
+    debit product from a credit card
+- Outcome:
+  - replaced the Admin mark with a compact token-based `F`/record-dot SVG,
+    removed the Banks first-time precision helper, and replaced completed-item
+    rediscovery checkboxes with an accessible normal/detailed Switch while
+    retaining the `precision_rediscovery` API contract
+  - bounded Banks and Review Queue grid/control widths; exact `390px` checks
+    show no document-level horizontal overflow and no filter overlap
+  - source materialization now inactivates and suppresses supporting HTML/PDF
+    rows whose latest persisted attempt ended in terminal HTTP 404
+  - verified Mortgage, Personal Loan, and Line of Credit coverage routes may
+    cross only the narrow low-score/family boundary when deterministic and AI
+    evidence agree; they carry
+    `verified_coverage_lending_review_source` through API and worker routing and
+    are excluded from automatic promotion
+  - made Alterna and B2B Credit Card catalog items inactive and made the stale
+    B2B Mortgage PDF inactive; Banks excludes inactive items and the API rejects
+    stale or crafted inactive-item launch requests
+- Persisted state:
+  - `catalog-ca-alterna-credit-card`: `inactive`,
+    `operator_disabled_after_current_official_credit_card_route_unverified`
+  - `catalog-ca-b2b-credit-card`: `inactive`,
+    `operator_disabled_after_current_official_credit_card_route_unverified`
+  - `AUTO-B2B-MOR-a0f9ad3c88`: `inactive`,
+    `terminal_404_supporting_source`
+- Verification:
+  - affected API unit modules: 197 tests passed
+  - worker validation routing: 42 tests passed
+  - Admin `pnpm run typecheck`: passed
+  - Admin `pnpm run build`: passed
+  - headless rendered QA: Review filter controls do not overlap at desktop,
+    tablet, or exact `390px`; Banks exposes `role="switch"`, both collection
+    labels, the new SVG mark, no first-time helper, and no document-level
+    overflow at exact `390px`
+  - exact database readback confirmed all three intended records are inactive
+- Limitation: migration `0040` intentionally replaces generic `audit_event`
+  persistence with a discard-only compatibility view, so these state changes
+  do not create retained generic audit rows. The exact `change_reason` values
+  and this journal entry are the durable operational record.
+- Boundaries: no collection rerun, candidate approval, canonical mutation,
+  Public publication, scheduler change, product-boundary relaxation, or
+  external write was performed.
+
+## 2026-08-26 - Bridgewater, EQ Bank, and Fairstone Partial-Run Scope Hardening
+
+- WBS: `5.50` (`Completed`).
+- Status: persisted-run RCA, reusable discovery correction, exact catalog
+  remediation, shared-dev migration, controlled recollection, and regression
+  verification are complete.
+- Root cause:
+  - collection `collection_Dy57RKJwNiRDTnkj` completed all 21 bank/Product
+    Type runs but 13 were Partial; every current Partial was a zero-detail
+    discovery outcome rather than a snapshot, parse, database, timeout, or
+    downstream worker failure
+  - all 21 catalog rows still had no coverage URL and the same
+    `Canada recognized bank full active Product Type coverage baseline`
+    reason from migration `0020`, which cross-joined every recognized bank
+    with every active Product Type without proving a current directly
+    collectable retail offering
+  - Bridgewater's current official retail site is scoped to GIC, mortgage, and
+    savings; EQ's Personal Account is a chequing product name the generic
+    discovery vocabulary did not recognize, while its Card is prepaid rather
+    than Credit Card; Fairstone's direct site exposes Personal Loan and
+    Mortgage, while Deposit/GIC/Card disclosures are group-level and do not
+    provide an attributable consumer detail route for the Fairstone row
+  - Fairstone's first verified home-equity hub still scored zero because its
+    direct HTML exposed a title but no H1/body evidence. The exact official
+    `second-mortgage` detail route scored 4 and crossed the normal evidence
+    threshold without a product-boundary exception.
+- Outcome:
+  - added migration
+    `0042_three_bank_partial_run_scope_hardening.sql`, pinning ten verified
+    official Product Type detail/hub routes and making eleven exact
+    non-collectable scopes inactive
+  - inactivated any older active source rows under the eleven excluded scopes;
+    no run, source, snapshot, evidence, review, or canonical history was
+    deleted
+  - added an EQ Bank-only `Personal Account` chequing discovery alias; the
+    global chequing identity vocabulary remains unchanged, so generic account
+    support pages do not become product details
+  - aligned DB/API README guidance, requirements, WBS, and active decision
+    `D-067` so the recognized-bank cross-product seed is explicitly not
+    current-offering evidence
+- Persisted state:
+  - the three banks now have 10 active and 11 inactive catalog rows
+  - excluded scopes have 0 active source rows and retain exact reversible
+    `change_reason` and coverage metadata
+  - migration history contains exactly one `0042` record
+  - automatic collection remains disabled and final active run count is 0
+- Recollection evidence:
+  - EQ run `run_20260827_012012_eqbank_chequing_collect_MhWnojnD`
+    completed with `partial_completion_flag=false`, no error, one
+    comparison-complete Personal Account candidate, and normal policy
+    auto-promotion
+  - the first controlled Fairstone hub run exposed the remaining
+    `page_evidence_below_threshold` issue; after narrowing the route, final
+    run `run_20260827_012505_fairstone_mortgage_collect_3XTW7ZIH`
+    completed with `partial_completion_flag=false`, no error, one source,
+    and one Second Mortgage candidate
+  - the Fairstone candidate remains in Review because the captured detail does
+    not ground required rate/type/term fields. This is intentional fail-closed
+    validation, not a Partial run, and no weak or invented financial fact was
+    promoted.
+- Verification:
+  - source-catalog module: 173 tests passed
+  - full API suite: 432 tests passed
+  - full worker suite in the repository-standard `uv run` environment: 461
+    tests passed; an initial API-only interpreter invocation could not import
+    the worker's BeautifulSoup dependency and was rerun in the documented
+    environment
+  - migration executed successfully against shared dev; exact 21-row
+    catalog/source/migration/scheduler/run readback matched the intended state
+- Boundaries: no historical deletion, manual Review decision, manual canonical
+  edit, Public publication, scheduler enablement, source/evidence gate
+  weakening, or unrelated bank scope change was performed.
+
+## 2026-08-26 - Generic Zero-Detail Coverage Circuit Breaker
+
+- WBS: `5.51` (`Completed`).
+- Status: three-bank persisted-run RCA, product-agnostic recurrence prevention,
+  shared-dev catalog remediation, controlled recollection, regression
+  coverage, and operational documentation are complete.
+- Root cause:
+  - persisted history contained 32 Partial runs across First Nations Bank
+    (`8`), Haventree Bank (`11`), and HomeEquity Bank (`13`)
+  - a conclusive zero-detail discovery result truthfully marked its run
+    Partial, but did not change the catalog scope's collection eligibility;
+    the automation query then explicitly selected recent Partial work again
+    after its retry interval
+  - the repeated outcomes combined three distinct cases: structural product
+    scopes with no verified direct official route, conservative false
+    negatives for valid product-family/hybrid account pages, and HomeEquity
+    official HTML pages that returned HTTP 403 to direct fetches
+  - migration `0020` had cross-joined every recognized Canadian bank with
+    every active Product Type, so unverified bootstrap coverage survived both
+    runtime cleanup and fresh migration replay
+- Outcome:
+  - structurally conclusive zero-detail results now atomically quarantine the
+    exact catalog and active-source scope with a reversible reason; timeout,
+    DNS, HTTP 408/425/429/5xx, and other transient evidence remain retriable
+  - manual and scheduled launch paths both reject quarantined scopes until an
+    operator restores a verified coverage route or active detail source
+  - the verified-coverage Review exception is now product-agnostic and retains
+    all hard evidence vetoes; qualifying family/hybrid pages remain Review-only
+    and cannot be automatically promoted
+  - any already SSRF-validated and allowlisted official HTML source returning
+    HTTP 403 receives one bounded browser fallback, without a bank-domain
+    special-case list
+  - migration `0043_generic_zero_detail_scope_quarantine.sql` pins twelve
+    verified FNBC/Haventree/HomeEquity routes, quarantines nine exact
+    unsupported scopes, and fail-closes every remaining blanket row lacking a
+    route, active detail source, or successful non-empty run
+- Persisted state:
+  - the named banks now have 12 active eligible and 9 inactive quarantined
+    catalog scopes; all 12 active scopes' latest runs are completed,
+    non-Partial, and have zero source failures
+  - 33 scopes across 11 banks are quarantined in total: the 9 named scopes plus
+    24 remaining legacy blanket scopes across 8 other banks
+  - quarantined scopes have 0 active source rows, migration history contains
+    exactly one `0043` record, automatic collection remains explicitly
+    disabled, and final nonterminal run count is 0
+- Controlled recollection:
+  - collection `collection_g9RsGxdasPBRqo7H` completed all five boundary
+    runs: FNBC Savings, Haventree Chequing/Savings, and HomeEquity GIC/Mortgage
+  - all five runs have `partial_completion_flag=false`, no error, 14/14
+    successful sources, 0 source failures, five candidates, and five Review
+    tasks; no candidate was manually approved
+  - HomeEquity GIC, Rates, and CHIP pages persisted HTTP 200 snapshots through
+    the generic `browser_pdf_fallback`, proving the 403 recovery path in the
+    live controlled run
+- Verification:
+  - focused source-catalog and collection-runner modules: 191 tests passed
+  - automation, AI autopilot, and candidate-promotion modules: 26 tests passed
+  - focused worker discovery and validation routing: 79 tests passed
+  - full API suite: 435 tests passed
+  - full worker suite in the repository-standard
+    `uv run python -m unittest discover -s worker -p "test_*.py"`
+    environment: 524 tests passed; an initial API-only interpreter invocation
+    could not import the worker's BeautifulSoup dependency and was rerun in the
+    documented environment
+  - exact shared-dev run/catalog/source/migration/scheduler readback matched
+    the intended state; `git diff --check` passed before journal closeout
+- Boundaries: no history deletion, product-retirement assertion, canonical
+  mutation, manual Review approval, Public publication, scheduler enablement,
+  evidence-gate weakening, or external Production write was performed.
+
+## 2026-08-26 - Public Home Equal Earth Coverage Map and Bank Counts
+
+- WBS: `5.52` (`Completed`).
+- Status: web reference and license review, Public Home map replacement,
+  country bank-count contract extension, localization, responsive rendering,
+  regression coverage, and documentation are complete.
+- Research and design:
+  - reviewed polished editorial/global-coverage map treatments and reusable map
+    sources rather than retaining the approximate seven-path illustration
+  - selected Natural Earth 1:110m public-domain land geometry, distributed
+    through `world-atlas`, and generated a compact Equal Earth projection;
+    source tooling was temporary and added no Public runtime dependency
+  - kept the map as a local static SVG with restrained graticules, accurate
+    geography, and country markers aligned to the existing SwitchaBank visual
+    tokens; no external map request, account, cookie, or tracking surface was
+    introduced
+- Outcome:
+  - `GET /api/public/countries` now returns active product `count` and
+    distinct active `bank_count` from the same latest completed
+    `phase1_public` snapshot
+  - the Public response type keeps `bank_count` optional so an older
+    five-minute cached response continues to render product counts safely
+  - Home country rows now show localized product and bank counts in EN, KO,
+    and JA while preserving unavailable, empty, current-country, and
+    assistive-label behavior
+  - the former hand-drawn continent paths were replaced by the local
+    `world-map-equal-earth.svg` asset and accurate marker coordinates
+- Verification:
+  - focused Public countries API module: 12 tests passed
+  - full API suite: 435 tests passed
+  - Public TypeScript typecheck passed
+  - Public Production build passed
+  - live local API readback returned product and distinct-bank counts for
+    Canada and the United States
+  - rendered Home inspection passed at 1440px EN, 768px JA, and exact 390px
+    KO; DOM measurement confirmed no document-level horizontal overflow and
+    both localized counts in every country row
+- Boundaries: no canonical product, aggregate eligibility, country scope,
+  Production deployment, analytics, external runtime map service, or unrelated
+  dirty-worktree state was changed.
+
+## 2026-08-26 - Public Home Map Fill and Bank-Count Compatibility
+
+- WBS: `5.53` (`Completed`).
+- Status: screenshot-led follow-up diagnosis, centered map enlargement,
+  bank-count rollout compatibility, old-response verification, responsive
+  rendering, and documentation are complete.
+- Root cause:
+  - the accurate Equal Earth asset was centered, but the full `0 0 1000 500`
+    projection viewport retained enough outer ocean margin that the land mass
+    read smaller than intended inside the compact Home card
+  - the screenshot used the new Public UI against a deployed/cached
+    `GET /api/public/countries` response that still returned only `code` and
+    product `count`; the intentionally optional `bank_count` compatibility
+    field therefore caused the bank label to be omitted
+- Outcome:
+  - the map now uses a symmetric centered `55 27.5 890 445` viewport,
+    enlarging the geometry by about 12% while keeping markers, graticules, and
+    the local SVG aligned
+  - Home still prefers `bank_count` from the country endpoint; only a country
+    missing that field receives an unfiltered dashboard-summary compatibility
+    lookup, using the established `banks_in_scope` metric
+  - compatibility failures are caught per country, so they cannot turn an
+    otherwise healthy Home or product count into an unavailable page; once
+    the country response includes `bank_count`, no extra summary lookup is
+    issued for that country
+- Verification:
+  - focused Public countries API module: 12 tests passed
+  - Public TypeScript typecheck passed after a corrupted generated
+    `.next/dev/types/routes.d.ts` was regenerated by Next dev
+  - Public Production build passed
+  - the existing local API was used as an exact old-response fixture:
+    `/api/public/countries` omitted `bank_count`, while Home still rendered
+    Canada with 16 banks and the United States with 10 banks
+  - visual and DOM checks passed at 1440px EN, 768px JA, and exact 390px KO;
+    every country row included its localized bank count and no document-level
+    horizontal overflow was present
+- Boundaries: no Public API formula, canonical product, aggregate eligibility,
+  country scope, Production deployment, external map service, or unrelated
+  dirty-worktree state was changed.

@@ -259,6 +259,46 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             update_call["error_summary"],
             "Homepage discovery produced no detail sources eligible for collection. Homepage discovery completed but no candidate-producing detail sources were identified.",
         )
+        run_metadata = json.loads(str(update_call["run_metadata"]))
+        self.assertEqual(
+            run_metadata["catalog_scope_quarantine"]["status"],
+            "quarantined",
+        )
+        catalog_update = next(
+            (sql, params)
+            for sql, params in connection.calls
+            if "UPDATE source_registry_catalog_item" in sql
+        )
+        self.assertIn("status = 'inactive'", catalog_update[0])
+        self.assertEqual(
+            catalog_update[1]["catalog_item_id"],
+            "catalog-ca-bmo-chequing-12345678",
+        )
+        source_update = next(
+            (sql, params)
+            for sql, params in connection.calls
+            if "UPDATE source_registry_item" in sql
+        )
+        self.assertIn("catalog_scope_quarantined_after_zero_detail", source_update[0])
+        self.assertEqual(source_update[1]["bank_code"], "BMO")
+
+    def test_zero_detail_quarantine_classifier_does_not_treat_transient_fetch_as_absence(self) -> None:
+        self.assertTrue(
+            source_catalog_collection_runner._no_detail_result_is_structural(
+                [
+                    "Homepage discovery candidate validation rejected all tentative detail pages.",
+                    "Detail rejection summary: page_evidence_below_threshold=2.",
+                ]
+            )
+        )
+        self.assertFalse(
+            source_catalog_collection_runner._no_detail_result_is_structural(
+                [
+                    "Homepage fetch was unavailable: timed out.",
+                    "Homepage discovery completed but no candidate-producing detail sources were identified.",
+                ]
+            )
+        )
 
     def test_no_detail_summary_prioritizes_decisive_rejection_diagnostics(self) -> None:
         summary = source_catalog_collection_runner._no_detail_sources_summary(

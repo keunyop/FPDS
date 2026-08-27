@@ -274,6 +274,21 @@ Do not add an entry for:
   - `pnpm run build`
 - Notes: historical entries retain their original paths as an implementation record; the block inventory contains the current paths
 
+## 2026-08-26 - Admin Collection Mode and Responsive Controls
+
+- Surface or Area: `app/admin` protected Banks and Review Queue workflows
+- Vendor Asset: shadcn-compatible Radix Switch primitive plus existing FPDS-owned Admin compositions
+- Source: existing `radix-ui` dependency and active `radix-nova` design tokens
+- Install Method: no new registry install; added the smallest local shadcn-compatible primitive required by the collection-mode control
+- Files Added or Changed: `app/admin/src/components/ui/switch.tsx`, `app/admin/src/components/fpds/admin/admin-mark.tsx`, `app/admin/src/components/fpds/admin/bank-registry-surface.tsx`, `app/admin/src/components/fpds/admin/review-queue-surface.tsx`
+- FPDS Wrappers or Overrides: completed Banks items use a normal/detailed collection toggle, the Admin shell uses a compact code-native data-led `F` mark, and Review Queue filter controls keep bounded independent widths
+- Direct Vendor Edits: no
+- Verification:
+  - `pnpm run typecheck`
+  - `pnpm run build`
+  - rendered desktop, tablet, and exact `390px` responsive checks
+- Notes: the server still owns first-time precision and inactive-catalog enforcement; the UI cannot bypass either boundary
+
 ---
 
 ## 5. Change History
@@ -282,3 +297,4 @@ Do not add an entry for:
 |---|---|
 | 2026-04-13 | Initial adoption log created after the template-first design baseline was approved |
 | 2026-07-28 | Recorded semantic Admin block ownership and reachability-backed vendor residue cleanup for client handoff |
+| 2026-08-26 | Recorded the shadcn-compatible Admin Switch primitive and responsive Banks/Review control refinements |

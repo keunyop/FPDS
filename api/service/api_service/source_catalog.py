@@ -184,6 +184,8 @@ _AI_DETAIL_OVERRIDE_VETO_REASON_CODES = {
     "non_product_editorial_page",
     "non_product_service_flow",
 }
+_TERMINAL_SUPPORTING_ROLES = {"supporting_html", "supporting_pdf", "linked_pdf"}
+_VERIFIED_COVERAGE_REVIEW_REASON = "verified_coverage_review_source"
 _PRODUCT_TYPE_EXCLUSION_KEYWORDS = {
     "chequing": (
         "savings-account",
@@ -401,6 +403,9 @@ _PRODUCT_TYPE_IDENTITY_HINTS = {
     "mortgage": ("mortgage",),
     "personal-loan": ("personal loan", "car loan", "vehicle loan", "rrsp loan"),
     "line-of-credit": ("line of credit", "home equity line", "student line", "professional line"),
+}
+_BANK_PRODUCT_TYPE_DISCOVERY_ALIASES = {
+    ("EQBANK", "chequing"): ("personal account",),
 }
 _DISCOVERY_PROFILE_TERMS = {
     "chequing": ("chequing", "checking", "everyday banking", "transactions", "debit card", "monthly fee"),
@@ -1658,6 +1663,27 @@ def start_source_catalog_collection(
             ON ptr.product_type_code = sci.product_type
            AND ptr.status = 'active'
         WHERE sci.catalog_item_id = ANY(%(catalog_item_ids)s)
+          AND sci.status = 'active'
+          AND (
+              sci.coverage_source_url IS NOT NULL
+              OR EXISTS (
+                  SELECT 1
+                  FROM source_registry_item AS active_detail
+                  WHERE active_detail.bank_code = sci.bank_code
+                    AND active_detail.country_code = sci.country_code
+                    AND active_detail.product_type = sci.product_type
+                    AND active_detail.status = 'active'
+                    AND active_detail.discovery_role = 'detail'
+              )
+              OR NOT EXISTS (
+                  SELECT 1
+                  FROM ingestion_run AS quarantined_run
+                  WHERE COALESCE(quarantined_run.run_metadata ->> 'country_code', quarantined_run.country_code) = sci.country_code
+                    AND COALESCE(quarantined_run.run_metadata ->> 'bank_code', '') = sci.bank_code
+                    AND COALESCE(quarantined_run.run_metadata ->> 'product_type', '') = sci.product_type
+                    AND quarantined_run.run_metadata #>> '{catalog_scope_quarantine,status}' = 'quarantined'
+              )
+          )
         ORDER BY b.bank_name, sci.product_type
         """,
         {"catalog_item_ids": catalog_item_ids},
@@ -1915,6 +1941,14 @@ def _materialize_sources_for_catalog_item(
             )
     generated_rows = _dedupe_generated_source_rows(generation_result.rows)
     discovery_notes = list(generation_result.discovery_notes)
+    generated_rows, terminal_404_source_ids = _exclude_terminal_404_supporting_rows(
+        connection,
+        generated_rows,
+    )
+    if terminal_404_source_ids:
+        discovery_notes.append(
+            f"Excluded {len(terminal_404_source_ids)} supporting source(s) after a persisted terminal HTTP 404."
+        )
     if product_type != original_product_type:
         discovery_notes.append(f"Product type `{original_product_type}` was normalized to `{product_type}` for source collection.")
     if generation_result.detail_source_ids:
@@ -1989,6 +2023,83 @@ def _materialize_sources_for_catalog_item(
         model_execution_records=generation_result.model_execution_records,
         usage_records=generation_result.usage_records,
         discovery_metrics=generation_result.discovery_metrics,
+    )
+
+
+def _exclude_terminal_404_supporting_rows(
+    connection: Connection,
+    rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[str]]:
+    supporting_source_ids = sorted(
+        {
+            str(row.get("source_id") or "").strip()
+            for row in rows
+            if str(row.get("discovery_role") or "").strip().lower() in _TERMINAL_SUPPORTING_ROLES
+            and str(row.get("source_id") or "").strip()
+        }
+    )
+    if not supporting_source_ids:
+        return rows, []
+
+    terminal_rows = connection.execute(
+        """
+        WITH latest_source_attempt AS (
+            SELECT DISTINCT ON (sd.source_metadata ->> 'source_id')
+                sd.source_metadata ->> 'source_id' AS source_id,
+                rsi.stage_status,
+                rsi.error_summary
+            FROM run_source_item AS rsi
+            JOIN source_document AS sd
+              ON sd.source_document_id = rsi.source_document_id
+            WHERE sd.source_metadata ->> 'source_id' = ANY(%(source_ids)s)
+            ORDER BY
+                sd.source_metadata ->> 'source_id',
+                rsi.updated_at DESC,
+                rsi.created_at DESC
+        )
+        SELECT source_id
+        FROM latest_source_attempt
+        WHERE stage_status = 'failed'
+          AND (
+              LOWER(COALESCE(error_summary, '')) LIKE '%%http%%404%%'
+              OR LOWER(COALESCE(error_summary, '')) LIKE '%%status 404%%'
+          )
+        """,
+        {"source_ids": supporting_source_ids},
+    ).fetchall()
+    terminal_source_ids = sorted(
+        {
+            str(row.get("source_id") or "").strip()
+            for row in terminal_rows
+            if str(row.get("source_id") or "").strip()
+        }
+    )
+    if not terminal_source_ids:
+        return rows, []
+
+    terminal_source_id_set = set(terminal_source_ids)
+    connection.execute(
+        """
+        UPDATE source_registry_item
+        SET
+            status = 'inactive',
+            change_reason = 'terminal_404_supporting_source',
+            updated_at = %(updated_at)s
+        WHERE source_id = ANY(%(source_ids)s)
+          AND status <> 'removed'
+        """,
+        {
+            "source_ids": terminal_source_ids,
+            "updated_at": utc_now(),
+        },
+    )
+    return (
+        [
+            row
+            for row in rows
+            if str(row.get("source_id") or "").strip() not in terminal_source_id_set
+        ],
+        terminal_source_ids,
     )
 
 
@@ -3130,6 +3241,11 @@ def _generate_sources_from_homepage(
     product_type_definition = localize_product_type_definition(
         country_code=country_code,
         definition=product_type_definition,
+    )
+    product_type_definition = _apply_bank_product_type_discovery_aliases(
+        bank_code=bank_code,
+        product_type=product_type,
+        product_type_definition=product_type_definition,
     )
     discovery_product_type = _product_type_discovery_profile(product_type, product_type_definition)
     normalized_homepage_url = normalize_source_url(homepage_url)
@@ -4935,12 +5051,18 @@ def _promote_detail_candidates(
             }
             seed_fetch_fallback_count += 1
         else:
+            verified_coverage_review_source = _verified_coverage_page_requires_review(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=page_evidence,
+            )
             if not _candidate_promotes_to_detail(
                 candidate=candidate,
                 ai_score=ai_score,
                 page_evidence=page_evidence,
                 ai_unavailable=ai_unavailable,
                 allow_family_overview=discovery_product_type in {"chequing", "savings", "gic"},
+                allow_verified_coverage_review_source=True,
             ):
                 if (
                     not _candidate_is_seed_backed(candidate)
@@ -4968,6 +5090,7 @@ def _promote_detail_candidates(
                     ai_score=ai_score,
                     page_evidence=page_evidence,
                     ai_unavailable=ai_unavailable,
+                    verified_coverage_review_source=verified_coverage_review_source,
                 )
                 metadata["selection_path"] = "seed_hint_ai_unavailable_low_page_evidence" if ai_unavailable else "seed_hint_low_page_evidence"
                 metadata["selection_confidence"] = "medium-low"
@@ -4986,6 +5109,7 @@ def _promote_detail_candidates(
                     ai_score=ai_score,
                     page_evidence=page_evidence,
                     ai_unavailable=ai_unavailable,
+                    verified_coverage_review_source=verified_coverage_review_source,
                 )
         row = _build_generated_source_row(
             bank_code=bank_code,
@@ -5372,12 +5496,26 @@ def _candidate_promotes_to_detail(
     page_evidence: PageEvidenceAssessment,
     ai_unavailable: bool = False,
     allow_family_overview: bool = False,
+    allow_verified_coverage_review_source: bool = False,
+    allow_verified_lending_review_source: bool = False,
 ) -> bool:
     if _page_is_audience_offer_hub(page_evidence):
         return False
     if "non_product_service_flow" in page_evidence.page_evidence_reason_codes:
         return False
-    if "multi_product_family_overview" in page_evidence.page_evidence_reason_codes and not allow_family_overview:
+    verified_coverage_review_source = (
+        (allow_verified_coverage_review_source or allow_verified_lending_review_source)
+        and _verified_coverage_page_requires_review(
+            candidate=candidate,
+            ai_score=ai_score,
+            page_evidence=page_evidence,
+        )
+    )
+    if (
+        "multi_product_family_overview" in page_evidence.page_evidence_reason_codes
+        and not allow_family_overview
+        and not verified_coverage_review_source
+    ):
         specific_singular_identity = _page_has_specific_singular_product_identity(page_evidence)
         named_detail_override = specific_singular_identity and (
             (
@@ -5409,6 +5547,8 @@ def _candidate_promotes_to_detail(
         ai_score=ai_score,
         page_evidence=page_evidence,
     ):
+        return True
+    if verified_coverage_review_source:
         return True
     if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
         return _high_confidence_detail_overrides_low_page_score(
@@ -5447,6 +5587,69 @@ def _candidate_promotes_to_detail(
             and page_evidence.negative_signal_count == 0
         )
     return candidate.heuristic_score > 0 or strong_page_detail_signal
+
+
+def _verified_coverage_page_requires_review(
+    *,
+    candidate: HomepageCandidate,
+    ai_score: AiParallelCandidateScore | None,
+    page_evidence: PageEvidenceAssessment,
+) -> bool:
+    page_reasons = set(page_evidence.page_evidence_reason_codes)
+    strong_verified_family_overview = (
+        "multi_product_family_overview" in page_reasons
+        and page_evidence.page_evidence_score >= 7
+        and page_evidence.product_identity_match
+        and page_evidence.negative_signal_count == 0
+        and ai_score is not None
+        and ai_score.predicted_role in {"detail", "supporting_html"}
+        and ai_score.relevance_score >= 8.0
+        and ai_score.confidence_band != "low"
+    )
+    requires_bounded_exception = (
+        page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE
+        or "multi_product_family_overview" in page_reasons
+    )
+    if (
+        candidate.origin != "verified_coverage_source"
+        or not requires_bounded_exception
+        or candidate.heuristic_score <= 0
+        or ai_score is None
+        or ai_score.predicted_role not in {"detail", "supporting_html"}
+        or (
+            ai_score.relevance_score < 8.5
+            and not strong_verified_family_overview
+        )
+        or ai_score.confidence_band == "low"
+        or page_evidence.page_evidence_score < 3
+        or page_evidence.attribute_signal_count < 1
+        or page_evidence.negative_signal_count > 1
+        or "product_type_semantic_match" not in page_reasons
+        or "pricing_or_feature_signal" not in page_reasons
+    ):
+        return False
+    veto_page_reasons = {
+        "non_consumer_business_page",
+        "non_product_editorial_page",
+        "non_product_service_flow",
+        "other_product_type",
+        "promo_or_apply_flow",
+        "supporting_terms_or_rates_page",
+    }
+    if page_reasons.intersection(veto_page_reasons):
+        return False
+    ai_reasons = set(_coerce_reason_codes(ai_score.reason_codes))
+    return not ai_reasons.intersection(
+        {
+            "insufficient_evidence",
+            "non_product_editorial_page",
+            "non_product_service_flow",
+            "not_product_detail",
+            "other_product_type",
+            "promo_or_apply_flow",
+            "supporting_terms_or_rates_page",
+        }
+    )
 
 
 def _location_gated_structured_page_can_be_detail(
@@ -5731,7 +5934,12 @@ def _build_detail_discovery_metadata(
     ai_score: AiParallelCandidateScore | None,
     page_evidence: PageEvidenceAssessment,
     ai_unavailable: bool = False,
+    verified_coverage_review_source: bool = False,
+    verified_coverage_lending_review_source: bool = False,
 ) -> dict[str, Any]:
+    verified_coverage_review_source = (
+        verified_coverage_review_source or verified_coverage_lending_review_source
+    )
     combined = _candidate_combined_score(candidate, {candidate.normalized_url: ai_score} if ai_score is not None else {})
     if page_evidence.page_evidence_score >= 7 and combined >= 8:
         confidence = "high"
@@ -5771,12 +5979,21 @@ def _build_detail_discovery_metadata(
                     )
                     else ""
                 ),
+                (
+                    _VERIFIED_COVERAGE_REVIEW_REASON
+                    if verified_coverage_review_source
+                    else ""
+                ),
             ]
         )
     )
     return {
-        "selection_path": _selection_path(candidate=candidate, ai_score=ai_score, ai_unavailable=ai_unavailable),
-        "selection_confidence": confidence,
+        "selection_path": (
+            _VERIFIED_COVERAGE_REVIEW_REASON
+            if verified_coverage_review_source
+            else _selection_path(candidate=candidate, ai_score=ai_score, ai_unavailable=ai_unavailable)
+        ),
+        "selection_confidence": "review" if verified_coverage_review_source else confidence,
         "selection_reason_codes": [code for code in selection_reason_codes if code],
         "candidate_origin": candidate.origin,
         "heuristic_score": candidate.heuristic_score,
@@ -7412,6 +7629,33 @@ def _product_type_description_terms(product_type_definition: dict[str, Any]) -> 
         if len(tokens) >= 16:
             break
     return tokens
+
+
+def _apply_bank_product_type_discovery_aliases(
+    *,
+    bank_code: str,
+    product_type: str,
+    product_type_definition: dict[str, Any],
+) -> dict[str, Any]:
+    aliases = _BANK_PRODUCT_TYPE_DISCOVERY_ALIASES.get(
+        (str(bank_code).strip().upper(), _canonical_product_type_code(product_type)),
+        (),
+    )
+    if not aliases:
+        return product_type_definition
+    return {
+        **product_type_definition,
+        "discovery_keywords": _dedupe_preserve_order(
+            [
+                *[
+                    str(item).strip().lower()
+                    for item in product_type_definition.get("discovery_keywords", [])
+                    if str(item).strip()
+                ],
+                *aliases,
+            ]
+        ),
+    }
 
 
 def _product_type_identity_keywords(product_type: str, product_type_definition: dict[str, Any]) -> list[str]:

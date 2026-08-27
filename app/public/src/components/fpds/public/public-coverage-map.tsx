@@ -10,21 +10,24 @@ import {
 } from "@/lib/public-locale";
 import { cn } from "@/lib/utils";
 
-const COUNTRY_MARKERS: Record<string, { x: number; y: number }> = {
-  AU: { x: 526, y: 226 },
-  BR: { x: 208, y: 205 },
-  CA: { x: 112, y: 78 },
-  CN: { x: 470, y: 132 },
-  DE: { x: 352, y: 102 },
-  FR: { x: 338, y: 114 },
-  GB: { x: 327, y: 94 },
-  IN: { x: 439, y: 161 },
-  JP: { x: 527, y: 130 },
-  KR: { x: 510, y: 132 },
-  MX: { x: 137, y: 151 },
-  NZ: { x: 569, y: 239 },
-  SG: { x: 472, y: 194 },
-  US: { x: 127, y: 116 }
+const COUNTRY_MARKERS: Record<
+  string,
+  { x: number; y: number; labelDx?: number; labelDy?: number }
+> = {
+  AU: { x: 848.24, y: 366.6 },
+  BR: { x: 360.39, y: 327.33 },
+  CA: { x: 273.07, y: 87.58 },
+  CN: { x: 758.23, y: 148.07 },
+  DE: { x: 523.3, y: 101.1, labelDx: 18, labelDy: -8 },
+  FR: { x: 505.13, y: 115.47, labelDx: -19, labelDy: 19 },
+  GB: { x: 492.62, y: 89.56, labelDx: -17, labelDy: -12 },
+  IN: { x: 708.87, y: 200.43 },
+  JP: { x: 841.98, y: 146.95, labelDx: 17, labelDy: -10 },
+  KR: { x: 816.56, y: 147.92, labelDx: -17, labelDy: 19 },
+  MX: { x: 231.43, y: 189.7 },
+  NZ: { x: 920.57, y: 418.71 },
+  SG: { x: 783.27, y: 270.31, labelDy: 19 },
+  US: { x: 261.32, y: 135.25 }
 };
 
 export function PublicCoverageMap({
@@ -53,7 +56,7 @@ export function PublicCoverageMap({
   return (
     <aside
       aria-labelledby="coverage-map-title"
-      className="min-w-0 border-y border-foreground/20 bg-card/55 px-4 py-4 md:px-5"
+      className="min-w-0 rounded-xl border border-foreground/15 bg-card/70 p-4 md:p-5"
     >
       <div className="flex items-end justify-between gap-4">
         <div>
@@ -67,43 +70,57 @@ export function PublicCoverageMap({
         </span>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-lg border border-border/80 bg-background/45 p-2">
+      <div className="mt-4 overflow-hidden rounded-lg border border-border/80 bg-background/45">
         <svg
           aria-label={copy.title}
-          className="aspect-[2.15/1] w-full"
+          className="mx-auto block aspect-[2/1] w-full"
+          preserveAspectRatio="xMidYMid meet"
           role="img"
-          viewBox="0 0 600 280"
+          viewBox="55 27.5 890 445"
         >
-          <g className="fill-none stroke-border/60" strokeWidth="1">
-            <path d="M20 70H580M20 140H580M20 210H580" strokeDasharray="3 7" />
-            <path d="M150 24V256M300 24V256M450 24V256" strokeDasharray="3 7" />
+          <title>{copy.title}</title>
+          <g className="fill-none stroke-border/70" strokeDasharray="2 11" strokeWidth="1.25">
+            <path d="M68 135Q500 91 932 135M48 250H952M68 365Q500 409 932 365" />
+            <path d="M250 32Q166 250 250 468M500 24V476M750 32Q834 250 750 468" />
           </g>
-          <g className="fill-muted stroke-foreground/20" strokeLinejoin="round" strokeWidth="1.4">
-            <path d="M44 58 82 34l69 8 42 30-9 28-27 9-19 31-31 13-17-31-28-16-22-24Z" />
-            <path d="m170 153 39 10 24 34-8 38-24 33-15-40-22-31Z" />
-            <path d="m302 72 42-18 50 12 24 25-27 17-43-3-30 15-26-18Z" />
-            <path d="m349 116 44 8 26 35-17 64-33 27-24-49-17-46Z" />
-            <path d="m393 72 79-26 83 25 20 34-31 31-47-2-28 31-39-12-16-35-28-24Z" />
-            <path d="m486 200 39-20 48 20-9 37-49 11-34-25Z" />
-            <path d="m81 24 30-13 29 13-16 19-33 3Z" />
-          </g>
+          <image
+            aria-hidden="true"
+            height="500"
+            href="/world-map-equal-earth.svg"
+            preserveAspectRatio="xMidYMid meet"
+            width="1000"
+          />
           {markers.map((country) => {
             const point = COUNTRY_MARKERS[country.code];
             const active = country.code === currentCountryCode;
+            const labelX = point.x + (point.labelDx ?? 0);
+            const labelY = point.y + (point.labelDy ?? -15);
             return (
               <g aria-hidden="true" key={country.code}>
+                <circle
+                  className={cn(active ? "fill-maple/15" : "fill-primary/12")}
+                  cx={point.x}
+                  cy={point.y}
+                  r={active ? 18 : 14}
+                />
                 <circle
                   className={cn(active ? "fill-maple stroke-background" : "fill-primary stroke-background")}
                   cx={point.x}
                   cy={point.y}
-                  r={active ? 6.5 : 5}
-                  strokeWidth="3"
+                  r={active ? 8 : 6.5}
+                  strokeWidth="4"
                 />
                 <text
-                  className="fill-foreground font-mono text-[10px] font-bold"
+                  className="fill-foreground font-mono text-[21px] font-bold"
+                  style={{
+                    paintOrder: "stroke",
+                    stroke: "var(--card)",
+                    strokeLinejoin: "round",
+                    strokeWidth: 7
+                  }}
                   textAnchor="middle"
-                  x={point.x}
-                  y={point.y - 10}
+                  x={labelX}
+                  y={labelY}
                 >
                   {country.code}
                 </text>
@@ -125,6 +142,14 @@ export function PublicCoverageMap({
             const productCount = formatPublicMessage(copy.products, {
               count: new Intl.NumberFormat(getIntlLocale(normalizedLocale)).format(country.count)
             });
+            const bankCount =
+              typeof country.bank_count === "number"
+                ? formatPublicMessage(copy.banks, {
+                    count: new Intl.NumberFormat(getIntlLocale(normalizedLocale)).format(
+                      Math.max(0, country.bank_count)
+                    )
+                  })
+                : null;
             return (
               <li
                 aria-current={active ? "true" : undefined}
@@ -139,8 +164,14 @@ export function PublicCoverageMap({
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{countryName}</span>
-                  <span className="mt-0.5 block whitespace-nowrap text-xs font-semibold tabular-nums text-muted-foreground">
-                    {productCount}
+                  <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-semibold tabular-nums text-muted-foreground">
+                    <span className="whitespace-nowrap">{productCount}</span>
+                    {bankCount ? (
+                      <>
+                        <span aria-hidden="true" className="text-border">·</span>
+                        <span className="whitespace-nowrap">{bankCount}</span>
+                      </>
+                    ) : null}
                   </span>
                 </span>
                 {active ? <Check className="size-3.5 shrink-0 text-maple" aria-hidden="true" /> : null}

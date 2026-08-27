@@ -1148,6 +1148,7 @@ export function getPublicInformationNotice(locale: string): PublicInformationNot
 }
 
 type PublicCoverageCopy = {
+  banks: string;
   description: string;
   products: string;
   title: string;
@@ -1157,20 +1158,23 @@ type PublicCoverageCopy = {
 const PUBLIC_COVERAGE_COPY: Record<PublicLocale, PublicCoverageCopy> = {
   en: {
     title: "Current collection coverage",
-    description: "Published products by country",
+    description: "Published products and banks by country",
     products: "{count} products",
+    banks: "{count} banks",
     unavailable: "Country coverage is temporarily unavailable."
   },
   ko: {
     title: "현재 수집 국가",
-    description: "국가별 공개 상품 수",
+    description: "국가별 공개 상품·은행 수",
     products: "상품 {count}개",
+    banks: "은행 {count}곳",
     unavailable: "국가별 수집 현황을 불러올 수 없습니다."
   },
   ja: {
     title: "現在の収集対象国",
-    description: "国別の公開商品数",
+    description: "国別の公開商品・銀行数",
     products: "{count} 件の商品",
+    banks: "{count} 行",
     unavailable: "国別の収集状況を読み込めません。"
   }
 };

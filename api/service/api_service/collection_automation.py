@@ -298,6 +298,8 @@ def load_recoverable_collection_review_task_ids(connection: Any, *, limit: int) 
               ) ?| ARRAY[
                   'multi_product_family_overview',
                   'hub_page_not_detail',
+                  'verified_coverage_review_source',
+                  'verified_coverage_lending_review_source',
                   'non_product_service_flow',
                   'non_product_editorial_page'
               ]
@@ -309,6 +311,8 @@ def load_recoverable_collection_review_task_ids(connection: Any, *, limit: int) 
               ) ?| ARRAY[
                   'multi_product_family_overview',
                   'hub_page_not_detail',
+                  'verified_coverage_review_source',
+                  'verified_coverage_lending_review_source',
                   'non_product_service_flow',
                   'non_product_editorial_page'
               ]
@@ -380,6 +384,26 @@ def load_due_catalog_item_ids(
         ) AS latest_run ON true
         WHERE sci.status = 'active'
           AND sci.product_type = ANY(%(product_types)s::text[])
+          AND (
+              sci.coverage_source_url IS NOT NULL
+              OR EXISTS (
+                  SELECT 1
+                  FROM source_registry_item AS active_detail
+                  WHERE active_detail.bank_code = sci.bank_code
+                    AND active_detail.country_code = sci.country_code
+                    AND active_detail.product_type = sci.product_type
+                    AND active_detail.status = 'active'
+                    AND active_detail.discovery_role = 'detail'
+              )
+              OR NOT EXISTS (
+                  SELECT 1
+                  FROM ingestion_run AS quarantined_run
+                  WHERE COALESCE(quarantined_run.run_metadata ->> 'country_code', quarantined_run.country_code) = sci.country_code
+                    AND COALESCE(quarantined_run.run_metadata ->> 'bank_code', '') = sci.bank_code
+                    AND COALESCE(quarantined_run.run_metadata ->> 'product_type', '') = sci.product_type
+                    AND quarantined_run.run_metadata #>> '{catalog_scope_quarantine,status}' = 'quarantined'
+              )
+          )
           AND (
               latest_run.latest_started_at IS NULL
               OR latest_run.latest_started_at < now() - make_interval(hours => %(interval_hours)s)

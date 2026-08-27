@@ -489,13 +489,24 @@ def _compute_validation_issue_codes(
             ]
             if str(code).strip()
         }
-        if (
-            discovery_reason_codes.intersection({"multi_product_family_overview", "hub_page_not_detail"})
-            and not _has_deterministic_sibling_lending_boundary(
-                candidate_record=candidate_record,
-                field_evidence_links=field_evidence_links,
+        verified_coverage_review_source = bool(
+            discovery_reason_codes.intersection(
+                {
+                    "verified_coverage_review_source",
+                    "verified_coverage_lending_review_source",
+                }
             )
-        ):
+        )
+        unresolved_family_boundary = discovery_reason_codes.intersection(
+            {
+                "multi_product_family_overview",
+                "hub_page_not_detail",
+            }
+        ) and not _has_deterministic_sibling_lending_boundary(
+            candidate_record=candidate_record,
+            field_evidence_links=field_evidence_links,
+        )
+        if verified_coverage_review_source or unresolved_family_boundary:
             issues.add("ambiguous_product_boundary")
 
     required_identity = {

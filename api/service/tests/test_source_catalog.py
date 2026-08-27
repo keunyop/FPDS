@@ -14,6 +14,7 @@ from api_service.source_catalog import (
     HomepageCandidate,
     HomepageSourceGenerationResult,
     PageEvidenceAssessment,
+    _build_detail_discovery_metadata,
     _build_source_catalog_collection_plan,
     _build_homepage_self_candidate,
     _generate_sources_from_homepage,
@@ -29,6 +30,7 @@ from api_service.source_catalog import (
     _dedupe_detail_rows_by_product_identity,
     _dedupe_generated_source_rows,
     _discover_detail_companion_links,
+    _exclude_terminal_404_supporting_rows,
     _supporting_source_is_bounded_to_selected_details,
     _extract_allowed_links,
     _generate_bank_code,
@@ -544,6 +546,183 @@ class SourceCatalogTests(unittest.TestCase):
                 )
             )
             scorer.assert_not_called()
+
+    def test_terminal_404_supporting_source_is_not_reactivated(self) -> None:
+        connection = _QueuedConnection(
+            [
+                [{"source_id": "AUTO-B2B-MOR-stale"}],
+                1,
+            ]
+        )
+        rows = [
+            {
+                "source_id": "AUTO-B2B-MOR-detail",
+                "discovery_role": "detail",
+            },
+            {
+                "source_id": "AUTO-B2B-MOR-stale",
+                "discovery_role": "linked_pdf",
+            },
+        ]
+
+        retained, excluded = _exclude_terminal_404_supporting_rows(connection, rows)
+
+        self.assertEqual(
+            [row["source_id"] for row in retained],
+            ["AUTO-B2B-MOR-detail"],
+        )
+        self.assertEqual(excluded, ["AUTO-B2B-MOR-stale"])
+        latest_sql, latest_params = connection.calls[0]
+        self.assertIn("latest_source_attempt", latest_sql)
+        self.assertIn("stage_status = 'failed'", latest_sql)
+        self.assertEqual(
+            latest_params["source_ids"],
+            ["AUTO-B2B-MOR-stale"],
+        )
+        update_sql, update_params = connection.calls[1]
+        self.assertIn("terminal_404_supporting_source", update_sql)
+        self.assertEqual(update_params["source_ids"], ["AUTO-B2B-MOR-stale"])
+
+    def test_verified_coverage_exception_is_product_agnostic_review_only_and_bounded(self) -> None:
+        url = "https://www.alternabank.ca/en/personal/homebuying"
+
+        def candidate(origin: str) -> HomepageCandidate:
+            return HomepageCandidate(
+                normalized_url=url,
+                raw_url=url,
+                anchor_text="Homebuying",
+                source_type="html",
+                origin=origin,
+                heuristic_score=3,
+                supporting_signal=False,
+                seed_source_id=None,
+                source_name_hint=None,
+                priority_hint=None,
+                expected_fields_hint=[],
+            )
+
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="detail",
+            relevance_score=9.5,
+            confidence_band="high",
+            reason_codes=["product_type_semantic_match"],
+            short_rationale="Official mortgage coverage page.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=3,
+            page_evidence_reason_codes=[
+                "product_type_semantic_match",
+                "pricing_or_feature_signal",
+            ],
+            page_title="Alterna Bank - Homebuying",
+            primary_heading=None,
+            heading_match=False,
+            attribute_signal_count=1,
+            negative_signal_count=0,
+            product_identity_match=False,
+        )
+
+        self.assertFalse(
+            _candidate_promotes_to_detail(
+                candidate=candidate("verified_coverage_source"),
+                ai_score=ai_score,
+                page_evidence=evidence,
+            )
+        )
+        self.assertTrue(
+            _candidate_promotes_to_detail(
+                candidate=candidate("verified_coverage_source"),
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_verified_coverage_review_source=True,
+            )
+        )
+        self.assertFalse(
+            _candidate_promotes_to_detail(
+                candidate=candidate("homepage_or_hub_link"),
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_verified_coverage_review_source=True,
+            )
+        )
+        metadata = _build_detail_discovery_metadata(
+            candidate=candidate("verified_coverage_source"),
+            ai_score=ai_score,
+            page_evidence=evidence,
+            verified_coverage_review_source=True,
+        )
+        self.assertEqual(
+            metadata["selection_path"],
+            "verified_coverage_review_source",
+        )
+        self.assertEqual(metadata["selection_confidence"], "review")
+        self.assertIn(
+            "verified_coverage_review_source",
+            metadata["selection_reason_codes"],
+        )
+
+    def test_verified_coverage_family_overview_is_review_only_without_structured_markup(self) -> None:
+        url = "https://www.examplebank.ca/personal/banking/saving-accounts"
+        candidate = HomepageCandidate(
+            normalized_url=url,
+            raw_url=url,
+            anchor_text="Personal Savings Accounts",
+            source_type="html",
+            origin="verified_coverage_source",
+            heuristic_score=5,
+            supporting_signal=True,
+            seed_source_id=None,
+            source_name_hint=None,
+            priority_hint=None,
+            expected_fields_hint=[],
+        )
+        ai_score = AiParallelCandidateScore(
+            candidate_url=url,
+            predicted_role="supporting_html",
+            relevance_score=8.0,
+            confidence_band="high",
+            reason_codes=["hub_page_not_detail"],
+            short_rationale="Official savings product family page.",
+        )
+        evidence = PageEvidenceAssessment(
+            page_evidence_score=10,
+            page_evidence_reason_codes=[
+                "product_identity_signal",
+                "title_semantic_match",
+                "url_product_identity_signal",
+                "product_type_semantic_match",
+                "pricing_or_feature_signal",
+                "multi_product_family_overview",
+            ],
+            page_title="Personal Savings Accounts | Example Bank",
+            primary_heading="Personal Savings Accounts",
+            heading_match=True,
+            attribute_signal_count=3,
+            negative_signal_count=0,
+            product_identity_match=True,
+        )
+
+        self.assertTrue(
+            _candidate_promotes_to_detail(
+                candidate=candidate,
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_family_overview=True,
+                allow_verified_coverage_review_source=True,
+            )
+        )
+        self.assertFalse(
+            _candidate_promotes_to_detail(
+                candidate=HomepageCandidate(
+                    **{**candidate.__dict__, "origin": "homepage_or_hub_link"}
+                ),
+                ai_score=ai_score,
+                page_evidence=evidence,
+                allow_family_overview=True,
+                allow_verified_coverage_review_source=True,
+            )
+        )
 
     def test_country_code_requires_iso_alpha_2_shape(self) -> None:
         self.assertEqual(_normalize_country_code(" us "), "US")
@@ -3905,7 +4084,36 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(result["selected_source_ids"], [])
         self.assertEqual(result["materialized_items"], [])
         self.assertEqual(result["workflow_state"], "queued")
+        self.assertIn("sci.status = 'active'", connection.calls[0][0])
+        self.assertIn("catalog_scope_quarantine,status", connection.calls[0][0])
+        self.assertIn("active_detail.discovery_role = 'detail'", connection.calls[0][0])
         launch_runner.assert_called_once()
+
+    def test_start_source_catalog_collection_rejects_inactive_catalog_item(self) -> None:
+        connection = _QueuedConnection([[]])
+
+        with patch(
+            "api_service.source_catalog._launch_source_catalog_collection_runner"
+        ) as launch_runner:
+            with self.assertRaises(SourceRegistryError) as captured:
+                start_source_catalog_collection(
+                    connection,
+                    catalog_item_ids=["catalog-ca-b2b-credit-card"],
+                    actor={
+                        "user_id": "usr-001",
+                        "role": "admin",
+                        "email": "admin@example.com",
+                    },
+                    request_context={
+                        "request_id": "req-001",
+                        "ip_address": "127.0.0.1",
+                        "user_agent": "test",
+                    },
+                )
+
+        self.assertEqual(captured.exception.code, "source_catalog_not_found")
+        self.assertIn("sci.status = 'active'", connection.calls[0][0])
+        launch_runner.assert_not_called()
 
     def test_launch_source_catalog_collection_runner_spawns_one_process_for_full_plan(self) -> None:
         plan = {
@@ -4607,6 +4815,73 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(detail_rows[0]["normalized_url"], candidate_url)
         self.assertEqual(detail_rows[0]["discovery_metadata"]["ai_predicted_role"], "supporting_html")
         self.assertIn("strong_page_evidence_detail_override", detail_rows[0]["discovery_metadata"]["selection_reason_codes"])
+
+    def test_generate_sources_from_homepage_recognizes_eq_personal_account_as_chequing(self) -> None:
+        homepage_html = """
+        <html>
+          <body>
+            <a href="/personal-banking/personal-account">Personal Account</a>
+            <a href="/personal-banking/notice-savings-account">Notice Savings Account</a>
+          </body>
+        </html>
+        """
+        detail_html = """
+        <html>
+          <head><title>EQ Bank Personal Account</title></head>
+          <body>
+            <h1>Personal Account</h1>
+            <p>Acts like chequing for everyday transactions while earning interest.</p>
+            <p>No monthly fees and unlimited transactions including Interac e-Transfers.</p>
+          </body>
+        </html>
+        """
+
+        candidate_url = "https://www.eqbank.ca/personal-banking/personal-account"
+        with (
+            patch("api_service.source_catalog.fetch_text", side_effect=[homepage_html, detail_html, detail_html]),
+            patch("api_service.source_catalog._load_seed_entry_url", return_value=None),
+            patch("api_service.source_catalog._load_seed_detail_hints", return_value=[]),
+            patch("api_service.source_catalog._load_seed_supporting_hints", return_value=[]),
+            patch(
+                "api_service.source_catalog._score_candidate_links_with_ai",
+                return_value=AiParallelScoringResult(
+                    scores={
+                        candidate_url: AiParallelCandidateScore(
+                            candidate_url=candidate_url,
+                            predicted_role="detail",
+                            relevance_score=9.0,
+                            confidence_band="high",
+                            reason_codes=["product_type_semantic_match", "detail_page_layout_signal"],
+                            short_rationale="The named Personal Account explicitly acts like chequing.",
+                        )
+                    },
+                    notes=[],
+                ),
+            ),
+        ):
+            result = _generate_sources_from_homepage(
+                bank_code="EQBANK",
+                bank_name="EQ Bank (Equitable Bank)",
+                country_code="CA",
+                product_type="chequing",
+                product_type_definition={
+                    **_product_type_definition("chequing"),
+                    "description": "Chequing account for everyday transactions, transfers, fees, and debit payments.",
+                    "discovery_keywords": ["chequing account", "everyday transactions", "monthly fee"],
+                    "expected_fields": ["product_name", "monthly_fee", "included_transactions"],
+                },
+                homepage_url="https://www.eqbank.ca/",
+                source_language="en",
+            )
+
+        detail_rows = [item for item in result.rows if item["discovery_role"] == "detail"]
+        self.assertEqual(len(detail_rows), 1, (result.discovery_notes, result.rows))
+        self.assertEqual(detail_rows[0]["normalized_url"], candidate_url)
+        self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
+        self.assertIn(
+            "product_identity_signal",
+            detail_rows[0]["discovery_metadata"]["page_evidence_reason_codes"],
+        )
 
     def test_chequing_support_pages_do_not_override_ai_supporting_role(self) -> None:
         cases = [
@@ -6102,6 +6377,71 @@ class SourceCatalogTests(unittest.TestCase):
             "chequing", "savings", "gic", "credit-card", "mortgage", "personal-loan", "line-of-credit"
         ):
             self.assertIn(f"('{product_type}',", migration_sql)
+
+    def test_three_bank_scope_migration_pins_verified_routes_and_excludes_known_empty_scopes(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        migration_sql = (
+            repo_root / "db" / "migrations" / "0042_three_bank_partial_run_scope_hardening.sql"
+        ).read_text(encoding="utf-8")
+
+        for coverage_url in (
+            "https://bridgewaterbank.ca/investments/gic-accounts/",
+            "https://bridgewaterbank.ca/mortgages/my-mortgage-solution/",
+            "https://bridgewaterbank.ca/savings/my-savings-acccount/",
+            "https://www.eqbank.ca/personal-banking/personal-account",
+            "https://www.eqbank.ca/personal-banking/gics",
+            "https://www.eqbank.ca/residential/heloc",
+            "https://www.eqbank.ca/reverse-mortgage",
+            "https://www.eqbank.ca/personal-banking/notice-savings-account",
+            "https://www.fairstone.ca/en/home-equity-loans/second-mortgage",
+            "https://www.fairstone.ca/en/loans/personal-loans",
+        ):
+            self.assertIn(coverage_url, migration_sql)
+        for bank_code, product_type in (
+            ("BRIDGEWATER", "chequing"),
+            ("BRIDGEWATER", "credit-card"),
+            ("BRIDGEWATER", "line-of-credit"),
+            ("BRIDGEWATER", "personal-loan"),
+            ("EQBANK", "credit-card"),
+            ("EQBANK", "personal-loan"),
+            ("FAIRSTONE", "chequing"),
+            ("FAIRSTONE", "credit-card"),
+            ("FAIRSTONE", "gic"),
+            ("FAIRSTONE", "line-of-credit"),
+            ("FAIRSTONE", "savings"),
+        ):
+            self.assertIn(f"('{bank_code}', '{product_type}',", migration_sql)
+        self.assertIn("UPDATE source_registry_item AS source", migration_sql)
+        self.assertIn("'scope_outcome', 'excluded_from_collection'", migration_sql)
+        self.assertIn("0042_three_bank_partial_run_scope_hardening.sql", migration_sql)
+        self.assertNotIn("DELETE FROM source_registry", migration_sql)
+
+    def test_generic_zero_detail_migration_quarantines_unverified_blanket_coverage(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        migration_sql = (
+            repo_root
+            / "db"
+            / "migrations"
+            / "0043_generic_zero_detail_scope_quarantine.sql"
+        ).read_text(encoding="utf-8")
+
+        for coverage_url in (
+            "https://www.fnbc.ca/personal/banking/saving-accounts",
+            "https://www.haventreebank.com/en-CA/accounts/everyday-growth-account",
+            "https://www.homeequitybank.ca/products/gic/",
+            "https://www.homeequitybank.ca/products/chip-reverse-mortgage/",
+        ):
+            self.assertIn(coverage_url, migration_sql)
+        self.assertIn(
+            "catalog.change_reason = 'Canada recognized bank full active Product Type coverage baseline'",
+            migration_sql,
+        )
+        self.assertIn("active_detail.discovery_role = 'detail'", migration_sql)
+        self.assertIn("successful_run.source_success_count > 0", migration_sql)
+        self.assertIn("legacy_blanket_coverage_without_collection_evidence", migration_sql)
+        self.assertIn("not_currently_offered_asserted', false", migration_sql)
+        self.assertIn("UPDATE source_registry_item AS source", migration_sql)
+        self.assertNotIn("DELETE FROM source_registry", migration_sql)
 
     def test_coverage_evidence_migration_is_additive_and_auditable(self) -> None:
         repo_root = Path(__file__).resolve().parents[3]

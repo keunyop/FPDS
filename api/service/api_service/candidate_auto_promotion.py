@@ -507,8 +507,20 @@ def _has_ambiguous_product_boundary(row: dict[str, Any]) -> bool:
         ]
         if str(code).strip()
     }
+    if reason_codes.intersection(
+        {
+            "verified_coverage_review_source",
+            "verified_coverage_lending_review_source",
+        }
+    ):
+        return True
     has_boundary_signal = bool(
-        reason_codes.intersection({"multi_product_family_overview", "hub_page_not_detail"})
+        reason_codes.intersection(
+            {
+                "multi_product_family_overview",
+                "hub_page_not_detail",
+            }
+        )
     )
     return has_boundary_signal and not _has_deterministic_sibling_lending_boundary(row)
 

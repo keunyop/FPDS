@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { DashboardSurface } from "@/components/fpds/public/dashboard-surface";
 import { getPublicMessages } from "@/lib/public-locale";
 import {
-  fetchPublicCountries,
   fetchPublicDashboardScatter,
   fetchPublicDashboardSummary,
+  fetchPublicHomeCountries,
   fetchPublicProducts
 } from "@/lib/public-api";
 import {
@@ -55,7 +55,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const [summaryResult, countriesResult, depositProductsResult, loanProductsResult] = await Promise.allSettled([
     fetchPublicDashboardSummary(buildDashboardSearchParams(filters)),
-    fetchPublicCountries(),
+    fetchPublicHomeCountries(filters.locale),
     fetchPublicProducts(buildDepositProductsSearchParams(filters)),
     fetchPublicProducts(buildLoanProductsSearchParams(filters))
   ]);
