@@ -193,6 +193,9 @@ This is still not a full FPDS product yet, but the ingestion core is now activel
 
 ## Client Handoff Map
 
+For an Admin-only handover, use the follow-in-order
+[minimum execution playbook](docs/01-planning/fpds-admin-handover-minimum-playbook.md).
+
 The runtime boundaries are intentionally separate:
 
 | Area | Purpose | Start here |

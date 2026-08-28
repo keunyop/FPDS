@@ -2973,3 +2973,36 @@ Read before coding:
 - Boundaries: no Public API formula, canonical product, aggregate eligibility,
   country scope, Production deployment, external map service, or unrelated
   dirty-worktree state was changed.
+
+## 2026-08-27 - FPDS Admin Minimum Handover Playbook
+
+- WBS: documentation-only Admin handover baseline; no WBS status changed.
+- Status: the follow-in-order execution playbook and primary handoff routing are
+  complete.
+- Outcome:
+  - reduced daily execution to nine gated steps: signed scope, code/assets,
+    client-owned environments, full dev rehearsal, five minimum manuals,
+    role-based training, client-led UAT, Production cutover, and ten-business-
+    day hypercare
+  - gave the Product Owner concrete checkboxes, expected evidence filenames,
+    pass criteria, and stop conditions instead of requiring them to interpret
+    a separate project-management plan
+  - retained non-negotiable Public exclusion, private-evidence/secrets handling,
+    dev-only stateful rehearsal, restore/rollback proof, independent operator
+    performance, client ownership, and final access revocation
+  - added a one-page final GO/NO-GO checklist and linked the playbook as the
+    primary Admin handover entrypoint from the root README and docs map
+- Key files:
+  - `docs/01-planning/fpds-admin-handover-minimum-playbook.md`
+  - `README.md`
+  - `docs/README.md`
+- Verification:
+  - the new cross-document Markdown links resolved locally
+  - changed-document whitespace and final-newline checks passed
+  - `git diff --check` passed after closeout
+  - no application build/test was run because this follow-up changes only
+    documentation and no runtime behavior
+- Boundaries: no credential, account, data, runtime, deployment, scheduler,
+  external service, Public surface, canonical fact, or WBS state changed.
+- Next step: fill the owner/date table at the top of the playbook, complete Step
+  1 signatures, and do not start code transfer until its stop gate is clear.

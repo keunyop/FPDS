@@ -1,7 +1,7 @@
 # FPDS Docs Map
 
 Status: Active navigation index
-Last updated: 2026-07-29
+Last updated: 2026-08-27
 
 This file is the main entrypoint for `docs/`.
 
@@ -52,6 +52,8 @@ requirements, planning, or design material.
 
 - `docs/01-planning/plan.md`: execution plan
 - `docs/01-planning/WBS.md`: current work breakdown and task status
+- `docs/01-planning/fpds-admin-handover-minimum-playbook.md`: follow-in-order
+  Admin handover checklist with evidence and stop gates
 - `docs/01-planning/canada-big5-source-registry.md`: active source coverage baseline for Phase 1
 - `docs/01-planning/fpds-customer-demo-scenario.md`: customer demo scenario for Admin collection through Public results, including AI/usage talking points and ChatGPT image prompts
 
@@ -86,6 +88,8 @@ Most commonly needed:
 ### 2.6 Client Handoff
 
 - `README.md`: runtime map, startup context, and full verification commands
+- `docs/01-planning/fpds-admin-handover-minimum-playbook.md`: primary Admin
+  execution entrypoint for the Product Owner and handover manager
 - `app/admin/README.md`: operator workflow, route/code map, and Admin safety boundaries
 - `app/public/README.md`: Public route, data, localization, and evidence boundaries
 - `api/service/README.md`: live API runtime and endpoint map
