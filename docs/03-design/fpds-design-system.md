@@ -402,8 +402,11 @@ Key rules:
 - Product Grid and Insights remain sibling surfaces
 - methodology and freshness must remain reachable
 - evidence is never exposed publicly
-- comparisons expose grounded differences without a winner, eligibility score,
-  or recommendation
+- catalog and selection-led comparisons expose grounded differences without a
+  winner, eligibility score, or recommendation
+- the Home same-type finder is the bounded `FR-PUB-021` exception: it may show
+  strict one-metric improvements only when the current and candidate values are
+  disclosed, while retaining the non-advice and non-eligibility boundary
 - use cards only when they establish a real grouping; do not make every number,
   paragraph, and action a floating card
 

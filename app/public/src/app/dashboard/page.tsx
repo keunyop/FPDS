@@ -5,7 +5,6 @@ import { getPublicMessages } from "@/lib/public-locale";
 import {
   fetchPublicDashboardScatter,
   fetchPublicDashboardSummary,
-  fetchPublicHomeCountries,
   fetchPublicProducts
 } from "@/lib/public-api";
 import {
@@ -44,18 +43,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const filters = parseDashboardPageFilters(resolvedSearchParams);
 
   let summary = null;
-  let countries = null;
   let depositProducts = null;
   let loanProducts = null;
   let scatter = null;
   let apiUnavailable = false;
-  let countriesUnavailable = false;
   let depositProductsUnavailable = false;
   let loanProductsUnavailable = false;
 
-  const [summaryResult, countriesResult, depositProductsResult, loanProductsResult] = await Promise.allSettled([
+  const [summaryResult, depositProductsResult, loanProductsResult] = await Promise.allSettled([
     fetchPublicDashboardSummary(buildDashboardSearchParams(filters)),
-    fetchPublicHomeCountries(filters.locale),
     fetchPublicProducts(buildDepositProductsSearchParams(filters)),
     fetchPublicProducts(buildLoanProductsSearchParams(filters))
   ]);
@@ -64,12 +60,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     summary = summaryResult.value;
   } else {
     apiUnavailable = true;
-  }
-
-  if (countriesResult.status === "fulfilled") {
-    countries = countriesResult.value;
-  } else {
-    countriesUnavailable = true;
   }
 
   if (depositProductsResult.status === "fulfilled") {
@@ -98,8 +88,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <DashboardSurface
       apiUnavailable={apiUnavailable}
-      countries={countries}
-      countriesUnavailable={countriesUnavailable}
       depositProducts={depositProducts}
       depositProductsUnavailable={depositProductsUnavailable}
       filters={filters}

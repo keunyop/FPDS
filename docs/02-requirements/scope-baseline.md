@@ -162,7 +162,8 @@ country.
 
 FPDS의 현재 공식 비범위 항목은 PRD의 전체 `Non-Goals`를 그대로 따른다.
 
-- 사용자 맞춤 추천
+- `FR-PUB-021`의 프로필 미사용 동일 유형 1개 공개지표 finder를 제외한
+  사용자 맞춤 추천
 - eligibility / fit matching
 - 금융기관 대상 market insight portal
 - product map / market analysis / insight mart
@@ -214,7 +215,8 @@ Phase 2는 계약 범위에 포함되지만, Phase 1 release cutline에서는 `L
 - external SaaS/Open API
 - external API auth / tenant isolation / rate limit / SLA
 - multilingual external API docs
-- personalized recommendation
+- profile-based or multi-factor personalized recommendation beyond
+  `FR-PUB-021`
 - market insight portal / product map / advanced analytics
 - public evidence exposure
 - billing / subscription

@@ -8,7 +8,6 @@ Current scope:
 - `fpds_extraction/` implements `WBS 3.5` sparse extracted draft generation, extracted artifact storage, and bounded `model_execution` persistence
 - `fpds_normalization/` implements `WBS 3.6` canonical candidate mapping, `normalized_candidate` persistence, `field_evidence_link` persistence, and normalized artifact storage
 - `fpds_validation_routing/` implements `WBS 3.7` candidate validation recheck, confidence recomputation, prototype review-task routing, and validation artifact storage
-- `fpds_result_viewer/` implements `WBS 3.8` read-only prototype viewer payload export from persisted run, candidate, and evidence rows
 - `fpds_aggregate_refresh/` implements `WBS 5.6` the retained aggregate source dataset in `public_product_projection`; dashboard metrics, rankings, and scatter are derived from it at read time
 
 Planned follow-on scope:
@@ -77,14 +76,6 @@ python -m worker.pipeline.fpds_validation_routing `
   --run-id run_20260410_3701 `
   --source-id TD-SAV-002 `
   --source-id TD-SAV-007
-```
-
-Export a run into the prototype viewer payload in dev:
-
-```powershell
-python -m worker.pipeline.fpds_result_viewer `
-  --env-file .env.dev `
-  --run-id run_20260410_3701
 ```
 
 Run aggregate refresh against the current canonical dataset in dev:
@@ -179,15 +170,6 @@ What `WBS 3.7` stores today:
 Current boundary:
 - Prototype routing mode sends every candidate to review even when validation passes
 - review decisions, canonical upsert, and change history still belong to later stages
-
-What `WBS 3.8` exports today:
-- static viewer payload JSON and browser-consumable JS for `app/prototype/index.html`
-- run summary, candidate summary, canonical payload, validation issues, and evidence excerpt data loaded from DB
-- registry-backed `source_id` labels mapped back onto persisted candidate rows for operator readability
-
-Current boundary:
-- this is a read-only prototype viewer export, not the full admin review queue or trace viewer
-- write actions, queue mutation, and deep trace drilldown remain deferred to later admin slices
 
 What `WBS 5.6` stores today:
 - one `aggregate_refresh_run` row per attempted snapshot

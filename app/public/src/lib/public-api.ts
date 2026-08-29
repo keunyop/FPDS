@@ -303,7 +303,7 @@ export async function fetchPublicCountries(): Promise<PublicCountriesResponse> {
   );
 }
 
-export async function fetchPublicHomeCountries(locale: string): Promise<PublicCountriesResponse> {
+export async function fetchPublicCoverageCountries(locale: string): Promise<PublicCountriesResponse> {
   const response = await fetchPublicCountries();
   const countries = await Promise.all(
     response.countries.map(async (country) => {

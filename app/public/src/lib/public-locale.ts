@@ -1183,6 +1183,134 @@ export function getPublicCoverageCopy(locale: string): PublicCoverageCopy {
   return PUBLIC_COVERAGE_COPY[normalizePublicLocale(locale)];
 }
 
+type PublicRecommendationCopy = {
+  annualFeeLower: string;
+  bankLabel: string;
+  bankPlaceholder: string;
+  caveat: string;
+  currentProduct: string;
+  loadProductsError: string;
+  loadingProducts: string;
+  loadingRecommendations: string;
+  metricLabels: { annualFee: string; higherRate: string; lowerRate: string; monthlyFee: string };
+  metricUnavailable: string;
+  monthlyFeeLower: string;
+  noImprovement: string;
+  noProductMatches: string;
+  noProducts: string;
+  productSearchLabel: string;
+  productSearchPlaceholder: string;
+  productTypeLabel: string;
+  productTypePlaceholder: string;
+  rateHigher: string;
+  rateLower: string;
+  recommendationsError: string;
+  reset: string;
+  retryProducts: string;
+  resultBasis: string;
+  resultTitle: string;
+  submit: string;
+  title: string;
+  viewDetails: string;
+};
+
+const PUBLIC_RECOMMENDATION_COPY: Record<PublicLocale, PublicRecommendationCopy> = {
+  en: {
+    title: 'Find a better product',
+    bankLabel: 'Bank',
+    bankPlaceholder: 'Select bank',
+    productTypeLabel: 'Product type',
+    productTypePlaceholder: 'Select type',
+    productSearchLabel: 'Product name',
+    productSearchPlaceholder: 'Search product name',
+    loadingProducts: 'Loading products…',
+    loadProductsError: 'Products could not be loaded.',
+    noProducts: 'No products found.',
+    noProductMatches: 'No matching products.',
+    submit: 'Compare',
+    reset: 'Reset',
+    retryProducts: 'Retry',
+    loadingRecommendations: 'Comparing…',
+    currentProduct: 'Current product',
+    metricUnavailable: 'The comparison metric is not published.',
+    recommendationsError: 'Products could not be compared. Try again.',
+    resultTitle: 'Better on this metric',
+    resultBasis: '{type} · {basis}',
+    noImprovement: 'No same-type product is better on {basis}.',
+    viewDetails: 'View details',
+    metricLabels: { annualFee: 'lower annual fee', higherRate: 'higher interest rate', lowerRate: 'lower interest rate', monthlyFee: 'lower monthly fee' },
+    rateHigher: '+{value} percentage points',
+    rateLower: '{value} percentage points lower',
+    monthlyFeeLower: '{value} less per month',
+    annualFeeLower: '{value} less per year',
+    caveat: 'One-metric comparison, not advice. Check all terms with the bank.'
+  },
+  ko: {
+    title: '더 나은 상품 찾기',
+    bankLabel: '은행',
+    bankPlaceholder: '은행 선택',
+    productTypeLabel: '상품유형',
+    productTypePlaceholder: '상품유형 선택',
+    productSearchLabel: '상품명',
+    productSearchPlaceholder: '상품명 검색',
+    loadingProducts: '상품 불러오는 중…',
+    loadProductsError: '상품을 불러오지 못했습니다.',
+    noProducts: '상품이 없습니다.',
+    noProductMatches: '검색 결과가 없습니다.',
+    submit: '비교하기',
+    reset: '초기화',
+    retryProducts: '다시 시도',
+    loadingRecommendations: '비교 중…',
+    currentProduct: '현재 상품',
+    metricUnavailable: '비교 지표가 공개되지 않았습니다.',
+    recommendationsError: '상품을 비교하지 못했습니다. 다시 시도해 주세요.',
+    resultTitle: '이 지표가 더 나은 상품',
+    resultBasis: '{type} · {basis}',
+    noImprovement: '{basis} 기준으로 더 나은 동일 유형 상품이 없습니다.',
+    viewDetails: '상세 보기',
+    metricLabels: { annualFee: '더 낮은 연회비', higherRate: '더 높은 금리', lowerRate: '더 낮은 금리', monthlyFee: '더 낮은 월 수수료' },
+    rateHigher: '+{value}%p',
+    rateLower: '{value}%p 낮음',
+    monthlyFeeLower: '월 {value} 낮음',
+    annualFeeLower: '연 {value} 낮음',
+    caveat: '한 가지 지표 비교이며 금융 조언이 아닙니다. 전체 조건은 은행에서 확인하세요.'
+  },
+  ja: {
+    title: 'より良い商品を探す',
+    bankLabel: '銀行',
+    bankPlaceholder: '銀行を選択',
+    productTypeLabel: '商品タイプ',
+    productTypePlaceholder: '商品タイプを選択',
+    productSearchLabel: '商品名',
+    productSearchPlaceholder: '商品名を検索',
+    loadingProducts: '商品を読み込み中…',
+    loadProductsError: '商品を読み込めませんでした。',
+    noProducts: '商品がありません。',
+    noProductMatches: '一致する商品がありません。',
+    submit: '比較する',
+    reset: 'リセット',
+    retryProducts: '再試行',
+    loadingRecommendations: '比較中…',
+    currentProduct: '現在の商品',
+    metricUnavailable: '比較指標が公開されていません。',
+    recommendationsError: '商品を比較できませんでした。もう一度お試しください。',
+    resultTitle: 'この指標がより有利な商品',
+    resultBasis: '{type} · {basis}',
+    noImprovement: '{basis}でより有利な同タイプの商品はありません。',
+    viewDetails: '詳細を見る',
+    metricLabels: { annualFee: 'より低い年会費', higherRate: 'より高い金利', lowerRate: 'より低い金利', monthlyFee: 'より低い月額手数料' },
+    rateHigher: '+{value}ポイント',
+    rateLower: '{value}ポイント低い',
+    monthlyFeeLower: '月 {value} 低い',
+    annualFeeLower: '年 {value} 低い',
+    caveat: '1つの指標による比較であり、助言ではありません。条件全体は銀行で確認してください。'
+  }
+};
+
+export function getPublicRecommendationCopy(locale: string): PublicRecommendationCopy {
+  return PUBLIC_RECOMMENDATION_COPY[normalizePublicLocale(locale)];
+}
+
 type PublicAnalyticsConsentCopy = {
   allow: string;
   choices: string;

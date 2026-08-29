@@ -15,6 +15,13 @@ Current decisions:
   makes metadata-scored evidence retrieval the current baseline.
 - Runtime admin and API reads no longer auto-reseed `bank`, `product_type_registry`, `source_registry_catalog_item`, or `source_registry_item` from committed JSON seed baselines. Empty tables now remain empty until an explicit operator write, import step, or full migration replay repopulates them.
 
+Current handoff snapshot:
+- [database migrations, schema, and ERD](../00-Scope/database-migrations-schema-erd.md)
+  lists every migration through
+  0044, records the 2026-08-29 shared-dev migration/schema observation, and
+  provides the current physical schema plus ERD. Treat the SQL files here as
+  migration authority and the handoff file as a dated environment observation.
+
 Files:
 - `migrations/0001_initial_baseline.sql`: core schema and seed data
 - `migrations/0002_admin_auth.sql`: DB-backed admin user, session, and login-attempt tables for `WBS 4.1`

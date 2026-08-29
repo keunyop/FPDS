@@ -72,32 +72,30 @@ web, API, long-running worker의 실제 운영 위치를 별도로 확정한다.
 
 인계 측에 아래 항목을 한 번에 요청한다.
 
-- [ ] release tag와 정확한 commit SHA
-- [ ] Admin transfer manifest: 포함·제외 파일 목록과 공유 파일 사유
-- [ ] Git history, branch, CI, lockfile와 runtime version
-- [ ] cloud, DB, storage, domain, DNS, TLS, LLM, monitoring 계정 목록
-- [ ] migration 목록과 현재 schema version
-- [ ] SBOM, third-party license/notice, known issue 목록
-- [ ] secret scan과 dependency/security scan 결과
+- [v] 어떻게 소스를 넘겨받을지? Git repo를 clone 하는게 좋을거 같음
+- [v] Admin transfer manifest: 포함·제외 파일 목록과 공유 파일 사유
+- [v] cloud, DB, storage, domain, DNS, TLS, LLM, monitoring의 현재 상태와
+      계정 기입 템플릿:
+      00-Scope/external-services-and-accounts.md
+- [ ] 위 템플릿의 실제 의뢰자 계정·소유자·MFA·비용·복구 항목을
+      02-Environment-And-Access/01-client-ownership-matrix.xlsx에 기입
+- [v] migration 0001~0044 목록, shared dev schema, ERD:
+      00-Scope/database-migrations-schema-erd.md
+- [ ] shared dev의 0013 적용 효과 부재 drift와 history 미기록 migration
+      증적을 정리하고
+      current schema version에 DBA/Product Owner 서명
 
 내가 확인할 일:
 
 - [ ] `app/public`이 기본 전달 package에 없는지 확인한다.
 - [ ] 실제 secret이나 private evidence가 Git/압축파일에 없는지 확인한다.
 - [ ] 전달하려는 release tag에서 clean build 증거가 있는지 확인한다.
+- [ ] 외부 서비스 문서의 미구성/부분 사용 항목을 production 완료로
+      오인하지 않았는지 확인한다.
+- [ ] migration history, fresh replay schema와 target DB schema가 일치하는지
+      확인한다.
 
-받아야 할 증거:
 
-- `01-Code-And-Assets/01-admin-transfer-manifest.md`
-- `01-Code-And-Assets/02-release-and-build-report.md`
-- `01-Code-And-Assets/03-account-and-asset-inventory.xlsx`
-- `01-Code-And-Assets/04-sbom-license-security.zip`
-
-통과 조건: release tag, transfer manifest, clean build 결과와 자산 목록이
-서로 같은 버전을 가리킨다.
-
-멈춤 조건: commit이 불명확하거나 secret이 발견되면 폐기·회전 후 다시
-검사한다.
 
 ### Step 3. 의뢰자 소유 환경을 준비한다
 

@@ -6,7 +6,7 @@ Status: `completed`
 Primary evidence base:
 - `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`
 - `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/validation-output.json`
-- `app/prototype/viewer-payload.json`
+- `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/viewer-export-output.json`
 
 ## 1. Purpose
 

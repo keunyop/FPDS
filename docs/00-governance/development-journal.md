@@ -25,6 +25,39 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of `2026-08-29` (Public finder simplification and Methodology map move,
+complete):
+
+- the Home finder now follows one compact path: published bank, available
+  Product Type, case-insensitive literal product-name filter, exact current
+  product, then comparison; selection is still local and persists no consumer
+  or financial value
+- the eyebrow, explanatory body, initial-state panel, and standing long caveat
+  are removed. Results retain one concise localized one-metric/non-advice line,
+  while loading, no-match, empty, unavailable-metric, no-improvement, error,
+  retry, reset, detail, and official-link states remain available
+- `FR-PUB-021` ranking behavior is unchanged: lower Chequing monthly fee,
+  higher Savings/GIC rate, lower Credit Card annual fee, and lower governed
+  Loan rate; ties, missing values, unsupported types, and the selected product
+  do not become candidates, and display remains capped at three
+- Home no longer renders or requests country coverage. Methodology now owns the
+  unchanged local Equal Earth map, published product/bank counts, fallback,
+  localization, freshness, and privacy behavior
+- requirements, WBS `5.55`, decision `D-070`, Public/design/runtime baselines,
+  and the UI override register reflect the explicit type/name flow and the new
+  map owner; profile-based, multi-factor, cross-type, suitability, eligibility,
+  and application recommendation remain out of scope
+- Public `pnpm run typecheck`, `pnpm run build`, and `git diff --check` passed.
+  Production-build Chrome QA passed EN `1440px`, KO `768px`, and JA exact
+  `390px`: localized no-match states appeared, `Aeroplan` returned four literal
+  matches, exact selection enabled Compare, and the CIBC Aeroplan Visa Infinite
+  Privilege Card returned three lower-annual-fee same-type candidates. All
+  viewports had no browser console error or document overflow and kept `44px`
+  minimum visible controls. Home had no coverage map; Methodology rendered it
+  at `1024px`, `705px`, and `358px` respectively. Exact-`390px` KO keyboard QA
+  confirmed visible Tab focus in order across Product Type, product search,
+  matching option, and Compare.
+
 As of `2026-08-21` (TD Credit Card precision publication proof, active):
 
 - final precision collection `collection_VU39TiCQ5NYprOMG` completed one TD
@@ -3126,3 +3159,107 @@ Read before coding:
 - Next step: apply migration `0044` through the approved deployment process and
   verify the six former collection-automation policy keys are absent in each
   target database.
+
+## 2026-08-28 - Repository Artifact Cleanup with Public Preservation
+
+- Status: non-Public cleanup complete. FPDS Public is excluded only from the
+  Admin handover and remains fully present in the repository.
+- Outcome:
+  - removed 219 tracked `tmp` logs, collection registry outputs, and test
+    persistence artifacts
+  - preserved four one-off `tmp` helpers because they include Public audit,
+    refresh, API-check, or projection-reset behavior, even though one helper's
+    retired scheduler import means it is not a current Admin runtime dependency
+  - removed the historical static prototype viewer, its worker exporter and
+    dedicated test after Admin Review Detail and Run Detail superseded it
+  - removed seven accidentally tracked Python bytecode files and local
+    regenerable root build/cache/package metadata
+  - retained `app/public`, anonymous Public API modules/tests, Vercel settings,
+    Public design/product documents, Public QA artifacts, all DB migrations,
+    aggregate refresh/health, and archive evidence
+  - replaced stale archive links to the retired static viewer with preserved
+    archived output/evidence references
+- Key files:
+  - `app/README.md`
+  - `worker/README.md`
+  - `worker/pipeline/README.md`
+  - `docs/01-planning/WBS.md`
+  - `docs/archive/00-governance/gate-b-prototype-review-note.md`
+  - `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`
+- Verification:
+  - exact Public path diff guard: passed; no Public code, API, test, deployment,
+    or Public-only document diff remains
+  - Admin and Public `pnpm run typecheck`: passed
+  - Admin and Public `pnpm run build`: passed
+  - full API suite: 431 tests passed
+  - full worker suite: 521 tests passed after removing the obsolete viewer test
+  - foundation baseline validation: passed
+  - repository project checks: passed for Admin and Public typecheck/build
+  - tracked-source checks: 83 Markdown references, 8 PowerShell syntax files,
+    and 56 JSON syntax files passed; active deleted-path references: zero
+  - `git diff --check`: passed with line-ending conversion warnings only
+  - full foundation entrypoint was run but repo-doctor stopped on ignored Public
+    Chromium QA profile data stored with a `.json` suffix but newline-delimited
+    contents; the Public artifact and harness policy were intentionally left
+    unchanged
+- Boundaries: no Public runtime/content deletion, Admin product behavior,
+  canonical/DB/object-storage data, cloud deployment, account, secret, or
+  external service changed. Existing user edits to Admin scope and handover
+  documents were preserved.
+
+## 2026-08-29 - FPDS Admin External-Service and Database Handover Inventory
+
+- WBS: documentation-only Admin handover completion; no WBS status changed.
+- Status: repository handover inventories and scope checklist complete; actual
+  account transfer, environment provisioning, migration reconciliation, and
+  Cutover remain client-executed gates.
+- Outcome:
+  - added a separate current-state inventory for GitHub, Admin compute,
+    Supabase PostgreSQL, AWS S3, Admin domain/DNS/TLS, OpenAI, monitoring,
+    secret management, official source sites, DB-backed auth, UI asset tooling,
+    and BX-PF, with safe account/ownership/security/recovery templates
+  - clearly marked Admin web/API/worker production hosting, Admin
+    domain/DNS/TLS, production monitoring, and a dedicated secret manager as
+    not ready; retained Vercel switchabank-api as a Public-read exception
+    rather than an Admin production deployment
+  - documented all 44 committed migrations through 0044 and read shared dev
+    through a read-only PostgreSQL transaction: latest history is 0044, with
+    31 base tables and two discard-only compatibility views
+  - recorded the shared-dev 0013 application-effect drift and the distinct
+    history limitations of 0009, 0014, and 0015 instead of silently declaring
+    a clean schema
+  - added the live physical schema dictionary, four bounded Mermaid ERDs,
+    reconciliation/restore checklist, and required restricted evidence paths
+  - expanded 00-Scope/scope.md into a final handover checklist and connected
+    the new files from the root README, docs map, DB README, and minimum
+    handover playbook
+- Key files:
+  - 00-Scope/external-services-and-accounts.md
+  - 00-Scope/database-migrations-schema-erd.md
+  - 00-Scope/scope.md
+  - docs/01-planning/fpds-admin-handover-minimum-playbook.md
+  - README.md
+  - docs/README.md
+  - db/README.md
+- Verification:
+  - repository migration filenames and document rows matched 44/44 with no
+    difference
+  - read-only shared-dev information_schema/pg_constraint checks found 33
+    public relations and every relation name is covered by the schema document
+  - migration_history, policy v2, Canada deposit taxonomy, columns, PKs, and
+    FKs were inspected read-only; no DB mutation or migration application ran
+  - changed local Markdown links resolved; credential-pattern scan returned no
+    finding; UTF-8, final newline, and all seven fenced blocks passed
+  - foundation baseline validation passed
+  - git diff --check passed with line-ending conversion warnings only
+- Known issue:
+  - a Mermaid CLI was not installed, so the four diagrams received structural
+    fence/entity review but not renderer execution
+  - shared dev needs an approved 0013 reconciliation and fresh-replay/schema
+    comparison before the handover checklist can be signed
+- Boundaries: no external account, credential, deployment, domain, DNS, TLS,
+  cloud resource, DB row/schema, object, canonical fact, Public behavior, or
+  runtime code changed.
+- Next step: the client owner fills the restricted ownership matrix, provisions
+  separated Admin production services, resolves the DB drift through the
+  approved DBA process, and completes rehearsal/restore/UAT before Cutover.

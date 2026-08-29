@@ -1,7 +1,7 @@
 # FPDS Docs Map
 
 Status: Active navigation index
-Last updated: 2026-08-27
+Last updated: 2026-08-29
 
 This file is the main entrypoint for `docs/`.
 
@@ -90,6 +90,12 @@ Most commonly needed:
 - `README.md`: runtime map, startup context, and full verification commands
 - `docs/01-planning/fpds-admin-handover-minimum-playbook.md`: primary Admin
   execution entrypoint for the Product Owner and handover manager
+- [Admin scope and checklist](../00-Scope/scope.md): signed Admin boundary, deliverable map, and final
+  handover checklist
+- [external services and accounts](../00-Scope/external-services-and-accounts.md): current external-service
+  inventory plus safe account/ownership template
+- [database migrations, schema, and ERD](../00-Scope/database-migrations-schema-erd.md): complete migration catalogue,
+  shared-dev schema status, data dictionary, and ERD
 - `app/admin/README.md`: operator workflow, route/code map, and Admin safety boundaries
 - `app/public/README.md`: Public route, data, localization, and evidence boundaries
 - `api/service/README.md`: live API runtime and endpoint map

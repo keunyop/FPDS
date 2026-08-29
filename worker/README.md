@@ -16,7 +16,6 @@ Current implementation slices:
 - `WBS 3.5` extraction flow in `worker/pipeline/fpds_extraction/`
 - `WBS 3.6` normalization mapping in `worker/pipeline/fpds_normalization/`
 - `WBS 3.7` validation/confidence routing in `worker/pipeline/fpds_validation_routing/`
-- `WBS 3.8` result-viewer payload export in `worker/pipeline/fpds_result_viewer/`
 
 Runtime invariants:
 - one ingestion run owns exactly one normalized ISO alpha-2 country code;

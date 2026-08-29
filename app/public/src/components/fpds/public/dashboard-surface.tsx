@@ -2,14 +2,13 @@ import { ArrowRight, CreditCard, ExternalLink, FilterX, Landmark, PiggyBank, Ref
 import Link from "next/link";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
-import { PublicCoverageMap } from "@/components/fpds/public/public-coverage-map";
+import { ProductRecommendationFinder } from "@/components/fpds/public/product-recommendation-finder";
 import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { getIntlLocale, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import {
-  type PublicCountriesResponse,
   type PublicDashboardScatterResponse,
   type PublicDashboardSummaryResponse,
   type PublicProductsResponse
@@ -18,8 +17,6 @@ import { buildPublicHref, type DashboardPageFilters } from "@/lib/public-query";
 
 type DashboardSurfaceProps = {
   apiUnavailable: boolean;
-  countries: PublicCountriesResponse | null;
-  countriesUnavailable: boolean;
   depositProducts: PublicProductsResponse | null;
   depositProductsUnavailable: boolean;
   filters: DashboardPageFilters;
@@ -31,8 +28,6 @@ type DashboardSurfaceProps = {
 
 export function DashboardSurface({
   apiUnavailable,
-  countries,
-  countriesUnavailable,
   depositProducts,
   depositProductsUnavailable,
   filters,
@@ -93,7 +88,7 @@ export function DashboardSurface({
     <main className="mx-auto min-w-0 w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
       <div className="flex min-w-0 flex-col gap-10 md:gap-14">
         <section className="border-y border-foreground/15 py-10 md:py-14">
-          <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.62fr)] lg:items-center">
+          <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(23rem,0.72fr)] lg:items-start">
             <div className="min-w-0 max-w-3xl">
               <h1 className="text-balance max-w-4xl font-display text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground [overflow-wrap:anywhere]">
                 {designCopy.homeTitle}
@@ -128,11 +123,10 @@ export function DashboardSurface({
                 ) : null}
               </div>
             </div>
-            <PublicCoverageMap
-              countries={countries?.countries ?? []}
-              currentCountryCode={filters.countryCode}
+            <ProductRecommendationFinder
+              banks={summary.breakdowns.products_by_bank}
+              countryCode={filters.countryCode}
               locale={filters.locale}
-              unavailable={countriesUnavailable}
             />
           </div>
         </section>

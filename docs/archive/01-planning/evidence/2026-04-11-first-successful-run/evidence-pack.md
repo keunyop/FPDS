@@ -49,7 +49,7 @@ Stage run ids:
 | Source coverage | Met | all 3 target products appear in the live viewer payload |
 | Source type coverage | Met | parse output includes HTML detail, current values HTML, and governing PDF sources |
 | Pipeline execution | Met | discovery through validation and viewer export all completed |
-| Reviewability | Met | live viewer payload exported to `app/prototype/` and can be opened in the static viewer |
+| Reviewability | Met | viewer payload was exported and verified during the prototype; the static UI was later superseded by Admin Review and Run Detail |
 | Evidence linkage | Met | candidate-level evidence links exported with section anchors and excerpts |
 | Findings closure | Pending | covered next in `WBS 3.10` findings memo |
 
@@ -155,12 +155,13 @@ Sample C. `TD ePremium Savings Account` interest calculation:
 
 ## 8. Viewer Equivalent
 
-Live viewer export artifacts:
-- [viewer-payload.json](/app/prototype/viewer-payload.json)
-- [viewer-payload.js](/app/prototype/viewer-payload.js)
-- [index.html](/app/prototype/index.html)
+Preserved prototype evidence:
+- [viewer export output](./viewer-export-output.json)
+- [validation output](./validation-output.json)
 
-For prototype acceptance, the static viewer with live payload is used as the `viewer screenshot or equivalent` artifact.
+The former `app/prototype` static viewer was removed after authenticated Admin
+Review Detail and Run Detail superseded it. The archived outputs preserve the
+Gate B evidence without retaining duplicate runtime code.
 
 ## 9. Raw Run Artifacts
 

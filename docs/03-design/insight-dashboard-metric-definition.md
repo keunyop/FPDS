@@ -301,6 +301,31 @@ Implemented country-coverage map refinement later on `2026-08-22`:
   surfaces; this changes visible Home composition, not freshness calculation
   or publication eligibility.
 
+Implemented same-type primary-metric finder on `2026-08-29`:
+
+- The finder owns Home's first-viewport task. The Equal Earth map and country
+  counts move to a bounded Methodology coverage section; their data and asset
+  contracts remain unchanged, and Home no longer loads the coverage payload.
+- Bank choices come from the selected country's unfiltered Public dashboard
+  bank breakdown. After bank selection, the browser loads only that bank's
+  active Public products. The visitor explicitly selects an available Product
+  Type, then narrows product names by case-insensitive literal substring and
+  selects one exact record. A submitted product loads at most the top 100
+  exact-type candidates ordered by the applicable primary metric.
+- The deterministic rules are Chequing monthly fee ascending, Savings/GIC
+  display rate descending, Credit Card annual fee ascending, and governed Loan
+  display rate ascending. Only strictly better disclosed values remain, the
+  selected product is excluded, and display stops after three candidates.
+- The compact finder omits explanatory eyebrow/body copy and any initial-state
+  panel. It shows the selected record, exact Product Type, directional metric
+  basis, candidate values/deltas, public detail/official actions, and a concise
+  result-only one-metric/non-advice boundary. Missing metric, no-improvement,
+  empty-bank, name-no-match, loading, and request failure are localized states.
+- The flow stores no consumer profile or financial value and does not add an
+  eligibility, suitability, application, or composite-score inference. It is
+  the bounded `FR-PUB-021` exception; Top 5, catalog, and selection-led compare
+  retain their factual non-recommendation semantics.
+
 ### 6.3 Ranking Row Baseline
 
 Each ranking row must expose:

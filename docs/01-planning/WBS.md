@@ -248,7 +248,7 @@ Based on:
 | 3.5 | Completed | extraction flow 구현 | 구조화 candidate 생성 | AI/Data | 3.4 | 2026-04-22 |
 | 3.6 | Completed | normalization mapping 구현 | canonical schema 매핑 | Backend, AI/Data | 3.5 | 2026-04-23 |
 | 3.7 | Completed | validation/confidence routing 구현 | review 대상 분기 규칙 반영 | Backend, AI/Data | 3.6 | 2026-04-24 |
-| 3.8 | Completed | internal result viewer 구현 | prototype 확인 UI | Frontend | 3.7 | 2026-04-27 |
+| 3.8 | Superseded | internal result viewer 구현 | Admin Review Detail·Run Detail로 대체되어 prototype 코드 제거 | Frontend | 3.7 | 2026-04-27 |
 | 3.9 | Completed | first end-to-end run 실행 | 성공 run evidence pack | QA, Tech Lead | 3.8 | 2026-04-28 |
 | 3.10 | Completed | prototype findings memo 작성 | 확장 가능성/제약/보완 항목 정리 | Tech Lead | 3.9 | 2026-04-29 |
 
@@ -337,6 +337,7 @@ Based on:
 | 5.52 | Completed | Public Home Equal Earth coverage map and bank counts | web-researched public-domain map geometry, accurate local Equal Earth asset, country product and distinct-bank counts from one completed snapshot, EN/KO/JA copy, responsive rendered verification | Frontend, Backend, UX, QA | 5.43, 5.48 | 2026-08-26 |
 | 5.53 | Completed | Public Home map fill and bank-count rollout compatibility | centered map viewport zoom, countries-first bank count with unfiltered dashboard-summary fallback for older API/cache responses, isolated fallback failure, old-response and EN/KO/JA responsive verification | Frontend, UX, QA | 5.52 | 2026-08-26 |
 | 5.54 | Completed | Admin manual-only collection boundary | removed API background collection lifecycle, runtime flags, recurring DB policy, time-based trigger branches, and unattended registry-refresh mode; preserved authenticated collection, Runs retry, in-run safeguards, and approval-triggered aggregate refresh | Backend, AI/Data, QA | 5.25, 5.49, 5.51 | 2026-08-28 |
+| 5.55 | Completed | Public Home same-type product finder | bank/Product-Type input, literal product-name filtering and exact selection, strict primary-metric improvement candidates, concise EN/KO/JA states, Methodology coverage-map relocation, responsive verification | Frontend, UX, QA | 5.43, 5.48, 5.52, 5.53 | 2026-08-29 |
 
 ### 5.5 Scope Baseline
 

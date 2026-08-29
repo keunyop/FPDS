@@ -158,7 +158,8 @@ FPDS는 원문 근거(evidence)를 보존하면서 구조화된 상품 데이터
 - FPDS DB / 검색 인덱스 / API delivery layer 확장
 
 ### 4.2 Out of Scope
-- personalized recommendation
+- profile-based or multi-factor personalized recommendation beyond the bounded
+  same-type primary-metric finder in `FR-PUB-021`
 - institution insight portal
 - product map / report portal
 - user profile based ranking
@@ -510,11 +511,11 @@ mark-only header and visible Home snapshot-ledger presentation above:
 - mobile Home, Deposit, Credit Card, Loan, and published-country selection
   move into one hamburger menu; desktop keeps the visible primary navigation
   and country selector
-- Home replaces the Public/Current snapshot, Visible products, and Banks count
-  ledger with an accurate locally hosted code-native Equal Earth world map plus
-  every country and its published product and distinct-bank counts returned by
-  `GET /api/public/countries`; the local geometry uses commercially safe
-  public-domain map data and no external runtime map service
+- Home does not restore the Public/Current snapshot, Visible products, and Banks
+  count ledger. Methodology owns an accurate locally hosted code-native Equal
+  Earth world map plus every country and its published product and distinct-bank
+  counts returned by `GET /api/public/countries`; the local geometry uses
+  commercially safe public-domain map data and no external runtime map service
 - the Home Deposit, Credit Card, and Loan actions have equal initial emphasis
 - when catalog `view` is absent, desktop defaults to Grid and mobile defaults
   to List; explicit `view=grid` or `view=list` remains a shareable override
@@ -628,6 +629,40 @@ without changing the approved factual-comparison or private-evidence boundary.
 - Open Graph/Twitter output may describe the SwitchaBank comparison surface
   but must not invent rates, rankings, recommendations, endorsements, or
   private evidence
+
+### FR-PUB-021 Same-Type Primary-Metric Product Finder
+
+Product Owner direction on `2026-08-29` approves one bounded recommendation
+exception on canonical Public Home. A visitor selects a published bank, an
+available Product Type, filters product names by case-insensitive literal
+substring, and selects one exact product currently held at that bank before
+requesting exact-Product-Type candidates from the active country's latest
+approved Public projection.
+
+- the finder must use only the existing anonymous, review-approved Public
+  projection and must not collect or persist a profile, balance, income,
+  credit, goal, eligibility, or application value
+- comparison is exact Product Type only and uses one explicit primary metric:
+  Chequing lower monthly fee, Savings/GIC higher disclosed numeric rate,
+  Credit Card lower annual fee, and Mortgage/Personal Loan/Line of Credit lower
+  disclosed numeric rate
+- a candidate is shown only when its metric is disclosed and strictly improves
+  the selected product's metric; the surface shows at most three candidates and
+  does not infer a winner from ties, missing values, or secondary conditions
+- the selected product, Product Type, comparison basis, current/candidate
+  values, and official/detail actions must remain visible and localized
+- loading, bank-with-no-product, product-name-no-match, undisclosed-metric,
+  no-improvement, and API failure states must remain usable and honest
+- the surface must state that the result is a one-metric comparison rather than
+  personal financial advice, suitability, eligibility, approval likelihood,
+  guaranteed savings, or an application outcome, and must direct users to
+  reconfirm all conditions with the institution
+- the existing Equal Earth country coverage map moves from Home to Methodology;
+  its snapshot, count, local-asset, localization, and privacy contracts do not
+  change, and Home no longer requests its country-coverage payload
+- this exception does not change canonical data, publication eligibility,
+  private evidence boundaries, analytics policy, catalog comparison, or the
+  broader prohibition on profile-based personalized ranking
 
 ## 8.2 Admin Requirements
 
@@ -2013,7 +2048,8 @@ LLM 사용량과 비용은 agent/run 단위로 추적 가능해야 한다.
 - External SaaS/Open API
 
 ## 19.2 Later Enhancements
-- personalized recommendation
+- profile-based or multi-factor personalized recommendation beyond
+  `FR-PUB-021`
 - institution portal
 - market analysis / product map / insight services
 - Japan full-market expansion

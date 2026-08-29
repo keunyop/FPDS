@@ -11,7 +11,7 @@ Source Documents:
 - `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`
 - `docs/archive/01-planning/prototype-findings-memo.md`
 - `docs/00-governance/development-journal.md`
-- `app/prototype/viewer-payload.json`
+- `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/viewer-export-output.json`
 
 ---
 
@@ -43,9 +43,9 @@ Conclusion:
 |---|---|---|
 | TD Savings source capture is possible | Pass | `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`, `docs/00-governance/development-journal.md` |
 | snapshot, parsing, chunking, extraction, normalization, and validation run at least once | Pass | `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`, `docs/00-governance/development-journal.md` |
-| evidence linkage is verifiable | Pass | `app/prototype/viewer-payload.json`, `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md` |
-| review routing works | Pass | `app/prototype/viewer-payload.json`, `docs/00-governance/development-journal.md` |
-| prototype viewer or equivalent exists | Pass | `app/prototype/index.html`, `app/prototype/viewer-payload.json` |
+| evidence linkage is verifiable | Pass | archived viewer export output, `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md` |
+| review routing works | Pass | archived validation output, `docs/00-governance/development-journal.md` |
+| prototype viewer or equivalent exists | Pass | archived viewer export output and evidence pack; runtime later superseded by Admin |
 | first end-to-end run evidence pack exists | Pass | `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md` |
 | prototype findings memo exists | Pass | `docs/archive/01-planning/prototype-findings-memo.md` |
 | prototype results explain Big 5 expansion value and risk | Pass | `docs/archive/01-planning/prototype-findings-memo.md`, Section 7 |
@@ -56,10 +56,10 @@ Conclusion:
 
 | Prototype Acceptance Check | Status | Evidence |
 |---|---|---|
-| 3 target products are present in the run output | Pass | `app/prototype/viewer-payload.json` for `run_20260411_3528_validate_harden3` |
+| 3 target products are present in the run output | Pass | archived evidence pack for `run_20260411_3528_validate_harden3` |
 | source type coverage includes HTML detail, current values HTML, and governing PDF | Pass | `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md` |
-| candidate output is reviewable in the viewer | Pass | `app/prototype/index.html`, `app/prototype/viewer-payload.json` |
-| key fields are evidence-linked with excerpt plus anchor | Pass | `app/prototype/viewer-payload.json` |
+| candidate output is reviewable in the viewer | Pass | archived viewer export output and evidence pack |
+| key fields are evidence-linked with excerpt plus anchor | Pass | archived viewer export output and evidence pack |
 | findings memo explains failure modes and scale-up risk | Pass | `docs/archive/01-planning/prototype-findings-memo.md` |
 | original `required_field_missing` blocker is closed for the 3 prototype targets | Pass | `docs/00-governance/development-journal.md`, entries for hardening slices 1 to 3 |
 

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { PublicCoverageMap } from "@/components/fpds/public/public-coverage-map";
 import { Button } from "@/components/ui/button";
+import { fetchPublicCoverageCountries } from "@/lib/public-api";
 import { getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import { buildPublicHref, parseDashboardPageFilters } from "@/lib/public-query";
 import { buildPublicPageMetadata } from "@/lib/public-seo";
@@ -29,6 +31,14 @@ export default async function MethodologyPage({ searchParams }: MethodologyPageP
   const filters = parseDashboardPageFilters(resolvedSearchParams);
   const copy = getPublicMessages(filters.locale);
   const designCopy = getPublicDesignCopy(filters.locale);
+  let countries = null;
+  let countriesUnavailable = false;
+
+  try {
+    countries = await fetchPublicCoverageCountries(filters.locale);
+  } catch {
+    countriesUnavailable = true;
+  }
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6 md:py-10">
@@ -85,6 +95,15 @@ export default async function MethodologyPage({ searchParams }: MethodologyPageP
               </article>
             ))}
           </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-5xl">
+          <PublicCoverageMap
+            countries={countries?.countries ?? []}
+            currentCountryCode={filters.countryCode}
+            locale={filters.locale}
+            unavailable={countriesUnavailable}
+          />
         </section>
 
         <section className="flex flex-col gap-4 border-y border-maple/30 bg-accent/35 px-5 py-6 sm:flex-row sm:items-center sm:justify-between">

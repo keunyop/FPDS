@@ -8,10 +8,11 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 ## Runtime Routes
 
 - `/` is the canonical public Home view. Its first viewport pairs a short market
-  thesis with an accurate locally served Equal Earth world map and the
-  published product and distinct-bank counts for every currently collected
-  country. Deposit, Credit Card, and Loan are equal direct
-  next actions. The main content places Deposit Top 5
+  thesis with a same-type product finder: a visitor selects a published bank
+  and Product Type, filters product names by literal substring, selects the
+  current product, then checks up to three exact-Product-Type products that
+  strictly improve one disclosed primary metric. Deposit, Credit Card, and Loan
+  remain equal direct next actions. The main content places Deposit Top 5
   on the left and Loan Top 5 on the right at desktop, stacking both lists below
   that breakpoint. Deposit uses the highest disclosed numeric rates; Loan uses
   the lowest disclosed numeric rates. Neither list is a personalized
@@ -32,7 +33,8 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 - `/products/[productId]` shows the selected product's available public facts,
   conditions, official-bank action, freshness, and methodology boundary.
 - `/methodology` explains the source-to-snapshot process, metric meaning,
-  comparison boundary, freshness states, and public evidence boundary.
+  comparison boundary, freshness states, and public evidence boundary, and
+  owns the Equal Earth country coverage map with product/distinct-bank counts.
 
 ## Experience Baseline
 
@@ -44,19 +46,34 @@ switch without introducing a literal bank, toggle, or decorative illustration.
 The wordmark is one uninterrupted same-color name. The shell mark and
 white-on-evergreen app icon share the same geometry so the identity remains
 clear at small sizes.
-Generic dashboard-card
-repetition, decorative gradients, synthetic scores, and recommendation
-language are avoided.
+Generic dashboard-card repetition, decorative gradients, and synthetic scores
+are avoided. Recommendation language is reserved for the bounded Home finder
+approved in `FR-PUB-021`; catalogs and Top 5 lists remain factual comparisons.
 
-Home uses real snapshot values rather than invented illustration data. Its
-country coverage map reads the existing public country catalog and renders
-active product and distinct-bank totals from the same completed snapshot.
-Home prefers the country response's `bank_count`. During a staggered API/UI
+Home uses real snapshot values rather than invented illustration data.
+Methodology's country coverage map reads the existing public country catalog
+and renders active product and distinct-bank totals from the same completed
+snapshot. The coverage loader prefers the country response's `bank_count`.
+During a staggered API/UI
 rollout, if an older cached country response omits that field, Home derives the
 count from the established unfiltered `banks_in_scope` dashboard summary for
 that country. Each compatibility lookup is isolated so a failed fallback does
 not hide the country or its product count, and the fallback stops issuing
 extra requests once the country endpoint supplies `bank_count`.
+
+The Home finder uses only anonymous review-approved Public projections. Bank
+selection loads that bank's active published products. Product Type is selected
+explicitly, and product names are narrowed locally by case-insensitive literal
+substring before one exact current product is selected. The candidate query
+stays inside the active country and exact Product Type. Chequing
+uses lower monthly fee, Savings and GIC use higher disclosed numeric rate,
+Credit Card uses lower annual fee, and Mortgage, Personal Loan, and Line of
+Credit use lower disclosed numeric rate. Missing metrics and ties never produce
+a candidate, and at most three strict improvements are shown. The UI stores no
+profile, balance, income, credit, goal, eligibility, or application value and
+states that its one-metric result is not personal financial advice or an
+eligibility decision. Broader profile-based or multi-factor recommendation
+remains out of scope.
 
 The dual Top 5 lists avoid repeated family labels, internal
 evidence explanations, and competing header actions. Catalog cards are
