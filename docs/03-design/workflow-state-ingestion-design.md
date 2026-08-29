@@ -56,7 +56,7 @@ Source Documents:
 
 | Stage | Input | Core Action | Primary Output | Persisted Artifacts | Failure Handling |
 |---|---|---|---|---|---|
-| 0. Run Initialization | schedule or manual trigger | run 생성, 대상 source set 확정 | `run_id`, source batch | run header, trigger metadata | invalid trigger면 run fail |
+| 0. Run Initialization | authenticated operator trigger | run 생성, 대상 source set 확정 | `run_id`, source batch | run header, trigger metadata | invalid trigger면 run fail |
 | 1. Discovery | source registry, bank/product scope | crawl target 발견/정규화 | discovered source list | source metadata | source 단위 warning 기록 |
 | 2. Snapshot Fetch | discovered source | HTML/PDF fetch, 원문 보존 | raw snapshot | snapshot object, fetch metadata | source 단위 retry, 최종 실패 시 source failed |
 | 3. Parse | raw snapshot | parsed text 생성 | parsed document | parsed text, parser metadata | parser retry 후 partial failure 가능 |
@@ -77,7 +77,7 @@ Source Documents:
 
 ### 5.1 Stage 0. Run Initialization
 
-- 입력: scheduler trigger, manual re-run trigger, prototype test trigger
+- 입력: Admin collection trigger, manual re-run trigger, prototype test trigger
 - 처리:
   - `run_id`를 발급한다.
   - 실행 범위(`bank`, `country`, `product_type`, source subset)를 고정한다.

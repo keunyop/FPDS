@@ -6,10 +6,10 @@ Current boundary:
 - `discovery/` for source discovery and registry-driven fetch entry
 - `pipeline/` for parse, chunk, extraction, normalization, validation, and review routing work
 - `publish/` for BX-PF-facing publish and reconciliation work
-- `runtime/` for worker bootstrap, scheduling, and execution plumbing
+- `runtime/` for worker bootstrap and execution plumbing
 
 Current implementation slices:
-- `WBS 3.1` source discovery, preflight drift checks, and scheduled refresh artifacts in `worker/discovery/`
+- `WBS 3.1` source discovery, preflight drift checks, and operator-initiated refresh artifacts in `worker/discovery/`
 - `WBS 3.2` snapshot capture and persistence in `worker/discovery/fpds_snapshot/`
 - `WBS 3.3` parse/chunk pipeline in `worker/pipeline/fpds_parse_chunk/`
 - `WBS 3.4` evidence retrieval in `worker/pipeline/fpds_evidence_retrieval/`

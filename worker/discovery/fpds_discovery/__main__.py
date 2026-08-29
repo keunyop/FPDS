@@ -25,7 +25,7 @@ def main() -> int:
     parser.add_argument(
         "--discovery-mode",
         default="manual",
-        choices=("scheduled", "manual", "retry"),
+        choices=("manual", "retry"),
         help="Discovery mode label used in the result payload.",
     )
     args = parser.parse_args()

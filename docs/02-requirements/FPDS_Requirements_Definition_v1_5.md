@@ -923,8 +923,8 @@ Boundary:
 - public HTML pages
 - linked PDF documents
 
-### FR-DATA-002 Crawl Scheduling
-시스템은 정해진 schedule에 따라 source를 주기적으로 수집할 수 있어야 한다.
+### FR-DATA-002 Operator-Initiated Crawl
+시스템은 인증된 운영자의 명시적 collection 또는 retry 요청으로만 source 수집을 시작해야 한다.
 
 ### FR-DATA-003 Snapshot Preservation
 수집된 원문은 snapshot 형태로 저장해야 한다.
@@ -1613,7 +1613,7 @@ Current live admin behavior:
   server-session country
 - bank detail can add more coverage and launch per-coverage collection
 - bank list can multi-select banks and bulk-launch collection across all attached coverage items
-- only active catalog coverage may enter manual or scheduled collection; an
+- only active catalog coverage may enter operator-initiated collection; an
   inactive row remains visible for governance/history but a stale or crafted
   launch request must fail closed
 - recognized-bank cross-product bootstrap rows are not current-offering
@@ -1647,7 +1647,7 @@ Later follow-on requirement:
 ## 12. Workflow Requirements
 
 ## 12.1 End-to-End Workflow
-1. Scheduler triggers crawl job
+1. An authenticated operator starts a crawl job
 2. Source pages/PDFs are discovered
 3. Snapshot is stored
 4. Text is parsed and chunked

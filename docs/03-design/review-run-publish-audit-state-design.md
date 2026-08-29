@@ -372,7 +372,7 @@ Every audit event must support at least the following fields.
 | `event_category` | review, run, publish, auth, config, usage |
 | `event_type` | concrete action name |
 | `occurred_at` | event timestamp |
-| `actor_type` | `system`, `user`, `service`, `scheduler` |
+| `actor_type` | `system`, `user`, `service` |
 | `actor_id` | user id, service id, or nullable system actor reference |
 | `actor_role_snapshot` | role at event time when available |
 | `target_type` | run, candidate, review_task, product, publish_item, auth_session, config |
@@ -409,14 +409,14 @@ Every audit event must support at least the following fields.
 | `review_ai_verification_completed` | user/system | official-domain verification completes | include review/candidate/model ids, allowed domains, cited sources, result summary, and correction field names |
 | `review_ai_verification_failed` | user/system | official-domain verification fails | include review/candidate/model ids and safe failure reason |
 | `review_ai_corrections_applied` | system | existing-queue or collection-autopilot remediation applies cited, contract-safe mismatches | preserve queued/deferred state until the separate threshold assessment and include model, field, value, source, and correlation context |
-| `run_started` | system/user/scheduler | run initialization | include trigger metadata |
+| `run_started` | system/user | run initialization | include trigger metadata |
 | `run_completed` | system | run terminal completion | include summary counters |
 | `run_failed` | system | fatal run termination | include terminal reason |
 | `run_retried` | system/user | retry run linked to prior run | include old/new run ids |
 | `publish_item_created` | system | publish preparation produces tracker | include pending reason |
 | `publish_attempted` | system | outbound publish attempt begins | include attempt number |
 | `publish_succeeded` | system | publish confirmed | include target master id |
-| `publish_retry_scheduled` | system | retry state entered | include error code/backoff plan |
+| `publish_retry_queued` | system | retry state entered | include error code/backoff plan |
 | `publish_reconciliation_entered` | system | reconciliation state entered | include mismatch/ambiguity summary |
 | `publish_reconciliation_resolved` | system/user | reconciliation closed | include resulting state |
 | `auth_login_succeeded` | user/system | login success | include auth method |

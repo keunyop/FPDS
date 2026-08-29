@@ -57,7 +57,6 @@ Included:
 Not included:
 - exact component library implementation
 - visual styling or motion details
-- scheduler management UX
 - registry diff-review workflow
 - exact chart library, table virtualization, or pagination implementation
 
@@ -152,7 +151,6 @@ navigation item until a live route exists.
 ### 5.4 Reserved Follow-On Navigation
 
 - `Localization Health` remains a possible future admin health surface
-- broader scheduler or refresh governance remains a later source-operations slice
 - `Product Type Management` is now the operator-owned registry surface for product type definitions used by bank coverage selection and homepage-first discovery
 - `Countries` is visible only to `admin`. It presents one prepared-country
   selector and the short active-country list; free-form creation is excluded.

@@ -1165,7 +1165,7 @@ def _record_verification_audit(
 ) -> None:
     proposed_fields = sorted(_mapping((result or {}).get("proposed_corrections")).keys())
     actor_type = str(actor.get("actor_type") or "user")
-    if actor_type not in {"system", "user", "service", "scheduler"}:
+    if actor_type not in {"system", "user", "service"}:
         actor_type = "user"
     connection.execute(
         """

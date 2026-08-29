@@ -25,6 +25,8 @@ class SettingsTests(unittest.TestCase):
                     "FPDS_ADMIN_CSRF_SECRET=csrf-secret",
                     "FPDS_COOKIE_SECURE=false",
                     "FPDS_COOKIE_SAMESITE=Lax",
+                    "FPDS_AUTOMATION_SCHEDULER_ENABLED=true",
+                    "FPDS_AUTOMATION_POLL_SECONDS=60",
                 ]
             ),
             encoding="utf-8",
@@ -47,6 +49,8 @@ class SettingsTests(unittest.TestCase):
                 "FPDS_ADMIN_CSRF_SECRET",
                 "FPDS_COOKIE_SECURE",
                 "FPDS_COOKIE_SAMESITE",
+                "FPDS_AUTOMATION_SCHEDULER_ENABLED",
+                "FPDS_AUTOMATION_POLL_SECONDS",
             ):
                 os.environ.pop(key, None)
             settings = Settings.from_env(env_path)
@@ -63,6 +67,8 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.allowed_admin_origins, ("http://localhost:3001", "http://127.0.0.1:3001"))
         self.assertFalse(settings.cookie_secure)
         self.assertEqual(settings.cookie_same_site, "lax")
+        self.assertFalse(hasattr(settings, "automation_scheduler_enabled"))
+        self.assertFalse(hasattr(settings, "automation_poll_seconds"))
 
     def test_settings_loads_repo_root_env_file_when_process_runs_under_api_service(self) -> None:
         previous = os.environ.copy()

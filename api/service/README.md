@@ -123,6 +123,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0040_bounded_operational_storage.sq
 psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_routes.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_hardening.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
 ```
 
 Create the first operator account:
@@ -153,13 +154,10 @@ Root `pyproject.toml` also declares
 though `app.py` is a recognized filename: the wrapper imports the existing
 runtime package dynamically, so Vercel must not rely on static app discovery.
 
-This first deployment is operated as a public-read API. When Vercel provides
-`VERCEL=1`, the entrypoint forcibly sets
-`FPDS_AUTOMATION_SCHEDULER_ENABLED=false` before importing the application.
-Collection, Review automation, and aggregate-refresh scheduling therefore stay
-outside request-scoped Vercel Functions. Existing authenticated Admin routes
-remain part of the FastAPI app, but no Admin web application is deployed in
-this slice.
+This first deployment is operated as a public-read API. The FastAPI process has
+no background collection loop; collection starts only through authenticated
+Admin actions. Existing authenticated Admin routes remain part of the FastAPI
+app, but no Admin web application is deployed in this slice.
 
 Configure these variables separately for Vercel Production and Preview; never
 upload or copy `.env.dev` as a production environment file:
@@ -171,7 +169,6 @@ upload or copy `.env.dev` as a production environment file:
 - `FPDS_PUBLIC_API_ORIGIN` and `FPDS_ADMIN_API_ORIGIN`
 - unique production `FPDS_ADMIN_SESSION_SECRET` and `FPDS_ADMIN_CSRF_SECRET`
 - `FPDS_COOKIE_SECURE=true`
-- `FPDS_AUTOMATION_SCHEDULER_ENABLED=false`
 
 After Vercel authentication and environment configuration:
 
@@ -217,18 +214,9 @@ cd api/service
 - Public list pagination remains page/page_size API state so the web catalog
   can load successive pages without exposing raw evidence or new data.
 
-- API lifespan starts one database-advisory-lock-elected collection scheduler
-  when `FPDS_AUTOMATION_SCHEDULER_ENABLED=true`. Policy rows from migration
-  `0035` control the weekly active-catalog cadence, six-scope batch size,
-  24-hour failed/partial retry, 12-hour stale-run recovery, and ten-task
-  current-contract Review recovery batch. `FPDS_AUTOMATION_POLL_SECONDS`
-  controls how often the leader checks for work; the database policy remains
-  fail-closed when migration `0035` is absent.
-- The scheduler uses actor type `scheduler`, preserves scheduled trigger
-  metadata on ingestion runs, globally recovers orphan `auto_validated`
-  candidates and eligible pre-policy Review tasks, and restarts queued
-  aggregate refresh work through the same canonical and Public
-  projection boundaries as interactive operations.
+- Source-catalog collection starts only from authenticated Admin collection or
+  retry actions. The collection runner still performs its bounded in-run
+  validation, promotion, Review routing, and guarded aggregate-refresh work.
 - Public reads are country-scoped by bank-owned ISO alpha-2 codes.
   `/api/public/countries` and `countries[]` in `/api/public/filters` expose only
   countries with active products in their latest completed public snapshot.
@@ -396,8 +384,8 @@ cd api/service
 - When accessible discovery decisively produces no candidate-making detail
   source, the run remains truthfully Partial and the exact catalog/source
   scope is reversibly inactivated with
-  `structural_zero_detail_collection_result`. Manual and scheduled launch
-  queries reject that quarantined scope until an official coverage route or
+  `structural_zero_detail_collection_result`. Operator launch queries reject
+  that quarantined scope until an official coverage route or
   active detail source is explicitly restored. Timeout, 408/425/429/5xx,
   connection, and DNS evidence does not trip this structural circuit breaker.
 - US discovery keeps the canonical `chequing` and `gic` codes but uses

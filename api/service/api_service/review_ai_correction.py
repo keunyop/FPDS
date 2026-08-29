@@ -442,7 +442,7 @@ def _record_correction_audit(
     corrected_at: Any,
 ) -> None:
     actor_type = str(actor.get("actor_type") or "user")
-    if actor_type not in {"system", "user", "service", "scheduler"}:
+    if actor_type not in {"system", "user", "service"}:
         actor_type = "user"
     connection.execute(
         """

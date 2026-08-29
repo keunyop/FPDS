@@ -134,7 +134,7 @@ WHERE catalog.status = 'active'
         AND COALESCE(successful_run.run_metadata ->> 'product_type', '') = catalog.product_type
   );
 
--- Preserve history while keeping any source-only scheduler path aligned with
+-- Preserve history while keeping any source-only collection path aligned with
 -- the quarantined catalog eligibility state.
 UPDATE source_registry_item AS source
 SET

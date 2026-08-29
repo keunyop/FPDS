@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 EVENT_CATEGORIES = ("review", "run", "publish", "auth", "config", "usage")
-ACTOR_TYPES = ("system", "user", "service", "scheduler")
+ACTOR_TYPES = ("system", "user", "service")
 _PRODUCT_NAME_SQL = """
 COALESCE(
     NULLIF(cp.product_name, ''),

@@ -66,7 +66,7 @@ are marked as removed and must not be treated as live contracts.
 |---|---|---|
 | Public | `/api/public/*` | anonymous browser UI |
 | Admin | `/api/admin/*` | authenticated admin UI |
-| Internal | private service / queue / worker interface | API server, worker, scheduler |
+| Internal | private service / queue / worker interface | API server, worker |
 | External SaaS/Open API | `/api/v1/*` | Phase 2 client/tenant consumer |
 | BX-PF | private connector boundary | publish worker only |
 
@@ -936,7 +936,7 @@ request baseline:
 | `country_code` | country |
 | `bank_code` | bank |
 | `seed_urls[]` | known source entry points |
-| `discovery_mode` | scheduled, manual, retry |
+| `discovery_mode` | manual, retry |
 
 response baseline:
 - `source_items[]`

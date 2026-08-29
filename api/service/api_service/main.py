@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import asyncio
-from contextlib import asynccontextmanager
 from datetime import UTC, datetime
-import threading
 from typing import Annotated
 from typing import Any
 from typing import Literal
@@ -39,7 +36,6 @@ from api_service.ai_verification import (
     run_review_ai_verification,
 )
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
-from api_service.collection_automation import run_collection_automation_scheduler
 from api_service.config import Settings
 from api_service.countries import activate_country, deactivate_country, load_country_registry
 from api_service.db import open_connection
@@ -174,33 +170,11 @@ def _clear_auth_cookies(response: Response, settings: Settings) -> None:
     response.delete_cookie(settings.csrf_cookie_name, path="/")
 
 
-@asynccontextmanager
-async def _lifespan(application: FastAPI):
-    runtime_settings: Settings = application.state.settings
-    stop_event = threading.Event()
-    scheduler_task = None
-    if runtime_settings.automation_scheduler_enabled:
-        scheduler_task = asyncio.create_task(
-            asyncio.to_thread(
-                run_collection_automation_scheduler,
-                runtime_settings,
-                stop_event,
-            )
-        )
-    try:
-        yield
-    finally:
-        stop_event.set()
-        if scheduler_task is not None:
-            await scheduler_task
-
-
 settings = Settings.from_env()
 app = FastAPI(
     title="FPDS Admin API",
     docs_url="/docs",
     redoc_url=None,
-    lifespan=_lifespan,
 )
 app.state.settings = settings
 

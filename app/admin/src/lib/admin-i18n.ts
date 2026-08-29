@@ -170,19 +170,16 @@ const ACTOR_TYPE_LABELS: Record<AdminLocale, Record<string, string>> = {
     user: "User",
     system: "System",
     service: "Service",
-    scheduler: "Scheduler",
   },
   ko: {
     user: "사용자",
     system: "시스템",
     service: "서비스",
-    scheduler: "스케줄러",
   },
   ja: {
     user: "ユーザー",
     system: "システム",
     service: "サービス",
-    scheduler: "スケジューラ",
   },
 };
 

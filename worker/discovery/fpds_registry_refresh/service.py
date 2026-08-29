@@ -78,7 +78,7 @@ class RegistryRefreshService:
             html_loader=self.html_loader,
             run_id=run_id,
             correlation_id=correlation_id,
-            discovery_mode="scheduled",
+            discovery_mode="manual",
         )
         preflight_result = self.preflight_service.check_sources(
             run_id=run_id,
@@ -140,7 +140,7 @@ class RegistryRefreshService:
                 expected_url=source.normalized_url,
                 detected_url=None,
                 discovered_on_url=None,
-                message="Approved registry source was not rediscovered during the scheduled refresh crawl.",
+                message="Approved registry source was not rediscovered during the manual refresh crawl.",
                 recommended_action="Review whether the source moved, was delisted, or should be deprecated.",
             )
             diffs_by_key[_diff_key(diff)] = diff
@@ -246,6 +246,6 @@ def _diff_from_discovery_warning(
         expected_url=None,
         detected_url=str(warning_payload.get("normalized_target_url") or warning_payload.get("target_url") or ""),
         discovered_on_url=str(warning_payload.get("discovered_on_url") or ""),
-        message=str(warning_payload.get("message") or "Scheduled refresh discovered an out-of-registry link."),
+        message=str(warning_payload.get("message") or "Manual refresh discovered an out-of-registry link."),
         recommended_action="Review whether this link should stay excluded, become an alias, or be promoted as a new candidate source.",
     )

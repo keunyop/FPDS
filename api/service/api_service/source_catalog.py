@@ -1701,12 +1701,6 @@ def start_source_catalog_collection(
         correlation_id=correlation_id,
         precision_rediscovery=precision_rediscovery,
     )
-    run_trigger_type = (
-        "scheduled_source_collection"
-        if str(actor.get("actor_type") or "").lower() == "scheduler"
-        else "admin_source_collection"
-    )
-
     for group in plan["groups"]:
         _insert_collection_run_row(
             connection,
@@ -1717,7 +1711,7 @@ def start_source_catalog_collection(
             collection_id=collection_id,
             group=group,
             pipeline_stage="source_catalog_collection",
-            trigger_type=run_trigger_type,
+            trigger_type="admin_source_collection",
             retry_of_run_id=retry_of_run_id,
         )
 
@@ -1802,11 +1796,7 @@ def _build_source_catalog_collection_plan(
         "collection_id": collection_id,
         "correlation_id": correlation_id,
         "request_id": request_context.get("request_id"),
-        "trigger_type": (
-            "scheduled_source_catalog_collection"
-            if str(actor.get("actor_type") or "").lower() == "scheduler"
-            else "admin_source_catalog_collection"
-        ),
+        "trigger_type": "admin_source_catalog_collection",
         "triggered_by": triggered_by,
         "precision_rediscovery_requested": precision_rediscovery,
         "actor": actor_payload,
@@ -7893,7 +7883,7 @@ def _record_catalog_audit_event(
     metadata: dict[str, Any],
 ) -> None:
     actor_type = str(actor.get("actor_type") or "user").lower()
-    if actor_type not in {"system", "user", "service", "scheduler"}:
+    if actor_type not in {"system", "user", "service"}:
         actor_type = "user"
     connection.execute(
         """

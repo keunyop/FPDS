@@ -231,11 +231,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             collection_id=str(plan["collection_id"]),
             group=_run_group_with_empty_collection_scope(group),
             pipeline_stage="source_catalog_collection",
-            trigger_type=(
-                "scheduled_source_collection"
-                if str(plan.get("trigger_type") or "").startswith("scheduled_")
-                else "admin_source_collection"
-            ),
+            trigger_type="admin_source_collection",
         )
         catalog_row = {
             "catalog_item_id": group["catalog_item_id"],

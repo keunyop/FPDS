@@ -1199,7 +1199,7 @@ def _record_review_audit_event(
     payload: dict[str, Any],
 ) -> None:
     actor_type = str(actor.get("actor_type") or "user")
-    if actor_type not in {"system", "user", "service", "scheduler"}:
+    if actor_type not in {"system", "user", "service"}:
         actor_type = "user"
     connection.execute(
         """

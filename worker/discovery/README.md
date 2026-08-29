@@ -10,14 +10,14 @@ Current implementation slice:
 - `data/source_registry_catalog.json` now catalogs the approved Canada Big 5 source-registry baseline across `chequing`, `savings`, and `gic`.
 - `fpds_discovery/` contains URL normalization, deterministic source identity, controlled fetch validation, and discovery rules for entry-page detail discovery plus linked PDF discovery.
 - `fpds_snapshot/` contains snapshot capture, preflight drift checks, object key generation, storage adapters, checksum or fingerprint calculation, retry handling, and snapshot reuse logic.
-- `fpds_registry_refresh/` contains scheduled refresh artifact generation for candidate diffs and source drift review.
+- `fpds_registry_refresh/` contains operator-initiated refresh artifact generation for candidate diffs and source drift review.
 - `tests/` contains offline fixtures and unit tests so discovery can be verified without live network access.
 
 Important boundary:
 - Big 5 registry coverage is now committed as a data baseline, but runnable offline discovery fixtures and the most mature discovery rules still live on the TD savings prototype slice.
 
 Operating policy:
-- `docs/03-design/source-registry-refresh-and-approval-policy.md` defines the registry operating baseline: keep an approved active registry, detect drift during preflight or scheduled refresh, and promote changes only after explicit approval.
+- `docs/03-design/source-registry-refresh-and-approval-policy.md` defines the registry operating baseline: keep an approved active registry, detect drift during preflight or an operator-initiated refresh, and promote changes only after explicit approval.
 
 Run offline fixture-based discovery:
 
@@ -58,7 +58,7 @@ python -m worker.discovery.fpds_snapshot `
   --source-id TD-SAV-008
 ```
 
-Run scheduled registry refresh artifact generation:
+Run registry refresh artifact generation manually:
 
 ```powershell
 python -m worker.discovery.fpds_registry_refresh `
@@ -71,7 +71,7 @@ python -m worker.discovery.fpds_registry_refresh `
 Notes:
 - Discovery keeps the approved registry as the source of truth and treats out-of-registry or excluded flows as warnings instead of auto-expanding scope.
 - The registry catalog is the planning baseline for Canada Big 5 expansion. Bank-specific parser or discovery behavior can still be enriched in later slices without rewriting the `5.1` cutline.
-- Registry refresh strategy is approval-first: ingestion uses the active registry, while future refresh automation should produce candidate diffs instead of rewriting the active registry in place.
+- Registry refresh strategy is approval-first: ingestion uses the active registry, while an operator-initiated refresh produces candidate diffs instead of rewriting the active registry in place.
 - Snapshot capture now performs lightweight preflight drift checks by default before fetching and storing raw artifacts. Use `--skip-preflight-drift-check` only when intentionally bypassing that operator signal.
 - Live fetch uses the `FPDS_SOURCE_FETCH_ALLOWLIST`, `FPDS_SOURCE_FETCH_BLOCK_PRIVATE_NETWORKS`, and `FPDS_SOURCE_FETCH_TIMEOUT_SECONDS` env settings from the shared baseline. The current default timeout baseline is `90` seconds.
 - For domains in `FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS`, a blocked/timed-out HTML-only discovery fetch may use the browser-rendered DOM. Snapshot capture normally uses a browser-rendered PDF, but domains in `FPDS_SOURCE_BROWSER_DOM_SNAPSHOT_DOMAINS` retain rendered HTML when their exact product/condition relationship lives in structured CMS data; Vancity is the default bounded case. The same path also covers explicit rate pages that are only JavaScript shells and product HTML with unresolved dynamic rate placeholders. Recognized placeholder shapes include template functions, data-code elements, and double-bracket `[[...RATE...]]`/`[[...APR...]]` tokens. Both formats stay on the validated official URL and per-bank domain boundary; snapshot fallback fails soft to usable direct HTML and persists `fetch_method` plus the browser executable name for auditability.
@@ -79,6 +79,6 @@ Notes:
 - `--env-file` now overrides ambient process env values so live dev runs stay aligned to the chosen local env file.
 - `--persist-db` creates or updates `ingestion_run`, upserts `source_document`, inserts new `source_snapshot`, and upserts `run_source_item`.
 - Snapshot capture now fetches multiple sources concurrently inside the same run, which reduces bank-wide collect wall-clock time when several sources are slow at once.
-- Scheduled refresh generates a JSON artifact with preflight drift findings, discovery warnings, and candidate diffs. It does not mutate the active registry.
+- A manual refresh generates a JSON artifact with preflight drift findings, discovery warnings, and candidate diffs. It does not mutate the active registry.
 - When `FPDS_DATABASE_SCHEMA` points at a schema without the required snapshot tables but `public` contains them, snapshot persistence falls back to `public` and reports the resolved schema in the runtime output.
 - `fetch_status` currently uses `fetched` or `reused`, while per-source `stage_status` stays conservative at `completed` or `failed` and keeps the finer-grained action in `stage_metadata.snapshot_action`.

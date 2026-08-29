@@ -37,7 +37,7 @@ class RegistryRefreshServiceTests(unittest.TestCase):
             html_overrides=html_overrides,
             run_id="run_refresh_001",
             correlation_id="corr_refresh_001",
-            discovery_mode="scheduled",
+            discovery_mode="manual",
         )
         for index, item in enumerate(discovery_result.selected_sources):
             if item.source_id != "TD-SAV-004":

@@ -140,17 +140,17 @@ PRD suggested stack의 `public/admin on Vercel`, `worker/storage/private integra
 - Its immediate operating purpose is anonymous Public reads from the latest
   completed aggregate snapshot. The existing authenticated Admin routes remain
   in the same app, but Admin web is not deployed in this slice.
-- Vercel must force `FPDS_AUTOMATION_SCHEDULER_ENABLED=false`; collection,
-  Review automation, browser execution, and refresh orchestration remain in a
-  future long-running private worker boundary.
+- Collection, browser execution, and other stateful Admin work start only from
+  authenticated operator actions and remain outside request-scoped Vercel
+  Functions.
 - Vercel Preview and Production receive environment-specific variables through
   Vercel configuration. Local `.env.dev` itself and its Admin secrets are not
   deployment inputs.
 - Product Owner exception dated 2026-08-22: Preview and Production temporarily
   reuse the current development database so the existing completed Public
-  snapshot can be served while collection is paused. The database URL is stored
-  as a sensitive Vercel variable, Vercel uses new environment-specific auth
-  secrets, and no scheduler runs there. This is an explicit temporary deviation
+  snapshot can be served while collection remains operator-controlled. The
+  database URL is stored as a sensitive Vercel variable, Vercel uses new environment-specific auth
+  secrets, and no background collection runs there. This is an explicit temporary deviation
   from Section 5.1, not a replacement for the environment-separation baseline.
 - Before the coupling becomes release-critical, replace the shared connection
   with a separate production database containing the current schema and an
@@ -226,8 +226,9 @@ PRD suggested stack의 `public/admin on Vercel`, `worker/storage/private integra
 |---|---|
 | 2026-04-01 | Initial environment separation strategy created for WBS 1.4.6 |
 | 2026-04-01 | Simplified baseline from `dev/stg/prod` to `dev/prod` for single-developer operating model |
-| 2026-08-22 | Bound the first Vercel FastAPI deployment to Public-read serving with automation disabled and production data/secrets separated from dev |
+| 2026-08-22 | Bound the first Vercel FastAPI deployment to Public-read serving and production data/secrets separated from dev |
 | 2026-08-22 | Recorded the Product Owner-approved temporary reuse of the dev database while retaining separate Vercel auth secrets and the long-term production DB boundary |
 | 2026-08-22 | Added the separate Bankompare Public Vercel project, monorepo root, server-only API origin, same-origin BFF, and aligned API Public CORS topology |
 | 2026-08-23 | Renamed the existing Vercel projects in place to `switchabank-api` and `switchabank-public`; retained project IDs, Git boundaries, assigned Production domains, and origin values |
 | 2026-08-23 | Migrated API/Public Production deployments, stable domains, Preview/Production origins, and CORS to `switchabank-*`; removed six legacy `bankompare-*` aliases after explicit approval |
+| 2026-08-28 | Removed background collection execution and fixed Admin collection to authenticated operator actions |

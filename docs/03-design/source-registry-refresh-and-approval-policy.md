@@ -194,7 +194,6 @@ Current AI bank-onboarding note:
 Still deferred from the MVP:
 - crawler-driven registry auto-promotion
 - candidate-diff review UI for registry changes
-- scheduler-level refresh governance UI
 - visual diffing between historical registry versions
 
 Current live product-type onboarding note:
@@ -444,7 +443,7 @@ The following are intentionally out of scope for the first source-registry admin
 - explicit DB import/export tooling for source-registry administration beyond first-boot seeding
 - broader supporting-source auto-inclusion rules beyond the existing explicit TD, BMO, and Scotia savings paths
 - dedicated collection-progress UX on the source surfaces instead of relying on the run views for deeper execution visibility
-- optional scheduler or approval governance follow-ons if source-registry operations later need tighter release controls
+- optional approval governance follow-ons if source-registry operations later need tighter release controls
 
 ---
 

@@ -49,7 +49,7 @@ FPDS-Admin-Handover/
 - 의뢰자 운영자가 전달자 도움 없이 Admin을 사용해야 최종 인수한다.
 
 현재 Public-read Vercel API는 Admin production 배포로 보지 않는다. Admin
-web, API, long-running worker/scheduler의 실제 운영 위치를 별도로 확정한다.
+web, API, long-running worker의 실제 운영 위치를 별도로 확정한다.
 
 ## 3. 단계별 실행
 
@@ -109,14 +109,14 @@ web, API, long-running worker/scheduler의 실제 운영 위치를 별도로 확
 - [ ] 의뢰자 secret manager와 신규 Admin session/CSRF/storage/DB secret
 - [ ] LLM provider account와 비용 한도·경보
 - [ ] monitoring/log/alert와 장애 연락 대상
-- [ ] Admin web host, API host, long-running worker/scheduler host
+- [ ] Admin web host, API host, long-running worker host
 
 내가 확인할 일:
 
 - [ ] 개인 계정이 production owner가 아닌지 확인한다.
 - [ ] `dev`와 `prod`가 DB credential과 storage를 공유하지 않는지 확인한다.
 - [ ] browser에서 private storage에 직접 접근할 수 없는지 확인한다.
-- [ ] scheduler는 우선 `disabled`인지 확인한다.
+- [ ] Admin collection이 운영자 수동 실행으로만 시작되는지 확인한다.
 - [ ] 모든 계정의 주 담당자와 대체 담당자를 기록한다.
 
 받아야 할 증거:
@@ -144,8 +144,7 @@ web, API, long-running worker/scheduler의 실제 운영 위치를 별도로 확
 - [ ] 별도 DB/storage로 backup restore
 - [ ] 이전 release와 backup으로 rollback rehearsal
 - [ ] `/healthz`, 로그인, 국가 선택, Overview, Review, Runs, Banks smoke test
-- [ ] scheduler를 켜지 않은 상태에서 수동 운영 가능 여부 확인
-- [ ] scheduler를 사용할 경우 한 명의 leader만 실행되는지 별도 검증
+- [ ] Banks collection과 Runs retry를 통한 수동 운영 가능 여부 확인
 
 최소 검증 명령은 release tag의 깨끗한 clone에서 실행한다.
 
@@ -177,7 +176,7 @@ git diff --check
 아래 5개만큼은 반드시 최신 release tag와 실제 운영 URL을 기준으로 받는다.
 
 - [ ] `00-read-me-first.md`: 버전, URL, 담당자, 범위, known limitation
-- [ ] `deployment-operations-recovery.md`: 설치, 배포, migration, scheduler,
+- [ ] `deployment-operations-recovery.md`: 설치, 배포, migration, 수동 collection,
       장애 처리, backup/restore, rollback
 - [ ] `admin-user-manual.md`: 로그인·국가·언어, Overview, Review/AI verify,
       Runs/retry, Banks/collection, Sources, Product Types, Countries, Changes,
@@ -202,7 +201,7 @@ git diff --check
 
 - [ ] 운영자 2시간: Overview → Review → Runs → Banks
 - [ ] 관리자/Data 2시간: 계정·국가·은행·상품 유형·수집·evidence 경계
-- [ ] SRE/보안 3시간: 배포·migration·scheduler·alert·restore·rollback·접근회수
+- [ ] SRE/보안 3시간: 배포·migration·수동 collection·alert·restore·rollback·접근회수
 
 교육 방식:
 
@@ -264,7 +263,7 @@ Cutover 당일:
 - [ ] `/healthz`, 로그인, RBAC, 국가 scope의 read-only smoke
 - [ ] 승인된 최소 stateful smoke만 실행
 - [ ] 의뢰자 admin과 비상 계정 확인
-- [ ] Admin 운영모드와 scheduler `enabled/disabled` 상태 기록
+- [ ] Admin 수동 collection·retry 운영모드 기록
 - [ ] 의뢰자 secret으로 최종 rotation
 - [ ] 전달자 개인/공유 production 접근 회수
 
@@ -312,7 +311,7 @@ Cutover 당일:
 - [ ] 의뢰자 운영자가 전달자 없이 Admin을 사용할 수 있는가?
 - [ ] 최소 매뉴얼 5종과 UAT 증적이 최신인가?
 - [ ] 신규 secret으로 회전했고 전달자 접근을 회수했는가?
-- [ ] Public 제외, BX-PF/audit 한계와 scheduler mode가 서명되었는가?
+- [ ] Public 제외, BX-PF/audit 한계와 Admin 수동 운영 기준이 서명되었는가?
 - [ ] 10영업일 Hypercare와 종료 책임자가 정해졌는가?
 
 모두 `예`일 때만 FPDS Admin 인수 완료로 서명한다.

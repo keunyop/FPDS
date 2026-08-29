@@ -69,8 +69,8 @@ Files:
   lineage in discovery metadata, reclassifies governing documents as
   supporting evidence, and removes known action/calculator detail rows from
   active collection scope
-- `migrations/0035_collection_publication_automation.sql`: adds the singleton
-  recurring collection/recovery policy used by the API scheduler
+- `migrations/0035_collection_publication_automation.sql`: retained historical
+  migration that introduced the former recurring collection policy
 - `migrations/0036_us_pricing_evidence_companions.sql`: moves active US card
   sources to the current market profile and requests the range-preserving
   `purchase_interest_rate_summary` alongside annual fee and purchase rate
@@ -103,6 +103,9 @@ Files:
   named-bank scopes, and generically quarantines any remaining migration-0020
   blanket row with no coverage route, active detail source, or successful
   non-empty collection; historical rows remain and reactivation is evidence-led
+- `migrations/0044_remove_admin_collection_scheduler.sql`: removes the former
+  recurring collection and recovery policy rows; Admin collection remains
+  operator-initiated
 
 How to apply when a database is available:
 
@@ -145,6 +148,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0040_bounded_operational_storage.sq
 psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_routes.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_hardening.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
 ```
 
 Notes:
@@ -189,11 +193,13 @@ Notes:
   enrollment, service, and calculator non-product patterns; canonical product
   status still changes only through the guarded remediation workflow.
 - Apply `0040` after all earlier migrations. It is the active storage baseline:
-  audit/usage writes are discarded, evidence retrieval is metadata-only,
-  Public dashboard datasets derive from the latest projection, and the API
-  scheduler applies `fpds_apply_data_retention()` before each automation cycle.
+  audit/usage writes are discarded, evidence retrieval is metadata-only, and
+  Public dashboard datasets derive from the latest projection. Run
+  `fpds_apply_data_retention()` explicitly during approved maintenance.
 - Apply `0042` after `0020` and `0031`. It makes the recognized-bank
   cross-product seed a bootstrap mechanism rather than current-offering
   evidence for Bridgewater, EQ Bank, and Fairstone. Inactive rows and their
-  historical sources are retained but cannot enter manual or scheduled
+  historical sources are retained but cannot enter operator-initiated
   collection until an operator supplies new attributable official evidence.
+- Apply `0044` after `0035`. It removes all former collection-automation policy
+  rows; no environment flag or database policy can start background collection.

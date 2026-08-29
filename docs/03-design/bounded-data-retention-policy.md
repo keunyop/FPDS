@@ -48,8 +48,8 @@ chronology. They are not duplicated into a generic audit-event stream.
 - after 14 days, reduce run and source-stage JSON to identity, correlation,
   retry, state, count, and decision fields used by the Admin run workflow
 
-The API scheduler calls this function before each automation cycle. The
-function is idempotent and may also be run manually during maintenance.
+The function is idempotent and is run explicitly by an operator during
+maintenance.
 
 ## 4. Removed Storage
 

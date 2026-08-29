@@ -24,7 +24,7 @@ only evidence required for an active workflow or an Admin field trace:
 - chunks from the latest snapshot for each source document; and
 - chunks produced by an active ingestion run.
 
-Unlinked older chunks are deleted by the scheduled retention function. No
+Unlinked older chunks are deleted when an operator runs the retention function. No
 embedding payload or embedding side table is retained. Raw/parsed object
 lifecycle remains a private storage concern and must not weaken Public or Admin
 field traceability. See `bounded-data-retention-policy.md` for the executable
@@ -197,7 +197,7 @@ excerpt를 DB에 직접 두는 baseline 이유는 아래와 같다.
 | Area | Open Item | Follow-Up WBS | Why It Does Not Block 1.4.3 |
 |---|---|---|---|
 | Encryption | KMS/provider-specific encryption detail | later infra/security setup | object vs metadata boundary는 먼저 고정 가능하다. |
-| Retention | exact day count, archive tier, purge schedule | later security/ops | retention hook만 먼저 두면 된다. |
+| Retention | exact day count, archive tier, purge procedure | later security/ops | retention hook만 먼저 두면 된다. |
 | Egress Security | exact SSRF allowlist, private IP deny detail | `1.6.5` | storage layout과 network policy는 분리 가능하다. |
 | Vendor Detail | S3-compatible provider, bucket class, compression policy | implementation stage | logical storage strategy만 먼저 고정하면 된다. |
 

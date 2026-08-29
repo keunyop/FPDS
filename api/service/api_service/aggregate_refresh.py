@@ -814,7 +814,7 @@ def _actor_label(actor: dict[str, Any]) -> str | None:
 
 def _actor_type(actor: dict[str, Any]) -> str:
     actor_type = str(actor.get("actor_type") or "").strip().lower()
-    if actor_type in {"system", "user", "service", "scheduler"}:
+    if actor_type in {"system", "user", "service"}:
         return actor_type
     if str(actor.get("role") or "").strip().lower() == "system":
         return "system"

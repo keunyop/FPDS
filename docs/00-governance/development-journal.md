@@ -3078,3 +3078,51 @@ Read before coding:
   RBAC, CSRF, session-country authority, Public surface, external service, or
   deployment state changed. Live Reject was not submitted against the shared
   database; its navigation path was verified without mutating review data.
+
+## 2026-08-28 - FPDS Admin Manual-Only Collection Boundary
+
+- WBS: `5.54` (`Completed`); decision `D-069` supersedes the recurring
+  execution portion of `D-042`.
+- Status: repository implementation and active-document alignment complete.
+  Migration `0044` is committed for the next approved DB deployment but was
+  not applied to the shared database in this slice.
+- Outcome:
+  - removed the API lifespan collection loop, leader lock, cadence policy
+    loader, runtime flags, scheduler module, and its dedicated tests
+  - fixed source-catalog collection and runner lineage to authenticated Admin
+    trigger values and removed the scheduler actor from current write contracts
+  - changed registry refresh discovery to explicit manual mode while retaining
+    candidate-diff generation and approval-first registry protection
+  - added migration `0044_remove_admin_collection_scheduler.sql` to delete the
+    former recurring collection/recovery policy rows
+  - aligned requirements, workflow/interface/state design, environment,
+    retention, runtime, DB, worker, RAID, WBS, handover, and `00-Scope` docs
+    with operator-initiated collection and retry
+  - retained historical migration, decision, actor/run, and journal records for
+    traceability; financial rate/fee schedules and Admin table auto-refresh are
+    unrelated and remain unchanged
+- Key files:
+  - `api/service/api_service/main.py`
+  - `api/service/api_service/config.py`
+  - `api/service/api_service/source_catalog.py`
+  - `worker/discovery/fpds_registry_refresh/service.py`
+  - `db/migrations/0044_remove_admin_collection_scheduler.sql`
+  - `docs/00-governance/decision-log.md`
+  - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+  - `00-Scope/scope.md`
+- Verification:
+  - full API unit suite: 431 tests passed
+  - full discovery-worker suite: 63 tests passed
+  - Admin `pnpm run typecheck`: passed
+  - Admin `pnpm run build`: passed
+  - root Vercel/FastAPI entrypoint import: passed (`FPDS Admin API`)
+  - active-code/document search found no recurring execution reference outside
+    the removal migration and the regression fixture for ignored legacy flags
+  - `git diff --check`: passed with line-ending conversion warnings only
+- Boundaries: no collection, retry, Review, approval-triggered aggregate
+  refresh, watchdog, financial-field schedule semantics, Public behavior,
+  canonical data, shared DB state, external service, or deployment was changed
+  beyond removal of the unattended Admin execution path.
+- Next step: apply migration `0044` through the approved deployment process and
+  verify the six former collection-automation policy keys are absent in each
+  target database.

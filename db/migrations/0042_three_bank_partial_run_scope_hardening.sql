@@ -155,7 +155,7 @@ WHERE catalog.country_code = 'CA'
   AND catalog.product_type = excluded_scopes.product_type;
 
 -- Keep historical source rows, but stop any older generated/supporting rows in
--- the excluded scopes from entering scheduled or manual source collection.
+-- the excluded scopes from entering operator-initiated source collection.
 WITH excluded_scopes(bank_code, product_type, exclusion_reason) AS (
     VALUES
         ('BRIDGEWATER', 'chequing', 'no_direct_collectible_offering'),
