@@ -57,25 +57,16 @@ web, API, long-running worker/scheduler의 실제 운영 위치를 별도로 확
 
 내가 할 일:
 
-- [ ] 위 담당자 5명과 대체 담당자를 지정한다.
-- [ ] 인수 범위를 `app/admin`, Admin API, Worker, DB, private evidence
+- [v] 인수 범위를 `app/admin`, Admin API, Worker, DB, private evidence
       storage, 운영환경, 문서, 교육과 지원으로 고정한다.
-- [ ] `app/public`과 Public 운영은 제외한다고 적는다.
-- [ ] 공유 API/DB/Worker 파일은 Admin 실행에 필요한 파일만 포함할지,
-      Admin 전용으로 분리할지 Product Owner 결정을 받는다.
-- [ ] BX-PF 미구현, standalone generic audit/usage ledger 미보존,
-      scheduler 운영방식을 known limitation으로 적는다.
-- [ ] 목표 Cutover 일시와 10영업일 Hypercare를 승인받는다.
+- [v] `app/public`과 Public 운영은 제외한다고 적는다.
 
-받아야 할 증거:
+작성할 문서:
 
-- `00-Scope/01-scope-and-raci-approved.pdf`
-- `00-Scope/02-known-limitations-approved.pdf`
+- `00-Scope/scope.md`
 
-통과 조건: Product Owner와 의뢰자 인수 책임자가 두 문서에 서명했다.
+통과 조건: Scope 문서를 작성한다.
 
-멈춤 조건: Public 제외 방식, 담당자 또는 production 운영 주체가 정해지지
-않았다면 다음 단계로 가지 않는다.
 
 ### Step 2. 코드와 자산 목록을 받는다
 

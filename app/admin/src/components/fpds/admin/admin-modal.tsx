@@ -3,7 +3,6 @@
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { AdminMark } from "@/components/fpds/admin/admin-mark";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -82,16 +81,15 @@ function AdminModal({
               aria-label="Operation context"
               className="hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:min-h-[34rem] lg:flex-col lg:px-6 lg:py-6"
             >
-              <div className="flex items-center justify-between gap-3">
-                <AdminMark />
-                {panelBadge ? (
+              {panelBadge ? (
+                <div className="flex justify-end">
                   <span className="border border-sidebar-border bg-sidebar-accent px-2 py-1 text-xs font-medium text-sidebar-primary">
                     {panelBadge}
                   </span>
-                ) : null}
-              </div>
+                </div>
+              ) : null}
 
-              <div className="mt-12 space-y-3">
+              <div className={cn("space-y-3", panelBadge ? "mt-12" : "")}>
                 <p className="text-sm font-medium text-sidebar-foreground/65">
                   FPDS Admin workspace
                 </p>

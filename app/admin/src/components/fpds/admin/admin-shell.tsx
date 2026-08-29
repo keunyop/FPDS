@@ -20,7 +20,6 @@ import {
 import { LogoutButton } from "@/app/admin/LogoutButton";
 import { AdminLocaleSwitcher } from "@/components/admin-locale-switcher";
 import { AdminCountrySwitcher } from "@/components/fpds/admin/admin-country-switcher";
-import { AdminMark } from "@/components/fpds/admin/admin-mark";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -410,10 +409,7 @@ function AdminShell({
         <header className="sticky top-0 z-40 border-b border-sidebar-border bg-sidebar text-sidebar-foreground">
           <div className="flex h-14 items-center gap-3 px-4 md:px-6">
             <SidebarTrigger className="md:hidden" />
-            <div className="flex items-center gap-3">
-              <AdminMark />
-              <p className="text-base font-semibold tracking-[-0.02em] text-sidebar-foreground">{copy.brand}</p>
-            </div>
+            <p className="shrink-0 text-base font-semibold tracking-[-0.02em] text-sidebar-foreground">{copy.brand}</p>
 
             <PrimaryNav locale={locale} pathname={pathname} />
 

@@ -47,6 +47,13 @@ attention state; its `Official sources` list stays collapsed until requested.
 This presentation does not change correction, CSRF, RBAC, audit, canonical, or
 publication boundaries.
 
+Review Queue search, reset, page-size changes, pagination, and visible auto
+refresh update only the results region through the authenticated same-origin
+Admin proxy. Page size is selectable as `20`, `50`, or `100` with `20` as the
+default. The active search/filter/sort/page state remains in the URL and is
+carried into Review Detail, so Back, Reject, and Defer return to the same queue
+context.
+
 ## Code Map
 
 ```text
@@ -84,6 +91,8 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
   country row or accept a free-form country identity from the browser.
 - Preserve session cookies, CSRF headers, RBAC, proxy status/body forwarding,
   query parameter names, and mutation timeout behavior.
+- Keep Review Queue query fields allowlisted and accept detail return context
+  only for the same-origin `/admin/reviews` route.
 - Do not expose evidence, review state, or private source traces to Public.
 - Keep `/admin/source-catalog/*` proxy handlers: Banks collection uses them even
   though the matching page routes redirect.

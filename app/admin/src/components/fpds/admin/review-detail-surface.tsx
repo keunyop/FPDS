@@ -35,6 +35,7 @@ type ReviewDetailSurfaceProps = {
   detail: ReviewTaskDetailResponse;
   csrfToken: string | null | undefined;
   locale: AdminLocale;
+  returnTo: string;
 };
 
 type Recommendation = {
@@ -513,7 +514,7 @@ const READ_ONLY_FIELDS = new Set([
   "effective_date",
 ]);
 
-export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailSurfaceProps) {
+export function ReviewDetailSurface({ detail, csrfToken, locale, returnTo }: ReviewDetailSurfaceProps) {
   const router = useRouter();
   const copy = REVIEW_DETAIL_COPY[locale];
   const localeHref = (pathname: string) => buildAdminHref(pathname, new URLSearchParams(), locale);
@@ -746,7 +747,7 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
 
       setMessage(actionLabel(action, locale));
       if (action === "defer" || action === "reject") {
-        router.replace(localeHref("/admin/reviews"));
+        router.replace(returnTo);
         return;
       }
       router.refresh();
@@ -777,7 +778,7 @@ export function ReviewDetailSurface({ detail, csrfToken, locale }: ReviewDetailS
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href={localeHref("/admin/reviews")}>{copy.backToQueue}</Link>
+              <Link href={returnTo}>{copy.backToQueue}</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href={localeHref(`/admin/runs/${detail.review_task.run_id}`)}>{copy.openRun}</Link>

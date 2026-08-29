@@ -1,7 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 
 import { AdminLocaleSwitcher } from "@/components/admin-locale-switcher";
-import { AdminMark } from "@/components/fpds/admin/admin-mark";
 import type { AdminLocale } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
@@ -49,10 +48,7 @@ export function AdminAuthFrame({
       <div className="mx-auto grid min-h-[calc(100svh-1.5rem)] w-full min-w-0 max-w-5xl overflow-hidden border border-border bg-card sm:min-h-[calc(100svh-2.5rem)] lg:grid-cols-[0.86fr_1.14fr]">
         <aside className="flex min-w-0 flex-col justify-between bg-sidebar p-6 text-sidebar-foreground sm:p-8 lg:p-10">
           <div>
-            <div className="flex items-center gap-3">
-              <AdminMark />
-              <p className="text-base font-semibold tracking-[-0.02em]">{brand}</p>
-            </div>
+            <p className="text-base font-semibold tracking-[-0.02em]">{brand}</p>
             <p className="mt-14 text-xs font-semibold text-sidebar-primary">{copy.mode}</p>
             <p className="mt-3 max-w-md break-keep text-2xl font-semibold leading-tight tracking-[-0.025em] sm:text-3xl">
               {copy.thesis}

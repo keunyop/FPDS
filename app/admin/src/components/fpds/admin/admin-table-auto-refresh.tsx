@@ -7,6 +7,7 @@ type AdminTableAutoRefreshProps = {
   disabled?: boolean;
   intervalMs?: number;
   locale?: Locale;
+  onRefresh?: () => void | Promise<void>;
 };
 
 type Locale = "en" | "ko" | "ja";
@@ -139,6 +140,7 @@ export function AdminTableAutoRefresh({
   disabled = false,
   intervalMs = DEFAULT_INTERVAL_MS,
   locale: requestedLocale,
+  onRefresh,
 }: AdminTableAutoRefreshProps) {
   const router = useRouter();
   const [lastRefreshAt, setLastRefreshAt] = useState<Date | null>(null);
@@ -153,11 +155,15 @@ export function AdminTableAutoRefresh({
       setPauseReason(getPauseReason());
     }
 
-    function requestRefresh() {
+    async function requestRefresh() {
       const nextPauseReason = getPauseReason();
       setPauseReason(nextPauseReason);
       if (nextPauseReason === null) {
-        router.refresh();
+        if (onRefresh) {
+          await onRefresh();
+        } else {
+          router.refresh();
+        }
         setLastRefreshAt(new Date());
       }
     }
@@ -168,7 +174,7 @@ export function AdminTableAutoRefresh({
       return;
     }
 
-    const intervalId = window.setInterval(requestRefresh, intervalMs);
+    const intervalId = window.setInterval(() => void requestRefresh(), intervalMs);
     const mutationObserver = new MutationObserver(updateStatus);
     mutationObserver.observe(document.body, {
       attributeFilter: [
@@ -192,7 +198,7 @@ export function AdminTableAutoRefresh({
 
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
-        requestRefresh();
+        void requestRefresh();
       } else {
         updateStatus();
       }
@@ -209,7 +215,7 @@ export function AdminTableAutoRefresh({
       document.removeEventListener("focusout", handleFocusChange);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [disabled, intervalMs, requestedLocale, router]);
+  }, [disabled, intervalMs, onRefresh, requestedLocale, router]);
 
   const messages = copy[locale];
   const isDisabled = disabled || intervalMs <= 0;

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { CirclePause, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -16,25 +15,19 @@ import {
   type AdminLocale,
 } from "@/lib/admin-i18n";
 import { buildAdminProductTypeLabelMap, formatAdminProductType } from "@/lib/admin-product-types";
+import { buildReviewQueueBrowserSearchParams, type ReviewQueuePageFilters } from "@/lib/review-queue-query";
 import { cn } from "@/lib/utils";
-
-type ReviewQueueResultsFilters = {
-  q: string;
-  states: string[];
-  bankCode: string;
-  productType: string;
-  validationStatus: string;
-  createdFrom: string;
-  createdTo: string;
-  sortBy: string;
-  sortOrder: "asc" | "desc";
-  page: number;
-};
 
 type ReviewQueueResultsProps = {
   queue: ReviewQueueResponse;
-  filters: ReviewQueueResultsFilters;
+  filters: ReviewQueuePageFilters;
+  isLoading: boolean;
+  loadError: string | null;
+  loadingLabel: string;
   locale: AdminLocale;
+  onPageChange: (page: number) => void | Promise<void>;
+  onRefresh: () => void | Promise<void>;
+  onReset: () => void;
   productTypes: ProductTypeItem[];
   csrfToken: string | null | undefined;
 };
@@ -148,8 +141,19 @@ const RESULTS_COPY = {
   },
 } as const;
 
-export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfToken }: ReviewQueueResultsProps) {
-  const router = useRouter();
+export function ReviewQueueResults({
+  queue,
+  filters,
+  isLoading,
+  loadError,
+  loadingLabel,
+  locale,
+  onPageChange,
+  onRefresh,
+  onReset,
+  productTypes,
+  csrfToken,
+}: ReviewQueueResultsProps) {
   const copy = RESULTS_COPY[locale];
   const productTypeLabelMap = buildAdminProductTypeLabelMap(productTypes);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -160,6 +164,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
   const selectableIds = selectableItems.map((item) => item.review_task_id);
   const visibleIdsKey = queue.items.map((item) => item.review_task_id).join("|");
   const allSelectableSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedSet.has(id));
+  const returnTo = buildAdminHref("/admin/reviews", buildReviewQueueBrowserSearchParams(filters), locale);
 
   useEffect(() => {
     const visibleIds = new Set(queue.items.map((item) => item.review_task_id));
@@ -232,11 +237,11 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
     } else {
       setStatusMessage(`${copy.bulkFailed(actionLabel(locale, action), failures.length)} ${failures.slice(0, 2).join(" ")}`);
     }
-    router.refresh();
+    await onRefresh();
   }
 
   return (
-    <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
+    <article aria-busy={isLoading} className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
       <div className="border-b border-border px-4 py-3">
         <div>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -247,6 +252,19 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
           </div>
         </div>
       </div>
+
+      {isLoading || loadError ? (
+        <div className="border-b border-border px-4 py-3">
+          {isLoading ? (
+            <p aria-live="polite" className="inline-flex items-center gap-2 text-sm text-muted-foreground" role="status">
+              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+              {loadingLabel}
+            </p>
+          ) : (
+            <p aria-live="assertive" className="text-sm text-destructive" role="alert">{loadError}</p>
+          )}
+        </div>
+      ) : null}
 
       {queue.items.length === 0 ? (
         <div className="px-4 py-8">
@@ -259,9 +277,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
               {copy.emptyBody}
             </p>
             <div className="mt-4">
-              <Button asChild variant="outline">
-                <Link href={buildAdminHref("/admin/reviews", new URLSearchParams(), locale)}>{copy.resetQueueFilters}</Link>
-              </Button>
+              <Button disabled={isLoading} onClick={onReset} type="button" variant="outline">{copy.resetQueueFilters}</Button>
             </div>
           </div>
         </div>
@@ -274,7 +290,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
                   aria-label={copy.selectPage}
                   checked={allSelectableSelected}
                   className="h-4 w-4 rounded border-border text-primary accent-[var(--primary)]"
-                  disabled={selectableIds.length === 0 || pendingAction !== null}
+                  disabled={isLoading || selectableIds.length === 0 || pendingAction !== null}
                   onChange={(event) => togglePage(event.currentTarget.checked)}
                   type="checkbox"
                 />
@@ -284,7 +300,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
             </div>
             {selectedIds.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-              <Button className="min-h-10" disabled={selectedIds.length === 0 || pendingAction !== null} onClick={() => handleBulkAction("defer")} size="sm" type="button" variant="outline">
+              <Button className="min-h-10" disabled={isLoading || selectedIds.length === 0 || pendingAction !== null} onClick={() => handleBulkAction("defer")} size="sm" type="button" variant="outline">
                 {pendingAction === "defer" ? <Loader2 className="animate-spin" /> : <CirclePause />}
                 {pendingAction === "defer" ? copy.deferring : translateReviewAction(locale, "defer")}
               </Button>
@@ -309,7 +325,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
                       <input
                         checked={selectedSet.has(item.review_task_id)}
                         className="h-4 w-4 rounded border-border text-primary accent-[var(--primary)] disabled:opacity-40"
-                        disabled={!selectable || pendingAction !== null}
+                        disabled={isLoading || !selectable || pendingAction !== null}
                         onChange={(event) => toggleItem(item.review_task_id, event.currentTarget.checked)}
                         type="checkbox"
                       />
@@ -320,7 +336,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
                       </p>
                       <Link
                         className="mt-0.5 block text-base font-semibold leading-6 text-foreground underline-offset-4 hover:text-primary hover:underline"
-                        href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}
+                        href={buildReviewDetailHref(item.review_task_id, returnTo, locale)}
                       >
                         {item.product_name}
                       </Link>
@@ -399,7 +415,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
                           <input
                             checked={selectedSet.has(item.review_task_id)}
                             className="h-4 w-4 rounded border-border text-primary accent-[var(--primary)] disabled:opacity-40"
-                            disabled={!selectable || pendingAction !== null}
+                            disabled={isLoading || !selectable || pendingAction !== null}
                             onChange={(event) => toggleItem(item.review_task_id, event.currentTarget.checked)}
                             type="checkbox"
                           />
@@ -415,7 +431,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
                         <div className="grid gap-1">
                           <Link
                             className="font-medium leading-5 text-foreground underline-offset-4 hover:text-primary hover:underline"
-                            href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}
+                            href={buildReviewDetailHref(item.review_task_id, returnTo, locale)}
                           >
                             {item.product_name}
                           </Link>
@@ -481,7 +497,7 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
                         <div className="grid gap-1 font-mono text-[11px] leading-5 text-muted-foreground">
                           <Link
                             className="underline-offset-4 hover:text-primary hover:underline"
-                            href={buildAdminHref(`/admin/reviews/${item.review_task_id}`, new URLSearchParams(), locale)}
+                            href={buildReviewDetailHref(item.review_task_id, returnTo, locale)}
                           >
                             {copy.task} {item.review_task_id}
                           </Link>
@@ -507,18 +523,14 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
             </p>
             <div className="flex items-center gap-2">
               {queue.page > 1 ? (
-                <Button asChild className="min-h-10" size="sm" variant="outline">
-                  <Link href={buildQueueHref(filters, { page: Math.max(1, queue.page - 1) }, locale)}>{copy.previous}</Link>
-                </Button>
+                <Button className="min-h-10" disabled={isLoading} onClick={() => onPageChange(Math.max(1, queue.page - 1))} size="sm" type="button" variant="outline">{copy.previous}</Button>
               ) : (
                 <span className="inline-flex h-10 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground opacity-60">
                   {copy.previous}
                 </span>
               )}
               {queue.has_next_page ? (
-                <Button asChild className="min-h-10" size="sm" variant="outline">
-                  <Link href={buildQueueHref(filters, { page: queue.page + 1 }, locale)}>{copy.next}</Link>
-                </Button>
+                <Button className="min-h-10" disabled={isLoading} onClick={() => onPageChange(queue.page + 1)} size="sm" type="button" variant="outline">{copy.next}</Button>
               ) : (
                 <span className="inline-flex h-10 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground opacity-60">
                   {copy.next}
@@ -532,48 +544,9 @@ export function ReviewQueueResults({ queue, filters, locale, productTypes, csrfT
   );
 }
 
-function buildQueueHref(
-  filters: ReviewQueueResultsFilters,
-  overrides: Partial<ReviewQueueResultsFilters>,
-  locale: AdminLocale,
-) {
-  const next = {
-    ...filters,
-    ...overrides,
-  };
-  const params = new URLSearchParams();
-  if (next.q) {
-    params.set("q", next.q);
-  }
-  for (const state of next.states) {
-    params.append("state", state);
-  }
-  if (next.bankCode) {
-    params.set("bank_code", next.bankCode);
-  }
-  if (next.productType) {
-    params.set("product_type", next.productType);
-  }
-  if (next.validationStatus) {
-    params.set("validation_status", next.validationStatus);
-  }
-  if (next.createdFrom) {
-    params.set("created_from", next.createdFrom);
-  }
-  if (next.createdTo) {
-    params.set("created_to", next.createdTo);
-  }
-  if (next.sortBy) {
-    params.set("sort_by", next.sortBy);
-  }
-  if (next.sortOrder) {
-    params.set("sort_order", next.sortOrder);
-  }
-  if (next.page > 1) {
-    params.set("page", String(next.page));
-  }
-
-  return buildAdminHref("/admin/reviews", params, locale);
+function buildReviewDetailHref(reviewTaskId: string, returnTo: string, locale: AdminLocale) {
+  const params = new URLSearchParams({ return_to: returnTo });
+  return buildAdminHref(`/admin/reviews/${reviewTaskId}`, params, locale);
 }
 
 function isBulkSelectable(item: ReviewTaskListItem) {

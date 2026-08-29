@@ -5,6 +5,7 @@ import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailab
 import { ReviewDetailSurface } from "@/components/fpds/admin/review-detail-surface";
 import { fetchAdminSession, fetchReviewTaskDetail, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
+import { buildReviewQueueBrowserSearchParams, parseReviewQueueReturnFilters } from "@/lib/review-queue-query";
 
 type ReviewDetailPageProps = {
   params: Promise<{
@@ -17,6 +18,11 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
   const { reviewTaskId } = await params;
   const resolvedSearchParams = (await searchParams) ?? {};
   const locale = resolveAdminLocale(resolvedSearchParams);
+  const returnFilters = parseReviewQueueReturnFilters(firstValue(resolvedSearchParams.return_to));
+  const returnTo = returnFilters
+    ? buildAdminHref("/admin/reviews", buildReviewQueueBrowserSearchParams(returnFilters), locale)
+    : buildAdminHref("/admin/reviews", new URLSearchParams(), locale);
+  const detailSearchParams = new URLSearchParams({ return_to: returnTo });
 
   let session: Awaited<ReturnType<typeof fetchAdminSession>> = null;
   let detail: Awaited<ReturnType<typeof fetchReviewTaskDetail>> = null;
@@ -32,7 +38,7 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
   }
 
   if (!session && !apiUnavailable) {
-    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref(`/admin/reviews/${reviewTaskId}`, new URLSearchParams(), locale))}`);
+    redirect(`/admin/login?next=${encodeURIComponent(buildAdminHref(`/admin/reviews/${reviewTaskId}`, detailSearchParams, locale))}`);
   }
 
   if (!session || apiUnavailable) {
@@ -62,7 +68,11 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
         role: session.user.role,
       }}
     >
-      <ReviewDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} />
+      <ReviewDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} returnTo={returnTo} />
     </AdminShell>
   );
+}
+
+function firstValue(value: string | string[] | undefined) {
+  return (Array.isArray(value) ? value[0] : value)?.trim();
 }

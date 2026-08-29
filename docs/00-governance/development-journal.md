@@ -3006,3 +3006,75 @@ Read before coding:
   external service, Public surface, canonical fact, or WBS state changed.
 - Next step: fill the owner/date table at the top of the playbook, complete Step
   1 signatures, and do not start code transfer until its stop gate is clear.
+
+## 2026-08-27 - FPDS Admin Graphical Mark Removal
+
+- WBS: small Product Owner-directed Admin UI refinement; no WBS status changed.
+- Status: complete.
+- Outcome:
+  - removed the graphical `F`/record-dot mark from Login and Signup, the
+    authenticated Admin header, and Admin modal context panels
+  - retained the localized `FPDS Admin` text identity and left all bank logos,
+    navigation, country, locale, authentication, and modal behavior unchanged
+  - removed the now-unused `admin-mark.tsx` component and recorded the identity
+    presentation override
+- Key files:
+  - `app/admin/src/components/fpds/admin/admin-auth-frame.tsx`
+  - `app/admin/src/components/fpds/admin/admin-shell.tsx`
+  - `app/admin/src/components/fpds/admin/admin-modal.tsx`
+  - `docs/03-design/ui-override-register.md`
+- Verification:
+  - Admin `pnpm run typecheck`: passed
+  - Admin `pnpm run build`: passed
+  - Login visual checks passed at 1440px and 768px; an exact 390x844 CSS
+    viewport check confirmed `scrollWidth=390`, no Admin mark, and retained
+    text identity
+  - repository `git diff --check`: passed
+- Boundaries: no bank logo, Public identity, auth/session behavior, data,
+  external service, deployment, or Product scope changed.
+
+## 2026-08-27 - Review Queue Result-Only Search and Context Return
+
+- WBS: Product Owner-directed Admin Review Queue refinement; no WBS status
+  changed.
+- Status: complete.
+- Outcome:
+  - Search, reset, page-size selection, pagination, bulk-action refresh, and
+    visible auto-refresh now use an authenticated same-origin Queue proxy and
+    replace only the results region
+  - operators can select `20`, `50`, or `100` rows; missing or invalid input
+    resolves to `20` and the selected value is passed to the existing API
+  - active search, filters, sort, page, page size, and locale stay in the
+    browser URL; Queue detail links carry a same-origin allowlisted
+    `return_to` context
+  - Review Detail Back, Reject, and Defer return to that preserved Queue
+    context, while direct or invalid return paths fall back to the localized
+    Queue root
+  - added concise Korean handover scope at `00-Scope/scope.md`
+- Key files:
+  - `app/admin/src/lib/review-queue-query.ts`
+  - `app/admin/src/app/admin/reviews/data/route.ts`
+  - `app/admin/src/components/fpds/admin/review-queue-surface.tsx`
+  - `app/admin/src/components/fpds/admin/review-queue-results.tsx`
+  - `app/admin/src/app/admin/reviews/[reviewTaskId]/page.tsx`
+  - `app/admin/src/components/fpds/admin/review-detail-surface.tsx`
+  - `00-Scope/scope.md`
+- Verification:
+  - focused query assertions passed for default/invalid `page_size`, the
+    `20/50/100` allowlist, date conversion, filter normalization, and rejection
+    of external or non-Queue return paths
+  - Admin `pnpm run typecheck`: passed
+  - Admin `pnpm run build`: passed; `/admin/reviews/data` was included in the
+    generated route table
+  - synthetic-data browser verification recorded no additional Document
+    request during Search and seven results-only requests across search,
+    reset, page size, pagination, failure, and delayed-loading scenarios
+  - loading, retained-results error, empty, default 20-row, 50-row, second-page,
+    and detail return-link states passed
+  - EN/KO/JA checks passed at 1440px, 768px, and exact 390x844; no
+    document-level horizontal overflow was present, and the 390px result was
+    visually inspected
+- Boundaries: no API schema, DB/canonical data, review-decision semantics,
+  RBAC, CSRF, session-country authority, Public surface, external service, or
+  deployment state changed. Live Reject was not submitted against the shared
+  database; its navigation path was verified without mutating review data.
