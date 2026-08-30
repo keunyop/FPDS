@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
+import { TrackedOfficialBankLink } from "@/components/fpds/public/product-engagement-link";
 import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { InterestCalculator } from "@/components/fpds/public/interest-calculator";
 import { PublicFreshness } from "@/components/fpds/public/public-freshness";
@@ -122,10 +123,10 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
             <div className="flex flex-wrap gap-2 lg:justify-end">
               {product.product_url ? (
                 <Button asChild>
-                  <a href={product.product_url} target="_blank" rel="noopener noreferrer">
+                  <TrackedOfficialBankLink countryCode={product.country_code} href={product.product_url} productId={product.product_id}>
                     {copy.detail.officialPage}
                     <ExternalLink className="size-4" aria-hidden="true" />
-                  </a>
+                  </TrackedOfficialBankLink>
                 </Button>
               ) : null}
               <Button asChild variant="outline">

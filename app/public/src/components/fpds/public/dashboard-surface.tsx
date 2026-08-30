@@ -2,6 +2,7 @@ import { ArrowRight, CreditCard, ExternalLink, FilterX, Landmark, PiggyBank, Ref
 import Link from "next/link";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
+import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/public/product-engagement-link";
 import { ProductRecommendationFinder } from "@/components/fpds/public/product-recommendation-finder";
 import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
@@ -127,6 +128,7 @@ export function DashboardSurface({
               banks={summary.breakdowns.products_by_bank}
               countryCode={filters.countryCode}
               locale={filters.locale}
+              productTypes={summary.breakdowns.products_by_product_type}
             />
           </div>
         </section>
@@ -262,9 +264,14 @@ function ProductTopFive({
               <span className="text-sm font-semibold text-muted-foreground tabular-nums">{index + 1}</span>
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
               <div className="min-w-0">
-                <Link className="flex min-h-11 min-w-0 items-center text-sm font-semibold text-foreground hover:text-primary [overflow-wrap:anywhere]" href={buildProductDetailHref(filters, product.product_id)}>
+                <TrackedProductLink
+                  className="flex min-h-11 min-w-0 items-center text-sm font-semibold text-foreground hover:text-primary [overflow-wrap:anywhere]"
+                  countryCode={filters.countryCode}
+                  href={buildProductDetailHref(filters, product.product_id)}
+                  productId={product.product_id}
+                >
                   {product.product_name}
-                </Link>
+                </TrackedProductLink>
                 <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
               </div>
               <div className="col-start-3 mt-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
@@ -272,15 +279,15 @@ function ProductTopFive({
                   {formatMetricValue(product.card_display_rate, "percent", filters.locale)}
                 </span>
                 {product.product_url ? (
-                  <a
+                  <TrackedOfficialBankLink
                     className="inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium text-primary hover:text-primary/80"
+                    countryCode={filters.countryCode}
                     href={product.product_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    productId={product.product_id}
                   >
                     {copy.common.bankPage}
                     <ExternalLink className="size-3.5" aria-hidden="true" />
-                  </a>
+                  </TrackedOfficialBankLink>
                 ) : null}
               </div>
             </li>

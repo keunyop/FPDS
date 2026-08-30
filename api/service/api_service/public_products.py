@@ -70,6 +70,7 @@ _REFERENCE_RANGE_PREFIX_PATTERN = re.compile(
 class PublicProductsQuery:
     filters: PublicQueryFilters
     search_query: str | None
+    product_name_query: str | None
     sort_by: str
     sort_order: str
     page: int
@@ -89,6 +90,7 @@ def normalize_public_products_query(
     minimum_deposit_bucket: str | None,
     term_bucket: str | None,
     search_query: str | None = None,
+    product_name_query: str | None = None,
     sort_by: str | None,
     sort_order: str | None,
     page: int,
@@ -116,6 +118,7 @@ def normalize_public_products_query(
             term_bucket=term_bucket,
         ),
         search_query=_normalize_name_search(search_query),
+        product_name_query=_normalize_name_search(product_name_query),
         sort_by=normalized_sort_by,
         sort_order=normalized_sort_order,
         page=page,
@@ -129,7 +132,11 @@ def load_public_products(connection, *, query: PublicProductsQuery) -> dict[str,
     if not snapshot:
         return {
             "items": [],
-            "applied_filters": _applied_filters(query.filters, search_query=query.search_query),
+            "applied_filters": _applied_filters(
+                query.filters,
+                search_query=query.search_query,
+                product_name_query=query.product_name_query,
+            ),
             "sort": {"sort_by": query.sort_by, "sort_order": query.sort_order},
             "freshness": freshness,
             "page": query.page,
@@ -147,6 +154,7 @@ def load_public_products(connection, *, query: PublicProductsQuery) -> dict[str,
     filtered_rows = _apply_name_search(
         apply_public_filters(rows, filters=query.filters),
         search_query=query.search_query,
+        product_name_query=query.product_name_query,
     )
     sorted_rows = _sort_rows(filtered_rows, query=query)
     total_items = len(sorted_rows)
@@ -155,7 +163,11 @@ def load_public_products(connection, *, query: PublicProductsQuery) -> dict[str,
 
     return {
         "items": [_serialize_product_row(row, locale=query.filters.locale) for row in page_rows],
-        "applied_filters": _applied_filters(query.filters, search_query=query.search_query),
+        "applied_filters": _applied_filters(
+            query.filters,
+            search_query=query.search_query,
+            product_name_query=query.product_name_query,
+        ),
         "sort": {"sort_by": query.sort_by, "sort_order": query.sort_order},
         "freshness": freshness,
         "page": query.page,
@@ -251,7 +263,11 @@ def load_public_filters(
         "minimum_balance_buckets": _count_bucket_options(filtered_rows, field_name="minimum_balance_bucket", locale=locale),
         "minimum_deposit_buckets": _count_bucket_options(filtered_rows, field_name="minimum_deposit_bucket", locale=locale),
         "term_buckets": _count_bucket_options(filtered_rows, field_name="term_bucket", locale=locale),
-        "applied_filters": _applied_filters(filters, search_query=normalized_search_query),
+        "applied_filters": _applied_filters(
+            filters,
+            search_query=normalized_search_query,
+            product_name_query=None,
+        ),
         "freshness": freshness,
     }
 
@@ -265,20 +281,38 @@ def _apply_name_search(
     rows: list[dict[str, Any]],
     *,
     search_query: str | None,
+    product_name_query: str | None = None,
 ) -> list[dict[str, Any]]:
-    if not search_query:
-        return rows
-    needle = search_query.casefold()
-    return [
-        row
-        for row in rows
-        if needle in str(row.get("bank_name") or "").casefold()
-        or needle in str(row.get("product_name") or "").casefold()
-    ]
+    filtered_rows = rows
+    if search_query:
+        needle = search_query.casefold()
+        filtered_rows = [
+            row
+            for row in filtered_rows
+            if needle in str(row.get("bank_name") or "").casefold()
+            or needle in str(row.get("product_name") or "").casefold()
+        ]
+    if product_name_query:
+        product_needle = product_name_query.casefold()
+        filtered_rows = [
+            row
+            for row in filtered_rows
+            if product_needle in str(row.get("product_name") or "").casefold()
+        ]
+    return filtered_rows
 
 
-def _applied_filters(filters: PublicQueryFilters, *, search_query: str | None) -> dict[str, Any]:
-    return {**applied_filters_payload(filters), "q": search_query}
+def _applied_filters(
+    filters: PublicQueryFilters,
+    *,
+    search_query: str | None,
+    product_name_query: str | None = None,
+) -> dict[str, Any]:
+    return {
+        **applied_filters_payload(filters),
+        "q": search_query,
+        "product_name": product_name_query,
+    }
 
 
 def load_available_public_countries(connection) -> list[dict[str, Any]]:

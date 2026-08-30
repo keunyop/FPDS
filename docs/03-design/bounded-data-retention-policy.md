@@ -1,7 +1,7 @@
 # FPDS Bounded Data Retention Policy
 
-Version: 1.0
-Date: 2026-08-13
+Version: 1.1
+Date: 2026-08-30
 Status: Active Product Owner Baseline
 
 ## 1. Objective
@@ -48,6 +48,18 @@ chronology. They are not duplicated into a generic audit-event stream.
 - after 14 days, reduce run and source-stage JSON to identity, correlation,
   retry, state, count, and decision fields used by the Admin run workflow
 
+Migration `0045_public_product_engagement.sql` separately owns the Public
+product-interaction bound:
+
+- persist one daily aggregate row per country, active product, and fixed event
+  type; no raw event row or visitor identity exists
+- event types are limited to product-detail click, official-bank click, and
+  finder My product selection
+- retain at most 400 calendar days; the statement trigger deletes older rows
+  during each insert/upsert, supported by an event-date index
+- do not retain IP, cookie, session, query, referrer, user-agent, or consumer
+  financial/profile values
+
 The function is idempotent and is run explicitly by an operator during
 maintenance.
 
@@ -83,6 +95,8 @@ rankings, and scatter data are derived at request time from the latest retained
 - Never remove the latest completed Public snapshot for a country/scope.
 - Never remove current canonical product, product version, review, or change
   history rows as an operational cleanup shortcut.
+- Never reinterpret finder selection counts as unique customers or verified
+  account ownership.
 - Authentication, authorization, CSRF, login throttling, safe fetch, and Public
   evidence privacy remain unchanged.
 - A migration or manual cleanup must compare latest Public snapshot IDs and

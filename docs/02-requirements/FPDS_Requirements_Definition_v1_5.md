@@ -28,6 +28,12 @@ unbounded evidence-retention statement later in this document:
 Historical LLM usage, audit, dashboard-snapshot, and embedding-table clauses
 below remain only as provenance and are not active acceptance criteria.
 
+Product Owner direction on 2026-08-30 additionally permits bounded anonymous
+Public product-engagement counters. Only event date, country, active product
+ID, one of three fixed event types, and an aggregate count may persist for 400
+days. Visitor identity, IP address, cookie, free-text query, and financial or
+eligibility profile values are prohibited.
+
 ---
 
 ## 1. Document Purpose
@@ -632,12 +638,12 @@ without changing the approved factual-comparison or private-evidence boundary.
 
 ### FR-PUB-021 Same-Type Primary-Metric Product Finder
 
-Product Owner direction on `2026-08-29` approves one bounded recommendation
-exception on canonical Public Home. A visitor selects a published bank, an
-available Product Type, filters product names by case-insensitive literal
-substring, and selects one exact product currently held at that bank before
-requesting exact-Product-Type candidates from the active country's latest
-approved Public projection.
+Product Owner direction on `2026-08-30` supersedes the input and copy portions
+of the 2026-08-29 finder while retaining its deterministic comparison rule. The
+visitor starts by selecting one exact published product they already hold.
+Bank and Product Type are optional narrowing controls. Product-name search must
+work without either control, and focusing an empty search must expose all
+active products alphabetically through bounded incremental paging.
 
 - the finder must use only the existing anonymous, review-approved Public
   projection and must not collect or persist a profile, balance, income,
@@ -651,18 +657,43 @@ approved Public projection.
   does not infer a winner from ties, missing values, or secondary conditions
 - the selected product, Product Type, comparison basis, current/candidate
   values, and official/detail actions must remain visible and localized
-- loading, bank-with-no-product, product-name-no-match, undisclosed-metric,
+- loading, loading-more, empty-scope, product-name-no-match, undisclosed-metric,
   no-improvement, and API failure states must remain usable and honest
-- the surface must state that the result is a one-metric comparison rather than
-  personal financial advice, suitability, eligibility, approval likelihood,
-  guaranteed savings, or an application outcome, and must direct users to
-  reconfirm all conditions with the institution
+- the heading/body must make it clear that the input is a product the visitor
+  already has; the primary action is Find a better product and the selected
+  record label is My product in EN/KO/JA
+- the former standing sentence One-metric comparison, not advice. Check all
+  terms with the bank. must not appear in the finder
 - the existing Equal Earth country coverage map moves from Home to Methodology;
   its snapshot, count, local-asset, localization, and privacy contracts do not
   change, and Home no longer requests its country-coverage payload
 - this exception does not change canonical data, publication eligibility,
-  private evidence boundaries, analytics policy, catalog comparison, or the
-  broader prohibition on profile-based personalized ranking
+  private evidence boundaries, catalog comparison, or the broader prohibition
+  on profile-based personalized ranking
+
+### FR-PUB-022 Bounded Public Product Analytics Admin
+
+The Public application must expose a private `/admin` route protected by a
+server-verified password and a signed HttpOnly, SameSite=Strict session cookie.
+The Product Owner deployment password is `1112` and must be supplied as a
+server-only environment value, never embedded in the client bundle. Failed
+login attempts require bounded best-effort throttling, the page must be
+`noindex` and excluded from GA page-view collection, and the analytics API must
+use a separate server-to-server credential.
+
+- collect only daily product-level aggregate counts for internal product-detail
+  clicks, official-bank outbound clicks, and finder My product selections
+- validate every event against an active product in the latest Public snapshot;
+  reject arbitrary event types, unknown products, oversized input, and missing
+  app credentials
+- store no visitor identifier, IP address, cookie, free-text search, or
+  financial/profile value; My product selections are a usage proxy and must
+  not be represented as unique customers or verified ownership
+- retain counters for 400 days and show totals, per-product counts, per-bank
+  counts, most-selected My products, a 30-day daily view, data freshness, and
+  the privacy/retention boundary
+- analytics recording is best-effort and must never block product navigation,
+  finder results, or official-bank navigation
 
 ## 8.2 Admin Requirements
 

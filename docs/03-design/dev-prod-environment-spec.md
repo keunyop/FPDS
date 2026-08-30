@@ -119,6 +119,9 @@ Rules:
 | `FPDS_ADMIN_AUTH_MODE` | admin auth baseline, currently `server-session` |
 | `FPDS_ADMIN_SESSION_SECRET` | session secret for admin authentication |
 | `FPDS_ADMIN_CSRF_SECRET` | CSRF secret for admin write protection |
+| `FPDS_PUBLIC_APP_API_SECRET` | shared server-only credential between Public BFF/server components and the bounded engagement API |
+| `FPDS_PUBLIC_ADMIN_PASSWORD` | server-only password for the separate Public analytics admin |
+| `FPDS_PUBLIC_ADMIN_SESSION_SECRET` | HMAC signing secret for the Public analytics admin cookie |
 | `FPDS_STORAGE_ACCESS_KEY` | storage access credential |
 | `FPDS_STORAGE_SECRET_KEY` | storage secret credential |
 | `FPDS_CRAWLER_SHARED_SECRET` | worker or crawler shared secret |
@@ -127,6 +130,9 @@ Rules:
 - browser surfaces must not receive these values
 - all secrets stay placeholder-only in tracked files
 - real secrets belong in a secret manager or untracked runtime env files
+- the Public app and API must receive matching
+  `FPDS_PUBLIC_APP_API_SECRET` values per environment; only the Public app
+  receives the Public Admin password/session secret
 
 ### 4.5 Fetch, LLM, and Publish Integration
 

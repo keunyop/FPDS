@@ -64,6 +64,25 @@
       "route_id": "public.proxy.countries",
       "implementation_path": "src/app/api/public/countries/route.ts",
       "resource_key": "public_country.options"
+    },
+    {
+      "route": "/api/public/products",
+      "route_id": "public.proxy.products",
+      "implementation_path": "src/app/api/public/products/route.ts",
+      "resource_key": "public_product.list"
+    },
+    {
+      "route": "/api/public/engagement",
+      "route_id": "public.proxy.engagement",
+      "implementation_path": "src/app/api/public/engagement/route.ts",
+      "resource_key": "public_product.engagement"
+    },
+    {
+      "route": "/admin",
+      "route_id": "public.analytics_admin",
+      "implementation_path": "src/app/admin/page.tsx",
+      "resource_key": "public_analytics.summary",
+      "access": "password"
     }
   ]
 }

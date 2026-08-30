@@ -299,6 +299,24 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
                 ]
             )
         )
+        self.assertTrue(
+            source_catalog_collection_runner._no_detail_result_is_structural(
+                [
+                    "Page evidence was unavailable for https://bank.example/form.pdf: "
+                    "Text fetch expected HTML content but received application/pdf.",
+                    "Homepage discovery candidate validation rejected all tentative detail pages.",
+                    "Detail rejection summary: page_evidence_below_threshold=3, page_fetch_unavailable=1.",
+                ]
+            )
+        )
+        self.assertFalse(
+            source_catalog_collection_runner._no_detail_result_is_structural(
+                [
+                    "Page evidence was unavailable for https://bank.example/product: HTTP 503.",
+                    "Homepage discovery completed but no candidate-producing detail sources were identified.",
+                ]
+            )
+        )
 
     def test_no_detail_summary_prioritizes_decisive_rejection_diagnostics(self) -> None:
         summary = source_catalog_collection_runner._no_detail_sources_summary(

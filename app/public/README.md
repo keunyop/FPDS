@@ -8,9 +8,8 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 ## Runtime Routes
 
 - `/` is the canonical public Home view. Its first viewport pairs a short market
-  thesis with a same-type product finder: a visitor selects a published bank
-  and Product Type, filters product names by literal substring, selects the
-  current product, then checks up to three exact-Product-Type products that
+  thesis with a same-type product finder: a visitor selects a product they
+  already have, then checks up to three exact-Product-Type products that
   strictly improve one disclosed primary metric. Deposit, Credit Card, and Loan
   remain equal direct next actions. The main content places Deposit Top 5
   on the left and Loan Top 5 on the right at desktop, stacking both lists below
@@ -35,6 +34,9 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 - `/methodology` explains the source-to-snapshot process, metric meaning,
   comparison boundary, freshness states, and public evidence boundary, and
   owns the Equal Earth country coverage map with product/distinct-bank counts.
+- `/admin` is a separate noindex Public product-analytics route. It requires a
+  server-verified password and signed HttpOnly session, sends no GA page view,
+  and shows only bounded aggregate product/bank interaction counters.
 
 ## Experience Baseline
 
@@ -61,19 +63,21 @@ that country. Each compatibility lookup is isolated so a failed fallback does
 not hide the country or its product count, and the fallback stops issuing
 extra requests once the country endpoint supplies `bank_count`.
 
-The Home finder uses only anonymous review-approved Public projections. Bank
-selection loads that bank's active published products. Product Type is selected
-explicitly, and product names are narrowed locally by case-insensitive literal
-substring before one exact current product is selected. The candidate query
-stays inside the active country and exact Product Type. Chequing
+The Home finder uses only anonymous review-approved Public projections and
+states that the visitor should start with a product they already have. Bank and
+Product Type are optional narrowing controls. Product-name search works with
+neither selected; focusing the empty field returns every active product
+alphabetically in 40-row pages and loads more inside the bounded list as the
+visitor scrolls. A non-empty name query is server-filtered against product
+names only before one exact My product is selected. The candidate query stays
+inside the active country and exact selected Product Type. Chequing
 uses lower monthly fee, Savings and GIC use higher disclosed numeric rate,
 Credit Card uses lower annual fee, and Mortgage, Personal Loan, and Line of
 Credit use lower disclosed numeric rate. Missing metrics and ties never produce
-a candidate, and at most three strict improvements are shown. The UI stores no
-profile, balance, income, credit, goal, eligibility, or application value and
-states that its one-metric result is not personal financial advice or an
-eligibility decision. Broader profile-based or multi-factor recommendation
-remains out of scope.
+a candidate, and at most three strict improvements are shown. The action reads
+Find a better product and the selected record reads My product in EN/KO/JA.
+The removed standing one-metric caveat is not rendered. Broader profile-based
+or multi-factor recommendation remains out of scope.
 
 The dual Top 5 lists avoid repeated family labels, internal
 evidence explanations, and competing header actions. Catalog cards are
@@ -190,6 +194,12 @@ product and filter reads use a five-minute server revalidation window; summary,
 ranking, and scatter reads use fifteen minutes, matching their aggregate
 refresh cadence while preserving snapshot freshness metadata in the UI.
 
+Product interactions use the same-origin `POST /api/public/engagement` BFF,
+which forwards only country, active product ID, and one fixed event type with a
+server-only shared credential. The password-gated `/admin` server component
+loads `GET /api/public/admin/engagement-summary` directly with that credential.
+Neither secret is available in a browser bundle.
+
 Verified bank logo assets live under `public/bank-logos/` or use approved
 official URLs in the `BankLogo` mapping. A failed image falls back to an
 unframed, accessible bank-code mark while retaining the institution name for
@@ -216,7 +226,14 @@ unloaded. The footer keeps an Analytics choices control available, and revoking
 a prior grant denies analytics consent, removes GA cookies, and reloads without
 the tag. Advertising storage, advertising user data, personalization, and
 Google signals are denied. No user ID, financial value, product-click event, or
-conversion event is sent by the Public application.
+conversion event is sent to GA.
+
+First-party operational counters are separate from GA consent. Product-detail
+clicks, official-bank clicks, and finder My product selections increment only
+daily country/product aggregates retained for 400 days. No visitor ID, IP,
+cookie, free-text query, referrer, user-agent, or financial/profile value is
+stored. Finder selections are not unique-customer or verified-ownership counts.
+The `/admin` path initializes neither GA nor the consent surface.
 
 The integration disables the tag's default page view and sends one explicit
 `page_view` for the initial screen and each Next.js client-side navigation,
@@ -235,7 +252,7 @@ country/locale catalog URL and use `noindex,follow` to avoid duplicate index
 surfaces.
 
 `https://www.switchabank.com/robots.txt` allows the anonymous site, excludes
-same-origin API paths, and points to
+same-origin API paths and `/admin`, and points to
 `https://www.switchabank.com/sitemap.xml`. The explicitly XML-escaped sitemap
 includes clean static Public routes and available product detail URLs for each
 published country, with language alternates. Product details emit
@@ -262,7 +279,11 @@ pnpm run build
 Use `app/public` as the Vercel project root. The Public server components and
 same-origin BFF routes read the upstream API from `FPDS_PUBLIC_API_ORIGIN`; set
 it to `https://switchabank-api.vercel.app` for both Preview and Production.
-There is no browser-side database or private API credential.
+There is no browser-side database or private API credential. Configure a long
+random `FPDS_PUBLIC_APP_API_SECRET` that exactly matches the API environment,
+set `FPDS_PUBLIC_ADMIN_PASSWORD` to the Product Owner value `1112`, and set an
+independent long random `FPDS_PUBLIC_ADMIN_SESSION_SECRET`. All three are
+server-only and should be sensitive Vercel variables.
 
 The Vercel project is `switchabank-public`. Its customer Production domains are
 `https://switchabank.com` and `https://www.switchabank.com`; the underlying
@@ -293,6 +314,7 @@ pnpm dlx vercel@latest deploy --yes
 ```
 
 Verify the Production root Home, the `/dashboard` permanent redirect,
+`https://www.switchabank.com/admin` password/login/logout and aggregate view,
 `https://www.switchabank.com/robots.txt`,
 `https://www.switchabank.com/sitemap.xml`, and the same-origin
 `/api/public/countries` route.

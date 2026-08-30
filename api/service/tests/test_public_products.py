@@ -188,6 +188,7 @@ class PublicProductsTests(unittest.TestCase):
                 payload = load_public_products(connection, query=query)
 
                 self.assertEqual([item["product_id"] for item in payload["items"]], expected_ids)
+
                 self.assertEqual(payload["applied_filters"]["q"], normalized_query)
 
         filter_connection = _PublicConnection(
@@ -209,6 +210,55 @@ class PublicProductsTests(unittest.TestCase):
 
         self.assertEqual([bank["code"] for bank in filter_payload["banks"]], ["RBC"])
         self.assertEqual(filter_payload["applied_filters"]["q"], "royal")
+
+    def test_product_name_search_does_not_match_bank_and_blank_lists_all_alphabetically(self) -> None:
+        connection = _PublicConnection(
+            latest_success=_latest_success_snapshot(),
+            latest_attempt=_latest_success_snapshot_attempt(),
+            rows=_projection_rows(),
+        )
+        bank_only_query = normalize_public_products_query(
+            locale="en",
+            country_code="CA",
+            bank_codes=None,
+            product_types=None,
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            product_name_query="royal bank",
+            sort_by="product_name",
+            sort_order="asc",
+            page=1,
+            page_size=20,
+        )
+        blank_query = normalize_public_products_query(
+            locale="en",
+            country_code="CA",
+            bank_codes=None,
+            product_types=None,
+            subtype_codes=None,
+            target_customer_tags=None,
+            fee_bucket=None,
+            minimum_balance_bucket=None,
+            minimum_deposit_bucket=None,
+            term_bucket=None,
+            product_name_query="  ",
+            sort_by="product_name",
+            sort_order="asc",
+            page=1,
+            page_size=100,
+        )
+
+        self.assertEqual(load_public_products(connection, query=bank_only_query)["items"], [])
+        items = load_public_products(connection, query=blank_query)["items"]
+        self.assertEqual(
+            [item["product_name"] for item in items],
+            sorted(item["product_name"] for item in items),
+        )
+        self.assertIsNone(blank_query.product_name_query)
 
 
     def test_load_public_products_visible_sort_options_are_stable(self) -> None:

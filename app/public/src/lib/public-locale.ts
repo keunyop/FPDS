@@ -1187,10 +1187,11 @@ type PublicRecommendationCopy = {
   annualFeeLower: string;
   bankLabel: string;
   bankPlaceholder: string;
-  caveat: string;
   currentProduct: string;
+  description: string;
   loadProductsError: string;
   loadingProducts: string;
+  loadingMoreProducts: string;
   loadingRecommendations: string;
   metricLabels: { annualFee: string; higherRate: string; lowerRate: string; monthlyFee: string };
   metricUnavailable: string;
@@ -1217,21 +1218,23 @@ type PublicRecommendationCopy = {
 const PUBLIC_RECOMMENDATION_COPY: Record<PublicLocale, PublicRecommendationCopy> = {
   en: {
     title: 'Find a better product',
+    description: 'Start with a product you already have.',
     bankLabel: 'Bank',
-    bankPlaceholder: 'Select bank',
+    bankPlaceholder: 'All banks',
     productTypeLabel: 'Product type',
-    productTypePlaceholder: 'Select type',
+    productTypePlaceholder: 'All product types',
     productSearchLabel: 'Product name',
     productSearchPlaceholder: 'Search product name',
     loadingProducts: 'Loading products…',
+    loadingMoreProducts: 'Loading more products…',
     loadProductsError: 'Products could not be loaded.',
     noProducts: 'No products found.',
     noProductMatches: 'No matching products.',
-    submit: 'Compare',
+    submit: 'Find a better product',
     reset: 'Reset',
     retryProducts: 'Retry',
     loadingRecommendations: 'Comparing…',
-    currentProduct: 'Current product',
+    currentProduct: 'My product',
     metricUnavailable: 'The comparison metric is not published.',
     recommendationsError: 'Products could not be compared. Try again.',
     resultTitle: 'Better on this metric',
@@ -1242,26 +1245,27 @@ const PUBLIC_RECOMMENDATION_COPY: Record<PublicLocale, PublicRecommendationCopy>
     rateHigher: '+{value} percentage points',
     rateLower: '{value} percentage points lower',
     monthlyFeeLower: '{value} less per month',
-    annualFeeLower: '{value} less per year',
-    caveat: 'One-metric comparison, not advice. Check all terms with the bank.'
+    annualFeeLower: '{value} less per year'
   },
   ko: {
     title: '더 나은 상품 찾기',
+    description: '현재 보유하고 있는 상품을 먼저 선택하세요.',
     bankLabel: '은행',
-    bankPlaceholder: '은행 선택',
+    bankPlaceholder: '모든 은행',
     productTypeLabel: '상품유형',
-    productTypePlaceholder: '상품유형 선택',
+    productTypePlaceholder: '모든 상품유형',
     productSearchLabel: '상품명',
     productSearchPlaceholder: '상품명 검색',
     loadingProducts: '상품 불러오는 중…',
+    loadingMoreProducts: '상품 더 불러오는 중…',
     loadProductsError: '상품을 불러오지 못했습니다.',
     noProducts: '상품이 없습니다.',
     noProductMatches: '검색 결과가 없습니다.',
-    submit: '비교하기',
+    submit: '더 나은 상품 찾기',
     reset: '초기화',
     retryProducts: '다시 시도',
     loadingRecommendations: '비교 중…',
-    currentProduct: '현재 상품',
+    currentProduct: '내 상품',
     metricUnavailable: '비교 지표가 공개되지 않았습니다.',
     recommendationsError: '상품을 비교하지 못했습니다. 다시 시도해 주세요.',
     resultTitle: '이 지표가 더 나은 상품',
@@ -1272,26 +1276,27 @@ const PUBLIC_RECOMMENDATION_COPY: Record<PublicLocale, PublicRecommendationCopy>
     rateHigher: '+{value}%p',
     rateLower: '{value}%p 낮음',
     monthlyFeeLower: '월 {value} 낮음',
-    annualFeeLower: '연 {value} 낮음',
-    caveat: '한 가지 지표 비교이며 금융 조언이 아닙니다. 전체 조건은 은행에서 확인하세요.'
+    annualFeeLower: '연 {value} 낮음'
   },
   ja: {
     title: 'より良い商品を探す',
+    description: '現在お持ちの商品を最初に選択してください。',
     bankLabel: '銀行',
-    bankPlaceholder: '銀行を選択',
+    bankPlaceholder: 'すべての銀行',
     productTypeLabel: '商品タイプ',
-    productTypePlaceholder: '商品タイプを選択',
+    productTypePlaceholder: 'すべての商品タイプ',
     productSearchLabel: '商品名',
     productSearchPlaceholder: '商品名を検索',
     loadingProducts: '商品を読み込み中…',
+    loadingMoreProducts: 'さらに商品を読み込み中…',
     loadProductsError: '商品を読み込めませんでした。',
     noProducts: '商品がありません。',
     noProductMatches: '一致する商品がありません。',
-    submit: '比較する',
+    submit: 'より良い商品を探す',
     reset: 'リセット',
     retryProducts: '再試行',
     loadingRecommendations: '比較中…',
-    currentProduct: '現在の商品',
+    currentProduct: '自分の商品',
     metricUnavailable: '比較指標が公開されていません。',
     recommendationsError: '商品を比較できませんでした。もう一度お試しください。',
     resultTitle: 'この指標がより有利な商品',
@@ -1302,8 +1307,7 @@ const PUBLIC_RECOMMENDATION_COPY: Record<PublicLocale, PublicRecommendationCopy>
     rateHigher: '+{value}ポイント',
     rateLower: '{value}ポイント低い',
     monthlyFeeLower: '月 {value} 低い',
-    annualFeeLower: '年 {value} 低い',
-    caveat: '1つの指標による比較であり、助言ではありません。条件全体は銀行で確認してください。'
+    annualFeeLower: '年 {value} 低い'
   }
 };
 

@@ -326,6 +326,26 @@ Implemented same-type primary-metric finder on `2026-08-29`:
   the bounded `FR-PUB-021` exception; Top 5, catalog, and selection-led compare
   retain their factual non-recommendation semantics.
 
+Product Owner finder/analytics override implemented on `2026-08-30`:
+
+- Bank and Product Type are optional finder filters. A product-name-only query
+  works globally, while an empty focused query returns the active country
+  inventory alphabetically in 40-row pages with list-contained scroll loading.
+- The finder explicitly asks for a product the visitor already has, the action
+  reads Find a better product, the result label reads My product, and the
+  former standing one-metric caveat is removed in EN/KO/JA. The same-type
+  primary-metric formulas, strict-improvement rule, and three-result cap do not
+  change.
+- Product detail clicks, official-bank clicks, and finder selections are
+  separate first-party operational counters, not GA custom events. Each metric
+  is the sum of 400-day daily country/product counters for its fixed event
+  type. Finder selections are a usage proxy, not distinct customers or
+  verified ownership.
+- The private Public `/admin` view may show totals, active-product rows, bank
+  rollups, selection ordering, and a 30-day daily series. It must not expose or
+  derive visitor identity, raw search terms, financial profiles, eligibility,
+  conversion attribution, or recommendation scores.
+
 ### 6.3 Ranking Row Baseline
 
 Each ranking row must expose:

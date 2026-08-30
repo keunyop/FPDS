@@ -84,6 +84,7 @@ class Settings:
     login_lock_threshold: int
     login_attempt_window_minutes: int
     login_attempt_ip_threshold: int
+    public_app_api_secret: str | None
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "Settings":
@@ -136,4 +137,5 @@ class Settings:
             login_lock_threshold=5,
             login_attempt_window_minutes=15,
             login_attempt_ip_threshold=10,
+            public_app_api_secret=os.getenv("FPDS_PUBLIC_APP_API_SECRET", "").strip() or None,
         )

@@ -18,7 +18,7 @@ Current decisions:
 Current handoff snapshot:
 - [database migrations, schema, and ERD](../00-Scope/database-migrations-schema-erd.md)
   lists every migration through
-  0044, records the 2026-08-29 shared-dev migration/schema observation, and
+  0045, records the latest dated shared-dev migration/schema observation, and
   provides the current physical schema plus ERD. Treat the SQL files here as
   migration authority and the handoff file as a dated environment observation.
 
@@ -113,6 +113,9 @@ Files:
 - `migrations/0044_remove_admin_collection_scheduler.sql`: removes the former
   recurring collection and recovery policy rows; Admin collection remains
   operator-initiated
+- `migrations/0045_public_product_engagement.sql`: adds 400-day bounded daily
+  product counters for Public detail clicks, official-bank clicks, and finder
+  selections. The table stores no visitor, query, cookie, IP, or profile value.
 
 How to apply when a database is available:
 
@@ -156,6 +159,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_route
 psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_hardening.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0045_public_product_engagement.sql
 ```
 
 Notes:
@@ -210,3 +214,6 @@ Notes:
   collection until an operator supplies new attributable official evidence.
 - Apply `0044` after `0035`. It removes all former collection-automation policy
   rows; no environment flag or database policy can start background collection.
+- Apply `0045` before enabling Public engagement recording or `/admin`
+  analytics. Its statement trigger and event-date index keep the daily
+  product/event aggregates bounded to 400 days.

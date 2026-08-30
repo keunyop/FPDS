@@ -2,14 +2,16 @@
 
 상태: 저장소 migration 전수 목록 + shared dev 실측 schema
 
-기준일: 2026-08-29
+기준일: 2026-08-30
 
 Database: Supabase-hosted PostgreSQL, schema public
 
 ## 1. 읽는 법과 안전 경계
 
 - migration의 원본 권위는 db/migrations/*.sql이다.
-- 이 문서의 shared dev 상태는 2026-08-29에 BEGIN READ ONLY로 조회했다.
+- 이 문서의 기존 shared dev 상태는 2026-08-29에 BEGIN READ ONLY로
+  조회했다. 0045는 2026-08-30 승인된 적용 직후 schema/history와 Public
+  snapshot ID/product count를 다시 읽어 확인했다.
 - 저장소에 파일이 있다는 사실과 특정 DB에 적용됐다는 사실을 구분한다.
 - migration_history만으로 증명할 수 없는 data migration은 임의로
   적용됐다고 가정하지 않는다.
@@ -20,12 +22,12 @@ Database: Supabase-hosted PostgreSQL, schema public
 
 ## 2. 현재 버전 요약
 
-| 항목 | 2026-08-29 확인 결과 |
+| 항목 | 2026-08-30 확인 결과 |
 |---|---|
-| 저장소 migration 파일 | 44개, 0001부터 0044까지 연속 |
-| shared dev 최신 history | 0044_remove_admin_collection_scheduler.sql |
-| shared dev history row | 40개 |
-| public base table | 31개 |
+| 저장소 migration 파일 | 45개, 0001부터 0045까지 연속 |
+| shared dev 최신 history | 0045_public_product_engagement.sql |
+| shared dev history row | 41개 |
+| public base table | 32개 |
 | public compatibility view | 2개: audit_event, llm_usage_record |
 | 현재 제거된 historical table | evidence_chunk_embedding, dashboard_metric_snapshot, dashboard_ranking_snapshot, dashboard_scatter_snapshot |
 | 현재 retrieval | metadata-scored evidence; 0012의 pgvector side table은 0040에서 제거 |
@@ -47,7 +49,7 @@ Database: Supabase-hosted PostgreSQL, schema public
    - 0015: 목표 policy-auto-approve-min-confidence-v2, value 0.82는 현재
      active 상태로 확인됐다.
 
-현재 version을 0044라고 부를 수는 있지만, 인수 완료 판정은 0013 drift를
+현재 version을 0045라고 부를 수는 있지만, 인수 완료 판정은 0013 drift를
 해결하고 fresh replay와 live schema가 일치할 때만 한다.
 
 ## 3. Migration 전수 목록
@@ -110,7 +112,7 @@ Database: Supabase-hosted PostgreSQL, schema public
 | 0033 | 0033_essential_field_low_touch_publication.sql | type별 essential field와 complete grounding publication | 기록됨 |
 | 0034 | 0034_country_product_market_profiles.sql | US market profile, source metadata, wrong-role cleanup | 기록됨 |
 
-### 0035-0044
+### 0035-0045
 
 | No. | 파일 | 목적 | shared dev |
 |---|---|---|---|
@@ -124,6 +126,7 @@ Database: Supabase-hosted PostgreSQL, schema public
 | 0042 | 0042_three_bank_partial_run_scope_hardening.sql | Bridgewater/EQ/Fairstone verified route와 unsupported scope 비활성화 | 기록됨 |
 | 0043 | 0043_generic_zero_detail_scope_quarantine.sql | verified route 고정과 zero-detail blanket coverage quarantine | 기록됨 |
 | 0044 | 0044_remove_admin_collection_scheduler.sql | recurring collection/recovery policy row 제거, 수동 collection 경계 | 기록됨 |
+| 0045 | 0045_public_product_engagement.sql | 400일 bounded Public 일별 상품 클릭/공식은행 이동/finder 선택 aggregate | 기록됨; 적용 직후 0행, retention trigger/index 확인 |
 
 ### 적용 확인 query
 
@@ -138,7 +141,7 @@ ORDER BY applied_at, migration_name;
 COMMIT;
 ~~~
 
-fresh DB에는 db/README.md의 순서대로 0001부터 0044까지 적용한다. 단,
+fresh DB에는 db/README.md의 순서대로 0001부터 0045까지 적용한다. 단,
 0013 drift를 확인한 뒤 migration을 재실행할지 별도 corrective migration을
 만들지는 DBA/Product Owner 승인으로 결정한다.
 
@@ -209,6 +212,7 @@ field_evidence_link는 candidate_id 또는 product_version_id 중 정확히 하�
 | aggregate_refresh_run | PK snapshot_id; FK triggered_by_run_id → ingestion_run | snapshot_id text; triggered_by_run_id?; refresh_scope text; country_code text; filter_scope jsonb; refresh_status text; source_change_cutoff_at? timestamptz; attempted_at timestamptz; refreshed_at? timestamptz; stale_flag boolean; error_summary?; refresh_metadata jsonb; created_at timestamptz |
 | aggregate_refresh_request | PK aggregate_refresh_request_id; FK requested_by_user_id → user_account; FK review_task_id → review_task; FK product_id → canonical_product; FK snapshot_id → aggregate_refresh_run ON DELETE SET NULL | aggregate_refresh_request_id text; refresh_scope text; country_code text; request_status text; trigger_reason text; requested_by_user_id?, requested_by_label?, review_task_id?, product_id?; request_metadata jsonb; requested_at timestamptz; started_at?, completed_at? timestamptz; snapshot_id?, error_summary?; created_at timestamptz |
 | public_product_projection | composite PK snapshot_id+product_id; FK snapshot_id → aggregate_refresh_run ON DELETE CASCADE; FK product_id → canonical_product; FK bank/country+bank → bank | snapshot_id text; product_id text; bank_code text; bank_name text; country_code text; product_family text; product_type text; subtype_code?; product_name text; source_language text; currency text; status text; public_display_rate?, public_display_fee?, monthly_fee?, effective_fee?, minimum_balance?, minimum_deposit? numeric; term_length_days? integer; product_highlight_badge_code?; target_customer_tags jsonb; fee_bucket?, minimum_balance_bucket?, minimum_deposit_bucket?, term_bucket?; last_verified_at?, last_changed_at? timestamptz; refresh_metadata jsonb; created_at timestamptz |
+| public_product_engagement_daily | composite PK event_date+country_code+product_id+event_type; FK country_code → country_registry; FK product_id → canonical_product | event_date date; country_code text; product_id text; event_type text; event_count bigint; first_recorded_at, last_recorded_at timestamptz; fixed three-event check and 400-day retention trigger |
 | publish_item | PK publish_item_id; FK product_version_id → product_version | publish_item_id text; product_version_id text; target_system_code text; publish_state text; pending_reason_code?; target_environment text; target_master_id?; target_metadata jsonb; created_at, updated_at timestamptz |
 | publish_attempt | PK publish_attempt_id; FK publish_item_id → publish_item | publish_attempt_id text; publish_item_id text; attempt_no integer; attempt_result_state text; error_code?, response_summary?; response_metadata jsonb; attempted_at timestamptz |
 
@@ -480,6 +484,13 @@ erDiagram
         text bank_code FK
         text country_code
     }
+    PUBLIC_PRODUCT_ENGAGEMENT_DAILY {
+        date event_date PK
+        text country_code PK
+        text product_id PK
+        text event_type PK
+        bigint event_count
+    }
 
     USER_ACCOUNT o|--o{ AGGREGATE_REFRESH_REQUEST : requests
     REVIEW_TASK o|--o{ AGGREGATE_REFRESH_REQUEST : triggers
@@ -489,6 +500,7 @@ erDiagram
     AGGREGATE_REFRESH_RUN ||--o{ PUBLIC_PRODUCT_PROJECTION : snapshots
     CANONICAL_PRODUCT ||--o{ PUBLIC_PRODUCT_PROJECTION : projects
     BANK ||--o{ PUBLIC_PRODUCT_PROJECTION : labels
+    CANONICAL_PRODUCT ||--o{ PUBLIC_PRODUCT_ENGAGEMENT_DAILY : aggregates
 ~~~
 
 ## 6. 인수인계 DB 체크리스트
@@ -497,7 +509,7 @@ erDiagram
       승인했다.
 - [ ] 0009, 0014, 0015처럼 history를 남기지 않는 migration의 증적 방식을
       정하고 future migration은 일관되게 기록한다.
-- [ ] 깨끗한 빈 PostgreSQL에 0001→0044를 순서대로 적용하고 schema diff가
+- [ ] 깨끗한 빈 PostgreSQL에 0001→0045를 순서대로 적용하고 schema diff가
       승인된 target과 일치한다.
 - [ ] 의뢰자 소유 dev/prod Supabase/PostgreSQL project, role, pool, credential,
       backup/PITR와 비용 계정이 분리됐다.
@@ -538,7 +550,7 @@ erDiagram
 Repository 근거:
 
 - db/migrations/0001_initial_baseline.sql부터
-  db/migrations/0044_remove_admin_collection_scheduler.sql
+  db/migrations/0045_public_product_engagement.sql
 - db/README.md
 - docs/03-design/db-migration-baseline.md
 - docs/03-design/domain-model-canonical-schema.md

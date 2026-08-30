@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
+import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/public/product-engagement-link";
 import { Button } from "@/components/ui/button";
 import { formatPublicMessage, getPublicDesignCopy, getPublicDiscoveryCopy, getPublicMessages } from "@/lib/public-locale";
 import type { PublicProduct, PublicProductsResponse } from "@/lib/public-api";
@@ -283,9 +284,9 @@ function ProductCompareListItem({
               </span>
             </div>
             <h2 className="mt-0.5 text-sm font-semibold leading-snug text-foreground sm:text-base">
-              <Link className="flex min-h-11 min-w-0 items-center hover:text-primary [overflow-wrap:anywhere]" href={detailHref}>
+              <TrackedProductLink className="flex min-h-11 min-w-0 items-center hover:text-primary [overflow-wrap:anywhere]" countryCode={product.country_code} href={detailHref} productId={product.product_id}>
                 {product.product_name}
-              </Link>
+              </TrackedProductLink>
             </h2>
           </div>
         </div>
@@ -311,10 +312,10 @@ function ProductCompareListItem({
             {selected ? copy.compare.selected : copy.compare.select}
           </Button>
           {product.product_url ? (
-            <a className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap px-1 text-sm font-medium text-primary hover:text-primary/80" href={product.product_url} target="_blank" rel="noopener noreferrer">
+            <TrackedOfficialBankLink className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap px-1 text-sm font-medium text-primary hover:text-primary/80" countryCode={product.country_code} href={product.product_url} productId={product.product_id}>
               {copy.common.bankPage}
               <ExternalLink className="size-3.5" aria-hidden="true" />
-            </a>
+            </TrackedOfficialBankLink>
           ) : null}
         </div>
       </div>
@@ -356,9 +357,9 @@ function ProductCompareCard({
           </div>
           <div className="min-w-0">
             <h2 className="text-lg font-semibold leading-snug tracking-[-0.02em]">
-              <Link className="inline-flex min-h-11 items-center break-words hover:text-primary" href={detailHref}>
+              <TrackedProductLink className="inline-flex min-h-11 items-center break-words hover:text-primary" countryCode={product.country_code} href={detailHref} productId={product.product_id}>
                 {product.product_name}
-              </Link>
+              </TrackedProductLink>
             </h2>
           </div>
         </div>
@@ -387,15 +388,15 @@ function ProductCompareCard({
             {selected ? copy.compare.selected : copy.compare.select}
           </Button>
           {product.product_url ? (
-            <a
+            <TrackedOfficialBankLink
               className="inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium text-primary hover:text-primary/80"
+              countryCode={product.country_code}
               href={product.product_url}
-              target="_blank"
-              rel="noopener noreferrer"
+              productId={product.product_id}
             >
               {copy.common.bankPage}
               <ExternalLink className="size-3.5" aria-hidden="true" />
-            </a>
+            </TrackedOfficialBankLink>
           ) : null}
         </div>
         {compareDisabled ? <p className="mt-2 text-xs leading-5 text-muted-foreground">{copy.compare.limit}</p> : null}
@@ -440,9 +441,9 @@ function ComparePanel({
               <div className="flex min-w-0 items-start gap-3">
                 <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
                 <div className="min-w-0">
-                  <Link className="break-words text-sm font-semibold text-foreground hover:text-primary" href={buildProductDetailHref(filters, product.product_id)}>
+                  <TrackedProductLink className="break-words text-sm font-semibold text-foreground hover:text-primary" countryCode={product.country_code} href={buildProductDetailHref(filters, product.product_id)} productId={product.product_id}>
                     {product.product_name}
-                  </Link>
+                  </TrackedProductLink>
                   <p className="mt-1 text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
                 </div>
               </div>
@@ -457,10 +458,10 @@ function ComparePanel({
             </dl>
             {product.product_url ? (
               <Button asChild variant="outline" className="mt-4 min-h-11 w-full rounded-full">
-                <a href={product.product_url} target="_blank" rel="noopener noreferrer">
+                <TrackedOfficialBankLink countryCode={product.country_code} href={product.product_url} productId={product.product_id}>
                   {copy.detail.officialPage}
                   <ExternalLink className="size-3.5" aria-hidden="true" />
-                </a>
+                </TrackedOfficialBankLink>
               </Button>
             ) : null}
           </article>

@@ -5086,6 +5086,62 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(update_params["source_ids"], ["AUTO-TD-CARD-zh"])
         self.assertIn("other_source_language_route", update_params["change_reason"])
 
+    def test_keeps_savings_detail_under_mixed_savings_cd_family_path(self) -> None:
+        connection = _QueuedConnection(
+            [
+                [
+                    {
+                        "source_id": "AUTO-GENERIC-SAVINGS-product",
+                        "normalized_url": "https://bank.example/savings-cds/everyday-savings",
+                        "source_name": "Everyday Savings",
+                        "discovery_metadata": {
+                            "page_title": "Open an Everyday Savings Account",
+                            "primary_heading": "Everyday Savings",
+                        },
+                    }
+                ]
+            ]
+        )
+
+        count = _deactivate_hard_scope_excluded_generated_detail_sources(
+            connection,
+            bank_code="GENERIC",
+            country_code="US",
+            product_type="savings",
+            source_language="en",
+        )
+
+        self.assertEqual(count, 0)
+        self.assertEqual(len(connection.calls), 1)
+
+    def test_keeps_chequing_detail_under_mixed_checking_savings_family_path(self) -> None:
+        connection = _QueuedConnection(
+            [
+                [
+                    {
+                        "source_id": "AUTO-OTHER-CHEQUING-product",
+                        "normalized_url": "https://other-bank.example/checking-savings/everyday-checking",
+                        "source_name": "Everyday Checking",
+                        "discovery_metadata": {
+                            "page_title": "Open an Everyday Checking Account",
+                            "primary_heading": "Everyday Checking",
+                        },
+                    }
+                ]
+            ]
+        )
+
+        count = _deactivate_hard_scope_excluded_generated_detail_sources(
+            connection,
+            bank_code="OTHER",
+            country_code="US",
+            product_type="chequing",
+            source_language="en",
+        )
+
+        self.assertEqual(count, 0)
+        self.assertEqual(len(connection.calls), 1)
+
     def test_existing_discovery_sources_filter_locale_before_bounded_selection(self) -> None:
         chinese_rows = [
             {

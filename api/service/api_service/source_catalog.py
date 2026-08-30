@@ -7279,8 +7279,16 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         return "other_product_type"
     path_segments = {segment for segment in source_path.split("/") if segment}
     explicit_path_types = {
-        "chequing": bool(path_segments.intersection({"chequing", "checking", "chequing-accounts", "checking-accounts"})),
-        "savings": bool(path_segments.intersection({"savings", "saving", "savings-accounts", "saving-accounts"})),
+        "chequing": bool(path_segments.intersection({"chequing", "checking", "chequing-accounts", "checking-accounts"}))
+        or any(
+            re.search(r"(?:^|-)(?:chequing|checking)(?:-|$)", segment)
+            for segment in path_segments
+        ),
+        "savings": bool(path_segments.intersection({"savings", "saving", "savings-accounts", "saving-accounts"}))
+        or any(
+            re.search(r"(?:^|-)savings?(?:-|$)", segment)
+            for segment in path_segments
+        ),
         "gic": bool(
             path_segments.intersection(
                 {"gic", "gics", "term-deposit", "term-deposits", "cd", "cds", "bank-cd", "certificate-of-deposit"}

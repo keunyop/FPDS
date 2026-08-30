@@ -72,6 +72,25 @@ Additional onboarding rules:
 - browser는 access token을 직접 저장하거나 전달하지 않는다.
 - service-to-service 인증은 admin browser login과 분리된 별도 credential을 사용한다.
 
+### 3.3 Public Analytics Admin Exception
+
+The Product Owner-approved Public `/admin` route is separate from the FPDS
+operator Admin/RBAC surface. It protects only bounded product engagement
+aggregates.
+
+- the password is read only from `FPDS_PUBLIC_ADMIN_PASSWORD` on the server;
+  the approved deployed value is `1112` and it must not enter client code
+- successful login issues an eight-hour signed HttpOnly, SameSite=Strict,
+  Secure-in-production cookie scoped to `/admin`
+- `FPDS_PUBLIC_ADMIN_SESSION_SECRET` signs that cookie; failed attempts receive
+  bounded best-effort per-origin throttling without database persistence
+- the page is `noindex` and excluded from GA initialization/page-view events
+- the server component reaches the API with
+  `FPDS_PUBLIC_APP_API_SECRET`; the browser never receives that credential
+- the credential-protected API validates active product IDs, allows only three
+  fixed events, rate-limits writes, and exposes no private FPDS evidence or
+  visitor-level record
+
 ---
 
 ## 4. Human RBAC Baseline
@@ -163,6 +182,7 @@ human RBAC baseline은 아래 3개 역할이다.
 - secret은 environment-separated owner/cadence 기준으로 관리한다.
 - rotation 대상:
   - admin auth/session secret
+  - Public Admin session and Public-app shared secrets
   - external API key material
   - BX-PF integration credential
   - storage/service secrets

@@ -223,6 +223,13 @@ Phase 2는 계약 범위에 포함되지만, Phase 1 release cutline에서는 `L
 - Japan full-market expansion
 - loan / card expansion
 
+Product Owner exception on 2026-08-30: the Later advanced-analytics exclusion
+does not block the private Public `/admin` aggregate described by `FR-PUB-022`.
+That exception is limited to three product-level daily counters and their
+operational summaries; it does not authorize a market-insight portal,
+visitor-level behavioral analytics, profiling, recommendations, or public
+evidence.
+
 ### 6.3 Cutline Rule
 
 `Must Have`에서 `Later`로 이동하거나, `Later`를 `Must Have`로 당기는 변경은 모두 scope change control 대상이다.

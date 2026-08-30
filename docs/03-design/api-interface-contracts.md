@@ -48,7 +48,9 @@ are marked as removed and must not be treated as live contracts.
 
 본 문서는 아래 확정 사항을 반영한다.
 
-1. public API는 익명 읽기 전용 경계이며 evidence raw artifact를 노출하지 않는다.
+1. public product API는 익명 읽기 경계이며 evidence raw artifact를 노출하지
+   않는다. D-071의 세 가지 aggregate counter write와 private summary는
+   Public BFF의 server-only shared credential이 있어야 한다.
 2. admin API는 인증된 운영자 전용 경계이며 review, run, canonical change, publish, registry, aggregate-health 데이터를 조회하거나 변경한다.
 3. internal orchestration interface는 browser-facing route가 아니라 private worker/service boundary다.
 4. approved normalized product의 target master store는 BX-PF이며, FPDS는 publish/reconciliation metadata를 유지한다.
@@ -64,7 +66,7 @@ are marked as removed and must not be treated as live contracts.
 
 | Surface | Base Path or Boundary | Intended Client |
 |---|---|---|
-| Public | `/api/public/*` | anonymous browser UI |
+| Public | `/api/public/*` | anonymous browser reads; credential-bound Public BFF for bounded engagement writes/private summary |
 | Admin | `/api/admin/*` | authenticated admin UI |
 | Internal | private service / queue / worker interface | API server, worker |
 | External SaaS/Open API | `/api/v1/*` | Phase 2 client/tenant consumer |
@@ -144,7 +146,10 @@ are marked as removed and must not be treated as live contracts.
 
 ### 3.5 Security Boundary Rules
 
-- public API는 anonymous access를 허용하지만 write action은 없다.
+- public product reads are anonymous. `POST /api/public/engagement` and
+  `GET /api/public/admin/engagement-summary` require the server-only
+  `X-FPDS-Public-App-Secret` value and must not be called directly by browser
+  code.
 - admin API는 authenticated actor context를 전제로 한다.
 - internal interface와 BX-PF contract는 browser에서 직접 호출하지 않는다.
 - external API는 Phase 2 credential-bound access를 전제로 한다.
@@ -178,6 +183,7 @@ public API는 가능한 한 동일한 filter scope를 공유한다.
 | `locale` | string | `en`, `ko`, `ja`, default locale fallback 허용 |
 | `country_code` | string | Phase 1 baseline은 `CA` |
 | q | string | products/filters endpoint 전용, 최대 120자; bank/product name literal substring |
+| `product_name` | string | products endpoint 전용, 최대 120자; product name only literal substring |
 | `bank_code` | string or repeated | multi-select 허용 |
 | `product_type` | string or repeated | `chequing`, `savings`, `gic` |
 | `subtype_code` | string or repeated | optional |
@@ -205,6 +211,10 @@ Name-search rules:
 - matching uses literal contains semantics; user-entered percent and
   underscore do not become wildcards, and evidence/private fields are never
   searched
+- `product_name` is independently normalized and searches only public
+  `product_name`. It works with no Bank or Product Type. An absent/blank value
+  combined with `sort_by=product_name&sort_order=asc` returns the complete
+  active product scope alphabetically through normal page/page_size bounds.
 
 ### 4.3 `GET /api/public/products`
 
@@ -420,6 +430,38 @@ point baseline:
 - evidence chunk excerpt
 - internal validation issue detail
 - review decision history
+
+### 4.10 `POST /api/public/engagement`
+
+Purpose:
+- accept one best-effort product interaction from the same-origin Public BFF
+- increment a daily aggregate only when the product is active in the latest
+  completed Public snapshot
+
+Request body is exactly `country_code`, `product_id`, and `event_type`.
+`event_type` is limited to `product_detail_click`, `official_bank_click`, or
+`finder_product_selected`. The route requires the Public-app shared secret,
+uses constant-time credential comparison, enforces a process-bounded rate
+limit, and returns 202 only after the aggregate upsert. Arbitrary event names,
+unknown/inactive products, and invalid country/product values fail closed.
+
+No visitor identifier, IP address, cookie, free-text query, referrer,
+user-agent, balance, income, credit, eligibility, or application value is
+accepted or stored.
+
+### 4.11 `GET /api/public/admin/engagement-summary`
+
+Purpose:
+- provide the password-gated Public `/admin` server component with product,
+  bank, total, and 30-day daily aggregates
+- optionally scope results by a two-letter `country_code`
+
+The route requires the same server-only Public-app credential and is not an
+anonymous browser endpoint. It returns active published products with
+`product_detail_clicks`, `official_bank_clicks`, and
+`finder_product_selections`; bank rollups; totals/freshness; a 30-day daily
+series; and `retention_days=400`. Finder selections are usage counts, not
+unique visitors or verified account ownership.
 
 ---
 

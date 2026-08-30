@@ -25,6 +25,62 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of `2026-08-30` (US partial-run recurrence and Public finder analytics,
+complete and verified in Production):
+
+- latest US Partial RCA: Wells Fargo Savings run
+  `run_20260829_202848_wfbn_savings_collect_nZQsjzvy` rejected three valid
+  Savings details under `/savings-cds/...` because the shared path classifier
+  detected `cds` but did not recognize Savings in a hyphenated family segment.
+  The only unavailable page was a deterministic non-HTML account-close PDF,
+  yet the no-detail classifier treated the generic unavailable wording as
+  transient, so the exact scope remained eligible to fail again
+- generic recurrence fix: path-token matching now recognizes Savings and
+  Chequing/Checking inside mixed hyphenated route segments for every bank and
+  Product Type. Deterministic non-HTML mismatches are structural; true
+  timeout/408/425/429/5xx evidence remains transient. A conclusive zero-detail
+  run can therefore use the existing reversible quarantine/no-repeat path
+- Public finder: Bank and Product Type are optional, product-name-only API
+  filtering works without them, and an empty focused field browses the complete
+  active scope alphabetically in 40-row pages with list-contained scroll
+  loading. Per the Product Owner follow-up, the labels no longer display an
+  optional qualifier and the blank-field browse hint is omitted. EN/KO/JA still
+  explain that the input is a held product, use Find a better product and My
+  product, and omit the requested standing caveat
+- Public analytics: migration `0045` defines 400-day daily product/event
+  aggregates only. The first-party BFF records internal detail clicks,
+  official-bank clicks, and finder selections after active-snapshot validation.
+  `/admin` uses server-only password/shared credentials, a signed eight-hour
+  HttpOnly SameSite=Strict cookie, best-effort login/write throttling, noindex,
+  and no GA initialization. It shows totals, product/bank rows, most-selected
+  My products, a 30-day series, and explicit selection/retention limitations
+- shared-dev migration `0045` was applied with the CA and US published
+  aggregate IDs/counts unchanged; the migration-history row, event table,
+  400-day retention trigger, and empty initial analytics state were read back.
+  Matching API/Public app credentials and the Product Owner password were set
+  for Vercel Production and Preview; an initially invalid generated secret was
+  immediately replaced with independently checked cryptographic values
+- final verification completed in this slice: focused API/runner tests 23/23,
+  post-integration engagement tests 8/8, final full API unit suite 442/442,
+  Public TypeScript typecheck, Public production build, and local production
+  functional QA for blank alphabetical browse, name-only search, EN/KO/JA
+  copy, secure password session, aggregate analytics, rejected events, GA
+  exclusion, and robots exclusion. Responsive renders passed at 1440px, 768px,
+  and exact 390px without layout breakage
+- Product Owner-authorized Production deployments completed for
+  `switchabank-api` (`dpl_EAn4tN5uhfjEfgyncDBSszLDUViK`) and
+  `switchabank-public` (`dpl_591MtMXQCHL32PCoPYbhXWbjToKK`). Public deployment
+  used a temporary package that preserved the configured `app/public` Root
+  Directory because the root API `.vercelignore` correctly excludes `app/`;
+  the two preceding failed Public builds never received the Production alias
+- Production read-back confirmed `https://www.switchabank.com/admin` returns
+  the configured login, password `1112` opens the aggregate dashboard, the
+  signed session cookie is Secure and HttpOnly, API-backed Product engagement
+  renders without the unavailable state, and the requested optional labels and
+  blank-field hint are absent. The pre-existing
+  `tmp/aggregate-refresh/aggregate-refresh-runner.log` change is preserved and
+  was not edited
+
 As of `2026-08-29` (Public finder simplification and Methodology map move,
 complete):
 

@@ -338,6 +338,7 @@ Based on:
 | 5.53 | Completed | Public Home map fill and bank-count rollout compatibility | centered map viewport zoom, countries-first bank count with unfiltered dashboard-summary fallback for older API/cache responses, isolated fallback failure, old-response and EN/KO/JA responsive verification | Frontend, UX, QA | 5.52 | 2026-08-26 |
 | 5.54 | Completed | Admin manual-only collection boundary | removed API background collection lifecycle, runtime flags, recurring DB policy, time-based trigger branches, and unattended registry-refresh mode; preserved authenticated collection, Runs retry, in-run safeguards, and approval-triggered aggregate refresh | Backend, AI/Data, QA | 5.25, 5.49, 5.51 | 2026-08-28 |
 | 5.55 | Completed | Public Home same-type product finder | bank/Product-Type input, literal product-name filtering and exact selection, strict primary-metric improvement candidates, concise EN/KO/JA states, Methodology coverage-map relocation, responsive verification | Frontend, UX, QA | 5.43, 5.48, 5.52, 5.53 | 2026-08-29 |
+| 5.56 | Completed | US partial-run recurrence and Public finder analytics | Wells Fargo mixed savings/CD route classification fix, deterministic non-HTML no-detail quarantine, optional finder filters with alphabetical scroll paging, anonymous bounded product counters, password-gated Public analytics admin, EN/KO/JA copy and runtime verification | Backend, AI/Data, Frontend, UX, QA | 5.51, 5.55 | 2026-08-30 |
 
 ### 5.5 Scope Baseline
 

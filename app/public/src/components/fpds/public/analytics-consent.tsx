@@ -85,6 +85,7 @@ function storeConsent(value: AnalyticsConsentStatus) {
 
 export function AnalyticsConsent({ measurementId }: Readonly<{ measurementId: string }>) {
   const pathname = usePathname();
+  const isAdminPath = pathname === '/admin' || pathname.startsWith('/admin/');
   const searchParams = useSearchParams();
   const locale = normalizePublicLocale(searchParams.get('locale') ?? '');
   const copy = getPublicAnalyticsConsentCopy(locale);
@@ -108,6 +109,10 @@ export function AnalyticsConsent({ measurementId }: Readonly<{ measurementId: st
   );
 
   useEffect(() => {
+    if (isAdminPath) {
+      setIsReady(true);
+      return;
+    }
     const storedConsent = readStoredConsent();
     if (storedConsent === 'granted') {
       enableAnalytics('default');
@@ -116,14 +121,15 @@ export function AnalyticsConsent({ measurementId }: Readonly<{ measurementId: st
     setConsent(storedConsent);
     setIsOpen(storedConsent === null);
     setIsReady(true);
-  }, [enableAnalytics]);
+  }, [enableAnalytics, isAdminPath]);
 
   useEffect(() => {
+    if (isAdminPath) return;
     setFooter(document.querySelector('footer'));
-  }, []);
+  }, [isAdminPath]);
 
   useEffect(() => {
-    if (consent !== 'granted') {
+    if (isAdminPath || consent !== 'granted') {
       return;
     }
 
@@ -146,7 +152,7 @@ export function AnalyticsConsent({ measurementId }: Readonly<{ measurementId: st
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [consent, measurementId, pathname, searchParams]);
+  }, [consent, isAdminPath, measurementId, pathname, searchParams]);
 
   const allowAnalytics = useCallback(() => {
     enableAnalytics(consent === 'granted' ? 'update' : 'default');
@@ -171,7 +177,7 @@ export function AnalyticsConsent({ measurementId }: Readonly<{ measurementId: st
     }
   }, [consent]);
 
-  if (!isReady) {
+  if (!isReady || isAdminPath) {
     return null;
   }
 

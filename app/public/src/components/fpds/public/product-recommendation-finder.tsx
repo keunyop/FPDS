@@ -1,10 +1,14 @@
 'use client';
 
 import { ArrowRight, ExternalLink, RefreshCw, Search } from 'lucide-react';
-import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BankLogo } from '@/components/fpds/public/bank-logo';
+import {
+  recordProductEngagement,
+  TrackedOfficialBankLink,
+  TrackedProductLink
+} from '@/components/fpds/public/product-engagement-link';
 import { Button } from '@/components/ui/button';
 import { formatPublicCurrency, formatPublicRate } from '@/lib/public-product-presentation';
 import { formatPublicMessage, getIntlLocale, getPublicMessages, getPublicRecommendationCopy } from '@/lib/public-locale';
@@ -24,6 +28,9 @@ type ResultState =
   | { currentProduct: PublicProduct; status: 'loading' | 'metric-unavailable' | 'error' }
   | { currentProduct: PublicProduct; recommendations: PublicProduct[]; rule: RecommendationRule; status: 'ready' };
 
+type ProductsStatus = 'error' | 'idle' | 'loading' | 'loading-more' | 'ready';
+
+const FINDER_PAGE_SIZE = 40;
 const RECOMMENDATION_RULES: Record<string, RecommendationRule> = {
   chequing: { direction: 'lower', metric: 'public_display_fee', metricKind: 'monthlyFee', sortBy: 'monthly_fee', sortOrder: 'asc' },
   savings: { direction: 'higher', metric: 'card_display_rate', metricKind: 'rate', sortBy: 'display_rate', sortOrder: 'desc' },
@@ -37,21 +44,27 @@ const RECOMMENDATION_RULES: Record<string, RecommendationRule> = {
 export function ProductRecommendationFinder({
   banks,
   countryCode,
-  locale
+  locale,
+  productTypes
 }: {
   banks: PublicDashboardSummaryResponse['breakdowns']['products_by_bank'];
   countryCode: string;
   locale: string;
+  productTypes: PublicDashboardSummaryResponse['breakdowns']['products_by_product_type'];
 }) {
   const copy = getPublicRecommendationCopy(locale);
   const [bankCode, setBankCode] = useState('');
-  const [bankLoadAttempt, setBankLoadAttempt] = useState(0);
   const [productType, setProductType] = useState('');
   const [productQuery, setProductQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [productId, setProductId] = useState('');
-  const [bankProducts, setBankProducts] = useState<PublicProduct[]>([]);
-  const [productsStatus, setProductsStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [productOptions, setProductOptions] = useState<PublicProduct[]>([]);
+  const [productsStatus, setProductsStatus] = useState<ProductsStatus>('idle');
+  const [nextPage, setNextPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [reloadAttempt, setReloadAttempt] = useState(0);
   const [result, setResult] = useState<ResultState>({ status: 'idle' });
+  const productController = useRef<AbortController | null>(null);
   const recommendationController = useRef<AbortController | null>(null);
 
   const bankOptions = useMemo(
@@ -59,55 +72,98 @@ export function ProductRecommendationFinder({
     [banks, locale]
   );
   const productTypeOptions = useMemo(
-    () => [...new Map(bankProducts.map((product) => [
-      product.product_type,
-      { label: product.product_type_label, value: product.product_type }
-    ])).values()].sort((left, right) => left.label.localeCompare(right.label, locale)),
-    [bankProducts, locale]
+    () => [...productTypes]
+      .map((item) => ({ label: item.product_type_label, value: item.product_type }))
+      .sort((left, right) => left.label.localeCompare(right.label, locale)),
+    [locale, productTypes]
   );
-  const productMatches = useMemo(() => {
-    const query = normalizeProductSearch(productQuery, locale);
-    if (!productType || !query) return [];
-
-    return bankProducts
-      .filter((product) => product.product_type === productType)
-      .filter((product) => normalizeProductSearch(product.product_name, locale).includes(query))
-      .sort((left, right) => left.product_name.localeCompare(right.product_name, locale))
-      .slice(0, 8);
-  }, [bankProducts, locale, productQuery, productType]);
+  const selectedProduct = productOptions.find((product) => product.product_id === productId) ?? null;
+  const resultBusy = result.status === 'loading';
 
   useEffect(() => {
-    recommendationController.current?.abort();
-    setProductType('');
-    setProductQuery('');
-    setProductId('');
-    setBankProducts([]);
-    setResult({ status: 'idle' });
-    if (!bankCode) {
-      setProductsStatus('idle');
-      return;
-    }
+    const timeoutId = window.setTimeout(
+      () => setDebouncedQuery(normalizeProductSearch(productQuery, locale)),
+      250
+    );
+    return () => window.clearTimeout(timeoutId);
+  }, [locale, productQuery]);
 
+  useEffect(() => {
+    productController.current?.abort();
     const controller = new AbortController();
+    productController.current = controller;
     setProductsStatus('loading');
-    void loadBankProducts({ bankCode, countryCode, locale, signal: controller.signal })
-      .then((products) => {
-        setBankProducts(products);
+    setNextPage(2);
+    setHasNextPage(false);
+
+    void fetchProductPage({
+      bankCode: bankCode || undefined,
+      countryCode,
+      locale,
+      page: 1,
+      pageSize: FINDER_PAGE_SIZE,
+      productName: debouncedQuery || undefined,
+      productType: productType || undefined,
+      signal: controller.signal,
+      sortBy: 'product_name',
+      sortOrder: 'asc'
+    })
+      .then((response) => {
+        setProductOptions(response.items);
+        setHasNextPage(response.has_next_page);
         setProductsStatus('ready');
       })
       .catch((error: unknown) => {
         if (!isAbortError(error)) setProductsStatus('error');
       });
     return () => controller.abort();
-  }, [bankCode, bankLoadAttempt, countryCode, locale]);
+  }, [bankCode, countryCode, debouncedQuery, locale, productType, reloadAttempt]);
 
-  useEffect(() => () => recommendationController.current?.abort(), []);
+  useEffect(() => () => {
+    productController.current?.abort();
+    recommendationController.current?.abort();
+  }, []);
+
+  async function loadMoreProducts() {
+    if (productsStatus !== 'ready' || !hasNextPage) return;
+    productController.current?.abort();
+    const controller = new AbortController();
+    productController.current = controller;
+    setProductsStatus('loading-more');
+    try {
+      const response = await fetchProductPage({
+        bankCode: bankCode || undefined,
+        countryCode,
+        locale,
+        page: nextPage,
+        pageSize: FINDER_PAGE_SIZE,
+        productName: debouncedQuery || undefined,
+        productType: productType || undefined,
+        signal: controller.signal,
+        sortBy: 'product_name',
+        sortOrder: 'asc'
+      });
+      setProductOptions((current) => [
+        ...new Map([...current, ...response.items].map((product) => [product.product_id, product])).values()
+      ]);
+      setNextPage((page) => page + 1);
+      setHasNextPage(response.has_next_page);
+      setProductsStatus('ready');
+    } catch (error: unknown) {
+      if (!isAbortError(error)) setProductsStatus('error');
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const currentProduct = bankProducts.find((product) => product.product_id === productId);
+    const currentProduct = productOptions.find((product) => product.product_id === productId);
     if (!currentProduct) return;
 
+    recordProductEngagement({
+      countryCode,
+      eventType: 'finder_product_selected',
+      productId: currentProduct.product_id
+    });
     const rule = RECOMMENDATION_RULES[currentProduct.product_type];
     const currentMetric = rule ? readMetric(currentProduct, rule) : null;
     if (!rule || currentMetric === null) {
@@ -141,54 +197,59 @@ export function ProductRecommendationFinder({
     }
   }
 
-  function resetFinder() {
+  function clearSelection() {
     recommendationController.current?.abort();
-    setBankCode('');
-    setBankLoadAttempt(0);
-    setProductType('');
     setProductQuery('');
     setProductId('');
-    setBankProducts([]);
-    setProductsStatus('idle');
     setResult({ status: 'idle' });
   }
 
-  const selectedProduct = bankProducts.find((product) => product.product_id === productId) ?? null;
-  const busy = productsStatus === 'loading' || result.status === 'loading';
+  function resetFinder() {
+    recommendationController.current?.abort();
+    setBankCode('');
+    setProductType('');
+    setProductQuery('');
+    setProductId('');
+    setResult({ status: 'idle' });
+  }
 
   return (
     <section aria-labelledby='product-finder-title' className='min-w-0 overflow-hidden rounded-xl border border-primary/25 bg-card/80 shadow-[0_18px_48px_rgba(28,39,35,0.08)]'>
       <div className='border-b border-primary/15 bg-primary/[0.045] px-4 py-4 md:px-5'>
         <h2 id='product-finder-title' className='text-xl font-semibold tracking-[-0.03em] text-foreground'>{copy.title}</h2>
+        <p className='mt-1 text-sm leading-6 text-muted-foreground'>{copy.description}</p>
       </div>
 
       <form className='grid gap-4 px-4 py-5 md:px-5' onSubmit={handleSubmit}>
         <FinderSelect
-          disabled={busy || !bankOptions.length}
+          disabled={resultBusy || !bankOptions.length}
           label={copy.bankLabel}
-          onChange={setBankCode}
+          onChange={(value) => {
+            setBankCode(value);
+            clearSelection();
+          }}
           options={bankOptions.map((bank) => ({ label: bank.bank_name, value: bank.bank_code }))}
           placeholder={copy.bankPlaceholder}
           value={bankCode}
         />
         <FinderSelect
-          disabled={!bankCode || busy || productsStatus !== 'ready' || !productTypeOptions.length}
+          disabled={resultBusy || !productTypeOptions.length}
           label={copy.productTypeLabel}
           onChange={(value) => {
-            recommendationController.current?.abort();
             setProductType(value);
-            setProductQuery('');
-            setProductId('');
-            setResult({ status: 'idle' });
+            clearSelection();
           }}
           options={productTypeOptions}
-          placeholder={productsStatus === 'loading' ? copy.loadingProducts : copy.productTypePlaceholder}
+          placeholder={copy.productTypePlaceholder}
           value={productType}
         />
         <ProductSearch
-          disabled={!productType || busy || productsStatus !== 'ready'}
+          disabled={resultBusy}
+          hasNextPage={hasNextPage}
           label={copy.productSearchLabel}
-          matches={productMatches}
+          loadingMoreText={copy.loadingMoreProducts}
+          loadingText={copy.loadingProducts}
+          matches={productOptions}
           noMatches={copy.noProductMatches}
           onChange={(value) => {
             recommendationController.current?.abort();
@@ -196,6 +257,7 @@ export function ProductRecommendationFinder({
             if (selectedProduct?.product_name !== value) setProductId('');
             setResult({ status: 'idle' });
           }}
+          onLoadMore={loadMoreProducts}
           onSelect={(product) => {
             setProductQuery(product.product_name);
             setProductId(product.product_id);
@@ -204,34 +266,32 @@ export function ProductRecommendationFinder({
           placeholder={copy.productSearchPlaceholder}
           query={productQuery}
           selectedProductId={productId}
+          status={productsStatus}
         />
 
         {productsStatus === 'error' ? (
           <div className='grid gap-2'>
             <FinderMessage tone='error'>{copy.loadProductsError}</FinderMessage>
-            <Button className='justify-self-start' onClick={() => setBankLoadAttempt((attempt) => attempt + 1)} size='sm' type='button' variant='outline'>
+            <Button className='justify-self-start' onClick={() => setReloadAttempt((attempt) => attempt + 1)} size='sm' type='button' variant='outline'>
               <RefreshCw className='size-3.5' aria-hidden='true' />
               {copy.retryProducts}
             </Button>
           </div>
         ) : null}
-        {productsStatus === 'ready' && bankCode && !bankProducts.length ? <FinderMessage>{copy.noProducts}</FinderMessage> : null}
+        {productsStatus === 'ready' && !productOptions.length && !debouncedQuery ? <FinderMessage>{copy.noProducts}</FinderMessage> : null}
 
         <div className='flex flex-wrap gap-2'>
-          <Button className='min-w-0 flex-1' disabled={!selectedProduct || busy} type='submit'>
-            {result.status === 'loading' ? <RefreshCw className='size-4 animate-spin' aria-hidden='true' /> : <Search className='size-4' aria-hidden='true' />}
-            {result.status === 'loading' ? copy.loadingRecommendations : copy.submit}
+          <Button className='min-w-0 flex-1' disabled={!selectedProduct || resultBusy} type='submit'>
+            {resultBusy ? <RefreshCw className='size-4 animate-spin' aria-hidden='true' /> : <Search className='size-4' aria-hidden='true' />}
+            {resultBusy ? copy.loadingRecommendations : copy.submit}
           </Button>
-          {bankCode ? <Button aria-label={copy.reset} onClick={resetFinder} type='button' variant='ghost'>{copy.reset}</Button> : null}
+          {bankCode || productType || productQuery ? <Button aria-label={copy.reset} onClick={resetFinder} type='button' variant='ghost'>{copy.reset}</Button> : null}
         </div>
       </form>
 
       {result.status !== 'idle' ? (
-        <div aria-live='polite' className='border-t border-border bg-background/35'>
-          <div className='px-4 py-4 md:px-5'>
-            <RecommendationResult countryCode={countryCode} locale={locale} result={result} />
-          </div>
-          <p className='border-t border-border px-4 py-3 text-xs leading-5 text-muted-foreground md:px-5'>{copy.caveat}</p>
+        <div aria-live='polite' className='border-t border-border bg-background/35 px-4 py-4 md:px-5'>
+          <RecommendationResult countryCode={countryCode} locale={locale} result={result} />
         </div>
       ) : null}
     </section>
@@ -298,12 +358,14 @@ function RecommendationResult({
                 <div className='flex min-w-0 items-center gap-3'>
                   <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size='sm' />
                   <div className='min-w-0 flex-1'>
-                    <Link
+                    <TrackedProductLink
                       className='inline-flex min-h-11 items-center text-sm font-semibold text-foreground hover:text-primary [overflow-wrap:anywhere]'
+                      countryCode={countryCode}
                       href={buildProductHref(product.product_id, countryCode, locale)}
+                      productId={product.product_id}
                     >
                       {product.product_name}
-                    </Link>
+                    </TrackedProductLink>
                     <p className='text-xs text-muted-foreground'>{product.bank_name}</p>
                   </div>
                   <div className='shrink-0 text-right'>
@@ -314,15 +376,25 @@ function RecommendationResult({
                   </div>
                 </div>
                 <div className='flex flex-wrap items-center gap-x-4 gap-y-1 sm:pl-[5.5rem]'>
-                  <Link className='inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-primary hover:underline' href={buildProductHref(product.product_id, countryCode, locale)}>
+                  <TrackedProductLink
+                    className='inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-primary hover:underline'
+                    countryCode={countryCode}
+                    href={buildProductHref(product.product_id, countryCode, locale)}
+                    productId={product.product_id}
+                  >
                     {copy.viewDetails}
                     <ArrowRight className='size-3.5' aria-hidden='true' />
-                  </Link>
+                  </TrackedProductLink>
                   {product.product_url ? (
-                    <a className='inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-primary hover:underline' href={product.product_url} rel='noopener noreferrer' target='_blank'>
+                    <TrackedOfficialBankLink
+                      className='inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-primary hover:underline'
+                      countryCode={countryCode}
+                      href={product.product_url}
+                      productId={product.product_id}
+                    >
                       {commonCopy.bankPage}
                       <ExternalLink className='size-3.5' aria-hidden='true' />
-                    </a>
+                    </TrackedOfficialBankLink>
                   ) : null}
                 </div>
               </li>
@@ -369,27 +441,37 @@ function FinderSelect({
 
 function ProductSearch({
   disabled,
+  hasNextPage,
   label,
+  loadingMoreText,
+  loadingText,
   matches,
   noMatches,
   onChange,
+  onLoadMore,
   onSelect,
   placeholder,
   query,
-  selectedProductId
+  selectedProductId,
+  status
 }: {
   disabled: boolean;
+  hasNextPage: boolean;
   label: string;
+  loadingMoreText: string;
+  loadingText: string;
   matches: PublicProduct[];
   noMatches: string;
   onChange: (value: string) => void;
+  onLoadMore: () => Promise<void>;
   onSelect: (product: PublicProduct) => void;
   placeholder: string;
   query: string;
   selectedProductId: string;
+  status: ProductsStatus;
 }) {
-  const selectedMatch = matches.find((product) => product.product_id === selectedProductId);
-  const showMatches = Boolean(query.trim()) && selectedMatch?.product_name !== query;
+  const [open, setOpen] = useState(false);
+  const showOptions = open && !disabled;
 
   return (
     <div className='grid gap-1.5'>
@@ -399,38 +481,67 @@ function ProductSearch({
         <input
           aria-autocomplete='list'
           aria-controls='current-product-options'
-          aria-expanded={showMatches && matches.length > 0}
+          aria-expanded={showOptions}
           autoComplete='off'
           className='h-12 w-full min-w-0 rounded-lg border border-input bg-background pl-10 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-muted/50 disabled:text-muted-foreground'
           disabled={disabled}
           id='current-product-search'
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => {
+            onChange(event.target.value);
+            setOpen(true);
+          }}
+          onClick={() => setOpen(true)}
+          onFocus={() => setOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') setOpen(false);
+          }}
           placeholder={placeholder}
           role='combobox'
           type='search'
           value={query}
         />
       </div>
-      {showMatches ? (
-        matches.length ? (
-          <ul className='max-h-56 overflow-y-auto rounded-lg border border-border bg-background p-1' id='current-product-options' role='listbox'>
+      {showOptions ? (
+        status === 'loading' && !matches.length ? (
+          <p className='px-1 py-2 text-sm text-muted-foreground'>{loadingText}</p>
+        ) : matches.length ? (
+          <ul
+            className='max-h-60 overflow-y-auto rounded-lg border border-border bg-background p-1'
+            id='current-product-options'
+            onScroll={(event) => {
+              const target = event.currentTarget;
+              if (
+                hasNextPage
+                && status === 'ready'
+                && target.scrollHeight - target.scrollTop - target.clientHeight < 48
+              ) {
+                void onLoadMore();
+              }
+            }}
+            role='listbox'
+          >
             {matches.map((product) => (
               <li key={product.product_id} role='none'>
                 <button
                   aria-selected={product.product_id === selectedProductId}
-                  className='flex min-h-11 w-full min-w-0 items-center rounded-md px-3 py-2 text-left text-sm font-medium text-foreground hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-                  onClick={() => onSelect(product)}
+                  className='grid min-h-11 w-full min-w-0 rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+                  onClick={() => {
+                    onSelect(product);
+                    setOpen(false);
+                  }}
                   role='option'
                   type='button'
                 >
-                  <span className='[overflow-wrap:anywhere]'>{product.product_name}</span>
+                  <span className='font-medium [overflow-wrap:anywhere]'>{product.product_name}</span>
+                  <span className='mt-0.5 text-xs text-muted-foreground'>{product.bank_name} · {product.product_type_label}</span>
                 </button>
               </li>
             ))}
+            {status === 'loading-more' ? <li className='px-3 py-2 text-xs text-muted-foreground'>{loadingMoreText}</li> : null}
           </ul>
-        ) : (
+        ) : status === 'ready' ? (
           <p className='px-1 py-2 text-sm text-muted-foreground'>{noMatches}</p>
-        )
+        ) : null
       ) : null}
     </div>
   );
@@ -447,45 +558,13 @@ function FinderMessage({ children, tone = 'neutral' }: { children: React.ReactNo
   );
 }
 
-async function loadBankProducts({
-  bankCode,
-  countryCode,
-  locale,
-  signal
-}: {
-  bankCode: string;
-  countryCode: string;
-  locale: string;
-  signal: AbortSignal;
-}) {
-  const products: PublicProduct[] = [];
-  let page = 1;
-  let hasNextPage = true;
-
-  while (hasNextPage && page <= 5) {
-    const response = await fetchProductPage({
-      bankCode,
-      countryCode,
-      locale,
-      page,
-      pageSize: 100,
-      signal,
-      sortBy: 'product_name',
-      sortOrder: 'asc'
-    });
-    products.push(...response.items);
-    hasNextPage = response.has_next_page;
-    page += 1;
-  }
-  return [...new Map(products.map((product) => [product.product_id, product])).values()];
-}
-
 async function fetchProductPage({
   bankCode,
   countryCode,
   locale,
   page,
   pageSize,
+  productName,
   productType,
   signal,
   sortBy,
@@ -496,6 +575,7 @@ async function fetchProductPage({
   locale: string;
   page: number;
   pageSize: number;
+  productName?: string;
   productType?: string;
   signal: AbortSignal;
   sortBy: string;
@@ -510,10 +590,11 @@ async function fetchProductPage({
     sort_order: sortOrder
   });
   if (bankCode) params.append('bank_code', bankCode);
+  if (productName) params.set('product_name', productName);
   if (productType) params.append('product_type', productType);
 
-  const response = await fetch(`/api/public/products?${params.toString()}`, { signal });
-  if (!response.ok) throw new Error(`Public products request failed (${response.status}).`);
+  const response = await fetch('/api/public/products?' + params.toString(), { signal });
+  if (!response.ok) throw new Error('Public products request failed (' + response.status + ').');
   const payload = await response.json() as { data?: PublicProductsResponse };
   if (!payload.data || !Array.isArray(payload.data.items)) throw new Error('Public products response was invalid.');
   return payload.data;
@@ -529,7 +610,8 @@ function isStrictImprovement(currentValue: number, candidateValue: number | null
   return rule.direction === 'higher' ? candidateValue > currentValue : candidateValue < currentValue;
 }
 
-function metricLabel(rule: RecommendationRule, locale: string) {
+function metricLabel(rule: RecommendationRule | undefined, locale: string) {
+  if (!rule) return getPublicRecommendationCopy(locale).metricLabels.higherRate;
   const labels = getPublicRecommendationCopy(locale).metricLabels;
   if (rule.metricKind === 'annualFee') return labels.annualFee;
   if (rule.metricKind === 'monthlyFee') return labels.monthlyFee;
@@ -560,7 +642,7 @@ function formatImprovement(current: PublicProduct, candidate: PublicProduct, rul
 }
 
 function buildProductHref(productId: string, countryCode: string, locale: string) {
-  return buildPublicHref(`/products/${productId}`, {
+  return buildPublicHref(('/products/' + encodeURIComponent(productId)) as Parameters<typeof buildPublicHref>[0], {
     bankCodes: [],
     countryCode,
     feeBucket: '',

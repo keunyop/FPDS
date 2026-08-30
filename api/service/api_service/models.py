@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,16 @@ class LoginRequest(BaseModel):
 
 class CountrySwitchRequest(BaseModel):
     country_code: str = Field(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
+
+
+class PublicEngagementRequest(BaseModel):
+    country_code: str = Field(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
+    product_id: str = Field(min_length=1, max_length=120)
+    event_type: Literal[
+        "finder_product_selected",
+        "official_bank_click",
+        "product_detail_click",
+    ]
 
 
 class SignupRequestCreateRequest(BaseModel):

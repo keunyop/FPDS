@@ -95,7 +95,6 @@ def _no_detail_result_is_structural(discovery_notes: list[str]) -> bool:
         "timed out",
         "timeout",
         "fetch was unavailable",
-        "page evidence was unavailable",
         "could not resolve",
         "connection reset",
         "temporary",

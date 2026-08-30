@@ -3,7 +3,8 @@
 This package is the live FastAPI runtime package for the completed admin slices through `WBS 5.25` plus the public aggregate-backed read APIs from `WBS 5.7` and `5.8`.
 
 Current scope:
-- anonymous public aggregate-backed product, product-detail, and dashboard read APIs
+- anonymous public aggregate-backed product, product-detail, and dashboard read
+  APIs plus a credential-bound bounded product-engagement writer/private summary
 - DB-backed admin user accounts
 - DB-backed admin sessions
 - enabled-country discovery plus country-required login, logout, session
@@ -44,6 +45,8 @@ Current routes:
 - `GET /api/public/dashboard-summary`
 - `GET /api/public/dashboard-rankings`
 - `GET /api/public/dashboard-scatter`
+- `POST /api/public/engagement`
+- `GET /api/public/admin/engagement-summary`
 - `GET /api/admin/auth/countries`
 - `POST /api/admin/auth/login`
 - `POST /api/admin/auth/signup-requests`
@@ -124,6 +127,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_route
 psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_hardening.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0045_public_product_engagement.sql
 ```
 
 Create the first operator account:
@@ -168,6 +172,8 @@ upload or copy `.env.dev` as a production environment file:
 - `FPDS_PUBLIC_WEB_ORIGIN` and `FPDS_ADMIN_WEB_ORIGIN`
 - `FPDS_PUBLIC_API_ORIGIN` and `FPDS_ADMIN_API_ORIGIN`
 - unique production `FPDS_ADMIN_SESSION_SECRET` and `FPDS_ADMIN_CSRF_SECRET`
+- a long random `FPDS_PUBLIC_APP_API_SECRET` shared only with the matching
+  Public app environment
 - `FPDS_COOKIE_SECURE=true`
 
 After Vercel authentication and environment configuration:
@@ -211,8 +217,17 @@ cd api/service
   whitespace and matches bank_name or product_name case-insensitively as a
   literal substring; percent and underscore are ordinary characters, not
   query wildcards. The normalized value is returned as applied_filters.q.
+- GET /api/public/products also accepts product_name, which searches only the
+  public product name and does not require bank_code or product_type. A blank
+  value with product_name ascending sort returns all active products through
+  normal bounded pagination.
 - Public list pagination remains page/page_size API state so the web catalog
   can load successive pages without exposing raw evidence or new data.
+- POST /api/public/engagement and GET
+  /api/public/admin/engagement-summary fail closed without the shared
+  Public-app credential. Writes accept only an active product ID plus one fixed
+  event type, are process-rate-limited, and persist only 400-day daily product
+  counts; no visitor-level or search value is stored.
 
 - Source-catalog collection starts only from authenticated Admin collection or
   retry actions. The collection runner still performs its bounded in-run
@@ -493,6 +508,16 @@ cd api/service
 - No-detail Partial summaries prefer the bounded rejection aggregate and the
   decisive rejected product URL over an incidental earlier hub fetch error, so
   Runs exposes the actual promotion failure on the next attempt.
+- Mixed family-route segments are token-aware: paths such as
+  `/savings-cds/...` remain eligible Savings detail routes while CD detection
+  remains available for the GIC scope. This prevents a valid same-scope detail
+  from being mislabeled as another Product Type.
+- A deterministic non-HTML content-type mismatch, including an irrelevant PDF
+  discovered where HTML detail evidence was required, is structural no-detail
+  evidence rather than a transient fetch outage. Actual timeouts, HTTP
+  408/425/429, and HTTP 5xx responses remain transient. The generic zero-detail
+  circuit breaker can therefore quarantine the conclusive empty scope and
+  prevent a repeated Partial without suppressing a recoverable network failure.
 - Review detail reads do not persist view events. Field evidence links and the current evidence excerpt remain available for operator review without creating read-amplification logs.
 - Approve and edit-approve now perform the first runtime canonical upsert/change-event side effects using a conservative prototype continuity match of country, bank, product family, product type, subtype, and product name.
 - Review write routes now require the stored session plus matching `X-CSRF-Token` header.

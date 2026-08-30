@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from secrets import compare_digest
 from typing import Annotated
 from typing import Any
 from typing import Literal
@@ -45,6 +46,7 @@ from api_service.models import BankWriteRequest
 from api_service.models import CountrySwitchRequest
 from api_service.models import LoginRequest
 from api_service.models import ProductTypeWriteRequest
+from api_service.models import PublicEngagementRequest
 from api_service.models import ReviewDecisionRequest
 from api_service.models import SignupRequestCreateRequest
 from api_service.models import SignupRequestReviewRequest
@@ -58,6 +60,11 @@ from api_service.public_dashboard import (
     load_public_dashboard_scatter,
     load_public_dashboard_summary,
     normalize_public_dashboard_query,
+)
+from api_service.public_engagement import (
+    PublicEngagementRateLimiter,
+    load_public_product_engagement_summary,
+    record_public_product_engagement,
 )
 from api_service.public_products import (
     PRODUCT_SORT_OPTIONS,
@@ -177,6 +184,27 @@ app = FastAPI(
     redoc_url=None,
 )
 app.state.settings = settings
+app.state.public_engagement_rate_limiter = PublicEngagementRateLimiter()
+
+
+def _public_app_auth_error(request: Request) -> JSONResponse | None:
+    configured_secret = request.app.state.settings.public_app_api_secret
+    if not configured_secret:
+        return _error(
+            status_code=503,
+            code="public_app_credential_not_configured",
+            message="The Public app credential is not configured.",
+            request=request,
+        )
+    provided_secret = request.headers.get("x-fpds-public-app-secret", "")
+    if not provided_secret or not compare_digest(provided_secret, configured_secret):
+        return _error(
+            status_code=401,
+            code="invalid_public_app_credential",
+            message="A valid Public app credential is required.",
+            request=request,
+        )
+    return None
 
 
 @app.middleware("http")
@@ -1124,6 +1152,7 @@ async def public_products(
     minimum_deposit_bucket: str | None = None,
     term_bucket: str | None = None,
     q: Annotated[str | None, Query(max_length=120)] = None,
+    product_name: Annotated[str | None, Query(max_length=120)] = None,
     sort_by: str = "default",
     sort_order: Literal["asc", "desc"] = "desc",
     page: Annotated[int, Query(ge=1)] = 1,
@@ -1141,6 +1170,7 @@ async def public_products(
         minimum_deposit_bucket=minimum_deposit_bucket,
         term_bucket=term_bucket,
         search_query=q,
+        product_name_query=product_name,
         sort_by=sort_by,
         sort_order=sort_order,
         page=page,
@@ -1159,6 +1189,54 @@ async def public_products(
             "total_items": payload["total_items"],
         },
     )
+
+
+@app.post("/api/public/engagement")
+async def public_engagement(request: Request, payload: PublicEngagementRequest) -> JSONResponse:
+    auth_error = _public_app_auth_error(request)
+    if auth_error:
+        return auth_error
+    limiter: PublicEngagementRateLimiter = request.app.state.public_engagement_rate_limiter
+    if not limiter.allow():
+        return _error(
+            status_code=429,
+            code="public_engagement_rate_limited",
+            message="Public engagement recording is temporarily rate limited.",
+            request=request,
+        )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        recorded = record_public_product_engagement(
+            connection,
+            country_code=payload.country_code,
+            product_id=payload.product_id,
+            event_type=payload.event_type,
+        )
+    if not recorded:
+        return _error(
+            status_code=404,
+            code="public_product_not_found",
+            message="The product is not active in the latest Public snapshot.",
+            request=request,
+        )
+    return _success({"recorded": True}, request, status_code=202)
+
+
+@app.get("/api/public/admin/engagement-summary")
+async def public_engagement_summary(
+    request: Request,
+    country_code: Annotated[str | None, Query(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")] = None,
+) -> JSONResponse:
+    auth_error = _public_app_auth_error(request)
+    if auth_error:
+        return auth_error
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        summary = load_public_product_engagement_summary(
+            connection,
+            country_code=country_code,
+        )
+    return _success(summary, request)
 
 
 @app.get("/api/public/products/{product_id}")

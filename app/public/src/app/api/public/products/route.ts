@@ -10,6 +10,7 @@ const ALLOWED_QUERY_KEYS = new Set([
   "locale",
   "country_code",
   "q",
+  "product_name",
   "bank_code",
   "product_type",
   "subtype_code",
@@ -29,7 +30,10 @@ export async function GET(request: NextRequest) {
 
   for (const [key, value] of request.nextUrl.searchParams.entries()) {
     if (ALLOWED_QUERY_KEYS.has(key)) {
-      apiUrl.searchParams.append(key, key === "q" ? value.slice(0, 120) : value);
+      apiUrl.searchParams.append(
+        key,
+        key === "q" || key === "product_name" ? value.slice(0, 120) : value
+      );
     }
   }
 
