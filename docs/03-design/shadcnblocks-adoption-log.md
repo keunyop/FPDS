@@ -55,6 +55,18 @@ Do not add an entry for:
 
 ## 4. Entries
 
+## 2026-08-31 - Public Feedback Dialog Primitives
+
+- Surface or Area: `app/public` product-detail Important note and global footer
+- Vendor Asset: shadcn-style Radix dialog and textarea primitives composed with the existing Public button and token baseline
+- Source: existing repository `radix-ui` dependency and generated primitive conventions
+- Install Method: repository-local primitive addition; no package or remote block install
+- Files Added or Changed: `app/public/src/components/ui/dialog.tsx`, `app/public/src/components/ui/textarea.tsx`, `app/public/src/components/fpds/public/public-feedback-dialog.tsx`
+- FPDS Wrappers or Overrides: one FPDS-owned EN/KO/JA feedback dialog owns category sets, bounded optional detail, product context, submission state, and footer/notice trigger variants
+- Direct Vendor Edits: no
+- Verification: `pnpm run typecheck` and `pnpm run build` in `app/public`; hydrated 1440px, 768px, and exact-390px browser checks
+- Notes: The modal retains 44px-or-larger actions, visible focus, semantic labels, error announcement, confirmation detail, reduced-motion-compatible token styling, and a bounded mobile viewport.
+
 ## 2026-04-13 - Admin Login and Shell Migration
 
 - Surface or Area: `app/admin` live runtime for `/admin/login` and protected `/admin`

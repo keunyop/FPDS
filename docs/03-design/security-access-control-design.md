@@ -91,6 +91,20 @@ aggregates.
   fixed events, rate-limits writes, and exposes no private FPDS evidence or
   visitor-level record
 
+### 3.4 Anonymous Public Feedback Boundary
+
+- the browser submits only to the same-origin Public feedback BFF; the BFF
+  forwards a bounded normalized body with the server-only Public-app credential
+- the API uses constant-time credential verification, fixed type/category
+  allowlists, strict country/locale/length validation, and a process-bounded
+  best-effort rate limit
+- product identity and display context are copied from the latest active Public
+  projection; browser-supplied bank/product labels are ignored
+- Public confirms only the current request and has no submission-list route;
+  the inbox is authenticated FPDS Admin data scoped by the session country
+- no contact or visitor identity is collected, and free text is explicitly
+  warned against personal or account information
+
 ---
 
 ## 4. Human RBAC Baseline

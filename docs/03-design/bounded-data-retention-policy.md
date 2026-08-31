@@ -60,6 +60,18 @@ product-interaction bound:
 - do not retain IP, cookie, session, query, referrer, user-agent, or consumer
   financial/profile values
 
+Migration `0046_public_feedback_submission.sql` separately owns the anonymous
+Public feedback bound:
+
+- retain structured product-error reports and general site feedback for at
+  most 400 days; an insert trigger removes older rows using the submitted-time
+  retention index
+- product reports keep only immutable country/snapshot/product/bank/name/type
+  context copied from the active Public projection, one fixed category,
+  locale, and at most 2,000 optional detail characters
+- do not retain visitor, contact, IP, cookie, session, query, profile, account,
+  user-agent, referrer, or other browser metadata
+
 The function is idempotent and is run explicitly by an operator during
 maintenance.
 

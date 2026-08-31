@@ -78,6 +78,12 @@
       "resource_key": "public_product.engagement"
     },
     {
+      "route": "/api/public/feedback",
+      "route_id": "public.proxy.feedback",
+      "implementation_path": "src/app/api/public/feedback/route.ts",
+      "resource_key": "public_feedback.submit"
+    },
+    {
       "route": "/admin",
       "route_id": "public.analytics_admin",
       "implementation_path": "src/app/admin/page.tsx",

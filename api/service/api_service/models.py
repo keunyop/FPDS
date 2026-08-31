@@ -27,6 +27,26 @@ class PublicEngagementRequest(BaseModel):
     ]
 
 
+class PublicFeedbackRequest(BaseModel):
+    country_code: str = Field(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
+    submission_type: Literal["product_error", "site_feedback"]
+    category: Literal[
+        "accessibility_issue",
+        "broken_link",
+        "content_issue",
+        "feature_suggestion",
+        "incorrect_product_details",
+        "incorrect_rate_or_fee",
+        "missing_information",
+        "other",
+        "outdated_information",
+        "usability_issue",
+    ]
+    details: str | None = Field(default=None, max_length=2000)
+    locale: Literal["en", "ko", "ja"] = "en"
+    product_id: str | None = Field(default=None, min_length=1, max_length=120)
+
+
 class SignupRequestCreateRequest(BaseModel):
     login_id: str = Field(min_length=3, max_length=50)
     display_name: str = Field(min_length=2, max_length=120)

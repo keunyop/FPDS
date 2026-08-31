@@ -463,6 +463,35 @@ anonymous browser endpoint. It returns active published products with
 series; and `retention_days=400`. Finder selections are usage counts, not
 unique visitors or verified account ownership.
 
+### 4.12 `POST /api/public/feedback`
+
+Purpose:
+- accept an anonymous product-error report or general site feedback from the
+  same-origin Public BFF
+- persist an immutable operator-review record without creating visitor identity
+
+The route requires the Public-app shared secret, fixed submission type/category
+pairs, ISO country, EN/KO/JA locale, at most 2,000 optional detail characters,
+and a process-bounded rate limit. A product report also requires a product ID;
+the API inserts it only when the ID is active in the country's latest completed
+Public snapshot and copies snapshot, bank, product name, and Product Type from
+that projection. Site feedback requires an active country and no product ID.
+
+The body does not accept contact information, visitor/session identifiers,
+browser display text, IP, cookie, query, profile, account, or financial values.
+
+### 4.13 `GET /api/admin/public-feedback`
+
+Purpose:
+- provide authenticated FPDS Admin with its server-session country's product
+  reports and site feedback
+- support optional submission_type, category, free-text search, and bounded
+  pagination without allowing query-based country override
+
+The response includes totals, stable submission IDs, submission time, locale,
+category/detail, snapshot ID, and authoritative product context when present.
+It is read-only and does not create a review or canonical mutation.
+
 ---
 
 ## 5. Admin API Contract

@@ -18,7 +18,7 @@ Current decisions:
 Current handoff snapshot:
 - [database migrations, schema, and ERD](../00-Scope/database-migrations-schema-erd.md)
   lists every migration through
-  0045, records the latest dated shared-dev migration/schema observation, and
+  0046, records the latest dated shared-dev migration/schema observation, and
   provides the current physical schema plus ERD. Treat the SQL files here as
   migration authority and the handoff file as a dated environment observation.
 
@@ -116,6 +116,9 @@ Files:
 - `migrations/0045_public_product_engagement.sql`: adds 400-day bounded daily
   product counters for Public detail clicks, official-bank clicks, and finder
   selections. The table stores no visitor, query, cookie, IP, or profile value.
+- `migrations/0046_public_feedback_submission.sql`: adds 400-day bounded
+  anonymous product-error and site-feedback submissions with authoritative
+  Public snapshot/product context and no visitor/contact/browser identity.
 
 How to apply when a database is available:
 
@@ -160,6 +163,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_h
 psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0045_public_product_engagement.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0046_public_feedback_submission.sql
 ```
 
 Notes:
@@ -217,3 +221,6 @@ Notes:
 - Apply `0045` before enabling Public engagement recording or `/admin`
   analytics. Its statement trigger and event-date index keep the daily
   product/event aggregates bounded to 400 days.
+- Apply `0046` before enabling Public feedback submission or the FPDS Admin
+  Feedback inbox. Its constraints enforce type/category/product context and its
+  submitted-time trigger/index bound retention to 400 days.

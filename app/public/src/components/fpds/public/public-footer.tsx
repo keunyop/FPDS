@@ -6,8 +6,9 @@ import { Suspense } from "react";
 
 import { PublicLocaleMenu } from "@/components/fpds/public/public-locale-menu";
 import { PublicMark, PublicWordmark } from "@/components/fpds/public/public-mark";
+import { PublicFeedbackDialog } from "@/components/fpds/public/public-feedback-dialog";
 import { getPublicMessages, normalizePublicLocale, type PublicLocale } from "@/lib/public-locale";
-import { buildScopedPublicHrefFromSearchParams } from "@/lib/public-query";
+import { buildScopedPublicHrefFromSearchParams, normalizeCountryCodeValue } from "@/lib/public-query";
 
 const FOOTER_COPY: Record<PublicLocale, { legalNote: string }> = {
   en: {
@@ -26,6 +27,7 @@ function FooterContent() {
   const locale = normalizePublicLocale(searchParams.get("locale") ?? "");
   const copy = getPublicMessages(locale);
   const footerCopy = FOOTER_COPY[locale];
+  const countryCode = normalizeCountryCodeValue(searchParams.get("country_code") ?? "");
   const dashboardHref = buildScopedPublicHrefFromSearchParams("/", searchParams);
   const productsHref = buildScopedPublicHrefFromSearchParams("/products", searchParams);
   const cardsHref = buildScopedPublicHrefFromSearchParams("/cards", searchParams);
@@ -52,6 +54,7 @@ function FooterContent() {
             <FooterLink href={cardsHref}>{copy.nav.card}</FooterLink>
             <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
             <FooterLink href={methodologyHref}>{copy.nav.methodology}</FooterLink>
+            <PublicFeedbackDialog countryCode={countryCode} locale={locale} mode="site_feedback" triggerStyle="footer" />
           </nav>
         </div>
 

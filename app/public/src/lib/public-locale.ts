@@ -1351,6 +1351,155 @@ export function getPublicAnalyticsConsentCopy(locale: string): PublicAnalyticsCo
   return PUBLIC_ANALYTICS_CONSENT_COPY[normalizePublicLocale(locale)];
 }
 
+export type PublicFeedbackCategory =
+  | "accessibility_issue"
+  | "broken_link"
+  | "content_issue"
+  | "feature_suggestion"
+  | "incorrect_product_details"
+  | "incorrect_rate_or_fee"
+  | "missing_information"
+  | "other"
+  | "outdated_information"
+  | "usability_issue";
+
+type PublicFeedbackCopy = {
+  cancel: string;
+  categoryLabel: string;
+  categoryPlaceholder: string;
+  categoryLabels: Record<PublicFeedbackCategory, string>;
+  close: string;
+  detailsCount: string;
+  detailsLabel: string;
+  detailsPlaceholder: string;
+  error: string;
+  noDetails: string;
+  privacyNote: string;
+  productLabel: string;
+  productTitle: string;
+  siteTitle: string;
+  submit: string;
+  submittedCategory: string;
+  submittedDetails: string;
+  submitting: string;
+  successBody: string;
+  successTitle: string;
+  triggerProduct: string;
+  triggerSite: string;
+};
+
+const PUBLIC_FEEDBACK_COPY: Record<PublicLocale, PublicFeedbackCopy> = {
+  en: {
+    cancel: "Cancel",
+    categoryLabel: "What would you like to report?",
+    categoryPlaceholder: "Select a reason",
+    categoryLabels: {
+      accessibility_issue: "Accessibility issue",
+      broken_link: "Official link does not work",
+      content_issue: "Content issue",
+      feature_suggestion: "Feature suggestion",
+      incorrect_product_details: "Product details or eligibility are incorrect",
+      incorrect_rate_or_fee: "Rate or fee is incorrect",
+      missing_information: "Important information is missing",
+      other: "Other",
+      outdated_information: "Information is out of date",
+      usability_issue: "Site usability issue",
+    },
+    close: "Close",
+    detailsCount: "{count}/2000",
+    detailsLabel: "Details (optional)",
+    detailsPlaceholder: "Add anything that would help us understand the issue.",
+    error: "Your feedback could not be submitted. Please try again.",
+    noDetails: "No additional details",
+    privacyNote: "Submitted anonymously. Do not include personal or account information. We cannot reply to individual submissions.",
+    productLabel: "Product",
+    productTitle: "Report a product error",
+    siteTitle: "Send feedback",
+    submit: "Submit",
+    submittedCategory: "Category",
+    submittedDetails: "Details",
+    submitting: "Submitting…",
+    successBody: "We received the following feedback.",
+    successTitle: "Thank you",
+    triggerProduct: "Report an error",
+    triggerSite: "Feedback",
+  },
+  ko: {
+    cancel: "취소",
+    categoryLabel: "어떤 내용을 신고하시겠어요?",
+    categoryPlaceholder: "신고 사유 선택",
+    categoryLabels: {
+      accessibility_issue: "접근성 문제",
+      broken_link: "공식 링크가 작동하지 않음",
+      content_issue: "콘텐츠 문제",
+      feature_suggestion: "기능 제안",
+      incorrect_product_details: "상품 정보 또는 가입 조건이 잘못됨",
+      incorrect_rate_or_fee: "금리 또는 수수료가 잘못됨",
+      missing_information: "중요한 정보가 누락됨",
+      other: "기타",
+      outdated_information: "정보가 오래됨",
+      usability_issue: "사이트 이용 불편",
+    },
+    close: "닫기",
+    detailsCount: "{count}/2000",
+    detailsLabel: "상세 내용 (선택)",
+    detailsPlaceholder: "문제를 이해하는 데 도움이 될 내용을 입력해 주세요.",
+    error: "피드백을 접수하지 못했습니다. 다시 시도해 주세요.",
+    noDetails: "추가 상세 내용 없음",
+    privacyNote: "익명으로 접수됩니다. 개인정보나 계좌 정보를 입력하지 마세요. 개별 답변은 제공되지 않습니다.",
+    productLabel: "상품",
+    productTitle: "상품 정보 오류 신고",
+    siteTitle: "피드백 보내기",
+    submit: "제출",
+    submittedCategory: "신고 내용",
+    submittedDetails: "상세 내용",
+    submitting: "제출 중…",
+    successBody: "아래 내용으로 접수했습니다.",
+    successTitle: "감사합니다",
+    triggerProduct: "오류 신고",
+    triggerSite: "피드백",
+  },
+  ja: {
+    cancel: "キャンセル",
+    categoryLabel: "どのような内容ですか？",
+    categoryPlaceholder: "理由を選択",
+    categoryLabels: {
+      accessibility_issue: "アクセシビリティの問題",
+      broken_link: "公式リンクが機能しない",
+      content_issue: "コンテンツの問題",
+      feature_suggestion: "機能の提案",
+      incorrect_product_details: "商品情報または申込条件が誤っている",
+      incorrect_rate_or_fee: "金利または手数料が誤っている",
+      missing_information: "重要な情報が不足している",
+      other: "その他",
+      outdated_information: "情報が古い",
+      usability_issue: "サイトが使いにくい",
+    },
+    close: "閉じる",
+    detailsCount: "{count}/2000",
+    detailsLabel: "詳細（任意）",
+    detailsPlaceholder: "問題の把握に役立つ内容をご入力ください。",
+    error: "フィードバックを送信できませんでした。もう一度お試しください。",
+    noDetails: "追加の詳細なし",
+    privacyNote: "匿名で送信されます。個人情報や口座情報は入力しないでください。個別の返信は行っていません。",
+    productLabel: "商品",
+    productTitle: "商品情報の誤りを報告",
+    siteTitle: "フィードバックを送る",
+    submit: "送信",
+    submittedCategory: "内容",
+    submittedDetails: "詳細",
+    submitting: "送信中…",
+    successBody: "以下の内容で受け付けました。",
+    successTitle: "ありがとうございます",
+    triggerProduct: "誤りを報告",
+    triggerSite: "フィードバック",
+  },
+};
+
+export function getPublicFeedbackCopy(locale: string): PublicFeedbackCopy {
+  return PUBLIC_FEEDBACK_COPY[normalizePublicLocale(locale)];
+}
+
 
 export function getIntlLocale(locale: string) {
   switch (normalizePublicLocale(locale)) {

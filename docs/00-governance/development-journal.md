@@ -25,6 +25,34 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-08-31 (Public product report and site feedback, complete):
+
+- migration 0046 defines a 400-day-bounded anonymous product-error and site-
+  feedback store. Product reports copy country, snapshot, bank, product name,
+  Product Type, and product ID from the latest active Public projection; no
+  visitor, contact, IP, cookie, query, profile, account, or browser identity is
+  retained
+- credential-bound POST /api/public/feedback enforces fixed type/category
+  pairs, active country/product context, locale and length bounds, and a
+  process rate limit. Authenticated GET /api/admin/public-feedback derives its
+  country exclusively from the Admin session
+- Public product-detail Important note and footer now open accessible EN/KO/JA
+  dialogs with Other, optional 2,000-character detail, anonymous/no-reply copy,
+  submitting/error state, and a confirmation that restates the current
+  submission without exposing an inbox
+- authenticated Admin /admin/feedback shows country-scoped totals, product and
+  site submissions, search/type/category filters, product/bank/snapshot
+  context, stable IDs, locale, detail, time, and pagination; it is read-only
+  and does not mutate canonical data or create Review decisions
+- verification: feedback tests 9/9 and security tests 2/2; Public and Admin
+  typechecks and production builds pass; hydrated browser checks at 1440px,
+  768px, and exact 390px confirm dialog containment, zero document overflow,
+  initial close-button focus, Escape closure, footer feedback, and EN/KO/JA
+  category/copy; route manifests parse and git diff --check passes
+- migration 0046 was not applied to shared dev or Production and no deployment
+  was performed. Next: apply 0046 through an approved database release before
+  enabling the deployed submit/inbox routes
+
 As of `2026-08-30` (US partial-run recurrence and Public finder analytics,
 complete and verified in Production):
 

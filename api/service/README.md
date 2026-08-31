@@ -4,7 +4,8 @@ This package is the live FastAPI runtime package for the completed admin slices 
 
 Current scope:
 - anonymous public aggregate-backed product, product-detail, and dashboard read
-  APIs plus a credential-bound bounded product-engagement writer/private summary
+  APIs plus credential-bound bounded product-engagement and anonymous-feedback
+  writers, a private engagement summary, and a country-scoped Admin feedback inbox
 - DB-backed admin user accounts
 - DB-backed admin sessions
 - enabled-country discovery plus country-required login, logout, session
@@ -46,6 +47,7 @@ Current routes:
 - `GET /api/public/dashboard-rankings`
 - `GET /api/public/dashboard-scatter`
 - `POST /api/public/engagement`
+- `POST /api/public/feedback`
 - `GET /api/public/admin/engagement-summary`
 - `GET /api/admin/auth/countries`
 - `POST /api/admin/auth/login`
@@ -68,6 +70,7 @@ Current routes:
 - `GET /api/admin/dashboard-health`
 - `POST /api/admin/dashboard-health/retry`
 - `GET /api/admin/change-history`
+- `GET /api/admin/public-feedback`
 - `GET /api/admin/sources`
 - `GET /api/admin/banks`
 - `POST /api/admin/banks`
@@ -128,6 +131,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_h
 psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0045_public_product_engagement.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0046_public_feedback_submission.sql
 ```
 
 Create the first operator account:
@@ -228,6 +232,12 @@ cd api/service
   Public-app credential. Writes accept only an active product ID plus one fixed
   event type, are process-rate-limited, and persist only 400-day daily product
   counts; no visitor-level or search value is stored.
+- POST /api/public/feedback requires the same Public-app credential, fixed
+  product/site category pairs, ISO country, EN/KO/JA locale, and at most 2,000
+  optional detail characters. Product reports are inserted only from an active
+  product in the latest completed Public snapshot. GET
+  /api/admin/public-feedback requires an Admin session and always derives its
+  country from that session; no visitor or contact identity is stored.
 
 - Source-catalog collection starts only from authenticated Admin collection or
   retry actions. The collection runner still performs its bounded in-run

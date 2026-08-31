@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { TrackedOfficialBankLink } from "@/components/fpds/public/product-engagement-link";
 import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
+import { PublicFeedbackDialog } from "@/components/fpds/public/public-feedback-dialog";
 import { InterestCalculator } from "@/components/fpds/public/interest-calculator";
 import { PublicFreshness } from "@/components/fpds/public/public-freshness";
 import { Button } from "@/components/ui/button";
@@ -189,6 +190,16 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
                 <Button asChild className="min-h-11 w-full rounded-full" size="sm" variant="outline">
                   <Link href={buildPublicHref("/methodology", filters)}>{copy.nav.methodology}</Link>
                 </Button>
+                <PublicFeedbackDialog
+                  countryCode={product.country_code}
+                  locale={filters.locale}
+                  mode="product_error"
+                  product={{
+                    bankName: product.bank_name,
+                    productId: product.product_id,
+                    productName: product.product_name,
+                  }}
+                />
               </div>
               <p className="mt-4 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">{designCopy.evidenceBoundary}</p>
             </aside>

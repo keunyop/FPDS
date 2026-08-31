@@ -978,6 +978,43 @@ export type CountryRegistryResponse = {
   };
 };
 
+export type PublicFeedbackSubmission = {
+  submission_id: string;
+  submitted_at: string | null;
+  country_code: string;
+  submission_type: "product_error" | "site_feedback";
+  category: string;
+  details: string | null;
+  locale: "en" | "ko" | "ja";
+  snapshot_id: string | null;
+  product: {
+    product_id: string;
+    bank_code: string;
+    bank_name: string;
+    product_name: string;
+    product_type: string;
+  } | null;
+};
+
+export type PublicFeedbackListResponse = {
+  items: PublicFeedbackSubmission[];
+  summary: {
+    total_items: number;
+    product_error_items: number;
+    site_feedback_items: number;
+  };
+  applied_filters: {
+    submission_type: string | null;
+    category: string | null;
+    search: string | null;
+  };
+  page: number;
+  page_size: number;
+  total_items: number;
+  total_pages: number;
+  has_next_page: boolean;
+};
+
 type AdminApiResponse<T> = {
   data: T;
 };
@@ -1051,6 +1088,10 @@ export async function fetchDashboardHealth(): Promise<DashboardHealthResponse | 
 
 export async function fetchChangeHistoryList(searchParams: URLSearchParams): Promise<ChangeHistoryListResponse | null> {
   return fetchAdminData<ChangeHistoryListResponse>("/api/admin/change-history", searchParams);
+}
+
+export async function fetchPublicFeedbackList(searchParams: URLSearchParams): Promise<PublicFeedbackListResponse | null> {
+  return fetchAdminData<PublicFeedbackListResponse>("/api/admin/public-feedback", searchParams);
 }
 
 export async function fetchSourceRegistryList(searchParams: URLSearchParams): Promise<SourceRegistryListResponse | null> {

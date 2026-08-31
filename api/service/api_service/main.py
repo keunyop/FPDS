@@ -47,6 +47,7 @@ from api_service.models import CountrySwitchRequest
 from api_service.models import LoginRequest
 from api_service.models import ProductTypeWriteRequest
 from api_service.models import PublicEngagementRequest
+from api_service.models import PublicFeedbackRequest
 from api_service.models import ReviewDecisionRequest
 from api_service.models import SignupRequestCreateRequest
 from api_service.models import SignupRequestReviewRequest
@@ -65,6 +66,13 @@ from api_service.public_engagement import (
     PublicEngagementRateLimiter,
     load_public_product_engagement_summary,
     record_public_product_engagement,
+)
+from api_service.public_feedback import (
+    PublicFeedbackRateLimiter,
+    create_public_feedback_submission,
+    is_feedback_category_allowed,
+    load_public_feedback_submissions,
+    normalize_public_feedback_filters,
 )
 from api_service.public_products import (
     PRODUCT_SORT_OPTIONS,
@@ -185,6 +193,7 @@ app = FastAPI(
 )
 app.state.settings = settings
 app.state.public_engagement_rate_limiter = PublicEngagementRateLimiter()
+app.state.public_feedback_rate_limiter = PublicFeedbackRateLimiter()
 
 
 def _public_app_auth_error(request: Request) -> JSONResponse | None:
@@ -1220,6 +1229,93 @@ async def public_engagement(request: Request, payload: PublicEngagementRequest) 
             request=request,
         )
     return _success({"recorded": True}, request, status_code=202)
+
+
+@app.post("/api/public/feedback")
+async def public_feedback(request: Request, payload: PublicFeedbackRequest) -> JSONResponse:
+    auth_error = _public_app_auth_error(request)
+    if auth_error:
+        return auth_error
+    if (
+        not is_feedback_category_allowed(
+            submission_type=payload.submission_type,
+            category=payload.category,
+        )
+        or (payload.submission_type == "product_error" and not payload.product_id)
+        or (payload.submission_type == "site_feedback" and payload.product_id is not None)
+    ):
+        return _error(
+            status_code=400,
+            code="invalid_feedback_payload",
+            message="The feedback category or product context is invalid.",
+            request=request,
+        )
+    limiter: PublicFeedbackRateLimiter = request.app.state.public_feedback_rate_limiter
+    if not limiter.allow():
+        return _error(
+            status_code=429,
+            code="public_feedback_rate_limited",
+            message="Public feedback submission is temporarily rate limited.",
+            request=request,
+        )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        submission = create_public_feedback_submission(
+            connection,
+            country_code=payload.country_code,
+            submission_type=payload.submission_type,
+            category=payload.category,
+            details=payload.details,
+            locale=payload.locale,
+            product_id=payload.product_id,
+        )
+    if not submission:
+        return _error(
+            status_code=404,
+            code=(
+                "public_product_not_found"
+                if payload.submission_type == "product_error"
+                else "public_country_not_found"
+            ),
+            message="The selected Public product or country is not available.",
+            request=request,
+        )
+    return _success({"submission": submission}, request, status_code=201)
+
+
+@app.get("/api/admin/public-feedback")
+async def admin_public_feedback(
+    request: Request,
+    submission_type: Literal["product_error", "site_feedback"] | None = None,
+    category: Literal[
+        "accessibility_issue",
+        "broken_link",
+        "content_issue",
+        "feature_suggestion",
+        "incorrect_product_details",
+        "incorrect_rate_or_fee",
+        "missing_information",
+        "other",
+        "outdated_information",
+        "usability_issue",
+    ] | None = None,
+    q: Annotated[str | None, Query(max_length=200)] = None,
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 50,
+) -> JSONResponse:
+    _actor, session_info = _resolve_session(request)
+    filters = normalize_public_feedback_filters(
+        country_code=_session_country(session_info),
+        submission_type=submission_type,
+        category=category,
+        search=q,
+        page=page,
+        page_size=page_size,
+    )
+    settings: Settings = request.app.state.settings
+    with open_connection(settings) as connection:
+        payload = load_public_feedback_submissions(connection, filters=filters)
+    return _success(payload, request)
 
 
 @app.get("/api/public/admin/engagement-summary")

@@ -30,7 +30,8 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 - `/loans` is the lending catalog for review-approved `mortgage`,
   `personal-loan`, and `line-of-credit` products.
 - `/products/[productId]` shows the selected product's available public facts,
-  conditions, official-bank action, freshness, and methodology boundary.
+  conditions, official-bank action, freshness, methodology boundary, and an
+  Important note error-report dialog.
 - `/methodology` explains the source-to-snapshot process, metric meaning,
   comparison boundary, freshness states, and public evidence boundary, and
   owns the Equal Earth country coverage map with product/distinct-bank counts.
@@ -199,6 +200,14 @@ which forwards only country, active product ID, and one fixed event type with a
 server-only shared credential. The password-gated `/admin` server component
 loads `GET /api/public/admin/engagement-summary` directly with that credential.
 Neither secret is available in a browser bundle.
+
+Product error reports and footer site feedback use the same-origin
+`POST /api/public/feedback` BFF. Both dialogs require one localized structured
+reason, include Other, allow up to 2,000 optional detail characters, warn
+against personal/account information, and confirm the current submission.
+Product reports send only the current product ID; the API copies bank, product,
+Product Type, country, and snapshot context from the latest active Public
+projection. Public never exposes other submissions.
 
 Verified bank logo assets live under `public/bank-logos/` or use approved
 official URLs in the `BankLogo` mapping. A failed image falls back to an

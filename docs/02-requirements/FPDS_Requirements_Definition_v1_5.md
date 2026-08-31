@@ -695,6 +695,33 @@ use a separate server-to-server credential.
 - analytics recording is best-effort and must never block product navigation,
   finder results, or official-bank navigation
 
+### FR-PUB-023 Anonymous Product Error Reports and Site Feedback
+
+Public visitors must be able to submit bounded anonymous feedback without
+creating an account or exposing private FPDS evidence.
+
+- every available product detail Important note must expose an error-report
+  action; the modal requires one common category, including Other, and allows
+  up to 2,000 optional detail characters
+- the global footer must expose a similar site-feedback modal with content,
+  usability, feature, accessibility, and Other categories
+- a product report must be validated against an active product in the latest
+  completed Public snapshot and store immutable country, snapshot, product,
+  bank, name, and Product Type context from that projection rather than trust
+  browser-supplied display text
+- the Public confirmation must restate the submitted category, optional
+  detail, and product context when applicable; Public must not expose other
+  visitors' submissions
+- authenticated FPDS Admin users must be able to review their server-session
+  country's submissions with type/category/search filters, product context,
+  detail, locale, stable IDs, and submission time
+- the workflow must store no visitor, contact, IP, cookie, query, profile, or
+  account value, must warn against personal/account information, and must not
+  imply an individual response
+- submission must use a same-origin Public BFF, a server-only app credential,
+  bounded payload/category validation, and best-effort process rate limiting;
+  stored submissions expire after at most 400 days
+
 ## 8.2 Admin Requirements
 
 ### FR-ADM-001 Admin Login

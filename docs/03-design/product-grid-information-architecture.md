@@ -487,6 +487,14 @@ pagination behavior in Section 10.19:
   conditions on the institution's official website before applying.
 - Raw evidence, Review state, personalized advice, scoring, and application
   submission remain outside Public.
+- Product detail Important note includes an EN/KO/JA error-report action. Its
+  dialog requires one structured reason, offers Other, accepts optional bounded
+  detail, identifies the current bank/product, warns against personal or
+  account information, and confirms only that visitor's submitted content.
+- The global footer exposes the corresponding site-feedback action with
+  content, usability, feature, accessibility, and Other reasons. Neither
+  dialog exposes an inbox, promises an individual reply, or changes canonical
+  product data; investigation remains in authenticated Admin.
 
 ### 10.21 Bankompare Identity and Comparison-Lens Mark
 
