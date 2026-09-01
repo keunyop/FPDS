@@ -3347,3 +3347,391 @@ Read before coding:
 - Next step: the client owner fills the restricted ownership matrix, provisions
   separated Admin production services, resolves the DB drift through the
   approved DBA process, and completes rehearsal/restore/UAT before Cutover.
+
+## 2026-08-31 - AI Bank Onboarding Transport and DB Failure Hardening
+
+- Status: reported `Add banks with AI` failure reproduced from the supplied
+  traceback, corrected in the API runtime, and covered by regression tests.
+- Root cause:
+  - the OpenAI Responses web-search request ended with Windows transport reset
+    `10054`
+  - the request held the initial PostgreSQL transaction open throughout the
+    provider wait; that connection was then unavailable when the failure path
+    tried to complete `model_execution`, replacing the intended bounded 502
+    response with an unhandled ASGI 500 traceback
+- Outcome:
+  - commits the started model execution before the external provider wait so
+    the database session is not left idle in a transaction
+  - retries exactly once for a transport reset, timeout, or URL transport
+    failure, while provider HTTP errors retain their existing single-attempt
+    status handling
+  - starts a new outer transaction before the atomic bank/coverage savepoint,
+    preserving all-or-nothing registry creation and final model metadata
+  - treats failure metadata/compatibility-ledger writes as best effort; if the
+    provider and database both disconnect, the route still returns the existing
+    `502 bank_ai_onboarding_failed` result and never enters the bank write batch
+- Key files:
+  - `api/service/api_service/bank_ai_onboarding.py`
+  - `api/service/tests/test_bank_ai_onboarding.py`
+  - `api/service/README.md`
+- Verification:
+  - focused bank AI onboarding suite: 14 tests passed
+  - full API unit suite: 453 tests passed
+  - regressions cover commit-before-provider ordering, one successful retry
+    after `ConnectionResetError(10054)`, bounded failure when model-execution
+    completion also loses the DB connection, existing success, and batch
+    rollback behavior
+  - `git diff --check` passed before documentation closeout
+- Boundaries: no live provider request, bank/coverage creation, shared database
+  mutation, collection, Review decision, canonical fact, Public snapshot,
+  deployment, credential, or external configuration changed.
+- Next step: restart the local Admin API so it loads the fix, then retry `Add
+  banks with AI`; deploy through the approved Admin release process before
+  expecting the same behavior in another environment.
+
+## 2026-08-31 - AI Bank Onboarding Official-Source Budget Hardening
+
+- Status: the follow-up `bank_ai_results_insufficient` failure was diagnosed
+  from the latest shared-dev execution and corrected without weakening bank,
+  duplicate, official-source, Product Type, or atomic-write validation.
+- Root cause:
+  - read-only inspection of model execution `modelexec_HNa8UD8d37Arq1jy`
+    found 32 consulted URLs, all from FDIC/FFIEC ranking, data, help, PDF, or
+    derivative search results; no candidate official bank homepage or current
+    product page was consulted
+  - the shared model runtime allowed at most four web-search tool calls while
+    the five-bank request asked for up to 13 fully sourced candidates, so the
+    model exhausted its search budget on ranking discovery and every candidate
+    correctly failed official-source validation
+- Outcome:
+  - the shared AI runtime retains its four-call default and accepts only an
+    explicit bounded caller override from 1 through 20
+  - bank onboarding now uses a requested-count-based search ceiling: 8 calls
+    for one through three banks, 10 for four, 12 for five, up to 20 for nine or
+    ten; the selected limit and candidate limit are persisted in execution
+    metadata under contract v4
+  - extra-candidate research is reduced from `count + 8` to at most
+    `count + min(3, count)`, making a five-bank request target at most eight
+    candidates instead of thirteen
+  - the prompt permits at most two ranking searches, then requires official
+    homepage, legal-identity, and current product evidence for the requested
+    count before any extra candidate; strict consulted-URL validation and
+    all-or-nothing creation remain unchanged
+- Key files:
+  - `worker/pipeline/fpds_ai_runtime.py`
+  - `worker/pipeline/tests/test_ai_runtime.py`
+  - `api/service/api_service/bank_ai_onboarding.py`
+  - `api/service/tests/test_bank_ai_onboarding.py`
+  - `api/service/README.md`
+  - `worker/pipeline/README.md`
+- Verification:
+  - focused shared AI runtime suite: 6 tests passed
+  - focused bank AI onboarding suite: 15 tests passed
+  - full API unit suite: 454 tests passed
+  - full worker unit suite: 522 tests passed
+  - regressions cover the unchanged default, a 12-call onboarding override,
+    the 1..20 policy bound, five-bank candidate bounding, sourcing-first prompt
+    ordering, persisted v4 limits, and existing atomic/provider failure paths
+  - `git diff --check` passed with line-ending conversion warnings only
+- Boundaries: diagnostics were read-only. No live provider request, bank or
+  coverage write, shared database mutation, collection, Review decision,
+  canonical fact, Public snapshot, deployment, credential, or external
+  configuration changed.
+- Next step: restart the local Admin API and retry `Add banks with AI`; a
+  five-bank request will then use the v4 candidate/search budget.
+
+## 2026-08-31 - AI Bank Onboarding Two-Stage Evidence Isolation
+
+- Status: the Product Owner reported the same insufficiency after v4. The new
+  execution was inspected read-only and the reusable orchestration defect was
+  replaced with a two-stage v5 contract.
+- Root cause:
+  - execution `modelexec_ATMzCeEr3OSGXZs9` confirms the running API loaded v4:
+    requested count 5, candidate limit 8, and web-search ceiling 12
+  - despite the prompt ordering, all 38 consulted URLs were again regulator,
+    ranking/statistical, aggregator, Wikipedia, filing, or news sources; zero
+    candidate official bank homepage or product domain was consulted
+  - a single model request could treat prompt ordering as guidance, so merely
+    increasing the shared tool budget could not reserve searches for official
+    evidence
+- Outcome:
+  - contract v5 performs a ranking-only call with its own strict schema and
+    four-call search ceiling; it cannot emit homepage, legal, logo, or Product
+    Type fields
+  - the ranking result is passed to a second strict-schema call that cannot add
+    candidates or repeat ranking research and may search only official
+    homepage, legal-identity, and current product evidence, using the existing
+    requested-count-based 8-to-20-call ceiling
+  - provider request IDs, sources, prompt/completion tokens, and per-stage
+    counts are combined into the one bounded operation record; if the official
+    evidence stage fails, completed ranking usage and sources are still retained
+  - insufficient-result metadata now records raw/accepted candidate counts and
+    how many candidates supplied consulted homepage, legal-name, ranking,
+    coverage, and relationship URLs. Official-source, duplicate, active Product
+    Type, relationship, and atomic-write validation remain unchanged
+- Key files:
+  - `api/service/api_service/bank_ai_onboarding.py`
+  - `api/service/tests/test_bank_ai_onboarding.py`
+  - `api/service/README.md`
+- Verification:
+  - focused bank AI onboarding suite: 16 tests passed
+  - full API unit suite: 455 tests passed
+  - full worker unit suite: 522 tests passed
+  - regression coverage proves isolated ranking/evidence calls, combined
+    source validation, v5 persisted limits/request IDs, strict source
+    diagnostics, one transport retry per stage, partial ranking-usage retention,
+    and existing all-or-nothing bank creation
+  - `git diff --check` passed with line-ending conversion warnings only
+- Boundaries: the reported v4 execution and current country context were read
+  only. No v5 live provider request, bank/coverage write, shared database
+  mutation, collection, Review decision, canonical fact, Public snapshot,
+  deployment, credential, or external configuration change was performed.
+- Remaining verification: a model-only v5 dry run would send the existing bank
+  and active Product Type payload to the configured OpenAI account and incur
+  provider usage, so it requires explicit Product Owner approval. It performs
+  no DB write.
+
+## 2026-08-31 - AI Bank Onboarding Per-Candidate Evidence Isolation
+
+- Status: the Product Owner approved the model-only v5 dry run. It proved that
+  separating ranking from one batch evidence prompt was still insufficient;
+  contract v6 now isolates official research per ranked bank.
+- Live v5 evidence:
+  - the first approved attempt completed ranking, then the official-evidence
+    stage exhausted its transport retry on a DNS disconnect; no DB write ran
+  - after network reconnection, ranking request
+    `resp_0f7bb224ba1a1617016a95ea36639487d0a0b0033e994cd83c` completed with 33
+    FDIC/FFIEC sources
+  - batch evidence request
+    `resp_02ac5b28a7b5c280016a95ea82a62087d099a10684b2db0b23` returned zero
+    consulted sources and one placeholder candidate, `No verified candidate
+    returned`; the unchanged sanitizer accepted zero of five
+  - source diagnostics confirmed one raw candidate, one consulted ranking
+    source, and zero candidates with consulted homepage, legal-name, coverage,
+    or relationship sources
+- Outcome:
+  - v6 keeps the ranking-only call, server-filters/deduplicates its bounded
+    candidates, and sends exactly one immutable ranked candidate to each
+    official-evidence call
+  - each candidate receives at most four official searches; an unsourceable
+    candidate returns an empty array and the server advances to the next rank
+  - evidence must identity-match the pinned ranking candidate, and the server
+    overwrites all rank/metric/source fields with the ranking-stage values
+    before applying the unchanged full sanitizer
+  - the operation stops as soon as the requested number of banks passes the
+    sanitizer; otherwise it remains an atomic `bank_ai_results_insufficient`
+    failure with no registry write
+  - per-candidate provider stages, request IDs, tokens, sources, failure rank,
+    and partial completed-stage usage remain auditable
+- Key files:
+  - `api/service/api_service/bank_ai_onboarding.py`
+  - `api/service/tests/test_bank_ai_onboarding.py`
+  - `api/service/README.md`
+- Verification:
+  - focused bank AI onboarding suite: 17 tests passed
+  - full API unit suite: 456 tests passed
+  - full worker unit suite: 522 tests passed
+  - regressions cover candidate pinning, rank/identity preservation, an empty
+    first candidate advancing to the next rank, sanitizer-based early stop,
+    partial usage retention, and existing atomic/provider failure behavior
+  - `git diff --check` passed with line-ending conversion warnings only
+- Boundaries: the approved v5 calls incurred provider usage but performed no
+  bank, coverage, audit, usage-ledger, or other DB write. The v6 live call did
+  not run because its potential one-ranking-plus-eight-evidence request scope
+  requires fresh explicit Product Owner approval.
+
+## 2026-08-31 - AI Bank Onboarding Exact Ranking and Homepage Evidence
+
+- Status: the Product Owner explicitly approved the expanded v6 model-only dry
+  run. It identified one ranking-shape defect and one equivalent official-URL
+  mismatch; contract v7 corrects both without relaxing legal/product evidence.
+- Live v6 evidence:
+  - ranking request `resp_056d3ddfcfe4c45d016a95ecf5f5d487d09ceb745817cbe58a`
+    returned only one entry instead of the eight-candidate limit and used the
+    report title `U.S. Domestically Chartered Commercial Banks, Ranked by
+    Consolidated Assets` as `ranking_name`
+  - the retained rank/alias still resolved to Fifth Third Bank; evidence request
+    `resp_082ce26440b17bb2016a95ed1155c487d0ac85d134dc93d99b` consulted 43
+    sources, including 32 on `53.com` or its subdomains, and returned one bank
+  - legal-name, ranking, coverage, and relationship URLs were consulted, but the
+    proposed homepage root did not exactly match any returned source path, so
+    the unchanged exact-URL check accepted zero candidates
+- Outcome:
+  - v7 creates the ranking JSON schema per request and requires exactly
+    `candidate_limit` entries rather than permitting one through twenty
+  - ranking instructions require an institution-row label, and the server
+    rejects common report/table heading shapes before spending evidence calls
+  - if the proposed homepage source path was not returned, the server selects a
+    URL that was actually consulted on the exact same normalized homepage host;
+    subdomain-only, off-domain, or unconsulted legal/ranking/product/relationship
+    evidence is not substituted
+  - source diagnostics now distinguish exact homepage-source consultation from
+    same-homepage-host consultation
+- Key files:
+  - `api/service/api_service/bank_ai_onboarding.py`
+  - `api/service/tests/test_bank_ai_onboarding.py`
+  - `api/service/README.md`
+- Verification:
+  - focused bank AI onboarding suite: 19 tests passed
+  - full API unit suite: 458 tests passed
+  - full worker unit suite: 522 tests passed
+  - regressions cover exact dynamic ranking cardinality, report-title rejection,
+    same-host consulted homepage recovery, off-domain rejection, per-candidate
+    fallback, and the existing full sanitizer/atomic-write boundaries
+  - `git diff --check` passed with line-ending conversion warnings only
+- Boundaries: the approved v6 calls incurred provider usage but performed no
+  DB write. A v7 live run has not executed because it changes the external
+  ranking schema and homepage evidence payload and therefore requires fresh
+  explicit Product Owner approval despite retaining the same maximum call count.
+
+## 2026-08-31 - AI Bank Onboarding Relevant-Source Retention
+
+- Status: the Product Owner explicitly approved the v7 model-only run. It
+  validated exact ranking cardinality and per-candidate search, then exposed a
+  server-side source aggregation cap; contract v8 corrects that loss. The
+  subsequently approved retry-expanded v8 model-only run passed the unchanged
+  five-bank sanitizer.
+- Live v7 evidence:
+  - ranking request `resp_07b0d39bb48089ab016a95ee5028e087d0afbe4772f3948b75`
+    returned exactly eight candidates and 51 ranking sources
+  - eight candidate-specific evidence requests returned 19 through 48 sources
+    each, including Fifth Third, Huntington, BMO, and First Citizens official
+    domains; one Huntington transport timeout retried successfully
+  - the merge path truncated combined sources at 100 before the final sanitizer,
+    so later candidate official URLs were absent even though their individual
+    provider responses had consulted them
+  - the final bounded diagnostics showed eight raw candidates but only one
+    accepted, two with exact retained coverage/relationship sources, and four
+    with retained homepage-host evidence
+- Live v8 evidence:
+  - the explicitly approved v8 run returned exactly ten ranked candidates after
+    one ranking timeout retry, then completed six candidate-specific evidence
+    responses with 22 through 52 consulted sources each
+  - the seventh candidate stopped on an OpenAI `503 Service Unavailable`; the
+    prior transport classifier deliberately treated every HTTP error as
+    non-retryable, so the already-completed stages could not continue to the
+    remaining consumer-bank candidates
+  - after explicit approval of the bounded gateway retry, ranking request
+    `resp_03ff33023b8a792a016a95f44b61a887d0b8101e3e444442f7` returned exactly
+    ten candidates and 23 total sources; six evidence requests then completed
+    without a retry and the sanitizer stopped early after accepting five banks
+  - the successful run retained 35 relevant consulted sources across official
+    domains and accepted Huntington Bank, BMO, First Citizens Bank, American
+    Express, and M&T Bank from six raw evidence candidates; the accepted
+    coverage included mortgage, savings, GIC, line of credit, credit card,
+    personal loan, and chequing product types
+  - the successful provider request chain was the ranking request above plus
+    `resp_016deb67507bc864016a95f4607b5887d0b6660494f028d7e4`,
+    `resp_0fd288b3dc3a9670016a95f47c634887d09e46cd16288d5b68`,
+    `resp_0fa3fcf2b95c86fc016a95f496a6f487d0aa9e949a09377821`,
+    `resp_00f7acf04bc04bb6016a95f4b5a8d887d0acb731026c13b046`,
+    `resp_0755d3daba589bf4016a95f4d5311087d09e13634c2b96a88a`, and
+    `resp_024af6777d56c7b3016a95f4edc03c87d09b3a4f796155e2fa`
+- Outcome:
+  - v8 filters every completed model stage before aggregation, retaining only
+    URLs referenced by ranking, legal, homepage, logo, coverage, or relationship
+    fields plus one actually consulted exact-host homepage URL when needed
+  - total provider source counts and retained relevant counts remain distinct in
+    model-stage metadata; combined relevant sources have a bounded 250-item cap
+    instead of allowing early discovery noise to consume a 100-item global cap
+  - the five-bank candidate limit increases from eight to ten to get past large
+    custody/investment-only institutions; per-candidate processing still stops
+    immediately once five banks pass the unchanged sanitizer
+  - bounded provider retry now includes gateway `502`, `503`, and `504` in
+    addition to connection reset/timeout/URL transport failures; HTTP `4xx` and
+    other provider contract errors remain single-attempt
+- Key files:
+  - `api/service/api_service/bank_ai_onboarding.py`
+  - `api/service/tests/test_bank_ai_onboarding.py`
+  - `api/service/README.md`
+- Verification:
+  - focused bank AI onboarding suite: 21 tests passed
+  - full API unit suite: 460 tests passed
+  - full worker unit suite: 522 tests passed
+  - regression coverage proves that 120 preceding irrelevant sources cannot
+    displace late exact official evidence and that retained/total source counts,
+    candidate fallback, source safety, `503` versus `400` retry classification,
+    and atomic creation remain bounded
+  - `git diff --check` passed with line-ending conversion warnings only
+- Boundaries: the approved v7 and both v8 calls incurred provider usage but
+  performed no DB write. The final approved v8 validation was a model-only dry
+  run: it exercised the production sanitizer but did not invoke the Admin bank
+  creation transaction, audit write, or usage-ledger write.
+
+## 2026-08-31 - Interrupted Admin Collection Recovery
+
+- Status: recovered the zero-progress remainder of source-catalog collection
+  `collection_uQka60tuZBPa68YR` after a local server/database interruption.
+- Diagnosis:
+  - six of the original 23 US runs had completed
+  - 17 runs remained `started` with no source scope, source item, model
+    execution, candidate, or Review progress
+  - the original runner log ended after Supabase DNS/network failures and could
+    not persist terminal failure state; no original runner process remained
+- Recovery:
+  - retained the six completed runs unchanged
+  - transitioned the exact 17 stale runs to `retried` with the interruption
+    reason, completion time, and replacement-run metadata
+  - created replacement collection `collection_RafvZX3T4bAgOdcC` with exactly
+    the same 17 country/bank/Product Type/catalog scopes
+  - stored 17 bidirectional old/new retry links and launched one sequential
+    source-catalog runner using precision discovery
+- Verification:
+  - read-only dry run passed exact-count, zero-progress, active-catalog, and
+    no-competing-run guards
+  - post-write SQL returned `completed=6` and `retried=17` for the original
+    collection, with 17/17 retry links, identity matches, and recovery reasons
+  - the replacement runner remained alive and its log advanced from run start
+    to `fpds_snapshot` for the first BMO line-of-credit run
+  - the first replacement run persisted five collection sources and two target
+    detail sources before snapshot processing
+- Key evidence:
+  - `tmp/source-catalog-collections/collection_uQka60tuZBPa68YR.log`
+  - `tmp/source-catalog-collections/collection_RafvZX3T4bAgOdcC.json`
+  - `tmp/source-catalog-collections/collection_RafvZX3T4bAgOdcC.log`
+- Boundaries: no completed run was recollected, and no schema, runtime code,
+  canonical fact, Review decision, or collection policy was changed manually.
+  The normal replacement collection remains in progress and may perform its
+  existing guarded source, candidate, Review, promotion, and aggregate effects.
+- Next step: monitor `collection_RafvZX3T4bAgOdcC` in Runs until its 17 groups
+  reach terminal states; investigate only if the runner disappears or its log
+  and DB progress both stop advancing.
+
+## 2026-08-31 - Server-Restart Replacement Collection Recovery
+
+- Status: recovered the interrupted remainder of replacement collection
+  `collection_RafvZX3T4bAgOdcC` after another local server restart.
+- Diagnosis:
+  - six of its 17 runs had completed and were retained unchanged
+  - the source-catalog runner and worker-stage processes were absent
+  - one FCB mortgage run had reached normalization and stopped immediately
+    after launching validation routing; ten later runs had never started work
+- Recovery:
+  - transitioned exactly the 11 stale `started` runs to `retried` with an
+    interruption reason, completion time, and recovery metadata
+  - created replacement collection `collection_XQchKyN0HiK603Yy` with only
+    the same 11 country/bank/Product Type/catalog scopes
+  - stored 11 bidirectional old/new retry links and launched one sequential
+    source-catalog runner
+- Verification:
+  - the guarded dry run passed exact-count, inactivity, active-catalog,
+    one-to-one catalog, and no-competing-run checks
+  - post-write SQL returned `completed=6` and `retried=11` for the interrupted
+    collection and 11 new runs, with 11/11 valid retry and identity links
+  - the replacement runner and its child snapshot worker remained alive
+  - the first FCB mortgage run entered `fpds_snapshot`, materialized ten source
+    scopes and ten source items, and recorded a fresh model execution
+- Key evidence:
+  - `tmp/source-catalog-collections/collection_RafvZX3T4bAgOdcC.log`
+  - `tmp/source-catalog-collections/collection_XQchKyN0HiK603Yy.json`
+  - `tmp/source-catalog-collections/collection_XQchKyN0HiK603Yy.log`
+- Boundaries: no completed run was recollected and no schema, runtime code,
+  canonical fact, Review decision, or collection policy was manually changed.
+  The database's bounded operational-storage policy discards `audit_event`
+  writes, so the durable recovery evidence is the bidirectional run linkage,
+  recovery metadata, interruption reason, plan, and runner log. The normal
+  replacement collection remains in progress and retains its existing guarded
+  downstream effects.
+- Next step: monitor `collection_XQchKyN0HiK603Yy` in Runs until all 11 groups
+  reach terminal states; investigate only if its process disappears or both
+  log and database activity stop advancing.

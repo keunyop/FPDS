@@ -24,7 +24,9 @@ Current scope:
 - admin-only, CSRF-protected AI bank onboarding for the session country, with
   required live web research, largest-first duplicate exclusion, official
   homepage/logo/active Product Type evidence, customer-facing display-name
-  validation, preserved legal/ranking names, and atomic creation
+  validation, preserved legal/ranking names, and atomic creation; onboarding
+  uses bounded ranking discovery followed by server-pinned, one-bank-at-a-time
+  official-evidence calls so one failed candidate cannot consume the batch
 - guarded bank delete support for operator-created bank profiles when only admin-managed coverage or generated-source rows exist
 - source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
@@ -349,6 +351,27 @@ cd api/service
   model-execution context. It does not persist a standalone usage/audit ledger,
   launch collection, or publish data. Migration `0027`
   must be applied before the route is enabled against a database.
+- Onboarding contract v8 performs ranking discovery first with a four-search
+  ceiling, then pins one ranked candidate at a time into a separate official-
+  evidence call with a four-search ceiling. The model may return zero candidates
+  instead of a placeholder; the server advances to the next rank and stops as
+  soon as the requested count passes the unchanged sanitizer. Evidence cannot
+  replace the pinned rank/identity with another bank. The ranking schema requires
+  exactly the bounded candidate limit and rejects report/table titles as bank
+  labels. When the homepage root was not itself returned by search, a consulted
+  URL on the exact same official hostname may serve as homepage evidence; legal,
+  ranking, coverage, and relationship URLs still require exact consultation.
+  Each stage retains only result-referenced consulted URLs plus the minimum
+  same-host homepage evidence, preventing later candidates from being displaced
+  by a global source cap. Provider request IDs, combined sources/tokens, total
+  and retained per-stage source counts are recorded; insufficient results also
+  retain bounded source-fulfilment counts.
+- The onboarding route commits its started model execution before the bounded
+  live web-search wait, retries one transient transport disconnect or provider
+  gateway `502`/`503`/`504`, and treats failure-finalization writes as best
+  effort. Client/provider contract errors remain single-attempt. A simultaneous
+  provider and database disconnect therefore returns the existing bounded
+  non-2xx response without entering the atomic bank/coverage write batch.
 - Bank create and update now accept homepage URLs without an explicit scheme by normalizing them to `https://...`, while still rejecting invalid non-http(s) values with a validation error instead of a server crash.
 - Bank delete now removes only the bank profile plus admin-managed coverage and generated-source rows; if collected source documents or downstream candidate/product history already exist, the API blocks deletion with a conflict response so operational history is not orphaned.
 - Existing bank homepage values are no longer auto-repaired from committed seed data during runtime reads or admin writes; reset and replay flows now preserve intentionally empty operator-managed state.

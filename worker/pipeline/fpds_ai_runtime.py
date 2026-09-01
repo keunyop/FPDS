@@ -27,11 +27,18 @@ def invoke_openai_json_schema(
     model_id: str | None = None,
     web_search_allowed_domains: list[str] | None = None,
     require_web_search: bool = False,
+    max_web_search_tool_calls: int = 4,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     provider = os.getenv("FPDS_LLM_PROVIDER", "openai").strip().lower()
     api_key = os.getenv("FPDS_LLM_API_KEY", "").strip()
     if provider != "openai" or not api_key:
         raise RuntimeError("OpenAI provider or API key was not configured.")
+    if (
+        isinstance(max_web_search_tool_calls, bool)
+        or not isinstance(max_web_search_tool_calls, int)
+        or not 1 <= max_web_search_tool_calls <= 20
+    ):
+        raise ValueError("max_web_search_tool_calls must be an integer between 1 and 20.")
 
     request_body = {
         "model": model_id or configured_model_id(),
@@ -68,7 +75,7 @@ def invoke_openai_json_schema(
         request_body["tools"] = [web_search_tool]
         request_body["tool_choice"] = "required" if require_web_search else "auto"
         request_body["include"] = ["web_search_call.action.sources"]
-        request_body["max_tool_calls"] = 4
+        request_body["max_tool_calls"] = max_web_search_tool_calls
         request_body["store"] = False
     request = urllib.request.Request(
         "https://api.openai.com/v1/responses",

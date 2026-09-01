@@ -5,8 +5,12 @@ import json
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
+import urllib.error
 
 from api_service.bank_ai_onboarding import (
+    _is_transient_provider_transport_error,
+    _ranked_candidates_for_evidence,
+    _retain_bank_ai_relevant_sources,
     build_bank_ai_onboarding_payload,
     run_bank_ai_onboarding,
     sanitize_bank_ai_onboarding_result,
@@ -48,6 +52,7 @@ class _Connection:
         existing_banks: list[dict[str, object]] | None = None,
         product_types: list[dict[str, object]] | None = None,
         schema_ready: bool = True,
+        fail_model_execution_update: bool = False,
     ) -> None:
         self.existing_banks = existing_banks or []
         self.product_types = product_types or [
@@ -65,7 +70,10 @@ class _Connection:
             },
         ]
         self.schema_ready = schema_ready
+        self.fail_model_execution_update = fail_model_execution_update
         self.calls: list[tuple[str, dict[str, object]]] = []
+        self.commit_count = 0
+        self.rollback_count = 0
         self.transaction_entered = 0
         self.transaction_exit_types: list[object] = []
 
@@ -80,10 +88,18 @@ class _Connection:
             return _Result(many=self.product_types)
         if "FROM bank" in normalized and "normalized_homepage_url" in normalized:
             return _Result(many=self.existing_banks)
+        if self.fail_model_execution_update and "UPDATE model_execution" in normalized:
+            raise RuntimeError("database connection closed while recording failure")
         return _Result()
 
     def transaction(self) -> _Transaction:
         return _Transaction(self)
+
+    def commit(self) -> None:
+        self.commit_count += 1
+
+    def rollback(self) -> None:
+        self.rollback_count += 1
 
 
 def _sources() -> list[dict[str, str]]:
@@ -174,6 +190,32 @@ def _created_bank(name: str, code: str, host: str) -> dict[str, object]:
 
 
 class BankAiOnboardingTests(unittest.TestCase):
+    def test_provider_retry_classifies_only_transient_gateway_http_errors(self) -> None:
+        transient_http_error = urllib.error.HTTPError(
+            "https://api.openai.com/v1/responses",
+            503,
+            "Service Unavailable",
+            hdrs=None,
+            fp=None,
+        )
+        wrapped_transient = RuntimeError("OpenAI request failed with status 503")
+        wrapped_transient.__cause__ = transient_http_error
+        client_http_error = urllib.error.HTTPError(
+            "https://api.openai.com/v1/responses",
+            400,
+            "Bad Request",
+            hdrs=None,
+            fp=None,
+        )
+
+        try:
+            self.assertTrue(_is_transient_provider_transport_error(wrapped_transient))
+            self.assertFalse(_is_transient_provider_transport_error(client_http_error))
+        finally:
+            wrapped_transient.__cause__ = None
+            transient_http_error.close()
+            client_http_error.close()
+
     def test_us_onboarding_uses_us_product_vocabulary_without_changing_codes(self) -> None:
         payload = build_bank_ai_onboarding_payload(
             country={"country_code": "US", "country_name": "United States"},
@@ -203,6 +245,56 @@ class BankAiOnboardingTests(unittest.TestCase):
         self.assertIn("checking account", allowed["chequing"]["discovery_keywords"])
         self.assertEqual(allowed["gic"]["display_name"], "Certificate of Deposit (CD)")
         self.assertIn("certificate of deposit", allowed["gic"]["discovery_keywords"])
+        self.assertEqual(payload["candidate_limit"], 2)
+
+    def test_payload_bounds_extra_candidates_to_preserve_source_research_budget(self) -> None:
+        payload = build_bank_ai_onboarding_payload(
+            country={"country_code": "US", "country_name": "United States"},
+            requested_count=5,
+            existing_banks=[],
+            product_types=[],
+        )
+
+        self.assertEqual(payload["candidate_limit"], 10)
+
+    def test_relevant_source_filter_keeps_late_official_evidence_without_noise(self) -> None:
+        candidate = _candidate(
+            rank=1,
+            name="Alpha Bank",
+            host="alpha.example",
+            coverage=["savings"],
+        )
+        candidate["legal_name_source_url"] = "https://alpha.example/about"
+        candidate["coverage"][0]["relationship_source_url"] = "https://alpha.example/about"  # type: ignore[index]
+        metadata = {
+            "provider": "openai",
+            "model_id": "test-model",
+            "provider_request_id": "resp-source-filter",
+            "prompt_tokens": 10,
+            "completion_tokens": 5,
+            "web_search_sources": [
+                *[
+                    {
+                        "url": f"https://noise-{index}.example/report",
+                        "title": f"Noise {index}",
+                    }
+                    for index in range(120)
+                ],
+                {"url": "https://alpha.example/about", "title": "About Alpha"},
+                {"url": "https://alpha.example/savings", "title": "Alpha savings"},
+            ],
+        }
+
+        filtered = _retain_bank_ai_relevant_sources(
+            result=_raw_result([candidate]),
+            provider_metadata=metadata,
+        )
+
+        self.assertEqual(filtered["web_search_source_total_count"], 122)
+        self.assertEqual(
+            [item["url"] for item in filtered["web_search_sources"]],
+            ["https://alpha.example/about", "https://alpha.example/savings"],
+        )
 
     @patch("api_service.bank_ai_onboarding.llm_provider_configured", return_value=True)
     def test_run_requires_standalone_ai_migration_before_provider_call(
@@ -297,6 +389,65 @@ class BankAiOnboardingTests(unittest.TestCase):
             )
 
         self.assertEqual(captured.exception.code, "bank_ai_results_insufficient")
+        diagnostics = getattr(captured.exception, "diagnostics", {})
+        self.assertEqual(diagnostics["raw_candidate_count"], 2)
+        self.assertEqual(diagnostics["accepted_candidate_count"], 1)
+        self.assertEqual(diagnostics["candidates_with_consulted_homepage_source"], 2)
+        self.assertEqual(diagnostics["candidates_with_consulted_coverage_source"], 2)
+
+    def test_sanitizer_uses_consulted_same_host_page_as_homepage_evidence(self) -> None:
+        candidate = _candidate(
+            rank=1,
+            name="Alpha Bank",
+            host="alpha.example",
+            coverage=["savings"],
+        )
+        candidate["legal_name_source_url"] = "https://alpha.example/about"
+        candidate["coverage"][0]["relationship_source_url"] = "https://alpha.example/about"  # type: ignore[index]
+
+        result = sanitize_bank_ai_onboarding_result(
+            raw_result=_raw_result([candidate]),
+            country_code="CA",
+            requested_count=1,
+            active_product_types={"savings"},
+            existing_banks=[],
+            sources=[
+                {"url": "https://regulator.example/bank-ranking", "title": "Bank ranking"},
+                {"url": "https://alpha.example/about", "title": "About Alpha"},
+                {"url": "https://alpha.example/savings", "title": "Alpha savings"},
+            ],
+        )
+
+        self.assertEqual(
+            result["candidates"][0]["homepage_source_url"],
+            "https://alpha.example/about",
+        )
+
+    def test_ranking_preparation_rejects_report_title_as_institution_name(self) -> None:
+        report_candidate = _candidate(
+            rank=1,
+            name="Alpha Bank",
+            host="alpha.example",
+            coverage=["savings"],
+        )
+        report_candidate["ranking_name"] = (
+            "U.S. Domestically Chartered Commercial Banks, Ranked by Consolidated Assets"
+        )
+        report_candidate["known_names"] = ["Alpha Bank"]
+        valid_candidate = _candidate(
+            rank=2,
+            name="Beta Bank",
+            host="beta.example",
+            coverage=["savings"],
+        )
+
+        ranked = _ranked_candidates_for_evidence(
+            ranking_result=_raw_result([report_candidate, valid_candidate]),
+            existing_banks=[],
+            candidate_limit=2,
+        )
+
+        self.assertEqual([item["ranking_name"] for item in ranked], ["BETA BANK"])
 
     def test_sanitizer_accepts_verified_official_consumer_brand_domain(self) -> None:
         candidate = _candidate(
@@ -419,23 +570,52 @@ class BankAiOnboardingTests(unittest.TestCase):
             _created_bank("Alpha Bank", "ALPHA", "alpha.example"),
             _created_bank("Beta Bank", "BETA", "beta.example"),
         ]
+        model_result = _raw_result(
+            [
+                _candidate(rank=1, name="Alpha Bank", host="alpha.example", coverage=["savings"]),
+                _candidate(rank=2, name="Beta Bank", host="beta.example", coverage=["savings"]),
+            ]
+        )
         invoke_model = Mock(
-            return_value=(
-                _raw_result(
-                    [
-                        _candidate(rank=1, name="Alpha Bank", host="alpha.example", coverage=["savings"]),
-                        _candidate(rank=2, name="Beta Bank", host="beta.example", coverage=["savings"]),
-                    ]
+            side_effect=[
+                (
+                    model_result,
+                    {
+                        "provider": "openai",
+                        "model_id": "test-model",
+                        "provider_request_id": "resp-ranking-001",
+                        "prompt_tokens": 40,
+                        "completion_tokens": 20,
+                        "web_search_sources": [_sources()[0]],
+                    },
                 ),
-                {
-                    "provider": "openai",
-                    "model_id": "test-model",
-                    "provider_request_id": "resp-001",
-                    "prompt_tokens": 120,
-                    "completion_tokens": 80,
-                    "web_search_sources": _sources(),
-                },
-            )
+                (
+                    _raw_result(
+                        [_candidate(rank=1, name="Alpha Bank", host="alpha.example", coverage=["savings"])]
+                    ),
+                    {
+                        "provider": "openai",
+                        "model_id": "test-model",
+                        "provider_request_id": "resp-evidence-alpha",
+                        "prompt_tokens": 40,
+                        "completion_tokens": 30,
+                        "web_search_sources": _sources()[1:3],
+                    },
+                ),
+                (
+                    _raw_result(
+                        [_candidate(rank=2, name="Beta Bank", host="beta.example", coverage=["savings"])]
+                    ),
+                    {
+                        "provider": "openai",
+                        "model_id": "test-model",
+                        "provider_request_id": "resp-evidence-beta",
+                        "prompt_tokens": 40,
+                        "completion_tokens": 30,
+                        "web_search_sources": _sources()[4:6],
+                    },
+                ),
+            ]
         )
 
         result = run_bank_ai_onboarding(
@@ -449,6 +629,7 @@ class BankAiOnboardingTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["added_count"], 2)
+        self.assertEqual(connection.commit_count, 1)
         self.assertEqual(connection.transaction_entered, 1)
         self.assertEqual(connection.transaction_exit_types, [None])
         self.assertEqual(create_bank_profile.call_count, 2)
@@ -460,7 +641,35 @@ class BankAiOnboardingTests(unittest.TestCase):
             create_bank_profile.call_args_list[0].kwargs["payload"]["initial_coverage_source_metadata"]["savings"]["coverage_domain"],
             "alpha.example",
         )
-        self.assertTrue(invoke_model.call_args.kwargs["require_web_search"])
+        self.assertEqual(invoke_model.call_count, 3)
+        ranking_call = invoke_model.call_args_list[0].kwargs
+        alpha_evidence_call = invoke_model.call_args_list[1].kwargs
+        beta_evidence_call = invoke_model.call_args_list[2].kwargs
+        self.assertTrue(ranking_call["require_web_search"])
+        self.assertEqual(ranking_call["schema_name"], "fpds_bank_registry_ranking_v1")
+        self.assertEqual(ranking_call["max_web_search_tool_calls"], 4)
+        self.assertEqual(ranking_call["schema"]["properties"]["candidates"]["minItems"], 4)
+        self.assertEqual(ranking_call["schema"]["properties"]["candidates"]["maxItems"], 4)
+        self.assertIn("ranking discovery agent", ranking_call["instructions"])
+        self.assertTrue(alpha_evidence_call["require_web_search"])
+        self.assertEqual(
+            alpha_evidence_call["schema_name"],
+            "fpds_bank_registry_onboarding_v8",
+        )
+        self.assertEqual(alpha_evidence_call["max_web_search_tool_calls"], 4)
+        self.assertEqual(alpha_evidence_call["payload"]["candidate_limit"], 1)
+        self.assertEqual(
+            alpha_evidence_call["payload"]["ranking_research_result"]["candidates"][0]["ranking_name"],
+            "ALPHA BANK",
+        )
+        self.assertEqual(
+            beta_evidence_call["payload"]["ranking_research_result"]["candidates"][0]["ranking_name"],
+            "BETA BANK",
+        )
+        self.assertIn(
+            "Do not search for another ranking",
+            alpha_evidence_call["instructions"],
+        )
         self.assertTrue(any("INSERT INTO model_execution" in sql for sql, _params in connection.calls))
         self.assertTrue(any("INSERT INTO llm_usage_record" in sql for sql, _params in connection.calls))
         completed_executions = [
@@ -470,6 +679,19 @@ class BankAiOnboardingTests(unittest.TestCase):
         ]
         self.assertEqual(len(completed_executions), 1)
         execution_metadata = json.loads(str(completed_executions[0]["execution_metadata"]))
+        self.assertEqual(execution_metadata["candidate_limit"], 4)
+        self.assertEqual(execution_metadata["ranking_search_tool_call_limit"], 4)
+        self.assertEqual(execution_metadata["official_evidence_search_tool_call_limit"], 4)
+        self.assertEqual(execution_metadata["official_evidence_candidate_limit"], 4)
+        self.assertEqual(execution_metadata["web_search_tool_call_limit"], 20)
+        self.assertEqual(
+            execution_metadata["onboarding_contract_version"],
+            "bank-registry-onboarding-v8",
+        )
+        self.assertEqual(
+            execution_metadata["provider_request_ids"],
+            ["resp-ranking-001", "resp-evidence-alpha", "resp-evidence-beta"],
+        )
         self.assertEqual(
             execution_metadata["bank_name_evidence"][0]["ranking_name"],
             "ALPHA BANK",
@@ -485,6 +707,230 @@ class BankAiOnboardingTests(unittest.TestCase):
         self.assertEqual(
             audit_payload["bank_name_evidence"][0]["legal_name"],
             "Alpha Bank Legal Entity",
+        )
+
+    @patch("api_service.bank_ai_onboarding.llm_provider_configured", return_value=True)
+    @patch("api_service.bank_ai_onboarding.create_bank_profile")
+    def test_empty_official_evidence_advances_to_next_ranked_candidate(
+        self,
+        create_bank_profile: Mock,
+        _provider_configured: Mock,
+    ) -> None:
+        connection = _Connection()
+        create_bank_profile.return_value = _created_bank(
+            "Beta Bank",
+            "BETA",
+            "beta.example",
+        )
+        ranking_result = _raw_result(
+            [
+                _candidate(rank=1, name="Alpha Bank", host="alpha.example", coverage=["savings"]),
+                _candidate(rank=2, name="Beta Bank", host="beta.example", coverage=["savings"]),
+            ]
+        )
+        invoke_model = Mock(
+            side_effect=[
+                (
+                    ranking_result,
+                    {
+                        "provider": "openai",
+                        "model_id": "test-model",
+                        "provider_request_id": "resp-ranking-fallback",
+                        "prompt_tokens": 40,
+                        "completion_tokens": 20,
+                        "web_search_sources": [_sources()[0]],
+                    },
+                ),
+                (
+                    _raw_result([]),
+                    {
+                        "provider": "openai",
+                        "model_id": "test-model",
+                        "provider_request_id": "resp-alpha-empty",
+                        "prompt_tokens": 30,
+                        "completion_tokens": 10,
+                        "web_search_sources": [],
+                    },
+                ),
+                (
+                    _raw_result(
+                        [_candidate(rank=2, name="Beta Bank", host="beta.example", coverage=["savings"])]
+                    ),
+                    {
+                        "provider": "openai",
+                        "model_id": "test-model",
+                        "provider_request_id": "resp-beta-sourced",
+                        "prompt_tokens": 30,
+                        "completion_tokens": 20,
+                        "web_search_sources": _sources()[4:6],
+                    },
+                ),
+            ]
+        )
+
+        result = run_bank_ai_onboarding(
+            connection,
+            country_code="CA",
+            requested_count=1,
+            actor={"user_id": "usr-admin", "role": "admin"},
+            request_context={"request_id": "req-ranked-fallback"},
+            invoke_model=invoke_model,
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["banks"][0]["bank"]["bank_name"], "Beta Bank")
+        self.assertEqual(invoke_model.call_count, 3)
+        self.assertEqual(
+            invoke_model.call_args_list[1].kwargs["payload"]["ranking_research_result"]["candidates"][0]["rank"],
+            1,
+        )
+        self.assertEqual(
+            invoke_model.call_args_list[2].kwargs["payload"]["ranking_research_result"]["candidates"][0]["rank"],
+            2,
+        )
+
+    @patch("api_service.bank_ai_onboarding.llm_provider_configured", return_value=True)
+    @patch("api_service.bank_ai_onboarding.create_bank_profile")
+    def test_transient_provider_reset_is_retried_after_started_execution_commit(
+        self,
+        create_bank_profile: Mock,
+        _provider_configured: Mock,
+    ) -> None:
+        connection = _Connection()
+        create_bank_profile.return_value = _created_bank(
+            "Alpha Bank",
+            "ALPHA",
+            "alpha.example",
+        )
+        committed_before_attempt: list[int] = []
+
+        def invoke_model(**_kwargs):  # type: ignore[no-untyped-def]
+            committed_before_attempt.append(connection.commit_count)
+            if len(committed_before_attempt) == 1:
+                raise ConnectionResetError(
+                    10054,
+                    "An existing connection was forcibly closed by the remote host",
+                )
+            return (
+                _raw_result(
+                    [
+                        _candidate(
+                            rank=1,
+                            name="Alpha Bank",
+                            host="alpha.example",
+                            coverage=["savings"],
+                        )
+                    ]
+                ),
+                {
+                    "provider": "openai",
+                    "model_id": "test-model",
+                    "provider_request_id": "resp-retry-001",
+                    "prompt_tokens": 120,
+                    "completion_tokens": 80,
+                    "web_search_sources": _sources(),
+                },
+            )
+
+        result = run_bank_ai_onboarding(
+            connection,
+            country_code="CA",
+            requested_count=1,
+            actor={"user_id": "usr-admin", "role": "admin"},
+            request_context={"request_id": "req-retry"},
+            invoke_model=invoke_model,
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["added_count"], 1)
+        self.assertEqual(committed_before_attempt, [1, 1, 1])
+        self.assertEqual(create_bank_profile.call_count, 1)
+
+    @patch("api_service.bank_ai_onboarding.llm_provider_configured", return_value=True)
+    def test_provider_and_failure_persistence_disconnect_returns_bounded_error(
+        self,
+        _provider_configured: Mock,
+    ) -> None:
+        connection = _Connection(fail_model_execution_update=True)
+        invoke_model = Mock(
+            side_effect=ConnectionResetError(
+                10054,
+                "An existing connection was forcibly closed by the remote host",
+            )
+        )
+
+        result = run_bank_ai_onboarding(
+            connection,
+            country_code="CA",
+            requested_count=1,
+            actor={"user_id": "usr-admin", "role": "admin"},
+            request_context={"request_id": "req-provider-db-reset"},
+            invoke_model=invoke_model,
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status_code"], 502)
+        self.assertEqual(result["error"]["code"], "bank_ai_onboarding_failed")
+        self.assertEqual(invoke_model.call_count, 2)
+        self.assertEqual(connection.commit_count, 1)
+        self.assertEqual(connection.rollback_count, 1)
+        self.assertEqual(connection.transaction_entered, 0)
+
+    @patch("api_service.bank_ai_onboarding.llm_provider_configured", return_value=True)
+    def test_official_evidence_failure_retains_completed_ranking_usage(
+        self,
+        _provider_configured: Mock,
+    ) -> None:
+        connection = _Connection()
+        ranking_result = _raw_result(
+            [_candidate(rank=1, name="Alpha Bank", host="alpha.example", coverage=["savings"])]
+        )
+        invoke_model = Mock(
+            side_effect=[
+                (
+                    ranking_result,
+                    {
+                        "provider": "openai",
+                        "model_id": "test-model",
+                        "provider_request_id": "resp-ranking-partial",
+                        "prompt_tokens": 40,
+                        "completion_tokens": 20,
+                        "web_search_sources": [_sources()[0]],
+                    },
+                ),
+                ConnectionResetError(10054, "official evidence reset"),
+                ConnectionResetError(10054, "official evidence reset"),
+            ]
+        )
+
+        result = run_bank_ai_onboarding(
+            connection,
+            country_code="CA",
+            requested_count=1,
+            actor={"user_id": "usr-admin", "role": "admin"},
+            request_context={"request_id": "req-evidence-reset"},
+            invoke_model=invoke_model,
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["status_code"], 502)
+        self.assertEqual(invoke_model.call_count, 3)
+        usage_rows = [
+            params
+            for sql, params in connection.calls
+            if "INSERT INTO llm_usage_record" in sql
+        ]
+        self.assertEqual(len(usage_rows), 1)
+        self.assertEqual(usage_rows[0]["prompt_tokens"], 40)
+        failed_executions = [
+            json.loads(str(params["execution_metadata"]))
+            for sql, params in connection.calls
+            if "UPDATE model_execution" in sql and params.get("execution_status") == "failed"
+        ]
+        self.assertEqual(failed_executions[0]["failed_model_stage"], "official_evidence_rank_1")
+        self.assertEqual(
+            failed_executions[0]["provider_request_ids"],
+            ["resp-ranking-partial"],
         )
 
     @patch("api_service.bank_ai_onboarding.llm_provider_configured", return_value=True)

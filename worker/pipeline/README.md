@@ -10,6 +10,12 @@ Current scope:
 - `fpds_validation_routing/` implements `WBS 3.7` candidate validation recheck, confidence recomputation, prototype review-task routing, and validation artifact storage
 - `fpds_aggregate_refresh/` implements `WBS 5.6` the retained aggregate source dataset in `public_product_projection`; dashboard metrics, rankings, and scatter are derived from it at read time
 
+Shared AI runtime note:
+- `fpds_ai_runtime.py` keeps the default web-search ceiling at four tool calls;
+  evidence-heavy callers may supply a validated caller-specific ceiling from
+  1 through 20. AI bank onboarding uses a requested-count-based ceiling from
+  8 through 20 without changing other model workflows.
+
 Planned follow-on scope:
 - canonical upsert and change assessment
 - publish preparation

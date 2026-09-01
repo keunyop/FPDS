@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime
 import json
 import re
 import unicodedata
 from typing import TYPE_CHECKING, Any
+import urllib.error
 from urllib.parse import urlsplit, urlunsplit
 
 from api_service.errors import SourceRegistryError
@@ -30,7 +32,88 @@ else:  # pragma: no cover - keeps unit tests lightweight.
 
 AI_BANK_ONBOARDING_STAGE = "bank_registry_onboarding"
 AI_BANK_ONBOARDING_AGENT = "fpds_bank_onboarding"
-AI_BANK_ONBOARDING_SCHEMA_NAME = "fpds_bank_registry_onboarding_v3"
+AI_BANK_ONBOARDING_SCHEMA_NAME = "fpds_bank_registry_onboarding_v8"
+AI_BANK_ONBOARDING_RANKING_SCHEMA_NAME = "fpds_bank_registry_ranking_v1"
+AI_BANK_ONBOARDING_RANKING_SEARCH_TOOL_CALL_LIMIT = 4
+AI_BANK_ONBOARDING_OFFICIAL_EVIDENCE_SEARCH_TOOL_CALL_LIMIT = 4
+
+
+class _BankAiResultsInsufficientError(SourceRegistryError):
+    def __init__(self, *, diagnostics: dict[str, Any] | None = None) -> None:
+        super().__init__(
+            status_code=422,
+            code="bank_ai_results_insufficient",
+            message=(
+                "AI research did not return enough fully sourced, non-duplicate banks "
+                "with official homepage and Product Type coverage evidence. No banks were added."
+            ),
+        )
+        self.diagnostics = diagnostics or {}
+
+
+class _BankAiProviderStageError(RuntimeError):
+    def __init__(
+        self,
+        *,
+        stage: str,
+        cause: Exception,
+        provider_metadata: dict[str, Any],
+    ) -> None:
+        self.stage = stage
+        self.cause = cause
+        self.provider_metadata = provider_metadata
+        super().__init__(str(cause))
+
+
+AI_BANK_ONBOARDING_RANKING_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["country_code", "ranking_basis", "candidates"],
+    "properties": {
+        "country_code": {"type": "string"},
+        "ranking_basis": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["metric", "as_of_date", "summary"],
+            "properties": {
+                "metric": {"type": "string"},
+                "as_of_date": {"type": "string"},
+                "summary": {"type": "string"},
+            },
+        },
+        "candidates": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "rank",
+                    "ranking_name",
+                    "known_names",
+                    "size_metric_label",
+                    "size_metric_value",
+                    "size_metric_as_of",
+                    "ranking_source_url",
+                ],
+                "properties": {
+                    "rank": {"type": "integer", "minimum": 1},
+                    "ranking_name": {"type": "string"},
+                    "known_names": {
+                        "type": "array",
+                        "maxItems": 10,
+                        "items": {"type": "string"},
+                    },
+                    "size_metric_label": {"type": "string"},
+                    "size_metric_value": {"type": "string"},
+                    "size_metric_as_of": {"type": "string"},
+                    "ranking_source_url": {"type": "string"},
+                },
+            },
+        },
+    },
+}
 AI_BANK_ONBOARDING_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -164,6 +247,8 @@ def run_bank_ai_onboarding(
     operation_id = new_id("bankonboard")
     model_execution_id = new_id("modelexec")
     model_id = configured_model_id()
+    candidate_limit = _bank_ai_candidate_limit(requested_count)
+    official_evidence_candidate_limit = candidate_limit
     started_at = utc_now()
     execution_metadata = {
         "operation_id": operation_id,
@@ -173,7 +258,20 @@ def run_bank_ai_onboarding(
         "requested_by_user_id": _string_or_none(actor.get("user_id")),
         "existing_bank_count": len(existing_banks),
         "active_product_type_count": len(product_types),
-        "onboarding_contract_version": "bank-registry-onboarding-v3",
+        "candidate_limit": candidate_limit,
+        "ranking_search_tool_call_limit": AI_BANK_ONBOARDING_RANKING_SEARCH_TOOL_CALL_LIMIT,
+        "official_evidence_search_tool_call_limit": (
+            AI_BANK_ONBOARDING_OFFICIAL_EVIDENCE_SEARCH_TOOL_CALL_LIMIT
+        ),
+        "official_evidence_candidate_limit": official_evidence_candidate_limit,
+        "web_search_tool_call_limit": (
+            AI_BANK_ONBOARDING_RANKING_SEARCH_TOOL_CALL_LIMIT
+            + (
+                AI_BANK_ONBOARDING_OFFICIAL_EVIDENCE_SEARCH_TOOL_CALL_LIMIT
+                * official_evidence_candidate_limit
+            )
+        ),
+        "onboarding_contract_version": "bank-registry-onboarding-v8",
     }
     _insert_model_execution(
         connection,
@@ -182,6 +280,10 @@ def run_bank_ai_onboarding(
         execution_metadata=execution_metadata,
         started_at=started_at,
     )
+    # The live web-search request can use the full provider timeout. Commit the
+    # started execution before that network wait so the database session is not
+    # left idle inside a transaction and the diagnostic survives a disconnect.
+    connection.commit()
 
     request_payload = build_bank_ai_onboarding_payload(
         country=country,
@@ -190,40 +292,51 @@ def run_bank_ai_onboarding(
         product_types=product_types,
     )
     try:
-        raw_result, provider_metadata = invoke_model(
-            instructions=_bank_ai_onboarding_instructions(),
-            payload=request_payload,
-            schema_name=AI_BANK_ONBOARDING_SCHEMA_NAME,
-            schema=AI_BANK_ONBOARDING_SCHEMA,
+        raw_result, provider_metadata = _invoke_bank_ai_onboarding_model(
+            invoke_model=invoke_model,
+            request_payload=request_payload,
             model_id=model_id,
-            require_web_search=True,
+            country_code=normalized_country_code,
+            requested_count=requested_count,
+            active_product_types={str(item["product_type_code"]) for item in product_types},
+            existing_banks=existing_banks,
         )
     except Exception as exc:
         error_message = _safe_provider_error(exc)
         completed_at = utc_now()
-        _complete_model_execution(
+        partial_provider_metadata = _mapping(
+            getattr(exc, "provider_metadata", None)
+        )
+        partial_sources = _source_list(
+            partial_provider_metadata.get("web_search_sources")
+        )
+        _persist_ai_onboarding_failure_best_effort(
             connection,
             model_execution_id=model_execution_id,
-            execution_status="failed",
             execution_metadata={
                 **execution_metadata,
-                "failure_type": type(exc).__name__,
+                "provider": _string_or_none(partial_provider_metadata.get("provider")),
+                "provider_request_id": _string_or_none(
+                    partial_provider_metadata.get("provider_request_id")
+                ),
+                "provider_request_ids": _string_list(
+                    partial_provider_metadata.get("provider_request_ids")
+                ),
+                "failure_type": type(getattr(exc, "cause", exc)).__name__,
+                "failed_model_stage": _string_or_none(getattr(exc, "stage", None)),
                 "error_message": error_message,
+                "sources": partial_sources,
             },
             completed_at=completed_at,
-        )
-        _record_ai_onboarding_audit(
-            connection,
-            event_type="bank_ai_onboarding_failed",
             actor=actor,
             country_code=normalized_country_code,
             operation_id=operation_id,
-            model_execution_id=model_execution_id,
             request_context=request_context,
             reason_code="provider_failure",
             reason_text=error_message,
-            bank_codes=[],
-            sources=[],
+            sources=partial_sources,
+            provider_metadata=partial_provider_metadata or None,
+            model_id=model_id if partial_provider_metadata else None,
         )
         return _error_result(
             status_code=502,
@@ -248,39 +361,27 @@ def run_bank_ai_onboarding(
             **execution_metadata,
             "provider": str(provider_metadata.get("provider") or "openai"),
             "provider_request_id": _string_or_none(provider_metadata.get("provider_request_id")),
+            "provider_request_ids": _string_list(provider_metadata.get("provider_request_ids")),
+            "model_stages": _dict_list(provider_metadata.get("model_stages")),
             "failure_type": "result_validation",
             "error_code": exc.code,
+            "validation_diagnostics": getattr(exc, "diagnostics", {}),
             "sources": sources,
         }
-        _complete_model_execution(
+        _persist_ai_onboarding_failure_best_effort(
             connection,
             model_execution_id=model_execution_id,
-            execution_status="failed",
             execution_metadata=failed_metadata,
             completed_at=completed_at,
-        )
-        _insert_usage_record(
-            connection,
-            model_execution_id=model_execution_id,
-            operation_id=operation_id,
-            country_code=normalized_country_code,
-            request_id=_string_or_none(request_context.get("request_id")),
-            provider_metadata=provider_metadata,
-            model_id=model_id,
-            recorded_at=completed_at,
-        )
-        _record_ai_onboarding_audit(
-            connection,
-            event_type="bank_ai_onboarding_failed",
             actor=actor,
             country_code=normalized_country_code,
             operation_id=operation_id,
-            model_execution_id=model_execution_id,
             request_context=request_context,
             reason_code=exc.code,
             reason_text=exc.message,
-            bank_codes=[],
             sources=sources,
+            provider_metadata=provider_metadata,
+            model_id=model_id,
         )
         return _error_result(
             status_code=exc.status_code,
@@ -291,6 +392,10 @@ def run_bank_ai_onboarding(
 
     created_items: list[dict[str, Any]] = []
     try:
+        # Start a new outer transaction after the pre-provider commit. The
+        # nested block remains the batch savepoint, while its successful writes
+        # and final model metadata are committed together by the request scope.
+        connection.execute("SELECT 1", {})
         with connection.transaction():
             for candidate in sanitized["candidates"]:
                 created_bank = create_bank_profile(
@@ -347,42 +452,29 @@ def run_bank_ai_onboarding(
             error_code = "bank_ai_registry_write_failed"
             error_message = "The verified banks could not be registered atomically."
         completed_at = utc_now()
-        _complete_model_execution(
+        _persist_ai_onboarding_failure_best_effort(
             connection,
             model_execution_id=model_execution_id,
-            execution_status="failed",
             execution_metadata={
                 **execution_metadata,
                 "provider": str(provider_metadata.get("provider") or "openai"),
                 "provider_request_id": _string_or_none(provider_metadata.get("provider_request_id")),
+                "provider_request_ids": _string_list(provider_metadata.get("provider_request_ids")),
+                "model_stages": _dict_list(provider_metadata.get("model_stages")),
                 "failure_type": "registry_write",
                 "error_code": error_code,
                 "sources": sources,
             },
             completed_at=completed_at,
-        )
-        _insert_usage_record(
-            connection,
-            model_execution_id=model_execution_id,
-            operation_id=operation_id,
-            country_code=normalized_country_code,
-            request_id=_string_or_none(request_context.get("request_id")),
-            provider_metadata=provider_metadata,
-            model_id=model_id,
-            recorded_at=completed_at,
-        )
-        _record_ai_onboarding_audit(
-            connection,
-            event_type="bank_ai_onboarding_failed",
             actor=actor,
             country_code=normalized_country_code,
             operation_id=operation_id,
-            model_execution_id=model_execution_id,
             request_context=request_context,
             reason_code=error_code,
             reason_text=error_message,
-            bank_codes=[],
             sources=sources,
+            provider_metadata=provider_metadata,
+            model_id=model_id,
         )
         return _error_result(
             status_code=status_code,
@@ -408,6 +500,8 @@ def run_bank_ai_onboarding(
         **execution_metadata,
         "provider": str(provider_metadata.get("provider") or "openai"),
         "provider_request_id": _string_or_none(provider_metadata.get("provider_request_id")),
+        "provider_request_ids": _string_list(provider_metadata.get("provider_request_ids")),
+        "model_stages": _dict_list(provider_metadata.get("model_stages")),
         "ranking_basis": sanitized["ranking_basis"],
         "created_bank_codes": bank_codes,
         "bank_name_evidence": bank_evidence,
@@ -472,7 +566,7 @@ def build_bank_ai_onboarding_payload(
     return {
         "country": country,
         "requested_count": requested_count,
-        "candidate_limit": min(20, requested_count + 8),
+        "candidate_limit": _bank_ai_candidate_limit(requested_count),
         "existing_banks_to_exclude": [
             {
                 "bank_name": str(item.get("bank_name") or ""),
@@ -577,7 +671,11 @@ def sanitize_bank_ai_onboarding_result(
         if _identities_overlap(identity_keys, existing_identity_keys | candidate_identity_keys):
             continue
 
-        homepage_source_url = _string_or_none(raw_candidate.get("homepage_source_url"))
+        homepage_source_url = _consulted_same_host_source_url(
+            reference_url=homepage_url,
+            preferred_url=_string_or_none(raw_candidate.get("homepage_source_url")),
+            sources=sources,
+        )
         legal_name_source_url = _string_or_none(raw_candidate.get("legal_name_source_url"))
         ranking_source_url = _string_or_none(raw_candidate.get("ranking_source_url"))
         if (
@@ -725,7 +823,13 @@ def sanitize_bank_ai_onboarding_result(
             break
 
     if len(candidates) < requested_count:
-        raise _insufficient_result_error()
+        raise _insufficient_result_error(
+            diagnostics={
+                **_bank_ai_source_diagnostics(raw_result=raw_result, sources=sources),
+                "accepted_candidate_count": len(candidates),
+                "requested_count": requested_count,
+            }
+        )
     return {
         "ranking_basis": ranking_basis,
         "candidates": candidates,
@@ -734,15 +838,19 @@ def sanitize_bank_ai_onboarding_result(
 
 def _bank_ai_onboarding_instructions() -> str:
     return (
-        "You are the FPDS bank-registry onboarding agent. You must use live web search before answering. "
-        "Research the exact supplied country and return the largest missing retail or commercial deposit-taking "
-        "banks, ordered by the latest comparable authoritative domestic size measure, preferably consolidated "
-        "total assets. Do not mix incomparable measures. Use a regulator, central bank, audited annual report, "
-        "or similarly authoritative current ranking source and preserve its as-of date. Exclude every supplied "
-        "existing bank, including aliases, parent/brand duplicates, and matching official domains. Exclude central "
-        "banks, regulators, closed institutions, investment-only firms, insurers, and institutions that do not "
-        "offer any supplied Product Type to customers in the country. Return extra ranked candidates up to "
-        "candidate_limit so server validation can remove duplicates. For each bank, verify the official bank-controlled "
+        "You are the FPDS official-bank-evidence agent. You must use live web search before answering. "
+        "Exactly one server-selected ranked candidate is supplied as ranking_research_result. Do not search for "
+        "another ranking, bank-size "
+        "list, statistical table, aggregator, Wikipedia page, or news summary. Preserve the supplied ranking basis, "
+        "rank, ranking_name, size fields, and ranking_source_url exactly. Use every web search only to consult official "
+        "bank-controlled homepages, official legal-identity pages, and current official product pages for that one "
+        "candidate. Do not introduce a different bank. Return an empty candidates array when the supplied candidate "
+        "cannot be fully sourced; never return a placeholder candidate. Do not return a candidate unless every URL "
+        "used for its homepage, legal "
+        "identity, and Product Type coverage was actually consulted. Exclude every supplied existing bank, including "
+        "aliases, parent/brand duplicates, and matching official domains. Exclude closed institutions, investment-only "
+        "firms, insurers, and institutions that do not offer any supplied Product Type to customers in the country. "
+        "For each bank, verify the official bank-controlled "
         "homepage. `bank_name` is the customer-facing official display name used by the bank on that homepage. "
         "It must be readable title/brand casing and must not reuse fixed-width regulatory abbreviations such as "
         "`JPMORGAN CHASE BK NA`, legal charter suffixes such as `N.A.` or `National Association`, or an all-caps "
@@ -759,8 +867,24 @@ def _bank_ai_onboarding_instructions() -> str:
         "current coverage. "
         "Provide an official same-domain logo asset only when directly verified; otherwise return null so FPDS can "
         "use its controlled favicon fallback. Every ranking, homepage, logo, and coverage source URL must be a URL "
-        "actually consulted during web search. Never invent a bank, URL, rank, asset value, date, coverage type, "
+        "consulted in either the supplied ranking research or this official-evidence research. Never invent a bank, "
+        "URL, rank, asset value, date, coverage type, "
         "or source. Keep display and legal names in their official source language and return the page language code."
+    )
+
+
+def _bank_ai_ranking_instructions() -> str:
+    return (
+        "You are the FPDS bank-ranking discovery agent. Use live web search only to find one current, authoritative, "
+        "comparable domestic ranking for the exact supplied country, preferably consolidated total assets from a "
+        "regulator, central bank, or audited filing. Do not mix measures. Return the largest missing retail or "
+        "commercial deposit-taking banks in exact ranking order. Return exactly candidate_limit bank entries while "
+        "excluding supplied "
+        "existing banks and their aliases. Exclude central banks, regulators, closed institutions, investment-only "
+        "firms, and insurers. Each ranking_name must be the exact institution row label, never the title of a report, "
+        "table, chart, or bank list. Preserve the source's exact ranking label, value, unit or metric label, as-of date, and "
+        "consulted ranking URL. This stage must not investigate bank homepages, legal pages, logos, or products; a "
+        "separate official-evidence stage handles those. Never invent a bank, rank, value, date, or URL."
     )
 
 
@@ -776,6 +900,20 @@ def _looks_like_regulatory_report_name(value: str, *, country_code: str) -> bool
     if compact == upper and re.search(r"(?:^|\s)(?:BK|AMER)(?:\s|$)", upper):
         return True
     return False
+
+
+def _looks_like_ranking_report_title(value: str) -> bool:
+    normalized = " ".join(str(value or "").casefold().split())
+    return any(
+        marker in normalized
+        for marker in (
+            "ranked by",
+            "domestically chartered commercial banks",
+            "banking industry profile",
+            "list of largest banks",
+            "commercial banks by consolidated assets",
+        )
+    )
 
 
 def _load_active_country(connection: Connection, *, country_code: str) -> dict[str, str]:
@@ -978,6 +1116,10 @@ def _insert_usage_record(
                     "operation_id": operation_id,
                     "country_code": country_code,
                     "request_id": request_id,
+                    "provider_request_ids": _string_list(
+                        provider_metadata.get("provider_request_ids")
+                    ),
+                    "model_stages": _dict_list(provider_metadata.get("model_stages")),
                 },
                 ensure_ascii=True,
             ),
@@ -1073,6 +1215,435 @@ def _record_ai_onboarding_audit(
     )
 
 
+def _invoke_bank_ai_onboarding_model(
+    *,
+    invoke_model: Any,
+    request_payload: dict[str, Any],
+    model_id: str,
+    country_code: str,
+    requested_count: int,
+    active_product_types: set[str],
+    existing_banks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    candidate_limit = _positive_integer(request_payload.get("candidate_limit")) or requested_count
+    ranking_result, ranking_metadata = _invoke_bank_ai_model_stage(
+        invoke_model=invoke_model,
+        instructions=_bank_ai_ranking_instructions(),
+        payload=request_payload,
+        schema_name=AI_BANK_ONBOARDING_RANKING_SCHEMA_NAME,
+        schema=_bank_ai_ranking_schema(candidate_limit),
+        model_id=model_id,
+        max_web_search_tool_calls=AI_BANK_ONBOARDING_RANKING_SEARCH_TOOL_CALL_LIMIT,
+    )
+    ranking_metadata = _retain_bank_ai_relevant_sources(
+        result=ranking_result,
+        provider_metadata=ranking_metadata,
+    )
+    ranking_basis = _mapping(ranking_result.get("ranking_basis"))
+    aggregate_result: dict[str, Any] = {
+        "country_code": str(ranking_result.get("country_code") or country_code),
+        "ranking_basis": ranking_basis,
+        "candidates": [],
+    }
+    stages: list[tuple[str, dict[str, Any]]] = [
+        ("ranking_discovery", ranking_metadata)
+    ]
+    ranked_candidates = _ranked_candidates_for_evidence(
+        ranking_result=ranking_result,
+        existing_banks=existing_banks,
+        candidate_limit=candidate_limit,
+    )
+    for ranked_candidate in ranked_candidates:
+        rank = int(ranked_candidate["rank"])
+        stage_name = f"official_evidence_rank_{rank}"
+        try:
+            evidence_result, evidence_metadata = _invoke_bank_ai_model_stage(
+                invoke_model=invoke_model,
+                instructions=_bank_ai_onboarding_instructions(),
+                payload={
+                    **request_payload,
+                    "requested_count": 1,
+                    "candidate_limit": 1,
+                    "ranking_research_result": {
+                        "country_code": aggregate_result["country_code"],
+                        "ranking_basis": ranking_basis,
+                        "candidates": [ranked_candidate],
+                    },
+                },
+                schema_name=AI_BANK_ONBOARDING_SCHEMA_NAME,
+                schema=AI_BANK_ONBOARDING_SCHEMA,
+                model_id=model_id,
+                max_web_search_tool_calls=(
+                    AI_BANK_ONBOARDING_OFFICIAL_EVIDENCE_SEARCH_TOOL_CALL_LIMIT
+                ),
+            )
+            evidence_metadata = _retain_bank_ai_relevant_sources(
+                result=evidence_result,
+                provider_metadata=evidence_metadata,
+            )
+        except Exception as exc:
+            raise _BankAiProviderStageError(
+                stage=stage_name,
+                cause=exc,
+                provider_metadata=_merge_bank_ai_provider_metadata(*stages),
+            ) from exc
+        stages.append((stage_name, evidence_metadata))
+        merged_candidate = _merge_ranked_candidate_evidence(
+            ranked_candidate=ranked_candidate,
+            evidence_result=evidence_result,
+        )
+        if merged_candidate is None:
+            continue
+        aggregate_result["candidates"].append(merged_candidate)
+        combined_metadata = _merge_bank_ai_provider_metadata(*stages)
+        try:
+            sanitize_bank_ai_onboarding_result(
+                raw_result=aggregate_result,
+                country_code=country_code,
+                requested_count=requested_count,
+                active_product_types=active_product_types,
+                existing_banks=existing_banks,
+                sources=_source_list(combined_metadata.get("web_search_sources")),
+            )
+        except SourceRegistryError:
+            continue
+        break
+    return aggregate_result, _merge_bank_ai_provider_metadata(*stages)
+
+
+def _ranked_candidates_for_evidence(
+    *,
+    ranking_result: dict[str, Any],
+    existing_banks: list[dict[str, Any]],
+    candidate_limit: int,
+) -> list[dict[str, Any]]:
+    existing_identity_keys = {
+        key
+        for item in existing_banks
+        for key in [_identity_key(item.get("bank_name"))]
+        if key
+    }
+    selected: list[dict[str, Any]] = []
+    selected_identity_keys: set[str] = set()
+    used_ranks: set[int] = set()
+    for candidate in sorted(
+        _dict_list(ranking_result.get("candidates")),
+        key=lambda item: (_positive_integer(item.get("rank")) or 10_000),
+    ):
+        rank = _positive_integer(candidate.get("rank"))
+        ranking_name = _compact_text(candidate.get("ranking_name"), limit=300)
+        known_names = _string_list(candidate.get("known_names"))[:10]
+        identity_keys = {
+            key
+            for value in [ranking_name, *known_names]
+            for key in [_identity_key(value)]
+            if key
+        }
+        size_metric_label = _compact_text(candidate.get("size_metric_label"), limit=160)
+        size_metric_value = _compact_text(candidate.get("size_metric_value"), limit=160)
+        size_metric_as_of = _compact_text(candidate.get("size_metric_as_of"), limit=80)
+        ranking_source_url = _string_or_none(candidate.get("ranking_source_url"))
+        if (
+            rank is None
+            or rank in used_ranks
+            or not ranking_name
+            or _looks_like_ranking_report_title(ranking_name)
+            or not identity_keys
+            or _identities_overlap(
+                identity_keys,
+                existing_identity_keys | selected_identity_keys,
+            )
+            or not size_metric_label
+            or not size_metric_value
+            or not size_metric_as_of
+            or not ranking_source_url
+            or not _citation_key(ranking_source_url)
+        ):
+            continue
+        used_ranks.add(rank)
+        selected_identity_keys.update(identity_keys)
+        selected.append(
+            {
+                "rank": rank,
+                "ranking_name": ranking_name,
+                "known_names": known_names,
+                "size_metric_label": size_metric_label,
+                "size_metric_value": size_metric_value,
+                "size_metric_as_of": size_metric_as_of,
+                "ranking_source_url": ranking_source_url,
+            }
+        )
+        if len(selected) == candidate_limit:
+            break
+    return selected
+
+
+def _bank_ai_ranking_schema(candidate_limit: int) -> dict[str, Any]:
+    schema = deepcopy(AI_BANK_ONBOARDING_RANKING_SCHEMA)
+    candidates_schema = schema["properties"]["candidates"]
+    candidates_schema["minItems"] = candidate_limit
+    candidates_schema["maxItems"] = candidate_limit
+    return schema
+
+
+def _merge_ranked_candidate_evidence(
+    *,
+    ranked_candidate: dict[str, Any],
+    evidence_result: dict[str, Any],
+) -> dict[str, Any] | None:
+    ranking_identity_keys = {
+        key
+        for value in [
+            ranked_candidate.get("ranking_name"),
+            *_string_list(ranked_candidate.get("known_names")),
+        ]
+        for key in [_identity_key(value)]
+        if key
+    }
+    for candidate in _dict_list(evidence_result.get("candidates")):
+        evidence_identity_keys = {
+            key
+            for value in [
+                candidate.get("bank_name"),
+                candidate.get("legal_name"),
+                candidate.get("ranking_name"),
+                *_string_list(candidate.get("known_names")),
+            ]
+            for key in [_identity_key(value)]
+            if key
+        }
+        if not _identities_overlap(ranking_identity_keys, evidence_identity_keys):
+            continue
+        return {
+            **candidate,
+            **ranked_candidate,
+        }
+    return None
+
+
+def _invoke_bank_ai_model_stage(
+    *,
+    invoke_model: Any,
+    instructions: str,
+    payload: dict[str, Any],
+    schema_name: str,
+    schema: dict[str, Any],
+    model_id: str,
+    max_web_search_tool_calls: int,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    for attempt in range(2):
+        try:
+            return invoke_model(
+                instructions=instructions,
+                payload=payload,
+                schema_name=schema_name,
+                schema=schema,
+                model_id=model_id,
+                require_web_search=True,
+                max_web_search_tool_calls=max_web_search_tool_calls,
+            )
+        except Exception as exc:
+            if attempt == 0 and _is_transient_provider_transport_error(exc):
+                continue
+            raise
+    raise AssertionError("Bank onboarding provider retry loop exited unexpectedly.")
+
+
+def _retain_bank_ai_relevant_sources(
+    *,
+    result: dict[str, Any],
+    provider_metadata: dict[str, Any],
+) -> dict[str, Any]:
+    consulted_sources = _source_list(
+        provider_metadata.get("web_search_sources"),
+        limit=500,
+    )
+    referenced_keys: set[str] = set()
+    homepage_hosts: set[str] = set()
+    for candidate in _dict_list(result.get("candidates")):
+        for field_name in (
+            "homepage_source_url",
+            "legal_name_source_url",
+            "ranking_source_url",
+            "logo_source_url",
+        ):
+            key = _citation_key(candidate.get(field_name))
+            if key:
+                referenced_keys.add(key)
+        homepage_host = _hostname(str(candidate.get("homepage_url") or ""))
+        if homepage_host:
+            homepage_hosts.add(homepage_host)
+        for coverage in _dict_list(candidate.get("coverage")):
+            for field_name in ("source_url", "relationship_source_url"):
+                key = _citation_key(coverage.get(field_name))
+                if key:
+                    referenced_keys.add(key)
+
+    retained: list[dict[str, str]] = []
+    retained_keys: set[str] = set()
+    retained_hosts: set[str] = set()
+    for source in consulted_sources:
+        key = _citation_key(source.get("url"))
+        if not key or key not in referenced_keys or key in retained_keys:
+            continue
+        retained.append(source)
+        retained_keys.add(key)
+        retained_hosts.add(_hostname(source["url"]))
+    for homepage_host in sorted(homepage_hosts - retained_hosts):
+        source = next(
+            (
+                item
+                for item in consulted_sources
+                if _hostname(item.get("url", "")) == homepage_host
+            ),
+            None,
+        )
+        if source is None:
+            continue
+        key = _citation_key(source.get("url"))
+        if not key or key in retained_keys:
+            continue
+        retained.append(source)
+        retained_keys.add(key)
+
+    return {
+        **provider_metadata,
+        "web_search_sources": retained,
+        "web_search_source_total_count": len(consulted_sources),
+    }
+
+
+def _merge_bank_ai_provider_metadata(
+    *stages: tuple[str, dict[str, Any]],
+) -> dict[str, Any]:
+    provider_request_ids = [
+        request_id
+        for _stage_name, metadata in stages
+        for request_id in [_string_or_none(metadata.get("provider_request_id"))]
+        if request_id
+    ]
+    stage_metadata = [
+        {
+            "stage": stage_name,
+            "provider_request_id": _string_or_none(metadata.get("provider_request_id")),
+            "prompt_tokens": int(metadata.get("prompt_tokens") or 0),
+            "completion_tokens": int(metadata.get("completion_tokens") or 0),
+            "web_search_source_count": len(_dict_list(metadata.get("web_search_sources"))),
+            "web_search_total_source_count": int(
+                metadata.get("web_search_source_total_count")
+                or len(_dict_list(metadata.get("web_search_sources")))
+            ),
+        }
+        for stage_name, metadata in stages
+    ]
+    final_metadata = stages[-1][1]
+    return {
+        "provider": str(final_metadata.get("provider") or "openai"),
+        "model_id": str(final_metadata.get("model_id") or ""),
+        "provider_request_id": provider_request_ids[-1] if provider_request_ids else None,
+        "provider_request_ids": provider_request_ids,
+        "prompt_tokens": sum(int(metadata.get("prompt_tokens") or 0) for _name, metadata in stages),
+        "completion_tokens": sum(
+            int(metadata.get("completion_tokens") or 0)
+            for _name, metadata in stages
+        ),
+        "web_search_sources": _source_list(
+            [
+                source
+                for _stage_name, metadata in stages
+                for source in _dict_list(metadata.get("web_search_sources"))
+            ]
+        ),
+        "model_stages": stage_metadata,
+    }
+
+
+def _bank_ai_candidate_limit(requested_count: int) -> int:
+    return min(20, requested_count + min(5, requested_count))
+
+
+def _bank_ai_web_search_tool_call_limit(requested_count: int) -> int:
+    return min(20, max(8, (requested_count * 2) + 2))
+
+
+def _is_transient_provider_transport_error(exc: Exception) -> bool:
+    current: BaseException | None = exc
+    seen: set[int] = set()
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        if isinstance(current, urllib.error.HTTPError):
+            return current.code in {502, 503, 504}
+        if isinstance(current, (ConnectionResetError, TimeoutError)):
+            return True
+        if isinstance(current, urllib.error.URLError):
+            reason = current.reason
+            if isinstance(reason, BaseException) and reason is not current:
+                current = reason
+                continue
+            return True
+        if getattr(current, "winerror", None) in {10053, 10054, 10060}:
+            return True
+        current = current.__cause__ or current.__context__
+    return False
+
+
+def _persist_ai_onboarding_failure_best_effort(
+    connection: Connection,
+    *,
+    model_execution_id: str,
+    execution_metadata: dict[str, Any],
+    completed_at: datetime,
+    actor: dict[str, Any],
+    country_code: str,
+    operation_id: str,
+    request_context: dict[str, Any],
+    reason_code: str,
+    reason_text: str,
+    sources: list[dict[str, str]],
+    provider_metadata: dict[str, Any] | None = None,
+    model_id: str | None = None,
+) -> None:
+    try:
+        _complete_model_execution(
+            connection,
+            model_execution_id=model_execution_id,
+            execution_status="failed",
+            execution_metadata=execution_metadata,
+            completed_at=completed_at,
+        )
+        if provider_metadata is not None and model_id is not None:
+            _insert_usage_record(
+                connection,
+                model_execution_id=model_execution_id,
+                operation_id=operation_id,
+                country_code=country_code,
+                request_id=_string_or_none(request_context.get("request_id")),
+                provider_metadata=provider_metadata,
+                model_id=model_id,
+                recorded_at=completed_at,
+            )
+        _record_ai_onboarding_audit(
+            connection,
+            event_type="bank_ai_onboarding_failed",
+            actor=actor,
+            country_code=country_code,
+            operation_id=operation_id,
+            model_execution_id=model_execution_id,
+            request_context=request_context,
+            reason_code=reason_code,
+            reason_text=reason_text,
+            bank_codes=[],
+            sources=sources,
+        )
+    except Exception:
+        rollback = getattr(connection, "rollback", None)
+        if callable(rollback):
+            try:
+                rollback()
+            except Exception:
+                pass
+
+
 def _error_result(*, status_code: int, code: str, message: str, operation_id: str) -> dict[str, Any]:
     return {
         "ok": False,
@@ -1085,15 +1656,67 @@ def _error_result(*, status_code: int, code: str, message: str, operation_id: st
     }
 
 
-def _insufficient_result_error() -> SourceRegistryError:
-    return SourceRegistryError(
-        status_code=422,
-        code="bank_ai_results_insufficient",
-        message=(
-            "AI research did not return enough fully sourced, non-duplicate banks "
-            "with official homepage and Product Type coverage evidence. No banks were added."
+def _insufficient_result_error(
+    *,
+    diagnostics: dict[str, Any] | None = None,
+) -> SourceRegistryError:
+    return _BankAiResultsInsufficientError(diagnostics=diagnostics)
+
+
+def _bank_ai_source_diagnostics(
+    *,
+    raw_result: dict[str, Any],
+    sources: list[dict[str, str]],
+) -> dict[str, int]:
+    consulted_keys = {
+        key
+        for item in sources
+        for key in [_citation_key(item.get("url"))]
+        if key
+    }
+    raw_candidates = _dict_list(raw_result.get("candidates"))
+
+    def candidate_has_consulted(field_name: str, candidate: dict[str, Any]) -> bool:
+        return _citation_key(candidate.get(field_name)) in consulted_keys
+
+    def candidate_has_consulted_coverage(field_name: str, candidate: dict[str, Any]) -> bool:
+        return any(
+            _citation_key(item.get(field_name)) in consulted_keys
+            for item in _dict_list(candidate.get("coverage"))
+        )
+
+    return {
+        "raw_candidate_count": len(raw_candidates),
+        "consulted_source_count": len(sources),
+        "candidates_with_consulted_homepage_source": sum(
+            candidate_has_consulted("homepage_source_url", candidate)
+            for candidate in raw_candidates
         ),
-    )
+        "candidates_with_consulted_homepage_domain": sum(
+            any(
+                _hostname(source.get("url", ""))
+                == _hostname(str(candidate.get("homepage_url") or ""))
+                for source in sources
+            )
+            for candidate in raw_candidates
+        ),
+        "candidates_with_consulted_legal_name_source": sum(
+            candidate_has_consulted("legal_name_source_url", candidate)
+            for candidate in raw_candidates
+        ),
+        "candidates_with_consulted_ranking_source": sum(
+            candidate_has_consulted("ranking_source_url", candidate)
+            for candidate in raw_candidates
+        ),
+        "candidates_with_consulted_coverage_source": sum(
+            candidate_has_consulted_coverage("source_url", candidate)
+            for candidate in raw_candidates
+        ),
+        "candidates_with_consulted_relationship_source": sum(
+            candidate_has_consulted_coverage("relationship_source_url", candidate)
+            for candidate in raw_candidates
+        ),
+    }
 
 
 def _safe_provider_error(exc: Exception) -> str:
@@ -1107,7 +1730,7 @@ def _safe_provider_error(exc: Exception) -> str:
     return "AI bank onboarding failed before a verified result was returned."
 
 
-def _source_list(value: Any) -> list[dict[str, str]]:
+def _source_list(value: Any, *, limit: int = 250) -> list[dict[str, str]]:
     output: list[dict[str, str]] = []
     seen: set[str] = set()
     if not isinstance(value, list):
@@ -1127,9 +1750,37 @@ def _source_list(value: Any) -> list[dict[str, str]]:
                 "title": _compact_text(item.get("title") or url, limit=300),
             }
         )
-        if len(output) == 100:
+        if len(output) == limit:
             break
     return output
+
+
+def _consulted_same_host_source_url(
+    *,
+    reference_url: str,
+    preferred_url: str | None,
+    sources: list[dict[str, str]],
+) -> str | None:
+    consulted_by_key = {
+        key: item["url"]
+        for item in sources
+        for key in [_citation_key(item.get("url"))]
+        if key
+    }
+    preferred_key = _citation_key(preferred_url)
+    if preferred_key and preferred_key in consulted_by_key:
+        return preferred_url
+    reference_host = _hostname(reference_url)
+    if not reference_host:
+        return None
+    return next(
+        (
+            item["url"]
+            for item in sources
+            if _hostname(item.get("url", "")) == reference_host
+        ),
+        None,
+    )
 
 
 def _citation_key(value: Any) -> str:

@@ -176,6 +176,7 @@ class AiRuntimeTests(unittest.TestCase):
                     "required": ["result"],
                 },
                 require_web_search=True,
+                max_web_search_tool_calls=12,
             )
 
         request_body = json.loads(urlopen.call_args.args[0].data.decode("utf-8"))
@@ -190,7 +191,29 @@ class AiRuntimeTests(unittest.TestCase):
             ],
         )
         self.assertEqual(request_body["tool_choice"], "required")
+        self.assertEqual(request_body["max_tool_calls"], 12)
         self.assertEqual(result, {"result": "researched"})
+
+    def test_responses_request_rejects_out_of_policy_web_search_budget(self) -> None:
+        with patch.dict(
+            os.environ,
+            {"FPDS_LLM_PROVIDER": "openai", "FPDS_LLM_API_KEY": "test-key"},
+            clear=True,
+        ):
+            with self.assertRaisesRegex(ValueError, "between 1 and 20"):
+                invoke_openai_json_schema(
+                    instructions="Research the market.",
+                    payload={"input": "test"},
+                    schema_name="test_result",
+                    schema={
+                        "type": "object",
+                        "additionalProperties": False,
+                        "properties": {"result": {"type": "string"}},
+                        "required": ["result"],
+                    },
+                    require_web_search=True,
+                    max_web_search_tool_calls=21,
+                )
 
 
 if __name__ == "__main__":
