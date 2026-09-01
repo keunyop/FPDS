@@ -150,7 +150,7 @@ class PublicFeedbackServiceTests(unittest.TestCase):
         self.assertIsNone(submission)
         self.assertEqual(connection.calls, [])
 
-    def test_admin_list_is_country_scoped_and_paginated(self) -> None:
+    def test_public_admin_list_is_country_scoped_and_paginated(self) -> None:
         connection = _Connection(
             [
                 _Result(one={"total_items": 51, "product_error_items": 40, "site_feedback_items": 11}),
@@ -183,10 +183,35 @@ class PublicFeedbackServiceTests(unittest.TestCase):
         self.assertEqual(payload["page"], 2)
         self.assertEqual(payload["total_pages"], 2)
         self.assertFalse(payload["has_next_page"])
+        self.assertEqual(payload["applied_filters"]["country_code"], "CA")
         for sql, params in connection.calls:
-            self.assertIn("country_code = %(country_code)s", sql)
+            self.assertIn("%(country_code)s::text IS NULL OR country_code = %(country_code)s", sql)
             self.assertEqual(params["country_code"], "CA")
             self.assertEqual(params["search_pattern"], "%mobile%")
+
+    def test_public_admin_list_can_span_all_countries(self) -> None:
+        connection = _Connection(
+            [
+                _Result(one={"total_items": 2, "product_error_items": 1, "site_feedback_items": 1}),
+                _Result(many=[]),
+            ]
+        )
+        filters = normalize_public_feedback_filters(
+            country_code=None,
+            submission_type=None,
+            category=None,
+            search=None,
+            page=1,
+            page_size=50,
+        )
+
+        payload = load_public_feedback_submissions(connection, filters=filters)
+
+        self.assertEqual(payload["total_items"], 2)
+        self.assertIsNone(payload["applied_filters"]["country_code"])
+        for sql, params in connection.calls:
+            self.assertIn("%(country_code)s::text IS NULL OR country_code = %(country_code)s", sql)
+            self.assertIsNone(params["country_code"])
 
     def test_rate_limiter_and_migration_are_bounded_without_identity(self) -> None:
         limiter = PublicFeedbackRateLimiter(limit=1, window_seconds=60)
@@ -287,7 +312,28 @@ class PublicFeedbackRouteTests(unittest.TestCase):
         self.assertEqual(json.loads(response.body)["data"]["submission"]["submission_id"], "feedback-4")
         mocked_create.assert_called_once()
 
-    def test_admin_list_uses_session_country(self) -> None:
+    def test_public_admin_list_requires_public_app_credential(self) -> None:
+        main.app.state.settings = replace(
+            self.original_settings,
+            public_app_api_secret="public-app-secret",
+        )
+        with patch.object(main, "open_connection") as mocked_open:
+            response = asyncio.run(
+                main.public_admin_feedback(
+                    _request(method="GET"),
+                    country_code=None,
+                    submission_type=None,
+                    category=None,
+                    q=None,
+                    page=1,
+                    page_size=50,
+                )
+            )
+
+        self.assertEqual(response.status_code, 401)
+        mocked_open.assert_not_called()
+
+    def test_public_admin_list_uses_optional_country_scope(self) -> None:
         payload = {
             "items": [],
             "summary": {"total_items": 0, "product_error_items": 0, "site_feedback_items": 0},
@@ -303,12 +349,11 @@ class PublicFeedbackRouteTests(unittest.TestCase):
         def fake_open_connection(_settings):
             yield object()
 
+        main.app.state.settings = replace(
+            self.original_settings,
+            public_app_api_secret="public-app-secret",
+        )
         with (
-            patch.object(
-                main,
-                "_resolve_session",
-                return_value=({"role": "read_only"}, {"country_code": "US"}),
-            ),
             patch.object(main, "open_connection", fake_open_connection),
             patch.object(
                 main,
@@ -317,8 +362,9 @@ class PublicFeedbackRouteTests(unittest.TestCase):
             ) as mocked_load,
         ):
             response = asyncio.run(
-                main.admin_public_feedback(
-                    _request(method="GET"),
+                main.public_admin_feedback(
+                    _request(method="GET", secret="public-app-secret"),
+                    country_code="US",
                     submission_type=None,
                     category=None,
                     q=None,

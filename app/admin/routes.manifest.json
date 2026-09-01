@@ -110,12 +110,6 @@
       "access": "authenticated"
     },
     {
-      "route": "/admin/feedback",
-      "route_id": "admin.feedback",
-      "implementation_path": "src/app/admin/feedback/page.tsx",
-      "access": "authenticated"
-    },
-    {
       "route": "/admin/health/dashboard",
       "route_id": "admin.health_dashboard",
       "implementation_path": "src/app/admin/health/dashboard/page.tsx",

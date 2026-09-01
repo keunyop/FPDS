@@ -480,17 +480,19 @@ that projection. Site feedback requires an active country and no product ID.
 The body does not accept contact information, visitor/session identifiers,
 browser display text, IP, cookie, query, profile, account, or financial values.
 
-### 4.13 `GET /api/admin/public-feedback`
+### 4.13 `GET /api/public/admin/feedback`
 
 Purpose:
-- provide authenticated FPDS Admin with its server-session country's product
+- provide the password-gated FPDS Public `/admin` server component with product
   reports and site feedback
-- support optional submission_type, category, free-text search, and bounded
-  pagination without allowing query-based country override
+- support an optional two-letter `country_code`, submission type, category,
+  free-text search, and bounded pagination
 
-The response includes totals, stable submission IDs, submission time, locale,
-category/detail, snapshot ID, and authoritative product context when present.
-It is read-only and does not create a review or canonical mutation.
+The route requires the same server-only Public-app credential and is not an
+anonymous browser endpoint. The response includes totals, stable submission
+IDs, submission time, locale, category/detail, snapshot ID, and authoritative
+product context when present. It is read-only and does not create a Review task
+or canonical mutation. FPDS Admin has no equivalent feedback-list API.
 
 ---
 

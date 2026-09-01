@@ -5,7 +5,8 @@ This package is the live FastAPI runtime package for the completed admin slices 
 Current scope:
 - anonymous public aggregate-backed product, product-detail, and dashboard read
   APIs plus credential-bound bounded product-engagement and anonymous-feedback
-  writers, a private engagement summary, and a country-scoped Admin feedback inbox
+  writers, a private engagement summary, and a private Public operations
+  feedback inbox
 - DB-backed admin user accounts
 - DB-backed admin sessions
 - enabled-country discovery plus country-required login, logout, session
@@ -51,6 +52,7 @@ Current routes:
 - `POST /api/public/engagement`
 - `POST /api/public/feedback`
 - `GET /api/public/admin/engagement-summary`
+- `GET /api/public/admin/feedback`
 - `GET /api/admin/auth/countries`
 - `POST /api/admin/auth/login`
 - `POST /api/admin/auth/signup-requests`
@@ -72,7 +74,6 @@ Current routes:
 - `GET /api/admin/dashboard-health`
 - `POST /api/admin/dashboard-health/retry`
 - `GET /api/admin/change-history`
-- `GET /api/admin/public-feedback`
 - `GET /api/admin/sources`
 - `GET /api/admin/banks`
 - `POST /api/admin/banks`
@@ -238,8 +239,10 @@ cd api/service
   product/site category pairs, ISO country, EN/KO/JA locale, and at most 2,000
   optional detail characters. Product reports are inserted only from an active
   product in the latest completed Public snapshot. GET
-  /api/admin/public-feedback requires an Admin session and always derives its
-  country from that session; no visitor or contact identity is stored.
+  /api/public/admin/feedback requires the server-only Public-app credential and
+  supports an optional exact country plus type/category/search/pagination
+  filters for the password-gated Public `/admin`; no visitor or contact
+  identity is stored.
 
 - Source-catalog collection starts only from authenticated Admin collection or
   retry actions. The collection runner still performs its bounded in-run

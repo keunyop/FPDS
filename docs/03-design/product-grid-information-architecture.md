@@ -494,7 +494,8 @@ pagination behavior in Section 10.19:
 - The global footer exposes the corresponding site-feedback action with
   content, usability, feature, accessibility, and Other reasons. Neither
   dialog exposes an inbox, promises an individual reply, or changes canonical
-  product data; investigation remains in authenticated Admin.
+  product data; investigation remains in the signed-session, password-gated
+  FPDS Public `/admin`, not the anonymous experience or FPDS Admin.
 
 ### 10.21 Bankompare Identity and Comparison-Lens Mark
 

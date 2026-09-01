@@ -85,9 +85,9 @@
     },
     {
       "route": "/admin",
-      "route_id": "public.analytics_admin",
+      "route_id": "public.operations_admin",
       "implementation_path": "src/app/admin/page.tsx",
-      "resource_key": "public_analytics.summary",
+      "resource_key": "public_operations.analytics_and_feedback",
       "access": "password"
     }
   ]

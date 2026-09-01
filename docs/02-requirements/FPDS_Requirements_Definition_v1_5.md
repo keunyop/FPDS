@@ -712,9 +712,10 @@ creating an account or exposing private FPDS evidence.
 - the Public confirmation must restate the submitted category, optional
   detail, and product context when applicable; Public must not expose other
   visitors' submissions
-- authenticated FPDS Admin users must be able to review their server-session
-  country's submissions with type/category/search filters, product context,
-  detail, locale, stable IDs, and submission time
+- the signed-session, password-gated FPDS Public `/admin` route must allow
+  review across all countries or one exact country with type/category/search
+  filters, product context, detail, locale, stable IDs, submission time, and
+  bounded pagination; FPDS Admin must not expose the inbox
 - the workflow must store no visitor, contact, IP, cookie, query, profile, or
   account value, must warn against personal/account information, and must not
   imply an individual response

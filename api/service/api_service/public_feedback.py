@@ -61,7 +61,7 @@ class PublicFeedbackRateLimiter:
 
 @dataclass(frozen=True)
 class PublicFeedbackFilters:
-    country_code: str
+    country_code: str | None
     submission_type: str | None
     category: str | None
     search: str | None
@@ -213,19 +213,23 @@ def _insert_site_feedback(connection: Any, *, params: dict[str, Any]) -> dict[st
 
 def normalize_public_feedback_filters(
     *,
-    country_code: str,
+    country_code: str | None,
     submission_type: str | None,
     category: str | None,
     search: str | None,
     page: int,
     page_size: int,
 ) -> PublicFeedbackFilters:
-    normalized_country = country_code.strip().upper()
+    normalized_country = country_code.strip().upper() if country_code else None
     normalized_type = submission_type.strip().lower() if submission_type else None
     normalized_category = category.strip().lower() if category else None
     normalized_search = search.strip() if search and search.strip() else None
     return PublicFeedbackFilters(
-        country_code=normalized_country,
+        country_code=(
+            normalized_country
+            if normalized_country and len(normalized_country) == 2 and normalized_country.isalpha()
+            else None
+        ),
         submission_type=normalized_type if normalized_type in PUBLIC_FEEDBACK_TYPES else None,
         category=normalized_category if normalized_category in PUBLIC_FEEDBACK_CATEGORIES else None,
         search=normalized_search,
@@ -248,7 +252,7 @@ def load_public_feedback_submissions(
         "submission_type": filters.submission_type,
     }
     where_sql = """
-        country_code = %(country_code)s
+        (%(country_code)s::text IS NULL OR country_code = %(country_code)s)
         AND (%(submission_type)s::text IS NULL OR submission_type = %(submission_type)s)
         AND (%(category)s::text IS NULL OR category = %(category)s)
         AND (
@@ -291,6 +295,7 @@ def load_public_feedback_submissions(
             "site_feedback_items": int(summary.get("site_feedback_items") or 0),
         },
         "applied_filters": {
+            "country_code": filters.country_code,
             "submission_type": filters.submission_type,
             "category": filters.category,
             "search": filters.search,

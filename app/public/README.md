@@ -35,9 +35,11 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 - `/methodology` explains the source-to-snapshot process, metric meaning,
   comparison boundary, freshness states, and public evidence boundary, and
   owns the Equal Earth country coverage map with product/distinct-bank counts.
-- `/admin` is a separate noindex Public product-analytics route. It requires a
+- `/admin` is a separate noindex Public operations route. It requires a
   server-verified password and signed HttpOnly session, sends no GA page view,
-  and shows only bounded aggregate product/bank interaction counters.
+  and shows bounded aggregate product/bank interaction counters plus anonymous
+  product-error and site-feedback submissions. Country, type, category, search,
+  and pagination filters remain server-rendered behind that session.
 
 ## Experience Baseline
 
@@ -198,8 +200,9 @@ refresh cadence while preserving snapshot freshness metadata in the UI.
 Product interactions use the same-origin `POST /api/public/engagement` BFF,
 which forwards only country, active product ID, and one fixed event type with a
 server-only shared credential. The password-gated `/admin` server component
-loads `GET /api/public/admin/engagement-summary` directly with that credential.
-Neither secret is available in a browser bundle.
+loads `GET /api/public/admin/engagement-summary` and
+`GET /api/public/admin/feedback` directly with that credential. Neither secret
+is available in a browser bundle.
 
 Product error reports and footer site feedback use the same-origin
 `POST /api/public/feedback` BFF. Both dialogs require one localized structured
@@ -208,6 +211,8 @@ against personal/account information, and confirm the current submission.
 Product reports send only the current product ID; the API copies bank, product,
 Product Type, country, and snapshot context from the latest active Public
 projection. Public never exposes other submissions.
+The only submission-list surface is the password-gated Public `/admin`; the
+anonymous Public experience and FPDS Admin application expose no feedback list.
 
 Verified bank logo assets live under `public/bank-logos/` or use approved
 official URLs in the `BankLogo` mapping. A failed image falls back to an

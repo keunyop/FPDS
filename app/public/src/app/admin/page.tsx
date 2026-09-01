@@ -3,6 +3,11 @@ import { cookies } from 'next/headers';
 import type { ReactNode } from 'react';
 
 import {
+  PublicAdminFeedbackInbox,
+  type PublicAdminFeedbackFilters,
+  type PublicAdminFeedbackResponse
+} from '@/components/fpds/public/public-admin-feedback-inbox';
+import {
   PUBLIC_ADMIN_COOKIE_NAME,
   publicAdminIsConfigured,
   verifyPublicAdminSession
@@ -12,7 +17,7 @@ import { getPublicApiOrigin } from '@/lib/public-api';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Public analytics admin',
+  title: 'Public operations admin',
   robots: { follow: false, index: false }
 };
 
@@ -77,17 +82,21 @@ export default async function PublicAdminPage({ searchParams }: AdminPageProps) 
 
   const requestedCountry = singleValue(resolvedSearchParams.country_code).toUpperCase();
   const countryCode = /^[A-Z]{2}$/.test(requestedCountry) ? requestedCountry : '';
-  const summary = await loadEngagementSummary(countryCode);
+  const feedbackFilters = parseFeedbackFilters(resolvedSearchParams, countryCode);
+  const [summary, feedback] = await Promise.all([
+    loadEngagementSummary(countryCode),
+    loadFeedback(feedbackFilters)
+  ]);
 
   return (
     <main className='mx-auto w-full max-w-7xl px-4 py-8 md:px-6 md:py-12'>
       <div className='flex flex-col gap-8'>
         <header className='flex flex-col gap-4 border-b border-foreground/15 pb-6 sm:flex-row sm:items-end sm:justify-between'>
           <div>
-            <p className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification'>Private · aggregate only</p>
-            <h1 className='mt-2 font-display text-4xl font-semibold tracking-[-0.05em] md:text-5xl'>Public product analytics</h1>
+            <p className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification'>Private · Public operations</p>
+            <h1 className='mt-2 font-display text-4xl font-semibold tracking-[-0.05em] md:text-5xl'>Public operations</h1>
             <p className='mt-3 max-w-3xl text-sm leading-6 text-muted-foreground'>
-              Daily product counters only. No visitor identity, IP address, cookie, free-text query, or financial profile is stored.
+              Product engagement aggregates and anonymous feedback. No visitor identity, contact, IP address, cookie, account, or financial profile is stored.
             </p>
           </div>
           <form action='/admin/logout' method='post'>
@@ -113,6 +122,7 @@ export default async function PublicAdminPage({ searchParams }: AdminPageProps) 
             <p className='mt-2 text-sm text-muted-foreground'>Check the Public API credential, API deployment, and database migration.</p>
           </section>
         )}
+        <PublicAdminFeedbackInbox feedback={feedback} filters={feedbackFilters} />
       </div>
     </main>
   );
@@ -130,7 +140,7 @@ function LoginPanel({ configured, error }: { configured: boolean; error: string 
     <main className='mx-auto grid min-h-[70vh] w-full max-w-md place-items-center px-4 py-10'>
       <section className='w-full rounded-xl border border-foreground/15 bg-card/85 p-6 shadow-[0_18px_48px_rgba(28,39,35,0.08)]'>
         <p className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification'>Private access</p>
-        <h1 className='mt-2 text-2xl font-semibold tracking-[-0.03em]'>Public analytics admin</h1>
+        <h1 className='mt-2 text-2xl font-semibold tracking-[-0.03em]'>Public operations admin</h1>
         <p className='mt-2 text-sm leading-6 text-muted-foreground'>Enter the administrator password to continue.</p>
         <form action='/admin/login' className='mt-5 grid gap-4' method='post'>
           <label className='grid gap-1.5 text-sm font-semibold'>
@@ -245,6 +255,59 @@ function Metric({ label, value }: { label: string; value: number }) {
 function Th({ children }: { children: ReactNode }) { return <th className='whitespace-nowrap px-3 py-3 font-semibold'>{children}</th>; }
 function Td({ children }: { children: ReactNode }) { return <td className='px-3 py-3 tabular-nums'>{children}</td>; }
 function singleValue(value: string | string[] | undefined) { return Array.isArray(value) ? value[0] ?? '' : value ?? ''; }
+
+const FEEDBACK_TYPES = new Set(['product_error', 'site_feedback']);
+const FEEDBACK_CATEGORIES = new Set([
+  'accessibility_issue',
+  'broken_link',
+  'content_issue',
+  'feature_suggestion',
+  'incorrect_product_details',
+  'incorrect_rate_or_fee',
+  'missing_information',
+  'other',
+  'outdated_information',
+  'usability_issue'
+]);
+
+function parseFeedbackFilters(
+  searchParams: Record<string, string | string[] | undefined>,
+  countryCode: string
+): PublicAdminFeedbackFilters {
+  const submissionType = singleValue(searchParams.feedback_type).toLowerCase();
+  const category = singleValue(searchParams.feedback_category).toLowerCase();
+  const parsedPage = Number.parseInt(singleValue(searchParams.feedback_page), 10);
+  return {
+    category: FEEDBACK_CATEGORIES.has(category) ? category : '',
+    countryCode,
+    page: Number.isFinite(parsedPage) && parsedPage >= 1 ? parsedPage : 1,
+    query: singleValue(searchParams.feedback_q).trim().slice(0, 200),
+    submissionType: FEEDBACK_TYPES.has(submissionType) ? submissionType : ''
+  };
+}
+
+async function loadFeedback(filters: PublicAdminFeedbackFilters): Promise<PublicAdminFeedbackResponse | null> {
+  const apiSecret = process.env.FPDS_PUBLIC_APP_API_SECRET?.trim();
+  if (!apiSecret) return null;
+  const url = new URL('/api/public/admin/feedback', getPublicApiOrigin());
+  if (filters.countryCode) url.searchParams.set('country_code', filters.countryCode);
+  if (filters.submissionType) url.searchParams.set('submission_type', filters.submissionType);
+  if (filters.category) url.searchParams.set('category', filters.category);
+  if (filters.query) url.searchParams.set('q', filters.query);
+  url.searchParams.set('page', String(filters.page));
+  url.searchParams.set('page_size', '50');
+  try {
+    const response = await fetch(url, {
+      cache: 'no-store',
+      headers: { 'x-fpds-public-app-secret': apiSecret }
+    });
+    if (!response.ok) return null;
+    const payload = await response.json() as { data?: PublicAdminFeedbackResponse };
+    return payload.data ?? null;
+  } catch {
+    return null;
+  }
+}
 
 async function loadEngagementSummary(countryCode: string): Promise<EngagementSummary | null> {
   const apiSecret = process.env.FPDS_PUBLIC_APP_API_SECRET?.trim();

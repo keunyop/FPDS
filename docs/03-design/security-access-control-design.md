@@ -72,11 +72,11 @@ Additional onboarding rules:
 - browser는 access token을 직접 저장하거나 전달하지 않는다.
 - service-to-service 인증은 admin browser login과 분리된 별도 credential을 사용한다.
 
-### 3.3 Public Analytics Admin Exception
+### 3.3 Public Operations Admin Exception
 
 The Product Owner-approved Public `/admin` route is separate from the FPDS
-operator Admin/RBAC surface. It protects only bounded product engagement
-aggregates.
+operator Admin/RBAC surface. It protects bounded product engagement aggregates
+and anonymous feedback review.
 
 - the password is read only from `FPDS_PUBLIC_ADMIN_PASSWORD` on the server;
   the approved deployed value is `1112` and it must not enter client code
@@ -88,8 +88,9 @@ aggregates.
 - the server component reaches the API with
   `FPDS_PUBLIC_APP_API_SECRET`; the browser never receives that credential
 - the credential-protected API validates active product IDs, allows only three
-  fixed events, rate-limits writes, and exposes no private FPDS evidence or
-  visitor-level record
+  fixed engagement events, rate-limits writes, and reads feedback through
+  optional exact-country and bounded list filters; it exposes no private FPDS
+  evidence or visitor-level record
 
 ### 3.4 Anonymous Public Feedback Boundary
 
@@ -100,8 +101,12 @@ aggregates.
   best-effort rate limit
 - product identity and display context are copied from the latest active Public
   projection; browser-supplied bank/product labels are ignored
-- Public confirms only the current request and has no submission-list route;
-  the inbox is authenticated FPDS Admin data scoped by the session country
+- anonymous Public confirms only the current request and has no
+  submission-list route; the signed-session Public `/admin` server component
+  reads the inbox with the server-only Public-app credential
+- FPDS Admin sessions and browser query parameters grant no feedback-list
+  access; Public `/admin` may request all countries or one validated exact
+  country because its separate password session owns this operational view
 - no contact or visitor identity is collected, and free text is explicitly
   warned against personal or account information
 

@@ -1283,9 +1283,13 @@ async def public_feedback(request: Request, payload: PublicFeedbackRequest) -> J
     return _success({"submission": submission}, request, status_code=201)
 
 
-@app.get("/api/admin/public-feedback")
-async def admin_public_feedback(
+@app.get("/api/public/admin/feedback")
+async def public_admin_feedback(
     request: Request,
+    country_code: Annotated[
+        str | None,
+        Query(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$"),
+    ] = None,
     submission_type: Literal["product_error", "site_feedback"] | None = None,
     category: Literal[
         "accessibility_issue",
@@ -1303,9 +1307,11 @@ async def admin_public_feedback(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> JSONResponse:
-    _actor, session_info = _resolve_session(request)
+    auth_error = _public_app_auth_error(request)
+    if auth_error:
+        return auth_error
     filters = normalize_public_feedback_filters(
-        country_code=_session_country(session_info),
+        country_code=country_code,
         submission_type=submission_type,
         category=category,
         search=q,

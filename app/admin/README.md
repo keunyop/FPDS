@@ -27,10 +27,9 @@ session, and returns to Overview in the same language so detail/filter state
 does not cross countries.
 
 The sidebar keeps less frequent tools available: Sources, Product Types,
-Countries, Changes, Feedback, and Public Health. Feedback is a read-only,
-country-scoped inbox for anonymous Public product-error and site-feedback
-submissions, with type/category/search filters and immutable product context.
-Countries is visible
+Countries, Changes, and Public Health. Anonymous Public product-error and
+site-feedback submissions are reviewed only in the password-gated FPDS Public
+`/admin` route, not in this operator application. Countries is visible
 only to administrators and uses a prepared ISO list: activation adds a login
 country, while reversible deactivation preserves history and protects the
 current/last active country. Existing Bank and Source Catalog detail URLs
@@ -97,8 +96,6 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 - Keep Review Queue query fields allowlisted and accept detail return context
   only for the same-origin `/admin/reviews` route.
 - Do not expose evidence, review state, or private source traces to Public.
-- Keep Feedback reads scoped to the authenticated session country. Feedback
-  does not mutate canonical product data or create a Review decision.
 - Keep `/admin/source-catalog/*` proxy handlers: Banks collection uses them even
   though the matching page routes redirect.
 - Treat `has_completed_collection` as server-owned history. The UI may request

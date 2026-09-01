@@ -316,6 +316,7 @@ Typography direction:
 | `/loans` | shared catalog composition | lending scope, lending facts, Loan color cue, review-approved public boundary |
 | `/products/[productId]` | detail/article composition | available facts, conditions, official action, freshness, methodology, family-specific content |
 | `/methodology` | docs/article/content sections | FPDS metric definitions, freshness policy, evidence boundary |
+| `/admin` | private operations summary and responsive inbox | bounded engagement aggregates, anonymous feedback filters, immutable product context, noindex/password boundary |
 
 ## 7.2 Admin Surfaces
 

@@ -78,7 +78,8 @@ Not included:
 - publish tracking lives primarily in Publish Monitor
 - aggregate freshness lives primarily in Public Health; bounded model outcome context stays with the owning review/run
 - source registry ownership lives primarily in Source Registry
-- anonymous Public product reports and site feedback live primarily in Feedback
+- anonymous Public product reports and site feedback live only in the separate
+  password-gated FPDS Public `/admin`, outside this operator IA
 
 ### 4.3 Preserve Context on Drilldown
 
@@ -130,7 +131,6 @@ choose an abstract module before finding a task.
 | More tools | Product Types | `/admin/product-types` | collection taxonomy and fallback metadata |
 | More tools | Countries | `/admin/countries` | admin-only operational country activation |
 | More tools | Change History | `/admin/changes` | canonical change chronology |
-| More tools | Feedback | `/admin/feedback` | country-scoped Public product-error and site-feedback intake |
 | More tools | Public Health | `/admin/health/dashboard` | public aggregate freshness and health |
 
 Publish Monitor remains approved follow-on scope but is not shown as a disabled
