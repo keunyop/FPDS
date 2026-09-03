@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Suspense, type ReactNode } from "react";
 
 import { PublicFooter } from "@/components/fpds/public/public-footer";
@@ -11,6 +12,7 @@ import {
 } from "@/components/fpds/public/public-structured-data";
 import { getGoogleAnalyticsMeasurementId } from "@/lib/google-analytics";
 import { PUBLIC_SITE_ORIGIN } from "@/lib/public-seo";
+import { normalizePublicProductLocale } from "@/lib/public-url-policy";
 
 import "./globals.css";
 
@@ -34,18 +36,15 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const googleAnalyticsMeasurementId = getGoogleAnalyticsMeasurementId();
+  const requestHeaders = await headers();
+  const locale = normalizePublicProductLocale(
+    requestHeaders.get("x-switchabank-public-locale") ?? ""
+  );
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: "(()=>{const l=new URLSearchParams(location.search).get('locale');document.documentElement.lang=l==='ko'||l==='ja'?l:'en'})()"
-          }}
-        />
-      </head>
+    <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground">
         <PublicStructuredData data={PUBLIC_SITE_STRUCTURED_DATA} />
         <Suspense fallback={null}>

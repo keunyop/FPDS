@@ -91,6 +91,14 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
       <div className="flex flex-col gap-5">
+        <nav aria-label={breadcrumbLabel(filters.locale)} className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <Link className="transition-colors hover:text-foreground" href={buildPublicHref("/", filters)}>
+            {copy.nav.dashboard}
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page" className="font-medium text-foreground">{catalogCopy.title}</span>
+        </nav>
+
         <section className="border-y border-foreground/15 py-7 md:py-10">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="max-w-3xl">
@@ -210,12 +218,28 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
         />
 
         {products.items.length ? (
-          <ProductCompareWorkspace
-            filters={filters}
-            initialProducts={products}
-            locale={filters.locale}
-            productsQuery={buildProductsSearchParams(filters).toString()}
-          />
+          <>
+            <ProductCompareWorkspace
+              filters={filters}
+              initialProducts={products}
+              locale={filters.locale}
+              productsQuery={buildProductsSearchParams(filters).toString()}
+            />
+            <noscript>
+              <nav aria-label={paginationLabel(filters.locale)} className="flex items-center justify-between gap-4 border-t border-border pt-4 text-sm">
+                {products.page > 1 ? (
+                  <Link className="font-medium text-primary underline-offset-4 hover:underline" href={buildCatalogHref(catalogPath, { ...filters, page: products.page - 1 })} rel="prev">
+                    {previousPageLabel(filters.locale)}
+                  </Link>
+                ) : <span />}
+                {products.has_next_page ? (
+                  <Link className="font-medium text-primary underline-offset-4 hover:underline" href={buildCatalogHref(catalogPath, { ...filters, page: products.page + 1 })} rel="next">
+                    {nextPageLabel(filters.locale)}
+                  </Link>
+                ) : null}
+              </nav>
+            </noscript>
+          </>
         ) : (
           <Card className="border-dashed">
             <CardHeader>
@@ -463,4 +487,20 @@ function findLabel(options: Array<{ label: string; value: string }>, value: stri
 
 function formatCount(value: number, locale: string) {
   return new Intl.NumberFormat(getIntlLocale(locale), { maximumFractionDigits: 0 }).format(value);
+}
+
+function breadcrumbLabel(locale: string) {
+  return locale === "ko" ? "경로" : locale === "ja" ? "パンくず" : "Breadcrumb";
+}
+
+function paginationLabel(locale: string) {
+  return locale === "ko" ? "상품 결과 페이지" : locale === "ja" ? "商品結果ページ" : "Product result pages";
+}
+
+function previousPageLabel(locale: string) {
+  return locale === "ko" ? "이전 상품" : locale === "ja" ? "前の商品" : "Previous products";
+}
+
+function nextPageLabel(locale: string) {
+  return locale === "ko" ? "다음 상품" : locale === "ja" ? "次の商品" : "Next products";
 }

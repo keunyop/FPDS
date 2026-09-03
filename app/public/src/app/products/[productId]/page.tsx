@@ -8,7 +8,10 @@ import {
 import { ProductDetailSurface } from "@/components/fpds/public/product-detail-surface";
 import {
   fetchPublicProductDetail,
-  isPublicApiError
+  fetchPublicProducts,
+  isPublicApiError,
+  type PublicProduct,
+  type PublicProductDetailResponse
 } from "@/lib/public-api";
 import { getPublicMessages } from "@/lib/public-locale";
 import {
@@ -20,9 +23,11 @@ import {
 } from "@/lib/public-query";
 import {
   buildProductSeoDescription,
+  buildProductSeoTitle,
   buildPublicPageMetadata,
   type PublicSeoPath
 } from "@/lib/public-seo";
+import { isIndexableProductLocale } from "@/lib/public-url-policy";
 
 type ProductDetailPageProps = {
   params: Promise<{ productId: string }>;
@@ -46,7 +51,7 @@ export async function generateMetadata({
       buildGlobalFilterSearchParams(filters)
     );
     return buildPublicPageMetadata({
-      title: detail.product.product_name + " | " + detail.product.bank_name,
+      title: buildProductSeoTitle(detail.product),
       description: buildProductSeoDescription(detail.product, filters.locale),
       path,
       locale: filters.locale,
@@ -59,8 +64,8 @@ export async function generateMetadata({
 
     const copy = getPublicMessages(filters.locale);
     return buildPublicPageMetadata({
-      title: copy.grid.pageTitle,
-      description: copy.grid.pageDescription,
+      title: unavailableProductTitle(filters.locale),
+      description: copy.grid.retryBody,
       path,
       locale: filters.locale,
       countryCode: filters.countryCode,
@@ -73,7 +78,8 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
   const [{ productId }, resolvedSearchParams] = await Promise.all([params, searchParams ?? Promise.resolve({})]);
   let filters = parseProductGridPageFilters(resolvedSearchParams);
 
-  let detail = null;
+  let detail: PublicProductDetailResponse | null = null;
+  let relatedProducts: PublicProduct[] = [];
   let apiUnavailable = false;
 
   try {
@@ -87,6 +93,24 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
       resolvedSearchParams,
       catalogProductTypes
     );
+    try {
+      const relatedParams = new URLSearchParams({
+        locale: filters.locale,
+        country_code: detail.product.country_code,
+        bank_code: detail.product.bank_code,
+        product_type: detail.product.product_type,
+        sort_by: "product_name",
+        sort_order: "asc",
+        page: "1",
+        page_size: "6"
+      });
+      const related = await fetchPublicProducts(relatedParams);
+      relatedProducts = related.items
+        .filter((product) => product.product_id !== detail?.product.product_id)
+        .slice(0, 4);
+    } catch {
+      relatedProducts = [];
+    }
   } catch (error) {
     if (isPublicApiError(error, 404)) {
       notFound();
@@ -96,7 +120,7 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
 
   return (
     <>
-      {detail ? (
+      {detail && isIndexableProductLocale(filters.locale) ? (
         <PublicStructuredData
           data={buildProductStructuredData(detail.product, filters.locale)}
         />
@@ -105,7 +129,18 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
         apiUnavailable={apiUnavailable}
         detail={detail}
         filters={filters}
+        relatedProducts={relatedProducts}
       />
     </>
   );
+}
+
+function unavailableProductTitle(locale: string) {
+  if (locale === "ko") {
+    return "상품 정보를 일시적으로 사용할 수 없음";
+  }
+  if (locale === "ja") {
+    return "商品情報を一時的に利用できません";
+  }
+  return "Product details temporarily unavailable";
 }

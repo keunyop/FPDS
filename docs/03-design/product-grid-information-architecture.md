@@ -612,14 +612,22 @@ Home rather than a streamed redirect shell:
 - `/` renders the existing Home composition directly and is the canonical
   Home URL; `/dashboard` remains only as a permanent compatibility redirect
 - all shell, mobile, footer, Methodology, and Home-state links target `/`
-- locale and published-country variants use reciprocal canonical/hreflang
-  metadata; catalog filters, search, sort, and view state remain shareable but
-  do not create duplicate index surfaces
+- static locale and published-country variants use reciprocal canonical and
+  `en-CA`/KO/JA hreflang metadata; because source-derived product facts are not
+  translated, KO/JA product details remain usable but `noindex,follow`, point
+  to the clean English canonical, and are excluded from product hreflang and
+  sitemap clusters
+- catalog filters, search, sort, view, and crawl-pagination state remain
+  shareable but do not create duplicate index surfaces; product-detail links
+  discard that state and polluted detail requests permanently redirect cleanly
 - `robots.txt`, a public-product sitemap, product-specific detail metadata,
   public-only structured data, and a code-native social preview establish the
   search/share baseline
 - missing products return a real 404; API failure continues to render the
   established honest unavailable state
+- category pages expose visible breadcrumbs and server-rendered product links;
+  no-script previous/next links provide a crawlable path through the same
+  bounded pages that the enhanced client loads continuously
 - no financial fact, product eligibility rule, ranking, recommendation,
   evidence boundary, or publication gate changes
 

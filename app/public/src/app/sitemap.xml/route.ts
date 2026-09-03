@@ -5,9 +5,11 @@ import {
 } from "@/lib/public-api";
 import {
   buildPublicLanguageAlternates,
+  buildPublicProductLanguageAlternates,
   buildPublicSeoUrl,
   type PublicSeoPath
 } from "@/lib/public-seo";
+import { buildCanonicalProductUrl } from "@/lib/public-url-policy";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -60,7 +62,9 @@ async function buildSitemapEntries(): Promise<SitemapEntry[]> {
   );
   const productEntries = productResults.flatMap((result) =>
     result.status === "fulfilled"
-      ? result.value.map((product) => productSitemapEntry(product))
+      ? result.value
+          .filter((product) => product.status === "active")
+          .map((product) => productSitemapEntry(product))
       : []
   );
 
@@ -111,11 +115,11 @@ function productSitemapEntry(product: PublicProduct): SitemapEntry {
   );
 
   return {
-    url: buildPublicSeoUrl(path, "en", product.country_code),
+    url: buildCanonicalProductUrl(path, product.country_code),
     lastModified,
     changeFrequency: "weekly",
     priority: 0.7,
-    alternates: buildPublicLanguageAlternates(path, product.country_code)
+    alternates: buildPublicProductLanguageAlternates(path, product.country_code)
   };
 }
 

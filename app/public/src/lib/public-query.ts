@@ -1,3 +1,5 @@
+import { buildProductDetailPath } from "@/lib/public-url-policy";
+
 export type PublicScopeFilters = {
   locale: string;
   countryCode: string;
@@ -85,7 +87,7 @@ export function parseProductGridPageFilters(searchParams: PageSearchParams, cata
       ? sortOrder
       : getDefaultSortOrder(sortBy, catalogProductTypes),
     viewMode: VIEW_MODES.has(viewMode) ? viewMode as "grid" | "list" : "auto",
-    page: 1
+    page: positiveInteger(firstValue(searchParams.page)) ?? 1
   };
 }
 
@@ -167,6 +169,10 @@ export function buildScopedFilterSearchParams(filters: PublicScopeFilters) {
 }
 
 export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
+  if (path.startsWith("/products/")) {
+    return buildProductDetailPath(path, state.locale, state.countryCode);
+  }
+
   const params = new URLSearchParams();
 
   if (state.locale !== "en") {
@@ -202,8 +208,11 @@ export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
     }
   }
 
-  const carriesCatalogState = path === "/products" || path === "/cards" || path === "/loans" || path.startsWith("/products/");
+  const carriesCatalogState = path === "/products" || path === "/cards" || path === "/loans";
   if (carriesCatalogState) {
+    if (state.page && state.page > 1) {
+      params.set("page", String(state.page));
+    }
     if (state.sortBy) {
       params.set("sort_by", state.sortBy);
     }

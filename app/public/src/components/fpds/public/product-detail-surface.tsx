@@ -27,12 +27,14 @@ import {
   getMarketLabel as marketTextLabel
 } from "@/lib/public-product-presentation";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
+import { buildBrandedProductName } from "@/lib/public-seo";
 import { cn } from "@/lib/utils";
 
 type ProductDetailSurfaceProps = {
   apiUnavailable: boolean;
   detail: PublicProductDetailResponse | null;
   filters: ProductGridPageFilters;
+  relatedProducts: PublicProduct[];
 };
 
 type DetailFact = {
@@ -40,7 +42,12 @@ type DetailFact = {
   value: string;
 };
 
-export function ProductDetailSurface({ apiUnavailable, detail, filters }: ProductDetailSurfaceProps) {
+export function ProductDetailSurface({
+  apiUnavailable,
+  detail,
+  filters,
+  relatedProducts
+}: ProductDetailSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
   const designCopy = getPublicDesignCopy(filters.locale);
   const fallbackCatalogPath = filters.catalogProductTypes.includes("credit-card")
@@ -78,6 +85,7 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
   }
 
   const product = detail.product;
+  const displayName = buildBrandedProductName(product);
   const catalogPath = product.product_type === "credit-card" ? "/cards" : product.product_family === "lending" ? "/loans" : "/products";
   const catalogHref = buildPublicHref(catalogPath, filters);
   const backToCatalog = product.product_type === "credit-card"
@@ -97,8 +105,28 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
   const termRateRows = product.term_rate_table ?? [];
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-7 md:px-6 md:py-9">
-      <div className="flex flex-col gap-5">
+    <main className="mx-auto w-full max-w-7xl overflow-x-clip px-4 py-7 md:px-6 md:py-9">
+      <div className="flex w-full min-w-0 max-w-[calc(100vw-2rem)] flex-col gap-5 md:max-w-full">
+        <nav aria-label={breadcrumbLabel(filters.locale)}>
+          <ol className="flex min-w-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <li>
+              <Link className="underline-offset-4 hover:text-foreground hover:underline" href={buildPublicHref("/", filters)}>
+                {copy.nav.dashboard}
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <Link className="underline-offset-4 hover:text-foreground hover:underline" href={catalogHref}>
+                {catalogLabel(product, filters.locale)}
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="min-w-0 font-medium text-foreground [overflow-wrap:anywhere]">
+              {displayName}
+            </li>
+          </ol>
+        </nav>
+
         <Button asChild variant="ghost" className="w-fit">
           <Link href={catalogHref}>
             <ArrowLeft className="size-4" aria-hidden="true" />
@@ -107,12 +135,12 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
         </Button>
 
         <section className="border-y border-foreground/15 py-6 md:py-9">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} />
               <div className="min-w-0 flex-1">
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{product.bank_name}</p>
-                <h1 className="text-balance mt-2 break-words font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground md:text-6xl">{product.product_name}</h1>
+                <h1 className="text-balance mt-2 font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground [overflow-wrap:anywhere] md:text-6xl">{displayName}</h1>
                 {product.description_short ? <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground md:text-base">{product.description_short}</p> : null}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Badge>{product.product_type_label}</Badge>
@@ -121,16 +149,16 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 lg:justify-end">
+            <div className="grid min-w-0 gap-2 sm:flex sm:flex-wrap lg:justify-end">
               {product.product_url ? (
-                <Button asChild>
+                <Button asChild className="w-full sm:w-auto">
                   <TrackedOfficialBankLink countryCode={product.country_code} href={product.product_url} productId={product.product_id}>
                     {copy.detail.officialPage}
                     <ExternalLink className="size-4" aria-hidden="true" />
                   </TrackedOfficialBankLink>
                 </Button>
               ) : null}
-              <Button asChild variant="outline">
+              <Button asChild className="w-full sm:w-auto" variant="outline">
                 <Link href={similarHref}>
                   {copy.detail.similarProducts}
                   <ArrowRight className="size-4" aria-hidden="true" />
@@ -144,6 +172,27 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
               <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
             ))}
           </dl>
+        </section>
+
+        <section
+          aria-labelledby="product-overview-title"
+          className="min-w-0 border-b border-foreground/15 pb-6"
+          data-seo-product-content
+        >
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">
+            {designCopy.verified}
+          </p>
+          <h2
+            id="product-overview-title"
+            className="mt-2 text-2xl font-semibold tracking-[-0.03em] [overflow-wrap:anywhere]"
+          >
+            {overviewTitle(displayName, filters.locale)}
+          </h2>
+          <div className="mt-3 grid max-w-4xl gap-3 text-sm leading-7 text-muted-foreground md:text-base">
+            {buildProductOverview(product, disclosureDate, filters.locale).map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
         </section>
 
         <section className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_23rem] lg:items-start">
@@ -207,9 +256,181 @@ export function ProductDetailSurface({ apiUnavailable, detail, filters }: Produc
         </section>
 
         <PublicInformationNotice locale={filters.locale} />
+
+        {relatedProducts.length ? (
+          <section aria-labelledby="related-products-title" className="border-t border-foreground/15 pt-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  {product.product_type_label}
+                </p>
+                <h2 id="related-products-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em] [overflow-wrap:anywhere]">
+                  {relatedTitle(product.bank_name, filters.locale)}
+                </h2>
+              </div>
+              <Link
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                href={similarHref}
+              >
+                {copy.detail.similarProducts}
+                <ArrowRight className="ml-1 size-4" aria-hidden="true" />
+              </Link>
+            </div>
+            <ul className="mt-4 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
+              {relatedProducts.map((relatedProduct) => (
+                <li className="bg-background" key={relatedProduct.product_id}>
+                  <Link
+                    className="flex min-h-24 flex-col justify-between gap-3 p-4 hover:bg-muted/40"
+                    href={buildPublicHref(
+                      `/products/${encodeURIComponent(relatedProduct.product_id)}`,
+                      filters
+                    )}
+                  >
+                    <span className="font-semibold leading-5">
+                      {buildBrandedProductName(relatedProduct)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {relatedProduct.product_type_label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </div>
     </main>
   );
+}
+
+function breadcrumbLabel(locale: string) {
+  if (locale === "ko") {
+    return "경로";
+  }
+  if (locale === "ja") {
+    return "パンくず";
+  }
+  return "Breadcrumb";
+}
+
+function catalogLabel(product: PublicProduct, locale: string) {
+  const copy = getPublicMessages(locale);
+  if (product.product_type === "credit-card") {
+    return copy.nav.card;
+  }
+  return product.product_family === "lending" ? copy.nav.loan : copy.nav.products;
+}
+
+function overviewTitle(displayName: string, locale: string) {
+  if (locale === "ko") {
+    return displayName + " 개요";
+  }
+  if (locale === "ja") {
+    return displayName + "の概要";
+  }
+  return "About " + displayName;
+}
+
+function relatedTitle(bankName: string, locale: string) {
+  if (locale === "ko") {
+    return bankName + "의 관련 상품";
+  }
+  if (locale === "ja") {
+    return bankName + "の関連商品";
+  }
+  return "Related products from " + bankName;
+}
+
+function buildProductOverview(
+  product: PublicProduct,
+  verifiedDate: string,
+  locale: string
+) {
+  const displayName = buildBrandedProductName(product);
+  const intro = localizedOverviewIntro(
+    displayName,
+    product.product_type_label,
+    verifiedDate,
+    locale
+  );
+  const details: string[] = [];
+
+  if (product.product_id === "prod_IbZVSqaogb3BkWBd") {
+    addSentence(details, product.interest_rate_summary);
+    addSentence(details, product.credit_limit_text);
+    addSentence(details, product.collateral_text);
+  } else if (product.product_id === "prod_vIoiSSdl3kwJjM1d") {
+    addSentence(details, product.description_short);
+    addLabeledSentence(details, "Available terms", product.term_length_text);
+    addSentence(details, cleanPublicSummary(product.prepayment_privileges));
+  } else if (product.product_id === "prod_g-yAIYCGJyxWOm8d") {
+    details.push(
+      'The verified product name is Vancity Fair and Fast Loan™; this is the Vancity loan sometimes searched as "Vancity Fast and Fair Loan."'
+    );
+    addLabeledSentence(details, "Published loan amount", product.loan_amount_text);
+    addLabeledSentence(details, "Published term", product.term_length_text);
+  } else if (product.product_id === "prod_h18VyAGREB3optuJ") {
+    addSentence(details, product.description_short);
+    addLabeledSentence(details, "Eligibility", product.eligibility_text);
+    addLabeledSentence(details, "Available terms", product.term_length_text);
+    addLabeledSentence(details, "Payment frequency", product.payment_frequency);
+    addLabeledSentence(details, "Application method", product.application_method);
+  } else {
+    addSentence(details, product.description_short);
+    addLabeledSentence(details, "Rate type", product.rate_type);
+    addLabeledSentence(details, "Available terms", product.term_length_text);
+    addLabeledSentence(details, "Published amount or limit", product.loan_amount_text ?? product.credit_limit_text);
+  }
+
+  return [intro, ...details.slice(0, 4)];
+}
+
+function localizedOverviewIntro(
+  displayName: string,
+  productType: string,
+  verifiedDate: string,
+  locale: string
+) {
+  if (locale === "ko") {
+    return `SwitchaBank의 검토된 공개 스냅샷은 ${displayName}을(를) ${productType} 상품으로 표시합니다. 최종 검증일은 ${verifiedDate}입니다.`;
+  }
+  if (locale === "ja") {
+    return `SwitchaBankの確認済み公開スナップショットでは、${displayName}を${productType}商品として掲載しています。最終確認日は${verifiedDate}です。`;
+  }
+  return `SwitchaBank lists ${displayName} as a ${productType} in its reviewed public snapshot, last verified ${verifiedDate}.`;
+}
+
+function addSentence(sentences: string[], value: string | null) {
+  const normalized = cleanPublicSummary(value);
+  if (normalized) {
+    sentences.push(withTerminalPunctuation(normalized));
+  }
+}
+
+function addLabeledSentence(
+  sentences: string[],
+  label: string,
+  value: string | null
+) {
+  const normalized = cleanPublicSummary(value);
+  if (normalized) {
+    sentences.push(`${label}: ${withTerminalPunctuation(normalized)}`);
+  }
+}
+
+function cleanPublicSummary(value: string | null) {
+  if (
+    !value ||
+    value.length > 260 ||
+    /(calculator|view tool|click|learn more)/i.test(value)
+  ) {
+    return null;
+  }
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function withTerminalPunctuation(value: string) {
+  return /[.!?]$/.test(value) ? value : value + ".";
 }
 
 function MetricTile({ highlight, label, value }: { highlight?: boolean; label: string; value: string }) {

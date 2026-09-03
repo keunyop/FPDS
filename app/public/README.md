@@ -259,19 +259,28 @@ Realtime or DebugView report.
 ## Search and Sharing
 
 The canonical production origin is `https://www.switchabank.com`. Root Home,
-catalog, Methodology, and public product detail pages emit absolute canonical
-URLs plus EN/KO/JA language alternates while retaining country-owned URL state.
-Catalog search, filter, sort, and view variants canonicalize to the clean
-country/locale catalog URL and use `noindex,follow` to avoid duplicate index
-surfaces.
+catalog, and Methodology pages emit absolute canonical URLs plus reciprocal
+`en-CA`/KO/JA language alternates while retaining country-owned URL state.
+Product facts remain source-language content, so only clean English product
+URLs are indexable. KO/JA product pages remain usable with `noindex,follow`, an
+English canonical, and no product hreflang or sitemap membership. Catalog
+search, filter, sort, view, and pagination variants canonicalize to the clean
+country/locale catalog URL and use `noindex,follow`.
+
+Product links retain only meaningful locale/country scope. Irrelevant catalog
+and tracking parameters receive a permanent `308` to the clean detail route.
+The confirmed duplicate BMO Performance Chequing Account route also resolves
+to its newer verified representative record. Catalog HTML contains product
+links and a no-script previous/next path so discovery does not depend only on
+continuous client loading.
 
 `https://www.switchabank.com/robots.txt` allows the anonymous site, excludes
 same-origin API paths and `/admin`, and points to
 `https://www.switchabank.com/sitemap.xml`. The explicitly XML-escaped sitemap
-includes clean static Public routes and available product detail URLs for each
-published country, with language alternates. Product details emit
-product-specific metadata and public-only
-`FinancialProduct`/breadcrumb structured data. A two-second product-detail
+includes clean static Public routes and unique active English product detail
+URLs for each published country. Product details emit type-specific metadata
+and public-only `FinancialProduct` or `LoanOrCredit` plus breadcrumb structured
+data; catalogs emit `CollectionPage`/`ItemList`/breadcrumb data. A two-second product-detail
 proxy checks active-snapshot membership before streaming so missing products
 return HTTP 404; timeouts and broader API failures fall through to the honest
 noindex unavailable state. The code-native
@@ -284,9 +293,17 @@ financial claims.
 Run from `app/public`:
 
 ```powershell
+pnpm run lint
 pnpm run typecheck
+pnpm run test
 pnpm run build
+$env:SEO_AUDIT_ORIGIN='http://127.0.0.1:3000'; pnpm run seo:audit
 ```
+
+Run `pnpm run seo:audit` against a locally started production build. It checks
+representative routes and every sitemap URL for status, metadata, canonical,
+robots, language, H1, JSON-LD, clean internal product links, redirects, and
+invalid-product 404 behavior.
 
 ## Vercel Deployment
 

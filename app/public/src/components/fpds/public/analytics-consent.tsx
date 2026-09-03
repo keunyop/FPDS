@@ -21,8 +21,8 @@ declare global {
 
 function initializeGtag(): Gtag {
   window.dataLayer ??= [];
-  window.gtag ??= function gtag(..._args: unknown[]) {
-    window.dataLayer?.push(arguments);
+  window.gtag ??= function gtag(...args: unknown[]) {
+    window.dataLayer?.push(args);
   };
 
   return window.gtag;

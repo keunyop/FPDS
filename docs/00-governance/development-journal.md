@@ -1357,3 +1357,85 @@ Read before coding:
   Review decision was applied, and no official-domain, SSRF, evidence,
   canonical, or publication gate was relaxed. Historical Failed rows were not
   rewritten or deleted.
+
+## 2026-09-03 - Admin Handover Scope And Owners
+
+- Status: documentation-only handover scope record complete.
+- Outcome:
+  - added `descent/01-scope-and-owners.md` with the Admin-only scope, known
+    contacts, target schedule, final client ownership, and approval fields
+  - left unknown owner, date, and evidence-store details explicitly pending
+    instead of inventing assignments
+  - retained the stop condition that source and data transfer cannot begin
+    until scope and ownership are approved
+- Verification: UTF-8 content, Markdown structure, and repository whitespace
+  checks passed.
+- Boundaries: no runtime, external account, secret, data, access, deployment,
+  or handover state was changed.
+
+## 2026-09-03 - GSC SEO Canonical and Product-Content Hardening
+
+- Status: repository implementation and production-like verification complete;
+  production deployment and GSC follow-up remain Product Owner operations.
+- Diagnosis:
+  - parsed every CSV in the two `2026-09-03` GSC ZIP exports; the available
+    performance window held 1 click / 79 impressions, while coverage reported
+    17 indexed and 193 non-indexed pages on `2026-08-27`
+  - catalog state was copied into product links, and every product locale was
+    self-canonical/indexable/hreflang-listed even though product facts remain
+    source language; the Japanese BMO URL therefore carried contradictory
+    locale and English-intent discovery signals
+  - product metadata fallback reused a Deposit category title, category crawl
+    discovery after the first batch depended on client loading, and product
+    pages had too little concise product-specific explanatory context
+  - the full generated-sitemap audit found two active CA BMO Performance
+    Chequing Account records competing with identical metadata
+- Outcome:
+  - added one product URL policy used by links, proxy redirects, metadata,
+    structured data, and sitemap; irrelevant listing/tracking state now returns
+    one 308 to a clean active product route, while invalid IDs remain 404
+  - retained static-page EN/KO/JA indexing, but made incomplete KO/JA product
+    variants usable `noindex,follow` with an English canonical and no product
+    sitemap/hreflang membership; `<html lang>` now renders on the server
+  - added unique type-specific metadata, verified-fact descriptions, truthful
+    FinancialProduct/LoanOrCredit and collection graphs, visible breadcrumbs,
+    server product overviews, related same-bank/type links, and crawlable
+    no-script catalog paging without changing financial facts
+  - resolved `prod_OOVZNobikI65DAAF` as Scotiabank The Long and Short Mortgage;
+    preserved its clean route and visibility
+  - consolidated older duplicate `prod_LuH-Kei2S8uFFOyY` by 308 to the newer
+    verified `prod_SNcPg2yBYt4rgyAt`, without mutating canonical data
+  - corrected the 390px product-detail intrinsic-width overflow found during
+    browser QA; exact DevTools measurements now show 390px client/scroll width,
+    one H1 within x=374, and zero overflow offenders
+- Verification:
+  - Public lint passed with zero warnings
+  - Public TypeScript check passed
+  - Public URL policy tests: 5 passed
+  - Next.js 16.2.3 Webpack production build passed against the deployed Public
+    API origin
+  - production-like SEO audit passed all 225 sitemap URLs and 10 required
+    representative routes, plus localized/noindex, polluted redirect, duplicate
+    alias, deposit/card sample, and invalid-product cases
+  - responsive QA passed at exact 390px, 768px, and 1440px with no document
+    width overflow; final repository `git diff --check` is recorded at handoff
+- Key files:
+  - `app/public/src/lib/public-url-policy.ts`
+  - `app/public/src/lib/public-seo.ts`
+  - `app/public/src/proxy.ts`
+  - `app/public/src/app/sitemap.xml/route.ts`
+  - `app/public/src/app/products/[productId]/page.tsx`
+  - `app/public/src/components/fpds/public/product-detail-surface.tsx`
+  - `app/public/src/components/fpds/public/public-structured-data.tsx`
+  - `app/public/scripts/seo-audit.mjs`
+  - `docs/seo/gsc-2026-09-03-action-plan.md`
+- Decisions: D-075 and WBS 5.60 record the source-language product indexing,
+  clean canonical, and duplicate-alias baseline.
+- Known issues: indexing/ranking remain controlled by Google; the upstream API
+  remains a dynamic-render dependency, and the hosting layer still gives the
+  HTTP apex a two-hop HTTPS/www redirect chain.
+- Next step: deploy Public, execute the documented live checklist, resubmit the
+  sitemap, request indexing only for the priority clean URLs, and capture 7-day
+  and 28-day GSC comparisons.
+- Boundaries: no database row, financial fact, Review/publish gate, secret,
+  production deployment, GSC property, or raw export was modified.

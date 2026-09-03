@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, ExternalLink, GitCompareArrows, LoaderCircle, Plus, RefreshCw, X } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
@@ -81,7 +80,7 @@ export function ProductCompareWorkspace({
     setNextPage(initialProducts.page + 1);
     setHasNextPage(initialProducts.has_next_page);
     setLoadState("idle");
-  }, [productsQuery]);
+  }, [initialProducts.has_next_page, initialProducts.items, initialProducts.page, productsQuery]);
 
   useEffect(() => {
     return () => requestRef.current?.abort();

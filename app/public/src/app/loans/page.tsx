@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
 import { ProductGridSurface } from "@/components/fpds/public/product-grid-surface";
+import {
+  buildCatalogStructuredData,
+  PublicStructuredData
+} from "@/components/fpds/public/public-structured-data";
 import { getPublicCatalogCopy } from "@/lib/public-locale";
 import { fetchPublicFilters, fetchPublicProducts } from "@/lib/public-api";
 import {
@@ -52,12 +56,24 @@ export default async function LoanCatalogPage({ searchParams }: LoanCatalogPageP
   }
 
   return (
-    <ProductGridSurface
-      apiUnavailable={apiUnavailable}
-      catalog="loan"
-      filterOptions={filterOptions}
-      filters={filters}
-      products={products}
-    />
+    <>
+      {products ? (
+        <PublicStructuredData
+          data={buildCatalogStructuredData(
+            products.items,
+            "loan",
+            filters.locale,
+            filters.countryCode
+          )}
+        />
+      ) : null}
+      <ProductGridSurface
+        apiUnavailable={apiUnavailable}
+        catalog="loan"
+        filterOptions={filterOptions}
+        filters={filters}
+        products={products}
+      />
+    </>
   );
 }

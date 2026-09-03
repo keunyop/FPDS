@@ -622,9 +622,13 @@ without changing the approved factual-comparison or private-evidence boundary.
 - `https://www.switchabank.com/` is the canonical Home and must render Home
   content directly; the historical `/dashboard` route permanently redirects to
   `/` while preserving query parameters
-- indexable Home, catalog, Methodology, and public product detail pages must
-  emit absolute canonical URLs and reciprocal EN/KO/JA alternates that preserve
-  the selected published country
+- indexable Home, catalog, and Methodology pages must emit absolute canonical
+  URLs and reciprocal `en-CA`/KO/JA alternates that preserve the selected
+  published country
+- product facts remain source-language content under the localization policy;
+  until a product page is substantially localized, only its clean English URL
+  is indexable, while KO/JA product variants remain usable `noindex,follow`,
+  canonicalize to English, and stay outside sitemap/hreflang clusters
 - catalog search, filter, sort, and view variants must canonicalize to the
   clean locale/country catalog URL and remain `noindex,follow`
 - production must expose a crawlable `robots.txt` and a sitemap containing
@@ -632,6 +636,10 @@ without changing the approved factual-comparison or private-evidence boundary.
   published countries; Preview must remain non-indexable
 - public product details must use product-specific titles/descriptions and
   public-only structured data, while missing product IDs return HTTP 404
+- irrelevant catalog, pagination, and tracking state on product-detail URLs
+  must permanently redirect to the clean locale/country route; confirmed
+  duplicate product records must resolve to one deterministic representative
+  URL rather than create competing indexable pages
 - Open Graph/Twitter output may describe the SwitchaBank comparison surface
   but must not invent rates, rankings, recommendations, endorsements, or
   private evidence
