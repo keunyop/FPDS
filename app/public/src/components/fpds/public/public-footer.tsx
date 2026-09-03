@@ -60,7 +60,11 @@ function FooterContent() {
 
         <div className="mt-6 flex flex-col gap-4 border-t border-background/15 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-3xl text-xs leading-5 text-background/60">{footerCopy.legalNote}</p>
-          <PublicLocaleMenu align="end" className="flex shrink-0" triggerClassName="w-full justify-between sm:w-auto" />
+          <PublicLocaleMenu
+            align="end"
+            className="flex shrink-0"
+            triggerClassName="w-full justify-between border-background/30 bg-transparent text-background hover:bg-background/10 hover:text-background aria-expanded:bg-background/10 aria-expanded:text-background sm:w-auto [&_svg]:text-background/70"
+          />
         </div>
       </div>
     </footer>

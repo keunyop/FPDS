@@ -1,160 +1,144 @@
-"use client";
+import type { PublicDashboardScatterResponse } from "@/lib/public-api";
 
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Scatter,
-  ScatterChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-  ZAxis
-} from "recharts";
+const CHART_WIDTH = 720;
+const CHART_HEIGHT = 320;
+const PLOT_LEFT = 72;
+const PLOT_RIGHT = 24;
+const PLOT_TOP = 20;
+const PLOT_BOTTOM = 54;
+const TICK_COUNT = 5;
 
-import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
-import type { PublicDashboardBreakdownItem, PublicDashboardScatterResponse } from "@/lib/public-api";
-
-type CompositionItem = PublicDashboardBreakdownItem & {
-  key: string;
-  label: string;
-};
-
-const compositionConfig = {
-  count: {
-    label: "Products",
-    color: "var(--chart-1)"
-  }
-} satisfies ChartConfig;
-
-const typeConfig = {
-  count: {
-    label: "Products",
-    color: "var(--chart-2)"
-  }
-} satisfies ChartConfig;
-
-const scatterConfig = {
-  products: {
-    label: "Products",
-    color: "var(--chart-1)"
-  }
-} satisfies ChartConfig;
-
-export function CompositionBarChart({ items }: { items: CompositionItem[] }) {
-  const data = items.map((item) => ({
-    ...item,
-    shortLabel: item.label.length > 12 ? `${item.label.slice(0, 12)}...` : item.label
-  }));
-
-  return (
-    <ChartContainer className="h-64 w-full" config={compositionConfig}>
-      <BarChart data={data} margin={{ bottom: 8, left: 4, right: 8, top: 8 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis axisLine={false} dataKey="shortLabel" interval={0} tick={{ fontSize: 11 }} tickLine={false} />
-        <YAxis allowDecimals={false} axisLine={false} tick={{ fontSize: 11 }} tickLine={false} width={32} />
-        <Tooltip cursor={{ fill: "rgba(48, 86, 211, 0.08)" }} />
-        <Bar dataKey="count" fill="var(--color-count)" radius={[6, 6, 0, 0]} />
-      </BarChart>
-    </ChartContainer>
-  );
-}
-
-export function ProductTypeBarChart({ items }: { items: CompositionItem[] }) {
-  return (
-    <ChartContainer className="h-64 w-full" config={typeConfig}>
-      <BarChart data={items} layout="vertical" margin={{ bottom: 8, left: 8, right: 16, top: 8 }}>
-        <CartesianGrid horizontal={false} strokeDasharray="3 3" />
-        <XAxis allowDecimals={false} axisLine={false} tick={{ fontSize: 11 }} tickLine={false} type="number" />
-        <YAxis axisLine={false} dataKey="label" tick={{ fontSize: 11 }} tickLine={false} type="category" width={88} />
-        <Tooltip cursor={{ fill: "rgba(15, 118, 110, 0.08)" }} />
-        <Bar dataKey="count" fill="var(--color-count)" radius={[0, 6, 6, 0]} />
-      </BarChart>
-    </ChartContainer>
-  );
-}
-
-export function PublicScatterChart({ scatter }: { scatter: PublicDashboardScatterResponse }) {
-  if (!scatter.points.length || !scatter.x_axis || !scatter.y_axis) {
+export function PublicScatterChart({
+  scatter
+}: {
+  scatter: PublicDashboardScatterResponse;
+}) {
+  const xAxis = scatter.x_axis;
+  const yAxis = scatter.y_axis;
+  if (!scatter.points.length || !xAxis || !yAxis) {
     return null;
   }
 
-  const data = scatter.points.map((point) => ({
-    ...point,
-    z: point.highlight_badge_code ? 95 : 70
-  }));
-
-  const chartLabel = `${scatter.title ?? "Product comparison"}. ${scatter.x_axis.label} by ${scatter.y_axis.label}. ${data.length} products.`;
+  const xValues = scatter.points.map((point) => point.x_value);
+  const yValues = scatter.points.map((point) => point.y_value);
+  const xDomain = createDomain(xValues);
+  const yDomain = createDomain(yValues);
+  const plotWidth = CHART_WIDTH - PLOT_LEFT - PLOT_RIGHT;
+  const plotHeight = CHART_HEIGHT - PLOT_TOP - PLOT_BOTTOM;
+  const chartLabel = `${scatter.title ?? "Product comparison"}. ${xAxis.label} by ${yAxis.label}. ${scatter.points.length} products.`;
 
   return (
-    <div>
-    <ChartContainer aria-label={chartLabel} className="h-72 w-full" config={scatterConfig} role="img">
-      <ScatterChart margin={{ bottom: 16, left: 4, right: 16, top: 12 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          axisLine={false}
-          dataKey="x_value"
-          name={scatter.x_axis.label}
-          tick={{ fontSize: 11 }}
-          tickFormatter={(value) => formatAxisValue(Number(value), scatter.x_axis?.unit ?? "")}
-          tickLine={false}
-          type="number"
+    <div className="w-full overflow-hidden">
+      <svg
+        aria-labelledby="public-scatter-chart-title"
+        className="h-72 w-full text-muted-foreground"
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+      >
+        <title id="public-scatter-chart-title">{chartLabel}</title>
+        {createTicks(yDomain).map((tick) => {
+          const y = scaleY(tick, yDomain, plotHeight);
+          return (
+            <g key={`y-${tick}`}>
+              <line
+                className="stroke-border"
+                x1={PLOT_LEFT}
+                x2={CHART_WIDTH - PLOT_RIGHT}
+                y1={y}
+                y2={y}
+              />
+              <text className="fill-muted-foreground text-[11px]" textAnchor="end" x={PLOT_LEFT - 10} y={y + 4}>
+                {formatAxisValue(tick, yAxis.unit)}
+              </text>
+            </g>
+          );
+        })}
+        {createTicks(xDomain).map((tick) => {
+          const x = scaleX(tick, xDomain, plotWidth);
+          return (
+            <g key={`x-${tick}`}>
+              <line
+                className="stroke-border/70"
+                x1={x}
+                x2={x}
+                y1={PLOT_TOP}
+                y2={CHART_HEIGHT - PLOT_BOTTOM}
+              />
+              <text
+                className="fill-muted-foreground text-[11px]"
+                textAnchor="middle"
+                x={x}
+                y={CHART_HEIGHT - PLOT_BOTTOM + 20}
+              >
+                {formatAxisValue(tick, xAxis.unit)}
+              </text>
+            </g>
+          );
+        })}
+        <line
+          className="stroke-foreground/40"
+          x1={PLOT_LEFT}
+          x2={CHART_WIDTH - PLOT_RIGHT}
+          y1={CHART_HEIGHT - PLOT_BOTTOM}
+          y2={CHART_HEIGHT - PLOT_BOTTOM}
         />
-        <YAxis
-          axisLine={false}
-          dataKey="y_value"
-          name={scatter.y_axis.label}
-          tick={{ fontSize: 11 }}
-          tickFormatter={(value) => formatAxisValue(Number(value), scatter.y_axis?.unit ?? "")}
-          tickLine={false}
-          type="number"
-          width={42}
+        <line
+          className="stroke-foreground/40"
+          x1={PLOT_LEFT}
+          x2={PLOT_LEFT}
+          y1={PLOT_TOP}
+          y2={CHART_HEIGHT - PLOT_BOTTOM}
         />
-        <ZAxis dataKey="z" range={[60, 110]} />
-        <Tooltip
-          cursor={{ strokeDasharray: "3 3" }}
-          content={({ active, payload }) => {
-            if (!active || !payload?.length) {
-              return null;
-            }
-            const point = payload[0]?.payload as (typeof data)[number] | undefined;
-            if (!point) {
-              return null;
-            }
-            return (
-              <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-lg">
-                <p className="font-medium text-foreground">{point.product_name}</p>
-                <p className="mt-1 text-muted-foreground">{point.bank_name}</p>
-                <p className="mt-2 tabular-nums text-foreground">
-                  {scatter.x_axis?.label}: {formatAxisValue(point.x_value, scatter.x_axis?.unit ?? "")}
-                </p>
-                <p className="tabular-nums text-foreground">
-                  {scatter.y_axis?.label}: {formatAxisValue(point.y_value, scatter.y_axis?.unit ?? "")}
-                </p>
-              </div>
-            );
-          }}
-        />
-        <Scatter data={data} dataKey="y_value" fill="var(--color-products)" name="products" />
-      </ScatterChart>
-    </ChartContainer>
+        {scatter.points.map((point) => (
+          <circle
+            className="fill-primary stroke-card"
+            cx={scaleX(point.x_value, xDomain, plotWidth)}
+            cy={scaleY(point.y_value, yDomain, plotHeight)}
+            key={point.product_id}
+            r={point.highlight_badge_code ? 7 : 5}
+            strokeWidth={2}
+          >
+            <title>
+              {`${point.product_name} - ${point.bank_name}. ${xAxis.label}: ${formatAxisValue(point.x_value, xAxis.unit)}. ${yAxis.label}: ${formatAxisValue(point.y_value, yAxis.unit)}.`}
+            </title>
+          </circle>
+        ))}
+        <text
+          className="fill-foreground text-xs font-medium"
+          textAnchor="middle"
+          x={PLOT_LEFT + plotWidth / 2}
+          y={CHART_HEIGHT - 8}
+        >
+          {xAxis.label}
+        </text>
+        <text
+          className="fill-foreground text-xs font-medium"
+          textAnchor="middle"
+          transform={`rotate(-90 16 ${PLOT_TOP + plotHeight / 2})`}
+          x={16}
+          y={PLOT_TOP + plotHeight / 2}
+        >
+          {yAxis.label}
+        </text>
+      </svg>
       <table className="sr-only">
         <caption>{chartLabel}</caption>
         <thead>
           <tr>
             <th>Product</th>
             <th>Bank</th>
-            <th>{scatter.x_axis.label}</th>
-            <th>{scatter.y_axis.label}</th>
+            <th>{xAxis.label}</th>
+            <th>{yAxis.label}</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((point) => (
+          {scatter.points.map((point) => (
             <tr key={point.product_id}>
               <td>{point.product_name}</td>
               <td>{point.bank_name}</td>
-              <td>{formatAxisValue(point.x_value, scatter.x_axis?.unit ?? "")}</td>
-              <td>{formatAxisValue(point.y_value, scatter.y_axis?.unit ?? "")}</td>
+              <td>{formatAxisValue(point.x_value, xAxis.unit)}</td>
+              <td>{formatAxisValue(point.y_value, yAxis.unit)}</td>
             </tr>
           ))}
         </tbody>
@@ -163,15 +147,42 @@ export function PublicScatterChart({ scatter }: { scatter: PublicDashboardScatte
   );
 }
 
+function createDomain(values: number[]): [number, number] {
+  const minimum = Math.min(...values);
+  const maximum = Math.max(...values);
+  if (minimum === maximum) {
+    const padding = Math.max(Math.abs(minimum) * 0.1, 1);
+    return [minimum - padding, maximum + padding];
+  }
+  const padding = (maximum - minimum) * 0.08;
+  return [minimum - padding, maximum + padding];
+}
+
+function createTicks([minimum, maximum]: [number, number]) {
+  const step = (maximum - minimum) / (TICK_COUNT - 1);
+  return Array.from({ length: TICK_COUNT }, (_, index) => minimum + step * index);
+}
+
+function scaleX(value: number, [minimum, maximum]: [number, number], plotWidth: number) {
+  return PLOT_LEFT + ((value - minimum) / (maximum - minimum)) * plotWidth;
+}
+
+function scaleY(value: number, [minimum, maximum]: [number, number], plotHeight: number) {
+  return PLOT_TOP + plotHeight - ((value - minimum) / (maximum - minimum)) * plotHeight;
+}
+
 function formatAxisValue(value: number, unit: string) {
   if (!Number.isFinite(value)) {
-    return "—";
+    return "Unavailable";
   }
   if (unit === "percent") {
     return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
   }
   if (unit === "currency") {
-    return `$${new Intl.NumberFormat("en-CA", { maximumFractionDigits: 0 }).format(value)}`;
+    return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
   }
-  return new Intl.NumberFormat("en-CA", { maximumFractionDigits: 2 }).format(value);
+  if (unit === "days") {
+    return `${Math.round(value)}d`;
+  }
+  return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }

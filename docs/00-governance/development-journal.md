@@ -1439,3 +1439,74 @@ Read before coding:
   and 28-day GSC comparisons.
 - Boundaries: no database row, financial fact, Review/publish gate, secret,
   production deployment, GSC property, or raw export was modified.
+
+## 2026-09-03 - Public PageSpeed Performance and Accessibility Hardening
+
+- Status: repository implementation and production-like verification complete;
+  production deployment and post-deployment PageSpeed reruns remain Product
+  Owner operations.
+- Diagnosis:
+  - the supplied mobile runs scored 88-92 Performance, 93 Accessibility,
+    96-100 Best Practices, and 100 SEO; the H1 was LCP at 3.3-3.5 seconds
+    with about 2.4 seconds of element render delay
+  - Home awaited summary and two ranking responses before emitting its hero,
+    and its initial client graph included the Recharts runtime plus the Radix
+    umbrella package; Lighthouse estimated 183-186 KiB of unused JavaScript
+  - the 13.7 KB stylesheet was render-blocking, and runtime logo requests
+    included oversized favicon images and short-cache third-party assets
+  - logo wrappers used prohibited ARIA, logo images had no intrinsic size,
+    and the footer locale trigger combined a mismatched accessible name with
+    1.08:1 visible-text contrast
+- Outcome:
+  - split the server-rendered hero/finder and ranking data into independent
+    Suspense boundaries while starting all upstream reads concurrently
+  - replaced the client Recharts scatter with accessible server SVG plus an
+    assistive table, removed Recharts, and replaced the Radix umbrella with
+    direct Dialog, Dropdown Menu, and Slot packages
+  - enabled Next inline CSS, removed the duplicate root locale synchronizer,
+    and retained the Header-owned client-navigation locale update
+  - restricted bank-logo browser images to five verified local assets, added
+    explicit dimensions, and used an accessible bank-code mark for all other
+    institutions
+  - matched locale/country trigger accessible names to their visible labels
+    and added a dark-footer locale style with readable contrast
+- Verification:
+  - Public lint, TypeScript, eight unit tests, and Next.js 16.2.3 Webpack
+    production build passed
+  - the Home client reference graph fell from 11 chunks / about 750 KiB raw
+    to 9 chunks / 223.8 KiB raw; no Recharts reference remains
+  - initial HTML has zero stylesheet links, zero third-party image sources,
+    zero images without dimensions, and the H1 is present in the server
+    document
+  - local Lighthouse 13.4.1 mobile scored 88/100/100/100 with LCP 3.0 seconds,
+    zero CLS, no console error, and 47 KiB estimated unused JavaScript;
+    desktop scored 99/100/100/100 with LCP 0.8 seconds and zero CLS
+  - the prior render-blocking, image-delivery, cache, ARIA, name-mismatch,
+    contrast, and console-error audits all passed locally
+  - exact 390px, 768px, and 1440px browser checks found zero horizontal
+    overflow, zero third-party images, and zero missing image dimensions;
+    the 390px mobile menu opened with six links and the footer locale menu
+    opened with all three locale choices;
+    EN/KO/JA plus a filtered Home route returned 200 with the expected
+    document language and H1
+- Verification limitation: Lighthouse wrote complete reports but its Windows
+  CLI process returned exit 1 during post-report temporary-directory cleanup
+  with `EPERM`; both JSON reports parsed normally and contain complete audits.
+- Key files:
+  - `app/public/src/app/dashboard/page.tsx`
+  - `app/public/src/components/fpds/public/dashboard-hero.tsx`
+  - `app/public/src/components/fpds/public/dashboard-surface.tsx`
+  - `app/public/src/components/fpds/public/public-dashboard-charts.tsx`
+  - `app/public/src/components/fpds/public/bank-logo.tsx`
+  - `app/public/src/lib/public-bank-logo.ts`
+  - `app/public/next.config.ts`
+  - `app/public/package.json`
+  - `app/public/README.md`
+- Decisions: D-076 and WBS 5.61 record the first-paint, runtime, logo, and
+  stylesheet baseline.
+- Next step: deploy Public, rerun both supplied PageSpeed profiles against
+  production, and compare mobile LCP, unused JavaScript, Accessibility, and
+  Best Practices after CDN caches stabilize.
+- Boundaries: no financial fact, ranking, finder rule, canonical data,
+  publication gate, analytics policy, Admin behavior, secret, deployment, or
+  external system was changed.

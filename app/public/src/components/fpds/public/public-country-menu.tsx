@@ -65,11 +65,11 @@ export function PublicCountryMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          aria-label={`${copy.label}: ${formatPublicCountryName(countryCode, locale)}`}
           className="h-11 max-w-44 whitespace-nowrap rounded-full border-border bg-card px-3 text-xs shadow-sm"
           size="sm"
           variant="outline"
         >
+          <span className="sr-only">{copy.label}: </span>
           <MapPin className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span className="hidden truncate font-medium min-[380px]:inline">
             {formatPublicCountryName(countryCode, locale)}

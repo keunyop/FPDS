@@ -1,14 +1,13 @@
-import { ArrowRight, CreditCard, ExternalLink, FilterX, Landmark, PiggyBank, RefreshCw } from "lucide-react";
+import { ArrowRight, ExternalLink, Landmark, PiggyBank, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/public/product-engagement-link";
-import { ProductRecommendationFinder } from "@/components/fpds/public/product-recommendation-finder";
-import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
+import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { getIntlLocale, getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
+import { getIntlLocale, getPublicMessages } from "@/lib/public-locale";
 import {
   type PublicDashboardScatterResponse,
   type PublicDashboardSummaryResponse,
@@ -38,43 +37,28 @@ export function DashboardSurface({
   summary
 }: DashboardSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
-  const designCopy = getPublicDesignCopy(filters.locale);
   const productsHref = buildPublicHref("/products", { ...filters, page: 1 });
-  const cardsHref = buildPublicHref("/cards", { ...filters, page: 1 });
   const loansHref = buildPublicHref("/loans", { ...filters, page: 1 });
-  const clearHref = buildPublicHref("/", {
-    ...filters,
-    bankCodes: [],
-    productTypes: [],
-    targetCustomerTags: [],
-    feeBucket: "",
-    minimumBalanceBucket: "",
-    minimumDepositBucket: "",
-    termBucket: "",
-    axisPreset: ""
-  });
 
   if (apiUnavailable || !summary) {
     return (
-      <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
-        <Card className="border-destructive/25">
-          <CardHeader>
-            <h1 className="text-lg font-semibold">{copy.dashboard.apiUnavailableTitle}</h1>
-            <CardDescription>{copy.dashboard.apiUnavailableBody}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button asChild>
-              <Link href={buildPublicHref("/", filters)}>
-                <RefreshCw className="size-4" aria-hidden="true" />
-                {copy.dashboard.retryDashboard}
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={productsHref}>{copy.dashboard.openProducts}</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </main>
+      <Card className="border-destructive/25">
+        <CardHeader>
+          <h2 className="text-lg font-semibold">{copy.dashboard.apiUnavailableTitle}</h2>
+          <CardDescription>{copy.dashboard.apiUnavailableBody}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button asChild>
+            <Link href={buildPublicHref("/", filters)}>
+              <RefreshCw className="size-4" aria-hidden="true" />
+              {copy.dashboard.retryDashboard}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={productsHref}>{copy.dashboard.openProducts}</Link>
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -86,53 +70,7 @@ export function DashboardSurface({
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
 
   return (
-    <main className="mx-auto min-w-0 w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
-      <div className="flex min-w-0 flex-col gap-10 md:gap-14">
-        <section className="border-y border-foreground/15 py-10 md:py-14">
-          <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(23rem,0.72fr)] lg:items-start">
-            <div className="min-w-0 max-w-3xl">
-              <h1 className="text-balance max-w-4xl font-display text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground [overflow-wrap:anywhere]">
-                {designCopy.homeTitle}
-              </h1>
-              <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground [overflow-wrap:anywhere] md:text-lg">{designCopy.homeBody}</p>
-              <div className="mt-7 flex flex-wrap gap-2.5">
-                <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
-                  <Link href={productsHref}>
-                    <PiggyBank className="size-4" aria-hidden="true" />
-                    {copy.nav.products}
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
-                  <Link href={cardsHref}>
-                    <CreditCard className="size-4" aria-hidden="true" />
-                    {copy.nav.card}
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
-                  <Link href={loansHref}>
-                    <Landmark className="size-4" aria-hidden="true" />
-                    {copy.nav.loan}
-                  </Link>
-                </Button>
-                {activeChips.length ? (
-                  <Button asChild variant="ghost">
-                    <Link href={clearHref}>
-                      <FilterX className="size-4" aria-hidden="true" />
-                      {copy.common.clearFilters}
-                    </Link>
-                  </Button>
-                ) : null}
-              </div>
-            </div>
-            <ProductRecommendationFinder
-              banks={summary.breakdowns.products_by_bank}
-              countryCode={filters.countryCode}
-              locale={filters.locale}
-              productTypes={summary.breakdowns.products_by_product_type}
-            />
-          </div>
-        </section>
-
+    <div className="flex min-w-0 flex-col gap-10 md:gap-14">
         {activeChips.length ? (
           <section aria-label={copy.grid.currentScope} className="flex flex-wrap gap-2 border-b border-border pb-5">
             {activeChips.map((chip) => (
@@ -200,7 +138,6 @@ export function DashboardSurface({
 
         <PublicInformationNotice locale={filters.locale} />
       </div>
-    </main>
   );
 }
 

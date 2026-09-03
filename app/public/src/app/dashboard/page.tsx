@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
+import {
+  DashboardFinderFallback,
+  DashboardHero
+} from "@/components/fpds/public/dashboard-hero";
 import { DashboardSurface } from "@/components/fpds/public/dashboard-surface";
+import { ProductRecommendationFinder } from "@/components/fpds/public/product-recommendation-finder";
 import { getPublicMessages } from "@/lib/public-locale";
 import {
   fetchPublicDashboardScatter,
   fetchPublicDashboardSummary,
-  fetchPublicProducts
+  fetchPublicProducts,
+  type PublicDashboardSummaryResponse,
+  type PublicProductsResponse
 } from "@/lib/public-api";
 import {
   buildDashboardSearchParams,
@@ -41,7 +49,69 @@ export async function generateMetadata({ searchParams }: DashboardPageProps): Pr
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
   const filters = parseDashboardPageFilters(resolvedSearchParams);
+  const summaryPromise = fetchPublicDashboardSummary(buildDashboardSearchParams(filters));
+  const depositProductsPromise = fetchPublicProducts(buildDepositProductsSearchParams(filters));
+  const loanProductsPromise = fetchPublicProducts(buildLoanProductsSearchParams(filters));
 
+  return (
+    <main className="mx-auto min-w-0 w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
+      <div className="flex min-w-0 flex-col gap-10 md:gap-14">
+        <DashboardHero
+          filters={filters}
+          finder={
+            <Suspense fallback={<DashboardFinderFallback />}>
+              <DashboardFinder filters={filters} summaryPromise={summaryPromise} />
+            </Suspense>
+          }
+        />
+        <Suspense fallback={<DashboardDataFallback />}>
+          <DashboardData
+            depositProductsPromise={depositProductsPromise}
+            filters={filters}
+            loanProductsPromise={loanProductsPromise}
+            summaryPromise={summaryPromise}
+          />
+        </Suspense>
+      </div>
+    </main>
+  );
+}
+
+async function DashboardFinder({
+  filters,
+  summaryPromise
+}: {
+  filters: DashboardPageFilters;
+  summaryPromise: Promise<PublicDashboardSummaryResponse>;
+}) {
+  let summary: PublicDashboardSummaryResponse | null = null;
+  try {
+    summary = await summaryPromise;
+  } catch {
+    summary = null;
+  }
+
+  return (
+    <ProductRecommendationFinder
+      banks={summary?.breakdowns.products_by_bank ?? []}
+      countryCode={filters.countryCode}
+      locale={filters.locale}
+      productTypes={summary?.breakdowns.products_by_product_type ?? []}
+    />
+  );
+}
+
+async function DashboardData({
+  depositProductsPromise,
+  filters,
+  loanProductsPromise,
+  summaryPromise
+}: {
+  depositProductsPromise: Promise<PublicProductsResponse>;
+  filters: DashboardPageFilters;
+  loanProductsPromise: Promise<PublicProductsResponse>;
+  summaryPromise: Promise<PublicDashboardSummaryResponse>;
+}) {
   let summary = null;
   let depositProducts = null;
   let loanProducts = null;
@@ -51,9 +121,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   let loanProductsUnavailable = false;
 
   const [summaryResult, depositProductsResult, loanProductsResult] = await Promise.allSettled([
-    fetchPublicDashboardSummary(buildDashboardSearchParams(filters)),
-    fetchPublicProducts(buildDepositProductsSearchParams(filters)),
-    fetchPublicProducts(buildLoanProductsSearchParams(filters))
+    summaryPromise,
+    depositProductsPromise,
+    loanProductsPromise
   ]);
 
   if (summaryResult.status === "fulfilled") {
@@ -96,6 +166,19 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       scatter={scatter}
       summary={summary}
     />
+  );
+}
+
+function DashboardDataFallback() {
+  return (
+    <section
+      aria-busy="true"
+      aria-label="Loading current product rankings"
+      className="grid min-w-0 gap-8 lg:grid-cols-2"
+    >
+      <div className="h-80 animate-pulse border border-border bg-card/60" />
+      <div className="h-80 animate-pulse border border-border bg-card/60" />
+    </section>
   );
 }
 

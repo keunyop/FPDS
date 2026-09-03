@@ -214,11 +214,20 @@ projection. Public never exposes other submissions.
 The only submission-list surface is the password-gated Public `/admin`; the
 anonymous Public experience and FPDS Admin application expose no feedback list.
 
-Verified bank logo assets live under `public/bank-logos/` or use approved
-official URLs in the `BankLogo` mapping. A failed image falls back to an
-unframed, accessible bank-code mark while retaining the institution name for
-assistive technology. The SwitchaBank shell mark is implemented in
+Verified bank logo assets live under `public/bank-logos/`. `BankLogo` never
+loads an institution image from a third-party origin: banks without a local
+asset render an unframed, accessible bank-code mark while retaining the
+institution name for assistive technology. Rendered image assets have explicit
+intrinsic dimensions. The SwitchaBank shell mark is implemented in
 `public-mark.tsx`; `src/app/icon.svg` is the matching favicon/app icon.
+
+The Home heading and primary catalog actions render independently of upstream
+summary and ranking data. Those requests start together and stream through
+separate Suspense boundaries. The optional scatter plot is server-rendered SVG
+with a screen-reader table, shared UI imports address only the required Radix
+packages, and the small global stylesheet is inlined into the initial document
+to avoid a render-blocking stylesheet request. Keep these boundaries measured
+before adding a client chart runtime, umbrella UI dependency, or remote logo.
 
 The Home map geometry in `public/world-map-equal-earth.svg` is a local static
 asset generated from [Natural Earth](https://www.naturalearthdata.com/downloads/)

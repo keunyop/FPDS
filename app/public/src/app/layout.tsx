@@ -4,7 +4,6 @@ import { Suspense, type ReactNode } from "react";
 
 import { PublicFooter } from "@/components/fpds/public/public-footer";
 import { PublicHeader } from "@/components/fpds/public/public-header";
-import { PublicLocaleSync } from "@/components/fpds/public/public-locale-sync";
 import { AnalyticsConsent } from "@/components/fpds/public/analytics-consent";
 import {
   PUBLIC_SITE_STRUCTURED_DATA,
@@ -47,9 +46,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground">
         <PublicStructuredData data={PUBLIC_SITE_STRUCTURED_DATA} />
-        <Suspense fallback={null}>
-          <PublicLocaleSync />
-        </Suspense>
         <div className="relative isolate min-h-screen">
           <PublicHeader />
           <div className="min-h-[calc(100vh-4rem)]">{children}</div>

@@ -48,11 +48,11 @@ export function PublicLocaleMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            aria-label={copy.nav.localeLabel}
             className={cn("h-11 rounded-full border-border bg-card px-3 text-xs shadow-sm", triggerClassName)}
             size="sm"
             variant="outline"
           >
+            <span className="sr-only">{copy.nav.localeLabel}: </span>
             <Globe2 className="size-3.5 text-muted-foreground" aria-hidden="true" />
             <span className="hidden sm:inline">{getPublicMessages(locale).localeName}</span>
             <span className="font-semibold uppercase tabular-nums sm:hidden">{locale}</span>
