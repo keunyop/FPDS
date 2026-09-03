@@ -439,6 +439,30 @@ cd api/service
   that quarantined scope until an official coverage route or
   active detail source is explicitly restored. Timeout, 408/425/429/5xx,
   connection, and DNS evidence does not trip this structural circuit breaker.
+- An SSRF-validated official HTML URL that returns a high-confidence HTTP-200
+  JavaScript/access-challenge shell receives one bank-agnostic browser DOM
+  attempt. Recovered HTML re-enters the ordinary Product-Type and evidence
+  gates. A challenge that remains after rendering is a structural no-detail
+  result and cannot use the seed-source fallback; browser absence, timeout, or
+  render failure remains transient and does not quarantine the scope.
+- A direct timeout, socket timeout, connection reset, or remote connection
+  close on any SSRF-validated official HTML URL receives the same single
+  bank- and Product-Type-agnostic browser DOM attempt, even when the bank is
+  not preconfigured for dynamic rendering. The stored snapshot identifies
+  `browser_html_fallback` and `direct_transport_failure`; PDF routes remain
+  excluded, and a browser result that is still an access challenge is rejected
+  before evidence storage.
+- Standard collection omits an otherwise active source when its latest attempt
+  ended in a persisted post-browser access challenge, or when a PDF source's
+  challenge recovery produced non-PDF content. This is a reversible runtime
+  exclusion rather than a registry mutation: precision rediscovery can
+  revalidate and restore the route, while transient browser-runtime failures
+  remain eligible for the next standard run.
+- Detail-companion discovery and later standard-scope reuse reject site-wide
+  user agreements plus wealth/investment disclosure documents that have no
+  deposit-product context. Product-specific account, card, pricing, fee, and
+  rate agreements remain eligible. This keeps non-product legal documents out
+  of future runs without adding bank-specific URL exceptions.
 - US discovery keeps the canonical `chequing` and `gic` codes but uses
   country-local `checking` and certificate-of-deposit/CD vocabulary. Product
   links and evidence embedded in bounded JSON-valued `data-*` component

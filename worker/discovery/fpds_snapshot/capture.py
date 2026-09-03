@@ -241,6 +241,7 @@ class SnapshotCaptureService:
             attempt_count += 1
             try:
                 fetched = self.fetcher(source.resolved_url, self.fetch_policy)
+                _validate_fetched_payload(source=source, fetched=fetched)
                 fetch_warning_count = len(preflight_issues) + int(
                     fetched.headers.get("x-fpds-browser-fallback-attempted") == "true"
                 )
@@ -424,6 +425,18 @@ def _build_checksum(body: bytes) -> str:
     return sha256(body).hexdigest()
 
 
+def _validate_fetched_payload(*, source: CaptureSource, fetched: FetchedResponse) -> None:
+    if source.source_type.lower() != "pdf":
+        return
+    if fetched.content_type.lower().startswith("application/pdf") or fetched.body.startswith(b"%PDF"):
+        return
+    fallback_reason = fetched.headers.get("x-fpds-browser-fallback-reason", "none")
+    raise NonRetryableFetchError(
+        "PDF source returned non-PDF content after bounded fetch recovery for "
+        f"{source.resolved_url} ({fetched.content_type}; reason={fallback_reason})."
+    )
+
+
 def _build_fingerprint(body: bytes, content_type: str) -> str:
     digest = sha256()
     digest.update(content_type.encode("utf-8"))
@@ -457,6 +470,7 @@ def _build_response_metadata(
         "fetch_method": fetched.headers.get("x-fpds-fetch-method") or "direct_https",
         "browser_executable": fetched.headers.get("x-fpds-browser-executable"),
         "browser_fallback_attempted": fetched.headers.get("x-fpds-browser-fallback-attempted") == "true",
+        "browser_fallback_reason": fetched.headers.get("x-fpds-browser-fallback-reason"),
         "browser_fallback_error_type": fetched.headers.get("x-fpds-browser-fallback-error-type"),
         "browser_fallback_error": fetched.headers.get("x-fpds-browser-fallback-error"),
         "attempt_count": attempt_count,

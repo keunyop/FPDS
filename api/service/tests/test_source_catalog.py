@@ -39,6 +39,7 @@ from api_service.source_catalog import (
     _authoritative_catalog_detail_bonus,
     _ai_supporting_source_is_relevant,
     _invoke_openai_parallel_scorer,
+    _is_non_product_supporting_document,
     _is_product_type_rate_page,
     _link_is_relevant_supporting_source,
     _looks_like_credit_card_detail_path,
@@ -4270,6 +4271,35 @@ class SourceCatalogTests(unittest.TestCase):
         )
         self.assertIn("2 exact-product", " ".join(notes))
 
+    def test_non_product_supporting_documents_reject_global_legal_and_investment_disclosures(self) -> None:
+        self.assertTrue(
+            _is_non_product_supporting_document(
+                product_type="savings",
+                normalized_url="https://www.bank.example/about/misc/user-agreement.html",
+            )
+        )
+        self.assertTrue(
+            _is_non_product_supporting_document(
+                product_type="savings",
+                normalized_url="https://www.bank.example/wealth/investments/disclosures.html",
+                anchor_text="Investment services disclosures",
+            )
+        )
+        self.assertFalse(
+            _is_non_product_supporting_document(
+                product_type="savings",
+                normalized_url="https://www.bank.example/wealth/savings-account-disclosure.html",
+                anchor_text="Savings account disclosure",
+            )
+        )
+        self.assertFalse(
+            _is_non_product_supporting_document(
+                product_type="credit-card",
+                normalized_url="https://www.bank.example/disclosures/card-agreement.html",
+                anchor_text="Credit card agreement",
+            )
+        )
+
     def test_existing_active_detail_can_supply_new_pricing_companion(self) -> None:
         homepage_url = "https://www.bank.example/"
         detail_url = "https://www.bank.example/cards/existing-card"
@@ -5363,6 +5393,50 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(rows[0]["discovery_role"], "detail")
         self.assertEqual(rows[0]["discovery_metadata"]["selection_path"], "seed_hint_fetch_unavailable")
         self.assertIn("seed-backed source", " ".join(notes))
+
+    def test_seed_detail_with_persisted_browser_challenge_is_not_promoted(self) -> None:
+        candidate = HomepageCandidate(
+            normalized_url="https://www.bank.example/accounts/savings",
+            raw_url="https://www.bank.example/accounts/savings",
+            anchor_text="Savings Accounts",
+            source_type="html",
+            origin="seed_detail_hint",
+            heuristic_score=8,
+            supporting_signal=False,
+            seed_source_id="BANK-SAV-001",
+            source_name_hint="Savings Accounts",
+            priority_hint="P0",
+            expected_fields_hint=["product_name", "standard_rate"],
+        )
+        with patch(
+            "api_service.source_catalog._score_page_evidence",
+            return_value=PageEvidenceAssessment(
+                page_evidence_score=0,
+                page_evidence_reason_codes=["page_fetch_unavailable"],
+                page_title=None,
+                primary_heading=None,
+                heading_match=False,
+                attribute_signal_count=0,
+                negative_signal_count=0,
+                fetch_error="HTML access challenge remained after bounded browser fallback for the official URL.",
+            ),
+        ):
+            rows, rejected_urls, notes = _promote_detail_candidates(
+                bank_code="BANK",
+                bank_name="Example Bank",
+                country_code="US",
+                product_type="savings",
+                discovery_product_type="savings",
+                product_type_definition=_product_type_definition("savings"),
+                source_language="en",
+                fetch_policy=SimpleNamespace(),
+                candidates=[candidate],
+                ai_scores={},
+            )
+
+        self.assertEqual(rows, [])
+        self.assertEqual(rejected_urls, [candidate.normalized_url])
+        self.assertIn("access_challenge_persisted=1", " ".join(notes))
 
     def test_seed_detail_low_page_evidence_with_negative_signal_is_not_promoted(self) -> None:
         candidate = HomepageCandidate(

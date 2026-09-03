@@ -8,6 +8,7 @@ import shutil
 import socket
 import subprocess
 import tempfile
+from threading import Lock
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -20,6 +21,7 @@ from .url_utils import host_matches_allowed_domains
 
 
 IPAddress = Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
+_BROWSER_FALLBACK_LOCK = Lock()
 
 
 @dataclass(frozen=True)
@@ -177,24 +179,61 @@ def fetch_response(
                 fetched_at=datetime.now(UTC).isoformat(),
                 redirect_count=redirect_handler.redirect_count,
             )
-            if _should_try_browser_rendered_rate_fallback(fetched_response, policy):
+            access_challenge_kind = _html_access_challenge_kind(fetched_response)
+            rate_fallback_requested = _should_try_browser_rendered_rate_fallback(
+                fetched_response,
+                policy,
+            )
+            if access_challenge_kind or rate_fallback_requested:
                 try:
-                    return _fetch_response_via_browser(
+                    rendered_response = _fetch_response_via_browser_bounded(
                         final_url,
                         policy,
-                        output_format=resolved_browser_format,
+                        output_format=(
+                            "html" if access_challenge_kind else resolved_browser_format
+                        ),
                     )
+                    remaining_challenge = _html_access_challenge_kind(rendered_response)
+                    if access_challenge_kind and remaining_challenge:
+                        raise NonRetryableFetchError(
+                            "HTML access challenge remained after bounded browser fallback "
+                            f"for {final_url} ({remaining_challenge})."
+                        )
+                    fallback_reason = (
+                        "html_access_challenge"
+                        if access_challenge_kind
+                        else "dynamic_rate_content"
+                    )
+                    return FetchedResponse(
+                        **{
+                            **rendered_response.__dict__,
+                            "headers": {
+                                **rendered_response.headers,
+                                "x-fpds-browser-fallback-attempted": "true",
+                                "x-fpds-browser-fallback-reason": fallback_reason,
+                            },
+                        }
+                    )
+                except NonRetryableFetchError:
+                    raise
                 except Exception as exc:
+                    fallback_error = re.sub(r"\s+", " ", str(exc)).strip()[:500]
+                    if access_challenge_kind:
+                        raise NonRetryableFetchError(
+                            "HTML access challenge required bounded browser fallback, but "
+                            f"browser fallback was unavailable for {final_url}: "
+                            f"{fallback_error or exc.__class__.__name__}"
+                        ) from exc
                     # A successful, auditable direct snapshot is still preferable
                     # to turning a best-effort rendering enhancement into a source
                     # failure. Preserve the failed attempt as operator-visible
                     # metadata so an incomplete rate page is explainable.
-                    fallback_error = re.sub(r"\s+", " ", str(exc)).strip()[:500]
                     return FetchedResponse(
                         **{
                             **fetched_response.__dict__,
                             "headers": {
                                 **fetched_response.headers,
+                                "x-fpds-browser-fallback-reason": "dynamic_rate_content",
                                 "x-fpds-browser-fallback-attempted": "true",
                                 "x-fpds-browser-fallback-error": fallback_error or exc.__class__.__name__,
                                 "x-fpds-browser-fallback-error-type": exc.__class__.__name__,
@@ -205,7 +244,7 @@ def fetch_response(
     except urllib.error.HTTPError as exc:
         try:
             if _should_try_browser_fallback(normalized_url, policy, exc):
-                return _fetch_response_via_browser(
+                return _fetch_response_via_browser_bounded(
                     normalized_url,
                     policy,
                     output_format=resolved_browser_format,
@@ -216,10 +255,33 @@ def fetch_response(
             exc.close()
     except Exception as exc:
         if _should_try_browser_fallback(normalized_url, policy, exc):
-            return _fetch_response_via_browser(
+            generic_official_transport = _uses_generic_official_transport_fallback(
                 normalized_url,
                 policy,
-                output_format=resolved_browser_format,
+                exc,
+            )
+            rendered_response = _fetch_response_via_browser_bounded(
+                normalized_url,
+                policy,
+                output_format="html" if generic_official_transport else resolved_browser_format,
+            )
+            if not generic_official_transport:
+                return rendered_response
+            remaining_challenge = _html_access_challenge_kind(rendered_response)
+            if remaining_challenge:
+                raise NonRetryableFetchError(
+                    "HTML access challenge remained after bounded browser fallback "
+                    f"for {normalized_url} ({remaining_challenge})."
+                )
+            return FetchedResponse(
+                **{
+                    **rendered_response.__dict__,
+                    "headers": {
+                        **rendered_response.headers,
+                        "x-fpds-browser-fallback-attempted": "true",
+                        "x-fpds-browser-fallback-reason": "direct_transport_failure",
+                    },
+                }
             )
         raise
 
@@ -324,10 +386,11 @@ def _should_try_browser_fallback(url: str, policy: DiscoveryFetchPolicy, exc: Ex
         return False
     if parsed.path.lower().endswith(".pdf"):
         return False
+    official_domain = host_matches_allowed_domains(hostname, policy.allowed_domains)
     if (
         isinstance(exc, urllib.error.HTTPError)
         and exc.code == 403
-        and host_matches_allowed_domains(hostname, policy.allowed_domains)
+        and official_domain
     ):
         # Access-denied responses from an already SSRF-validated official
         # source are a presentation-layer limitation, not evidence that the
@@ -335,18 +398,40 @@ def _should_try_browser_fallback(url: str, policy: DiscoveryFetchPolicy, exc: Ex
         # for any selected official domain instead of maintaining an
         # institution-by-institution exception list.
         return True
+    if official_domain and _is_transient_transport_failure(exc):
+        # A timeout or remotely closed connection from an already validated
+        # official HTML source is likewise a transport limitation. Allow one
+        # browser path without requiring a permanent bank exception.
+        return True
     if not policy.browser_fallback_domains:
         return False
     if not host_matches_allowed_domains(hostname, policy.browser_fallback_domains):
         return False
     if isinstance(exc, urllib.error.HTTPError):
         return exc.code in {403, 408, 425, 429, 500, 502, 503, 504}
-    if isinstance(exc, (TimeoutError, socket.timeout, ConnectionResetError, ConnectionAbortedError)):
-        return True
-    if isinstance(exc, urllib.error.URLError):
-        reason = exc.reason
-        return isinstance(reason, (TimeoutError, socket.timeout, ConnectionResetError, ConnectionAbortedError))
-    return False
+    return _is_transient_transport_failure(exc)
+
+
+def _is_transient_transport_failure(exc: Exception) -> bool:
+    reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
+    return isinstance(
+        reason,
+        (TimeoutError, socket.timeout, ConnectionResetError, ConnectionAbortedError),
+    )
+
+
+def _uses_generic_official_transport_fallback(
+    url: str,
+    policy: DiscoveryFetchPolicy,
+    exc: Exception,
+) -> bool:
+    hostname = (urlparse(url).hostname or "").lower()
+    return bool(
+        hostname
+        and _is_transient_transport_failure(exc)
+        and host_matches_allowed_domains(hostname, policy.allowed_domains)
+        and not host_matches_allowed_domains(hostname, policy.browser_fallback_domains)
+    )
 
 
 def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy: DiscoveryFetchPolicy) -> bool:
@@ -428,6 +513,20 @@ def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy
     if not any(marker in lowered for marker in ("interest rate", "annual percentage rate", "rates")):
         return False
     return not has_numeric_rate
+
+
+def _fetch_response_via_browser_bounded(
+    url: str,
+    policy: DiscoveryFetchPolicy,
+    *,
+    output_format: Literal["pdf", "html"] = "pdf",
+) -> FetchedResponse:
+    # Snapshot capture fetches sources concurrently. Starting several fresh
+    # headless sessions against one institution at once can retrigger the WAF
+    # that this fallback is intended to clear. Keep the recovery bounded and
+    # serial within the worker process; direct HTTP fetches remain concurrent.
+    with _BROWSER_FALLBACK_LOCK:
+        return _fetch_response_via_browser(url, policy, output_format=output_format)
 
 
 def _fetch_response_via_browser(
@@ -523,6 +622,38 @@ def _fetch_response_via_browser(
             fetched_at=datetime.now(UTC).isoformat(),
             redirect_count=0,
         )
+
+
+def _html_access_challenge_kind(response: FetchedResponse) -> str | None:
+    """Return a bounded, high-confidence access-challenge signature."""
+
+    if not response.content_type.lower().startswith(("text/html", "application/xhtml+xml")):
+        return None
+    decoded = response.body[:512_000].decode(
+        _get_charset(response.headers.get("content-type", "")),
+        errors="replace",
+    ).lower()
+    if "pardon our interruption" in decoded and any(
+        marker in decoded
+        for marker in (
+            "security check: javascript disabled",
+            "enable cookies and javascript",
+            "__imperva_interstitial",
+            "reeseskip",
+        )
+    ):
+        return "javascript_access_challenge"
+    if "just a moment" in decoded and any(
+        marker in decoded
+        for marker in ("/cdn-cgi/challenge-platform", "cf-chl-", "__cf_chl")
+    ):
+        return "managed_access_challenge"
+    if "verify you are human" in decoded and any(
+        marker in decoded
+        for marker in ("captcha", "bot detection", "challenge-platform")
+    ):
+        return "human_verification_challenge"
+    return None
 
 
 def _resolve_browser_executable(explicit_executable: str | None) -> str | None:

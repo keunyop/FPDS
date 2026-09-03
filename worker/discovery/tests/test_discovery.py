@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import socket
@@ -16,6 +17,7 @@ from worker.discovery.fpds_discovery.discovery import (
 from worker.discovery.fpds_discovery.fetch import (
     DiscoveryFetchPolicy,
     FetchedResponse,
+    NonRetryableFetchError,
     _should_try_browser_rendered_rate_fallback,
     fetch_response,
     fetch_text,
@@ -468,6 +470,81 @@ class FetchPolicyTests(unittest.TestCase):
         self.assertEqual(response.headers["x-fpds-fetch-method"], "browser_pdf_fallback")
         self.assertTrue(response.body.startswith(b"%PDF-1.4"))
 
+    def test_transport_failure_uses_browser_dom_on_any_official_domain(self) -> None:
+        url = "https://www.examplebank.ca/accounts/savings"
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=(),
+        )
+        rendered = FetchedResponse(
+            body=b"<html><h1>Everyday Savings</h1></html>",
+            final_url=url,
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-09-02T00:00:00+00:00",
+            redirect_count=0,
+        )
+        for failure in (
+            socket.timeout("timed out"),
+            ConnectionResetError("connection reset"),
+            http.client.RemoteDisconnected("remote end closed connection without response"),
+        ):
+            with self.subTest(failure=type(failure).__name__):
+                opener = type(
+                    "Opener",
+                    (),
+                    {"open": lambda self, request, timeout, error=failure: (_ for _ in ()).throw(error)},
+                )()
+                with (
+                    patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=opener),
+                    patch(
+                        "worker.discovery.fpds_discovery.fetch._fetch_response_via_browser",
+                        return_value=rendered,
+                    ) as browser,
+                ):
+                    response = fetch_response(url, policy)
+
+                self.assertEqual(response.body, rendered.body)
+                self.assertEqual(response.headers["x-fpds-browser-fallback-reason"], "direct_transport_failure")
+                self.assertEqual(browser.call_args.kwargs["output_format"], "html")
+
+    def test_transport_fallback_rejects_browser_access_challenge(self) -> None:
+        url = "https://www.examplebank.ca/accounts/savings"
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=(),
+        )
+        opener = type(
+            "Opener",
+            (),
+            {"open": lambda self, request, timeout: (_ for _ in ()).throw(socket.timeout("timed out"))},
+        )()
+        rendered_challenge = FetchedResponse(
+            body=(
+                b"<html><title>Pardon Our Interruption</title>"
+                b"<h1>Security check: JavaScript disabled</h1>"
+                b"<script>window.reeseSkipExpirationCheck=true;</script></html>"
+            ),
+            final_url=url,
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-09-02T00:00:00+00:00",
+            redirect_count=0,
+        )
+        with (
+            patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=opener),
+            patch(
+                "worker.discovery.fpds_discovery.fetch._fetch_response_via_browser",
+                return_value=rendered_challenge,
+            ),
+        ):
+            with self.assertRaisesRegex(NonRetryableFetchError, "remained after bounded browser fallback"):
+                fetch_response(url, policy)
+
     def test_fetch_response_uses_browser_fallback_for_403_on_any_allowlisted_official_domain(self) -> None:
         policy = DiscoveryFetchPolicy(
             allowed_domains=("examplebank.ca",),
@@ -523,6 +600,72 @@ class FetchPolicyTests(unittest.TestCase):
         ):
             with self.assertRaises(ValueError):
                 fetch_text("https://www.bmo.com/main/personal/test/", policy)
+
+    def test_http_200_access_challenge_uses_browser_dom_on_any_official_domain(self) -> None:
+        url = "https://www.examplebank.ca/accounts/savings"
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=(),
+        )
+        challenge = (
+            b"<html><title>Pardon Our Interruption</title>"
+            b"<h1>Security check: JavaScript disabled</h1>"
+            b"<script>window.reeseSkipExpirationCheck=true;</script></html>"
+        )
+        rendered = FetchedResponse(
+            body=b"<html><h1>Everyday Savings Account</h1><p>APY 2.00%</p></html>",
+            final_url=url,
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-09-02T00:00:00+00:00",
+            redirect_count=0,
+        )
+        opener = type("Opener", (), {"open": lambda self, request, timeout: _DirectHtmlResponse(body=challenge, url=url)})()
+        with (
+            patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=opener),
+            patch("worker.discovery.fpds_discovery.fetch._fetch_response_via_browser", return_value=rendered) as browser,
+        ):
+            response = fetch_response(url, policy)
+
+        self.assertIn(b"Everyday Savings Account", response.body)
+        self.assertEqual(response.headers["x-fpds-browser-fallback-reason"], "html_access_challenge")
+        self.assertEqual(browser.call_args.kwargs["output_format"], "html")
+
+    def test_http_200_access_challenge_never_returns_an_unresolved_shell(self) -> None:
+        url = "https://www.examplebank.ca/accounts/savings"
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=(),
+        )
+        challenge = (
+            b"<html><title>Pardon Our Interruption</title>"
+            b"<h1>Security check: JavaScript disabled</h1>"
+            b"<script>window.reeseSkipExpirationCheck=true;</script></html>"
+        )
+        opener = type("Opener", (), {"open": lambda self, request, timeout: _DirectHtmlResponse(body=challenge, url=url)})()
+        rendered_challenge = FetchedResponse(
+            body=challenge,
+            final_url=url,
+            content_type="text/html",
+            status_code=200,
+            headers={"content-type": "text/html; charset=utf-8"},
+            fetched_at="2026-09-02T00:00:00+00:00",
+            redirect_count=0,
+        )
+        with (
+            patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=opener),
+            patch(
+                "worker.discovery.fpds_discovery.fetch._fetch_response_via_browser",
+                side_effect=[rendered_challenge, RuntimeError("browser timed out")],
+            ),
+        ):
+            with self.assertRaisesRegex(NonRetryableFetchError, "remained after bounded browser fallback"):
+                fetch_response(url, policy)
+            with self.assertRaisesRegex(NonRetryableFetchError, "browser fallback was unavailable"):
+                fetch_response(url, policy)
 
     def test_fetch_text_uses_browser_html_fallback_for_eligible_429(self) -> None:
         policy = DiscoveryFetchPolicy(
@@ -916,3 +1059,29 @@ class _CompletedProcess:
         self.returncode = returncode
         self.stdout = stdout
         self.stderr = stderr
+
+
+class _ContentTypeHeaders(dict):
+    def get_content_type(self) -> str:
+        return "text/html"
+
+
+class _DirectHtmlResponse:
+    status = 200
+
+    def __init__(self, *, body: bytes, url: str) -> None:
+        self._body = body
+        self._url = url
+        self.headers = _ContentTypeHeaders({"content-type": "text/html; charset=utf-8"})
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, traceback):
+        return False
+
+    def geturl(self) -> str:
+        return self._url
+
+    def read(self) -> bytes:
+        return self._body

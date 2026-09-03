@@ -39,9 +39,18 @@ Runtime invariants:
   boundaries; each routes a candidate to Review rather than auto-validating a
   family or review-only coverage page as one product. Historical
   `verified_coverage_lending_review_source` evidence remains equivalent.
-- an HTTP 403 from an already SSRF-validated, allowlisted official HTML source
-  receives one bounded headless-browser snapshot attempt regardless of bank;
-  other transient browser fallback remains restricted to configured domains
+- an HTTP 403, a direct timeout/connection-close failure, or a high-confidence
+  HTTP-200 JavaScript/access-challenge shell from an already SSRF-validated,
+  allowlisted official HTML source receives one bounded headless-browser
+  attempt regardless of bank or Product Type. Generic transport recovery uses
+  browser DOM so the result remains ordinary inspectable HTML. A
+  rendered page that remains a challenge is rejected as product evidence and
+  can trip the existing reversible structural zero-detail quarantine; a missing
+  browser or render failure remains transient. Other HTTP/upstream browser
+  fallback remains restricted to configured domains. Browser recoveries are
+  serialized within one worker so concurrent source capture does not retrigger
+  the same institution's WAF. A source declared as PDF must still return PDF
+  bytes; a recovered HTML viewer or challenge shell is rejected before storage
 - market defaults are country-owned (`CA -> CAD`, `US -> USD`); an unknown
   country remains explicit instead of silently inheriting CAD
 - savings subtype inference compares the candidate currency with that country

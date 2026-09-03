@@ -152,6 +152,122 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
         self.assertEqual(scope["target_source_ids"], ["CARD-DETAIL"])
         self.assertEqual(scope["collection_source_ids"], ["CARD-DETAIL", "CARD-PRICING"])
 
+    def test_active_deposit_scope_excludes_global_legal_and_investment_disclosures(self) -> None:
+        connection = _Connection(
+            [[
+                {
+                    "source_id": "SAVINGS-DETAIL",
+                    "discovery_role": "detail",
+                    "source_name": "Everyday Savings",
+                    "source_url": "https://www.bank.example/personal/savings/everyday.html",
+                    "purpose": "detail",
+                    "expected_fields": [],
+                },
+                {
+                    "source_id": "PRODUCT-DISCLOSURE",
+                    "discovery_role": "supporting_html",
+                    "source_name": "Savings account disclosure",
+                    "source_url": "https://www.bank.example/wealth/savings-account-disclosure.html",
+                    "purpose": "pricing companion",
+                    "expected_fields": [],
+                },
+                {
+                    "source_id": "INVESTMENT-DISCLOSURE",
+                    "discovery_role": "supporting_html",
+                    "source_name": "Investment disclosures",
+                    "source_url": "https://www.bank.example/wealth/investments/disclosures.html",
+                    "purpose": "legacy broad support",
+                    "expected_fields": [],
+                },
+                {
+                    "source_id": "GLOBAL-USER-AGREEMENT",
+                    "discovery_role": "supporting_html",
+                    "source_name": "User agreement",
+                    "source_url": "https://www.bank.example/about/misc/user-agreement.html",
+                    "purpose": "legacy broad support",
+                    "expected_fields": [],
+                },
+            ]]
+        )
+
+        scope = source_catalog_collection_runner._load_active_collection_scope(
+            connection,
+            bank_code="EX",
+            country_code="US",
+            product_type="savings",
+            source_language="en",
+        )
+
+        self.assertEqual(scope["target_source_ids"], ["SAVINGS-DETAIL"])
+        self.assertEqual(
+            scope["collection_source_ids"],
+            ["SAVINGS-DETAIL", "PRODUCT-DISCLOSURE"],
+        )
+
+    def test_active_scope_skips_only_latest_terminal_fetch_failures(self) -> None:
+        connection = _Connection(
+            [[
+                {
+                    "source_id": "DETAIL-GOOD",
+                    "source_type": "html",
+                    "discovery_role": "detail",
+                    "source_name": "Good account",
+                    "source_url": "https://bank.example/good",
+                    "purpose": "detail",
+                    "expected_fields": [],
+                    "latest_stage_status": "completed",
+                },
+                {
+                    "source_id": "DETAIL-BLOCKED",
+                    "source_type": "html",
+                    "discovery_role": "detail",
+                    "source_name": "Blocked account",
+                    "source_url": "https://bank.example/blocked",
+                    "purpose": "detail",
+                    "expected_fields": [],
+                    "latest_stage_status": "failed",
+                    "latest_error_summary": "HTML access challenge remained after bounded browser fallback for https://bank.example/blocked.",
+                },
+                {
+                    "source_id": "PDF-WRONG-TYPE",
+                    "source_type": "pdf",
+                    "discovery_role": "linked_pdf",
+                    "source_name": "Terms",
+                    "source_url": "https://bank.example/terms.pdf",
+                    "purpose": "terms",
+                    "expected_fields": [],
+                    "latest_stage_status": "failed",
+                    "latest_error_summary": "HTML parser produced no usable text.",
+                    "latest_snapshot_content_type": "text/html",
+                    "latest_browser_fallback_reason": "html_access_challenge",
+                },
+                {
+                    "source_id": "DETAIL-TRANSIENT",
+                    "source_type": "html",
+                    "discovery_role": "detail",
+                    "source_name": "Retryable account",
+                    "source_url": "https://bank.example/retryable",
+                    "purpose": "detail",
+                    "expected_fields": [],
+                    "latest_stage_status": "failed",
+                    "latest_error_summary": "Browser fallback was unavailable due to timeout.",
+                },
+            ]]
+        )
+
+        scope = source_catalog_collection_runner._load_active_collection_scope(
+            connection,
+            bank_code="EX",
+            country_code="US",
+            product_type="savings",
+            source_language="en",
+        )
+
+        self.assertEqual(scope["target_source_ids"], ["DETAIL-GOOD", "DETAIL-TRANSIENT"])
+        self.assertEqual(scope["collection_source_ids"], ["DETAIL-GOOD", "DETAIL-TRANSIENT"])
+        self.assertEqual(scope["terminal_fetch_source_ids"], ["DETAIL-BLOCKED", "PDF-WRONG-TYPE"])
+        self.assertIn("LEFT JOIN LATERAL", connection.calls[0][0])
+
     def test_catalog_failure_metadata_retains_exact_worker_stage(self) -> None:
         failure = source_collection_runner.WorkerStageError(
             stage_name="fpds_snapshot",
@@ -314,6 +430,19 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
                 [
                     "Page evidence was unavailable for https://bank.example/product: HTTP 503.",
                     "Homepage discovery completed but no candidate-producing detail sources were identified.",
+                ]
+            )
+        )
+        self.assertTrue(
+            source_catalog_collection_runner._no_detail_result_is_structural(
+                ["HTML access challenge remained after bounded browser fallback for the official URL."]
+            )
+        )
+        self.assertFalse(
+            source_catalog_collection_runner._no_detail_result_is_structural(
+                [
+                    "HTML access challenge required bounded browser fallback, but browser fallback "
+                    "was unavailable for the official URL: browser timed out."
                 ]
             )
         )

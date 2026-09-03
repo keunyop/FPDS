@@ -13,6 +13,7 @@ from api_service.source_catalog import (
     CatalogItemMaterializationResult,
     _canonical_product_type_code,
     _has_unrelated_product_type_signal,
+    _is_non_product_supporting_document,
     _materialize_sources_for_catalog_item,
     _product_type_scope_codes,
     _record_catalog_audit_event,
@@ -91,6 +92,10 @@ def _mark_run_failure_best_effort(
 
 def _no_detail_result_is_structural(discovery_notes: list[str]) -> bool:
     normalized = " ".join(str(note).strip().lower() for note in discovery_notes if str(note).strip())
+    if "html access challenge remained after bounded browser fallback" in normalized:
+        return True
+    if "html access challenge required bounded browser fallback, but browser fallback was unavailable" in normalized:
+        return False
     transient_markers = (
         "timed out",
         "timeout",
@@ -266,16 +271,27 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             and existing_scope_before_repair
             and existing_scope_before_repair["target_source_ids"]
         ):
+            terminal_fetch_source_ids = list(
+                existing_scope_before_repair.get("terminal_fetch_source_ids") or []
+            )
+            reuse_notes = [
+                "Precision source rediscovery was skipped by operator choice; "
+                "collection reused the current active source scope."
+            ]
+            if terminal_fetch_source_ids:
+                reuse_notes.append(
+                    f"Skipped {len(terminal_fetch_source_ids)} source(s) whose latest "
+                    "attempt had a terminal access or content-type failure."
+                )
             materialized = CatalogItemMaterializationResult(
                 generated_rows=[],
-                discovery_notes=[
-                    "Precision source rediscovery was skipped by operator choice; collection reused the current active source scope."
-                ],
+                discovery_notes=reuse_notes,
                 detail_source_ids=[],
                 discovery_metrics={
                     "mode": "standard",
                     "reused_collection_source_count": len(existing_scope_before_repair["collection_source_ids"]),
                     "reused_detail_source_count": len(existing_scope_before_repair["target_source_ids"]),
+                    "terminal_fetch_skipped_source_count": len(terminal_fetch_source_ids),
                 },
             )
         else:
@@ -535,18 +551,38 @@ def _load_active_collection_scope(
     rows = connection.execute(
         """
         SELECT
-            source_id,
-            discovery_role,
-            source_name,
-            source_url,
-            purpose,
-            expected_fields
-        FROM source_registry_item
-        WHERE bank_code = %(bank_code)s
-          AND country_code = %(country_code)s
-          AND product_type = ANY(%(product_type_scope)s)
-          AND status = 'active'
-        ORDER BY source_id
+            sri.source_id,
+            sri.source_type,
+            sri.discovery_role,
+            sri.source_name,
+            sri.source_url,
+            sri.purpose,
+            sri.expected_fields,
+            latest.stage_status AS latest_stage_status,
+            latest.error_summary AS latest_error_summary,
+            latest.snapshot_content_type AS latest_snapshot_content_type,
+            latest.browser_fallback_reason AS latest_browser_fallback_reason
+        FROM source_registry_item AS sri
+        LEFT JOIN LATERAL (
+            SELECT
+                rsi.stage_status,
+                rsi.error_summary,
+                ss.content_type AS snapshot_content_type,
+                ss.response_metadata ->> 'browser_fallback_reason' AS browser_fallback_reason
+            FROM run_source_item AS rsi
+            JOIN source_document AS sd
+              ON sd.source_document_id = rsi.source_document_id
+            LEFT JOIN source_snapshot AS ss
+              ON ss.snapshot_id = rsi.selected_snapshot_id
+            WHERE sd.source_metadata ->> 'source_id' = sri.source_id
+            ORDER BY rsi.updated_at DESC, rsi.created_at DESC
+            LIMIT 1
+        ) AS latest ON true
+        WHERE sri.bank_code = %(bank_code)s
+          AND sri.country_code = %(country_code)s
+          AND sri.product_type = ANY(%(product_type_scope)s)
+          AND sri.status = 'active'
+        ORDER BY sri.source_id
         """,
         {
             "bank_code": bank_code,
@@ -554,9 +590,15 @@ def _load_active_collection_scope(
             "product_type_scope": _product_type_scope_codes(product_type),
         },
     ).fetchall()
-    collection_source_ids = [
+    terminal_fetch_source_ids = [
         str(row["source_id"])
         for row in rows
+        if _source_has_terminal_fetch_failure(row)
+    ]
+    eligible_rows = [row for row in rows if not _source_has_terminal_fetch_failure(row)]
+    collection_source_ids = [
+        str(row["source_id"])
+        for row in eligible_rows
         if str(row["discovery_role"]) != "entry" or _is_candidate_producing_source(row, product_type=product_type)
         if _source_matches_active_product_scope(
             row,
@@ -567,7 +609,7 @@ def _load_active_collection_scope(
     ]
     target_source_ids = [
         str(row["source_id"])
-        for row in rows
+        for row in eligible_rows
         if _is_candidate_producing_source(row, product_type=product_type)
         and _source_matches_active_product_scope(
             row,
@@ -579,7 +621,26 @@ def _load_active_collection_scope(
     return {
         "collection_source_ids": collection_source_ids,
         "target_source_ids": target_source_ids,
+        "terminal_fetch_source_ids": terminal_fetch_source_ids,
     }
+
+
+def _source_has_terminal_fetch_failure(row: Any) -> bool:
+    normalized_row = dict(row) if not isinstance(row, dict) else row
+    if str(normalized_row.get("latest_stage_status") or "").lower() != "failed":
+        return False
+    error_summary = str(normalized_row.get("latest_error_summary") or "").lower()
+    if "html access challenge remained after bounded browser fallback" in error_summary:
+        return True
+    if "pdf source returned non-pdf content after bounded fetch recovery" in error_summary:
+        return True
+    snapshot_content_type = str(normalized_row.get("latest_snapshot_content_type") or "").lower()
+    browser_fallback_reason = str(normalized_row.get("latest_browser_fallback_reason") or "").lower()
+    return (
+        str(normalized_row.get("source_type") or "").lower() == "pdf"
+        and not snapshot_content_type.startswith("application/pdf")
+        and browser_fallback_reason == "html_access_challenge"
+    )
 
 
 def _source_matches_active_product_scope(
@@ -605,6 +666,15 @@ def _source_matches_active_product_scope(
         str(normalized_row.get(key) or "")
         for key in ("source_url", "source_name", "purpose")
     ).lower()
+    if (
+        str(normalized_row.get("discovery_role") or "").lower()
+        in {"supporting_html", "supporting_pdf", "linked_pdf"}
+        and _is_non_product_supporting_document(
+            product_type=product_type,
+            normalized_url=source_url,
+        )
+    ):
+        return False
     return not _has_unrelated_product_type_signal(
         product_type=product_type,
         fingerprint=fingerprint,

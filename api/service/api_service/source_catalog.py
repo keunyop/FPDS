@@ -153,6 +153,8 @@ _DETAIL_COMPANION_EXCLUDED_MARKERS = (
     "service-agreement.go",
     "site-terms",
     "terms-of-use",
+    "user-agreement",
+    "user_agreement",
 )
 _HUB_KEYWORDS = (
     "account",
@@ -5015,6 +5017,16 @@ def _promote_detail_candidates(
             page_evidence_by_url[candidate.normalized_url] = page_evidence
         if page_evidence.fetch_error:
             notes.append(f"Page evidence was unavailable for {candidate.normalized_url}: {page_evidence.fetch_error}")
+            if _page_fetch_error_is_structural_access_challenge(page_evidence.fetch_error):
+                rejected_detail_urls.append(candidate.normalized_url)
+                rejection_counts["access_challenge_persisted"] += 1
+                if len(rejection_diagnostics) < 8:
+                    rejection_diagnostics.append(
+                        "Rejected detail "
+                        f"{candidate.normalized_url}: reason=access_challenge_persisted; "
+                        f"page_error={_collapse_whitespace(page_evidence.fetch_error)[:500]}."
+                    )
+                continue
             if not _candidate_is_seed_backed(candidate):
                 rejection_counts["page_fetch_unavailable"] += 1
                 continue
@@ -5246,6 +5258,56 @@ def _discover_detail_companion_links(
     return list(by_url.values()), notes
 
 
+def _is_non_product_supporting_document(
+    *,
+    product_type: str,
+    normalized_url: str,
+    anchor_text: str = "",
+) -> bool:
+    parsed = urlparse(normalized_url)
+    path = parsed.path.lower()
+    if any(
+        marker in path
+        for marker in (
+            "/about/misc/user-agreement",
+            "/user-agreement",
+            "/user_agreement",
+            "/website-terms",
+        )
+    ):
+        return True
+
+    canonical_type = _canonical_product_type_code(product_type)
+    if canonical_type not in {"chequing", "savings", "gic"}:
+        return False
+    investment_path = any(
+        marker in path
+        for marker in ("/wealth/", "/invest/", "/investment/", "/investments/")
+    )
+    if not investment_path:
+        return False
+    fingerprint = f"{path} {_collapse_whitespace(anchor_text).lower()}"
+    document_marker = any(
+        marker in fingerprint
+        for marker in ("disclosure", "prospectus", "fund-fact", "fund_fact")
+    )
+    deposit_context = any(
+        marker in fingerprint
+        for marker in (
+            "account-guide",
+            "chequing",
+            "checking",
+            "deposit-account",
+            "fee-schedule",
+            "gic",
+            "interest-rate",
+            "savings",
+            "term-deposit",
+        )
+    )
+    return document_marker and not deposit_context
+
+
 def _detail_companion_link_score(*, product_type: str, normalized_url: str, anchor_text: str) -> int:
     parsed = urlparse(normalized_url)
     hostname = str(parsed.hostname or "").lower()
@@ -5258,6 +5320,12 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
     path_and_query = " ".join(part for part in (parsed.path.lower(), parsed.query.lower()) if part)
     fingerprint = f"{path_and_query} {anchor}".strip()
     if any(marker in fingerprint for marker in _DETAIL_COMPANION_EXCLUDED_MARKERS):
+        return 0
+    if _is_non_product_supporting_document(
+        product_type=product_type,
+        normalized_url=normalized_url,
+        anchor_text=anchor_text,
+    ):
         return 0
     if _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
         return 0
@@ -5477,6 +5545,10 @@ def _candidate_combined_score(candidate: HomepageCandidate, ai_scores: dict[str,
 
 def _candidate_is_seed_backed(candidate: HomepageCandidate) -> bool:
     return bool(candidate.seed_source_id) or candidate.origin == "seed_detail_hint"
+
+
+def _page_fetch_error_is_structural_access_challenge(error_summary: str) -> bool:
+    return "html access challenge remained after bounded browser fallback" in error_summary.strip().lower()
 
 
 def _candidate_promotes_to_detail(

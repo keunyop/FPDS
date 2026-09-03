@@ -243,6 +243,37 @@ class SnapshotCaptureTests(unittest.TestCase):
         self.assertEqual(item.attempt_count, 1)
         self.assertEqual(attempts["count"], 1)
 
+    def test_capture_rejects_html_recovery_payload_for_pdf_source_without_retry(self) -> None:
+        source = CaptureSource.from_registry_source(self.registry.by_source_id("TD-SAV-007"))
+        object_store = _RecordingObjectStore()
+        service = SnapshotCaptureService(
+            fetch_policy=self.fetch_policy,
+            storage_config=SnapshotStorageConfig(
+                driver="filesystem",
+                env_prefix="dev",
+                snapshot_object_prefix="snapshots",
+                retention_class="hot",
+                filesystem_root="ignored-for-tests",
+            ),
+            object_store=object_store,
+            fetcher=lambda url, policy: _fetched_response(
+                body=b"<html><body><embed type='application/pdf'></body></html>",
+                content_type="text/html",
+                final_url=url,
+                headers={"x-fpds-browser-fallback-reason": "html_access_challenge"},
+            ),
+            max_attempts=3,
+        )
+
+        result = service.capture_sources(run_id="run-pdf-html", sources=[source])
+
+        item = result.source_results[0]
+        self.assertTrue(result.partial_completion_flag)
+        self.assertEqual(item.snapshot_action, "failed")
+        self.assertEqual(item.attempt_count, 1)
+        self.assertIn("PDF source returned non-PDF content", item.error_summary or "")
+        self.assertEqual(object_store.writes, [])
+
 
 def _fetched_response(
     *, body: bytes, content_type: str, final_url: str, headers: dict[str, str] | None = None
