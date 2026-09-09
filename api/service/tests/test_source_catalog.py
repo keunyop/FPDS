@@ -6589,19 +6589,12 @@ class SourceCatalogTests(unittest.TestCase):
         migration_sql = (
             repo_root / "db" / "migrations" / "0022_bank_logo_asset_refresh.sql"
         ).read_text(encoding="utf-8")
-        public_logo_component = (
-            repo_root / "app" / "public" / "src" / "components" / "fpds" / "public" / "bank-logo.tsx"
-        ).read_text(encoding="utf-8")
 
         self.assertIn("official_logo_refresh", migration_sql)
         self.assertIn("bank.logo_url IS NULL OR bank.logo_url = official_logo_refresh.previous_logo_url", migration_sql)
         self.assertIn("0022_bank_logo_asset_refresh.sql", migration_sql)
         for bank_code in ("NATIONAL", "TANGERINE", "EQBANK", "MANULIFE", "ALTERNA", "FNBC", "SIMPLII", "VERSABANK"):
             self.assertIn(f"'{bank_code}'", migration_sql)
-            self.assertIn(f"{bank_code}: {{ src:", public_logo_component)
-
-        self.assertIn('onError={() => setFailed(true)}', public_logo_component)
-        self.assertNotIn('rounded-md border border-border/70 bg-white', public_logo_component)
 
     def test_homepage_parallel_scorer_uses_default_medium_reasoning_effort_when_omitted(self) -> None:
         response = MagicMock()

@@ -1,3 +1,4 @@
+import { adminEnvironmentLabel } from "@/lib/admin-auth-client";
 import { notFound, redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
@@ -43,7 +44,7 @@ export default async function RunDetailPage({ params, searchParams }: RunDetailP
     notFound();
   }
 
-  const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
+  const envLabel = adminEnvironmentLabel(session.environment);
   return (
     <AdminShell
       countryCode={session.country_code}

@@ -87,3 +87,13 @@ Goals:
 | 2026-08-26 | Recorded the Admin mark, collection-mode Switch wrapper, and Banks/Review responsive containment |
 | 2026-08-27 | Recorded Product Owner removal of the graphical Admin mark across the Admin UI |
 | 2026-08-29 | Recorded the streamlined Public Home finder and Methodology country coverage composition |
+
+
+## 2026-09-06 - Admin Auth Wrapper Correction
+
+The existing login2/application-shell5 wrappers now restrict post-login
+navigation to Admin, carry CSRF into logout, keep a failed logout visibly
+retryable, and omit the nonfunctional Account settings item. Existing vendor
+primitives and semantic tokens remain in use. The API environment and run
+attention union replace misleading build-mode/status assumptions. The local
+fixture browser matrix passed all three locales at 390/768/1440px.

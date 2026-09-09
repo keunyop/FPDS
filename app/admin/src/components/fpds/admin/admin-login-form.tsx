@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
+import { safeAdminReturnPath } from "@/lib/admin-auth-client";
 
 type LoginCopy = {
   brand: string;
@@ -123,12 +124,7 @@ const AdminLoginForm = ({ apiOrigin, nextPath, locale, className }: AdminLoginFo
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const safeNextPath = useMemo(() => {
-    if (!nextPath.startsWith("/")) {
-      return "/admin";
-    }
-    return nextPath;
-  }, [nextPath]);
+  const safeNextPath = useMemo(() => safeAdminReturnPath(nextPath, locale), [nextPath, locale]);
 
   const signupHref = useMemo(() => buildAdminHref("/admin/signup", new URLSearchParams(), locale), [locale]);
 

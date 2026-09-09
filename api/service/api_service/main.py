@@ -578,6 +578,7 @@ async def logout(request: Request) -> JSONResponse:
             resolved = get_session_by_token(connection, session_token=session_token, settings=settings)
             if resolved:
                 actor, session = resolved
+                _require_csrf(request, session_info=session)
                 revoke_session(
                     connection,
                     auth_session_id=session["auth_session_id"],
@@ -599,6 +600,7 @@ async def session(request: Request) -> JSONResponse:
         {
             "user": actor,
             "country_code": _session_country(session_info),
+            "environment": request.app.state.settings.env,
             "csrf_token": session_info["csrf_token"],
         },
         request,

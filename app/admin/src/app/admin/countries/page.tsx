@@ -1,3 +1,4 @@
+import { adminEnvironmentLabel } from "@/lib/admin-auth-client";
 import { redirect } from "next/navigation";
 
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
@@ -44,7 +45,7 @@ export default async function CountriesPage({ searchParams }: CountriesPageProps
     <AdminShell
       countryCode={session.country_code}
       csrfToken={session.csrf_token}
-      environmentLabel={process.env.NODE_ENV === "production" ? "Prod" : "Dev"}
+      environmentLabel={adminEnvironmentLabel(session.environment)}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
       user={{

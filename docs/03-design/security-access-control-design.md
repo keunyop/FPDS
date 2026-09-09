@@ -79,7 +79,7 @@ operator Admin/RBAC surface. It protects bounded product engagement aggregates
 and anonymous feedback review.
 
 - the password is read only from `FPDS_PUBLIC_ADMIN_PASSWORD` on the server;
-  the approved deployed value is `1112` and it must not enter client code
+  its value must remain outside Git and must not enter client code
 - successful login issues an eight-hour signed HttpOnly, SameSite=Strict,
   Secure-in-production cookie scoped to `/admin`
 - `FPDS_PUBLIC_ADMIN_SESSION_SECRET` signs that cookie; failed attempts receive

@@ -1,3 +1,4 @@
+import { adminEnvironmentLabel } from "@/lib/admin-auth-client";
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
@@ -39,7 +40,7 @@ export default async function DashboardHealthPage({ searchParams }: DashboardHea
     return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "대시보드 상태를 불러올 수 없습니다." : locale === "ja" ? "ダッシュボード状態を読み込めません。" : "Dashboard health could not load."} />;
   }
 
-  const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
+  const envLabel = adminEnvironmentLabel(session.environment);
 
   return (
     <AdminShell

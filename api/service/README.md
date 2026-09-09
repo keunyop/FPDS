@@ -584,3 +584,15 @@ cd api/service
 - Later admin write routes can keep reusing the same session and CSRF token model.
 - The settings loader now resolves a relative `FPDS_ENV_FILE` from either the current working directory or the repo root, so `.env.dev` works both from the workspace root and from inside `api/service`.
 - `api/service/tests/test_ops_scenario_qa.py` gives the service layer a Gate C-focused operator scenario test that verifies review decision side effects, durable change-history linkage, and run-detail drilldown context together.
+
+## Admin Handover Corrections (2026-09-06)
+
+- POST /api/admin/auth/logout validates CSRF before revoking an active session.
+  Missing/expired sessions remain idempotent and clear stale browser cookies.
+- GET /api/admin/auth/session includes the API's environment value, so a
+  production-mode web build connected to dev is not labeled Production.
+- The run-list summary adds attention_items: the count of failed or partial
+  runs, without counting a failed partial run twice.
+- Focused regression tests cover logout rejection/success/idempotency, the
+  environment contract, and execution of the attention aggregate against mixed
+  country/state test data.

@@ -1,3 +1,4 @@
+import { adminEnvironmentLabel } from "@/lib/admin-auth-client";
 import { notFound, redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
@@ -50,7 +51,7 @@ export default async function SourceDetailPage({ params, searchParams }: SourceD
     <AdminShell
       countryCode={session.country_code}
       csrfToken={session.csrf_token}
-      environmentLabel={process.env.NODE_ENV === "production" ? "Prod" : "Dev"}
+      environmentLabel={adminEnvironmentLabel(session.environment)}
       locale={locale}
       logoutApiOrigin={getAdminApiOrigin()}
       user={{

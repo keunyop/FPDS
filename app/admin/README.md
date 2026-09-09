@@ -64,7 +64,7 @@ src/components/fpds/admin/        Admin shell and workflow/domain surfaces
 src/components/ui/                reusable vendor UI primitives
 src/lib/admin-api.ts              server-side Admin API client and response types
 src/lib/admin-i18n.ts             locale-preserving URLs and Admin translations
-src/middleware.ts                 protected-route session gate
+middleware.ts                     protected-route session gate
 routes.manifest.json              current page-route-to-file map
 ```
 
@@ -113,9 +113,32 @@ From this directory:
 pnpm install --frozen-lockfile
 pnpm run dev
 pnpm run typecheck
+pnpm run test
 pnpm run build
 ```
 
 Admin runs on `http://localhost:3001`. Copy `.env.example` to the appropriate
 local environment file and follow the root README for the API/database startup
 order.
+
+## Handover Hardening
+
+- The environment badge comes from the authenticated API session's environment
+  (dev/prod), never from the Next.js build mode. An older API without this field
+  shows an unknown mark.
+- Overview counts the union of failed and partial runs across all default run
+  states, including completed partial runs, once per run. Its Runs link keeps
+  completed partial runs reachable.
+- Login return destinations stay under the same-origin /admin path and keep
+  the selected locale.
+- Logout sends the session CSRF token, has a 15-second timeout, and returns to
+  Login only after success. Failures remain visible with a localized retry
+  message because the session may still be active.
+- The Account menu contains working locale and logout controls; the disabled
+  account-settings placeholder is removed. Account lifecycle tooling is pending
+  explicit approval; see descent/02-release-readiness.md at repository root.
+- Web responses set frame-ancestor/object/base restrictions, frame denial,
+  nosniff, and referrer policy. API headers do not protect the separate web
+  document. TLS/HSTS and production cookie behavior still require deployment UAT.
+- The test script uses the installed Node TypeScript support (verified on Node
+  24.13.0) for auth success/failure, safe navigation, and environment regressions.

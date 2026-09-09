@@ -2,6 +2,8 @@
 
 상태: 실행용 체크리스트
 
+Kick-off 미팅 자료: [FPDS 인수인계 킥오프 미팅 (한국어・日本語)](00-kickoff-meeting.md)
+
 적용 범위: FPDS Admin, Admin API, worker, DB, private evidence storage
 
 이 문서는 위에서 아래 순서대로 실행한다. 각 단계의 체크박스와 통과 조건을
@@ -94,9 +96,9 @@ descent/
 
 실행:
 
-- [ ] 전달 대상 Git repository와 의뢰자 소유 organization을 확정한다.
-- [ ] 포함·제외 경로와 공유 파일의 사유를 기록한다.
-- [ ] 불필요한 log, cache, 임시파일과 재생성 가능한 산출물을 제외한다.
+- [v] 전달 대상 Git repository와 의뢰자 소유 organization을 확정한다.
+- [v] 포함·제외 경로와 공유 파일을 확정한다.
+- [v] 불필요한 log, cache, 임시파일과 재생성 가능한 산출물을 제외한다.
 - [ ] Git과 전달 archive에 실제 secret, DB URL, 고객 데이터, private evidence
       원문이 없는지 검사한다.
 - [ ] 빈 환경에서 dependency를 설치하고 아래 검증을 실행한다.
@@ -109,6 +111,7 @@ descent/
 ```powershell
 cd app/admin
 pnpm run typecheck
+pnpm run test
 pnpm run build
 
 cd ../..
@@ -408,3 +411,11 @@ UAT 기록에 최소한 다음을 포함한다.
 - [Admin API 운영 경계](../api/service/README.md)
 - [Worker 운영 경계](../worker/README.md)
 - [DB 운영 경계](../db/README.md)
+
+## 8. 사전 기술 점검 기록
+
+- [2026-09-06 인수 준비 점검과 잔여 항목](02-release-readiness.md)
+- [현재 Admin 운영 핸드북 초안](05-operations-handbook.md)
+
+위 기록은 저장소 수정·로컬 검증 결과이며, Step 1 승인, 깨끗한 clone 검증,
+의뢰자 환경 복구·UAT 또는 Production GO 승인을 대신하지 않는다.

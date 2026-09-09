@@ -14,7 +14,6 @@ import {
   LayoutDashboard,
   LogOut,
   Shapes,
-  UserRound,
 } from "lucide-react";
 
 import { LogoutButton } from "@/app/admin/LogoutButton";
@@ -24,7 +23,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -284,12 +282,14 @@ function MobileBottomNav({
 }
 
 function AppSidebar({
+  csrfToken,
   locale,
   logoutApiOrigin,
   pathname,
   user,
 }: {
   locale: AdminLocale;
+  csrfToken?: string | null;
   logoutApiOrigin: string;
   pathname: string | null;
   user: ShellUser;
@@ -364,17 +364,13 @@ function AppSidebar({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <div className="p-1">
-                  <DropdownMenuItem className="justify-start gap-2 text-left" disabled>
-                    <UserRound className="h-4 w-4" />
-                    <span>{copy.account}</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <React.Suspense fallback={null}>
                     <AdminLocaleSwitcher locale={locale} variant="menu" />
                   </React.Suspense>
                   <DropdownMenuSeparator />
                   <LogoutButton
                     apiOrigin={logoutApiOrigin}
+                    csrfToken={csrfToken}
                     className="w-full justify-start px-1.5 text-left"
                     icon={LogOut}
                     variant="ghost"
@@ -424,6 +420,7 @@ function AdminShell({
 
         <div className="flex min-w-0 flex-1">
           <AppSidebar
+            csrfToken={csrfToken}
             locale={locale}
             logoutApiOrigin={logoutApiOrigin}
             pathname={pathname}

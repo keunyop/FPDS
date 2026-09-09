@@ -1510,3 +1510,120 @@ Read before coding:
 - Boundaries: no financial fact, ranking, finder rule, canonical data,
   publication gate, analytics policy, Admin behavior, secret, deployment, or
   external system was changed.
+
+## 2026-09-03 - Admin/Public Disposable Artifact Cleanup
+
+- Status: local cleanup and dependency-backed verification complete.
+- Outcome:
+  - removed the Admin and Public `.next` build trees, both
+    `tsconfig.tsbuildinfo` compiler caches, the empty legacy `route-shells`
+    directory trees, and ignored root `tmp` logs, screenshots, browser
+    profiles, generated payloads, one-off patches, and test persistence output
+  - removed the tracked aggregate-refresh runner log; the existing runtime
+    creates its directory and log again on demand under the already ignored
+    root `tmp` boundary
+  - reclaimed approximately 3.80 GB (3.54 GiB) while retaining both
+    `node_modules` installations, local environment configuration, Vercel
+    project-link metadata, tracked operational helper scripts, source, assets,
+    lockfiles, and route manifests
+- Verification:
+  - Admin `pnpm run typecheck` passed
+  - Admin clean `pnpm run build` passed
+  - Public `pnpm run lint`, `pnpm run typecheck`, and all 8 unit tests passed
+  - Public clean `pnpm run build` passed
+  - build-generated `.next` and TypeScript caches were removed again after
+    verification; Next-generated `next-env.d.ts` changes were restored
+  - final `git diff --check` passed
+- Key files:
+  - `tmp/aggregate-refresh/aggregate-refresh-runner.log`
+  - `docs/00-governance/development-journal.md`
+- Decisions: no runtime, product, data, dependency, environment, or deployment
+  contract changed; existing ignore rules already cover every regenerated
+  artifact, so no ignore-rule change was needed.
+- Known issues: none from this cleanup.
+- Next step: none.
+- Boundaries: no dependency installation, secret, Vercel link, source file,
+  financial fact, canonical/private data, external service, or deployment was
+  changed. Pre-existing Product Owner worktree changes were preserved.
+
+
+## 2026-09-06 - Admin Pre-Handover Review And Corrections
+
+- Status: approved local corrections and verification complete; account lifecycle
+  CLI authorization and client release/recovery/UAT gates remain open.
+- Findings/fixes: active-session logout lacked CSRF and the client navigated on
+  failure; login allowed external return paths; production-mode builds labeled
+  dev as Prod; Overview excluded completed partial runs and could double-count
+  failed partial runs. Fixed all five flows and added web frame/base/object,
+  nosniff, and referrer headers.
+- Removed the disabled Account placeholder. Preserved operational secondary
+  screens, compatibility redirects, and Banks' source-catalog APIs. Added the
+  missing Admin environment example and corrected the middleware documentation.
+- Corrected an API regression that coupled migration logo protection to obsolete
+  Public component strings; Public's own logo behavior tests remain in place.
+- Redacted explicit deployment-password values from two current documents.
+  Historical exposure/rotation is R-008; no real credential was rotated.
+- Verification: Admin typecheck, 5 focused Node tests and final production build
+  passed; API 474 tests and Worker 527 tests passed; full foundation harness
+  passed including Public lint/typecheck/8 tests/build. A separate headless
+  Chrome fixture matrix passed EN/KO/JA at exact 390/768/1440px, logout failure
+  and successful cookie removal, API Dev labels, completed-partial attention
+  query coverage, headers, and zero horizontal overflow. KO mobile/desktop
+  screenshots were also visually inspected.
+- Verification limits: existing dependency workspace, not a clean clone;
+  browser data/accounts were synthetic. No live role/collection/review,
+  deployment, data migration, restore, secret rotation, or customer UAT occurred.
+  Admin Node tests emit a harmless module-type auto-detection warning.
+- Key files: Admin auth client and tests, LogoutButton, admin-shell/login wrapper,
+  page environment wiring, next.config.ts, API main.py/run_status.py and auth/
+  aggregate tests; descent/02-release-readiness.md and 05-operations-handbook.md.
+- The new privileged access CLI was not written: automatic approval review
+  rejected its creation as a persistent privileged capability outside the
+  recorded account-change exclusion. Explicit approval was requested; the
+  reviewable scope is documented under release readiness. I-004 and WBS 5.62
+  remain open. Actual account operations remain separate.
+- The 10-business-day versus one-month hypercare conflict was recorded for
+  Product Owner resolution; no schedule or acceptance signature was invented.
+- Next step: approve/resolve account lifecycle scope, rotate the documented
+  credential as applicable, complete clean-clone/release and client environment
+  restore/UAT evidence. Final whitespace/document checks are recorded below.
+- Boundaries: existing descent guide/journal edits and user-deleted SEO/tmp files
+  preserved; no canonical/private evidence, external state or release tag changed.
+- Final checks: repository doctor and git diff --check passed after documentation updates; only verified Next-generated route-type import changes were restored. The goal remains for the unresolved privileged account-tool authorization.
+
+## 2026-09-07 - Search Console coverage diagnosis
+
+- Outcome: parsed all four CSVs from the supplied Coverage ZIP. Its chart ends
+  September 3 at 27 indexed / 218 not indexed; reasons are 213 discovered,
+  3 redirects, 1 noindex, and 1 duplicate without user-selected canonical.
+  The overview export contains no affected URLs or Google-selected canonicals.
+- Verified current Production against existing FR-PUB-020/D-075: www Home is
+  200; apex and dashboard redirect; clean product canonical/index signals,
+  localized/filtered noindex, and the documented duplicate redirect are live.
+- Verification: existing Production SEO audit passed all 225 sitemap URLs and
+  10 representative routes plus its locale/redirect/missing-product cases;
+  separate public GETs checked host redirects, robots, sitemap, and sample
+  HTTP/header/meta responses. No runtime build was needed or run.
+- Decision: no reproducible runtime defect justified changing the approved
+  indexing boundary. Do not equate intended exclusions with missing products
+  or infer a 213-page capacity/content defect from aggregate counts.
+- Key file: docs/seo/gsc-2026-09-07-diagnosis.md records evidence and follow-up.
+- Limitation/next: Product Owner exports each reason's affected URL table and
+  checks URL Inspection canonical/last-crawl fields, sitemap status and Crawl
+  stats. Existing tools do not access authenticated GSC. No deployment, GSC
+  action, or canonical-data mutation performed; unrelated Admin work preserved.
+
+
+## 2026-09-08 - English handover kick-off meeting guide
+
+- Outcome: added descent/00-kickoff-meeting.md for a shared 25-minute discussion
+  with optional five-minute questions, using short English sentences and tables.
+- Covers the existing Admin handover scope, five transfer steps, responsibilities,
+  dates, completion criteria, and an action list. Linked from descent/README.md.
+- Preserves the unresolved 10-business-day versus one-month support decision;
+  dates and assignments remain for meeting confirmation. No release or acceptance
+  approval is implied, and the existing Admin goal remains untouched.
+- Verification: checked content against the scope, execution guide, and latest
+  release-readiness record. Markdown links and whitespace checked separately.
+- Next: use the guide at kick-off and record the agreed owners, dates, and support
+  period. No runtime changes or application tests are needed for this document.

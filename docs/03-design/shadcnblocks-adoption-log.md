@@ -310,3 +310,14 @@ Do not add an entry for:
 | 2026-04-13 | Initial adoption log created after the template-first design baseline was approved |
 | 2026-07-28 | Recorded semantic Admin block ownership and reachability-backed vendor residue cleanup for client handoff |
 | 2026-08-26 | Recorded the shadcn-compatible Admin Switch primitive and responsive Banks/Review control refinements |
+
+
+## 2026-09-06 - Admin Handover Auth And Shell Corrections
+
+- Existing login2/application-shell5 wrappers only; no new vendor primitive.
+- Restricted login return paths, propagated logout CSRF, retained localized
+  failure/retry feedback, and removed the disabled Account placeholder.
+- Environment labels now use the API session; Overview includes completed
+  partial runs without duplicate attention counts.
+- Verified production build with fixture data in EN/KO/JA at 390/768/1440px,
+  including menu, logout failure/success, and zero horizontal overflow.

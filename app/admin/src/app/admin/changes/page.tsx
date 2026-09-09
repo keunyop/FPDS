@@ -1,3 +1,4 @@
+import { adminEnvironmentLabel } from "@/lib/admin-auth-client";
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
@@ -48,7 +49,7 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
     return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "변경 이력을 불러올 수 없습니다." : locale === "ja" ? "変更履歴を読み込めません。" : "Change history could not load."} />;
   }
 
-  const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
+  const envLabel = adminEnvironmentLabel(session.environment);
   return (
     <AdminShell
       countryCode={session.country_code}

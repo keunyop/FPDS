@@ -235,18 +235,16 @@ Purpose:
 - first-stop triage surface after login
 - for `admin`, also the first-stop approval surface for pending signup requests
 
-Minimum widgets:
-- total products
-- products by bank
-- products by type
-- pending signup requests
-- runs today/this week
-- queued review count
-- approval rate
-- recent failures
-- recently changed products
-- dashboard refresh status
-- metric aggregation health
+Current shipped attention signals:
+- failed or partial runs, counted once per run across all default states;
+  completed partial runs remain included in the linked Runs view
+- queued or deferred review count
+- failed, stale, or empty Public aggregate state
+- pending signup requests for administrators
+
+Unavailable data remains visibly unavailable. The shell environment badge comes
+from the API session, independently of the web build mode. The Account menu
+contains language and logout controls; no account-settings page is shipped.
 
 ### 7.2 Review Queue
 

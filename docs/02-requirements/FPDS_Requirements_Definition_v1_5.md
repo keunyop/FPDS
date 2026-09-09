@@ -683,7 +683,7 @@ active products alphabetically through bounded incremental paging.
 
 The Public application must expose a private `/admin` route protected by a
 server-verified password and a signed HttpOnly, SameSite=Strict session cookie.
-The Product Owner deployment password is `1112` and must be supplied as a
+The deployment password must be managed outside Git and supplied as a
 server-only environment value, never embedded in the client bundle. Failed
 login attempts require bounded best-effort throttling, the page must be
 `noindex` and excluded from GA page-view collection, and the analytics API must

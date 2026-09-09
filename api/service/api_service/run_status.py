@@ -131,10 +131,11 @@ def load_run_status_list(connection: Connection, *, filters: RunStatusFilters) -
     ).fetchall()
     partial_row = connection.execute(
         f"""
-        SELECT COUNT(*) AS item_count
+        SELECT
+            COUNT(*) FILTER (WHERE ir.partial_completion_flag = true) AS item_count,
+            COUNT(*) FILTER (WHERE ir.run_state = 'failed' OR ir.partial_completion_flag = true) AS attention_items
         FROM ingestion_run AS ir
         WHERE {where_sql}
-          AND ir.partial_completion_flag = true
         """,
         params,
     ).fetchone()
@@ -199,6 +200,7 @@ def load_run_status_list(connection: Connection, *, filters: RunStatusFilters) -
             "state_counts": state_counts,
             "run_type_counts": run_type_counts,
             "partial_items": partial_items,
+            "attention_items": int(partial_row["attention_items"]) if partial_row else 0,
         },
         "applied_filters": {
             "country_code": filters.country_code,

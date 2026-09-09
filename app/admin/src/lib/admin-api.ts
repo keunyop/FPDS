@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 
 export type AdminSession = {
+  environment?: string;
   country_code: string;
   user: {
     user_id: string;
@@ -148,6 +149,7 @@ export type RunStatusListResponse = {
     state_counts: Record<string, number>;
     run_type_counts: Record<string, number>;
     partial_items: number;
+    attention_items?: number;
   };
   applied_filters: {
     states: string[];

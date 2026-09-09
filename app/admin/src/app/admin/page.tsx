@@ -1,3 +1,4 @@
+import { adminEnvironmentLabel } from "@/lib/admin-auth-client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Activity, ArrowUpRight, Gauge, ShieldCheck, UserCheck } from "lucide-react";
@@ -171,9 +172,9 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
     fetchOptional(fetchDashboardHealth()),
   ]);
 
-  const envLabel = process.env.NODE_ENV === "production" ? "Prod" : "Dev";
+  const envLabel = adminEnvironmentLabel(activeSession.environment);
   const reviewCount = reviewQueue?.summary.active_items ?? null;
-  const runAttentionCount = runs ? (runs.summary.state_counts.failed ?? 0) + runs.summary.partial_items : null;
+  const runAttentionCount = runs?.summary.attention_items ?? null;
   const dashboardIssueCount = dashboardHealth
     ? dashboardHealth.summary.failed_domains + dashboardHealth.summary.stale_domains + dashboardHealth.summary.empty_domains
     : null;
@@ -337,8 +338,6 @@ function buildReviewQueueParams() {
 
 function buildRunStatusParams() {
   const params = new URLSearchParams();
-  params.append("state", "started");
-  params.append("state", "failed");
   params.set("sort_by", "started_at");
   params.set("sort_order", "desc");
   params.set("page", "1");
@@ -354,8 +353,6 @@ function reviewQueueLinkParams() {
 
 function runLinkParams() {
   const params = new URLSearchParams();
-  params.append("state", "started");
-  params.append("state", "failed");
   return params;
 }
 
