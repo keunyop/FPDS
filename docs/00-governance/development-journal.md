@@ -25,6 +25,31 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-09-12 (Admin purpose/features source reconciliation, complete):
+
+- added the Korean [Admin purpose and feature guide](../03-design/fpds-admin-purpose-and-features.md),
+  covering purpose, workflow, every current screen, API-enforced roles, shared
+  Product Types versus country-owned data, AI verification/promotion, Public
+  refresh, and explicitly deferred or removed capabilities
+- corrected Admin IA, requirements, scope/security/API design, runtime READMEs,
+  and navigation indexes. Product Types is implemented; Product Record and
+  Publish Monitor are not. Generated-source create/update returns 405, source
+  removal is a soft transition, and eligible bank deletion removes its remaining
+  coverage/generated sources. In-run automation survives scheduler removal
+- correction to the 2026-08-31 resume block below: D-072 and the current code
+  place feedback only in password-gated app/public `/admin` and
+  GET /api/public/admin/feedback. FPDS Admin has neither the inbox page nor
+  GET /api/admin/public-feedback. The old block remains a historical record
+- verification: all 18 Admin package pages match routes.manifest.json; the guide
+  covers every /admin page route. All 59 API method/path pairs in the README
+  match main.py AST. Repository Markdown-reference checks and git diff --check
+  pass. This was static/document verification; no runtime suite, app build,
+  browser QA, live DB read, collection, approval, migration, or deployment ran
+- existing untracked user manual/images and earlier goal ownership are preserved.
+  The independent documentation slice is complete; prior account-lifecycle and
+  client handover gates remain open. Next: use the guide for operator orientation
+  and keep the route/role inventory aligned when runtime behavior changes
+
 As of 2026-08-31 (Public product report and site feedback, complete):
 
 - migration 0046 defines a 400-day-bounded anonymous product-error and site-

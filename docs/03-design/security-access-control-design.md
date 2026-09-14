@@ -63,7 +63,7 @@ Additional onboarding rules:
 - 선택 국가는 `admin_auth_session.country_code`에 저장되고 Admin shell에서
   지속적으로 표시된다.
 - admin API는 cookie-backed authenticated session이 없으면 접근할 수 없다.
-- 은행, 소스, 수집, run, review, canonical change, LLM usage처럼
+- 은행, 소스, 수집, run, review, canonical change처럼
   국가가 소유하는 Admin 데이터는 request query가 아니라 세션 국가로
   제한한다. 다른 국가의 ID를 직접 요청해도 존재 여부를 노출하지 않는다.
 - 이 country context는 현재 role을 대체하는 새 권한이 아니다. RBAC와 CSRF
@@ -71,6 +71,12 @@ Additional onboarding rules:
   authorization mapping으로 추가한다.
 - browser는 access token을 직접 저장하거나 전달하지 않는다.
 - service-to-service 인증은 admin browser login과 분리된 별도 credential을 사용한다.
+
+Current interpretation (2026-09-12): account administration and Product Type
+definitions are shared registries, not country-owned operational rows.
+Country/type market profiles separately govern collection and publication.
+D-044 and requirements Section 0 supersede older generic audit/usage retention
+clauses; role, session, CSRF, and country checks remain enforced.
 
 ### 3.3 Public Operations Admin Exception
 

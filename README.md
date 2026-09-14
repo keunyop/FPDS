@@ -179,6 +179,8 @@ This is still not a full FPDS product yet, but the ingestion core is now activel
 
 ## Start Here
 
+- [FPDS Admin purpose and complete feature guide (Korean)](docs/03-design/fpds-admin-purpose-and-features.md): source-verified current screens, roles, collection/review/publication flow, and deferred or removed features (2026-09-12)
+
 - docs map: [docs/README.md](docs/README.md)
 - development journal: [docs/00-governance/development-journal.md](docs/00-governance/development-journal.md)
 - requirements baseline: [docs/02-requirements/FPDS_Requirements_Definition_v1_5.md](docs/02-requirements/FPDS_Requirements_Definition_v1_5.md)
@@ -216,7 +218,11 @@ The runtime boundaries are intentionally separate:
 
 Admin daily work is **Overview → Review → Runs → Banks**. Sources, Product
 Types, Changes, Countries, and Public Health remain available under
-**More tools**. The current page-to-file maps are
+**More tools**. Product Types is a shared registry; country-owned operational
+data comes from the authenticated session. Collection starts from an operator
+action, with guarded automation inside that run. Public feedback and engagement
+belong to the separate password-gated Public app `/admin`. The current
+page-to-file maps are
 `app/admin/routes.manifest.json` and `app/public/routes.manifest.json`.
 
 Handoff verification:

@@ -823,8 +823,10 @@ Trace viewer 최소 요소:
 ### FR-ADM-011 BX-PF Integration Status
 운영자는 BX-PF connector 상태, write-back 결과, pending/retry 상태를 확인할 수 있어야 한다.
 
-### FR-ADM-012 LLM Usage Dashboard
-운영자는 agent별 / run별 LLM token usage와 estimated cost를 조회할 수 있어야 한다. 위젯 title과 상태 label은 EN/KO/JA locale을 지원해야 한다.
+### FR-ADM-012 Removed: LLM Usage Dashboard
+이 과거 요구사항은 Section 0 및 D-044로 대체됐다. 독립적인 token/cost
+장부와 Usage 화면은 제공하지 않는다. Review/Run은 품질 진단에 필요한
+제한된 모델 실행 상태만 유지한다.
 
 ### FR-ADM-013 Dashboard Refresh and Metric Health
 운영자는 공개 dashboard의 last refresh 시각, 집계 성공/실패 여부, 누락 데이터 비율 또는 equivalent metric health 정보를 확인할 수 있어야 한다.
@@ -833,7 +835,10 @@ Trace viewer 최소 요소:
 운영자는 locale별 번역 적용 상태, 누락된 번역 항목 수, fallback 적용 여부 또는 동등한 localization health 정보를 확인할 수 있어야 한다.
 
 ### FR-ADM-015 Source Registry Management
-운영자는 admin UI에서 은행 목록과 source registry catalog를 관리할 수 있어야 하며, generated source row는 read-only로 조회할 수 있어야 한다.
+운영자는 admin UI에서 은행 목록과 source registry catalog를 관리할 수 있어야
+하며, generated source row는 조회 중심으로 제공한다. 직접 생성·수정은
+허용하지 않고, admin만 잘못된 소스를 `removed` 상태로 전환할 수 있다.
+이 제거는 과거 run·candidate를 삭제하거나 공개 상품을 철회하지 않는다.
 
 Source registry row 최소 정보:
 - source id
@@ -849,7 +854,9 @@ Source registry row 최소 정보:
 - updated time
 
 ### FR-ADM-016 Source Collection Trigger
-운영자는 source registry 목록에서 하나 이상의 source를 선택해 상품정보 수집을 시작할 수 있어야 한다.
+admin 권한 운영자는 Banks에서 개별 Coverage 또는 여러 은행의 활성
+Coverage를 선택해 상품정보 수집을 시작할 수 있어야 한다. Sources는 생성된
+소스 점검 화면이며, 기존 source-ID collection API는 호환 경로로 유지한다.
 
 이 수집의 기본 의미는 raw fetch only가 아니라 `normalized_candidate`까지 생성하는 full collection이다.
 
@@ -872,10 +879,10 @@ Current Phase 1 source-registry admin note:
   fail safe into precision discovery rather than closing or collecting only
   supporting sources.
 
-### FR-ADM-017 Deferred Dynamic Product Type Management
+### FR-ADM-017 Dynamic Product Type Management (Implemented)
 FPDS should support an operator-managed product type registry, not only a fixed hard-coded product-type list.
 
-Minimum later capability:
+Implemented capability baseline:
 - admin can create and edit product types with at least `name` and `description`
 - admin can search product types when attaching coverage to a bank
 - AI-assisted discovery can use the stored product type name and description to infer relevant bank-site URLs during homepage-first source generation
@@ -1739,10 +1746,11 @@ Current live admin behavior:
   `verified_coverage_review_source`; candidate validation, auto-promotion,
   canonical, and publication paths must keep that evidence Review-only
 
-Later follow-on requirement:
-- operator-managed product type onboarding should exist as a separate management surface
-- that later product type registry should support searchable `name` and `description`
-- AI-assisted discovery should be able to use those product type definitions when inferring bank-site URLs from a homepage
+Implemented Product Type management (FR-ADM-017, WBS 5.16):
+- `/admin/product-types` owns shared, searchable product-type definitions
+- admins maintain the code, display name, description, and status
+- AI-assisted discovery uses these definitions when inferring bank-site URLs
+- country/type approval profiles remain a separate publication boundary
 
 ---
 
@@ -1833,7 +1841,7 @@ Later follow-on requirement:
 ### BR-001 Phase 1 Product Type Constraint
 Phase 1 확정 상품군은 chequing, savings, gic이다.
 
-### BR-001A Deferred Product Type Extensibility
+### BR-001A Product Type Extensibility
 FPDS supports operator-defined product types for the admin registry and
 collection pipeline, with AI-assisted discovery plus generic extraction,
 normalization, validation, and vocabulary fallback rules. Dynamic types remain
@@ -1843,9 +1851,11 @@ collection AI autopilot may safely correct and threshold-approve remaining
 review candidates. The approved Public Credit Card and Loan slices expose
 approved `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit`
 canonical products regardless of whether approval came from a human or the
-policy-qualified system path. Active CA/US catalog coverage is collected on a
-recurring policy cadence, and interrupted promotion, Review recovery, or
-aggregate work is resumed without requiring routine operator action.
+policy-qualified system path. Under D-069, CA/US catalog collection starts
+only through authenticated Admin collection or Runs retry actions. The
+recurring scheduler and unattended recovery sweep are removed; in-run
+validation, qualified promotion, bounded Review AI remediation, and
+approval-triggered aggregate refresh remain automatic.
 
 ### BR-002 Phase 2 Country Constraint
 Phase 2 확정 범위는 일본 Big 5 은행의 수신상품이다.

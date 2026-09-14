@@ -1,6 +1,9 @@
 # FPDS API Service
 
-This package is the live FastAPI runtime package for the completed admin slices through `WBS 5.25` plus the public aggregate-backed read APIs from `WBS 5.7` and `5.8`.
+This package is the live FastAPI runtime for authenticated Admin operations
+and Public aggregate reads, engagement, and feedback. The current endpoint
+map is implemented in `api_service/main.py`; historical WBS delivery numbers
+do not by themselves describe the current enabled surface.
 
 Current scope:
 - anonymous public aggregate-backed product, product-detail, and dashboard read
@@ -28,11 +31,16 @@ Current scope:
   validation, preserved legal/ranking names, and atomic creation; onboarding
   uses bounded ranking discovery followed by server-pinned, one-bank-at-a-time
   official-evidence calls so one failed candidate cannot consume the batch
-- guarded bank delete support for operator-created bank profiles when only admin-managed coverage or generated-source rows exist
+- guarded bank deletion when no collected source document, candidate, canonical
+  product, or Public projection depends on the bank; remaining coverage and
+  generated-source rows are deleted with the profile
 - source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
 - auto-promotion for `auto_validated` pass candidates after collection, including non-detail/non-product skip/reject guards and same-detail-source stale-review supersession
-- read-only source registry list/detail routes backed by generated `source_registry_item`
+- generated-source list/detail inspection and admin-only soft removal; direct
+  create/update handlers return `405`
+- shared Product Type registry list/detail/create/update/delete routes; writes
+  require admin, while collection/publication profiles remain country-owned
 - approve, reject, defer, and edit-approve review mutations
 - approved and edited review tasks can be reopened through `edit_approve` for follow-up operator corrections without reopening reject/defer paths
 - canonical product/version creation or update side effects for approved decisions
@@ -74,7 +82,6 @@ Current routes:
 - `GET /api/admin/dashboard-health`
 - `POST /api/admin/dashboard-health/retry`
 - `GET /api/admin/change-history`
-- `GET /api/admin/sources`
 - `GET /api/admin/banks`
 - `POST /api/admin/banks`
 - `POST /api/admin/banks/ai-onboard`
@@ -87,9 +94,15 @@ Current routes:
 - `PATCH /api/admin/source-catalog/:catalogItemId`
 - `POST /api/admin/source-catalog/collect`
 - `GET /api/admin/sources`
-- `POST /api/admin/sources`
+- `POST /api/admin/sources` (compatibility handler; returns `405`)
 - `GET /api/admin/sources/:sourceId`
-- `PATCH /api/admin/sources/:sourceId`
+- `PATCH /api/admin/sources/:sourceId` (compatibility handler; returns `405`)
+- `DELETE /api/admin/sources/:sourceId` (admin-only soft removal)
+- `GET /api/admin/product-types`
+- `POST /api/admin/product-types`
+- `GET /api/admin/product-types/:productTypeCode`
+- `PATCH /api/admin/product-types/:productTypeCode`
+- `DELETE /api/admin/product-types/:productTypeCode`
 - `POST /api/admin/source-collections`
 - `POST /api/admin/review-tasks/:reviewTaskId/approve`
 - `POST /api/admin/review-tasks/:reviewTaskId/reject`

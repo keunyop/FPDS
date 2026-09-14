@@ -1,7 +1,7 @@
 # FPDS Docs Map
 
 Status: Active navigation index
-Last updated: 2026-08-29
+Last updated: 2026-09-12
 
 This file is the main entrypoint for `docs/`.
 
@@ -67,6 +67,7 @@ requirements, planning, or design material.
 Start from [docs/03-design/README.md](03-design/README.md).
 
 Most commonly needed:
+- [FPDS Admin purpose and complete feature guide (Korean)](03-design/fpds-admin-purpose-and-features.md): source-verified workflow, screens, roles, automation, and current versus deferred scope
 - `docs/03-design/domain-model-canonical-schema.md`
 - `docs/03-design/financial-product-field-contract.md`
 - `docs/03-design/workflow-state-ingestion-design.md`

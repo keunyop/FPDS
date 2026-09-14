@@ -4,6 +4,10 @@ This package is the authenticated operator workspace. It keeps collection,
 review, and canonical-change context private while the Public package
 reads only approved projections.
 
+For the complete source-verified Korean overview, read
+[Admin purpose and features](../../docs/03-design/fpds-admin-purpose-and-features.md).
+It distinguishes implemented screens from removed and deferred capabilities.
+
 ## Operator Workflow
 
 The shell puts four daily tasks first:
@@ -82,8 +86,9 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
   and writes derive country from the authenticated server-side session.
 - Keep header switching limited to active countries and CSRF-protected,
   and redirected to Overview rather than preserving a country-owned route.
-- Keep platform-wide account administration conceptually separate
-  from country-owned bank, source, collection, review, and product data.
+- Keep platform-wide account administration and the shared Product Type
+  definition registry separate from country-owned bank, source, collection,
+  review, and product data. Market approval profiles are country/type-specific.
 - Keep `Add banks with AI` admin-only and tied to the displayed server-session
   country. Its result must retain clickable ranking/homepage/coverage evidence
   and must not imply that product collection or Public release has occurred.
@@ -104,6 +109,22 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
   only to completed items.
 - Keep `data-admin-dirty` and mutation-pending signals so automatic refresh
   pauses during edits, dialogs, and writes.
+
+## Current Capability Boundaries
+
+- API mutations for registries, collection, Runs retry, and Public Health retry
+  require `admin`. Review decisions and AI verification allow `admin` and
+  `reviewer`; `read_only` has no mutation rights. Countries and signup approval
+  are admin-only.
+- Sources are inspectable and support admin-only soft removal. Their direct
+  create/update APIs return `405`; bank coverage owns configuration.
+- Collection is operator-initiated. Validation, qualified candidate promotion,
+  bounded Review AI autopilot, and approval-triggered aggregate refresh remain
+  automatic within that workflow. There is no recurring collection scheduler.
+- Review Detail AI Verify stores verification results and stages suggested edits;
+  it does not itself approve or publish the candidate.
+- There is no standalone Product Record, Publish Monitor, Audit, Usage, global
+  search, localization-health, or existing-account-management page.
 
 ## Local Commands
 

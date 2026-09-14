@@ -1,7 +1,7 @@
 # FPDS Design Docs
 
 Status: Active design index
-Last updated: 2026-07-16
+Last updated: 2026-09-12
 
 Use this file to avoid opening every design doc.
 
@@ -33,6 +33,8 @@ Use this file to avoid opening every design doc.
 - `product-type-visualization-principles.md`
 
 ## Admin Experience
+
+- [FPDS Admin purpose and complete feature guide (Korean)](fpds-admin-purpose-and-features.md): current implementation inventory verified against source on 2026-09-12
 
 - `admin-information-architecture.md`
 - `fpds-design-system.md`

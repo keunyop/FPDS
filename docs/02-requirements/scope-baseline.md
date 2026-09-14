@@ -13,6 +13,28 @@ Source Documents:
 
 ---
 
+## Current applicability — 2026-09-12
+
+The original Prototype and Phase 1 cutlines below remain historical baselines.
+Apply these already-approved later requirements when interpreting current scope:
+
+- requirements `FR-ADM-017` and WBS `5.16` implement dynamic Product Types;
+  WBS `5.24` and decisions D-034/D-035 govern CA/US country/type comparison
+  profiles and the approved Credit Card/Loan public slices. The older Canada-
+  only and all-loan/card-deferred wording is not a current runtime inventory.
+- requirements Section 0 and D-044 remove generic audit/LLM usage ledgers and
+  their Admin screens; earlier usage-tracked/audited wording does not restore
+  them. Review decisions and canonical change history remain durable.
+- D-069 removes recurring collection and unattended recovery. Authenticated
+  operator collection/retry retains its in-run safeguards and approval-triggered
+  Public aggregate refresh.
+- D-072 assigns feedback review to the separate password-gated Public `/admin`,
+  with no FPDS Admin inbox or API.
+
+This reconciliation grants no new country/product rollout or release approval.
+See the [current Admin feature inventory](../03-design/fpds-admin-purpose-and-features.md)
+and [decision log](../00-governance/decision-log.md) for the current boundaries.
+
 ## 1. Purpose
 
 이 문서는 FPDS의 범위 경계, 비범위 항목, Phase 1 release cutline, 개발 시작 승인 방식을 한 장으로 고정하기 위한 기준 문서다.

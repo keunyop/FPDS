@@ -795,7 +795,10 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 | `product_version_id` | approved version id when applicable |
 | `publish_item` | publish tracker summary if created |
 
-### 5.5 `GET /api/admin/products`
+### 5.5 `GET /api/admin/products` (Not Implemented)
+
+Reserved contract only: no handler exists in `api/service/api_service/main.py`
+as of 2026-09-12. Current approved context is read through Review and Changes.
 
 목적:
 - canonical product list와 admin drilldown entry를 제공한다.
@@ -822,7 +825,10 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 - `latest_change_event_type`
 - `publish_state`
 
-### 5.6 `GET /api/admin/products/:id`
+### 5.6 `GET /api/admin/products/:id` (Not Implemented)
+
+Reserved contract only: neither this API nor an Admin Product Record page is
+implemented. The anonymous Public product-detail API is a separate contract.
 
 목적:
 - canonical continuity record, current version, change summary, publish summary를 제공한다.
@@ -900,7 +906,10 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 Removed by Decision `D044`. Durable business chronology is available through
 review decisions, canonical change history, run state, and publish state.
 
-### 5.11 `GET /api/admin/bxpf-publish`
+### 5.11 `GET /api/admin/bxpf-publish` (Not Implemented)
+
+Reserved BX-PF follow-on contract. There is no registered handler or live
+Publish Monitor page; Public aggregate refresh is already implemented and separate.
 
 목적:
 - BX-PF publish monitor를 제공한다.

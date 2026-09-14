@@ -1,7 +1,7 @@
 # FPDS Admin Information Architecture
 
-Version: 1.2
-Date: 2026-07-28
+Version: 1.3
+Date: 2026-09-12
 Status: Approved Baseline for WBS 1.7.4 plus source-registry follow-on
 Source Documents:
 - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
@@ -16,6 +16,15 @@ Source Documents:
 - `docs/00-governance/decision-log.md`
 
 ---
+
+## Current implementation status — 2026-09-12
+
+The [Admin purpose and feature guide](fpds-admin-purpose-and-features.md) is the
+source-verified current inventory. Product Record, Publish Monitor, global
+search, and Localization Health remain design-only follow-ons; their descriptions
+below do not imply live routes. Product Types is implemented as a shared
+registry. D-044 removes generic audit/usage retention, and D-069 removes recurring
+collection while preserving in-run automation and approval-triggered refresh.
 
 ## 1. Purpose
 
@@ -33,14 +42,14 @@ This is an IA and operator-workflow baseline, not a UI implementation approval b
 ## 2. Baseline Decisions Carried Forward
 
 1. The admin console is a browser-based operator surface protected by server-side session auth.
-2. Review, runs, durable change history, publish, and dashboard health remain separate operator surfaces; generic audit and token/cost usage screens are intentionally removed.
+2. Review, runs, durable change history, and dashboard health are live operator surfaces. Publish Monitor remains a follow-on; generic audit and token/cost usage screens are removed.
 3. Source registry management is an operations surface, not a hidden settings page.
-4. The first source-registry slice is intentionally minimal: bank setup plus bank-owned coverage management, while generated source rows are inspectable and may only be operator-removed through an audit-visible `removed` status transition.
+4. Banks owns setup and coverage. Generated sources are inspectable and allow admin-only `removed` transitions that preserve historical runs/candidates; D-044 does not retain a separate generic audit event.
 5. Bulk collection may start from the bank list as long as the collect action still resolves down to the existing bank-plus-product coverage items.
-6. Dynamic operator-defined product-type onboarding is a later slice because it needs explicit AI-assisted discovery, parser, and fallback contracts beyond the current canonical product set.
-5. Collection launched from the source registry means candidate-producing ingestion through `normalized_candidate`, not raw fetch only.
-6. `detail` sources are the default candidate-producing scope. Supporting sources may be included for evidence support, but should not create standalone primary candidates unless explicitly configured.
-7. UI-owned labels and navigation support `en`, `ko`, and `ja`, while source-derived product text stays in source language.
+6. Dynamic product-type onboarding is implemented; shared definitions feed bank coverage, AI-assisted discovery, and guarded generic fallback. Country/type profiles determine approval requirements.
+7. Collection launched from the source registry means candidate-producing ingestion through `normalized_candidate`, not raw fetch only.
+8. `detail` sources are the default candidate-producing scope. Supporting sources may be included for evidence support, but should not create standalone primary candidates unless explicitly configured.
+9. UI-owned labels and navigation support `en`, `ko`, and `ja`, while source-derived product text stays in source language.
 
 ---
 
@@ -49,7 +58,8 @@ This is an IA and operator-workflow baseline, not a UI implementation approval b
 Included:
 - admin shell and primary navigation
 - contextual route ownership
-- overview, review, runs, change history, publish, dashboard health, bank registry, source catalog compatibility, source registry, and later product-type-management surfaces
+- live overview, review, runs, change history, dashboard health, bank registry, source catalog compatibility, source registry, Product Types, and Countries
+- design-only Product Record and Publish Monitor follow-ons
 - cross-surface drilldown rules
 - role-visibility baseline
 - responsive and localization baseline
@@ -142,13 +152,13 @@ navigation item until a live route exists.
 |---|---|---|
 | Signup Request | `/admin/signup` | login screen, anonymous access-request flow |
 | Review Detail / Trace Viewer | `/admin/reviews/:reviewTaskId` | review queue, run detail, search |
-| Bank Detail | `/admin/banks/:bankCode` | bank list |
+| Bank Detail | `/admin/banks?bank=:bankCode` | bank list modal; `/admin/banks/:bankCode` redirects here |
 | Source Catalog Detail | `/admin/source-catalog/:catalogItemId` | compatibility redirect into bank detail |
 | Source Registry Detail | `/admin/sources/:sourceId` | source registry list, source catalog detail, run detail, search |
 | Product Type Management | `/admin/product-types` | operator-managed product type registry, bank coverage search, and dynamic onboarding controls |
 | Country Management | `/admin/countries` | admin-only prepared-country activation and reversible deactivation |
 | Run Detail | `/admin/runs/:runId` | runs list, review detail, source collection history, search |
-| Product Record | `/admin/products/:productId` | change history, publish monitor, review result context, search |
+| Product Record (not implemented) | reserved `/admin/products/:productId` | follow-on design only; no live page |
 
 ### 5.4 Reserved Follow-On Navigation
 
@@ -190,7 +200,11 @@ navigation item until a live route exists.
 
 ### 6.1 Search Baseline
 
-Global search should support at least:
+Current screens have their own search/filter controls and ID-based drilldowns.
+No global search input, unified result page, or search API is implemented.
+The following is a follow-on design, not current operator behavior.
+
+Future global search should support at least:
 
 - `bank`
 - `product name`
@@ -213,6 +227,9 @@ Recommended result grouping:
 - `product name` should prefer an active review task when one exists, otherwise the Product Record
 
 ### 6.3 Cross-Link Rules
+
+Rows involving Product Record or Publish Monitor are reserved follow-on links;
+current operators inspect approved context through Review and Changes.
 
 | From | To | Why |
 |---|---|---|
@@ -304,7 +321,7 @@ Runtime decision refinement:
 - reason code and reviewer note are optional collapsed controls; the recommended decision actions remain immediately available
 - an AI verification disclosure sits between candidate/source context and editable fields; it opens for active verification, failure, or a result needing attention, separates match, mismatch, and unverified results, and allows safe corrections to be staged individually or together
 - the AI verification `Official sources` list is collapsed initially; field-level citations remain beside the compared field so a reviewer does not need to open the full source list for the primary correction path
-- AI verification is advisory evidence: running it does not alter review state, apply a candidate mutation, approve a product, or publish; the existing human edit-and-approve action remains the only persistence boundary
+- Review Detail AI verification persists its verification result but does not change the candidate, review state, approval, or Public data. Staged corrections persist through the human decision. Separately, the collection runner may use the bounded AI autopilot to correct and approve eligible candidates through the same guarded canonical path.
 
 ### 7.4 Source Registry Management
 
@@ -319,7 +336,7 @@ Purpose:
 - make first-time precision source discovery mandatory per bank/Product Type,
   while giving completed items one compact normal/detailed collection-mode
   toggle for both single and bulk launch
-- reserve a later operator-managed product type surface for searchable product-type definitions that AI-assisted discovery can use
+- use the implemented Product Types surface for searchable shared definitions that AI-assisted discovery consumes
 
 `/admin/sources` minimum list behavior:
 - filter by bank, country, product type, status, role
@@ -375,8 +392,8 @@ Rules:
   by the API even when a stale or crafted client request includes their IDs
 - `/admin/source-catalog` remains only as a compatibility redirect into the bank-owned workflow
 - `/admin/product-types` owns all product-type definitions as operator-managed DB rows and is the source of truth for bank coverage option search
-- product types without specialized parser support use the generic AI extraction/normalization fallback path and remain review-first rather than auto-publish
-- `/admin/sources` and `/admin/sources/:sourceId` are generated-source inspection surfaces; destructive cleanup is limited to an admin-only soft remove that preserves audit and historical run context
+- product types without specialized parser support use generic AI extraction/normalization; official identity and complete country/type essentials may qualify them for guarded auto-approval. Missing, contradictory, or ambiguous facts remain in Review.
+- `/admin/sources` and `/admin/sources/:sourceId` are generated-source inspection surfaces; destructive cleanup is limited to an admin-only soft remove that preserves source status/reason and historical run context under D-044
 - collection means full candidate-producing ingestion through `normalized_candidate`
 - `detail` sources are candidate-producing by default
 - supporting sources may be included for evidence support, but should not create standalone primary candidates unless explicitly configured
@@ -424,7 +441,8 @@ Purpose:
 - detected at
 - related review/run context
 
-`/admin/products/:productId` minimum detail:
+The following Product Record remains unimplemented. Reserved
+`/admin/products/:productId` design:
 - product summary
 - current approved version summary
 - finalized evidence links
@@ -438,7 +456,10 @@ and generic actor/request or trace-view events are not retained. Operators use
 review decisions, canonical change history, run state, and publish state for
 the business chronology required by each workflow.
 
-### 7.8 Publish Monitor
+### 7.8 Publish Monitor (Not Implemented)
+
+No live Admin page or API is registered. WBS `6.4` remains a follow-on;
+Public Health monitors FPDS projection refresh, not BX-PF delivery.
 
 Purpose:
 - BX-PF publish tracking surface
@@ -487,11 +508,15 @@ Minimum information:
 | Review queue list/detail read | O | O | O | trace read allowed |
 | Review decision actions | O | O | X | approve/reject/edit/defer |
 | Source registry list/detail read | O | O | O | source scope visibility and run drilldown |
-| Source registry edit and collection start | O | X | X | direct registry mutation and collection kickoff |
+| Bank/coverage writes, source removal, collection start | O | X | X | direct generated-source create/update stays disabled |
 | Runs and run detail | O | O | O | diagnostic read |
-| Change history and product record | O | O | O | diagnostic read |
-| Publish monitor read | O | O | O | operational visibility |
+| Change history | O | O | O | diagnostic read; no standalone product record |
+| Publish monitor read (future) | O | O | O | intended visibility; not implemented |
 | Dashboard health read | O | O | O | aggregate health visibility |
+| Run retry / dashboard refresh retry | O | X | X | guarded admin mutation |
+| Review AI verification | O | O | X | verification result; no direct approval |
+| Product Type definition writes | O | X | X | shared registry |
+| Countries / signup request administration | O | X | X | privileged configuration/access |
 
 ---
 
@@ -562,6 +587,7 @@ Minimum information:
 
 | Date | Change |
 |---|---|
+| 2026-09-12 | Reconciled implemented Product Types, redirects, AI persistence/automation, role boundaries, and explicit follow-on-only routes against source |
 | 2026-08-26 | Replaced completed-item rediscovery checkboxes with normal/detailed collection toggles, removed the visible first-time helper, and recorded inactive-item and responsive containment rules |
 | 2026-08-20 | Added first-time precision-required and completed-item precision-rediscovery controls for single and bulk Banks collection |
 | 2026-07-30 | Standardized Banks list, AI-result, and detail-preview logos on one unframed fixed-footprint component |

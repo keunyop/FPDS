@@ -54,3 +54,29 @@ identified, Production audit passed 225 sitemap URLs and 10 representative
 routes, and diagnosis/journal record known limits and GSC follow-up. No runtime
 fix was justified by the observed responses. Preserve this root goal for the
 unresolved Admin scope above; SEO completion does not close that ownership.
+
+## Independent slice: 2026-09-12 Admin purpose and feature documentation
+
+Ownership: preserve the unresolved Admin handover goal and completed SEO slice.
+This documentation request neither authorizes the account lifecycle CLI nor
+closes the earlier goal.
+
+Objective: write a Korean Markdown guide to FPDS Admin purpose and all current
+features, grounded in active documentation and executable source code.
+Scope: inspect Admin routes/components, related API/worker contracts and tests;
+correct confirmed stale active documentation and add navigation to the guide.
+Exclusions: runtime changes, live collection, account/data mutations, migrations,
+deployment, scope expansion, and edits to existing untracked manual/images.
+Acceptance:
+- [x] Explain purpose, workflow, screens, roles, country/locale boundaries,
+      automation/publication, and implemented versus deferred/removed features.
+- [x] Link source evidence and reconcile confirmed stale active descriptions.
+- [x] Verify document links and final diff; run git diff --check; update journal.
+Verification: read-only route/API/worker inspection, focused document-link and
+manifest checks, and diff review; no unrelated application builds required.
+
+Completion: the Korean guide and active-document reconciliation are complete.
+18 page files match the Admin manifest and all Admin routes are covered; 59
+API method/path pairs match the API README. Markdown references and diff checks
+pass. No runtime or external state changed. Preserve this goal file because
+the earlier Admin account-lifecycle acceptance remains unresolved.
