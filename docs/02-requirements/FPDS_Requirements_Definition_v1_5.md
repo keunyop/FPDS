@@ -373,6 +373,17 @@ available in comparison and detail. Result-set freshness remains visible near
 the catalog heading. This changes presentation only and does not alter the
 approved projection, comparison meaning, or publication gate.
 
+Product Owner correction on `2026-09-16` supersedes the 2026-08-13 minimum
+range/introductory card-rate rule. Public cards, list rows, comparison and
+detail must distinguish full rates, ranges/schedules, benchmark spreads,
+conditional discounts and promotions, preserving approved source conditions.
+Only an unambiguous full rate participates in rate ordering, Top 5, finder
+differences, dashboard rate metrics and interest estimates. Missing/qualified
+values sort last and cannot generate a numeric improvement. Never synthesize
+a full rate using a current benchmark. Existing data corrections require a
+separate bounded evidence review and version/change history; the Product Owner
+explicitly authorized agent self-review/approval for this correction slice.
+
 ### FR-PUB-005 Filtering
 사용자는 다음 필터를 사용할 수 있어야 하며, 필터 라벨은 선택된 locale에 따라 표시되어야 한다.
 
@@ -657,9 +668,9 @@ active products alphabetically through bounded incremental paging.
   projection and must not collect or persist a profile, balance, income,
   credit, goal, eligibility, or application value
 - comparison is exact Product Type only and uses one explicit primary metric:
-  Chequing lower monthly fee, Savings/GIC higher disclosed numeric rate,
+  Chequing lower monthly fee, Savings/GIC higher comparable full rate,
   Credit Card lower annual fee, and Mortgage/Personal Loan/Line of Credit lower
-  disclosed numeric rate
+  comparable full rate; D-077 excludes ranges, margins, conditions and promotions
 - a candidate is shown only when its metric is disclosed and strictly improves
   the selected product's metric; the surface shows at most three candidates and
   does not infer a winner from ties, missing values, or secondary conditions

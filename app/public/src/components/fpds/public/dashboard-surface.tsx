@@ -1,3 +1,4 @@
+import { getComparablePublicRate } from "@/lib/public-rate";
 import { ArrowRight, ExternalLink, Landmark, PiggyBank, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
@@ -64,9 +65,9 @@ export function DashboardSurface({
 
   const activeChips = buildScopeChips(filters, summary);
   const rankedDeposits = (depositProducts?.items ?? [])
-    .filter((product) => product.card_display_rate !== null && Number.isFinite(product.card_display_rate))
+    .filter((product) => getComparablePublicRate(product) !== null)
     .slice(0, 5);
-  const rankedLoans = (loanProducts?.items ?? []).filter((product) => product.card_display_rate !== null && Number.isFinite(product.card_display_rate)).slice(0, 5);
+  const rankedLoans = (loanProducts?.items ?? []).filter((product) => getComparablePublicRate(product) !== null).slice(0, 5);
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
 
   return (
@@ -212,8 +213,8 @@ function ProductTopFive({
                 <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
               </div>
               <div className="col-start-3 mt-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
-                <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${copy.grid.metricDisplayRate} ${formatMetricValue(product.card_display_rate, "percent", filters.locale)}`}>
-                  {formatMetricValue(product.card_display_rate, "percent", filters.locale)}
+                <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${copy.grid.metricDisplayRate} ${formatMetricValue(getComparablePublicRate(product), "percent", filters.locale)}`}>
+                  {formatMetricValue(getComparablePublicRate(product), "percent", filters.locale)}
                 </span>
                 {product.product_url ? (
                   <TrackedOfficialBankLink

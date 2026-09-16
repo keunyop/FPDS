@@ -14,6 +14,14 @@ Source Documents:
 
 ---
 
+## Current rate presentation correction — 2026-09-16
+
+D-077 supersedes numeric minimum-range/introductory presentation: card/list and
+comparison/detail labels distinguish full rates, ranges/schedules, benchmark
+spreads, conditional discounts and promotions. Conditions remain visible in
+source language. Only comparable full numbers participate in rate ordering;
+other records remain browsable and sort last. Rate text wraps at 390px.
+
 ## 1. Purpose
 
 이 문서는 `WBS 1.7.1 Product Grid 정보 구조 설계`의 기준 문서다.

@@ -1,3 +1,4 @@
+import { getComparablePublicRate } from "@/lib/public-rate";
 import type { Metadata } from "next";
 
 import { formatPublicCountryName } from "@/lib/public-country";
@@ -259,8 +260,8 @@ function buildProductSeoFacts(product: PublicProduct) {
     );
   } else {
     candidates.push(
-      product.public_display_rate !== null
-        ? product.public_display_rate + "% published rate"
+      getComparablePublicRate(product) !== null
+        ? getComparablePublicRate(product) + "% published rate"
         : null,
       product.public_display_fee !== null
         ? product.currency + " " + product.public_display_fee + " published fee"

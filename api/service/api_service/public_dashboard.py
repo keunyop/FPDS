@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from api_service.public_rates import comparable_rate
+
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any, Iterable
@@ -169,7 +171,7 @@ def load_public_dashboard_summary(connection, *, query: PublicDashboardQuery) ->
     recent_threshold = refreshed_at - timedelta(days=30) if refreshed_at else None
 
     highest_display_rate = max(
-        (serialize_decimal(row.get("public_display_rate")) for row in filtered_rows if row.get("public_display_rate") is not None),
+        (comparable_rate(row) for row in filtered_rows if comparable_rate(row) is not None),
         default=None,
     )
     recently_changed_count = sum(
@@ -348,7 +350,7 @@ def build_dashboard_methodology_note(locale: str) -> str:
     if locale == "ko":
         return (
             "지표와 ranking은 현재 공개 범위의 최신 성공 aggregate snapshot을 기준으로 계산됩니다. "
-            "금리 비교는 public_display_rate를 사용하고, 수수료 비교는 public_display_fee가 있으면 우선 사용하며 없으면 monthly_fee로 대체합니다. "
+            "금리 비교에는 조건이 붙지 않은 전체 금리만 사용하고 범위·기준금리 가산·조건부·프로모션 금리는 제외하며, 수수료 비교는 public_display_fee가 있으면 우선 사용하며 없으면 monthly_fee로 대체합니다. "
             "최근 변경 상품은 snapshot refresh 시각 기준 최근 30일 창으로 계산됩니다. "
             "해당 비교에 필요한 숫자 필드가 없는 상품은 ranking과 comparative chart에서 제외됩니다. "
             "이 공개 dashboard는 시장 요약 전용이며 evidence trace나 source excerpt는 노출하지 않습니다."
@@ -356,14 +358,14 @@ def build_dashboard_methodology_note(locale: str) -> str:
     if locale == "ja":
         return (
             "指標と ranking は、現在の公開スコープに対する最新の成功 aggregate snapshot を基準に計算されます。"
-            "金利比較には public_display_rate を使い、手数料比較には public_display_fee があれば優先し、なければ monthly_fee にフォールバックします。"
+            "金利比較には条件のない全体金利のみを使い、範囲・基準金利への加減算・条件付き・キャンペーン金利を除外し、手数料比較には public_display_fee があれば優先し、なければ monthly_fee にフォールバックします。"
             "最近変更された商品は、snapshot refresh 時刻を基準にした直近 30 日ウィンドウで計算されます。"
             "その比較に必要な数値フィールドがない商品は、ranking と comparative chart から除外されます。"
             "この公開 dashboard は市場要約専用であり、evidence trace や source excerpt は公開しません。"
         )
     return (
         "Metrics and rankings are computed from the latest successful aggregate snapshot for the current public scope. "
-        "Rate comparisons use public_display_rate, while fee comparisons prefer public_display_fee and fall back to monthly_fee when needed. "
+        "Rate comparisons use only unqualified full rates; ranges, reference spreads, conditional rates and promotions are excluded, while fee comparisons prefer public_display_fee and fall back to monthly_fee when needed. "
         "Recently changed products are measured over the trailing 30 days from the snapshot refresh time. "
         "Products missing the numeric fields required for a comparison are excluded from the affected ranking and comparative chart. "
         "This public dashboard is a market summary surface and does not expose evidence trace or source excerpts."
@@ -379,18 +381,18 @@ def _build_ranking_widget(
 ) -> dict[str, Any] | None:
     title, metric_label = RANKING_LABELS[locale][ranking_key]
     if ranking_key == "highest_display_rate":
-        eligible_rows = [row for row in filtered_rows if row.get("public_display_rate") is not None]
+        eligible_rows = [row for row in filtered_rows if comparable_rate(row) is not None]
         eligible_rows = sorted(
             eligible_rows,
             key=lambda row: (
-                -(serialize_decimal(row.get("public_display_rate")) or 0.0),
+                -(comparable_rate(row) or 0.0),
                 str(row["bank_name"]),
                 str(row["product_name"]),
                 str(row["product_id"]),
             ),
         )
         metric_unit = "percent"
-        metric_value_builder = lambda row: serialize_decimal(row.get("public_display_rate"))
+        metric_value_builder = lambda row: comparable_rate(row)
         metadata: dict[str, Any] = {}
     elif ranking_key == "lowest_monthly_fee":
         eligible_rows = [
@@ -420,7 +422,7 @@ def _build_ranking_widget(
             eligible_rows,
             key=lambda row: (
                 serialize_decimal(row.get("minimum_deposit")) or 0.0,
-                -(serialize_decimal(row.get("public_display_rate")) or 0.0),
+                -(comparable_rate(row) or 0.0),
                 str(row["bank_name"]),
                 str(row["product_name"]),
                 str(row["product_id"]),
@@ -495,7 +497,7 @@ def _build_scatter_chart(
         for row in filtered_rows
         if axis["product_type"] == row["product_type"]
         and row.get(axis["x_field"]) is not None
-        and row.get(axis["y_field"]) is not None
+        and (comparable_rate(row) if axis["y_field"] == "public_display_rate" else serialize_decimal(row.get(axis["y_field"]))) is not None
     ]
     if len(eligible_rows) < 3:
         return None
@@ -509,7 +511,7 @@ def _build_scatter_chart(
             "product_name": str(row["product_name"]),
             "product_type": str(row["product_type"]),
             "x_value": serialize_decimal(row.get(axis["x_field"])),
-            "y_value": serialize_decimal(row.get(axis["y_field"])),
+            "y_value": comparable_rate(row) if axis["y_field"] == "public_display_rate" else serialize_decimal(row.get(axis["y_field"])),
             "highlight_badge_code": row.get("product_highlight_badge_code"),
         }
         for row in sorted(

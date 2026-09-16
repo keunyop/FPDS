@@ -243,8 +243,9 @@ Name-search rules:
 | `status` | product lifecycle status |
 | `standard_rate` | standard/source rate if available |
 | `base_12_month_rate` | base rate normalized for 12-month comparison if available |
-| `public_display_rate` | display rate snapshot |
-| `card_display_rate` | finite numeric percentage rendered on catalog cards; for lending ranges this is the lowest explicit absolute rate derivable from approved scalar/summary fields, while deposits retain `public_display_rate`; unrelated qualification percentages and unresolved reference-rate spreads return `null` |
+| `public_display_rate` | comparable full rate, or `null` when qualified/ambiguous; the stored projection is not rewritten by this read |
+| `card_display_rate` | compatibility alias of `rate.comparable_rate`; no range endpoint, spread, promotion or conditional rate |
+| `rate` | `{ kind, comparable_rate, source_text }`; `kind` is `absolute`, `range`, `reference`, `conditional`, `promotional`, or `unknown`; only `absolute` has a comparable finite 0–100 scalar, including zero; source text preserves approved conditions (term schedules may be rendered from approved rows) |
 | `public_display_fee` | display fee snapshot |
 | `minimum_balance` | minimum balance if available |
 | `minimum_deposit` | minimum deposit if available |
@@ -268,10 +269,16 @@ Name-search rules:
 - `freshness`
 
 Numeric product fields are serialized as finite JSON numbers only. Missing, invalid, `NaN`, or infinite source values are returned as `null` so public sort/render paths can remain stable.
-`sort_by=display_rate` uses `card_display_rate`, keeping the visible catalog
-order aligned with the numeric card value. `public_display_rate`,
-`interest_rate_summary`, and `purchase_interest_rate_summary` remain unchanged
-for comparison/detail presentation and source-language condition disclosure.
+As of 2026-09-16, `sort_by=display_rate`, dashboard rates and scatter use the
+same comparable full rate. Ineligible values sort after eligible numbers in
+both directions, with the existing stable name/id tie-break. No endpoint adds
+a benchmark, selects a range endpoint, or infers a promotional/conditional
+rate as an unqualified rate. Conflicting scalar/summary/standard rates fail
+closed. Original summary fields and explicit term rows remain available.
+The additive `rate` contract also applies to product detail. Public clients
+must require `kind=absolute` plus a finite comparable rate for rankings,
+finder differences and calculators; pre-contract cached responses fail closed.
+Deploy the API before Public and allow the existing cache TTLs to expire.
 
 ### 4.4 `GET /api/public/products/{product_id}`
 

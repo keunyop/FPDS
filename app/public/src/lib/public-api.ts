@@ -1,3 +1,5 @@
+import type { PublicRate } from "./public-rate";
+
 export type PublicFreshness = {
   snapshot_id: string | null;
   refreshed_at: string | null;
@@ -35,6 +37,7 @@ export type PublicProduct = {
   base_12_month_rate: number | null;
   public_display_rate: number | null;
   card_display_rate: number | null;
+  rate?: PublicRate;
   public_display_fee: number | null;
   annual_fee: number | null;
   purchase_interest_rate: number | null;

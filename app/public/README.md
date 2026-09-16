@@ -95,11 +95,15 @@ Canada shows Chequing fee/balance/transactions and GIC
 rate/term/minimum-deposit/redeemability. US Checking shows
 fee/opening-or-minimum-balance/fee-waiver activity, US CDs show
 rate/term/minimum-deposit/early-withdrawal penalty. Lending and Credit Card
-catalog cards render one numeric Interest rate from the current approved
-projection; a disclosed range uses its lowest explicit absolute rate, while
-reference-rate components and qualification percentages are excluded. The
-complete assumption-bearing rate/APR summary remains visible in comparison and
-product detail. Savings, Personal Loan, and Line of Credit likewise use their
+catalog cards distinguish full rates, ranges/schedules, reference-rate
+margins, conditional discounts and promotions in EN/KO/JA. Approved rate text
+stays in its source language on cards, comparison and detail. Only the API's
+explicit `rate.kind=absolute` and finite `rate.comparable_rate` participate in
+rate sorting, Home Top 5, finder differences, dashboard metrics or calculators.
+An old cached API response without this contract cannot supply a comparison
+rate. Zero is a valid full rate; no benchmark arithmetic or minimum-range/
+introductory shortcut is permitted. API deployment should precede Public;
+existing response caches expire normally. Savings, Personal Loan, and Line of Credit likewise use their
 market profile. Incomplete governed products are excluded during aggregate
 refresh. Filters are progressively disclosed and sort controls stay close to
 the results. Deposit opens at Interest rate descending, Credit Card at Annual

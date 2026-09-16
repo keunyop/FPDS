@@ -91,7 +91,7 @@ The remaining follow-on work is `5.10`, `5.11`, and localization implementation 
 
 ### 4.2 Numeric Field Usage Rules
 
-- Rate-based metrics use `public_display_rate`.
+- Rate-based metrics use the shared comparable full-rate interpretation (D-077); ranges, benchmark spreads, conditional/promotional values and conflicting rates are excluded, including numeric legacy projections.
 - Fee-based metrics use `public_display_fee` if present; otherwise they fall back to `monthly_fee`.
 - Deposit/balance metrics use canonical numeric fields directly:
   - `minimum_balance`

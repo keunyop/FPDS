@@ -25,6 +25,62 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-09-16 (Public rate semantics correction, implementation complete):
+
+- read the full growth proposal and implemented only its full-rate/spread fix
+  under explicit Product Owner self-review authorization; D-077 / WBS 5.63
+  supersede the minimum-range/introductory scalar behavior of D-045
+- shared API `public_rates.py` adds source-preserving rate classification and
+  a comparable full scalar; catalog/detail/sort/dashboard and Public Home,
+  finder, calculator and SEO consumers use that contract. EN/KO/JA distinguish
+  reference margins, ranges, conditions and promotions; older cached contracts
+  fail closed for arithmetic; ordinary fee-based comparison remains intact
+- replayed all 216 public products; 64 prior numeric card rates are excluded
+  under the new contract. Source records remain browsable. This audit does not
+  establish current bank pricing for every legacy scalar-only record
+- separately verified and applied one canonical correction: Vancity Planet-Wise
+  personal loan `prod_dGBpyMydkwGWu30L`, 0.75 scalar to a qualified Prime + 0.75%
+  summary. Audited version 2 and cloned CA snapshot preserve original history,
+  source freshness and every other 227 projection rows. Active counts remain
+  CA 165 / US 51; transaction rehearsal, idempotence and live anonymous read pass
+- verification: API 481 / Public 12 tests, lint, typecheck, production build,
+  19 Chromium scenarios including EN/KO/JA and 390/768/1440px, repo doctor,
+  foundation validation, and final whitespace/diff inspection pass
+- [rate correction audit](public-rate-correction-2026-09-16.md) records separate
+  API/UI/data self-approvals, source URLs, committed IDs, bounded remediation
+  script, rollout and recovery. No API/Public deployment was performed; release
+  API before Public and verify after existing caches expire. No collection or
+  unrelated Admin/account change; preserve the earlier unresolved Admin goal.
+
+
+As of 2026-09-16 (SwitchaBank Public growth investigation, complete):
+
+- added the Korean [Public growth proposal](../01-planning/switchabank-public-growth-proposal-2026-09-16.md),
+  distinguishing implemented features, reproduced friction, data dependencies,
+  acquisition/engagement/outbound hypotheses, measurement limits, and approval
+  boundaries; no implementation or release scope was changed
+- read the Public source and API rate/freshness logic, all 216 anonymous live
+  products (CA 165 / US 51), and nine Chrome page/country/locale combinations
+  across 1440px, 768px, and exact 390px; observed no document overflow or
+  JavaScript exception in those checks. Additional 390x844 checks measured
+  first-screen access and confirmed a zero-default Savings calculator
+- reproduced compare selection loss after sorting (1/4 to 0/4), BMO Prime
+  plus 0.5% being exposed as card_display_rate 0.5, and old completed snapshots
+  still returning fresh. These are recorded follow-up findings, not fixes
+- Production SEO audit passed all 225 sitemap URLs and 10 representative
+  routes. Direct rate/freshness function probes ran; no full runtime suites or
+  builds were needed for this investigation. Document links and diff checks
+  are verified in the completion record
+- browser engagement/feedback and Google Analytics traffic were blocked;
+  no private analytics login, submission, collection, publication, canonical
+  mutation, configuration, or deployment ran. Actual GA/GSC metrics and growth
+  uplift remain unmeasured
+- next: Product Owner selects correctness/freshness repairs and the first
+  growth slice. Proposed order is purpose-specific comparison entry pages,
+  persistent/shareable comparison, bounded scenario calculations, clearer
+  official-bank actions, then validated return-visit features. The existing
+  Admin account-lifecycle goal and untracked user PDF remain untouched
+
 As of 2026-09-12 (Admin purpose/features source reconciliation, complete):
 
 - added the Korean [Admin purpose and feature guide](../03-design/fpds-admin-purpose-and-features.md),

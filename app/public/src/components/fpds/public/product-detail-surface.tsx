@@ -1,3 +1,4 @@
+import { getComparablePublicRate, getPublicRateMetric } from "@/lib/public-rate";
 import { ArrowLeft, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -15,7 +16,6 @@ import type { PublicProduct, PublicProductDetailResponse } from "@/lib/public-ap
 import {
   buildPublicProductMetrics,
   formatPublicCurrency as formatCurrency,
-  formatPublicPurchaseRate as formatPurchaseRate,
   formatPublicRate as formatRate,
   formatPublicRedeemability as formatRedeemability,
   formatPublicSecurity as formatSecurity,
@@ -218,14 +218,14 @@ export function ProductDetailSurface({
           </div>
 
           <div className="grid gap-4">
-            {product.product_family === "deposit" && product.public_display_rate !== null ? (
+            {product.product_family === "deposit" && getComparablePublicRate(product) !== null ? (
               <InterestCalculator
                 currency={product.currency}
                 locale={filters.locale}
                 minimumBalance={product.minimum_balance}
                 minimumDeposit={product.minimum_deposit}
                 productType={product.product_type}
-                rate={product.public_display_rate}
+                rate={getComparablePublicRate(product)}
                 termLengthDays={product.term_length_days}
               />
             ) : null}
@@ -437,7 +437,7 @@ function MetricTile({ highlight, label, value }: { highlight?: boolean; label: s
   return (
     <div className={cn("min-h-28 px-1 py-5 sm:px-5", highlight && "bg-verification-soft/45")}>
       <dt className={cn("font-mono text-[10px] font-semibold uppercase tracking-wide", highlight ? "text-verification" : "text-muted-foreground")}>{label}</dt>
-      <dd className="mt-2 break-words font-display text-3xl font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums">{value}</dd>
+      <dd className={cn("mt-2 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums", value.length > 24 ? "text-lg" : "text-3xl")}>{value}</dd>
     </div>
   );
 }
@@ -465,9 +465,10 @@ function buildMetricCards(product: PublicProduct, locale: string): DetailFact[] 
 
 function buildDetailFacts(product: PublicProduct, locale: string) {
   const facts: DetailFact[] = [];
+  const rate = getPublicRateMetric(product, locale);
   if (product.product_type === "credit-card") {
     addFact(facts, cardLabel("annualFee", locale), formatCurrency(product.annual_fee, product.currency, locale), locale);
-    addFact(facts, cardLabel("purchaseRate", locale), formatPurchaseRate(product, locale), locale);
+    addFact(facts, rate.label, rate.value, locale);
     addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
     addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
     addFact(facts, getPublicDesignCopy(locale).sourceLanguage, product.source_language, locale);
@@ -476,8 +477,8 @@ function buildDetailFacts(product: PublicProduct, locale: string) {
   if (product.product_family === "lending") {
     addFact(
       facts,
-      loanLabel("rate", locale),
-      product.interest_rate_summary ?? product.mortgage_rate ?? product.interest_rate,
+      rate.label,
+      rate.value,
       locale
     );
     addFact(facts, loanLabel("rateType", locale), product.rate_type, locale);

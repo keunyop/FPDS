@@ -341,7 +341,7 @@ class PublicProductsTests(unittest.TestCase):
         )
         self.assertEqual(payload["items"][0]["product_type_label"], "Credit Card")
 
-    def test_lending_card_rate_uses_lowest_explicit_range_and_preserves_summary(self) -> None:
+    def test_lending_ranges_are_not_scalar_rates_and_preserve_summary(self) -> None:
         requested_summary = (
             "**Fixed rates from 5.15% to 18.00% APR; APR may differ based on loan amount, "
             "term length, and credit profile; excellent credit is required for the lowest "
@@ -390,15 +390,16 @@ class PublicProductsTests(unittest.TestCase):
 
         self.assertEqual(
             [item["product_id"] for item in payload["items"]],
-            ["loan-requested-example", "loan-higher-rate", "line-reference-spread"],
+            ["line-reference-spread", "loan-higher-rate", "loan-requested-example"],
         )
-        requested = payload["items"][0]
-        self.assertEqual(requested["card_display_rate"], 5.15)
+        requested = payload["items"][2]
+        self.assertIsNone(requested["card_display_rate"])
+        self.assertEqual(requested["rate"]["kind"], "range")
         self.assertIsNone(requested["public_display_rate"])
         self.assertEqual(requested["interest_rate_summary"], requested_summary)
         self.assertIsNone(payload["items"][2]["card_display_rate"])
 
-    def test_card_rate_ignores_qualification_percentages_and_keeps_intro_apr(self) -> None:
+    def test_qualified_and_intro_rates_never_supply_comparison_numbers(self) -> None:
         mortgage = _lending_projection(
             "mortgage-assumptions",
             product_type="mortgage",
@@ -475,11 +476,11 @@ class PublicProductsTests(unittest.TestCase):
         payload = load_public_products(connection, query=query)
         by_id = {item["product_id"]: item for item in payload["items"]}
 
-        self.assertEqual(by_id["mortgage-assumptions"]["card_display_rate"], 6.625)
-        self.assertEqual(by_id["card-intro-apr"]["card_display_rate"], 0.0)
-        self.assertEqual(by_id["card-formula-components"]["card_display_rate"], 18.24)
-        self.assertEqual(by_id["loan-discount-qualified"]["card_display_rate"], 9.99)
-        self.assertEqual(by_id["mortgage-multiple-examples"]["card_display_rate"], 4.45)
+        self.assertIsNone(by_id["mortgage-assumptions"]["card_display_rate"])
+        self.assertIsNone(by_id["card-intro-apr"]["card_display_rate"])
+        self.assertIsNone(by_id["card-formula-components"]["card_display_rate"])
+        self.assertIsNone(by_id["loan-discount-qualified"]["card_display_rate"])
+        self.assertIsNone(by_id["mortgage-multiple-examples"]["card_display_rate"])
 
     def test_load_public_products_handles_bad_numeric_values_in_visible_sorts(self) -> None:
         bad_row = dict(_projection_rows()[0])

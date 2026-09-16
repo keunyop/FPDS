@@ -1,5 +1,7 @@
 'use client';
 
+import { getComparablePublicRate, getRateComparisonUnavailable } from '@/lib/public-rate';
+
 import { ArrowRight, ExternalLink, RefreshCw, Search } from 'lucide-react';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -328,7 +330,7 @@ function RecommendationResult({
           <p className='mt-0.5 text-xs text-muted-foreground'>{result.currentProduct.bank_name} · {result.currentProduct.product_type_label}</p>
         </div>
         {rule ? (
-          <span className='shrink-0 border-b-2 border-maple px-1.5 py-1 text-sm font-semibold tabular-nums text-foreground'>
+          <span className='max-w-[45%] border-b-2 border-maple px-1.5 py-1 text-sm font-semibold tabular-nums text-foreground [overflow-wrap:anywhere]'>
             {formatMetric(result.currentProduct, rule, locale)}
           </span>
         ) : null}
@@ -601,7 +603,7 @@ async function fetchProductPage({
 }
 
 function readMetric(product: PublicProduct, rule: RecommendationRule) {
-  const value = product[rule.metric];
+  const value = rule.metricKind === 'rate' ? getComparablePublicRate(product) : product[rule.metric];
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
@@ -621,7 +623,7 @@ function metricLabel(rule: RecommendationRule | undefined, locale: string) {
 function formatMetric(product: PublicProduct, rule: RecommendationRule, locale: string) {
   const value = readMetric(product, rule);
   return rule.metricKind === 'rate'
-    ? formatPublicRate(value, locale)
+    ? value === null ? getRateComparisonUnavailable(locale) : formatPublicRate(value, locale)
     : formatPublicCurrency(value, product.currency, locale);
 }
 

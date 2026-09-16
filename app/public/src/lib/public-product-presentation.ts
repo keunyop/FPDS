@@ -1,3 +1,4 @@
+import { getPublicRateMetric } from "@/lib/public-rate";
 import type { PublicProduct } from "@/lib/public-api";
 import { getIntlLocale, getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
 
@@ -41,9 +42,10 @@ export function buildPublicProductMetrics(
   presentation: "card" | "comparison" = "comparison"
 ): PublicProductMetric[] {
   const copy = getPublicMessages(locale);
-  const productRate = presentation === "card"
-    ? formatPublicRate(product.card_display_rate, locale)
-    : formatPublicProductRate(product, locale);
+  const rateMetric = getPublicRateMetric(product, locale);
+  if (presentation === "comparison" && product.rate?.source_text && !/^\s*[\d.]+\s*%?\s*$/.test(product.rate.source_text)) {
+    rateMetric.value = product.rate.source_text;
+  }
 
   if (product.product_type === "chequing") {
     return [
@@ -57,7 +59,7 @@ export function buildPublicProductMetrics(
 
   if (product.product_type === "gic") {
     return [
-      { label: copy.grid.metricDisplayRate, value: productRate },
+      rateMetric,
       { label: copy.grid.metricTerm, value: formatPublicProductTerm(product, locale) },
       { label: copy.grid.metricMinDeposit, value: formatPublicCurrency(product.minimum_deposit, product.currency, locale) },
       product.country_code === "US"
@@ -69,18 +71,13 @@ export function buildPublicProductMetrics(
   if (product.product_type === "credit-card") {
     return [
       { label: getCardLabel("annualFee", locale), value: formatPublicCurrency(product.annual_fee, product.currency, locale) },
-      {
-        label: getCardLabel("purchaseRate", locale),
-        value: presentation === "card"
-          ? formatPublicRate(product.card_display_rate, locale)
-          : formatPublicPurchaseRate(product, locale)
-      }
+      { ...rateMetric, label: product.rate?.kind === "absolute" ? getCardLabel("purchaseRate", locale) : rateMetric.label }
     ];
   }
 
   if (product.product_type === "mortgage") {
     return [
-      { label: copy.grid.metricDisplayRate, value: productRate },
+      rateMetric,
       { label: getLoanLabel("rateType", locale), value: product.rate_type ?? copy.common.notDisclosed },
       { label: getLoanLabel("term", locale), value: formatPublicProductTerm(product, locale) }
     ];
@@ -88,7 +85,7 @@ export function buildPublicProductMetrics(
 
   if (product.product_type === "personal-loan") {
     return [
-      { label: copy.grid.metricDisplayRate, value: productRate },
+      rateMetric,
       { label: getEssentialLabel("loanAmount", locale), value: product.loan_amount_text ?? copy.common.notDisclosed },
       { label: getLoanLabel("term", locale), value: formatPublicProductTerm(product, locale) }
     ];
@@ -96,14 +93,14 @@ export function buildPublicProductMetrics(
 
   if (product.product_type === "line-of-credit") {
     return [
-      { label: copy.grid.metricDisplayRate, value: productRate },
+      rateMetric,
       { label: getEssentialLabel("creditLimit", locale), value: product.credit_limit_text ?? copy.common.notDisclosed },
       { label: getEssentialLabel("security", locale), value: formatPublicSecurity(product, locale) }
     ];
   }
 
   return [
-    { label: copy.grid.metricDisplayRate, value: productRate },
+    rateMetric,
     { label: copy.grid.metricMonthlyFee, value: formatPublicCurrency(product.public_display_fee, product.currency, locale) },
     { label: copy.grid.metricMinBalance, value: formatPublicCurrency(product.minimum_balance, product.currency, locale) }
   ];
@@ -128,7 +125,7 @@ export function buildPublicSortMetric(product: PublicProduct, locale: string, so
     case "last_changed_at":
       return { label: copy.grid.metricLastChange, value: product.last_changed_at?.slice(0, 10) ?? copy.common.notDisclosed };
     default:
-      return { label: copy.grid.metricDisplayRate, value: formatPublicRate(product.card_display_rate, locale) };
+      return getPublicRateMetric(product, locale);
   }
 }
 
@@ -144,16 +141,7 @@ export function formatPublicCurrency(value: number | null, currency: string, loc
 }
 
 export function formatPublicProductRate(product: PublicProduct, locale: string) {
-  if (product.public_display_rate !== null) {
-    return formatPublicRate(product.public_display_rate, locale);
-  }
-  if (product.country_code === "US" && product.product_type === "mortgage" && product.interest_rate_summary) {
-    return product.interest_rate_summary;
-  }
-  return product.mortgage_rate
-    ?? product.interest_rate
-    ?? product.interest_rate_summary
-    ?? getPublicMessages(locale).common.notDisclosed;
+  return getPublicRateMetric(product, locale).value;
 }
 
 export function formatPublicProductTerm(product: PublicProduct, locale: string) {
@@ -178,7 +166,7 @@ export function formatPublicProductTerm(product: PublicProduct, locale: string) 
 }
 
 export function formatPublicPurchaseRate(product: PublicProduct, locale: string) {
-  return product.purchase_interest_rate_summary ?? formatPublicRate(product.purchase_interest_rate, locale);
+  return getPublicRateMetric(product, locale).value;
 }
 
 export function formatPublicRate(value: number | null, locale: string) {

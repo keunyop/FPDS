@@ -609,3 +609,17 @@ cd api/service
 - Focused regression tests cover logout rejection/success/idempotency, the
   environment contract, and execution of the attention aggregate against mixed
   country/state test data.
+
+
+## Public rate interpretation (2026-09-16)
+
+`api_service/public_rates.py` is the shared read-time interpretation for product
+list/detail, sorting, dashboard metrics/rankings/scatter. The additive `rate`
+object distinguishes absolute/range/reference/conditional/promotional/unknown.
+Only an absolute full rate supplies numeric comparison values. Legacy
+`public_display_rate` and `card_display_rate` responses are safe aliases of that
+value; stored data and source summaries remain intact. The interpreter never
+loads a prime rate or combines a benchmark and margin. Run the Public rate and
+product regression tests together. The separately reviewed, rollback-by-default
+single-record correction is documented in
+[the rate correction audit](../../docs/00-governance/public-rate-correction-2026-09-16.md).

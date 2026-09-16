@@ -369,7 +369,7 @@ function ProductCompareCard({
             <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-verification">{primaryMetric.label}</dt>
             <dd className={cn(
               "mt-1 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums",
-              product.product_family === "lending" && !Number.isFinite(product.card_display_rate) ? "text-lg" : "text-3xl"
+              primaryMetric.value.length > 24 ? "text-lg" : "text-3xl"
             )}>{primaryMetric.value}</dd>
           </div>
           <div className={cn("grid border-t border-border", secondaryMetrics.length > 1 && "grid-cols-2 divide-x divide-border")}>
