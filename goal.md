@@ -136,3 +136,20 @@ committed with version/change/snapshot history, unchanged unrelated records,
 idempotence and live-read verification. BMO source data required no mutation.
 Code deployment remains outside this slice. Preserve the unresolved prior
 Admin goal and its independent ownership.
+
+## Independent slice: 2026-09-16 Home Top 5 bank logos
+
+Objective: restore official bank images missing from the Home Top 5 lists.
+Scope: reproduce CA/US Home, add verified same-origin logo assets for the
+missing displayed banks, preserve existing text fallback and dimensions.
+Exclusions: rate/ranking changes, database writes, API contracts, deployment.
+Acceptance:
+- [x] Identify missing mappings versus failed network/image requests.
+- [x] Verify sourced bank assets and render affected Home rows at 390/768/1440px.
+- [x] Run Public tests, typecheck/build and diff checks; update journal.
+Preserve prior goal ownership and unrelated proposal edits.
+
+Completed: 13 Public tests, lint, typecheck, production build and all 18
+CA/US x EN/KO/JA x 390/768/1440 browser cases passed (two initial data-load
+timeouts passed on retry). Local image decode, alt text and no horizontal
+overflow verified. No deployment or canonical-data mutation.

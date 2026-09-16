@@ -1708,3 +1708,28 @@ Read before coding:
   release-readiness record. Markdown links and whitespace checked separately.
 - Next: use the guide at kick-off and record the agreed owners, dates, and support
   period. No runtime changes or application tests are needed for this document.
+
+
+## 2026-09-16 - Restore Home Top 5 bank logos
+
+- Root cause: the same-origin logo registry covered only BMO/CIBC/RBC/Scotia/TD.
+  Live CA Top 5 showed text fallbacks for Vancity, Manulife and Laurentian;
+  existing mapped images loaded successfully.
+- Added nine missing CA/US bank mappings and local image assets. Preserved
+  image dimensions, accessible unknown-bank fallback and all financial logic.
+  Sources and preparation are recorded in public/bank-logos/SOURCES.md.
+  Manulife uses an unmodified current-wordmark mirror because its official
+  SVG endpoint returned 403; some official US favicon sources are low resolution.
+- Key files: public-bank-logo.ts, public-bank-logo.test.ts, bank-logos assets,
+  Public README. Regression coverage checks files exist and SVGs contain no
+  scripts, foreign objects or external href/src resources.
+- Verification: Public 13 tests, lint, typecheck, production build and
+  git diff --check passed. Production-build browser verification passed all
+  18 CA/US x EN/KO/JA x 390/768/1440 cases, checking every current Top 5 row's
+  image decode, same-origin URL, alt text and no horizontal overflow. CA/US
+  mobile screenshots inspected. Read-only local API used; analytics blocked.
+- Two initial localized-data loads timed out; both passed on retry without
+  code changes. This existing data-loading behavior is outside this asset fix.
+- No API, ranking, financial data or database changes. Unrelated proposal
+  edits preserved. Next step: deploy Public through the normal release flow;
+  production deployment was not performed in this slice.

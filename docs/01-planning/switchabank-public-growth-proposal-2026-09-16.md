@@ -54,21 +54,6 @@ Production은 홈, 예금, 카드, 대출, 상세 2개, Methodology, 미국 홈�
 
 ## 3. 성장 기능보다 먼저 해결할 문제
 
-### A. 전체 금리와 가산금리의 혼동 — 확인됨
-
-BMO Professional Student Line of Credit의 공개 응답은 다음과 같았다.
-
-- 설명: `Variable low-interest rate based on BMO’s Prime Rate plus 0.5% while you’re in school.`
-- `public_display_rate = null`, `card_display_rate = 0.5`.
-- 홈 Loan Top 5와 대출 목록은 `0.5%`를 Interest rate로 표시한다.
-- [BMO 공식 페이지](https://www.bmo.com/en-ca/main/personal/loans-line-of-credit/student-borrowing/professional-student-line-of-credit/)도 전공별 Prime 가산·차감 조건을 제시한다. 전체 대출 금리 0.5%로 해석할 수 없다.
-
-로컬 실제 `_explicit_rate_candidates` 함수에 공개 설명을 넣어 `[0.5]` 반환을 재현했다. `Prime Rate + 2.00%`는 배제하지만 현재 문장형 `plus` 사례를 놓친다. 이 파생값은 목록 정렬과 finder에도 사용된다. 따라서 상세 설명만 맞는 것으로 해결되지 않는다.
-
-권고: 전체 금리·범위·가산금리·조건부 우대·프로모션을 구분해 표시하고, 비교 가능한 전체 수치가 없으면 순위와 차이 계산에서 제외한다. 최신 기준금리를 근거 없이 더해 전체 금리를 만들어내지 않는다. 수정 시 기존 공개 데이터 정정과 화면/API 수정의 범위를 분리해 승인받고 검증해야 한다.
-
-근거: [공개 상세](https://www.switchabank.com/products/prod_IbZVSqaogb3BkWBd), [API 금리 추출](../../api/service/api_service/public_products.py), [홈 순위](../../app/public/src/components/fpds/public/dashboard-surface.tsx).
-
 ### B. 스냅샷 성공과 상품 정보의 최신성이 섞임 — 확인됨
 
 9월 16일 읽은 CA 8월 27일·US 9월 3일 스냅샷은 모두 `status=fresh`였다. `build_freshness_payload`는 stale flag 또는 후속 refresh 실패를 보며, 경과 시간을 판단하지 않는다. 오래된 성공 스냅샷을 넣은 직접 함수 확인에서도 `fresh`였다.
