@@ -1,6 +1,9 @@
+import type { ProductVerification } from "./public-verification";
 import type { PublicRate } from "./public-rate";
 
 export type PublicFreshness = {
+  snapshot_status?: "completed" | "stale" | "unavailable";
+  verification?: { total_products: number; counts: Record<ProductVerification["status"], number>; evaluated_at: string };
   snapshot_id: string | null;
   refreshed_at: string | null;
   source_change_cutoff_at: string | null;
@@ -76,6 +79,7 @@ export type PublicProduct = {
   product_highlight_badge_label: string | null;
   target_customer_tags: string[];
   target_customer_tag_labels: string[];
+  verification?: ProductVerification;
   last_verified_at: string | null;
   last_changed_at: string | null;
 };

@@ -346,6 +346,7 @@ Based on:
 | 5.61 | Completed | Public PageSpeed performance and accessibility hardening | PageSpeed desktop/mobile RCA, data-independent Home hero streaming, server-rendered scatter SVG, granular Radix imports, inline critical stylesheet, same-origin sized bank logos with accessible fallback, locale-control contrast/name fixes, and Lighthouse plus responsive regression verification | Frontend, UX, QA | 5.48, 5.55, 5.60 | 2026-09-03 |
 | 5.62 | In Progress | Admin pre-handover readiness | auth/logout/return-path fixes, API-owned environment, partial-run attention, web headers, placeholder removal, 474 API and 527 Worker tests, Admin build and 9 browser cases complete; privileged account lifecycle implementation awaits explicit approval, client recovery/UAT/release gates remain open | Frontend, Backend, Security, QA, Product Owner | 4.1, 4.5, 5.27, 5.54 | - |
 | 5.63 | Completed | Public full-rate and reference-spread correction | shared safe rate interpretation, source-preserving EN/KO/JA display, rate comparison exclusions, regression/browser verification, separate bounded published-data correction and self-review | Backend, Frontend, Data, QA | 5.28, 5.55, 5.56 | 2026-09-16 |
+| 5.64 | Completed | Public product verification freshness | separate snapshot/product dates, elapsed type-specific review/expiry status, EN/KO/JA comparison surfaces, read-only overdue report and manual review cadence, regression and responsive verification | Backend, Frontend, QA | 5.63 | 2026-09-21 |
 
 ### 5.5 Scope Baseline
 

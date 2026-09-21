@@ -3,6 +3,7 @@
 import { Check, ExternalLink, GitCompareArrows, LoaderCircle, Plus, RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { ProductVerification } from "@/components/fpds/public/product-verification";
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/public/product-engagement-link";
 import { Button } from "@/components/ui/button";
@@ -287,6 +288,7 @@ function ProductCompareListItem({
                 {product.product_name}
               </TrackedProductLink>
             </h2>
+            <ProductVerification product={product} locale={locale} />
           </div>
         </div>
 
@@ -360,6 +362,7 @@ function ProductCompareCard({
                 {product.product_name}
               </TrackedProductLink>
             </h2>
+            <ProductVerification product={product} locale={locale} />
           </div>
         </div>
       </div>
@@ -450,6 +453,7 @@ function ComparePanel({
                 <X className="size-4" aria-hidden="true" />
               </button>
             </div>
+            <ProductVerification product={product} locale={locale} />
             <dl className="mt-4 divide-y divide-border border-y border-border">
               {rowsByProduct[productIndex].map((row) => (
                 <CompareFact different={differingKeys.has(row.key)} key={row.key} label={row.label} value={row.value} />

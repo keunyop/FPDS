@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { ProductVerification } from "@/components/fpds/public/product-verification";
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { TrackedOfficialBankLink } from "@/components/fpds/public/product-engagement-link";
 import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
@@ -95,7 +96,7 @@ export function ProductDetailSurface({
       : copy.detail.backToList;
   const metricCards = buildMetricCards(product, filters.locale);
   const detailFacts = buildDetailFacts(product, filters.locale);
-  const disclosureDate = formatIsoDate(product.last_verified_at ?? detail.freshness.refreshed_at);
+  const disclosureDate = formatIsoDate(product.verification ? product.verification.last_verified_at : product.last_verified_at, copy.common.noDate);
   const similarHref = buildPublicHref(catalogPath, {
     ...filters,
     bankCodes: [product.bank_code],
@@ -167,6 +168,7 @@ export function ProductDetailSurface({
             </div>
           </div>
 
+          <ProductVerification product={product} locale={filters.locale} detailed />
           <dl className="mt-7 grid border-y border-border sm:grid-cols-3 sm:divide-x sm:divide-border">
             {metricCards.map((metric, index) => (
               <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
@@ -397,7 +399,7 @@ function localizedOverviewIntro(
   if (locale === "ja") {
     return `SwitchaBankの確認済み公開スナップショットでは、${displayName}を${productType}商品として掲載しています。最終確認日は${verifiedDate}です。`;
   }
-  return `SwitchaBank lists ${displayName} as a ${productType} in its reviewed public snapshot, last verified ${verifiedDate}.`;
+  return `SwitchaBank lists ${displayName} as a ${productType} in its reviewed public snapshot. Product information was last checked ${verifiedDate}.`;
 }
 
 function addSentence(sentences: string[], value: string | null) {
@@ -620,23 +622,23 @@ function detailLabel(key: string, locale: string) {
   return labels[key] ?? key;
 }
 
-function formatIsoDate(value: string | null) {
+function formatIsoDate(value: string | null, fallback: string) {
   if (!value) {
-    return "unknown date";
+    return fallback;
   }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return value.slice(0, 10);
+    return fallback;
   }
   return date.toISOString().slice(0, 10);
 }
 
 function buildDisclosure(date: string, locale: string) {
   if (locale === "ko") {
-    return `${date} 기준 공개 스냅샷입니다. 금리와 가입 조건은 변경될 수 있으므로 신청 전 은행 공식 페이지에서 다시 확인하세요.`;
+    return `${date} 상품 정보 확인 기준입니다. 금리와 가입 조건은 변경될 수 있으므로 신청 전 은행 공식 페이지에서 다시 확인하세요.`;
   }
   if (locale === "ja") {
-    return `${date} 時点の公開スナップショットです。金利や申込条件は変更される場合があるため、申込前に銀行の公式ページで再確認してください。`;
+    return `${date} 時点の商品情報の確認記録です。金利や申込条件は変更される場合があるため、申込前に銀行の公式ページで再確認してください。`;
   }
-  return `Public snapshot as of ${date}. Rates and eligibility can change, so confirm them on the bank's official page before applying.`;
+  return `Product information last checked: ${date}. Rates and eligibility can change, so confirm them on the bank's official page before applying.`;
 }

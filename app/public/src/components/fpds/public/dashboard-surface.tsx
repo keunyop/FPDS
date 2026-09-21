@@ -2,6 +2,7 @@ import { getComparablePublicRate } from "@/lib/public-rate";
 import { ArrowRight, ExternalLink, Landmark, PiggyBank, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
+import { ProductVerification } from "@/components/fpds/public/product-verification";
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/public/product-engagement-link";
 import { PublicScatterChart } from "@/components/fpds/public/public-dashboard-charts";
@@ -211,6 +212,7 @@ function ProductTopFive({
                   {product.product_name}
                 </TrackedProductLink>
                 <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
+                <ProductVerification product={product} locale={filters.locale} />
               </div>
               <div className="col-start-3 mt-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
                 <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${copy.grid.metricDisplayRate} ${formatMetricValue(getComparablePublicRate(product), "percent", filters.locale)}`}>

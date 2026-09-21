@@ -437,7 +437,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "Freshness and verification",
-          body: "Snapshot status shows when the public dataset was refreshed. Current rates and conditions must still be confirmed with the institution."
+          body: "Snapshot generation and each product’s last check are separate. Rebuilding a snapshot does not recheck bank facts. Savings, GIC/CD and loans are due for recheck after 7 days and verification expires after 30 days; checking/chequing and cards use 30 and 90 days. These are review windows, not guaranteed rate-validity periods. Warnings do not mean product withdrawal. Confirm current terms with the bank."
         }
       ]
     }
@@ -652,7 +652,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "최신성과 재확인",
-          body: "스냅샷 상태는 공개 데이터가 갱신된 시점을 보여줍니다. 현재 금리와 조건은 금융기관에서 다시 확인해야 합니다."
+          body: "스냅샷 생성일과 상품별 마지막 확인일은 다릅니다. 스냅샷을 다시 만들어도 은행 정보를 재확인한 것은 아닙니다. Savings·GIC/CD·대출은 7일 후 재확인 필요, 30일 후 확인 기한 만료로 표시합니다. Chequing/Checking·카드는 각각 30일·90일입니다. 이는 검수 주기이며 금리 유효기간 보장이 아닙니다. 경고는 상품 판매 중단을 뜻하지 않습니다. 최신 조건은 은행에서 확인하세요."
         }
       ]
     }
@@ -867,7 +867,7 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
         },
         {
           title: "鮮度と再確認",
-          body: "スナップショット状態は公開データの更新時点を示します。現在の金利と条件は金融機関で再確認してください。"
+          body: "スナップショット生成日と商品の最終確認日は異なります。再生成は銀行情報の再確認ではありません。Savings・GIC/CD・ローンは7日後に再確認が必要、30日後に確認期限切れとなります。Chequing/Checking・カードは30日・90日です。これは確認周期であり金利の有効期間保証ではありません。注意表示は販売終了を意味しません。最新条件は銀行で確認してください。"
         }
       ]
     }
@@ -884,7 +884,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     cardCoverage: "Credit cards",
     depositCoverage: "Chequing, savings and GIC",
     evidenceBoundary: "Raw evidence and internal review traces stay private.",
-    fresh: "Current snapshot",
+    fresh: "Snapshot available",
     freshness: "Snapshot freshness",
     homeBody: "Review rates, fees, and key terms side by side—then confirm the latest details with the bank before you switch.",
     homeKicker: "Reviewed public product data",
@@ -909,7 +909,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     sourceLanguage: "Source language",
     stale: "Snapshot needs refresh",
     unavailable: "Snapshot unavailable",
-    verified: "Verified record"
+    verified: "Reviewed record"
   },
   ko: {
     asOf: "기준일",
@@ -920,7 +920,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     cardCoverage: "신용카드",
     depositCoverage: "입출금·저축·GIC",
     evidenceBoundary: "원문 증거와 내부 검토 이력은 공개하지 않습니다.",
-    fresh: "최신 스냅샷",
+    fresh: "스냅샷 제공 중",
     freshness: "스냅샷 최신성",
     homeBody: "여러 은행의 검토된 금리·수수료·핵심 조건을 나란히 비교하고, 바꾸기 전 최신 정보는 은행에서 확인하세요.",
     homeKicker: "검토된 공개 상품 데이터",
@@ -945,7 +945,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     sourceLanguage: "원문 언어",
     stale: "갱신 필요",
     unavailable: "스냅샷 없음",
-    verified: "검증된 기록"
+    verified: "검토된 기록"
   },
   ja: {
     asOf: "基準日",
@@ -956,7 +956,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     cardCoverage: "クレジットカード",
     depositCoverage: "当座・普通預金・GIC",
     evidenceBoundary: "原文証拠と内部レビュー履歴は公開しません。",
-    fresh: "最新スナップショット",
+    fresh: "スナップショット提供中",
     freshness: "スナップショットの鮮度",
     homeBody: "複数の銀行の確認済み金利・手数料・主な条件を並べて比較し、乗り換える前に最新情報を銀行で確認してください。",
     homeKicker: "レビュー済み公開商品データ",
@@ -981,7 +981,7 @@ const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
     sourceLanguage: "ソース言語",
     stale: "更新が必要",
     unavailable: "スナップショットなし",
-    verified: "検証済みレコード"
+    verified: "確認記録"
   }
 };
 

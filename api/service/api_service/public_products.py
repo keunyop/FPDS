@@ -22,6 +22,8 @@ from api_service.public_common import (
     serialize_decimal,
 )
 
+from api_service.public_verification import as_utc, product_verification
+
 from api_service.public_rates import comparable_rate, interpret_rate_text, public_rate
 
 PRODUCT_SORT_OPTIONS = (
@@ -126,13 +128,14 @@ def load_public_products(connection, *, query: PublicProductsQuery) -> dict[str,
         search_query=query.search_query,
         product_name_query=query.product_name_query,
     )
+    freshness = build_freshness_payload(snapshot, cache_ttl_sec=300, rows=filtered_rows)
     sorted_rows = _sort_rows(filtered_rows, query=query)
     total_items = len(sorted_rows)
     total_pages = (total_items + query.page_size - 1) // query.page_size if total_items else 0
     page_rows = sorted_rows[(query.page - 1) * query.page_size : query.page * query.page_size]
 
     return {
-        "items": [_serialize_product_row(row, locale=query.filters.locale) for row in page_rows],
+        "items": [_serialize_product_row(row, locale=query.filters.locale, evaluated_at=freshness["verification"]["evaluated_at"]) for row in page_rows],
         "applied_filters": _applied_filters(
             query.filters,
             search_query=query.search_query,
@@ -167,8 +170,9 @@ def load_public_product_detail(connection, *, product_id: str, filters: PublicQu
     if product_row is None:
         return None
 
+    freshness = build_freshness_payload(snapshot, cache_ttl_sec=300, rows=[product_row])
     return {
-        "product": _serialize_product_row(product_row, locale=filters.locale),
+        "product": _serialize_product_row(product_row, locale=filters.locale, evaluated_at=freshness["verification"]["evaluated_at"]),
         "applied_filters": applied_filters_payload(filters),
         "freshness": freshness,
     }
@@ -208,6 +212,7 @@ def load_public_filters(
         apply_public_filters(rows, filters=filters),
         search_query=normalized_search_query,
     )
+    freshness = build_freshness_payload(snapshot, cache_ttl_sec=300, rows=filtered_rows)
     locale = filters.locale
     return {
         "countries": countries,
@@ -443,7 +448,7 @@ def _sort_numeric_rows(
     )
 
 
-def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any]:
+def _serialize_product_row(row: dict[str, Any], *, locale: str, evaluated_at: str | None = None) -> dict[str, Any]:
     metadata = _coerce_metadata(row.get("refresh_metadata"))
     target_customer_tags = [str(tag).lower() for tag in coerce_string_list(row.get("target_customer_tags"))]
     badge_code = row.get("product_highlight_badge_code")
@@ -510,6 +515,7 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str) -> dict[str, Any
         "target_customer_tag_labels": [
             localize_target_customer_tag(tag, locale=locale) or tag for tag in target_customer_tags
         ],
+        "verification": product_verification(row, now=as_utc(evaluated_at)),
         "last_verified_at": serialize_datetime(row.get("last_verified_at")),
         "last_changed_at": serialize_datetime(row.get("last_changed_at")),
     }

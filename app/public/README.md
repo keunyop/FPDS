@@ -380,3 +380,17 @@ checks cover document
 overflow, language metadata, heading structure, touch targets, browser errors,
 comparison selection, reduced motion, the mobile wordmark/menu, responsive
 Grid/List defaults, and the live aggregate snapshot.
+
+## Public verification freshness (2026-09-21)
+
+Snapshot generation and product verification are separate. Public product rows
+carry read-time verification state/deadlines; snapshot success is neutral and
+never substitutes for a missing product check. Catalog, comparison, Home/finder
+results and detail share the EN/KO/JA product status. Existing comparisons and
+product availability stay intact. Legacy clients retain fresh/stale/unavailable,
+with fresh restricted to known checks within their policy window.
+
+See [the freshness policy and operator report](../../docs/03-design/public-verification-freshness-policy.md)
+for contract details, the read-only overdue CLI, manual daily/weekly review and
+release order. Initial warning-only intervals are 7/30 days for rate-led products and 30/90 days for chequing/cards. D-069 collection
+is manual; these changes do not start collection, update facts or publish data.

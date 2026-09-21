@@ -5,6 +5,7 @@ import { getComparablePublicRate, getRateComparisonUnavailable } from '@/lib/pub
 import { ArrowRight, ExternalLink, RefreshCw, Search } from 'lucide-react';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
+import { ProductVerification } from "@/components/fpds/public/product-verification";
 import { BankLogo } from '@/components/fpds/public/bank-logo';
 import {
   recordProductEngagement,
@@ -328,6 +329,7 @@ function RecommendationResult({
           <p className='text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground'>{copy.currentProduct}</p>
           <p className='mt-1 text-sm font-semibold text-foreground [overflow-wrap:anywhere]'>{result.currentProduct.product_name}</p>
           <p className='mt-0.5 text-xs text-muted-foreground'>{result.currentProduct.bank_name} · {result.currentProduct.product_type_label}</p>
+          <ProductVerification product={result.currentProduct} locale={locale} />
         </div>
         {rule ? (
           <span className='max-w-[45%] border-b-2 border-maple px-1.5 py-1 text-sm font-semibold tabular-nums text-foreground [overflow-wrap:anywhere]'>
@@ -369,6 +371,7 @@ function RecommendationResult({
                       {product.product_name}
                     </TrackedProductLink>
                     <p className='text-xs text-muted-foreground'>{product.bank_name}</p>
+                    <ProductVerification product={product} locale={locale} />
                   </div>
                   <div className='shrink-0 text-right'>
                     <p className='text-base font-semibold tabular-nums text-primary'>{formatMetric(product, readyResult.rule, locale)}</p>

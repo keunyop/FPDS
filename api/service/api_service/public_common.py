@@ -383,9 +383,14 @@ def apply_public_filters(rows: list[dict[str, Any]], *, filters: PublicQueryFilt
     return filtered
 
 
-def build_freshness_payload(snapshot: dict[str, Any] | None, *, cache_ttl_sec: int) -> dict[str, Any]:
+def build_freshness_payload(snapshot: dict[str, Any] | None, *, cache_ttl_sec: int, rows: list[dict[str, Any]] | None = None, now: datetime | None = None) -> dict[str, Any]:
+    from api_service.public_verification import verification_summary
+
+    verification = verification_summary(rows or [], now=now)
     if not snapshot:
         return {
+            "snapshot_status": "unavailable",
+            "verification": verification,
             "snapshot_id": None,
             "refreshed_at": None,
             "source_change_cutoff_at": None,
@@ -405,14 +410,21 @@ def build_freshness_payload(snapshot: dict[str, Any] | None, *, cache_ttl_sec: i
         if latest_attempt_status == "failed" and latest_attempt_time and refreshed_time and latest_attempt_time > refreshed_time:
             status = "stale"
 
+    snapshot_status = "stale" if status == "stale" else "completed"
+    counts = verification["counts"]
+    if not verification["total_products"] or any(counts[key] for key in ("review_due", "expired", "unknown")):
+        status = "stale"
+
     return {
+        "snapshot_status": snapshot_status,
+        "verification": verification,
         "snapshot_id": snapshot.get("snapshot_id"),
         "refreshed_at": _serialize_datetime(refreshed_at),
         "source_change_cutoff_at": _serialize_datetime(snapshot.get("source_change_cutoff_at")),
         "cache_ttl_sec": cache_ttl_sec,
         "status": status,
         "latest_attempted_at": _serialize_datetime(latest_attempt.get("attempted_at")) if latest_attempt else None,
-        "latest_error_summary": latest_attempt.get("error_summary") if latest_attempt and status == "stale" else None,
+        "latest_error_summary": latest_attempt.get("error_summary") if latest_attempt and snapshot_status == "stale" else None,
     }
 
 

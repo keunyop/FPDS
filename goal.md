@@ -153,3 +153,26 @@ Completed: 13 Public tests, lint, typecheck, production build and all 18
 CA/US x EN/KO/JA x 390/768/1440 browser cases passed (two initial data-load
 timeouts passed on retry). Local image decode, alt text and no horizontal
 overflow verified. No deployment or canonical-data mutation.
+
+## Independent slice: 2026-09-21 Public verification freshness
+
+Ownership: preserve unresolved Admin goal and earlier slices.
+Objective: separate snapshot generation from product verification, with elapsed
+verification status and manual operator follow-up under D-069.
+Scope: Public API/UI, product-type policy, read-only overdue report, documentation.
+Exclusions: automated collection, live mutations, deployment, ranking formulas,
+new countries/types, evidence exposure, unrelated Admin work.
+Acceptance:
+- [x] Separate snapshot success/date from product verification/status; no date fallback.
+- [x] Document and implement product-type intervals, expiry and unknown handling.
+- [x] Provide overdue list and manual operator review cadence.
+- [x] API/Public regression suites, lint/typecheck/build, 390/768/1440px UI checks.
+- [x] Update contracts/journal, inspect diff and run git diff --check.
+Verification: deterministic boundary, failure and regenerated-snapshot checks;
+localized browser regression with no analytics writes. Initial warning-only policy uses 7/30 and 30/90 elapsed days; optional PO preference remains adjustable.
+
+Completion: API 490, Public 16 and worker aggregate-refresh 7 tests pass;
+lint/typecheck/production build, 70 browser cases, read-only CA/US report,
+repo doctor/foundation and final diff checks pass. Dates, statuses, manual report
+and initial warning-only policy are documented. No deployment or live mutation.
+Preserve this file for the earlier unresolved Admin ownership.

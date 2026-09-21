@@ -164,7 +164,7 @@ def normalize_public_dashboard_query(
 
 def load_public_dashboard_summary(connection, *, query: PublicDashboardQuery) -> dict[str, Any]:
     snapshot, filtered_rows = _load_scoped_rows(connection, filters=query.filters)
-    freshness = build_freshness_payload(snapshot, cache_ttl_sec=900)
+    freshness = build_freshness_payload(snapshot, cache_ttl_sec=900, rows=filtered_rows)
     locale = query.filters.locale
     labels = SUMMARY_LABELS[locale]
     refreshed_at = _resolve_refreshed_at(snapshot)
@@ -247,7 +247,7 @@ def load_public_dashboard_summary(connection, *, query: PublicDashboardQuery) ->
 
 def load_public_dashboard_rankings(connection, *, query: PublicDashboardQuery) -> dict[str, Any]:
     snapshot, filtered_rows = _load_scoped_rows(connection, filters=query.filters)
-    freshness = build_freshness_payload(snapshot, cache_ttl_sec=900)
+    freshness = build_freshness_payload(snapshot, cache_ttl_sec=900, rows=filtered_rows)
     locale = query.filters.locale
     labels = RANKING_LABELS[locale]
     refreshed_at = _resolve_refreshed_at(snapshot)
@@ -279,7 +279,7 @@ def load_public_dashboard_rankings(connection, *, query: PublicDashboardQuery) -
 
 def load_public_dashboard_scatter(connection, *, query: PublicDashboardQuery) -> dict[str, Any]:
     snapshot, filtered_rows = _load_scoped_rows(connection, filters=query.filters)
-    freshness = build_freshness_payload(snapshot, cache_ttl_sec=900)
+    freshness = build_freshness_payload(snapshot, cache_ttl_sec=900, rows=filtered_rows)
     locale = query.filters.locale
     labels = SCATTER_LABELS[locale]
     scope_key = _resolve_scope_key(filtered_rows, filters=query.filters)

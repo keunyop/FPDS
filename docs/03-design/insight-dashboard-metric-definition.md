@@ -440,3 +440,11 @@ This metric baseline requires the following API/aggregate alignment.
 - `5.10`: build public Insight Dashboard UI against a stable metric contract
 - `5.11`: implement exact grid/dashboard cross-filter choreography
 - `5.13`: render methodology/freshness note copy
+
+### Freshness correction — 2026-09-21
+
+Snapshot completion is independent of product verification age. The API adds
+snapshot_status and verification counts over the complete filtered rows; legacy
+fresh now requires known within-window checks. Home Top 5 and finder show each
+product's verification status without altering ranking or arithmetic. See
+[verification policy](public-verification-freshness-policy.md) for the contract.

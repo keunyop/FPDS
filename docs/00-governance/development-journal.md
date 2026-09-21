@@ -25,6 +25,35 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-09-21 (Public verification freshness, implementation complete):
+
+- implemented only the growth proposal's snapshot/product-freshness correction.
+  D-078 / WBS 5.64 separate snapshot completion/generated time from each product's
+  recorded check and elapsed within-window/recheck-due/expired/unknown status
+- initial warning-only policy: Savings, GIC/CD and governed loans 7/30 days;
+  Chequing/Checking and cards 30/90. These reversible operating defaults are not
+  bank rate-validity guarantees or an independently confirmed numeric PO SLA
+- shared `public_verification.py` drives Public product and scoped summary
+  responses; regenerated aggregates cannot reset check dates. EN/KO/JA catalog,
+  comparison, Home/finder and detail distinguish dates/statuses. Missing dates
+  never use snapshot time, and completed snapshots no longer get a green check
+- read-only `public_verification_report` lists expired/unknown/due products and
+  [the policy](../03-design/public-verification-freshness-policy.md) defines daily
+  triage and weekly reconciliation through existing manual Admin collection and
+  Review. No automated collection or availability/ranking change
+- verification: API 490, Public 16 and aggregate-refresh 7 tests; Public lint,
+  typecheck, production build; 70 browser cases across CA/US, EN/KO/JA and exact
+  390/768/1440px plus four status fixtures, comparison, card/loan views and
+  loading/empty/error/retry. Final runs passed with no overflow or JS exceptions;
+  harness timeout/cache/selector corrections are recorded in the policy
+- read-only 216-product report: CA due/expired 76/44, US 24/6; both unknown=0.
+  This is classification of recorded dates, not re-verification of bank facts.
+  Repo doctor, foundation baseline and whitespace checks pass
+- no deployment, live writes, collection or account operations. Next: separately
+  authorized API then Public release, check after caches expire, and operator
+  manual overdue review. Preserve unresolved earlier Admin goal ownership.
+
+
 As of 2026-09-16 (Public rate semantics correction, implementation complete):
 
 - read the full growth proposal and implemented only its full-rate/spread fix

@@ -623,3 +623,17 @@ loads a prime rate or combines a benchmark and margin. Run the Public rate and
 product regression tests together. The separately reviewed, rollback-by-default
 single-record correction is documented in
 [the rate correction audit](../../docs/00-governance/public-rate-correction-2026-09-16.md).
+
+## Public verification freshness (2026-09-21)
+
+Snapshot generation and product verification are separate. Public product rows
+carry read-time verification state/deadlines; snapshot success is neutral and
+never substitutes for a missing product check. Catalog, comparison, Home/finder
+results and detail share the EN/KO/JA product status. Existing comparisons and
+product availability stay intact. Legacy clients retain fresh/stale/unavailable,
+with fresh restricted to known checks within their policy window.
+
+See [the freshness policy and operator report](../../docs/03-design/public-verification-freshness-policy.md)
+for contract details, the read-only overdue CLI, manual daily/weekly review and
+release order. Initial warning-only intervals are 7/30 days for rate-led products and 30/90 days for chequing/cards. D-069 collection
+is manual; these changes do not start collection, update facts or publish data.

@@ -146,7 +146,8 @@ class PublicProductsTests(unittest.TestCase):
         self.assertTrue(payload["items"][0]["non_redeemable_flag"])
         self.assertFalse(payload["items"][0]["redeemable_flag"])
         self.assertEqual(payload["items"][1]["product_id"], "gic-td-short")
-        self.assertEqual(payload["freshness"]["status"], "fresh")
+        self.assertEqual(payload["freshness"]["status"], "stale")
+        self.assertEqual(payload["freshness"]["snapshot_status"], "completed")
         self.assertEqual(payload["applied_filters"]["bank_code"], ["TD", "BMO"])
         projection_sql = connection.calls[-1][0]
         self.assertIn("JOIN normalized_candidate AS nc", projection_sql)

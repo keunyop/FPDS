@@ -337,6 +337,18 @@ Phase 2 SaaS/Open API를 이용하는 외부 시스템 또는 기업 사용자
 - Status / last updated
 
 ### FR-PUB-004 Grid Card Content
+
+2026-09-21 freshness correction: snapshot generation is distinct from each
+product's last verification. Catalog/list, comparison, Home rankings/finder and
+detail show product check date and within-window/recheck-due/expired/unknown
+state in EN/KO/JA. Missing verification never falls back to snapshot time.
+Initial warning-only review/expiry windows are 7/30 elapsed UTC days for
+Savings, GIC/CD and governed loans, and 30/90 for Chequing/Checking and cards.
+These windows do not guarantee rate validity, change availability/ranking rules,
+or restart automatic collection. Operators use the read-only overdue report and
+manual daily/weekly checklist in
+[the verification policy](../03-design/public-verification-freshness-policy.md).
+
 각 상품 card/grid item은 최소 아래 정보를 표시할 수 있어야 한다.
 
 - bank name

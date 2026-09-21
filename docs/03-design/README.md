@@ -28,6 +28,8 @@ Use this file to avoid opening every design doc.
 
 ## Public Experience
 
+- [Product verification freshness](public-verification-freshness-policy.md): elapsed review/expiry policy, separate snapshot timing and manual operator report
+
 - `product-grid-information-architecture.md`
 - `insight-dashboard-metric-definition.md`
 - `product-type-visualization-principles.md`

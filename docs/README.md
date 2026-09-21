@@ -70,6 +70,7 @@ requirements, planning, or design material.
 Start from [docs/03-design/README.md](03-design/README.md).
 
 Most commonly needed:
+- [Public verification freshness](03-design/public-verification-freshness-policy.md): separate snapshot/product dates, read-only overdue report, manual review cadence
 - [FPDS Admin purpose and complete feature guide (Korean)](03-design/fpds-admin-purpose-and-features.md): source-verified workflow, screens, roles, automation, and current versus deferred scope
 - `docs/03-design/domain-model-canonical-schema.md`
 - `docs/03-design/financial-product-field-contract.md`

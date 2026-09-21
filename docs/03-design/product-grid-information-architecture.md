@@ -656,3 +656,12 @@ Home rather than a streamed redirect shell:
 - `5.9`: Product Grid UI 구현
 - `5.11`: grid/dashboard cross-filter 적용
 - `5.14`: responsive QA refreshed on `2026-07-27` for the verified-record Public design
+
+### Public verification freshness correction — 2026-09-21
+
+Catalog Grid/List, selected comparisons, Home rankings/finder results and detail
+show the product check date and read-time review status. Snapshot availability
+and generated date remain separate neutral data-serving information. No product
+check can fall back to snapshot generation. Expiry is a verification warning,
+not a bank withdrawal. Existing comparison eligibility/order is unchanged.
+See [verification policy](public-verification-freshness-policy.md).

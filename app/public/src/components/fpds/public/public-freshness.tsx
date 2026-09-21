@@ -1,53 +1,33 @@
-import { Check, CircleAlert, Clock3 } from "lucide-react";
-
-import { getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
+import { CircleAlert, Clock3 } from "lucide-react";
 import type { PublicFreshness } from "@/lib/public-api";
+import { getVerificationCopy, verificationDate } from "@/lib/public-verification";
 import { cn } from "@/lib/utils";
 
-export function PublicFreshness({
-  className = "",
-  freshness,
-  locale,
-  compact = false,
-}: {
-  className?: string;
-  compact?: boolean;
-  freshness: PublicFreshness;
-  locale: string;
+export function PublicFreshness({ className = "", freshness, locale, compact = false }: {
+  className?: string; compact?: boolean; freshness: PublicFreshness; locale: string;
 }) {
-  const copy = getPublicMessages(locale);
-  const designCopy = getPublicDesignCopy(locale);
-  const status = freshness.status;
-  const Icon = status === "fresh" ? Check : status === "stale" ? Clock3 : CircleAlert;
-  const statusLabel = status === "fresh" ? designCopy.fresh : status === "stale" ? designCopy.stale : designCopy.unavailable;
-  const date = formatSnapshotDate(freshness.refreshed_at, copy.common.noDate);
-
+  const copy = getVerificationCopy(locale);
+  const status = freshness.snapshot_status ?? (freshness.status === "unavailable" ? "unavailable" : freshness.status === "stale" ? "stale" : "completed");
+  const Icon = status === "unavailable" ? CircleAlert : Clock3;
+  const counts = freshness.verification?.counts;
+  const attention = counts ? counts.review_due + counts.expired + counts.unknown : null;
   return (
-    <div
-      className={cn(
-        "inline-flex min-h-11 min-w-0 max-w-full items-center gap-2.5 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm",
-        status === "fresh" && "border-verification/20 bg-verification-soft text-verification",
-        status === "stale" && "border-warning/25 bg-warning-soft text-warning",
-        status === "unavailable" && "border-destructive/20 bg-destructive/5 text-destructive",
-        className
-      )}
-    >
-      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-current/10">
-        <Icon className="size-3.5" aria-hidden="true" />
-      </span>
-      <span className="min-w-0">
-        <span className="font-semibold">{statusLabel}</span>
-        {!compact ? <span className="mx-1.5 text-current/45" aria-hidden="true">·</span> : null}
-        {!compact ? <span className="font-mono text-xs text-current/80">{date}</span> : null}
-      </span>
+    <div className={cn("min-w-0 max-w-full text-xs leading-5 text-muted-foreground", className)}>
+      <div className={cn("inline-flex max-w-full items-center gap-2 rounded-lg border px-3 py-2", status === "unavailable" && "text-destructive", status === "stale" && "text-warning")}>
+        <Icon className="size-4 shrink-0" aria-hidden="true" />
+        <span className="min-w-0 [overflow-wrap:anywhere]">
+          <span className="font-semibold">{copy[status]}</span>
+          {!compact ? <span className="block">{copy.snapshot}: {formatSnapshotDate(freshness.refreshed_at, copy.unknownDate)} (UTC)</span> : null}
+        </span>
+      </div>
+      {!compact ? <>
+        {attention !== null && freshness.verification?.total_products ? <p className="mt-2">{copy.summary}: {attention} / {freshness.verification.total_products}</p> : null}
+        <p className="mt-1 max-w-xl">{copy.notice}</p>
+      </> : null}
     </div>
   );
 }
 
 export function formatSnapshotDate(value: string | null, fallback: string) {
-  if (!value) {
-    return fallback;
-  }
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value.slice(0, 10) : date.toISOString().slice(0, 10);
+  return verificationDate(value, fallback);
 }
