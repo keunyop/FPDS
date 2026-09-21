@@ -168,7 +168,6 @@ export function ProductDetailSurface({
             </div>
           </div>
 
-          <ProductVerification product={product} locale={filters.locale} detailed />
           <dl className="mt-7 grid border-y border-border sm:grid-cols-3 sm:divide-x sm:divide-border">
             {metricCards.map((metric, index) => (
               <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
@@ -235,6 +234,7 @@ export function ProductDetailSurface({
             <aside className="border border-foreground/20 bg-card/75 p-5 shadow-[8px_8px_0_rgba(28,39,35,0.05)]">
               <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{designCopy.officialRecord}</p>
               <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em]">{copy.detail.disclosureTitle}</h2>
+              <ProductVerification product={product} locale={filters.locale} detailed />
               <PublicFreshness className="mt-4" freshness={detail.freshness} locale={filters.locale} />
               <p className="mt-4 text-xs leading-5 text-muted-foreground">{buildDisclosure(disclosureDate, filters.locale)}</p>
               <div className="mt-4 grid gap-2">
