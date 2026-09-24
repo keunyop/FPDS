@@ -56,7 +56,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     params.set("page", String(page));
     return fetchPublicProducts(params);
   });
-  const loanProductsPromise = fetchPublicProducts(buildLoanProductsSearchParams(filters));
+  const loanProductsPromise = allProductPages(page => {
+    const params = buildLoanProductsSearchParams(filters);
+    params.set("page", String(page));
+    return fetchPublicProducts(params);
+  });
 
   return (
     <main className="mx-auto min-w-0 w-full max-w-7xl px-4 py-6 md:px-6 md:py-9">
@@ -211,7 +215,7 @@ function buildLoanProductsSearchParams(filters: DashboardPageFilters) {
     termBucket: ""
   });
   params.set("page", "1");
-  params.set("page_size", "5");
+  params.set("page_size", "100");
   params.set("sort_by", "display_rate");
   params.set("sort_order", "asc");
   return params;

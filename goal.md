@@ -207,3 +207,53 @@ lint/typechecks/builds, 79 browser cases plus 15 final-build smoke checks,
 216-product compatibility replay, repository/foundation and diff checks pass.
 No deployment or live data writes. Missing source semantics remain explicit
 unavailable states. Preserve this file for the unresolved earlier Admin goal.
+
+## Independent slice: 2026-09-24 Home comparison condition refinement
+
+Ownership: preserve the unresolved Admin goal and prior completed slices.
+Objective: replace Home Deposit Top 5 currency choices with concise product
+conditions while preserving compatible rate comparisons and other features.
+Scope: Public Home condition grouping, EN/KO/JA labels, regression tests and docs.
+Use the selected country's home currency; Savings conditions use disclosed zero
+monthly fee or zero minimum balance, and GIC retains exact term/redemption.
+Exclusions: API/data changes, finder/calculator behavior, deployment, collection,
+new countries/types and unrelated Admin work.
+Acceptance:
+- [x] Replace currency-led choices with grounded product conditions.
+- [x] Preserve country/currency/basis/term gates, ordering and empty/error states.
+- [x] Verify Public regressions, lint/typecheck/build and EN/KO/JA at
+      1440/768/exact 390px, including unaffected Loan/catalog/finder/calculator.
+- [x] Update active docs/journal, inspect final diff and run git diff --check.
+Verification: deterministic boundary tests, browser fixtures and published-data
+reads with analytics/feedback blocked. Do not claim zero bugs or deployment.
+
+Completion: product-condition presets and concise currency/basis context are
+implemented. Public 28 tests, lint/typecheck/production build, 79 browser
+regression cases and 30 final-build Home cases pass; EN/KO/JA at 390/768/1440px,
+keyboard focus, empty/error, Loan isolation, catalog comparison, finder and
+calculator paths verified. KO mobile/EN desktop screenshots inspected. No API,
+canonical data or deployment changes. Keep this file for prior Admin ownership.
+
+## Independent slice: 2026-09-24 Loan Home comparison conditions
+
+Ownership: preserve the unresolved Admin goal and completed Deposit changes.
+Objective: add concise Loan Top 5 conditions matching the Deposit interaction.
+Scope: Home loan Product Type and disclosed secured/unsecured presets, complete
+snapshot pagination, EN/KO/JA, regression tests and active documentation.
+Boundaries: use CA CAD / US USD, retain explicit comparable full-rate eligibility
+and ascending order; do not infer security from names or unknown flags.
+Exclusions: API/worker/financial data changes, finder/catalog changes, deployment,
+new countries/types or personalized suitability.
+Acceptance:
+- [x] Provide product-based conditions with the existing compact selector style.
+- [x] Rank each type/condition from all pages without mixing country/currency;
+      later-page failures and changed snapshots fail closed.
+- [x] Verify Public tests/lint/typecheck/build, EN/KO/JA at 390/768/1440px,
+      empty/error/pagination and Deposit/Loan independence plus existing flows.
+- [x] Update docs/journal, inspect final diff and run git diff --check.
+
+Completion: Loan product-type/security presets and full-snapshot pagination are
+complete. Public 34 tests, lint/typecheck/build, 52 final-build browser cases,
+visual screenshots and git diff --check pass. Existing API source/classification
+discrepancy I-005 remains a separately scoped follow-up; no financial data or
+API semantics were changed. Keep this goal for prior unresolved Admin ownership.

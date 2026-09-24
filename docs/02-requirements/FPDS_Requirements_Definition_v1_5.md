@@ -482,6 +482,18 @@ factual rather than personalized. The customer-facing title is `BankTable`,
 with one simple table mark shared by the shell and favicon; FPDS remains the
 internal platform name.
 
+Product Owner follow-up on `2026-09-24` adds Loan Top 5 comparison conditions
+using the same compact interaction as Deposit. The visitor selects Mortgage,
+Personal Loan or Line of Credit, with All / Secured / Unsecured presets supported
+by explicit public security flags. Unknown flags remain only in their type's
+All preset. Home uses CA CAD / US USD, shows the currency as context, and ranks
+only explicit comparable full rates ascending within that group. Full snapshot
+pagination precedes grouping; a later-page error or snapshot change fails closed.
+No term, fixed/variable rate type or security fact is inferred from product names
+or free text. This is a factual rate ordering, not a total-cost or eligibility
+comparison. The concise subtitle states the selected-condition ordering; product
+links retain access to complete published conditions.
+
 The later Home presentation refinement on `2026-08-14` keeps those ranking
 semantics but strengthens family recognition. Each region must pair its
 Deposit or Loan label with a family icon and semantic edge treatment so the
@@ -676,7 +688,12 @@ GIC uses the same selected term row and known redemption category. Promotional,
 tiered, market-linked, conflicting and missing conditions fail closed. The
 primary metric and three strict-improvement limit remain; no personal scoring
 is added. Home Deposit Top 5 is scoped by type/currency/basis/term instead of
-mixing Savings and GIC. Detail offers explicit simple-estimate horizons, positive
+mixing Savings and GIC. The subsequent Home refinement replaces currency
+choices with product conditions: Savings All / No monthly fee / No minimum
+balance, and GIC exact term/redemption. Home retains one currency (CA CAD / US
+USD), displays it with rate basis, and never treats unknown values or conditional
+fee waivers as zero-cost conditions. Foreign-currency products remain in the
+catalog. Detail offers explicit simple-estimate horizons, positive
 initial scenario amounts, minimum validation and localized unavailable reasons
 with official-bank links. See [the comparison policy](../03-design/public-deposit-comparison-policy.md)
 for calculation, data-boundary and cache behavior.

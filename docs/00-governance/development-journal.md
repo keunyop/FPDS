@@ -25,6 +25,63 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-09-24 (Loan Home comparison conditions complete):
+
+- Loan Top 5 now uses the Deposit-style compact selector: exact Mortgage,
+  Personal Loan or Line of Credit, with All / Secured / Unsecured only when
+  explicit public flags support the condition. Home currency is CA CAD / US
+  USD; unknown flags stay in the type's All group. Qualified rates remain
+  excluded by the existing comparable-rate contract. Each group sorts ascending
+  and shows at most five products; no security, term or rate-type inference.
+- Home now reads every Loan page from one snapshot before grouping. A failed
+  later page or changed snapshot renders unavailable, never a partial ranking.
+  Deposit and Loan use independent state and distinct React reset keys.
+- Key files: loan-top-five.tsx, public-loan-ranking.ts and tests, dashboard/page,
+  dashboard-surface, public-locale; Public README, FR-PUB-009 and metric design.
+- Verification: Public 34 tests, lint/typecheck/production build and final diff
+  check passed. Final-build browser QA passed 52 cases: 18 CA/US x EN/KO/JA x
+  390/768/1440 independence cases; 18 paginated fixture cases; 9 localized
+  empty/second-page failure/snapshot-change cases; 3 catalog comparisons;
+  existing Loan finder and Deposit calculator; 2 client country/locale changes.
+  Verified touch targets, keyboard focus, ordering, zero rates, conditional-rate
+  exclusion, screenshots and no overflow, JS errors or hydration/key warnings.
+  KO mobile and EN desktop screenshots inspected. Analytics/feedback blocked.
+- Test-harness corrections: replaced a network-idle timeout with target readiness,
+  waited for finder client data and disambiguated two similarly named products.
+  No runtime finder or API change was required; final scenarios passed.
+- Existing data limitation found separately: US product prod_QSCmmE97KOSfGp_c
+  has a public 0.375 rate with source wording describing an interest-rate
+  reduction. This predates the selector and remains open as RAID I-005 for
+  official verification and a separately authorized correction; no guessed
+  replacement or canonical mutation was made. Do not claim full data correctness.
+- Preserved prior Deposit work, the user's concurrent proposal edits and the
+  unresolved Admin goal. No API/worker/Admin change, live mutation or deployment.
+  Next: separately address I-005 and use the normal authorized release workflow.
+
+As of 2026-09-24 (Home product-condition refinement complete):
+
+- Replaced currency-led Deposit Top 5 choices with Savings All / No monthly
+  fee / No minimum balance and eligible GIC exact term/redemption conditions.
+  Home uses CA CAD / US USD with short visible currency/basis context; other
+  currencies remain in catalogs. Unknown amounts and conditional fee waivers
+  never qualify as zero-value conditions. Annual/APY and exact terms stay apart.
+- Key files: deposit-top-five.tsx, public-deposit-ranking.ts and its tests;
+  Public README, FR-PUB-021 and public-deposit-comparison-policy.md.
+- Verification: Public 28 tests, lint, typecheck, production build and final
+  git diff --check passed. Browser regression passed 79 cases covering Home,
+  Oaken/INDEXED and fixture calculators, catalog comparison, finder success,
+  loading, empty, error and retry. After correcting a PowerShell UTF-8 pipe
+  issue, 30 final-build Home checks passed: CA/US and EN/KO/JA at exact
+  390/768/1440px, product-condition/GIC selection, API failures, focus/touch
+  targets, unchanged Loan rows, no overflow or browser exceptions. KO mobile
+  and EN desktop screenshots visually inspected; analytics/feedback blocked.
+- Live data still has one eligible CAD Savings record and no eligible US
+  deposits/GICs; presets do not manufacture five results or relax eligibility.
+  API/worker/Admin code and financial data were untouched; those suites were
+  not rerun for this Public-only refinement. No deployment or live mutation.
+- Next: normal separately authorized release. Earlier unresolved Admin goal
+  remains preserved. No known defect remains from this slice.
+
 As of 2026-09-24 (Public deposit comparison, implementation complete):
 
 - selected only growth proposal section C; D-079 / WBS 5.65 explicitly amend

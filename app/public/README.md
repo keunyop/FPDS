@@ -14,8 +14,14 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
   and the deposit basis/term conditions below. Deposit, Credit Card, and Loan
   remain equal direct next actions. The main content places Deposit Top 5
   on the left and Loan Top 5 on the right at desktop, stacking both lists below
-  that breakpoint. Deposit orders a selected type/currency/rate-basis/GIC-term group; Loan uses
-  the lowest disclosed comparable rates. Neither list is a personalized
+  that breakpoint. Deposit offers Savings conditions (all, no monthly fee,
+  no minimum balance)
+  and GIC exact term/redemption choices within the selected country's home
+  currency (CA CAD / US USD) and matching rate basis. Loan offers exact Product
+  Type plus All / Secured / Unsecured where an explicit security flag exists,
+  within the same home-currency policy. It orders comparable full rates ascending.
+  Both lists read all snapshot pages before ranking; later-page failure or a
+  changing snapshot shows unavailable rather than a partial result. Neither list is a personalized
   recommendation. The two groups use distinct Deposit/Loan family rails,
   labels, and icons; catalog navigation is a text-style more link below each
   list rather than a competing header button.
@@ -405,7 +411,10 @@ is manual; these changes do not start collection, update facts or publish data.
 
 The [deposit comparison policy](../../docs/03-design/public-deposit-comparison-policy.md) supersedes headline-only Savings/GIC
 comparison and implicit one-year calculation. Home scopes rankings by type,
-currency, rate basis and exact GIC term/redemption category. The finder uses
+currency, rate basis and exact GIC term/redemption category. The selector uses
+product conditions, with currency/basis shown as compact context. Zero-fee and
+zero-minimum-balance conditions require explicit values, and conditional fee
+waivers do not qualify as no monthly fee. The finder uses
 those gates before its existing metric; the calculator uses disclosed annual
 basis and an explicit period, or a concise unavailable reason and official link.
 `deposit_terms` is additive. Public reads a bounded whitelist from the exact

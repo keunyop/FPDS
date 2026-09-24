@@ -1,6 +1,5 @@
-import { ProductTopFive } from "@/components/fpds/public/product-top-five";
+import { LoanTopFive } from "@/components/fpds/public/loan-top-five";
 import { DepositTopFive } from "@/components/fpds/public/deposit-top-five";
-import { getComparablePublicRate } from "@/lib/public-rate";
 import { RefreshCw } from "lucide-react";
 import Link from "next/link";
 
@@ -39,7 +38,6 @@ export function DashboardSurface({
 }: DashboardSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
   const productsHref = buildPublicHref("/products", { ...filters, page: 1 });
-  const loansHref = buildPublicHref("/loans", { ...filters, page: 1 });
 
   if (apiUnavailable || !summary) {
     return (
@@ -64,7 +62,6 @@ export function DashboardSurface({
   }
 
   const activeChips = buildScopeChips(filters, summary);
-  const rankedLoans = (loanProducts?.items ?? []).filter((product) => getComparablePublicRate(product) !== null).slice(0, 5);
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
 
   return (
@@ -85,19 +82,7 @@ export function DashboardSurface({
 
         <section className="grid min-w-0 items-start gap-8 lg:grid-cols-2" aria-label={copy.dashboard.rateSnapshotsLabel}>
           <DepositTopFive key={filters.countryCode + filters.locale} filters={filters} products={depositProducts?.items ?? []} unavailable={depositProductsUnavailable} />
-          <ProductTopFive
-            accent="loan"
-            emptyText={copy.dashboard.loanTopEmpty}
-            filters={filters}
-            headingId="loan-top-title"
-            href={loansHref}
-            linkLabel={copy.dashboard.moreLoans}
-            products={rankedLoans}
-            subtitle={copy.dashboard.loanTopSubtitle}
-            title={copy.dashboard.loanTopTitle}
-            unavailable={loanProductsUnavailable}
-            unavailableText={copy.dashboard.loanTopUnavailable}
-          />
+          <LoanTopFive key={"loan-" + filters.countryCode + filters.locale} filters={filters} products={loanProducts?.items ?? []} unavailable={loanProductsUnavailable} />
         </section>
 
         {hasScatter || filters.productTypes.length === 1 ? (

@@ -457,3 +457,25 @@ supersede mixed Savings/GIC Home rankings and unconditional scalar estimates.
 Public products add `deposit_terms`; the Home/finder/calculator require explicit
 compatible basis, currency and GIC maturity before arithmetic. Existing
 card/loan metrics and private evidence boundaries remain intact.
+
+## 2026-09-24 Loan Home comparison conditions
+
+The Product Owner requested the Deposit-style condition selector for Loan Top 5.
+Home now groups exact Mortgage / Personal Loan / Line of Credit within CA CAD
+or US USD, with All and explicitly disclosed Secured / Unsecured presets. A null
+or missing security flag never means unsecured. Product names, rate-type text
+and term text are not classification evidence for these presets.
+
+Only the existing explicit absolute comparable full rate participates; zero is
+valid, while ranges, reference margins, conditional/promotional and missing rates
+remain excluded. Rank each group ascending with a deterministic product-ID tie
+break and at most five records. Both Home families read all pages from one
+snapshot; later-page failures or changed snapshots render unavailable. Show only
+presets with eligible records. Keep one compact localized selector and short
+currency context, existing empty/error states, and independent Deposit selection.
+
+The condition groups do not assert identical maturities, repayment terms, annual
+cost bases or personal eligibility. Existing catalog, finder, API and private
+evidence contracts are unchanged. Validate real and fixture CA/US data, including
+second-page conditions, explicit/unknown security, invalid rates, pagination
+failure, localization and exact 390/768/1440px layouts.
