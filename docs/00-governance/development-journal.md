@@ -25,6 +25,31 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-09-24 (bounded Home Top 5 data completion; approval pending):
+
+- Published nine official-source canonical corrections with immutable versions,
+  field-level private evidence, guarded transaction, cloned country snapshots and
+  unchanged verification dates. CA Savings All / No fee / No minimum each rose
+  from 1 to 5. US Savings counts are 2 / 2 / 1; three additional validated US
+  review patches await explicit human approval after automatic verification did
+  not pass. No candidate was manually approved without that decision.
+- Corrected BofA's discount-as-rate, Manulife ALOC Plus collateral/tier semantics
+  and U.S. Bank Simple Loan's example APR. Some Loan counts fell appropriately;
+  five GIC/Loan records per condition were not established by the bounded sources.
+  I-005's persisted record is mitigated; generic parser coverage remains open.
+- Key artifacts and source/limit details:
+  [Top 5 data completion report](home-top5-data-completion-2026-09-24.md),
+  scripts/maintenance/top5_completion_20260924.py and companion JSON,
+  scripts/maintenance/top5_review_candidates_20260924.json.
+- Verification: rollback rehearsal, committed readback, 9 unchanged prior payloads,
+  120 unchanged unrelated canonical records, unchanged unrelated projections,
+  idempotent re-run; live HTTP 165 CA / 51 US rows match DB comparison fields.
+  Actual Home replay passed; API 32, Public 34 and aggregate 8 tests passed.
+  Corrected test import invocation and no-op-null readback expectation before
+  final passing checks. No UI/runtime release or deployment.
+- Next: PO decision on the three concrete US review patches; retain limited
+  coverage and targeted GIC/loan follow-up. Existing Admin goal is preserved.
+
 As of 2026-09-24 (Loan Home comparison conditions complete):
 
 - Loan Top 5 now uses the Deposit-style compact selector: exact Mortgage,

@@ -35,6 +35,8 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [Home Top 5 bounded data completion](00-governance/home-top5-data-completion-2026-09-24.md): official-source corrections, condition counts and pending US reviews
+
 - [Public deposit comparison self-review](00-governance/public-deposit-comparison-review-2026-09-24.md): INDEXED GIC/Oaken official-source review and bounded data limitations
 
 - [Public rate correction and self-review](00-governance/public-rate-correction-2026-09-16.md): API/UI rate semantics, published-data audit and separately authorized one-record correction

@@ -1,0 +1,237 @@
+{
+  "operation_id": "top5-completion-20260924",
+  "authorization": "Product Owner requested bounded official-bank research and Deposit/Loan data completion on 2026-09-24.",
+  "items": [
+    {
+      "product_id": "prod_3HAnWqgWvu4Wip5R",
+      "expected_version": 1,
+      "expected_payload_sha256": "965518f6759add23e60f6a1c9bfff57965d617b4bc0b93fece5e59b507ece5b3",
+      "changes": {
+        "interest_calculation_method": "Annual interest rate; calculated daily on the closing balance and paid monthly."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.alternabank.ca/en/personal/accounts/high-interest-esavings",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "Annual interest rate; calculated daily on the closing balance and paid monthly.",
+          "fields": [
+            "interest_calculation_method"
+          ]
+        }
+      ],
+      "expected_public": {
+        "deposit_basis": "annual",
+        "deposit_eligible": true
+      }
+    },
+    {
+      "product_id": "prod_CI2SlegGKNETAwnN",
+      "expected_version": 1,
+      "expected_payload_sha256": "415c037b32148e3aa343d93faa0a5f2a4635b19f380ce0202d2136d6562da87d",
+      "changes": {
+        "interest_calculation_method": "Annual interest rate; calculated on the daily balance and paid monthly."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.nbc.ca/personal/savings-investments/accounts/high-interest.html",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "Annual interest rate; calculated on the daily balance and paid monthly.",
+          "fields": [
+            "interest_calculation_method"
+          ]
+        }
+      ],
+      "expected_public": {
+        "deposit_basis": "annual",
+        "deposit_eligible": true
+      }
+    },
+    {
+      "product_id": "prod_E2dNwW86nFNJGtJZ",
+      "expected_version": 7,
+      "expected_payload_sha256": "9675a9048206078083f9cee8e3c6a32260eabd66cc3606eba5577a84f4fa1b74",
+      "changes": {
+        "interest_calculation_method": "Annual interest rate; simple interest calculated daily and paid monthly."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.rbcroyalbank.com/rates/persacct.html",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "Annual interest rate; simple interest calculated daily and paid monthly.",
+          "fields": [
+            "interest_calculation_method"
+          ]
+        }
+      ],
+      "expected_public": {
+        "deposit_basis": "annual",
+        "deposit_eligible": true
+      }
+    },
+    {
+      "product_id": "prod_gNB_lQy4Jda-lfk-",
+      "expected_version": 5,
+      "expected_payload_sha256": "c64dac7c3ef2aa3752845b48cf88413f97aacf4db059217304b607e259cff94e",
+      "changes": {
+        "interest_calculation_method": "Annual interest rate; calculated daily and paid monthly.",
+        "eligibility_text": "For children; a parent or legal guardian must already hold a Tangerine account."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.tangerine.ca/en/personal/save/childrens-savings-account",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "Annual interest rate; calculated daily and paid monthly. Parent or legal guardian must hold a Tangerine account.",
+          "fields": [
+            "interest_calculation_method",
+            "eligibility_text"
+          ]
+        }
+      ],
+      "expected_public": {
+        "deposit_basis": "annual",
+        "deposit_eligible": true
+      }
+    },
+    {
+      "product_id": "prod_kJPYb0EzJ2uEVxQa",
+      "expected_version": 1,
+      "expected_payload_sha256": "7a4469dfec8e21efa6dabff10111487e5d241d0e3a9b906f504f659e4f229e8b",
+      "changes": {
+        "interest_rate_summary": "0.10% APY. Minimum opening deposit is $50 in new funds; maximum opening deposit $1,000,000.",
+        "interest_calculation_method": "Annual percentage yield (APY)."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.firstcitizens.com/personal/savings/online-savings-account",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "Online Savings pays 0.10% APY, without a monthly fee or ongoing minimum balance; opening requires $50 in new funds, maximum $1,000,000.",
+          "fields": [
+            "interest_rate_summary",
+            "interest_calculation_method"
+          ]
+        }
+      ],
+      "expected_public": {
+        "deposit_basis": "apy"
+      }
+    },
+    {
+      "product_id": "prod_hiJANQ-L5-J0pziJ",
+      "expected_version": 2,
+      "expected_payload_sha256": "f9242670348961a34f6d83734a24da76f297b4c70a2437e97870a65cf9eb559d",
+      "changes": {
+        "standard_rate": 3.5,
+        "public_display_rate": 3.5,
+        "monthly_fee": 0,
+        "public_display_fee": 0,
+        "interest_rate_summary": "3.50% APY.",
+        "interest_calculation_method": "Annual percentage yield (APY).",
+        "description_short": "Online savings with no monthly fee or minimum opening deposit.",
+        "eligibility_text": "Optional referral program adds 1.00 percentage point to APY for three months; this is separate from the standard APY."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.marcus.com/us/en/savings/high-yield-savings",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "Standard APY is 3.50% on September 24, 2026; no fees or minimum deposit. Optional referral boost is 1.00 percentage point for three months.",
+          "fields": [
+            "standard_rate",
+            "public_display_rate",
+            "monthly_fee",
+            "public_display_fee",
+            "interest_rate_summary",
+            "interest_calculation_method",
+            "description_short",
+            "eligibility_text"
+          ]
+        }
+      ],
+      "expected_public": {
+        "deposit_basis": "apy",
+        "deposit_eligible": true
+      }
+    },
+    {
+      "product_id": "prod_QSCmmE97KOSfGp_c",
+      "expected_version": 2,
+      "expected_payload_sha256": "c0998ec198bbe05802beee04e7aee88cc1ce6e86edc6c2c83d807a08e0955139",
+      "changes": {
+        "mortgage_rate": null,
+        "interest_rate": null,
+        "public_display_rate": null,
+        "interest_rate_summary": "BofA Rewards mortgage interest-rate discount depends on the eligible membership tier and applicable PayPlan enrollment; this is a discount, not a full mortgage interest rate."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.bankofamerica.com/mortgage/refinance/",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "The Rewards benefit is an origination-fee or interest-rate reduction depending on membership tier, with PayPlan enrollment requirements for some tiers. No unconditional whole-loan rate is established.",
+          "fields": [
+            "mortgage_rate",
+            "interest_rate",
+            "public_display_rate",
+            "interest_rate_summary"
+          ]
+        }
+      ],
+      "expected_public": {
+        "comparable_rate": null
+      }
+    },
+    {
+      "product_id": "prod_44JlWqm4XAGyya64",
+      "expected_version": 1,
+      "expected_payload_sha256": "7e5925475e086cb3b0658c88b4c527c4b626b51ff604bcde8703d3f5d6d87700",
+      "changes": {
+        "interest_rate": null,
+        "public_display_rate": null,
+        "interest_rate_summary": "Access Line of Credit Plus Quick interest rates: 5.95% for limits $25,000-$99,999; 5.70% for $100,000-$249,999; 5.45% for $250,000-$1,000,000. Max interest rate: 4.95% for $1,000,000 and above. Pricing depends on the credit limit and security.",
+        "secured_flag": true,
+        "security_requirement": "Secured by investments or permanent life insurance."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.manulifebank.ca/personal-banking/loans/line-of-credit.html",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "Quick pricing varies across three limit bands (5.95%, 5.70%, 5.45%); Max is 4.95%. ALOC Plus is secured by investments or permanent life insurance.",
+          "fields": [
+            "interest_rate",
+            "public_display_rate",
+            "interest_rate_summary",
+            "secured_flag",
+            "security_requirement"
+          ]
+        }
+      ],
+      "expected_public": {
+        "comparable_rate": null,
+        "secured_flag": true
+      }
+    },
+    {
+      "product_id": "prod_ZuZIEkEnYFN0sQW8",
+      "expected_version": 1,
+      "expected_payload_sha256": "f6b8c6284a0a424ae87f3e3c451285166b61bf630d8614dc99a104fe74ed67ce",
+      "changes": {
+        "interest_rate": null,
+        "public_display_rate": null,
+        "interest_rate_summary": "Representative APR example: 35.65% for a $400 loan with a $24 fee, repaid in three monthly payments of approximately $141.33 with automatic payments."
+      },
+      "field_evidence": [
+        {
+          "source_url": "https://www.usbank.com/loans-credit-lines/personal-loans-and-lines-of-credit/simple-loan.html",
+          "checked_at": "2026-09-24T21:00:54.668958+00:00",
+          "fact": "35.65% is the disclosed APR example for $400 borrowed, a $24 fee, three monthly repayments and automatic payments; it is not a standalone unqualified product rate.",
+          "fields": [
+            "interest_rate",
+            "public_display_rate",
+            "interest_rate_summary"
+          ]
+        }
+      ],
+      "expected_public": {
+        "comparable_rate": null
+      }
+    }
+  ]
+}

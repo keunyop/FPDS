@@ -257,3 +257,30 @@ complete. Public 34 tests, lint/typecheck/build, 52 final-build browser cases,
 visual screenshots and git diff --check pass. Existing API source/classification
 discrepancy I-005 remains a separately scoped follow-up; no financial data or
 API semantics were changed. Keep this goal for prior unresolved Admin ownership.
+
+## Independent slice: 2026-09-24 bounded Home Top 5 data completion
+
+Ownership: preserve the unresolved Admin goal and all earlier slices.
+Objective: investigate short Deposit/Loan condition lists and supplement only
+the official-bank facts/products needed to fill existing Home Top 5 conditions.
+Authorization: Product Owner requested official-page research and bounded
+product-data completion; no full-catalog research or unrelated release.
+Scope: existing CA/US countries and Deposit/Loan types, existing canonical
+products first, evidence-backed corrections and audited publication.
+Exclusions: invented rates, relaxed comparison gates, new countries/types,
+account operations, general collection sweeps, UI redesign and deployment.
+Acceptance:
+- [x] Record current condition counts and why records are excluded.
+- [x] Research a bounded shortlist on official bank pages; preserve financial
+      basis, currency, term, qualifiers and field-level evidence.
+- [ ] Apply verified additions/corrections through an audited, reversible path;
+      stop each condition at five or document a concrete evidence limitation.
+- [x] Verify Public eligibility/counts, unchanged unrelated records, relevant
+      regressions, final diff and journal outcome.
+Verification: read-only baseline, official-source review, rollback rehearsal,
+bounded apply and live readback; preserve immutable history.
+
+Progress: nine existing-product corrections are committed and verified; CA
+Savings presets reach five. US three-candidate manual review approval remains
+pending; Loan/GIC evidence limits are recorded in the dated data report. No
+blanket Top 5 completion is claimed. Preserve this goal and prior ownership.

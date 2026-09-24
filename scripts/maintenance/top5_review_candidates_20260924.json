@@ -1,0 +1,119 @@
+{
+  "operation_id": "top5-review-candidates-20260924",
+  "items": [
+    {
+      "review_task_id": "review-81e7c95a51700431",
+      "candidate_id": "cand-7ca66aa1125afa1b",
+      "bank_code": "CONA",
+      "country_code": "US",
+      "product_type": "savings",
+      "product_name": "360 Performance Savings",
+      "source_url": "https://www.capitalone.com/bank/savings-accounts/online-performance-savings-account/",
+      "checked_at": "2026-09-24",
+      "rendered_source_sha256": "2dc63d8a504f4319e656059e08b96159f4995c12b5a97e9a84d4387658490a48",
+      "expected_candidate_sha256": "083f34f3a788533b3023f11621689348b1360820725870d03ff27c2ed4230b5e",
+      "override_payload": {
+        "standard_rate": 3.0,
+        "public_display_rate": 3.0,
+        "interest_rate_summary": "3.00% APY.",
+        "tiered_rate_flag": false,
+        "interest_calculation_method": "Annual percentage yield (APY).",
+        "description_short": null,
+        "eligibility_text": null,
+        "notes": null
+      },
+      "reviewed_facts": {
+        "apy": 3.0,
+        "monthly_fee": 0,
+        "minimum_balance": 0,
+        "minimum_opening_deposit": 0
+      },
+      "source_review": "Official rendered exact-product page; uniform account APY, zero monthly fee and no minimum balance verified. Calculator values and national-average rates excluded.",
+      "expected_public": {
+        "basis": "apy",
+        "rate": 3.0,
+        "all": true,
+        "no_monthly_fee": true,
+        "no_minimum_balance": true
+      },
+      "approval_state": "pending_human_review"
+    },
+    {
+      "review_task_id": "review-402876ac88b4366e",
+      "candidate_id": "cand-0bc98c257728684d",
+      "bank_code": "AE",
+      "country_code": "US",
+      "product_type": "savings",
+      "product_name": "High Yield Savings Account",
+      "source_url": "https://www.americanexpress.com/en-us/banking/online-savings/high-yield-savings-account/",
+      "checked_at": "2026-09-24",
+      "rendered_source_sha256": "5dd2f4480e04813d15b90f85bf4cf950ee55130accdcf8c32f0c1d25de95144e",
+      "expected_candidate_sha256": "7d40d03801383ddad31b75ab21785bb043be6f66571f252297669486f20aa8d0",
+      "override_payload": {
+        "product_name": "High Yield Savings Account",
+        "standard_rate": 3.1,
+        "public_display_rate": 3.1,
+        "interest_rate_summary": "3.10% APY.",
+        "tiered_rate_flag": false,
+        "tier_definition_text": null,
+        "interest_calculation_method": "Annual percentage yield (APY).",
+        "description_short": null,
+        "eligibility_text": null,
+        "notes": null
+      },
+      "reviewed_facts": {
+        "apy": 3.1,
+        "monthly_fee": 0,
+        "minimum_balance": 0,
+        "minimum_opening_deposit": 0
+      },
+      "source_review": "Official rendered exact-product page; uniform account APY, zero monthly fee and no minimum balance verified. Calculator values and national-average rates excluded.",
+      "expected_public": {
+        "basis": "apy",
+        "rate": 3.1,
+        "all": true,
+        "no_monthly_fee": true,
+        "no_minimum_balance": true
+      },
+      "approval_state": "pending_human_review"
+    },
+    {
+      "review_task_id": "review-c8dfc52b7940615a",
+      "candidate_id": "cand-3d631950bf51eb39",
+      "bank_code": "CONA",
+      "country_code": "US",
+      "product_type": "savings",
+      "product_name": "Kids Savings Account",
+      "source_url": "https://www.capitalone.com/bank/savings-accounts/kids-savings-account/",
+      "checked_at": "2026-09-24",
+      "rendered_source_sha256": "81ae27c147071de8cd6b9e895dae2eee19c3249c56b8b96d0c2641e3d83ef42e",
+      "expected_candidate_sha256": "b0c5607a3af2c9fa90c124549c0c1cb2c7fcae815b4e0887932a38d2d8e1ebe9",
+      "override_payload": {
+        "product_name": "Kids Savings Account",
+        "standard_rate": 2.5,
+        "public_display_rate": 2.5,
+        "interest_rate_summary": "2.50% APY.",
+        "tiered_rate_flag": false,
+        "interest_calculation_method": "Annual percentage yield (APY).",
+        "description_short": null,
+        "eligibility_text": "Joint savings account for a child and an adult; an adult must open and share the account.",
+        "notes": null
+      },
+      "reviewed_facts": {
+        "apy": 2.5,
+        "monthly_fee": 0,
+        "minimum_balance": 0,
+        "minimum_opening_deposit": 0
+      },
+      "source_review": "Official rendered exact-product page; uniform account APY, zero monthly fee and no minimum balance verified. Calculator values and national-average rates excluded.",
+      "expected_public": {
+        "basis": "apy",
+        "rate": 2.5,
+        "all": true,
+        "no_monthly_fee": true,
+        "no_minimum_balance": true
+      },
+      "approval_state": "pending_human_review"
+    }
+  ]
+}
