@@ -1,7 +1,7 @@
-﻿# FPDS Project Execution Plan
+# FPDS Project Execution Plan
 
-Version: 1.0  
-Date: 2026-03-28  
+Version: 1.0
+Date: 2026-03-28
 Basis: `FPDS_Requirements_Definition_v1_5.md`
 
 ---
@@ -569,3 +569,14 @@ Prototype을 실제 Phase 1 범위로 확장한다.
 
 이 순서를 지키면 현재 요구사항 정의서와 가장 정합적인 방식으로 프로젝트를 진행할 수 있다.
 
+
+
+## 2026-09-24 Public deposit correctness slice
+
+Product Owner authorized only growth proposal section C. D-079 / WBS 5.65
+amend FR-PUB-021 with currency, annual-rate basis and exact GIC term eligibility;
+Home separates deposit conditions and the existing calculator handles explicit
+scenarios or concise unavailability. The scope includes public-safe qualifiers
+from the projection's exact approved version and future aggregate preservation.
+Other growth features, personal scoring, deployment and live-data mutations
+remain outside this request.

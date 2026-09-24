@@ -242,3 +242,12 @@ UI 규칙:
 - `5.11`: grid/dashboard cross-filter 적용
 - `5.13`: methodology/freshness note 렌더링
 - `5.14`: responsive QA 수행
+
+
+## 2026-09-24 deposit comparison correction
+
+D-079 and the [deposit comparison policy](public-deposit-comparison-policy.md)
+supersede mixed Savings/GIC Home rankings and unconditional scalar estimates.
+Public products add `deposit_terms`; the Home/finder/calculator require explicit
+compatible basis, currency and GIC maturity before arithmetic. Existing
+card/loan metrics and private evidence boundaries remain intact.

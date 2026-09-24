@@ -10,11 +10,12 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 - `/` is the canonical public Home view. Its first viewport pairs a short market
   thesis with a same-type product finder: a visitor selects a product they
   already have, then checks up to three exact-Product-Type products that
-  strictly improve one disclosed primary metric. Deposit, Credit Card, and Loan
+  strictly improve one disclosed primary metric after matching country/currency
+  and the deposit basis/term conditions below. Deposit, Credit Card, and Loan
   remain equal direct next actions. The main content places Deposit Top 5
   on the left and Loan Top 5 on the right at desktop, stacking both lists below
-  that breakpoint. Deposit uses the highest disclosed numeric rates; Loan uses
-  the lowest disclosed numeric rates. Neither list is a personalized
+  that breakpoint. Deposit orders a selected type/currency/rate-basis/GIC-term group; Loan uses
+  the lowest disclosed comparable rates. Neither list is a personalized
   recommendation. The two groups use distinct Deposit/Loan family rails,
   labels, and icons; catalog navigation is a text-style more link below each
   list rather than a competing header button.
@@ -73,8 +74,10 @@ neither selected; focusing the empty field returns every active product
 alphabetically in 40-row pages and loads more inside the bounded list as the
 visitor scrolls. A non-empty name query is server-filtered against product
 names only before one exact My product is selected. The candidate query stays
-inside the active country and exact selected Product Type. Chequing
-uses lower monthly fee, Savings and GIC use higher disclosed numeric rate,
+inside the active country and exact selected Product Type, reads every page,
+and excludes currency mismatches before metric comparisons. Chequing
+uses lower monthly fee, Savings and GIC use the higher rate for compatible
+annual/APY basis and GIC term/redemption conditions,
 Credit Card uses lower annual fee, and Mortgage, Personal Loan, and Line of
 Credit use lower disclosed numeric rate. Missing metrics and ties never produce
 a candidate, and at most three strict improvements are shown. The action reads
@@ -99,7 +102,9 @@ catalog cards distinguish full rates, ranges/schedules, reference-rate
 margins, conditional discounts and promotions in EN/KO/JA. Approved rate text
 stays in its source language on cards, comparison and detail. Only the API's
 explicit `rate.kind=absolute` and finite `rate.comparable_rate` participate in
-rate sorting, Home Top 5, finder differences, dashboard metrics or calculators.
+catalog rate sorting and dashboard scalar metrics. Deposit Home/finder and
+calculators additionally use the explicit `deposit_terms` contract; a validated
+GIC schedule supplies its selected term rate even when the headline is a range.
 An old cached API response without this contract cannot supply a comparison
 rate. Zero is a valid full rate; no benchmark arithmetic or minimum-range/
 introductory shortcut is permitted. API deployment should precede Public;
@@ -394,3 +399,17 @@ See [the freshness policy and operator report](../../docs/03-design/public-verif
 for contract details, the read-only overdue CLI, manual daily/weekly review and
 release order. Initial warning-only intervals are 7/30 days for rate-led products and 30/90 days for chequing/cards. D-069 collection
 is manual; these changes do not start collection, update facts or publish data.
+
+
+## Deposit comparison conditions (2026-09-24)
+
+The [deposit comparison policy](../../docs/03-design/public-deposit-comparison-policy.md) supersedes headline-only Savings/GIC
+comparison and implicit one-year calculation. Home scopes rankings by type,
+currency, rate basis and exact GIC term/redemption category. The finder uses
+those gates before its existing metric; the calculator uses disclosed annual
+basis and an explicit period, or a concise unavailable reason and official link.
+`deposit_terms` is additive. Public reads a bounded whitelist from the exact
+approved version pinned by the snapshot; aggregates preserve these qualifiers
+for future refreshes. Missing basis is never inferred from country. API release
+precedes Public; old cached contracts fail closed. No live refresh or migration
+is needed for the version-pinned bridge. See the policy for current data limits.

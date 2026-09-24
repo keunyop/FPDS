@@ -1,5 +1,7 @@
 'use client';
 
+import { allProductPages, depositCopy, depositOptions, depositPeriod, depositRate, depositReason, sameComparisonScope } from '@/lib/public-deposit';
+
 import { getComparablePublicRate, getRateComparisonUnavailable } from '@/lib/public-rate';
 
 import { ArrowRight, ExternalLink, RefreshCw, Search } from 'lucide-react';
@@ -19,6 +21,7 @@ import type { PublicDashboardSummaryResponse, PublicProduct, PublicProductsRespo
 import { buildPublicHref } from '@/lib/public-query';
 
 type RecommendationRule = {
+  termKey?: string;
   direction: 'higher' | 'lower';
   metric: 'annual_fee' | 'card_display_rate' | 'public_display_fee';
   metricKind: 'annualFee' | 'monthlyFee' | 'rate';
@@ -61,6 +64,7 @@ export function ProductRecommendationFinder({
   const [productQuery, setProductQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [productId, setProductId] = useState('');
+  const [termKey, setTermKey] = useState('');
   const [productOptions, setProductOptions] = useState<PublicProduct[]>([]);
   const [productsStatus, setProductsStatus] = useState<ProductsStatus>('idle');
   const [nextPage, setNextPage] = useState(2);
@@ -167,9 +171,12 @@ export function ProductRecommendationFinder({
       eventType: 'finder_product_selected',
       productId: currentProduct.product_id
     });
-    const rule = RECOMMENDATION_RULES[currentProduct.product_type];
+    const baselineRule = RECOMMENDATION_RULES[currentProduct.product_type];
+    const selectedTerm = termKey || depositOptions(currentProduct)[0]?.key || '';
+    const rule = baselineRule ? { ...baselineRule, termKey: selectedTerm } : undefined;
     const currentMetric = rule ? readMetric(currentProduct, rule) : null;
-    if (!rule || currentMetric === null) {
+    if (!rule || currentMetric === null || !/^[A-Z]{3}$/.test(currentProduct.currency)
+      || (currentProduct.product_type === 'gic' && currentProduct.deposit_terms?.withdrawal === 'unknown')) {
       setResult({ currentProduct, status: 'metric-unavailable' });
       return;
     }
@@ -180,19 +187,22 @@ export function ProductRecommendationFinder({
     setResult({ currentProduct, status: 'loading' });
 
     try {
-      const response = await fetchProductPage({
+      const response = await allProductPages(page => fetchProductPage({
         countryCode,
         locale,
-        page: 1,
+        page,
         pageSize: 100,
         productType: currentProduct.product_type,
         signal: controller.signal,
         sortBy: rule.sortBy,
         sortOrder: rule.sortOrder
-      });
+      }));
+      if (controller.signal.aborted) return;
       const recommendations = response.items
         .filter((candidate) => candidate.product_id !== currentProduct.product_id)
+        .filter((candidate) => sameComparisonScope(currentProduct, candidate, selectedTerm))
         .filter((candidate) => isStrictImprovement(currentMetric, readMetric(candidate, rule), rule))
+        .sort((a, b) => (rule.direction === 'higher' ? -1 : 1) * ((readMetric(a, rule) ?? 0) - (readMetric(b, rule) ?? 0)) || a.product_id.localeCompare(b.product_id))
         .slice(0, 3);
       setResult({ currentProduct, recommendations, rule, status: 'ready' });
     } catch (error: unknown) {
@@ -264,6 +274,7 @@ export function ProductRecommendationFinder({
           onSelect={(product) => {
             setProductQuery(product.product_name);
             setProductId(product.product_id);
+            setTermKey(depositOptions(product)[0]?.key ?? '');
             setResult({ status: 'idle' });
           }}
           placeholder={copy.productSearchPlaceholder}
@@ -271,6 +282,13 @@ export function ProductRecommendationFinder({
           selectedProductId={productId}
           status={productsStatus}
         />
+
+        {selectedProduct?.product_type === 'gic' && depositOptions(selectedProduct).length ? (
+          <FinderSelect disabled={resultBusy} label={depositCopy(locale).term} value={termKey || depositOptions(selectedProduct)[0]?.key || ''}
+            placeholder={depositCopy(locale).term}
+            options={depositOptions(selectedProduct).map(option => ({ value: option.key, label: depositPeriod(option, locale) }))}
+            onChange={value => { recommendationController.current?.abort(); setTermKey(value); setResult({ status: 'idle' }); }} />
+        ) : null}
 
         {productsStatus === 'error' ? (
           <div className='grid gap-2'>
@@ -320,6 +338,7 @@ function RecommendationResult({
     ? result.rule
     : RECOMMENDATION_RULES[result.currentProduct.product_type];
   const readyResult = result.status === 'ready' ? result : null;
+  const selectedTerm = readyResult ? depositOptions(result.currentProduct).find(option => option.key === readyResult.rule.termKey) : undefined;
 
   return (
     <div className='grid gap-4'>
@@ -330,6 +349,7 @@ function RecommendationResult({
           <p className='mt-1 text-sm font-semibold text-foreground [overflow-wrap:anywhere]'>{result.currentProduct.product_name}</p>
           <p className='mt-0.5 text-xs text-muted-foreground'>{result.currentProduct.bank_name} · {result.currentProduct.product_type_label}</p>
           <ProductVerification product={result.currentProduct} locale={locale} />
+          <p className='mt-1 text-xs text-muted-foreground'>{result.currentProduct.currency}{['savings', 'gic'].includes(result.currentProduct.product_type) && selectedTerm ? ` · ${result.currentProduct.deposit_terms?.basis === 'apy' ? 'APY' : depositCopy(locale).annual} · ${depositPeriod(selectedTerm, locale)}` : ''}</p>
         </div>
         {rule ? (
           <span className='max-w-[45%] border-b-2 border-maple px-1.5 py-1 text-sm font-semibold tabular-nums text-foreground [overflow-wrap:anywhere]'>
@@ -339,7 +359,14 @@ function RecommendationResult({
       </div>
 
       {result.status === 'metric-unavailable' ? (
-        <FinderMessage>{copy.metricUnavailable}</FinderMessage>
+        <div className='grid gap-1'>
+          <FinderMessage>{['savings', 'gic'].includes(result.currentProduct.product_type)
+            ? depositReason(result.currentProduct.deposit_terms?.reason || 'conditions_unclear', locale) : copy.metricUnavailable}</FinderMessage>
+          {result.currentProduct.product_url ? <TrackedOfficialBankLink className='inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary hover:underline'
+            countryCode={countryCode} productId={result.currentProduct.product_id} href={result.currentProduct.product_url}>
+            {depositCopy(locale).bank}<ExternalLink className='size-3.5' aria-hidden='true' />
+          </TrackedOfficialBankLink> : null}
+        </div>
       ) : result.status === 'error' ? (
         <FinderMessage tone='error'>{copy.recommendationsError}</FinderMessage>
       ) : readyResult && readyResult.recommendations.length ? (
@@ -407,7 +434,7 @@ function RecommendationResult({
           </ol>
         </div>
       ) : (
-        <FinderMessage>{formatPublicMessage(copy.noImprovement, { basis: metricLabel(rule, locale) })}</FinderMessage>
+        <FinderMessage>{['savings', 'gic'].includes(result.currentProduct.product_type) ? depositCopy(locale).noMatch : formatPublicMessage(copy.noImprovement, { basis: metricLabel(rule, locale) })}</FinderMessage>
       )}
     </div>
   );
@@ -606,7 +633,9 @@ async function fetchProductPage({
 }
 
 function readMetric(product: PublicProduct, rule: RecommendationRule) {
-  const value = rule.metricKind === 'rate' ? getComparablePublicRate(product) : product[rule.metric];
+  const value = rule.metricKind === 'rate'
+    ? ['savings', 'gic'].includes(product.product_type) ? depositRate(product, rule.termKey ?? '') : getComparablePublicRate(product)
+    : product[rule.metric];
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 

@@ -318,8 +318,23 @@ def load_public_projection_rows(
             p.last_verified_at,
             p.last_changed_at,
             COALESCE(p.refresh_metadata, '{}'::jsonb) AS refresh_metadata,
+            CASE WHEN p.product_type IN ('savings', 'gic') THEN
+                jsonb_strip_nulls(jsonb_build_object(
+                    'interest_calculation_method', approved_version.normalized_payload -> 'interest_calculation_method',
+                    'interest_payment_frequency', approved_version.normalized_payload -> 'interest_payment_frequency',
+                    'compounding_frequency', approved_version.normalized_payload -> 'compounding_frequency',
+                    'payout_option', approved_version.normalized_payload -> 'payout_option',
+                    'tier_definition_text', approved_version.normalized_payload -> 'tier_definition_text',
+                    'tiered_rate_flag', approved_version.normalized_payload -> 'tiered_rate_flag',
+                    'promotional_rate', approved_version.normalized_payload -> 'promotional_rate',
+                    'promotional_period_text', approved_version.normalized_payload -> 'promotional_period_text',
+                    'introductory_rate_flag', approved_version.normalized_payload -> 'introductory_rate_flag'
+                )) ELSE '{}'::jsonb END AS approved_deposit_conditions,
             COALESCE(p.refresh_metadata ->> 'product_url', official_source.normalized_source_url) AS product_url
         FROM public_product_projection AS p
+        LEFT JOIN product_version AS approved_version
+          ON approved_version.product_version_id = NULLIF(p.refresh_metadata ->> 'product_version_id', '')
+         AND approved_version.product_id = p.product_id
         LEFT JOIN LATERAL (
             SELECT source.normalized_source_url
             FROM (

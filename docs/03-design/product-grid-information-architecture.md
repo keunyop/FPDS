@@ -665,3 +665,12 @@ and generated date remain separate neutral data-serving information. No product
 check can fall back to snapshot generation. Expiry is a verification warning,
 not a bank withdrawal. Existing comparison eligibility/order is unchanged.
 See [verification policy](public-verification-freshness-policy.md).
+
+
+## 2026-09-24 deposit comparison correction
+
+D-079 and the [deposit comparison policy](public-deposit-comparison-policy.md)
+supersede mixed Savings/GIC Home rankings and unconditional scalar estimates.
+Public products add `deposit_terms`; the Home/finder/calculator require explicit
+compatible basis, currency and GIC maturity before arithmetic. Existing
+card/loan metrics and private evidence boundaries remain intact.

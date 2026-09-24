@@ -448,3 +448,12 @@ snapshot_status and verification counts over the complete filtered rows; legacy
 fresh now requires known within-window checks. Home Top 5 and finder show each
 product's verification status without altering ranking or arithmetic. See
 [verification policy](public-verification-freshness-policy.md) for the contract.
+
+
+## 2026-09-24 deposit comparison correction
+
+D-079 and the [deposit comparison policy](public-deposit-comparison-policy.md)
+supersede mixed Savings/GIC Home rankings and unconditional scalar estimates.
+Public products add `deposit_terms`; the Home/finder/calculator require explicit
+compatible basis, currency and GIC maturity before arithmetic. Existing
+card/loan metrics and private evidence boundaries remain intact.

@@ -25,6 +25,34 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-09-24 (Public deposit comparison, implementation complete):
+
+- selected only growth proposal section C; D-079 / WBS 5.65 explicitly amend
+  FR-PUB-021. API adds deposit terms from public facts and bounded qualifiers of
+  the exact snapshot-pinned approved version. Worker preserves the whitelist
+- Home now groups by type/currency/basis/GIC term/redemption; finder filters the
+  full matching scope, and the calculator uses explicit periods, a positive
+  default, minimum checks and EN/KO/JA unavailable reasons with bank links
+- INDEXED GIC self-review confirms linked-return semantics and conflicting
+  legacy terms; no replacement rate or canonical mutation. Oaken annual basis
+  is tied to one source-reviewed version/value. Insurance eligibility no longer
+  masquerades as a conditional rate
+- API 502 / Public 22 / aggregate 8 / Admin 5 tests passed; Public lint,
+  Admin/Public typechecks and production builds, repo doctor, foundation and
+  final diff checks passed. Browser QA passed 79 cases across EN/KO/JA and
+  1440/768/exact 390px, plus 15 final-build mobile/catalog smoke checks;
+  no observed overflow or browser exceptions. Analytics/feedback were blocked
+- compatibility replay of 216 published products leaves 213 prior responses
+  unchanged beyond the additive contract; only reviewed Oaken and two linked
+  GIC classifications/source displays change. Existing loan/card metrics remain
+- read-only data audit finds three CA Savings scenarios in separate currencies
+  and no eligible GIC or US deposit; missing annual basis and restrictions remain
+  explicit limits. Next: separately authorized API-before-Public release and
+  normal manual Admin review of missing semantics and the INDEXED GIC issue
+- preserve the user-edited proposal and unresolved Admin goal. No deployment,
+  collection or live mutation. Details: public-deposit-comparison-review-2026-09-24.md
+
+
 As of 2026-09-21 (Public verification freshness, implementation complete):
 
 - implemented only the growth proposal's snapshot/product-freshness correction.

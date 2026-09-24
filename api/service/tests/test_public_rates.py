@@ -84,12 +84,19 @@ class PublicRateTests(unittest.TestCase):
         self.assertIsNone(comparable_rate({'product_family': 'deposit', 'public_display_rate': 5, 'refresh_metadata': {'standard_rate': .5}}))
         for description in (
             'Great daily interest rates; deposits insured up to applicable limits.',
+            'We offer daily interest rates. Savings accounts are eligible for CDIC coverage, up to applicable limits.',
             'Earn up to 10x more interest on your USD compared to other banks.',
             '*rates subject to change. See all rates and account conditions.',
         ):
             self.assertEqual(comparable_rate({'public_display_rate': 2.5, 'refresh_metadata': {'description_short': description}}), 2.5)
         self.assertIsNone(comparable_rate({'public_display_rate': 4.5, 'refresh_metadata': {'description_short': 'Earn an interest rate of 0.30% on every dollar.'}}))
 
+
+    def test_market_linked_gic_scalar_never_enters_any_numeric_rate_consumer(self):
+        for name in ("INDEXED GIC", "Market-linked GIC", "Index-linked term deposit", "Step-up GIC"):
+            value = self.row("indexed", 5)
+            value.update(product_type="gic", product_name=name)
+            self.assertIsNone(comparable_rate(value))
 
     def test_rate_sort_keeps_qualified_rows_after_full_rates_both_directions(self):
         rows = [self.row('spread', .5, 'Prime plus .5%'), self.row('full', 5), self.row('zero', 0)]

@@ -1,3 +1,4 @@
+import type { DepositTerms } from "./public-deposit";
 import type { ProductVerification } from "./public-verification";
 import type { PublicRate } from "./public-rate";
 
@@ -41,6 +42,7 @@ export type PublicProduct = {
   public_display_rate: number | null;
   card_display_rate: number | null;
   rate?: PublicRate;
+  deposit_terms?: DepositTerms | null;
   public_display_fee: number | null;
   annual_fee: number | null;
   purchase_interest_rate: number | null;

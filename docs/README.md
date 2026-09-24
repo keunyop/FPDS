@@ -35,6 +35,8 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [Public deposit comparison self-review](00-governance/public-deposit-comparison-review-2026-09-24.md): INDEXED GIC/Oaken official-source review and bounded data limitations
+
 - [Public rate correction and self-review](00-governance/public-rate-correction-2026-09-16.md): API/UI rate semantics, published-data audit and separately authorized one-record correction
 
 - `docs/00-governance/working-agreement.md`: collaboration and document authority rules
@@ -70,6 +72,7 @@ requirements, planning, or design material.
 Start from [docs/03-design/README.md](03-design/README.md).
 
 Most commonly needed:
+- [Deposit comparison conditions](03-design/public-deposit-comparison-policy.md): matching type/currency/basis/maturity and calculator eligibility
 - [Public verification freshness](03-design/public-verification-freshness-policy.md): separate snapshot/product dates, read-only overdue report, manual review cadence
 - [FPDS Admin purpose and complete feature guide (Korean)](03-design/fpds-admin-purpose-and-features.md): source-verified workflow, screens, roles, automation, and current versus deferred scope
 - `docs/03-design/domain-model-canonical-schema.md`

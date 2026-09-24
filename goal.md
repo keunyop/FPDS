@@ -176,3 +176,34 @@ lint/typecheck/production build, 70 browser cases, read-only CA/US report,
 repo doctor/foundation and final diff checks pass. Dates, statuses, manual report
 and initial warning-only policy are documented. No deployment or live mutation.
 Preserve this file for the earlier unresolved Admin ownership.
+
+
+## Independent slice: 2026-09-24 Public deposit comparison and estimates
+
+Ownership: preserve the unresolved Admin goal and all prior completed slices.
+Objective: implement growth proposal section C with defensible deposit comparison
+conditions, explicit calculation eligibility and a self-reviewed INDEXED GIC
+investigation; keep the existing restrained EN/KO/JA experience.
+Scope: approved Public fields, API comparison/calculation contract, Home deposit
+rankings, same-type finder, detail calculator, regressions and active documents.
+Exclusions: other growth features, personal scoring, new countries/types,
+collection, deployment, speculative canonical edits or unrelated Admin work.
+Acceptance:
+- [x] Review INDEXED GIC against its official source and document the result.
+- [x] Match currency, deposit type, rate basis and GIC term before comparison;
+      reject ambiguous, conditional and promotional calculations.
+- [x] Make amount/period assumptions visible; avoid a zero initial amount;
+      show concise unavailable reasons and an official-bank path.
+- [x] Explicitly revise FR-PUB-021 and related runtime/design documents.
+- [x] Pass focused and regression API/Public tests, lint/typecheck/build and
+      EN/KO/JA desktop/tablet/exact-390px browser checks; inspect final diff.
+Verification: read-only official-source investigation, financial boundary/failure
+regressions, existing suites, browser checks with analytics blocked, journal
+update and git diff --check. Do not claim zero bugs or a deployment from tests.
+
+Completion: the selected comparison/calculation slice and INDEXED GIC self-review
+are complete. API 502, Public 22, aggregate 8 and Admin 5 tests pass; final
+lint/typechecks/builds, 79 browser cases plus 15 final-build smoke checks,
+216-product compatibility replay, repository/foundation and diff checks pass.
+No deployment or live data writes. Missing source semantics remain explicit
+unavailable states. Preserve this file for the unresolved earlier Admin goal.

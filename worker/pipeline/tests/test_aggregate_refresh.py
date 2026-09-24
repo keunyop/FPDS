@@ -12,6 +12,20 @@ from worker.pipeline.fpds_aggregate_refresh.service import AggregateRefreshServi
 
 
 class AggregateRefreshServiceTests(unittest.TestCase):
+    def test_deposit_qualifiers_survive_essential_only_projection_without_private_data(self):
+        from worker.pipeline.fpds_aggregate_refresh.service import _build_product_refresh_metadata
+        payload = {"interest_calculation_method": "Annual rate, daily calculation", "promotional_rate": 5,
+                   "promotional_period_text": "90 days", "tiered_rate_flag": True,
+                   "private_notes": "SECRET", "evidence": "SECRET"}
+        metadata = _build_product_refresh_metadata(payload=payload, product_version_id="v", product_url=None,
+                                                   allowed_field_names={"standard_rate"}, product_type="savings")
+        self.assertEqual(metadata["deposit_conditions"]["promotional_period_text"], "90 days")
+        self.assertTrue(metadata["deposit_conditions"]["tiered_rate_flag"])
+        self.assertNotIn("SECRET", str(metadata))
+        card = _build_product_refresh_metadata(payload=payload, product_version_id="v", product_url=None,
+                                               allowed_field_names={"standard_rate"}, product_type="credit-card")
+        self.assertNotIn("deposit_conditions", card)
+
     def test_build_snapshot_generates_projection_metrics_rankings_and_scatter(self) -> None:
         service = AggregateRefreshService()
         result = service.build_snapshot(

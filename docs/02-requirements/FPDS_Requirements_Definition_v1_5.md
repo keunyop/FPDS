@@ -669,6 +669,19 @@ without changing the approved factual-comparison or private-evidence boundary.
 
 ### FR-PUB-021 Same-Type Primary-Metric Product Finder
 
+Product Owner amendment on `2026-09-24` (D-079, WBS 5.65) supersedes the
+single-number eligibility rule below: all candidates require matching country
+and currency; Savings/GIC require an explicit matching annual/APY rate basis;
+GIC uses the same selected term row and known redemption category. Promotional,
+tiered, market-linked, conflicting and missing conditions fail closed. The
+primary metric and three strict-improvement limit remain; no personal scoring
+is added. Home Deposit Top 5 is scoped by type/currency/basis/term instead of
+mixing Savings and GIC. Detail offers explicit simple-estimate horizons, positive
+initial scenario amounts, minimum validation and localized unavailable reasons
+with official-bank links. See [the comparison policy](../03-design/public-deposit-comparison-policy.md)
+for calculation, data-boundary and cache behavior.
+
+
 Product Owner direction on `2026-08-30` supersedes the input and copy portions
 of the 2026-08-29 finder while retaining its deterministic comparison rule. The
 visitor starts by selecting one exact published product they already hold.

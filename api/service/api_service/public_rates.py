@@ -83,6 +83,11 @@ def interpret_rate_text(value: Any) -> dict[str, Any]:
 def public_rate(row: dict[str, Any]) -> dict[str, Any]:
     metadata = row.get("refresh_metadata")
     metadata = metadata if isinstance(metadata, dict) else {}
+    if row.get("product_type") == "gic" and re.search(
+        r"\b(?:indexed|index.linked|market.linked|equity.linked|ActionGIC|step.up|step.rate|escalating)\b",
+        str(row.get("product_name") or "") + " " + str(metadata.get("interest_rate_summary") or ""), re.I
+    ):
+        return _result("conditional", _text(metadata.get("interest_rate_summary")) or _text(row.get("product_name")))
     card = row.get("product_type") == "credit-card"
     keys = ("purchase_interest_rate_summary", "purchase_interest_rate") if card else (
         "interest_rate_summary", "mortgage_rate", "interest_rate")
@@ -94,10 +99,12 @@ def public_rate(row: dict[str, Any]) -> dict[str, Any]:
     # cannot. An explicit conflicting interest rate is also unsafe to compare.
     description = _text(metadata.get("description_short"))
     if description and _RATE.search(description):
+        qualification_text = re.sub(
+            r"eligible for (?:CDIC|FDIC|deposit insurance)(?: coverage)?", "insured", description, flags=re.I)
         qualifies_rate = re.search(
             r"(?:tiered|boosted|preferential|conditional)\W{0,5}(?:interest\s+)?rates?"
             r"|(?:interest|rate|APY|APR).{0,80}(?:autopay|discount|eligible|new clients|new customers)"
-            r"|interest.{0,60}when.{0,50}balance", description, re.I)
+            r"|interest.{0,60}when.{0,50}balance", qualification_text, re.I)
         if _REFERENCE.search(description) or _PROMOTION.search(description) or qualifies_rate:
             description_rate = interpret_rate_text(description)
             parsed.append(description_rate)

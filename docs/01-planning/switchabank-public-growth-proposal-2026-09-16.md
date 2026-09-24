@@ -54,16 +54,6 @@ Production은 홈, 예금, 카드, 대출, 상세 2개, Methodology, 미국 홈�
 
 ## 3. 성장 기능보다 먼저 해결할 문제
 
-### B. 스냅샷 성공과 상품 정보의 최신성이 섞임 — 확인됨
-
-9월 16일 읽은 CA 8월 27일·US 9월 3일 스냅샷은 모두 `status=fresh`였다. `build_freshness_payload`는 stale flag 또는 후속 refresh 실패를 보며, 경과 시간을 판단하지 않는다. 오래된 성공 스냅샷을 넣은 직접 함수 확인에서도 `fresh`였다.
-
-현재 UI 문구는 `Current snapshot`이므로 실시간 금리라고 명시한 것은 아니다. 다만 녹색 확인 표시·순위·과거 검증일이 함께 쓰여 방문자가 최신성의 의미를 잘못 이해할 여지가 있다.
-
-권고: 스냅샷 생성일과 상품별 마지막 확인일을 분리하고, 허용 확인 주기·만료 조건을 상품군별로 정한다. 운영자가 확인할 지연 목록과 검수 주기를 만든다. D-069의 수동 수집 결정을 존중하며 이번 제안이 자동 수집 재개를 승인하는 것은 아니다. 스냅샷만 다시 생성했다고 은행 사실을 새로 검증한 것처럼 표시해서도 안 된다.
-
-근거: [freshness API](../../api/service/api_service/public_common.py), [상태 UI](../../app/public/src/components/fpds/public/public-freshness.tsx), [결정 D-069](../00-governance/decision-log.md).
-
 ### C. 비교 조건과 계산 가정의 부족 — 일부 확인, 추가 검증 필요
 
 현재 Home Deposit Top 5에는 Savings와 GIC가 함께 나오고, finder는 동일 Product Type과 한 숫자를 비교한다. 후보 선별에는 별도의 통화·GIC 만기·프로모션 적용기간 검증이 없다. 이는 모든 결과가 잘못됐다는 뜻은 아니지만 더 높은 숫자만으로 교체의 이점을 설명하기 어려운 구조다.

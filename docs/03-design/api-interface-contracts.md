@@ -1465,3 +1465,12 @@ public/admin 전용 internal fields, evidence detail, review history는 포함�
 | 2026-04-01 | Initial API and interface contract baseline created for WBS 1.5.1-1.5.5 |
 | 2026-04-13 | Added the admin audit-log route baseline alongside change history, publish, usage, and dashboard health contracts |
 | 2026-07-30 | Added the session-country, cited, atomic AI bank-onboarding mutation contract |
+
+
+## 2026-09-24 deposit comparison correction
+
+D-079 and the [deposit comparison policy](public-deposit-comparison-policy.md)
+supersede mixed Savings/GIC Home rankings and unconditional scalar estimates.
+Public products add `deposit_terms`; the Home/finder/calculator require explicit
+compatible basis, currency and GIC maturity before arithmetic. Existing
+card/loan metrics and private evidence boundaries remain intact.

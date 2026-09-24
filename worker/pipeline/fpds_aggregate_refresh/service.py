@@ -176,6 +176,7 @@ class AggregateRefreshService:
             product_version_id=canonical_row.product_version_id,
             product_url=product_url,
             allowed_field_names=public_field_allowlist,
+            product_type=canonical_row.product_type,
         )
         return {
             "snapshot_id": snapshot_id,
@@ -443,6 +444,7 @@ def _build_product_refresh_metadata(
     product_version_id: str | None,
     product_url: str | None,
     allowed_field_names: set[str] | None = None,
+    product_type: str | None = None,
 ) -> dict[str, object]:
     metadata: dict[str, object] = {
         "product_version_id": product_version_id,
@@ -521,6 +523,25 @@ def _build_product_refresh_metadata(
             if base_rate is not None:
                 metadata["base_12_month_rate"] = base_rate
 
+    # Preserve only approved financial qualifiers required to judge a deposit
+    # rate. Essential-only market profiles must not discard its restrictions.
+    if product_type in ("savings", "gic"):
+        conditions: dict[str, object] = {}
+        for name in ("interest_calculation_method", "interest_payment_frequency",
+                     "compounding_frequency", "payout_option", "tier_definition_text",
+                     "promotional_period_text"):
+            value = _coerce_string(payload.get(name))
+            if value is not None:
+                conditions[name] = value
+        for name in ("tiered_rate_flag", "introductory_rate_flag"):
+            value = _coerce_bool(payload.get(name))
+            if value is not None:
+                conditions[name] = value
+        promo = _coerce_float(payload.get("promotional_rate"))
+        if promo is not None:
+            conditions["promotional_rate"] = promo
+        if conditions:
+            metadata["deposit_conditions"] = conditions
     return metadata
 
 

@@ -1,3 +1,4 @@
+import { allProductPages } from "@/lib/public-deposit";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -50,7 +51,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const resolvedSearchParams = (await searchParams) ?? {};
   const filters = parseDashboardPageFilters(resolvedSearchParams);
   const summaryPromise = fetchPublicDashboardSummary(buildDashboardSearchParams(filters));
-  const depositProductsPromise = fetchPublicProducts(buildDepositProductsSearchParams(filters));
+  const depositProductsPromise = allProductPages(page => {
+    const params = buildDepositProductsSearchParams(filters);
+    params.set("page", String(page));
+    return fetchPublicProducts(params);
+  });
   const loanProductsPromise = fetchPublicProducts(buildLoanProductsSearchParams(filters));
 
   return (
@@ -189,7 +194,7 @@ function buildDepositProductsSearchParams(filters: DashboardPageFilters) {
     productTypes: [...DEPOSIT_PRODUCT_TYPES]
   });
   params.set("page", "1");
-  params.set("page_size", "5");
+  params.set("page_size", "100");
   params.set("sort_by", "display_rate");
   params.set("sort_order", "desc");
   return params;

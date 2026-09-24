@@ -348,6 +348,8 @@ Based on:
 | 5.63 | Completed | Public full-rate and reference-spread correction | shared safe rate interpretation, source-preserving EN/KO/JA display, rate comparison exclusions, regression/browser verification, separate bounded published-data correction and self-review | Backend, Frontend, Data, QA | 5.28, 5.55, 5.56 | 2026-09-16 |
 | 5.64 | Completed | Public product verification freshness | separate snapshot/product dates, elapsed type-specific review/expiry status, EN/KO/JA comparison surfaces, read-only overdue report and manual review cadence, regression and responsive verification | Backend, Frontend, QA | 5.63 | 2026-09-21 |
 
+| 5.65 | Completed | Public deposit comparison and estimate conditions | same-currency/type/basis/term gates, scoped Home Top 5, explicit calculator scenarios and unavailable reasons, pinned approved qualifiers, INDEXED GIC self-review, regression and browser checks | Backend, Frontend, Data, QA | 5.63, 5.64 | 2026-09-24 |
+
 ### 5.5 Scope Baseline
 
 `WBS 5.5`는 현재 Big 5 parser coverage를 실제 bank variation에 견디는 normalization 품질로 끌어올리는 hardening slice다.

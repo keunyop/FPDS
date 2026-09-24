@@ -325,3 +325,14 @@ Gate A `Pass` 자체는 개발 시작 승인이 아니다.
 | 2026-03-30 | Initial scope baseline created for WBS 1.1.1 - 1.1.5 |
 | 2026-04-06 | Clarified that Gate A Pass and actual implementation start approval are separate controls |
 | 2026-07-30 | Recorded the bounded AI-assisted bank-registry onboarding authorization without widening collection or release scope |
+
+
+## 2026-09-24 Public deposit correctness slice
+
+Product Owner authorized only growth proposal section C. D-079 / WBS 5.65
+amend FR-PUB-021 with currency, annual-rate basis and exact GIC term eligibility;
+Home separates deposit conditions and the existing calculator handles explicit
+scenarios or concise unavailability. The scope includes public-safe qualifiers
+from the projection's exact approved version and future aggregate preservation.
+Other growth features, personal scoring, deployment and live-data mutations
+remain outside this request.

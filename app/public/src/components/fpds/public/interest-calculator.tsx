@@ -1,158 +1,54 @@
 "use client";
 
-import { Calculator } from "lucide-react";
-import { useMemo, useState } from "react";
-
-import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { Calculator, ExternalLink } from "lucide-react";
+import { useId, useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { TrackedOfficialBankLink } from "@/components/fpds/public/product-engagement-link";
+import type { PublicProduct } from "@/lib/public-api";
+import { depositCopy, depositOptions, depositPeriod, depositReason, estimateDeposit, startingDepositAmount } from "@/lib/public-deposit";
+import { formatPublicCurrency } from "@/lib/public-product-presentation";
 
-type InterestCalculatorProps = {
-  currency: string;
-  locale: string;
-  minimumBalance: number | null;
-  minimumDeposit: number | null;
-  productType: string;
-  rate: number | null;
-  termLengthDays: number | null;
-};
-
-export function InterestCalculator({
-  currency,
-  locale,
-  minimumBalance,
-  minimumDeposit,
-  productType,
-  rate,
-  termLengthDays,
-}: InterestCalculatorProps) {
-  const startingAmount = firstFiniteNumber(minimumDeposit, minimumBalance, 10000);
-  const [amount, setAmount] = useState(String(Math.max(0, startingAmount)));
-  const parsedAmount = Number(amount.replace(/,/g, ""));
-  const validAmount = Number.isFinite(parsedAmount) && parsedAmount >= 0 ? parsedAmount : null;
-  const annualRate = Number.isFinite(rate ?? NaN) ? Number(rate) : null;
-  const termYears = productType === "gic" && Number.isFinite(termLengthDays) && termLengthDays ? termLengthDays / 365 : 1;
-  const estimatedInterest = annualRate === null || validAmount === null ? null : validAmount * (annualRate / 100) * termYears;
-  const labels = useMemo(() => calculatorLabels(locale), [locale]);
-
+export function InterestCalculator({ product, locale }: { product: PublicProduct; locale: string }) {
+  const copy = depositCopy(locale);
+  const options = depositOptions(product);
+  const [amount, setAmount] = useState(String(startingDepositAmount(product.minimum_balance, Math.max(product.minimum_deposit ?? 0, options[0]?.minimum_deposit ?? 0))));
+  const [term, setTerm] = useState(options[0]?.key ?? '');
+  const [days, setDays] = useState(365);
+  const option = options.find(item => item.key === term);
+  const reason = !product.deposit_terms ? 'basis_unknown' : product.deposit_terms.reason ?? product.deposit_terms.calculation_reason
+    ?? (!option ? 'term_unknown' : null);
+  const unavailable = !product.deposit_terms || Boolean(reason);
+  const estimate = estimateDeposit(product, option, amount, days);
+  const errorId = useId();
   return (
-    <Card>
+    <Card data-deposit-calculator>
       <CardHeader>
-        <CardDescription className="flex items-center gap-2">
-          <Calculator className="size-4" aria-hidden="true" />
-          {labels.eyebrow}
-        </CardDescription>
-        <h2 className="text-base font-semibold">{labels.title}</h2>
+        <h2 className="flex items-center gap-2 text-base font-semibold"><Calculator className="size-4" aria-hidden="true" />{copy.title}</h2>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <label className="grid gap-2 text-sm">
-          <span className="font-medium text-foreground">{labels.amount}</span>
-          <Input
-            className="h-10 rounded-lg bg-background"
-            inputMode="decimal"
-            min="0"
-            onChange={(event) => setAmount(event.target.value)}
-            step="0.01"
-            type="number"
-            value={amount}
-          />
-        </label>
-        <dl className="grid gap-3 rounded-lg border border-border bg-muted/25 p-4 sm:grid-cols-3">
-          <CalculatorFact label={labels.rate} value={annualRate === null ? labels.notAvailable : `${annualRate.toFixed(2).replace(/\.?0+$/, "")}%`} />
-          <CalculatorFact label={labels.term} value={formatTermYears(termYears, locale)} />
-          <CalculatorFact
-            label={labels.interest}
-            value={estimatedInterest === null ? labels.notAvailable : formatCurrency(estimatedInterest, currency, locale)}
-          />
-        </dl>
-        <p className="text-xs leading-5 text-muted-foreground">{labels.note}</p>
+        {unavailable ? <p className="text-sm text-muted-foreground">{copy.unavailable} · {depositReason(reason, locale)}</p> : <>
+          <label className="grid gap-2 text-sm font-medium">{copy.amount} ({product.currency})
+            <Input className="min-h-11" inputMode="decimal" type="text" value={amount} aria-invalid={estimate === null} aria-describedby={estimate === null ? errorId : undefined} onChange={event => setAmount(event.target.value)} />
+          </label>
+          <label className="grid gap-2 text-sm font-medium">{product.product_type === 'gic' ? copy.term : copy.period}
+            {product.product_type === 'gic' ? <select className="min-h-11 min-w-0 rounded-md border border-input bg-background px-3" value={term} onChange={event => setTerm(event.target.value)}>
+              {options.map(item => <option value={item.key} key={item.key}>{depositPeriod(item, locale)}</option>)}
+            </select> : <select className="min-h-11 rounded-md border border-input bg-background px-3" value={days} onChange={event => setDays(Number(event.target.value))}>
+              {[30, 90, 180, 365].map(value => <option key={value} value={value}>{value} {copy.days}</option>)}
+            </select>}
+          </label>
+          {estimate === null ? <p id={errorId} role="status" className="text-xs text-destructive">{copy.inputError}</p> : null}
+          <dl className="grid grid-cols-2 gap-3 border-y border-border py-4" aria-live="polite">
+            <div><dt className="text-xs text-muted-foreground">{copy.annual}</dt><dd className="mt-1 font-semibold tabular-nums">{option?.rate}%</dd></div>
+            <div><dt className="text-xs text-muted-foreground">{copy.interest}</dt><dd className="mt-1 font-semibold tabular-nums">{estimate === null ? '—' : formatPublicCurrency(estimate, product.currency, locale)}</dd></div>
+          </dl>
+          <p className="text-xs leading-5 text-muted-foreground">{copy.note}</p>
+        </>}
+        {product.product_url ? <TrackedOfficialBankLink className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-primary hover:underline" countryCode={product.country_code} productId={product.product_id} href={product.product_url}>
+          {copy.bank}<ExternalLink className="size-3.5" aria-hidden="true" />
+        </TrackedOfficialBankLink> : null}
       </CardContent>
     </Card>
   );
-}
-
-function CalculatorFact({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-1 text-base font-semibold tabular-nums text-foreground">{value}</dd>
-    </div>
-  );
-}
-
-function calculatorLabels(locale: string) {
-  if (locale === "ko") {
-    return {
-      amount: "예금 금액",
-      eyebrow: "이자 계산기",
-      interest: "예상 이자",
-      note: "표시된 연 금리를 기준으로 한 단순 추정치입니다. 실제 이자, 복리, 세금, 가입 조건은 가입 시점에 달라질 수 있습니다.",
-      notAvailable: "n/a",
-      rate: "금리",
-      term: "기간",
-      title: "예상 이자 계산",
-    };
-  }
-  if (locale === "ja") {
-    return {
-      amount: "預入金額",
-      eyebrow: "利息計算",
-      interest: "予想利息",
-      note: "表示年利による単純な概算です。実際の利息、複利、税金、申込条件は異なる場合があります。",
-      notAvailable: "未公開",
-      rate: "金利",
-      term: "期間",
-      title: "利息を概算",
-    };
-  }
-  return {
-    amount: "Deposit amount",
-    eyebrow: "Interest calculator",
-    interest: "Estimated interest",
-    note: "Simple estimate using the displayed annual rate. Actual interest, compounding, tax, and eligibility can differ at signup.",
-    notAvailable: "n/a",
-    rate: "Rate",
-    term: "Term",
-    title: "Estimate interest",
-  };
-}
-
-function formatCurrency(value: number, currency: string, locale: string) {
-  if (!Number.isFinite(value)) {
-    return calculatorLabels(locale).notAvailable;
-  }
-  return new Intl.NumberFormat(intlLocale(locale), {
-    currency: normalizeCurrency(currency),
-    maximumFractionDigits: 2,
-    style: "currency",
-  }).format(value);
-}
-
-function formatTermYears(termYears: number, locale: string) {
-  if (!Number.isFinite(termYears) || termYears <= 0) {
-    return locale === "ko" ? "1년" : locale === "ja" ? "1年" : "1 year";
-  }
-  const value = Number.isInteger(termYears) ? String(termYears) : termYears.toFixed(2).replace(/\.?0+$/, "");
-  if (locale === "ko" || locale === "ja") {
-    return locale === "ko" ? `${value}년` : `${value}年`;
-  }
-  return `${value} year${value === "1" ? "" : "s"}`;
-}
-
-function intlLocale(locale: string) {
-  if (locale === "ko") {
-    return "ko-KR";
-  }
-  if (locale === "ja") {
-    return "ja-JP";
-  }
-  return "en-CA";
-}
-
-function firstFiniteNumber(...values: Array<number | null>) {
-  return values.find((value): value is number => typeof value === "number" && Number.isFinite(value)) ?? 10000;
-}
-
-function normalizeCurrency(currency: string) {
-  const normalized = currency.trim().toUpperCase();
-  return /^[A-Z]{3}$/.test(normalized) ? normalized : "CAD";
 }

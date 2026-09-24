@@ -22,6 +22,8 @@ from api_service.public_common import (
     serialize_decimal,
 )
 
+from api_service.public_deposits import deposit_terms
+
 from api_service.public_verification import as_utc, product_verification
 
 from api_service.public_rates import comparable_rate, interpret_rate_text, public_rate
@@ -475,6 +477,7 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str, evaluated_at: st
         "public_display_rate": rate["comparable_rate"],
         "card_display_rate": rate["comparable_rate"],
         "rate": rate,
+        "deposit_terms": deposit_terms(row),
         "public_display_fee": serialize_decimal(row.get("effective_fee")),
         "annual_fee": serialize_decimal(metadata.get("annual_fee")),
         "purchase_interest_rate": serialize_decimal(metadata.get("purchase_interest_rate")),

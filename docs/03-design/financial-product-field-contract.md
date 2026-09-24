@@ -285,3 +285,14 @@ Each new false-positive or merge failure class requires a regression test. Repre
 - evidence links against the source actually used;
 - reviewer-visible field notes;
 - safe review routing for facts the source did not publish accessibly.
+
+
+## 2026-09-24 Public calculation qualifiers
+
+Approved deposit calculation/payment/compounding/payout, tier and promotion
+fields must survive aggregate projection in a bounded `deposit_conditions`
+object. These qualifiers restrict comparison even for essential-only country
+profiles. Public may recover this whitelist from the exact version already
+pinned by an old snapshot, never from a newer canonical version. Raw payloads,
+operator notes and evidence remain private. Unknown annual/APY basis is an
+explicit unavailable state under the [comparison policy](public-deposit-comparison-policy.md).

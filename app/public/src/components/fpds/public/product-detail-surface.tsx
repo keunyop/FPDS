@@ -1,4 +1,4 @@
-import { getComparablePublicRate, getPublicRateMetric } from "@/lib/public-rate";
+import { getPublicRateMetric } from "@/lib/public-rate";
 import { ArrowLeft, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -219,16 +219,8 @@ export function ProductDetailSurface({
           </div>
 
           <div className="grid gap-4">
-            {product.product_family === "deposit" && getComparablePublicRate(product) !== null ? (
-              <InterestCalculator
-                currency={product.currency}
-                locale={filters.locale}
-                minimumBalance={product.minimum_balance}
-                minimumDeposit={product.minimum_deposit}
-                productType={product.product_type}
-                rate={getComparablePublicRate(product)}
-                termLengthDays={product.term_length_days}
-              />
+            {['savings', 'gic'].includes(product.product_type) ? (
+              <InterestCalculator key={product.product_id} product={product} locale={filters.locale} />
             ) : null}
 
             <aside className="border border-foreground/20 bg-card/75 p-5 shadow-[8px_8px_0_rgba(28,39,35,0.05)]">

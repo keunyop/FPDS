@@ -637,3 +637,17 @@ See [the freshness policy and operator report](../../docs/03-design/public-verif
 for contract details, the read-only overdue CLI, manual daily/weekly review and
 release order. Initial warning-only intervals are 7/30 days for rate-led products and 30/90 days for chequing/cards. D-069 collection
 is manual; these changes do not start collection, update facts or publish data.
+
+
+## Deposit comparison conditions (2026-09-24)
+
+The [deposit comparison policy](../../docs/03-design/public-deposit-comparison-policy.md) supersedes headline-only Savings/GIC
+comparison and implicit one-year calculation. Home scopes rankings by type,
+currency, rate basis and exact GIC term/redemption category. The finder uses
+those gates before its existing metric; the calculator uses disclosed annual
+basis and an explicit period, or a concise unavailable reason and official link.
+`deposit_terms` is additive. Public reads a bounded whitelist from the exact
+approved version pinned by the snapshot; aggregates preserve these qualifiers
+for future refreshes. Missing basis is never inferred from country. API release
+precedes Public; old cached contracts fail closed. No live refresh or migration
+is needed for the version-pinned bridge. See the policy for current data limits.

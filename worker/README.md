@@ -166,3 +166,17 @@ Runtime invariants:
   percentage. This includes `Interest: Purchases` and `Interest: Cash
   Advances`; purchase, cash-advance, and balance-transfer labels remain
   distinct so a nearby 22.99% cash rate cannot populate the purchase rate.
+
+
+## Deposit comparison conditions (2026-09-24)
+
+The [deposit comparison policy](../docs/03-design/public-deposit-comparison-policy.md) supersedes headline-only Savings/GIC
+comparison and implicit one-year calculation. Home scopes rankings by type,
+currency, rate basis and exact GIC term/redemption category. The finder uses
+those gates before its existing metric; the calculator uses disclosed annual
+basis and an explicit period, or a concise unavailable reason and official link.
+`deposit_terms` is additive. Public reads a bounded whitelist from the exact
+approved version pinned by the snapshot; aggregates preserve these qualifiers
+for future refreshes. Missing basis is never inferred from country. API release
+precedes Public; old cached contracts fail closed. No live refresh or migration
+is needed for the version-pinned bridge. See the policy for current data limits.
