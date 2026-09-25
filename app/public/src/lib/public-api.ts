@@ -270,8 +270,8 @@ export async function fetchPublicProducts(searchParams: URLSearchParams): Promis
   return fetchPublicData<PublicProductsResponse>("/api/public/products", searchParams, PUBLIC_PRODUCTS_REVALIDATE_SEC);
 }
 
-export async function fetchPublicProductDetail(productId: string, searchParams: URLSearchParams): Promise<PublicProductDetailResponse> {
-  return fetchPublicData<PublicProductDetailResponse>(`/api/public/products/${encodeURIComponent(productId)}`, searchParams, PUBLIC_PRODUCTS_REVALIDATE_SEC);
+export async function fetchPublicProductDetail(productId: string, searchParams: URLSearchParams, latest = false): Promise<PublicProductDetailResponse> {
+  return fetchPublicData<PublicProductDetailResponse>(`/api/public/products/${encodeURIComponent(productId)}`, searchParams, latest ? 0 : PUBLIC_PRODUCTS_REVALIDATE_SEC);
 }
 
 export async function fetchPublicFilters(searchParams: URLSearchParams): Promise<PublicFiltersResponse> {
@@ -380,7 +380,7 @@ async function fetchPublicData<T>(path: string, searchParams: URLSearchParams | 
   const timeout = setTimeout(() => controller.abort(), PUBLIC_DATA_FETCH_TIMEOUT_MS);
 
   const response = await fetch(url, {
-    next: { revalidate: revalidateSeconds },
+    ...(revalidateSeconds === 0 ? { cache: "no-store" as const } : { next: { revalidate: revalidateSeconds } }),
     signal: controller.signal,
   }).finally(() => clearTimeout(timeout));
 

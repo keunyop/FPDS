@@ -317,3 +317,36 @@ freshness and GIC exact-term limits keep those routes held with catalog fallback
 final HTTP checks, repo doctor/foundation and final diff checks pass. No API,
 financial-data or deployment changes. Preserve this file for prior unresolved
 Admin and bounded-data goals; this completed slice does not close their scope.
+
+
+## Independent slice: 2026-09-25 persistent and shareable Public comparisons
+
+Ownership: preserve unresolved Admin and bounded-data goals and the Product
+Owner's proposal edits. Implement only the explicitly requested P1-2.
+Objective: retain up to four selections through catalog/detail navigation,
+public-ID sharing, explicit device-only saving and current projection rechecks.
+Scope: Public shared state, catalog/curated/detail entry, noindex compare route,
+bounded read-only BFF, EN/KO/JA, compact mobile access, documentation and QA.
+Exclusions: new analytics events, financial-input persistence, recommendations,
+comparison arithmetic, public history, API/DB writes, collection or deployment.
+Acceptance:
+- [x] Preserve selections across search, filters, sorting, pagination, detail
+      and locale; isolate countries and consistently enforce the four-item cap.
+- [x] Restore ID/country/locale-only URLs; explicit local save/delete and fresh
+      projection rechecks with unavailable/changed/retry states.
+- [x] Identify incompatible types/currencies without misleading differences.
+- [x] Detail add/other-bank same-type links; fixed mobile comparison access.
+- [x] Public regressions, lint/typecheck/build, EN/KO/JA at 1440/768/390px,
+      existing-flow regression, metadata, documentation/journal and diff checks.
+Verification: state/URL/storage/fetch boundary tests and browser scenarios with
+analytics/feedback writes blocked; read-only real data; git diff --check.
+No passing check is a zero-bug guarantee. Retain this goal for prior owners.
+
+
+Completion: the requested P1-2 slice is implemented and verified. Public 52 tests,
+lint/typecheck/production build, repo doctor/foundation (including Admin 5 tests
+and build), 63 production-build browser scenarios and 4 SEO HTTP checks pass.
+Final corrected bundle rechecked 29 localized/live cases. No observed remaining
+runtime regression within the tested scope; no deployment or canonical mutation.
+The user-edited proposal and earlier unresolved Admin/data goals are preserved;
+this file remains because those separately owned acceptance items are still open.

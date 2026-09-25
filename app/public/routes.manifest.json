@@ -16,6 +16,12 @@
       "resource_key": "public_navigation.products"
     },
     {
+      "route": "/compare",
+      "route_id": "public.comparison",
+      "implementation_path": "src/app/compare/page.tsx",
+      "resource_key": "public_comparison.title"
+    },
+    {
       "route": "/ca/[slug]",
       "route_id": "public.curated_comparison",
       "implementation_path": "src/app/ca/[slug]/page.tsx",
@@ -100,6 +106,12 @@
       "implementation_path": "src/app/admin/page.tsx",
       "resource_key": "public_operations.analytics_and_feedback",
       "access": "password"
+    },
+    {
+      "route": "/api/public/compare",
+      "route_id": "public.proxy.comparison",
+      "implementation_path": "src/app/api/public/compare/route.ts",
+      "resource_key": "public_comparison.current"
     }
   ]
 }

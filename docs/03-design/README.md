@@ -28,6 +28,8 @@ Use this file to avoid opening every design doc.
 
 ## Public Experience
 
+- [Persistent comparison lists](public-comparison-list-policy.md): country-scoped selection, noindex sharing, device save/delete and current-data rechecks
+
 - [Curated Canadian comparisons](public-curated-comparison-policy.md): purpose pages, shared launch gate, Home fallbacks and bounded search discovery
 
 - [Deposit comparison and estimates](public-deposit-comparison-policy.md): compatible currency/basis/terms, scenario inputs and unavailability

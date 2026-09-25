@@ -1,9 +1,11 @@
 "use client";
 
 import { Check, ExternalLink, Plus, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import Link from 'next/link';
+import { useComparison } from '@/components/fpds/public/comparison-provider';
+import { ComparisonSelection } from '@/components/fpds/public/comparison-controls';
+import { comparisonHref } from '@/lib/public-comparison';
 import { BankLogo } from '@/components/fpds/public/bank-logo';
-import { ComparePanel } from '@/components/fpds/public/product-compare-workspace';
 import { ProductVerification } from '@/components/fpds/public/product-verification';
 import { TrackedOfficialBankLink, TrackedProductLink } from '@/components/fpds/public/product-engagement-link';
 import { Button } from '@/components/ui/button';
@@ -41,31 +43,31 @@ function facts(product: PublicProduct, slug: CuratedSlug, locale: string) {
 export function CuratedComparisonTable({ comparison, locale }: { comparison: CuratedComparison; locale: string }) {
   const copy = curatedCopy(locale);
   const messages = getPublicMessages(locale);
-  const [selected, setSelected] = useState<string[]>([]);
-  const panel = useRef<HTMLDivElement>(null);
+  const selection = useComparison('CA');
+  const selected = selection.entries.map(item => item.id);
   const filters = parseProductGridPageFilters({ locale });
-  const products = comparison.groups.flatMap(group => group.products);
-  const selectedProducts = selected.map(id => products.find(p => p.product_id === id)).filter((p): p is PublicProduct => Boolean(p));
-  const rowsById = Object.fromEntries(comparison.groups.flatMap(group => group.products.map(product => [product.product_id, [
-    { key: 'scope', label: copy.scopeLabel, value: `${copy.scope} · ${curatedGroupTitle(group.key, locale)}` },
-    ...facts(product, comparison.slug, locale).map((fact, index) => ({ ...fact, key: String(index) }))
-  ]])));
-  function toggle(id: string) {
-    setSelected(current => current.includes(id) ? current.filter(value => value !== id) : current.length < 4 ? [...current, id] : current);
-  }
+  const rowsById = Object.fromEntries(selection.entries.flatMap(entry => {
+    const product = entry.product;
+    const group = comparison.groups.find(group => group.products.some(p => p.product_id === entry.id));
+    if (!product || !group || entry.changed || product.country_code !== 'CA' || product.currency !== 'CAD') return [];
+    return [[entry.id, [
+      { key: 'scope', label: copy.scopeLabel, value: `${copy.scope} · ${curatedGroupTitle(group.key, locale)}` },
+      ...facts(product, comparison.slug, locale).map(fact => ({ ...fact, key: fact.label }))
+    ]]];
+  }));
+  function toggle(product: PublicProduct) { selection.toggle(product); }
+
   return (
     <div className="grid min-w-0 gap-8" data-curated-comparison={comparison.slug}>
       <div className="sticky top-16 z-20 flex min-h-14 flex-wrap items-center justify-between gap-2 border-y border-foreground/15 bg-background/95 px-1 py-2 backdrop-blur-xl">
         <span className="text-xs font-semibold tabular-nums" role="status">{messages.compare.selectedCount.replace('{count}', String(selected.length)).replace('{limit}', '4')}</span>
         <div className="flex items-center gap-1">
-          <Button type="button" size="sm" variant="ghost" disabled={!selected.length} onClick={() => {
-            panel.current?.scrollIntoView({ behavior: 'instant', block: 'start' }); panel.current?.focus({ preventScroll: true });
-          }}>{copy.viewCompare}</Button>
-          {selected.length ? <Button type="button" size="sm" variant="ghost" onClick={() => setSelected([])}><X className="size-4" aria-hidden="true" />{messages.compare.clear}</Button> : null}
+          <Button asChild size="sm" variant="ghost"><Link href={comparisonHref(selected, filters)}>{copy.viewCompare}</Link></Button>
+          {selected.length ? <Button type="button" size="sm" variant="ghost" onClick={selection.clear}><X className="size-4" aria-hidden="true" />{messages.compare.clear}</Button> : null}
         </div>
       </div>
-      <div ref={panel} tabIndex={-1} className="min-w-0 scroll-mt-36" hidden={!selected.length}>
-        {selected.length ? <ComparePanel filters={filters} locale={locale} products={selectedProducts} onRemove={toggle} rowsById={rowsById} /> : null}
+      <div className="min-w-0 scroll-mt-36" hidden={!selected.length}>
+        {selected.length ? <ComparisonSelection filters={filters} locale={locale} rowsById={rowsById} /> : null}
       </div>
       {comparison.groups.map(group => (
         <section key={group.key} className="min-w-0" aria-labelledby={`curated-${group.key}`}>
@@ -93,7 +95,7 @@ export function CuratedComparisonTable({ comparison, locale }: { comparison: Cur
                     <span className={index === 0 ? 'font-mono text-lg font-semibold tabular-nums' : ''}>{fact.value}</span>
                   </td>)}
                   <td role="cell" className="min-w-0 sm:col-span-2 lg:px-3 lg:py-5 lg:align-top"><div className="flex flex-wrap items-center gap-x-4 gap-y-1 lg:flex-col lg:items-start">
-                    <Button type="button" size="sm" variant={added ? 'secondary' : 'outline'} aria-pressed={added} aria-label={`${added ? copy.selected : copy.compare}: ${product.product_name}`} disabled={!added && selected.length >= 4} onClick={() => toggle(product.product_id)} className="min-h-11">
+                    <Button type="button" size="sm" variant={added ? 'secondary' : 'outline'} aria-pressed={added} aria-label={`${added ? copy.selected : copy.compare}: ${product.product_name}`} disabled={!added && selected.length >= 4} onClick={() => toggle(product)} className="min-h-11">
                       {added ? <Check className="size-4" aria-hidden="true" /> : <Plus className="size-4" aria-hidden="true" />}{added ? copy.selected : messages.compare.select}
                     </Button>
                     <TrackedOfficialBankLink className="inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-primary hover:underline" countryCode="CA" productId={product.product_id} href={product.product_url!}>{copy.checkBank}<ExternalLink className="size-3.5 shrink-0" aria-hidden="true" /></TrackedOfficialBankLink>

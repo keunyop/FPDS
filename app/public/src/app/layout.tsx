@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Suspense, type ReactNode } from "react";
 
+import { ComparisonProvider } from "@/components/fpds/public/comparison-provider";
+import { ComparisonDock } from "@/components/fpds/public/comparison-controls";
 import { PublicFooter } from "@/components/fpds/public/public-footer";
 import { PublicHeader } from "@/components/fpds/public/public-header";
 import { AnalyticsConsent } from "@/components/fpds/public/analytics-consent";
@@ -47,9 +49,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className="min-h-screen bg-background text-foreground">
         <PublicStructuredData data={PUBLIC_SITE_STRUCTURED_DATA} />
         <div className="relative isolate min-h-screen">
-          <PublicHeader />
-          <div className="min-h-[calc(100vh-4rem)]">{children}</div>
-          <PublicFooter />
+          <ComparisonProvider>
+            <PublicHeader />
+            <div className="min-h-[calc(100vh-4rem)]">{children}</div>
+            <PublicFooter />
+            <Suspense fallback={null}><ComparisonDock /></Suspense>
+          </ComparisonProvider>
         </div>
         {googleAnalyticsMeasurementId ? (
           <Suspense fallback={null}>

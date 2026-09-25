@@ -796,6 +796,29 @@ creating an account or exposing private FPDS evidence.
   bounded payload/category validation, and best-effort process rate limiting;
   stored submissions expire after at most 400 days
 
+### FR-PUB-024 Persistent and Shareable Comparison Lists
+
+Product Owner P1-2 direction on `2026-09-25` authorizes up to four selections
+per country across Public search/filter/sort/catalog/detail navigation. Detail
+must offer comparison selection and other-bank same-type browsing without a
+synthetic score. A compact fixed mobile action returns to the comparison.
+
+- `/compare` shares public product IDs, country and UI language only and always
+  remains noindex; no user financial inputs or ownership relationship is shared.
+- Explicit Save on this device stores one bounded list per country locally,
+  including public identities and approved-term fingerprints; it persists until
+  explicit deletion or browser clearing, with a concise visible explanation.
+- Reopen by current approved projection, showing removed/inactive products,
+  changed saved terms, loading and retriable failures distinctly. Saved values
+  never become a fallback source of current financial facts.
+- Type/currency incompatibility and unresolved deposit conditions must remain
+  visible; no combined arithmetic, winner or additional recommendation is added.
+- EN/KO/JA, 390px access, country isolation, four-product limits and existing
+  analytics/privacy boundaries apply. FR-PUB-022 gains no new event.
+
+See [the comparison-list policy](../03-design/public-comparison-list-policy.md).
+
+
 ## 8.2 Admin Requirements
 
 ### FR-ADM-001 Admin Login

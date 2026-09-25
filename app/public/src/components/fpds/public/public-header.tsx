@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 
+import { ComparisonHeaderLink } from "@/components/fpds/public/comparison-controls";
 import { PublicCountryMenu } from "@/components/fpds/public/public-country-menu";
 import { PublicMark, PublicWordmark } from "@/components/fpds/public/public-mark";
 import { PublicMobileMenu } from "@/components/fpds/public/public-mobile-menu";
@@ -35,9 +36,11 @@ function HeaderContent() {
         </div>
         <div className="hidden min-w-0 items-center gap-2 md:flex">
           <PublicNav />
+          <ComparisonHeaderLink />
           <PublicCountryMenu />
         </div>
-        <div className="shrink-0 md:hidden">
+        <div className="flex shrink-0 items-center gap-1 md:hidden">
+          <ComparisonHeaderLink />
           <PublicMobileMenu />
         </div>
       </div>

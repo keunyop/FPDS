@@ -168,3 +168,8 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Keep the mobile return action clear of consent and open modal surfaces. */
+body:has(#analytics-consent-title, [role="dialog"][data-state="open"]) [data-comparison-dock] {
+  display: none;
+}

@@ -1,3 +1,5 @@
+import { AddToComparison } from "@/components/fpds/public/comparison-controls";
+import { comparisonCopy } from "@/lib/public-comparison-copy";
 import { getPublicRateMetric } from "@/lib/public-rate";
 import { ArrowLeft, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
 import Link from "next/link";
@@ -36,6 +38,7 @@ type ProductDetailSurfaceProps = {
   detail: PublicProductDetailResponse | null;
   filters: ProductGridPageFilters;
   relatedProducts: PublicProduct[];
+  otherBanksHref?: string | null;
 };
 
 type DetailFact = {
@@ -47,7 +50,8 @@ export function ProductDetailSurface({
   apiUnavailable,
   detail,
   filters,
-  relatedProducts
+  relatedProducts,
+  otherBanksHref
 }: ProductDetailSurfaceProps) {
   const copy = getPublicMessages(filters.locale);
   const designCopy = getPublicDesignCopy(filters.locale);
@@ -136,7 +140,7 @@ export function ProductDetailSurface({
         </Button>
 
         <section className="border-y border-foreground/15 py-6 md:py-9">
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
             <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} />
               <div className="min-w-0 flex-1">
@@ -150,16 +154,18 @@ export function ProductDetailSurface({
                 </div>
               </div>
             </div>
-            <div className="grid min-w-0 gap-2 sm:flex sm:flex-wrap lg:justify-end">
+            <div className="grid min-w-0 gap-2 sm:flex sm:flex-wrap lg:grid lg:grid-cols-1">
               {product.product_url ? (
-                <Button asChild className="w-full sm:w-auto">
+                <Button asChild className="w-full sm:w-auto lg:w-full">
                   <TrackedOfficialBankLink countryCode={product.country_code} href={product.product_url} productId={product.product_id}>
                     {copy.detail.officialPage}
                     <ExternalLink className="size-4" aria-hidden="true" />
                   </TrackedOfficialBankLink>
                 </Button>
               ) : null}
-              <Button asChild className="w-full sm:w-auto" variant="outline">
+              <AddToComparison product={product} locale={filters.locale} />
+              {otherBanksHref ? <Button asChild className="w-full sm:w-auto lg:w-full" variant="outline"><Link href={otherBanksHref}>{comparisonCopy(filters.locale).otherBanks}<ArrowRight className="size-4" aria-hidden="true" /></Link></Button> : null}
+              <Button asChild className="w-full sm:w-auto lg:w-full" variant="outline">
                 <Link href={similarHref}>
                   {copy.detail.similarProducts}
                   <ArrowRight className="size-4" aria-hidden="true" />

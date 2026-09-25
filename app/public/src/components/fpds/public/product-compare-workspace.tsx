@@ -1,19 +1,23 @@
 "use client";
 
 import { Check, ExternalLink, GitCompareArrows, LoaderCircle, Plus, RefreshCw, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ProductVerification } from "@/components/fpds/public/product-verification";
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/public/product-engagement-link";
 import { Button } from "@/components/ui/button";
-import { formatPublicMessage, getPublicDesignCopy, getPublicDiscoveryCopy, getPublicMessages } from "@/lib/public-locale";
+import { formatPublicMessage, getPublicDiscoveryCopy, getPublicMessages } from "@/lib/public-locale";
 import type { PublicProduct, PublicProductsResponse } from "@/lib/public-api";
 import { buildPublicProductMetrics, buildPublicSortMetric } from "@/lib/public-product-presentation";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
 
-const MAX_COMPARE_PRODUCTS = 4;
+import Link from 'next/link';
+import { useComparison } from '@/components/fpds/public/comparison-provider';
+import { ComparisonSelection } from '@/components/fpds/public/comparison-controls';
+import { MAX_COMPARE_PRODUCTS, comparisonHref } from '@/lib/public-comparison';
+import { comparisonCopy } from '@/lib/public-comparison-copy';
 
 type ProductCompareWorkspaceProps = {
   filters: ProductGridPageFilters;
@@ -46,7 +50,8 @@ export function ProductCompareWorkspace({
   const copy = getPublicMessages(locale);
   const discoveryCopy = getPublicDiscoveryCopy(locale);
   const [products, setProducts] = useState<PublicProduct[]>(initialProducts.items);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const comparison = useComparison(filters.countryCode);
+  const selectedIds = comparison.entries.map(item => item.id);
   const [nextPage, setNextPage] = useState(initialProducts.page + 1);
   const [hasNextPage, setHasNextPage] = useState(initialProducts.has_next_page);
   const [loadState, setLoadState] = useState<LoadState>("idle");
@@ -55,10 +60,7 @@ export function ProductCompareWorkspace({
   );
   const requestRef = useRef<AbortController | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const selectedProducts = useMemo(
-    () => selectedIds.map((productId) => products.find((product) => product.product_id === productId)).filter((product): product is PublicProduct => Boolean(product)),
-    [products, selectedIds]
-  );
+
 
   useEffect(() => {
     if (filters.viewMode !== "auto") {
@@ -77,7 +79,6 @@ export function ProductCompareWorkspace({
     requestRef.current?.abort();
     requestRef.current = null;
     setProducts(initialProducts.items);
-    setSelectedIds([]);
     setNextPage(initialProducts.page + 1);
     setHasNextPage(initialProducts.has_next_page);
     setLoadState("idle");
@@ -154,21 +155,10 @@ export function ProductCompareWorkspace({
     return () => observer.disconnect();
   }, [hasNextPage, loadMore, loadState]);
 
-  function toggleProduct(productId: string) {
-    setSelectedIds((current) => {
-      if (current.includes(productId)) {
-        return current.filter((id) => id !== productId);
-      }
-      if (current.length >= MAX_COMPARE_PRODUCTS) {
-        return current;
-      }
-      return [...current, productId];
-    });
-  }
 
   return (
     <section className="grid gap-4" aria-labelledby="compare-products-title">
-      <div className="sticky top-16 z-20 flex items-center justify-between gap-3 border-y border-foreground/15 bg-background/95 px-1 py-2.5 backdrop-blur-xl">
+      <div className="sticky top-16 z-20 flex flex-wrap items-center justify-between gap-2 border-y border-foreground/15 bg-background/95 px-1 py-2.5 backdrop-blur-xl">
         <div className="min-w-0">
           <h2 id="compare-products-title" className="flex items-center gap-2 whitespace-nowrap text-xs font-semibold text-foreground sm:text-sm">
             <GitCompareArrows className="size-4 text-primary" aria-hidden="true" />
@@ -176,11 +166,12 @@ export function ProductCompareWorkspace({
           </h2>
         </div>
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          <span className="whitespace-nowrap font-mono text-[11px] font-semibold text-muted-foreground" aria-label={copy.compare.selectedCount.replace("{count}", String(selectedProducts.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))}>
-            {copy.compare.selectedCount.replace("{count}", String(selectedProducts.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))}
+          <span className="whitespace-nowrap font-mono text-[11px] font-semibold text-muted-foreground" aria-label={copy.compare.selectedCount.replace("{count}", String(selectedIds.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))}>
+            {copy.compare.selectedCount.replace("{count}", String(selectedIds.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))}
           </span>
-          {selectedProducts.length ? (
-            <Button onClick={() => setSelectedIds([])} size="sm" type="button" variant="ghost">
+          {selectedIds.length ? <Button asChild size="sm" variant="outline"><Link href={comparisonHref(selectedIds, filters)}>{comparisonCopy(locale).view}</Link></Button> : null}
+          {selectedIds.length ? (
+            <Button onClick={comparison.clear} size="sm" type="button" variant="ghost">
               <X className="size-4" aria-hidden="true" />
               {copy.compare.clear}
             </Button>
@@ -188,14 +179,7 @@ export function ProductCompareWorkspace({
         </div>
       </div>
 
-      {selectedProducts.length ? (
-        <ComparePanel
-          filters={filters}
-          locale={locale}
-          onRemove={(productId) => setSelectedIds((current) => current.filter((id) => id !== productId))}
-          products={selectedProducts}
-        />
-      ) : null}
+      <ComparisonSelection filters={filters} locale={locale} />
 
       <section className={cn("grid", resolvedViewMode === "list" ? "gap-2" : "gap-5 md:grid-cols-2 xl:grid-cols-3")}>
         {products.map((product) => {
@@ -205,7 +189,7 @@ export function ProductCompareWorkspace({
             compareDisabled,
             filters,
             locale,
-            onToggle: () => toggleProduct(product.product_id),
+            onToggle: () => comparison.toggle(product),
             product,
             selected
           };
@@ -244,8 +228,8 @@ export function ProductCompareWorkspace({
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {selectedProducts.length
-          ? copy.compare.selectedCount.replace("{count}", String(selectedProducts.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))
+        {selectedIds.length
+          ? copy.compare.selectedCount.replace("{count}", String(selectedIds.length)).replace("{limit}", String(MAX_COMPARE_PRODUCTS))
           : copy.compare.emptyTitle}
       </p>
     </section>
@@ -405,97 +389,6 @@ function ProductCompareCard({
       </div>
     </article>
   );
-}
-
-export function ComparePanel({
-  filters,
-  locale,
-  onRemove,
-  products,
-  rowsById
-}: {
-  filters: ProductGridPageFilters;
-  locale: string;
-  onRemove: (productId: string) => void;
-  products: PublicProduct[];
-  rowsById?: Record<string, Array<{ key: string; label: string; value: string }>>;
-}) {
-  const copy = getPublicMessages(locale);
-  const designCopy = getPublicDesignCopy(locale);
-  const rowsByProduct = products.map((product) => rowsById?.[product.product_id] ?? buildCompareRows(product, locale));
-  const differingKeys = new Set(
-    rowsByProduct[0]
-      ?.filter((row) => {
-        const values = new Set(rowsByProduct.map((rows) => rows.find((candidate) => candidate.key === row.key)?.value ?? copy.common.notDisclosed));
-        return values.size > 1;
-      })
-      .map((row) => row.key) ?? []
-  );
-
-  return (
-    <section className="scroll-mt-32 border-y border-maple/30 bg-card/70 px-3 py-4 md:px-4" aria-label={copy.compare.title}>
-      <div className="mb-4 flex flex-col gap-1 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-maple">{copy.compare.title}</p>
-        <p className="text-xs leading-5 text-muted-foreground">{designCopy.compareBoundary}</p>
-      </div>
-      <div className={cn("grid gap-3 md:grid-cols-2", products.length === 3 ? "xl:grid-cols-3" : products.length >= 4 ? "xl:grid-cols-4" : "")}>
-        {products.map((product, productIndex) => (
-          <article className="border border-border bg-background/75 p-4" key={product.product_id}>
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-start gap-3">
-                <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
-                <div className="min-w-0">
-                  <TrackedProductLink className="break-words text-sm font-semibold text-foreground hover:text-primary" countryCode={product.country_code} href={buildProductDetailHref(filters, product.product_id)} productId={product.product_id}>
-                    {product.product_name}
-                  </TrackedProductLink>
-                  <p className="mt-1 text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
-                </div>
-              </div>
-              <button className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => onRemove(product.product_id)} type="button" aria-label={`${copy.compare.remove}: ${product.product_name}`}>
-                <X className="size-4" aria-hidden="true" />
-              </button>
-            </div>
-            <ProductVerification product={product} locale={locale} />
-            <dl className="mt-4 divide-y divide-border border-y border-border">
-              {rowsByProduct[productIndex].map((row) => (
-                <CompareFact different={differingKeys.has(row.key)} key={row.key} label={row.label} value={row.value} />
-              ))}
-            </dl>
-            {product.product_url ? (
-              <Button asChild variant="outline" className="mt-4 min-h-11 w-full rounded-full">
-                <TrackedOfficialBankLink countryCode={product.country_code} href={product.product_url} productId={product.product_id}>
-                  {copy.detail.officialPage}
-                  <ExternalLink className="size-3.5" aria-hidden="true" />
-                </TrackedOfficialBankLink>
-              </Button>
-            ) : null}
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function CompareFact({ different, label, value }: { different: boolean; label: string; value: string }) {
-  return (
-    <div className={cn("px-2 py-3", different && "bg-accent/45")}>
-      <dt className="text-[11px] font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-semibold text-foreground tabular-nums">{value}</dd>
-    </div>
-  );
-}
-
-function buildCompareRows(product: PublicProduct, locale: string) {
-  const copy = getPublicMessages(locale);
-  const typeAware = buildPublicProductMetrics(product, locale);
-  return [
-    { key: "type", label: copy.grid.productTypes, value: product.product_type_label },
-    ...typeAware.map((metric, index) => ({
-      key: `essential-${index}`,
-      label: metric.label,
-      value: metric.value
-    }))
-  ];
 }
 
 function buildProductDetailHref(filters: ProductGridPageFilters, productId: string) {

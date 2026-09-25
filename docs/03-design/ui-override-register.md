@@ -97,3 +97,11 @@ retryable, and omit the nonfunctional Account settings item. Existing vendor
 primitives and semantic tokens remain in use. The API environment and run
 attention union replace misleading build-mode/status assumptions. The local
 fixture browser matrix passed all three locales at 390/768/1440px.
+
+## 2026-09-25 - Public comparison composition
+
+FPDS-owned catalog, curated, detail and shell wrappers reuse the existing Button,
+ledger, bank identity, verification and link primitives for FR-PUB-024. Shared
+state and `/compare` add no vendor primitive or visual-token family. Header
+comparison entry and the mobile dock use existing semantic colors and 44px
+controls; consent/open dialogs hide the dock. No direct vendor edit or install.

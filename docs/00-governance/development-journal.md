@@ -25,6 +25,48 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+
+As of 2026-09-25 (persistent/shareable Public comparisons complete):
+
+- Implemented the explicitly selected P1-2 under FR-PUB-024 / D-081 / WBS 5.67.
+  One four-product list per country now spans search/sort/filter/Grid/List,
+  continuous loading, curated pages and detail. Header/footer and a compact
+  mobile dock open `/compare`; detail also offers other-bank same-type browsing
+  while preserving same-bank related products and the existing financial rules.
+- Sharing includes only public IDs/country/locale, always noindex and outside
+  sitemap. Explicit local Save/Delete owns one list per country: public identity
+  plus approved-term hashes, retained until deletion/browser clearing. A fresh
+  visit restores saved IDs and rechecks current projections; no financial input,
+  ownership relationship, full product payload or new analytics event is stored.
+- The bounded uncached Public BFF distinguishes missing/inactive from transient
+  failures, rejects mixed snapshots, and keeps removals safe during pending reads.
+  Changed saved conditions display current facts; incompatible types/currencies
+  suppress misleading highlights and explain unavailable combined calculations.
+- Key files: public-comparison.ts and tests/copy, comparison-provider/controls/
+  surface, extracted compare-panel, compare page/BFF, catalog/curated/detail and
+  minimal shell integration. The comparison-list policy records storage,
+  data/SEO boundaries and operational behavior. No API service or canonical write.
+- Visual QA caught and fixed a squeezed desktop detail heading and shell-pipe
+  encoding damage to new KO/JA copy/separators; localized-script unit coverage
+  now guards the copy. Saved-list reopening also explicitly reapplies the saved
+  baseline even when the active IDs match. Selector-role and network-idle test
+  assumptions were corrected; a clean rebuild verifies all corrected strings.
+- Verification: Public 52 tests, lint, standalone typecheck and production build
+  pass; repo doctor/foundation pass, including Admin 5 tests/typecheck/build.
+  Production-build browser checks pass 63 scenarios: 18 selection/save/failure,
+  8 extra state/pagination/BFF, 17 localized/layout/boundary, 8 existing real-data
+  Home/finder/calculator/official-click and 12 live CA/US Deposit/Card/Loan cases.
+  The final rebuilt bundle rechecked all 29 layout/live cases. EN/KO/JA at exact
+  390/768/1440px, touch targets, focus, consent coexistence and screenshots were
+  reviewed; no observed JS exceptions or hydration warnings remain. Four HTTP
+  checks confirm EN/KO/JA noindex/no-product-JSON-LD and sitemap exclusion.
+  Final diff/whitespace checks pass. API/worker suites were not rerun because
+  their runtimes were unchanged. These checks do not assert zero future bugs.
+- Preserve the Product Owner's proposal edits and the unresolved earlier goal
+  ownership. No deployment, collection, external analytics/feedback write or
+  canonical mutation. No known remaining implementation issue in the verified
+  slice. Next: normal authorized release; prior Admin/data decisions stay open.
+
 As of 2026-09-25 (Home comparison shortcut visibility):
 
 - Made the three Canadian purpose links more prominent using the existing

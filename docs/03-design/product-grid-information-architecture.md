@@ -682,3 +682,11 @@ D-080 adds only the three Canadian routes and Home shortcuts described in the
 responsive tables, existing selection/official links and per-product dates.
 Base fees and waiver conditions stay separate. Curated eligibility and search
 discovery fail closed when insufficient; existing catalogs are unchanged.
+
+## 2026-09-25 persistent comparison state
+
+FR-PUB-024 moves selection ownership outside catalog response state. Search,
+sort, empty results and detail navigation retain up to four country-scoped IDs;
+curated/detail controls share the same list. The existing ledger, header entry,
+noindex `/compare` and mobile return action use the current-data/local-save
+rules in [the comparison-list policy](public-comparison-list-policy.md).

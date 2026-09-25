@@ -10,6 +10,9 @@ import { PublicFeedbackDialog } from "@/components/fpds/public/public-feedback-d
 import { getPublicMessages, normalizePublicLocale, type PublicLocale } from "@/lib/public-locale";
 import { buildScopedPublicHrefFromSearchParams, normalizeCountryCodeValue } from "@/lib/public-query";
 
+import { comparisonHref } from '@/lib/public-comparison';
+import { comparisonCopy } from '@/lib/public-comparison-copy';
+
 const FOOTER_COPY: Record<PublicLocale, { legalNote: string }> = {
   en: {
     legalNote: "Information may change. Confirm rates and conditions on the bank's official page."
@@ -53,6 +56,7 @@ function FooterContent() {
             <FooterLink href={productsHref}>{copy.nav.products}</FooterLink>
             <FooterLink href={cardsHref}>{copy.nav.card}</FooterLink>
             <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
+            <FooterLink href={comparisonHref([], { countryCode, locale })}>{comparisonCopy(locale).title}</FooterLink>
             <FooterLink href={methodologyHref}>{copy.nav.methodology}</FooterLink>
             <PublicFeedbackDialog countryCode={countryCode} locale={locale} mode="site_feedback" triggerStyle="footer" />
           </nav>

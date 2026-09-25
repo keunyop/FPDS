@@ -351,6 +351,8 @@ Based on:
 | 5.65 | Completed | Public deposit comparison and estimate conditions | same-currency/type/basis/term gates, scoped Home Top 5, explicit calculator scenarios and unavailable reasons, pinned approved qualifiers, INDEXED GIC self-review, regression and browser checks | Backend, Frontend, Data, QA | 5.63, 5.64 | 2026-09-24 |
 | 5.66 | Completed | Curated Canadian purpose comparisons | three allowlisted server-rendered comparisons, shared data/readiness gate, Home shortcuts, EN/KO/JA, canonical/sitemap and regression/browser verification | Frontend, QA | 5.63, 5.64, 5.65 | 2026-09-25 |
 
+| 5.67 | Completed | Persistent and shareable Public comparisons | four-product navigation state, detail/other-bank entry, noindex URL restoration, explicit local save/delete, current projection/changed/removed/error states and responsive regression verification | Frontend, QA | 5.63, 5.64, 5.65, 5.66 | 2026-09-25 |
+
 ### 5.5 Scope Baseline
 
 `WBS 5.5`는 현재 Big 5 parser coverage를 실제 bank variation에 견디는 normalization 품질로 끌어올리는 hardening slice다.

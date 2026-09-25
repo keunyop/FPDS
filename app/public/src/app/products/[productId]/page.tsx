@@ -8,6 +8,7 @@ import {
 import { ProductDetailSurface } from "@/components/fpds/public/product-detail-surface";
 import {
   fetchPublicProductDetail,
+  fetchPublicFilters,
   fetchPublicProducts,
   isPublicApiError,
   type PublicProduct,
@@ -16,6 +17,7 @@ import {
 import { getPublicMessages } from "@/lib/public-locale";
 import {
   buildGlobalFilterSearchParams,
+  buildPublicHref,
   CARD_PRODUCT_TYPES,
   DEPOSIT_PRODUCT_TYPES,
   LOAN_PRODUCT_TYPES,
@@ -81,6 +83,7 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
   let detail: PublicProductDetailResponse | null = null;
   let relatedProducts: PublicProduct[] = [];
   let apiUnavailable = false;
+  let otherBanksHref: string | null = null;
 
   try {
     detail = await fetchPublicProductDetail(productId, buildGlobalFilterSearchParams(filters));
@@ -93,24 +96,23 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
       resolvedSearchParams,
       catalogProductTypes
     );
-    try {
-      const relatedParams = new URLSearchParams({
-        locale: filters.locale,
-        country_code: detail.product.country_code,
-        bank_code: detail.product.bank_code,
-        product_type: detail.product.product_type,
-        sort_by: "product_name",
-        sort_order: "asc",
-        page: "1",
-        page_size: "6"
+    const currentProduct = detail.product;
+    const relatedParams = new URLSearchParams({ locale: filters.locale, country_code: currentProduct.country_code,
+      bank_code: currentProduct.bank_code, product_type: currentProduct.product_type,
+      sort_by: 'product_name', sort_order: 'asc', page: '1', page_size: '6' });
+    const [bankOptions, related] = await Promise.allSettled([
+      fetchPublicFilters(new URLSearchParams({ locale: filters.locale, country_code: currentProduct.country_code, product_type: currentProduct.product_type })),
+      fetchPublicProducts(relatedParams)
+    ]);
+    if (bankOptions.status === 'fulfilled') {
+      const bankCodes = bankOptions.value.banks.filter(bank => bank.value !== currentProduct.bank_code && bank.count > 0).map(bank => bank.value);
+      if (bankCodes.length) otherBanksHref = buildPublicHref(currentProduct.product_type === 'credit-card' ? '/cards' : currentProduct.product_family === 'lending' ? '/loans' : '/products', {
+        ...parseProductGridPageFilters({ locale: filters.locale, country_code: currentProduct.country_code }),
+        bankCodes, productTypes: [currentProduct.product_type], sortBy: 'bank_name', sortOrder: 'asc'
       });
-      const related = await fetchPublicProducts(relatedParams);
-      relatedProducts = related.items
-        .filter((product) => product.product_id !== detail?.product.product_id)
-        .slice(0, 4);
-    } catch {
-      relatedProducts = [];
     }
+    if (related.status === 'fulfilled') relatedProducts = related.value.items.filter(product => product.product_id !== currentProduct.product_id).slice(0, 4);
+
   } catch (error) {
     if (isPublicApiError(error, 404)) {
       notFound();
@@ -130,6 +132,7 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
         detail={detail}
         filters={filters}
         relatedProducts={relatedProducts}
+        otherBanksHref={otherBanksHref}
       />
     </>
   );

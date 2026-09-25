@@ -5,6 +5,17 @@ only review-approved public projections; raw evidence, review state, and private
 source traces remain inside FPDS Admin. Its customer-facing identity is
 `SwitchaBank`; `FPDS` remains the internal platform/runtime name.
 
+## Persistent comparisons (2026-09-25)
+
+`/compare` is a noindex, country-scoped four-product workspace. Catalog, curated
+and detail choices survive filters/sort/navigation in memory; the header/footer
+and compact mobile dock open the shared list. URLs contain only public IDs,
+country and locale. Explicit device saving stores identities and term hashes
+until deletion/browser clearing; revisits read current projections through the
+uncached, bounded `/api/public/compare` BFF. Removed products, changed saved
+terms and retriable failures stay distinct. No new analytics event or financial
+input persistence. See [the complete contract](../../docs/03-design/public-comparison-list-policy.md).
+
 ## Runtime Routes
 
 - `/` is the canonical public Home view. Its first viewport pairs a short market
