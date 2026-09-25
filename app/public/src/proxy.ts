@@ -1,9 +1,11 @@
+import { curatedCatalogHref, isCuratedSlug } from "@/lib/public-curated";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import {
   normalizeProductDetailRequest,
-  normalizePublicProductLocale
+  normalizePublicProductLocale,
+  normalizePublicProductCountry
 } from "@/lib/public-url-policy";
 
 const PRODUCT_DETAIL_PREFIX = "/products/";
@@ -16,6 +18,18 @@ export async function proxy(request: NextRequest) {
     PUBLIC_LOCALE_HEADER,
     normalizePublicProductLocale(request.nextUrl.searchParams.get("locale") ?? "")
   );
+  // Resolve the bounded route/country before streaming, preserving real HTTP status codes.
+  if (request.nextUrl.pathname.startsWith("/ca/")) {
+    const slug = request.nextUrl.pathname.slice("/ca/".length);
+    if (!isCuratedSlug(slug)) {
+      return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
+    }
+    const country = normalizePublicProductCountry(request.nextUrl.searchParams.get("country_code") ?? "");
+    if (country !== "CA") {
+      return NextResponse.redirect(new URL(curatedCatalogHref(slug,
+        normalizePublicProductLocale(request.nextUrl.searchParams.get("locale") ?? ""), country), request.url), 308);
+    }
+  }
   const productId = readProductId(request.nextUrl.pathname);
   if (!productId) {
     return NextResponse.next({

@@ -1,3 +1,5 @@
+import { buildCuratedComparison, CURATED_PAGES, type CuratedSlug } from "@/lib/public-curated";
+import { fetchCuratedProducts } from "@/lib/public-curated-data";
 import {
   fetchPublicCountries,
   fetchPublicProducts,
@@ -68,7 +70,17 @@ async function buildSitemapEntries(): Promise<SitemapEntry[]> {
       : []
   );
 
-  return deduplicateEntries([...staticEntries, ...productEntries]);
+  const curatedProducts = countries.includes("CA") ? await fetchCuratedProducts() : null;
+  const curatedEntries: SitemapEntry[] = curatedProducts === null ? [] :
+    (Object.keys(CURATED_PAGES) as CuratedSlug[])
+      .filter(slug => buildCuratedComparison(slug, curatedProducts).ready)
+      .flatMap(slug => (["en", "ko", "ja"] as const).map(locale => ({
+        url: buildPublicSeoUrl(`/ca/${slug}`, locale, "CA"),
+        changeFrequency: "daily" as const,
+        priority: 0.8,
+        alternates: buildPublicLanguageAlternates(`/ca/${slug}`, "CA")
+      })));
+  return deduplicateEntries([...staticEntries, ...curatedEntries, ...productEntries]);
 }
 
 async function loadPublishedCountryCodes() {

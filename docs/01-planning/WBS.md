@@ -349,6 +349,7 @@ Based on:
 | 5.64 | Completed | Public product verification freshness | separate snapshot/product dates, elapsed type-specific review/expiry status, EN/KO/JA comparison surfaces, read-only overdue report and manual review cadence, regression and responsive verification | Backend, Frontend, QA | 5.63 | 2026-09-21 |
 
 | 5.65 | Completed | Public deposit comparison and estimate conditions | same-currency/type/basis/term gates, scoped Home Top 5, explicit calculator scenarios and unavailable reasons, pinned approved qualifiers, INDEXED GIC self-review, regression and browser checks | Backend, Frontend, Data, QA | 5.63, 5.64 | 2026-09-24 |
+| 5.66 | Completed | Curated Canadian purpose comparisons | three allowlisted server-rendered comparisons, shared data/readiness gate, Home shortcuts, EN/KO/JA, canonical/sitemap and regression/browser verification | Frontend, QA | 5.63, 5.64, 5.65 | 2026-09-25 |
 
 ### 5.5 Scope Baseline
 

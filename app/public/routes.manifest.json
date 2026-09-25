@@ -16,6 +16,17 @@
       "resource_key": "public_navigation.products"
     },
     {
+      "route": "/ca/[slug]",
+      "route_id": "public.curated_comparison",
+      "implementation_path": "src/app/ca/[slug]/page.tsx",
+      "resource_key": "public_curated.comparison",
+      "allowed_slugs": [
+        "savings-accounts",
+        "no-monthly-fee-chequing",
+        "1-year-gic"
+      ]
+    },
+    {
       "route": "/products/[productId]",
       "route_id": "public.product_detail",
       "implementation_path": "src/app/products/[productId]/page.tsx",

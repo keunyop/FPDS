@@ -25,6 +25,55 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-09-25 (curated Canadian comparison pages, implementation complete):
+
+- Implemented only growth proposal P1-1 under D-080 / WBS 5.66 / FR-PUB-020:
+  three allowlisted CA/CAD purpose routes, compact Home links, SSR comparison
+  tables, existing four-product comparison and official-bank actions, authored
+  EN/KO/JA metadata/copy, canonical/alternates and gated sitemap discovery.
+- One shared gate requires three banks per primary compatible group, active
+  approved products and known non-expired verification. This is a new-page
+  editorial baseline, not Google's rule; existing catalog/Top 5 warning-only
+  freshness remains intact. Exact zero base fees are separate from waivers;
+  Savings annual/APY and qualified rates stay apart; GIC uses exact m12 rows
+  and matching redemption. Unknown withdrawals never inherit transaction counts.
+- Read-only replay of 165 CA public products: Chequing is ready with 12 zero-base
+  fee accounts across 7 banks and 11 conditional-waiver accounts (23 rows / 10
+  banks overall). Savings has only one non-expired bank with an eligible base
+  rate; it stays held. GIC has no eligible exact one-year group and stays held.
+  Home routes those two purposes to existing catalogs. Held pages are noindex
+  with no comparison or sitemap membership; no data was refreshed or reverified.
+- Key files: public-curated.ts, public-curated-data.ts, public-curated-copy.ts,
+  curated-comparison.tsx, curated-shortcuts.tsx, ca/[slug]/page.tsx, sitemap,
+  Public proxy and minimal Home/compare/query integration. The
+  [curated comparison policy](../03-design/public-curated-comparison-policy.md)
+  records scope, launch gate, cache behavior, measurement and operator follow-up.
+- Verification: all 42 Public tests pass; Public lint, standalone typecheck and
+  production build pass. Browser QA passed 42 real-data and 41 fixture scenarios,
+  followed by 18 final-build localized/layout checks and 8 existing-flow checks
+  after label refinements (109 total). EN/KO/JA at 1440/768/exact 390px cover
+  selection/limits/removal, no overflow, per-product dates, localized tags,
+  distinct fee/promotion groups, exact GIC rows, all-page loading, error/retry,
+  partial/changed snapshot failure, Home fallback, existing catalog comparison,
+  finder, calculator, independent Top 5 and client locale/country navigation.
+  Official navigation was intercepted locally and its existing three-field event
+  contract verified; analytics/feedback/engagement writes were blocked.
+- Found and fixed a streamed HTTP-200 response for unknown curated routes;
+  proxy preflight now returns real 404/308. Five final HTTP checks confirm
+  unknown/extra routes, country redirect, localized no-JS SSR and the 228-URL
+  sitemap containing only three Chequing locale URLs. Chrome had no observed
+  exceptions or hydration/key warnings. KO mobile and EN desktop screenshots
+  visually reviewed. Initial test harness expectations for missing copy,
+  article/select scope and selected-only SSR labels were corrected before pass.
+- Repo doctor, foundation baseline and final diff/whitespace checks pass.
+  API/worker/Admin suites were not rerun for this Public-only slice. No known
+  implementation defect remains within the verified scope; no zero-bug claim.
+  No deployment, collection, canonical mutation or analytics-account operation.
+- Next: normal authorized release; operator verification of Savings freshness
+  and GIC basis/term/redemption before dedicated discovery. GSC/GA performance
+  remains unmeasured. Prior unresolved Admin and US-data goal ownership remains.
+
+
 As of 2026-09-24 (bounded Home Top 5 data completion; approval pending):
 
 - Published nine official-source canonical corrections with immutable versions,

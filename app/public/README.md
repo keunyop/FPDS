@@ -32,6 +32,11 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
   are preserved, but all internal Home links and search metadata use the root.
 - `/products` is the Deposit catalog for review-approved `chequing`, `savings`,
   and `gic` products.
+- `/ca/[slug]` allowlists Savings, no-monthly-fee Chequing and 1-year GIC
+  comparisons. A shared three-bank and verification gate controls rows, metadata,
+  Home links and sitemap inclusion. Insufficient data shows a noindex holding
+  state; Home falls back to the appropriate existing catalog. See the
+  [curated comparison policy](../../docs/03-design/public-curated-comparison-policy.md).
 - `/cards` is the Credit Card catalog for review-approved `credit-card`
   products with annual fee and purchase interest rate comparison.
 - `/loans` is the lending catalog for review-approved `mortgage`,

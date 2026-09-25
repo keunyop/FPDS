@@ -1,3 +1,4 @@
+import type { CuratedPath } from "@/lib/public-curated";
 import { getComparablePublicRate } from "@/lib/public-rate";
 import type { Metadata } from "next";
 
@@ -21,6 +22,7 @@ export const PUBLIC_SITE_NAME = "SwitchaBank";
 export { PUBLIC_SITE_ORIGIN };
 
 export type PublicSeoPath =
+  | CuratedPath
   | "/"
   | "/products"
   | "/cards"

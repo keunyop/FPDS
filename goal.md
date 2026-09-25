@@ -284,3 +284,36 @@ Progress: nine existing-product corrections are committed and verified; CA
 Savings presets reach five. US three-candidate manual review approval remains
 pending; Loan/GIC evidence limits are recorded in the dated data report. No
 blanket Top 5 completion is claimed. Preserve this goal and prior ownership.
+
+## Independent slice: 2026-09-25 curated Canadian comparison pages
+
+Ownership: preserve unresolved Admin and bounded-data goals above.
+Objective: implement only growth proposal P1-1: purpose-specific Canadian
+comparison pages and direct Home entry, with restrained EN/KO/JA presentation.
+Scope: approved active Public projections, CAD Savings and zero-monthly-fee
+Chequing comparisons, exact one-year GIC readiness, SSR/canonical/sitemap,
+existing comparison and official-bank actions, focused regression and UI QA.
+Exclusions: other proposal features, new analytics events, canonical mutations,
+collection, deployment, arbitrary indexable filters or country/bank permutations.
+Acceptance:
+- [x] Audit public data; apply one documented readiness gate consistently to
+      pages, internal links and sitemap; defer insufficient GIC coverage.
+- [x] Separate base/promotional/withdrawal conditions and zero base fees from
+      conditional waivers; retain product verification dates and source language.
+- [x] Provide localized server-rendered comparison rows and Home shortcuts,
+      comparison selection and official links using existing domain components.
+- [x] Preserve catalog noindex, country/locale navigation and existing features.
+- [x] Pass focused/Public regressions, lint/typecheck/build and browser QA at
+      1440/768/exact 390px; update docs/journal and inspect final diff.
+Verification: anonymous read-only data audit, deterministic eligibility/SEO/
+pagination boundary tests, responsive and failure-state browser checks with
+analytics/engagement/feedback blocked, and git diff --check. No zero-bug or
+search-growth guarantee is inferred from passing checks.
+
+Completion: all three routes and Home shortcuts are implemented with shared
+readiness and bounded search discovery. Actual data enables Chequing; Savings
+freshness and GIC exact-term limits keep those routes held with catalog fallbacks.
+42 Public tests, lint/typecheck/production build, 109 browser scenarios, five
+final HTTP checks, repo doctor/foundation and final diff checks pass. No API,
+financial-data or deployment changes. Preserve this file for prior unresolved
+Admin and bounded-data goals; this completed slice does not close their scope.

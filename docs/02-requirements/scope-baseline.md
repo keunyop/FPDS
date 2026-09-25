@@ -336,3 +336,12 @@ scenarios or concise unavailability. The scope includes public-safe qualifiers
 from the projection's exact approved version and future aggregate preservation.
 Other growth features, personal scoring, deployment and live-data mutations
 remain outside this request.
+
+## 2026-09-25 selected Public growth scope
+
+The Product Owner authorized proposal P1-1 only: three allowlisted Canadian
+purpose comparisons and Home shortcuts, gated by approved comparable data.
+D-080 / WBS 5.66 amend FR-PUB-020. This excludes other growth proposals,
+canonical changes, collection, new analytics events, countries and deployment.
+Existing arbitrary filters remain noindex; insufficient comparison data defers
+curated discovery. See [the policy](../03-design/public-curated-comparison-policy.md).

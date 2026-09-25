@@ -28,6 +28,8 @@ Use this file to avoid opening every design doc.
 
 ## Public Experience
 
+- [Curated Canadian comparisons](public-curated-comparison-policy.md): purpose pages, shared launch gate, Home fallbacks and bounded search discovery
+
 - [Deposit comparison and estimates](public-deposit-comparison-policy.md): compatible currency/basis/terms, scenario inputs and unavailability
 
 - [Product verification freshness](public-verification-freshness-policy.md): elapsed review/expiry policy, separate snapshot timing and manual operator report

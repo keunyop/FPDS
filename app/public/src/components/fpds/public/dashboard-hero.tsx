@@ -8,10 +8,12 @@ import { buildPublicHref, type DashboardPageFilters } from "@/lib/public-query";
 
 export function DashboardHero({
   filters,
-  finder
+  finder,
+  shortcuts
 }: {
   filters: DashboardPageFilters;
   finder: ReactNode;
+  shortcuts?: ReactNode;
 }) {
   const copy = getPublicMessages(filters.locale);
   const designCopy = getPublicDesignCopy(filters.locale);
@@ -68,6 +70,7 @@ export function DashboardHero({
               </Button>
             ) : null}
           </div>
+          {shortcuts}
         </div>
         {finder}
       </div>

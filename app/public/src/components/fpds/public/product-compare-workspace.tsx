@@ -407,20 +407,22 @@ function ProductCompareCard({
   );
 }
 
-function ComparePanel({
+export function ComparePanel({
   filters,
   locale,
   onRemove,
-  products
+  products,
+  rowsById
 }: {
   filters: ProductGridPageFilters;
   locale: string;
   onRemove: (productId: string) => void;
   products: PublicProduct[];
+  rowsById?: Record<string, Array<{ key: string; label: string; value: string }>>;
 }) {
   const copy = getPublicMessages(locale);
   const designCopy = getPublicDesignCopy(locale);
-  const rowsByProduct = products.map((product) => buildCompareRows(product, locale));
+  const rowsByProduct = products.map((product) => rowsById?.[product.product_id] ?? buildCompareRows(product, locale));
   const differingKeys = new Set(
     rowsByProduct[0]
       ?.filter((row) => {

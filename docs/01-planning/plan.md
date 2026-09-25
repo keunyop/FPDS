@@ -580,3 +580,12 @@ scenarios or concise unavailability. The scope includes public-safe qualifiers
 from the projection's exact approved version and future aggregate preservation.
 Other growth features, personal scoring, deployment and live-data mutations
 remain outside this request.
+
+## 2026-09-25 curated Public comparison slice
+
+The Product Owner selected growth proposal P1-1. D-080 / WBS 5.66 implement
+Canadian Savings, no-monthly-fee Chequing and exact 1-year GIC entry pages with
+Home shortcuts and bounded search discovery. Implement and verify every route;
+activate discovery only when each route's approved-data gate passes. Other
+proposal slices, data remediation, analytics changes and deployment remain
+separately scoped. See [the policy](../03-design/public-curated-comparison-policy.md).

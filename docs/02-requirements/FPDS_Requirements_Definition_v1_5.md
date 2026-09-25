@@ -664,6 +664,18 @@ without changing the approved factual-comparison or private-evidence boundary.
   until a product page is substantially localized, only its clean English URL
   is indexable, while KO/JA product variants remain usable `noindex,follow`,
   canonicalize to English, and stay outside sitemap/hreflang clusters
+- explicitly curated Canadian Savings, zero-base-monthly-fee Chequing and
+  exact 1-year GIC routes may emit their own server-rendered comparison,
+  localized canonical/alternates, structured data and sitemap entries only
+  after the shared comparison-quality gate passes. Require three distinct
+  banks per primary compatible group and non-expired known verification for
+  these new pages; this is an operating baseline, not a Google requirement.
+  Keep base/promotional rates and zero fees/conditional waivers distinct,
+  show per-product check dates, compare controls and official-bank links.
+  Home exposes direct purpose links; insufficient data falls back to existing
+  catalogs while dedicated pages remain noindex and outside sitemap. This
+  does not change existing catalog/Top 5 freshness or financial data. See
+  [the curated policy](../03-design/public-curated-comparison-policy.md).
 - catalog search, filter, sort, and view variants must canonicalize to the
   clean locale/country catalog URL and remain `noindex,follow`
 - production must expose a crawlable `robots.txt` and a sitemap containing

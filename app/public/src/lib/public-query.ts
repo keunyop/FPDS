@@ -1,3 +1,4 @@
+import { curatedCountryPath } from "@/lib/public-curated";
 import { buildProductDetailPath } from "@/lib/public-url-policy";
 
 export type PublicScopeFilters = {
@@ -251,6 +252,7 @@ export function buildCountryHref(pathname: string, searchParams: SearchParamsRea
   const params = new URLSearchParams();
   const locale = normalizeLocaleValue(searchParams.get("locale") ?? "");
   const normalizedCountryCode = normalizeCountryCodeValue(countryCode);
+  pathname = curatedCountryPath(pathname, normalizedCountryCode);
 
   if (locale !== "en") {
     params.set("locale", locale);

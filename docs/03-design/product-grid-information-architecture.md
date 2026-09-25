@@ -674,3 +674,11 @@ supersede mixed Savings/GIC Home rankings and unconditional scalar estimates.
 Public products add `deposit_terms`; the Home/finder/calculator require explicit
 compatible basis, currency and GIC maturity before arithmetic. Existing
 card/loan metrics and private evidence boundaries remain intact.
+
+## 2026-09-25 purpose-specific comparison entry
+
+D-080 adds only the three Canadian routes and Home shortcuts described in the
+[curated policy](public-curated-comparison-policy.md). Comparisons use flat
+responsive tables, existing selection/official links and per-product dates.
+Base fees and waiver conditions stay separate. Curated eligibility and search
+discovery fail closed when insufficient; existing catalogs are unchanged.

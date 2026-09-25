@@ -1,3 +1,4 @@
+import { CuratedShortcutLinks, CuratedShortcuts } from "@/components/fpds/public/curated-shortcuts";
 import { allProductPages } from "@/lib/public-deposit";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -67,6 +68,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <div className="flex min-w-0 flex-col gap-10 md:gap-14">
         <DashboardHero
           filters={filters}
+          shortcuts={filters.countryCode === "CA" ? (
+            <Suspense fallback={<CuratedShortcutLinks locale={filters.locale} />}>
+              <CuratedShortcuts locale={filters.locale} productsPromise={depositProductsPromise} />
+            </Suspense>
+          ) : null}
           finder={
             <Suspense fallback={<DashboardFinderFallback />}>
               <DashboardFinder filters={filters} summaryPromise={summaryPromise} />
