@@ -1,5 +1,6 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import type { PublicProductsResponse } from '@/lib/public-api';
 import { buildCuratedComparison, curatedCatalogHref, curatedHref, type CuratedSlug } from '@/lib/public-curated';
 import { curatedCopy } from '@/lib/public-curated-copy';
@@ -7,9 +8,27 @@ import { curatedCopy } from '@/lib/public-curated-copy';
 export function CuratedShortcutLinks({ locale, ready = [] }: { locale: string; ready?: CuratedSlug[] }) {
   const copy = curatedCopy(locale);
   const items: [CuratedSlug, string][] = [['no-monthly-fee-chequing', copy.feeLink], ['savings-accounts', copy.savingsLink], ['1-year-gic', copy.gicLink]];
-  return <nav aria-label={copy.shortcuts} className="mt-5 flex flex-wrap gap-x-5 gap-y-1 border-t border-border pt-3" data-curated-shortcuts>
-    {items.map(([slug, label]) => <Link key={slug} href={ready.includes(slug) ? curatedHref(slug, locale) : curatedCatalogHref(slug, locale)} className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-primary hover:underline">{label}<ArrowUpRight className="size-3.5" aria-hidden="true" /></Link>)}
-  </nav>;
+  return (
+    <nav
+      aria-label={copy.shortcuts}
+      className="mt-5 grid gap-2 border-t border-border pt-5 sm:grid-cols-3"
+      data-curated-shortcuts
+    >
+      {items.map(([slug, label]) => (
+        <Button
+          key={slug}
+          asChild
+          variant="secondary"
+          className="h-auto min-h-14 min-w-0 justify-between gap-3 whitespace-normal border-primary/25 px-4 py-3 text-left text-base font-semibold hover:border-primary hover:bg-primary hover:text-primary-foreground sm:min-h-20"
+        >
+          <Link href={ready.includes(slug) ? curatedHref(slug, locale) : curatedCatalogHref(slug, locale)}>
+            <span>{label}</span>
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </Button>
+      ))}
+    </nav>
+  );
 }
 export async function CuratedShortcuts({ locale, productsPromise }: { locale: string; productsPromise: Promise<PublicProductsResponse> }) {
   let ready: CuratedSlug[] = [];

@@ -25,6 +25,25 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+As of 2026-09-25 (Home comparison shortcut visibility):
+
+- Made the three Canadian purpose links more prominent using the existing
+  secondary Button primitive, evergreen-tinted backgrounds, visible borders,
+  16px semibold labels and right arrows. Equal-width columns at tablet/desktop
+  stack into full-width 56px targets on mobile; no extra explanatory copy.
+- Changed only `curated-shortcuts.tsx` presentation. Existing ready/catalog
+  destinations, loading fallback, locale labels and US Home behavior remain.
+- Verification: 42 Public tests, lint, typecheck, production build and diff
+  hygiene pass. Nine real-data Home layouts (EN/KO/JA at 390/768/1440px)
+  pass text-fit, overflow, target-size, keyboard-focus and finder/Top 5 presence
+  checks; desktop/mobile screenshots reviewed. Three destination navigations
+  and the unchanged US boundary pass. Navigation QA was corrected to await
+  streamed page content before inspecting H1; no runtime fix was needed.
+  Analytics/engagement/feedback writes were blocked during browser QA.
+- No observed browser exceptions or hydration warnings. No data or deployment
+  changes; no remaining implementation issue in this visual slice.
+
+
 As of 2026-09-25 (curated Canadian comparison pages, implementation complete):
 
 - Implemented only growth proposal P1-1 under D-080 / WBS 5.66 / FR-PUB-020:
