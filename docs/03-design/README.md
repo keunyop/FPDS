@@ -28,6 +28,8 @@ Use this file to avoid opening every design doc.
 
 ## Public Experience
 
+- [Same-amount calculator](public-scenario-calculator-policy.md): formulas, exact maturity rows, unavailable states and browser-only inputs
+
 - [Persistent comparison lists](public-comparison-list-policy.md): country-scoped selection, noindex sharing, device save/delete and current-data rechecks
 
 - [Curated Canadian comparisons](public-curated-comparison-policy.md): purpose pages, shared launch gate, Home fallbacks and bounded search discovery

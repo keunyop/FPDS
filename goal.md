@@ -350,3 +350,30 @@ Final corrected bundle rechecked 29 localized/live cases. No observed remaining
 runtime regression within the tested scope; no deployment or canonical mutation.
 The user-edited proposal and earlier unresolved Admin/data goals are preserved;
 this file remains because those separately owned acceptance items are still open.
+
+## Independent slice: 2026-09-26 same-amount comparison calculator
+
+Ownership: preserve earlier unresolved goals and the user's proposal edits.
+Objective: implement the explicitly requested P1-3 two-product scenario calculator.
+Scope: separate noindex Public screen, approved projections and comparison list,
+simple annual deposit interest, unconditional fixed monthly fees, EN/KO/JA,
+exact GIC rows, browser-only inputs, regression and responsive checks.
+Exclusions: personal recommendations, APY/APR/compound/promo/tier/FX models,
+canonical writes, deployment, new analytics events and other growth proposals.
+Acceptance:
+- [x] Display two products, shared amount/period, separate interest/fee differences
+      and concise exclusions; unknown fees never become zero or net profit.
+- [x] Validate zero/missing/minimum/rounding/currency/term/promo/APY boundaries.
+- [x] Keep inputs out of URLs, storage, analytics and finder state.
+- [x] Pass Public tests/lint/typecheck/build and EN/KO/JA 390/768/1440 browser QA;
+      check existing flows, update active docs/journal and inspect final diff.
+Verification: arithmetic/failure tests; browser request/storage inspection with
+analytics writes blocked; existing Public suite and git diff --check.
+Keep this root file after completion because earlier goals remain unresolved.
+
+Completion: all four acceptance items are satisfied. Public 61 tests, lint,
+typecheck and production build; API 24 focused tests; 73 final-build browser
+cases and repository/diff checks passed. Real CA/US public projections, input
+privacy, empty/error/retry/maturity-change states and existing flows were checked.
+No deployment or live mutation; actual user research and uplift are unmeasured.
+Preserve this goal for the earlier unresolved Admin/data ownership.

@@ -352,6 +352,7 @@ Based on:
 | 5.66 | Completed | Curated Canadian purpose comparisons | three allowlisted server-rendered comparisons, shared data/readiness gate, Home shortcuts, EN/KO/JA, canonical/sitemap and regression/browser verification | Frontend, QA | 5.63, 5.64, 5.65 | 2026-09-25 |
 
 | 5.67 | Completed | Persistent and shareable Public comparisons | four-product navigation state, detail/other-bank entry, noindex URL restoration, explicit local save/delete, current projection/changed/removed/error states and responsive regression verification | Frontend, QA | 5.63, 5.64, 5.65, 5.66 | 2026-09-25 |
+| 5.68 | Completed | Same-amount Public calculator | separate two-product scenario, exact GIC rows, unconditional monthly fees, signed differences, local-only inputs, regression and browser verification | Frontend, QA | 5.65, 5.67 | 2026-09-26 |
 
 ### 5.5 Scope Baseline
 

@@ -73,3 +73,10 @@ requests in flight, locale/country isolation, unavailable states and exact
 checks. No API service, DB, collection or deployment change is required.
 FR-PUB-022's three fixed events remain unchanged; adding comparison usage events
 requires a separate contract change. Browser QA blocks analytics and feedback.
+
+## P1-3 amendment - 2026-09-26
+
+FR-PUB-025 adds a calculator entry from this list. The separate
+[scenario contract](public-scenario-calculator-policy.md) owns arithmetic and
+local inputs; this list still stores and shares only its existing public identities
+and term hashes. No amount/period is passed back to comparison or finder.

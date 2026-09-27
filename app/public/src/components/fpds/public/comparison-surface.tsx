@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ComparisonSelection } from '@/components/fpds/public/comparison-controls';
 import { useComparison } from '@/components/fpds/public/comparison-provider';
 import { comparisonHref, parseComparison } from '@/lib/public-comparison';
+import { scenarioCopy } from '@/lib/public-scenario-copy';
 import { comparisonCopy } from '@/lib/public-comparison-copy';
 import { buildPublicHref, parseProductGridPageFilters } from '@/lib/public-query';
 
@@ -41,6 +42,7 @@ export function ComparisonSurface() {
     {!scope.valid ? <p role="alert" className="mb-4 text-destructive">{copy.invalid}</p> : null}
     <div className="mb-4 flex flex-wrap gap-2">
       {entries.length ? <>
+        {entries.length >= 2 ? <Button asChild><Link href={comparisonHref(entries.map(item => item.id), scope).replace('/compare?', '/calculator?')}>{scenarioCopy(scope.locale).entry}</Link></Button> : null}
         <Button onClick={copyLink} variant="outline"><Link2 className="size-4" aria-hidden="true" />{copy.share}</Button>
         <Button onClick={saveHere} variant="outline" disabled={saving || entries.some(item => item.status !== 'ready')}><Bookmark className="size-4" aria-hidden="true" />{copy.save}</Button>
         <Button onClick={refresh} variant="ghost" disabled={loading}><RefreshCw className="size-4" aria-hidden="true" />{copy.refresh}</Button>

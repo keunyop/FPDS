@@ -25,6 +25,47 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-26 - Same-amount Public calculator
+
+- Outcome: implemented the requested P1-3 as noindex `/calculator`, reached from
+  `/compare`. Two selected same-country/currency/type deposit products share a
+  hypothetical amount and period; interest, unconditional monthly fees and signed
+  differences remain separate. No net-profit or personal-ranking claim.
+- Reused approved deposit terms, current-comparison BFF, UI primitives,
+  verification and official-bank actions. Exact GIC rows supply their own rates
+  and minimums; a removed selected maturity cannot silently become another term.
+  Decimal rational arithmetic rounds half up to cents. Unknown costs, APY,
+  promotions, tier/bonus/compound models and mismatches remain unavailable.
+- Inputs stay in component memory. Browser checks confirmed no amount in URLs,
+  requests, GA dataLayer, operational events or explicitly saved comparisons.
+  Rechecks preserve inputs while hiding old calculations. Existing finder,
+  catalogs, saved comparison and single-product calculator remain intact.
+- Key files: public-scenario.ts and its regression/copy files, scenario-surface,
+  calculator/page, the comparison entry and route manifest. FR-PUB-025, D-082,
+  WBS 5.68 and public-scenario-calculator-policy.md record the bounded contract.
+- Verification: Public lint/typecheck/61 tests/production build passed; API
+  deposit 11 and product 13 tests passed, including expired-promotion handling.
+  Final production-build browser QA passed 57 fixture/flow and 16 extra cases:
+  EN/KO/JA at exact 390/768/1440px, zero/blank/minimum/rounding, missing/conditional
+  fees, APY/promotions, exact/removed maturities, errors/retry, storage/network
+  privacy, real BFF loading/snapshot mismatch, and existing Public routes.
+  Keyboard controls, formula disclosure, noindex and 44px targets were checked.
+  KO mobile and EN desktop screenshots were visually inspected.
+- Read-only Production audit retrieved 165 CA and 51 US public products. Twelve
+  browser cases replayed unmodified published CA/US values and their unavailable
+  states. These are public projection checks, not new bank-source verification.
+  Analytics, feedback and official destinations were blocked in browser QA.
+- Repository doctor, route manifest, new-file UTF-8/whitespace and git diff checks
+  passed. Restored the known Next-generated declaration import; preserved the
+  user's proposal edits and earlier unresolved root goals.
+- Known issues: no remaining defect observed within this slice's checked scope.
+  Existing product verification expiry remains visible under D-078. Actual user
+  comprehension and bank-visit uplift need post-release observation; existing
+  aggregate events cannot isolate calculator conversion.
+- Next: normal Public release and user observation. No deployment, API service,
+  canonical data, collection, account or analytics-configuration mutation occurred.
+
+
 
 As of 2026-09-25 (persistent/shareable Public comparisons complete):
 

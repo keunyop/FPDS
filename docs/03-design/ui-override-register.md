@@ -105,3 +105,10 @@ ledger, bank identity, verification and link primitives for FR-PUB-024. Shared
 state and `/compare` add no vendor primitive or visual-token family. Header
 comparison entry and the mobile dock use existing semantic colors and 44px
 controls; consent/open dialogs hide the dock. No direct vendor edit or install.
+
+## 2026-09-26 - Public scenario calculator
+
+The FPDS-owned calculator composes existing Button/Input, verification and
+official-link components with a responsive two-column result ledger. It uses
+existing semantic tokens and a native formula disclosure. No vendor source,
+primitive, font or token family was changed.

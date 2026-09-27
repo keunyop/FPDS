@@ -438,3 +438,12 @@ approved version pinned by the snapshot; aggregates preserve these qualifiers
 for future refreshes. Missing basis is never inferred from country. API release
 precedes Public; old cached contracts fail closed. No live refresh or migration
 is needed for the version-pinned bridge. See the policy for current data limits.
+
+## Same-amount comparison calculator (2026-09-26)
+
+The comparison list opens noindex `/calculator`. Choose two products and apply
+one browser-only amount/period. It shows separate interest and fixed-monthly-fee
+results and differences, using approved annual semantics and exact GIC rows.
+Missing fees stay unknown; no net return, personal ranking or new event. Existing
+comparison storage, finder and detail calculator behavior remain unchanged.
+See [the calculator contract](../../docs/03-design/public-scenario-calculator-policy.md).

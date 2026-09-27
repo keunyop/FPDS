@@ -71,6 +71,8 @@ requirements, planning, or design material.
 
 ### 2.4 Design
 
+- [Same-amount calculator](03-design/public-scenario-calculator-policy.md): two-product scenarios, rounding and privacy contract
+
 Start from [docs/03-design/README.md](03-design/README.md).
 
 Most commonly needed:

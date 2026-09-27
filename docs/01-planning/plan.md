@@ -589,3 +589,11 @@ Home shortcuts and bounded search discovery. Implement and verify every route;
 activate discovery only when each route's approved-data gate passes. Other
 proposal slices, data remediation, analytics changes and deployment remain
 separately scoped. See [the policy](../03-design/public-curated-comparison-policy.md).
+
+## 2026-09-26 same-amount Public calculator
+
+The Product Owner selected only P1-3. FR-PUB-025 / D-082 / WBS 5.68 add the
+separate two-product calculator, exact arithmetic/boundary contract, browser-only
+inputs and regressions. Existing comparison state is reused without adding
+financial storage or analytics events. Deployment, user research and the other
+growth proposals remain separately scoped.

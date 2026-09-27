@@ -112,6 +112,12 @@
       "route_id": "public.proxy.comparison",
       "implementation_path": "src/app/api/public/compare/route.ts",
       "resource_key": "public_comparison.current"
+    },
+    {
+      "route": "/calculator",
+      "route_id": "public.scenario_calculator",
+      "implementation_path": "src/app/calculator/page.tsx",
+      "resource_key": "public_scenario.title"
     }
   ]
 }

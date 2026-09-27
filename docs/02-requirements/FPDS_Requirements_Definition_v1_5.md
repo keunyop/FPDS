@@ -818,6 +818,21 @@ synthetic score. A compact fixed mobile action returns to the comparison.
 
 See [the comparison-list policy](../03-design/public-comparison-list-policy.md).
 
+### FR-PUB-025 Same-Amount Two-Product Calculator
+
+Product Owner P1-3 direction on `2026-09-26` adds a separate noindex calculator
+from the comparison list. Two active same-country/currency/type deposit products
+share one hypothetical amount and explicit period. Show estimated interest,
+disclosed unconditional monthly fees and separate signed differences; never
+infer missing costs as zero or label a combined result net profit. GIC uses
+actual matching maturity rows. Unsupported rates, promotions, tiers, APY/APR,
+compounding, FX and early withdrawal remain unavailable. Inputs stay exclusively
+in browser component memory, outside URLs, GA, operational counters, saved
+comparisons and finder. Preserve EN/KO/JA, verification and bank actions.
+The [calculation contract](../03-design/public-scenario-calculator-policy.md)
+defines formulas, half-up rounding, bounds and failure states. Existing analytics
+events and personalized-recommendation exclusions remain unchanged.
+
 
 ## 8.2 Admin Requirements
 
