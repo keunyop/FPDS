@@ -597,3 +597,18 @@ separate two-product calculator, exact arithmetic/boundary contract, browser-onl
 inputs and regressions. Existing comparison state is reused without adding
 financial storage or analytics events. Deployment, user research and the other
 growth proposals remain separately scoped.
+
+## 2026-09-26 official bank handoff
+
+The Product Owner selected P1-4. FR-PUB-026 / D-083 / WBS 5.69 cover compact
+detail/comparison confirmation, unobstructed mobile official actions and a
+read-only operator URL report. Preserve comparison/calculator contracts and
+existing events. No Home redesign, collection, canonical mutation or deployment.
+
+## 2026-09-26 authored comparison guides
+
+Implement selected P2-1 under FR-PUB-027 / D-084 / WBS 5.70 with four concise
+Canadian topics, official source checks, localized discovery and the existing
+comparison/calculator/bank journey. Verify all languages, data gates and existing
+product SEO. Future topic expansion, professional review, traffic experiments
+and deployment require their own scope. See [the guide policy](../03-design/public-comparison-guides-policy.md).

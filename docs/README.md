@@ -35,6 +35,8 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [Official bank link sample](00-governance/public-bank-link-check-2026-09-26.md): initial P1-4 URL checks and operator follow-up
+
 - [Home Top 5 bounded data completion](00-governance/home-top5-data-completion-2026-09-24.md): official-source corrections, condition counts and pending US reviews
 
 - [Public deposit comparison self-review](00-governance/public-deposit-comparison-review-2026-09-24.md): INDEXED GIC/Oaken official-source review and bounded data limitations
@@ -76,6 +78,7 @@ requirements, planning, or design material.
 Start from [docs/03-design/README.md](03-design/README.md).
 
 Most commonly needed:
+- [Authored comparison guides](03-design/public-comparison-guides-policy.md): newcomer entry, sources/corrections and localized guide discovery
 - [Deposit comparison conditions](03-design/public-deposit-comparison-policy.md): matching type/currency/basis/maturity and calculator eligibility
 - [Public verification freshness](03-design/public-verification-freshness-policy.md): separate snapshot/product dates, read-only overdue report, manual review cadence
 - [FPDS Admin purpose and complete feature guide (Korean)](03-design/fpds-admin-purpose-and-features.md): source-verified workflow, screens, roles, automation, and current versus deferred scope

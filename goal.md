@@ -377,3 +377,65 @@ cases and repository/diff checks passed. Real CA/US public projections, input
 privacy, empty/error/retry/maturity-change states and existing flows were checked.
 No deployment or live mutation; actual user research and uplift are unmeasured.
 Preserve this goal for the earlier unresolved Admin/data ownership.
+
+## Independent slice: 2026-09-26 bank handoff (P1-4)
+
+Ownership: preserve earlier Admin/data goals and their unresolved decisions.
+Objective: help Public visitors confirm disclosed terms before visiting a bank.
+Scope: compact detail/comparison panels, approved facts and official domains,
+mobile actions clear of consent/keyboard/comparison, and a read-only operator
+URL check report. Reuse EN/KO/JA primitives and existing events.
+Exclusions: forced dialogs, invented facts, application/eligibility claims,
+Home/catalog redesign, canonical writes, collection, new analytics, deployment.
+Acceptance:
+- [x] Show currency, qualified rate/cost, product check date, official domain and
+      published minimum/waiver/withdrawal terms with honest missing states.
+- [x] Accessible mobile detail/comparison actions without obscured content or
+      overlaps; preserve comparison, calculators and navigation.
+- [x] Operator failure/redirect report without automatic repair, public evidence
+      exposure or unbounded/untrusted fetching.
+- [x] Relevant tests, lint/typecheck/build, EN/KO/JA 390/768/1440px browser QA,
+      final diff checks and journal/document updates pass.
+Verification: financial and URL boundary regressions, browser state/layout checks
+with analytics blocked, read-only public-data replay and operator link report.
+
+
+Completion: all acceptance items are satisfied. Public 67 tests, operator URL
+10 tests, lint/typecheck/production build, 68 browser flow/layout/live-projection
+cases plus 16 extra state checks and 18 final layout rechecks pass. Repo doctor,
+new-file whitespace and final diff checks pass. CA/US 216 public records were
+read; the bounded 16-record official-link sample has 12 identity observations
+and four inconclusive BMO timeouts documented for operator follow-up.
+No runtime defect remains observed within this slice's checked scope. No
+deployment, collection, canonical write or new event. Preserve this file for
+earlier unresolved Admin/data ownership.
+
+## Independent slice: 2026-09-26 comparison guides (P2-1)
+
+Ownership: preserve earlier unresolved Admin/data goals and completed Public slices.
+Objective: answer comparison questions in concise EN/KO/JA guides and connect
+new visitors to approved comparisons, existing comparison/calculation and banks.
+Scope: four Canadian guides, guide index, restrained Home/footer/context links,
+truthful authorship/source/correction disclosure and bounded localized discovery.
+Exclusions: product-condition translations, personalized advice, news feed, new
+markets/events, canonical writes, deployment or claims of expert human review.
+Acceptance:
+- [x] Four source-checked, authored EN/KO/JA guides with useful comparison paths
+      and an entry that needs no existing product.
+- [x] Explicit Canadian scope, source links/date, truthful creation/review method
+      and existing feedback correction path; no invented credentials or facts.
+- [x] Localized guide canonicals/hreflang/sitemap; product locale noindex and
+      curated readiness gates preserved, unknown guide slugs return real 404.
+- [x] Public regressions, lint/typecheck/build, EN/KO/JA 390/768/1440px browser
+      checks, final diff inspection and journal/contracts updated.
+Verification: route/content boundary tests, source review and browser journeys
+with outbound writes blocked; ready/held/unavailable data and prior flows.
+Keep this root file after completion for earlier unresolved ownership.
+
+Completion: all four acceptance items are satisfied. Public 71 tests,
+lint/typecheck/build, 121 browser checks across EN/KO/JA and 390/768/1440px,
+source/copy review, repository and diff checks pass. Actual approved CA/US
+projections, data failure/loading, selection, calculator/bank paths and existing
+product indexing remain verified. No deployment, canonical mutation or new
+analytics. Independent professional review and traffic uplift are not claimed.
+Preserve this goal file for earlier unresolved Admin/data ownership.

@@ -1,13 +1,14 @@
+import { BankHandoffPanel } from "@/components/fpds/public/bank-handoff-panel";
+import { BankHandoffDock } from "@/components/fpds/public/bank-handoff-dock";
 import { AddToComparison } from "@/components/fpds/public/comparison-controls";
 import { comparisonCopy } from "@/lib/public-comparison-copy";
 import { getPublicRateMetric } from "@/lib/public-rate";
-import { ArrowLeft, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ProductVerification } from "@/components/fpds/public/product-verification";
 import { BankLogo } from "@/components/fpds/public/bank-logo";
-import { TrackedOfficialBankLink } from "@/components/fpds/public/product-engagement-link";
 import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { PublicFeedbackDialog } from "@/components/fpds/public/public-feedback-dialog";
 import { InterestCalculator } from "@/components/fpds/public/interest-calculator";
@@ -155,14 +156,6 @@ export function ProductDetailSurface({
               </div>
             </div>
             <div className="grid min-w-0 gap-2 sm:flex sm:flex-wrap lg:grid lg:grid-cols-1">
-              {product.product_url ? (
-                <Button asChild className="w-full sm:w-auto lg:w-full">
-                  <TrackedOfficialBankLink countryCode={product.country_code} href={product.product_url} productId={product.product_id}>
-                    {copy.detail.officialPage}
-                    <ExternalLink className="size-4" aria-hidden="true" />
-                  </TrackedOfficialBankLink>
-                </Button>
-              ) : null}
               <AddToComparison product={product} locale={filters.locale} />
               {otherBanksHref ? <Button asChild className="w-full sm:w-auto lg:w-full" variant="outline"><Link href={otherBanksHref}>{comparisonCopy(filters.locale).otherBanks}<ArrowRight className="size-4" aria-hidden="true" /></Link></Button> : null}
               <Button asChild className="w-full sm:w-auto lg:w-full" variant="outline">
@@ -179,6 +172,7 @@ export function ProductDetailSurface({
               <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
             ))}
           </dl>
+          <BankHandoffPanel product={product} locale={filters.locale} />
         </section>
 
         <section
@@ -255,6 +249,7 @@ export function ProductDetailSurface({
           </div>
         </section>
 
+        <BankHandoffDock products={[product]} locale={filters.locale} />
         <PublicInformationNotice locale={filters.locale} />
 
         {relatedProducts.length ? (

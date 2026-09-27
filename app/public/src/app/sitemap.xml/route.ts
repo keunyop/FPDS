@@ -1,3 +1,4 @@
+import { GUIDE_SLUGS, GUIDE_REVIEWED_AT } from "@/lib/public-guides";
 import { buildCuratedComparison, CURATED_PAGES, type CuratedSlug } from "@/lib/public-curated";
 import { fetchCuratedProducts } from "@/lib/public-curated-data";
 import {
@@ -80,7 +81,15 @@ async function buildSitemapEntries(): Promise<SitemapEntry[]> {
         priority: 0.8,
         alternates: buildPublicLanguageAlternates(`/ca/${slug}`, "CA")
       })));
-  return deduplicateEntries([...staticEntries, ...curatedEntries, ...productEntries]);
+  const guideEntries: SitemapEntry[] = (["/guides", ...GUIDE_SLUGS.map(slug => `/guides/${slug}`)] as PublicSeoPath[])
+    .flatMap(path => (["en", "ko", "ja"] as const).map(locale => ({
+      url: buildPublicSeoUrl(path, locale, "CA"),
+      lastModified: GUIDE_REVIEWED_AT,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+      alternates: buildPublicLanguageAlternates(path, "CA")
+    })));
+  return deduplicateEntries([...staticEntries, ...curatedEntries, ...guideEntries, ...productEntries]);
 }
 
 async function loadPublishedCountryCodes() {

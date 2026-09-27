@@ -1,3 +1,4 @@
+import { GUIDE_SLUGS, GUIDE_COMPARISONS, guideCopy, guideHref } from "@/lib/public-guides";
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
@@ -40,6 +41,9 @@ export default async function CuratedPage({ params, searchParams }: Props) {
       <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">{copy.scope}</p>
       <h1 className="max-w-4xl text-balance font-display text-3xl font-semibold leading-tight tracking-tight md:text-5xl">{copy.pages[slug].title}</h1>
       <p className="mt-4 max-w-3xl text-sm leading-6 text-muted-foreground">{curatedNote(slug, locale)}</p>
+      <nav aria-label={guideCopy(locale).nav} className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-primary">
+        {GUIDE_SLUGS.filter(guide => GUIDE_COMPARISONS[guide] === slug).map(guide => <Link key={guide} href={guideHref(guide, locale)} className="inline-flex min-h-11 items-center underline underline-offset-4">{guideCopy(locale).topics[guide]}</Link>)}
+      </nav>
     </header>
     <Suspense fallback={<section aria-busy="true" aria-label={copy.loading} className="grid gap-4 py-4">
       <p role="status" className="text-sm text-muted-foreground">{copy.loading}</p>

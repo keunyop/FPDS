@@ -173,3 +173,16 @@
 body:has(#analytics-consent-title, [role="dialog"][data-state="open"]) [data-comparison-dock] {
   display: none;
 }
+
+/* One mobile action surface; reserve its measured height below all page content. */
+@media (max-width: 767px) {
+  body:has([data-bank-handoff-dock]) {
+    padding-bottom: calc(var(--bank-handoff-height, 112px) + 16px);
+  }
+  html:has([data-bank-handoff-dock]) {
+    scroll-padding-bottom: calc(var(--bank-handoff-height, 112px) + 16px);
+  }
+  body:has([data-bank-handoff-dock]) [data-comparison-dock] { display: none; }
+}
+body:has(#analytics-consent-title, [role="dialog"][data-state="open"], [role="menu"][data-state="open"]) [data-bank-handoff-dock],
+[data-bank-handoff-dock][data-keyboard="open"] { display: none; }

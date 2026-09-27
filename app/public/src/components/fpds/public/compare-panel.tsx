@@ -1,9 +1,10 @@
 "use client";
-import { ExternalLink, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { ProductVerification } from '@/components/fpds/public/product-verification';
 import { BankLogo } from '@/components/fpds/public/bank-logo';
-import { TrackedOfficialBankLink, TrackedProductLink } from '@/components/fpds/public/product-engagement-link';
-import { Button } from '@/components/ui/button';
+import { TrackedProductLink } from '@/components/fpds/public/product-engagement-link';
+import { BankHandoffPanel } from '@/components/fpds/public/bank-handoff-panel';
+import { BankHandoffDock } from '@/components/fpds/public/bank-handoff-dock';
 import { getPublicDesignCopy, getPublicMessages } from '@/lib/public-locale';
 import type { PublicProduct } from '@/lib/public-api';
 import { buildPublicProductMetrics } from '@/lib/public-product-presentation';
@@ -48,7 +49,7 @@ export function ComparePanel({
       {boundary ? <p className="mb-4 text-sm text-muted-foreground" role="note">{compareCopy[boundary]}</p> : null}
       <div className={cn("grid gap-3 md:grid-cols-2", products.length === 3 ? "xl:grid-cols-3" : products.length >= 4 ? "xl:grid-cols-4" : "")}>
         {products.map((product, productIndex) => (
-          <article className="border border-border bg-background/75 p-4" key={product.product_id}>
+          <article data-handoff-product={product.product_id} className="border border-border bg-background/75 p-4" key={product.product_id}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
                 <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
@@ -69,17 +70,11 @@ export function ComparePanel({
                 <CompareFact different={!boundary && differingKeys.has(row.key)} key={row.key} label={row.label} value={row.value} />
               ))}
             </dl>
-            {product.product_url ? (
-              <Button asChild variant="outline" className="mt-4 min-h-11 w-full rounded-full">
-                <TrackedOfficialBankLink countryCode={product.country_code} href={product.product_url} productId={product.product_id}>
-                  {copy.detail.officialPage}
-                  <ExternalLink className="size-3.5" aria-hidden="true" />
-                </TrackedOfficialBankLink>
-              </Button>
-            ) : null}
+            <BankHandoffPanel product={product} locale={locale} compact />
           </article>
         ))}
       </div>
+      <BankHandoffDock products={products} locale={locale} />
     </section>
   );
 }

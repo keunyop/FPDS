@@ -112,3 +112,16 @@ The FPDS-owned calculator composes existing Button/Input, verification and
 official-link components with a responsive two-column result ledger. It uses
 existing semantic tokens and a native formula disclosure. No vendor source,
 primitive, font or token family was changed.
+
+## 2026-09-26 - Public bank handoff
+
+FPDS domain sections reuse Button, product verification and tracked official
+links. The mobile bank dock shares semantic tokens and suppresses the comparison
+dock while present. No vendor primitive, asset, font or style family was changed.
+
+## 2026-09-26 - Authored Public guides
+
+FPDS-owned index/article composition uses existing typography, semantic colors,
+flat ruled sections, Button, Link and the feedback dialog. A native disclosure
+keeps editorial detail secondary. Home/footer/curated wrappers receive concise
+links; no vendor primitive, asset, font or token family changed.

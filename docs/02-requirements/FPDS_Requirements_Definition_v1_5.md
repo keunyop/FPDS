@@ -834,6 +834,42 @@ defines formulas, half-up rounding, bounds and failure states. Existing analytic
 events and personalized-recommendation exclusions remain unchanged.
 
 
+### FR-PUB-026 Official Bank Handoff
+
+Product Owner P1-4 direction on 2026-09-26 authorizes compact inline detail and
+comparison confirmation panels using approved public terms, currency, qualified
+cost/rate, product check date and official hostname. Keep minimum deposit,
+minimum balance, fee waivers and withdrawal restrictions semantically separate;
+missing conditions direct the visitor to the bank. Preserve source language.
+
+Mobile detail/comparison shows product name and a direct official action, clear
+of consent, input keyboards, dialogs and the comparison return dock, with space
+reserved for content. No forced popup, approval/eligibility/application promise,
+new analytics event or inferred document/qualification requirement.
+
+Operators receive a manually invoked read-only URL report for HTTP failures,
+redirect chains and product-identity review. It never repairs URLs, refreshes
+verification, starts collection or publishes. See [the handoff policy](../03-design/public-bank-handoff-policy.md).
+
+### FR-PUB-027 Authored Comparison Guides
+
+The 2026-09-26 P2-1 request authorizes four concise Canadian explanations in
+EN/KO/JA: base/promotional rates, monthly fee waivers, GIC maturity/withdrawals
+and account switching. Provide a newcomer entry without a held product, then
+relevant approved comparison tables/catalogs, existing comparison/calculation
+and official-bank confirmation. Reuse curated readiness and financial rules.
+
+Explain the real publisher, AI-assisted writing/translation, source checks and
+correction path honestly. Link official sources and show the guide review date
+separately from product verification. Do not invent experts, certifications,
+eligibility or bank-specific facts. Existing anonymous site feedback handles
+corrections without new fields/events.
+
+Only authored guides receive localized search discovery. Bank/product facts
+stay in the source language; KO/JA product noindex and existing curated/filter
+boundaries remain. Language market demand and search uplift are unvalidated.
+See [the guide policy](../03-design/public-comparison-guides-policy.md).
+
 ## 8.2 Admin Requirements
 
 ### FR-ADM-001 Admin Login

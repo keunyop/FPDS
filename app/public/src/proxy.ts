@@ -1,3 +1,4 @@
+import { guideCountryDestination, isGuideSlug } from "@/lib/public-guides";
 import { curatedCatalogHref, isCuratedSlug } from "@/lib/public-curated";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -29,6 +30,16 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL(curatedCatalogHref(slug,
         normalizePublicProductLocale(request.nextUrl.searchParams.get("locale") ?? ""), country), request.url), 308);
     }
+  }
+  if (request.nextUrl.pathname === "/guides" || request.nextUrl.pathname.startsWith("/guides/")) {
+    const path = request.nextUrl.pathname;
+    if (path !== "/guides" && !isGuideSlug(path.slice("/guides/".length))) {
+      return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
+    }
+    const destination = guideCountryDestination(path,
+      normalizePublicProductLocale(request.nextUrl.searchParams.get("locale") ?? ""),
+      normalizePublicProductCountry(request.nextUrl.searchParams.get("country_code") ?? ""));
+    if (destination) return NextResponse.redirect(new URL(destination, request.url), 308);
   }
   const productId = readProductId(request.nextUrl.pathname);
   if (!productId) {

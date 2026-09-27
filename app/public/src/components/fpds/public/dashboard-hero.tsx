@@ -1,3 +1,4 @@
+import { guideCopy, guideHref } from "@/lib/public-guides";
 import { CreditCard, FilterX, Landmark, PiggyBank } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -70,6 +71,7 @@ export function DashboardHero({
               </Button>
             ) : null}
           </div>
+          {filters.countryCode === "CA" ? <Link data-guide-entry href={guideHref(null, filters.locale)} className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-primary underline underline-offset-4">{guideCopy(filters.locale).newcomer}</Link> : null}
           {shortcuts}
         </div>
         {finder}

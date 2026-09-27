@@ -25,6 +25,87 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-26 - Public authored comparison guides
+
+- Implemented requested P2-1 as FR-PUB-027 / D-084 / WBS 5.70. Four short
+  Canadian topics have original EN/KO/JA copy, official FCAC sources and a
+  separate editorial check date. Guide index and Home entry require no held
+  product; contextual links reuse existing comparison/calculator/bank routes.
+- Key files: public-guides, public-guide-content, guide-editorial, `/guides`
+  routes and metadata/sitemap/proxy integration. The [guide policy](../03-design/public-comparison-guides-policy.md)
+  records sources, actual AI-assisted creation/checking and feedback corrections.
+  Product source language/noindex and curated data gates remain unchanged.
+- Verification: 71 Public tests, lint, standalone typecheck and production build
+  pass. Browser checks: 74 guide/layout/SEO/newcomer/existing-route cases, five
+  failure/empty/loading/recovery cases, 18 previous handoff layout regressions,
+  18 real-projection guide/detail cases and six consent/keyboard/feedback/state
+  checks (121 total). EN/KO/JA at 390x844, 768px and 1440px; no observed document
+  overflow, browser exception or hydration warning. Guide corrections retain
+  unique form IDs and existing selection/dock behavior. Sources and localized
+  meaning were checked; no independent professional/human review is claimed.
+- CA 165 / US 51 previously read approved public records were replayed. Live
+  eligibility keeps Chequing comparison ready and routes Savings/GIC to existing
+  catalogs. Product KO/JA noindex, English canonical and 15 new guide sitemap
+  URLs pass. Query/foreign/unknown-slug boundaries also pass.
+- QA setup corrections: use the visible responsive header control and footer
+  language control. Await rendered content instead of background-prefetch
+  network idleness; US Home returned HTTP 200 and its product navigation passed.
+  Final diff/new-file text checks and repository doctor pass. No runtime defect
+  was observed within the verified slice; no deployment, canonical write or new
+  event. API/worker/Admin code and runtime contracts were not changed.
+- Next: deployment remains separately scoped; later topic edits follow source,
+  locale and correction checks in the guide policy. Traffic uplift and language
+  demand require actual permitted GA/GSC observations. Earlier goals remain.
+
+
+## 2026-09-26 - Public official bank handoff
+
+- Outcome: implemented selected proposal P1-4 under FR-PUB-026 / D-083 /
+  WBS 5.69. Detail and comparison show compact disclosed-term confirmation
+  beside direct external bank actions. Missing conditions stay unknown; minimum
+  deposit/balance, GIC term minimums, base costs/waivers and redemption/penalties
+  retain their separate meaning. Source-language conditions stay unchanged.
+- Mobile detail/comparison displays the current product and bank action, follows
+  the viewed comparison card, reserves measured content space and yields to
+  consent, dialogs, menus, input focus and keyboard viewport changes. It replaces
+  the return dock while preserving header comparison access and existing events.
+- Key files: public-bank-handoff and tests, bank-handoff-panel/dock, minimal
+  detail/compare/global CSS integration, public_official_link_report.py and its
+  tests. The [handoff policy](../03-design/public-bank-handoff-policy.md) records
+  presentation, URL safety, manual operator commands and review responsibilities.
+- Operator report reads a complete stable Public snapshot, follows bounded
+  HTTPS GETs only inside the original approved host/www pair, applies existing
+  DNS/private-network checks and caps redirects/body size. JSON/Markdown show
+  HTTP failures, title/H1 identity hints and redirect paths. No automatic repair,
+  collection, verification renewal, source-body persistence or Public exposure.
+- Verification: Public 67 tests and report 10 tests pass; Public lint, standalone
+  typecheck and production build pass. Browser QA passed 68 flow/layout cases
+  plus 16 extra states, followed by all 18 localized layout checks on the final
+  build. EN/KO/JA at exact 390x844, 768 and 1440px cover footer space, four-product
+  scroll/removal, safe direct bank events, real consent/feedback/menu surfaces,
+  keyboard resize, missing/unsafe URLs, loading/error/retry, saved comparisons,
+  GIC layouts and existing Home/catalog/calculator/Methodology routes.
+- Read 165 CA and 51 US published records; replayed unmodified values in 24
+  localized detail cases. No browser exceptions or hydration warnings observed
+  in the checked flows. KO mobile and EN/KO desktop screenshots were inspected.
+  Browser analytics, feedback and official navigation writes were blocked.
+- The [16-record link sample](public-bank-link-check-2026-09-26.md) has 12
+  reachable identity hints, four BMO network timeouts and three benign trailing
+  slash redirects. No wrong-product redirect was established. Timeouts remain
+  inconclusive; operators should verify them in a normal browser.
+- Verification refinements: scoped duplicate test selectors, used client
+  navigation for in-memory comparison state and separate locale cache keys for
+  server-state fixtures. The first repository-doc check ran before its linked
+  report existed; the completed document set passes. SVG titles were excluded
+  from operator page titles. Restored the Next-generated declaration import.
+- Repo doctor, new-file UTF-8/whitespace and git diff --check pass. API, Worker
+  and FPDS Admin runtimes were unchanged; unrelated full suites were not rerun.
+  No remaining implementation defect was observed within this verified scope.
+- Next: normal authorized Public release and manual follow-up on inconclusive
+  links. No deployment, canonical mutation, collection or analytics-account
+  change. Earlier unresolved Admin/data goal ownership remains preserved.
+
+
 ## 2026-09-26 - Same-amount Public calculator
 
 - Outcome: implemented the requested P1-3 as noindex `/calculator`, reached from

@@ -28,6 +28,10 @@ Use this file to avoid opening every design doc.
 
 ## Public Experience
 
+- [Authored comparison guides](public-comparison-guides-policy.md): localized explanations, sources/corrections and bounded search discovery
+
+- [Official bank handoff](public-bank-handoff-policy.md): disclosed conditions, mobile actions and read-only operator URL checks
+
 - [Same-amount calculator](public-scenario-calculator-policy.md): formulas, exact maturity rows, unavailable states and browser-only inputs
 
 - [Persistent comparison lists](public-comparison-list-policy.md): country-scoped selection, noindex sharing, device save/delete and current-data rechecks

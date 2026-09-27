@@ -1,3 +1,4 @@
+import { guideCountryDestination } from "./public-guides.ts";
 import { curatedCountryPath } from "@/lib/public-curated";
 import { buildProductDetailPath } from "@/lib/public-url-policy";
 
@@ -252,6 +253,8 @@ export function buildCountryHref(pathname: string, searchParams: SearchParamsRea
   const params = new URLSearchParams();
   const locale = normalizeLocaleValue(searchParams.get("locale") ?? "");
   const normalizedCountryCode = normalizeCountryCodeValue(countryCode);
+  const guideDestination = guideCountryDestination(pathname, locale, normalizedCountryCode);
+  if (guideDestination) return guideDestination;
   pathname = curatedCountryPath(pathname, normalizedCountryCode);
 
   if (locale !== "en") {

@@ -5,6 +5,20 @@ only review-approved public projections; raw evidence, review state, and private
 source traces remain inside FPDS Admin. Its customer-facing identity is
 `SwitchaBank`; `FPDS` remains the internal platform/runtime name.
 
+## Comparison guides (2026-09-26)
+
+`/guides` and four allowlisted `/guides/[slug]` pages provide original EN/KO/JA
+Canadian explanations with official FCAC references and a source-check date.
+Home's newcomer entry and contextual links lead through a relevant curated
+comparison (or the existing catalog when data is insufficient) to selection,
+calculation and bank confirmation. No existing product is required.
+
+The editorial disclosure identifies SwitchaBank, AI-assisted creation/source
+checks and the existing site-feedback correction path; independent professional
+review is not claimed. Product source-language/KO-JA noindex rules remain intact.
+Only the authored guide URLs add localized canonical/hreflang/sitemap entries.
+See [guide scope, sources and maintenance](../../docs/03-design/public-comparison-guides-policy.md).
+
 ## Persistent comparisons (2026-09-25)
 
 `/compare` is a noindex, country-scoped four-product workspace. Catalog, curated
@@ -447,3 +461,16 @@ results and differences, using approved annual semantics and exact GIC rows.
 Missing fees stay unknown; no net return, personal ranking or new event. Existing
 comparison storage, finder and detail calculator behavior remain unchanged.
 See [the calculator contract](../../docs/03-design/public-scenario-calculator-policy.md).
+
+## Official bank handoff (2026-09-26)
+
+Detail and each selected comparison place approved minimum/waiver/withdrawal
+conditions beside their bank action, with currency, qualified rate/cost, product
+check date and official hostname. Unknown conditions remain explicit. Mobile
+shows the viewed product and direct bank action; consent, dialogs and input
+keyboards suppress it, and it replaces the comparison return dock while present.
+Existing header comparison access and three-field click events remain.
+
+The [handoff policy and operator commands](../../docs/03-design/public-bank-handoff-policy.md)
+describe the bounded read-only failure/redirect report. Reports do not update
+facts, product verification or official destinations.

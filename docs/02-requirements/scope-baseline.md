@@ -345,3 +345,19 @@ D-080 / WBS 5.66 amend FR-PUB-020. This excludes other growth proposals,
 canonical changes, collection, new analytics events, countries and deployment.
 Existing arbitrary filters remain noindex; insufficient comparison data defers
 curated discovery. See [the policy](../03-design/public-curated-comparison-policy.md).
+
+## 2026-09-26 selected bank handoff scope
+
+The Product Owner authorizes P1-4 under FR-PUB-026: existing detail/comparison
+actions gain disclosed-condition context and a compact mobile action; operators
+gain a read-only official-URL failure/redirect report. The scope excludes forced
+confirmation steps, invented eligibility or documents, canonical changes,
+collection automation, new events, Home redesign and deployment.
+
+## 2026-09-26 selected comparison-guide scope
+
+The Product Owner selected P2-1 under FR-PUB-027 / D-084 / WBS 5.70: four
+Canada-scoped authored EN/KO/JA explanations, a newcomer entry and existing
+comparison/calculator/bank paths. Source and creation/correction transparency
+are included. Product-condition translation, other markets, news publishing,
+new analytics, canonical changes and deployment remain outside this slice.

@@ -690,3 +690,18 @@ sort, empty results and detail navigation retain up to four country-scoped IDs;
 curated/detail controls share the same list. The existing ledger, header entry,
 noindex `/compare` and mobile return action use the current-data/local-save
 rules in [the comparison-list policy](public-comparison-list-policy.md).
+
+## 2026-09-26 bank handoff
+
+FR-PUB-026 replaces detail/comparison official buttons with compact condition
+context and preserves direct external navigation. The mobile bank dock owns the
+single bottom action while present; header comparison entry stays available.
+See [the handoff policy](public-bank-handoff-policy.md).
+
+## 2026-09-26 comparison guides
+
+FR-PUB-027 adds `/guides` and four bounded Canadian article paths. Home offers
+one newcomer link, the footer an index link, and curated comparisons contextual
+topic links. The primary guide action uses the existing curated readiness gate
+or a typed catalog fallback. Native editorial disclosures reuse site feedback.
+See [the guide policy](public-comparison-guides-policy.md).

@@ -118,6 +118,24 @@
       "route_id": "public.scenario_calculator",
       "implementation_path": "src/app/calculator/page.tsx",
       "resource_key": "public_scenario.title"
+    },
+    {
+      "route": "/guides",
+      "route_id": "public.guides",
+      "implementation_path": "src/app/guides/page.tsx",
+      "resource_key": "public_guides.title"
+    },
+    {
+      "route": "/guides/[slug]",
+      "route_id": "public.guide",
+      "implementation_path": "src/app/guides/[slug]/page.tsx",
+      "resource_key": "public_guides.topics",
+      "allowed_slugs": [
+        "base-and-promotional-rates",
+        "monthly-fee-waivers",
+        "gic-maturity-and-withdrawals",
+        "switching-bank-accounts"
+      ]
     }
   ]
 }

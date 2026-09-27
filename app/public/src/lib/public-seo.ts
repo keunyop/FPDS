@@ -22,6 +22,7 @@ export const PUBLIC_SITE_NAME = "SwitchaBank";
 export { PUBLIC_SITE_ORIGIN };
 
 export type PublicSeoPath =
+  | import("./public-guides").GuidePath
   | CuratedPath
   | "/"
   | "/products"
