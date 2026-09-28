@@ -34,29 +34,29 @@ export function DashboardHero({
   });
 
   return (
-    <section className="border-y border-foreground/15 py-10 md:py-14">
-      <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(23rem,0.72fr)] lg:items-start">
+    <section className="border-y border-foreground/15 py-8 md:py-10">
+      <div className="grid min-w-0 gap-7 lg:grid-cols-[minmax(0,0.95fr)_minmax(23rem,0.72fr)] lg:items-start">
         <div className="min-w-0 max-w-3xl">
-          <h1 className="text-balance max-w-4xl font-display text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-foreground [overflow-wrap:anywhere]">
+          <h1 className="text-balance max-w-4xl font-display text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.08] tracking-[-0.055em] text-foreground [overflow-wrap:anywhere]">
             {designCopy.homeTitle}
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground [overflow-wrap:anywhere] md:text-lg">
             {designCopy.homeBody}
           </p>
-          <div className="mt-7 flex flex-wrap gap-2.5">
-            <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-3 sm:px-4">
               <Link href={productsHref}>
                 <PiggyBank className="size-4" aria-hidden="true" />
                 {copy.nav.products}
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
+            <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-3 sm:px-4">
               <Link href={cardsHref}>
                 <CreditCard className="size-4" aria-hidden="true" />
                 {copy.nav.card}
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-5">
+            <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full border-foreground/20 bg-transparent px-3 sm:px-4">
               <Link href={loansHref}>
                 <Landmark className="size-4" aria-hidden="true" />
                 {copy.nav.loan}

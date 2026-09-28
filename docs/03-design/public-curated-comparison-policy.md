@@ -87,9 +87,10 @@ operator review before these routes become discoverable. The code opens them
 only after their approved public data meets the gate.
 
 After an authorized release, review each URL's GSC non-brand impressions/clicks,
-consented GA landing-page engagement, and same-period existing official-bank
-click counts. Those counters have no entry-page attribution and must not be
-called a curated-page conversion rate or divided by consented GA sessions.
+GA screen-type engagement, and same-period existing official-bank click counts.
+The 2026-09-28 Analytics change groups curated URLs as `/ca/comparison`; GA
+no longer distinguishes individual curated landing pages. Those counters have no entry-page attribution and must not be
+called a curated-page conversion rate or divided by GA sessions.
 No analytics credentials, configuration or event contracts changed. Search
 performance and actual indexing remain unmeasured.
 

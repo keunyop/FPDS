@@ -21,30 +21,35 @@ function HeaderContent() {
     document.documentElement.lang = locale;
   }, [locale]);
 
+  const skipLabel = locale === "ko" ? "본문으로 건너뛰기" : locale === "ja" ? "本文へ移動" : "Skip to content";
+
   return (
-    <header className="sticky top-0 z-30 border-b border-border/80 bg-background/92 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 py-2 md:px-6">
-        <div className="flex min-w-0 items-center justify-between">
-          <Link
-            aria-label={`${copy.shell.brand} ${copy.nav.dashboard}`}
-            href={buildScopedPublicHrefFromSearchParams("/", searchParams)}
-            className="flex min-h-11 min-w-0 items-center justify-start gap-1"
-          >
-            <PublicMark />
-            <PublicWordmark className="text-lg font-semibold tracking-[-0.04em] text-foreground sm:text-[1.375rem]" />
-          </Link>
+    <>
+      <a href="#main-content" className="fixed left-4 top-3 z-50 -translate-y-24 rounded-lg bg-primary px-4 py-3 font-semibold text-primary-foreground focus:translate-y-0">{skipLabel}</a>
+      <header className="sticky top-0 z-30 border-b border-border/80 bg-background/92 backdrop-blur-xl">
+        <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 py-2 md:px-6">
+          <div className="flex min-w-0 items-center justify-between">
+            <Link
+              aria-label={`${copy.shell.brand} ${copy.nav.dashboard}`}
+              href={buildScopedPublicHrefFromSearchParams("/", searchParams)}
+              className="flex min-h-11 min-w-0 items-center justify-start gap-1"
+            >
+              <PublicMark />
+              <PublicWordmark className="text-lg font-semibold tracking-[-0.04em] text-foreground sm:text-[1.375rem]" />
+            </Link>
+          </div>
+          <div className="hidden min-w-0 items-center gap-2 lg:flex">
+            <PublicNav />
+            <ComparisonHeaderLink />
+            <PublicCountryMenu />
+          </div>
+          <div className="flex shrink-0 items-center gap-1 lg:hidden">
+            <ComparisonHeaderLink />
+            <PublicMobileMenu />
+          </div>
         </div>
-        <div className="hidden min-w-0 items-center gap-2 md:flex">
-          <PublicNav />
-          <ComparisonHeaderLink />
-          <PublicCountryMenu />
-        </div>
-        <div className="flex shrink-0 items-center gap-1 md:hidden">
-          <ComparisonHeaderLink />
-          <PublicMobileMenu />
-        </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
 

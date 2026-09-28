@@ -439,3 +439,50 @@ projections, data failure/loading, selection, calculator/bank paths and existing
 product indexing remain verified. No deployment, canonical mutation or new
 analytics. Independent professional review and traffic uplift are not claimed.
 Preserve this goal file for earlier unresolved Admin/data ownership.
+
+## Independent slice: 2026-09-28 automatic Public analytics
+
+Preserve earlier goal ownership and unresolved acceptance.
+Objective: remove consent UI while continuing configured GA4, as explicitly requested.
+Scope: Public analytics, obsolete consent copy/styles, active documentation.
+Exclusions: deployment, analytics-account changes, new events, Admin tracking.
+Acceptance: no prompt/footer choice; automatic Public page views independent of
+legacy storage; invalid/missing ID stays disabled; advertising stays denied.
+Verification: Public tests, lint/typecheck/build; browser checks for fresh/legacy
+choices, navigation, Admin exclusion and EN/KO/JA at 390/768/1440px; final diff
+and journal. Keep this file for earlier open goals.
+
+Completion: requested consent UI removal and automatic analytics are implemented.
+74 tests, typecheck/build and 28 local browser scenarios pass; Google requests
+were stubbed. Metadata is restricted to fixed screen types after automatic review
+rejected full URL/title transmission. No deployment or live Analytics verification.
+Final full Public lint and git diff --check pass. All acceptance items for this
+slice are satisfied. Preserve this goal for earlier unresolved ownership.
+
+## Independent slice: 2026-09-28 Public UI and UX review
+
+Ownership: preserve earlier unresolved goals and all existing user changes.
+Objective: inspect SwitchaBank screens and improve confirmed usability,
+hierarchy, responsive layout and accessibility issues with concise EN/KO/JA copy.
+Scope: existing Public routes, domain components and semantic styles; reversible
+presentation and interaction fixes plus relevant regression checks and docs.
+Exclusions: financial semantics, API/Admin/worker changes, canonical mutations,
+collection, analytics changes, new features/countries and deployment.
+Acceptance:
+- [x] Inspect Home, catalogs, detail, comparison, calculator and guide/navigation
+      flows; record concrete issues and bounded fixes.
+- [x] Implement improvements with existing primitives and financial boundaries,
+      preserving functions, locale/country state and source-language facts.
+- [x] Verify affected flows and loading/empty/error states, keyboard access and
+      EN/KO/JA at exact 390px, 768px and 1440px; inspect actual screenshots.
+- [x] Pass Public tests/lint/typecheck/build, inspect final diff, run
+      git diff --check and update journal and relevant design/runtime docs.
+Verification: local browser checks with external writes blocked, approved public
+replay where available and focused regression scenarios. Passing checks do not
+prove absence of every possible bug. Keep this file for earlier open goals.
+
+Completion: all acceptance items for this UI slice are satisfied. Public 74 tests,
+lint/typecheck/build, 111 browser audit checks and 18 extra state/flow
+cases pass. Reviewed EN/KO/JA screenshots; no observed remaining regression
+in the checked scope. No deployment or canonical mutation. Preserve this file
+for the earlier unresolved Admin/data goals.

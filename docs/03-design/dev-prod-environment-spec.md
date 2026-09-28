@@ -198,10 +198,11 @@ Rules:
 | `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` | optional non-sensitive GA4 web-stream measurement ID for the Public production build; valid values use the `G-...` format |
 
 Rules:
-- an absent or invalid value disables both the Google tag and analytics consent prompt
+- an absent or invalid value disables the Google tag
 - configure the Production stream only after the Product Owner supplies the exact ID; Preview remains unset unless separate traffic handling is approved
 - the value is embedded in the browser bundle at build time, so every change requires a new Public deployment
-- visitor consent is required before the tag loads; advertising and personalization signals remain denied
+- the tag loads automatically without consent UI (Product Owner instruction, 2026-09-28); legacy consent storage is ignored and advertising/personalization remain denied
+- page metadata uses fixed screen types and an empty referrer; queries, dynamic IDs and browser titles are excluded
 - the Public integration disables the tag's default page view and emits one explicit event for the initial screen and each Next.js client-side navigation; keep Enhanced Measurement history-change page views disabled to prevent duplicates
 - verify Production activation with live browser requests plus Tag Assistant and GA4 Realtime or DebugView when property access is available
 

@@ -609,6 +609,14 @@ chart와 ranking은 선택된 product type의 의미에 맞게 달라져야 한�
 ### FR-PUB-015 Responsive Experience
 공개 dashboard는 desktop 우선으로 설계하되 tablet/mobile에서도 사용 가능해야 한다.
 
+The Product Owner's `2026-09-28` Public UX refinement retains existing routes
+and comparison semantics. Catalog search stays visible, advanced filters keep
+the visitor's disclosure choice, and asynchronous results preserve control
+focus and text composition. Home suggestions support arrow/Enter/Escape keys;
+mobile/tablet navigation has readable names and a keyboard skip path. Compact
+family headings remove repeated explanatory copy. Sort scrolling must not hide
+the Grid/List controls or reduce their 44px targets.
+
 ### FR-PUB-016 Locale-Aware Presentation
 공개 dashboard의 메뉴, 필터 라벨, 카드 라벨, KPI 명칭, 차트 제목, methodology 안내는 선택된 locale(EN/KO/JA)에 따라 표시되어야 하며, 통화/숫자/날짜 포맷도 locale-aware 하게 표시되어야 한다.
 
@@ -626,25 +634,23 @@ SwitchaBank works to keep it current, and that rates, fees, eligibility, and
 other terms may change. Users must be directed to reconfirm the product and
 conditions on the financial institution's official website before applying.
 
-### FR-PUB-019 Consent-Based Public Analytics
+### FR-PUB-019 Automatic Public Analytics
 
 When a valid GA4 measurement ID is configured for the Public production build,
 SwitchaBank may collect aggregate page-view analytics across Public routes.
 
-- the Google tag must not load before the visitor explicitly allows analytics
-- EN/KO/JA controls must offer equally reachable allow and decline actions and
-  a persistent way to reopen the choice
-- declining must leave Google Analytics scripts and cookies unloaded; revoking
-  a prior grant must disable analytics and remove its first-party cookies
-- the consent choice may be stored locally in the browser but must not change
-  product data, filters, rankings, eligibility, or recommendation boundaries
+- per the Product Owner instruction on 2026-09-28, load the Google tag
+  automatically without a consent prompt or footer choice control
+- legacy consent storage is ignored; Admin and unknown routes remain excluded
+- send only fixed screen-type URLs/titles and an empty referrer; exclude query
+  strings, dynamic identifiers, browser titles and incoming referrers
 - advertising storage, advertising user data, personalization, remarketing,
   and Google signals remain disabled
 - only aggregate page-view analytics is approved in this baseline; user IDs,
   personally identifiable information, financial field values, and custom
   product click or conversion events are not approved
 - the initial Public screen and each Next.js client-side route change must emit
-  exactly one page view with the current location; automatic and explicit SPA
+  exactly one page view with the fixed screen-type location; automatic and explicit SPA
   page-view mechanisms must not run together
 - an absent or invalid measurement ID must fail closed with no tag and no
   consent prompt
@@ -843,7 +849,7 @@ minimum balance, fee waivers and withdrawal restrictions semantically separate;
 missing conditions direct the visitor to the bank. Preserve source language.
 
 Mobile detail/comparison shows product name and a direct official action, clear
-of consent, input keyboards, dialogs and the comparison return dock, with space
+of input keyboards, dialogs and the comparison return dock, with space
 reserved for content. No forced popup, approval/eligibility/application promise,
 new analytics event or inferred document/qualification requirement.
 
@@ -2230,7 +2236,7 @@ LLM 사용량과 비용은 agent/run 단위로 추적 가능해야 한다.
 - BX-PF 미연계 시 publish pending / retry / reconciliation 상태 추적 가능
 - LLM usage / cost dashboard 작동
 - monitoring / error tracking enabled
-- configured Public analytics respects EN/KO/JA consent and fail-closed tag loading
+- configured Public analytics starts without a prompt in EN/KO/JA and fails closed for an invalid ID
 - README and environment setup documented
 
 ## 18.3 Phase 2 Acceptance

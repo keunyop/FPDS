@@ -109,7 +109,9 @@ Product Type are optional narrowing controls. Product-name search works with
 neither selected; focusing the empty field returns every active product
 alphabetically in 40-row pages and loads more inside the bounded list as the
 visitor scrolls. A non-empty name query is server-filtered against product
-names only before one exact My product is selected. The candidate query stays
+names only before one exact My product is selected. Arrow keys move through product suggestions, Enter selects, and Escape or
+Tab closes the list. Product search leads the finder; optional bank/type
+controls share a row beneath it. The candidate query stays
 inside the active country and exact selected Product Type, reads every page,
 and excludes currency mismatches before metric comparisons. Chequing
 uses lower monthly fee, Savings and GIC use the higher rate for compatible
@@ -150,11 +152,16 @@ refresh. Filters are progressively disclosed and sort controls stay close to
 the results. Deposit opens at Interest rate descending, Credit Card at Annual
 fee ascending, and Loan at Interest rate ascending; there is no separate
 Default sort choice.
-Every catalog Search conditions panel includes one localized bank-or-product
-search field. Its bounded q value matches institution or product names
+Every catalog keeps its localized bank-or-product search field visible above
+the optional Search conditions panel. Short family titles and compact spacing
+put products closer to the controls. Grid/List actions stay visible beside the
+scrollable sort choices and provide 44px targets. Filter disclosure follows the
+visitor's choice, including after the final filter is cleared. Its bounded q value matches institution or product names
 case-insensitively as a literal substring. Typing is debounced briefly;
 search, checkbox, and select changes update the shareable URL and filtered
-results without an Apply action.
+results without an Apply action. Controls retain keyboard focus during URL
+updates and restore their URL values on browser back/forward. Korean/Japanese
+composition finishes before search navigation.
 
 Catalogs server-render the first 20 products. An intersection sentinel requests
 only the next API page through /api/public/products, appends unseen product
@@ -226,6 +233,9 @@ market profiles and fixtures are registered.
 - Loading, unavailable/error, empty, stale, fresh, and missing-value states use
   the same visual vocabulary across Home, catalogs, comparison, detail, and
   Methodology.
+- A localized skip link moves keyboard focus to the content. The labelled
+  route/country menu serves mobile and tablet widths below 1024px; desktop
+  navigation exposes route names and the current page.
 - Interactive controls provide a 44px minimum target, visible keyboard focus,
   semantic heading order, and reduced-motion support.
 - Mobile sort rails and dense term-rate tables may scroll inside an explicitly
@@ -283,31 +293,30 @@ asset generated from [Natural Earth](https://www.naturalearthdata.com/downloads/
 through `world-atlas` and the Equal Earth projection. It does not load an
 external map service or tracking script at runtime.
 
-## Analytics and Consent
+## Public Analytics
 
 Public GA4 is loaded with Next.js `Script` and is disabled unless the build
 receives a valid `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` in the `G-...` format. The ID
 is a public tag identifier, not a secret, but the real value still lives in the
 deployment environment rather than source control.
 
-When configured, a first visit shows localized EN/KO/JA analytics choices.
-Google scripts and `_ga` cookies load only after Allow; Decline leaves the tag
-unloaded. The footer keeps an Analytics choices control available, and revoking
-a prior grant denies analytics consent, removes GA cookies, and reloads without
-the tag. Advertising storage, advertising user data, personalization, and
-Google signals are denied. No user ID, financial value, product-click event, or
-conversion event is sent to GA.
+When configured, GA4 starts automatically without a consent prompt or footer
+choices (Product Owner instruction, 2026-09-28). Legacy consent storage is
+ignored. Advertising storage, advertising user data, personalization and Google
+signals remain denied. Only fixed screen-type URLs/titles and an empty referrer
+are supplied: no query strings, product IDs, browser title or incoming referrer.
+No user ID, financial value, product-click or conversion event is sent to GA.
 
-First-party operational counters are separate from GA consent. Product-detail
+First-party operational counters are separate from GA. Product-detail
 clicks, official-bank clicks, and finder My product selections increment only
 daily country/product aggregates retained for 400 days. No visitor ID, IP,
 cookie, free-text query, referrer, user-agent, or financial/profile value is
 stored. Finder selections are not unique-customer or verified-ownership counts.
-The `/admin` path initializes neither GA nor the consent surface.
+The `/admin` path does not initialize GA.
 
 The integration disables the tag's default page view and sends one explicit
 `page_view` for the initial screen and each Next.js client-side navigation,
-including the previous virtual URL as the referrer. Keep GA4 Enhanced
+using fixed screen metadata and an empty referrer. Keep GA4 Enhanced
 Measurement's `Page changes based on browser history events` option disabled to
 avoid duplicates. Verify live changes with Google Tag Assistant and the GA4
 Realtime or DebugView report.
@@ -355,6 +364,19 @@ pnpm run test
 pnpm run build
 $env:SEO_AUDIT_ORIGIN='http://127.0.0.1:3000'; pnpm run seo:audit
 ```
+
+Optional interaction and responsive regression, from the repository root with
+Chrome installed and a running local Public build backed by approved products:
+
+```powershell
+$env:FPDS_UI_TEST_ORIGIN='http://localhost:3000'
+uv run --with playwright python app/public/scripts/ui-ux-audit.py
+```
+
+This checks EN/KO/JA at 390/768/1440px, focus-preserving search/filters, IME,
+finder keyboard navigation, shell names, comparison/calculator rendering and
+skip navigation. It stubs browser writes and external requests. Data is read
+through the local app; it needs at least two approved CAD savings products.
 
 Run `pnpm run seo:audit` against a locally started production build. It checks
 representative routes and every sitemap URL for status, metadata, canonical,
@@ -467,7 +489,7 @@ See [the calculator contract](../../docs/03-design/public-scenario-calculator-po
 Detail and each selected comparison place approved minimum/waiver/withdrawal
 conditions beside their bank action, with currency, qualified rate/cost, product
 check date and official hostname. Unknown conditions remain explicit. Mobile
-shows the viewed product and direct bank action; consent, dialogs and input
+shows the viewed product and direct bank action; dialogs and input
 keyboards suppress it, and it replaces the comparison return dock while present.
 Existing header comparison access and three-field click events remain.
 

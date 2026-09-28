@@ -14,6 +14,7 @@ const SEARCH_DEBOUNCE_MS = 350;
 export function InstantFilterForm({ action, children, pendingMessage }: InstantFilterFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+  const composingRef = useRef(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isDebouncing, setIsDebouncing] = useState(false);
@@ -63,6 +64,8 @@ export function InstantFilterForm({ action, children, pendingMessage }: InstantF
       clearTimeout(debounceRef.current);
     }
 
+    if (target.name === "q" && composingRef.current) return;
+
     if (target.name === "q") {
       setIsDebouncing(true);
       debounceRef.current = setTimeout(() => {
@@ -93,7 +96,19 @@ export function InstantFilterForm({ action, children, pendingMessage }: InstantF
     <form
       action={action}
       aria-busy={isUpdating}
-      className="grid gap-4"
+      className="group/filter grid gap-4"
+      onCompositionStart={() => {
+        composingRef.current = true;
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        setIsDebouncing(false);
+      }}
+      onCompositionEnd={(event) => {
+        composingRef.current = false;
+        handleChange(event);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" && (composingRef.current || event.nativeEvent.isComposing)) event.preventDefault();
+      }}
       onChange={handleChange}
       onSubmit={handleSubmit}
       ref={formRef}

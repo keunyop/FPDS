@@ -22,6 +22,16 @@ spreads, conditional discounts and promotions. Conditions remain visible in
 source language. Only comparable full numbers participate in rate ordering;
 other records remain browsable and sort last. Rate text wraps at 390px.
 
+## Current interaction refinement — 2026-09-28
+
+The Public UX review keeps a short localized product-family heading and places
+bank/product search above the optional filter disclosure. Search alone does not
+open the panel; manually opened filters remain open after the final removal.
+Input, checkbox and select nodes retain focus during URL updates, and text
+composition finishes before the debounced search runs. Long search chips wrap.
+The sort choices scroll within their own region while 44px Grid/List actions
+stay visible. Current continuous loading, comparison and financial rules remain.
+
 ## 1. Purpose
 
 이 문서는 `WBS 1.7.1 Product Grid 정보 구조 설계`의 기준 문서다.

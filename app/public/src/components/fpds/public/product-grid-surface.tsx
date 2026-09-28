@@ -1,7 +1,8 @@
-import { ArrowDownUp, ChevronDown, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowDownUp, ChevronDown, LoaderCircle, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { CatalogCheckbox, CatalogFilterDisclosure, CatalogSearchInput, CatalogSelect } from "@/components/fpds/public/catalog-filter-controls";
 import { InstantFilterForm } from "@/components/fpds/public/instant-filter-form";
 import { ProductCompareWorkspace } from "@/components/fpds/public/product-compare-workspace";
 import { PublicFreshness } from "@/components/fpds/public/public-freshness";
@@ -31,6 +32,7 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
   const copy = getPublicMessages(filters.locale);
   const discoveryCopy = getPublicDiscoveryCopy(filters.locale);
   const catalogCopy = getPublicCatalogCopy(filters.locale, catalog);
+  const catalogTitle = catalog === "loan" ? copy.nav.loan : catalog === "card" ? copy.nav.card : copy.nav.products;
   const catalogPath: CatalogPath = catalog === "loan" ? "/loans" : catalog === "card" ? "/cards" : "/products";
   const clearHref = buildCatalogHref(catalogPath, {
     ...filters,
@@ -96,17 +98,16 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
             {copy.nav.dashboard}
           </Link>
           <span aria-hidden="true">/</span>
-          <span aria-current="page" className="font-medium text-foreground">{catalogCopy.title}</span>
+          <span aria-current="page" className="font-medium text-foreground">{catalogTitle}</span>
         </nav>
 
-        <section className="border-y border-foreground/15 py-7 md:py-10">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <section className="border-b border-foreground/15 pb-5 md:pb-6">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="max-w-3xl">
               <p className={`font-mono text-[10px] font-semibold uppercase tracking-[0.16em] ${catalog === "deposit" ? "text-deposit" : "text-loan"}`}>
                 {catalogCopy.coverage}
               </p>
-              <h1 className="text-balance mt-3 max-w-full font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground [overflow-wrap:anywhere] md:text-6xl">{catalogCopy.title}</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere] md:text-base">{catalogCopy.description}</p>
+              <h1 className="text-balance mt-3 max-w-full font-display text-3xl font-semibold leading-tight tracking-[-0.04em] text-foreground [overflow-wrap:anywhere] md:text-4xl">{catalogTitle}</h1>
             </div>
             <div className="flex flex-col items-start gap-3 lg:items-end">
               <p className="whitespace-nowrap font-mono text-xs font-semibold text-foreground">
@@ -117,42 +118,41 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
           </div>
         </section>
 
-        <section className="overflow-hidden border-y border-border bg-card/55">
-          <details className="group" open={activeChips.length > 0}>
-            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-foreground outline-none transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50 sm:px-5 [&::-webkit-details-marker]:hidden">
-              <span className="flex items-center gap-2">
-                <SlidersHorizontal className="size-4 text-primary" aria-hidden="true" />
-                {copy.grid.searchConditions}
-                {activeChips.length ? (
-                  <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground tabular-nums">{activeChips.length}</span>
-                ) : null}
+        <section aria-label={discoveryCopy.searchLabel}>
+          <InstantFilterForm action={catalogPath} pendingMessage={discoveryCopy.updatingResults}>
+            <input name="locale" type="hidden" value={filters.locale} />
+            <input name="country_code" type="hidden" value={filters.countryCode} />
+            <input name="sort_by" type="hidden" value={filters.sortBy} />
+            <input name="sort_order" type="hidden" value={filters.sortOrder} />
+            {filters.viewMode !== "auto" ? <input name="view" type="hidden" value={filters.viewMode} /> : null}
+
+            <label className="grid gap-1.5">
+              <span className="text-sm font-medium text-foreground">{discoveryCopy.searchLabel}</span>
+              <span className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <CatalogSearchInput
+                  className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-10 text-base sm:text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                  value={filters.searchQuery}
+                  maxLength={120}
+                  name="q"
+                  placeholder={discoveryCopy.searchPlaceholder}
+                  type="search"
+                />
+                <LoaderCircle data-filter-progress className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-primary opacity-0 group-aria-busy/filter:opacity-100" aria-hidden="true" />
               </span>
-              <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
-            </summary>
-            <CardContent className="border-t border-border/70 px-4 py-4 sm:px-5">
-              <InstantFilterForm action={catalogPath} pendingMessage={discoveryCopy.updatingResults}>
-                <input name="locale" type="hidden" value={filters.locale} />
-                <input name="country_code" type="hidden" value={filters.countryCode} />
-                <input name="sort_by" type="hidden" value={filters.sortBy} />
-                <input name="sort_order" type="hidden" value={filters.sortOrder} />
-                {filters.viewMode !== "auto" ? <input name="view" type="hidden" value={filters.viewMode} /> : null}
-
-                <label className="grid max-w-2xl gap-1.5">
-                  <span className="text-sm font-medium text-foreground">{discoveryCopy.searchLabel}</span>
-                  <span className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-                    <input
-                      className="h-11 w-full rounded-lg border border-input bg-background pl-10 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                      defaultValue={filters.searchQuery}
-                      key={filters.searchQuery || "empty-search"}
-                      maxLength={120}
-                      name="q"
-                      placeholder={discoveryCopy.searchPlaceholder}
-                      type="search"
-                    />
-                  </span>
-                </label>
-
+            </label>
+            <CatalogFilterDisclosure initialOpen={activeChips.some((chip) => chip.group !== "q")}>
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-foreground outline-none transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50 sm:px-5 [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center gap-2">
+                  <SlidersHorizontal className="size-4 text-primary" aria-hidden="true" />
+                  {copy.grid.searchConditions}
+                  {activeChips.some((chip) => chip.group !== "q") ? (
+                    <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground tabular-nums">{activeChips.filter((chip) => chip.group !== "q").length}</span>
+                  ) : null}
+                </span>
+                <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <CardContent className="grid gap-4 border-t border-border/70 px-4 py-4 sm:px-5">
                 <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
                   <FilterGroup label={copy.grid.banks}>
                     <OptionGrid locale={filters.locale} name="bank_code" options={filterOptions.banks} selectedValues={new Set(filters.bankCodes)} />
@@ -204,9 +204,9 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
                     <Link href={clearHref}>{copy.common.clearFilters}</Link>
                   </Button>
                 </div>
-              </InstantFilterForm>
-            </CardContent>
-          </details>
+              </CardContent>
+            </CatalogFilterDisclosure>
+          </InstantFilterForm>
         </section>
 
         <DiscoveryToolbar
@@ -279,12 +279,12 @@ function DiscoveryToolbar({
         {activeChips.length ? (
           activeChips.map((chip) => (
             <Link
-              className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
+              className="inline-flex min-h-11 items-center gap-1.5 max-w-full rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
               href={chip.href}
               key={`${chip.group}-${chip.value}`}
             >
-              {chip.label}
-              <X className="size-3" aria-hidden="true" />
+              <span className="min-w-0 [overflow-wrap:anywhere]">{chip.label}</span>
+              <X className="size-3 shrink-0" aria-hidden="true" />
             </Link>
           ))
         ) : (
@@ -297,20 +297,22 @@ function DiscoveryToolbar({
         ) : null}
       </div>
 
-      <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 lg:justify-end lg:pb-0">
-        <span className="inline-flex shrink-0 items-center gap-1.5 pr-1 text-xs font-semibold text-muted-foreground">
-          <ArrowDownUp className="size-3.5" aria-hidden="true" />
-          {copy.grid.sortBy}
-        </span>
-        {options.map((option) => (
-          <SortLink
-            active={filters.sortBy === option.value}
-            href={buildCatalogHref(catalogPath, { ...filters, page: 1, sortBy: option.value, sortOrder: option.order })}
-            key={option.value}
-          >
-            {option.label}
-          </SortLink>
-        ))}
+      <div className="flex min-w-0 items-center gap-2 lg:justify-end">
+        <div className="flex min-w-0 items-center gap-2 overflow-x-auto py-1">
+          <span className="inline-flex shrink-0 items-center gap-1.5 pr-1 text-xs font-semibold text-muted-foreground">
+            <ArrowDownUp className="size-3.5" aria-hidden="true" />
+            {copy.grid.sortBy}
+          </span>
+          {options.map((option) => (
+            <SortLink
+              active={filters.sortBy === option.value}
+              href={buildCatalogHref(catalogPath, { ...filters, page: 1, sortBy: option.value, sortOrder: option.order })}
+              key={option.value}
+            >
+              {option.label}
+            </SortLink>
+          ))}
+        </div>
         <span className="ml-1 h-6 w-px shrink-0 bg-border" aria-hidden="true" />
         <ResponsiveCatalogViewToggle
           gridHref={buildCatalogHref(catalogPath, { ...filters, viewMode: "grid" })}
@@ -368,13 +370,13 @@ function OptionGrid({
     <div className="grid max-h-52 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
       {options.map((option) => (
         <label
-          key={[option.value, selectedValues.has(option.value)].join("-")}
+          key={option.value}
           className={cn(
             "flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-sm transition-colors hover:bg-muted/70",
             selectedValues.has(option.value) ? "border-primary/40 bg-primary/5" : "border-border bg-background"
           )}
         >
-          <input className="size-4 rounded border-border text-primary" defaultChecked={selectedValues.has(option.value)} name={name} type="checkbox" value={option.value} />
+          <CatalogCheckbox className="size-4 shrink-0 rounded border-border accent-primary" checked={selectedValues.has(option.value)} name={name} type="checkbox" value={option.value} />
           <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
             <span className="truncate font-medium text-foreground">{option.label}</span>
             <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground tabular-nums">{option.count}</span>
@@ -401,10 +403,9 @@ function SelectField({
   return (
     <label className="space-y-1.5">
       <span className="text-sm font-medium text-foreground">{label}</span>
-      <select
+      <CatalogSelect
         className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-        defaultValue={value}
-        key={[name, value].join("-")}
+        value={value}
         name={name}
       >
         <option value="">{getPublicMessages(locale).common.all}</option>
@@ -413,7 +414,7 @@ function SelectField({
             {option.label}
           </option>
         ))}
-      </select>
+      </CatalogSelect>
     </label>
   );
 }

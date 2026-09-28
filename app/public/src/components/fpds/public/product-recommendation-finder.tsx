@@ -234,28 +234,6 @@ export function ProductRecommendationFinder({
       </div>
 
       <form className='grid gap-4 px-4 py-5 md:px-5' onSubmit={handleSubmit}>
-        <FinderSelect
-          disabled={resultBusy || !bankOptions.length}
-          label={copy.bankLabel}
-          onChange={(value) => {
-            setBankCode(value);
-            clearSelection();
-          }}
-          options={bankOptions.map((bank) => ({ label: bank.bank_name, value: bank.bank_code }))}
-          placeholder={copy.bankPlaceholder}
-          value={bankCode}
-        />
-        <FinderSelect
-          disabled={resultBusy || !productTypeOptions.length}
-          label={copy.productTypeLabel}
-          onChange={(value) => {
-            setProductType(value);
-            clearSelection();
-          }}
-          options={productTypeOptions}
-          placeholder={copy.productTypePlaceholder}
-          value={productType}
-        />
         <ProductSearch
           disabled={resultBusy}
           hasNextPage={hasNextPage}
@@ -282,6 +260,30 @@ export function ProductRecommendationFinder({
           selectedProductId={productId}
           status={productsStatus}
         />
+        <div className="grid min-w-0 grid-cols-2 gap-3">
+          <FinderSelect
+            disabled={resultBusy || !bankOptions.length}
+            label={copy.bankLabel}
+            onChange={(value) => {
+              setBankCode(value);
+              clearSelection();
+            }}
+            options={bankOptions.map((bank) => ({ label: bank.bank_name, value: bank.bank_code }))}
+            placeholder={copy.bankPlaceholder}
+            value={bankCode}
+          />
+          <FinderSelect
+            disabled={resultBusy || !productTypeOptions.length}
+            label={copy.productTypeLabel}
+            onChange={(value) => {
+              setProductType(value);
+              clearSelection();
+            }}
+            options={productTypeOptions}
+            placeholder={copy.productTypePlaceholder}
+            value={productType}
+          />
+        </div>
 
         {selectedProduct?.product_type === 'gic' && depositOptions(selectedProduct).length ? (
           <FinderSelect disabled={resultBusy} label={depositCopy(locale).term} value={termKey || depositOptions(selectedProduct)[0]?.key || ''}
@@ -503,29 +505,67 @@ function ProductSearch({
   status: ProductsStatus;
 }) {
   const [open, setOpen] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const showOptions = open && !disabled;
+  const activeIndex = matches.findIndex((product) => product.product_id === activeId);
+  const optionId = (index: number) => `current-product-option-${index}`;
+
+  useEffect(() => {
+    if (showOptions && activeIndex >= 0) {
+      document.getElementById(`current-product-option-${activeIndex}`)?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [activeIndex, showOptions]);
+
+  function selectProduct(product: PublicProduct) {
+    onSelect(product);
+    setActiveId(null);
+    setOpen(false);
+  }
 
   return (
-    <div className='grid gap-1.5'>
+    <div className='grid gap-1.5' onBlur={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    }}>
       <label className='text-sm font-semibold text-foreground' htmlFor='current-product-search'>{label}</label>
       <div className='relative'>
         <Search className='pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' aria-hidden='true' />
         <input
           aria-autocomplete='list'
-          aria-controls='current-product-options'
+          aria-controls={showOptions && matches.length ? 'current-product-options' : undefined}
+          aria-activedescendant={showOptions && activeIndex >= 0 ? optionId(activeIndex) : undefined}
           aria-expanded={showOptions}
           autoComplete='off'
           className='h-12 w-full min-w-0 rounded-lg border border-input bg-background pl-10 pr-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-muted/50 disabled:text-muted-foreground'
           disabled={disabled}
           id='current-product-search'
+          ref={inputRef}
           onChange={(event) => {
             onChange(event.target.value);
+            setActiveId(null);
             setOpen(true);
           }}
           onClick={() => setOpen(true)}
           onFocus={() => setOpen(true)}
           onKeyDown={(event) => {
-            if (event.key === 'Escape') setOpen(false);
+            if (event.nativeEvent.isComposing) return;
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              setOpen(false);
+              setActiveId(null);
+            } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+              event.preventDefault();
+              setOpen(true);
+              if (!matches.length) return;
+              const nextIndex = !showOptions || activeIndex < 0
+                ? event.key === 'ArrowDown' ? 0 : matches.length - 1
+                : Math.max(0, Math.min(matches.length - 1, activeIndex + (event.key === 'ArrowDown' ? 1 : -1)));
+              setActiveId(matches[nextIndex].product_id);
+              if (nextIndex === matches.length - 1 && hasNextPage && status === 'ready') void onLoadMore();
+            } else if (event.key === 'Enter' && showOptions) {
+              event.preventDefault();
+              if (activeIndex >= 0) selectProduct(matches[activeIndex]);
+            }
           }}
           placeholder={placeholder}
           role='combobox'
@@ -535,7 +575,7 @@ function ProductSearch({
       </div>
       {showOptions ? (
         status === 'loading' && !matches.length ? (
-          <p className='px-1 py-2 text-sm text-muted-foreground'>{loadingText}</p>
+          <p role='status' className='px-1 py-2 text-sm text-muted-foreground'>{loadingText}</p>
         ) : matches.length ? (
           <ul
             className='max-h-60 overflow-y-auto rounded-lg border border-border bg-background p-1'
@@ -551,15 +591,18 @@ function ProductSearch({
               }
             }}
             role='listbox'
+            aria-label={label}
           >
-            {matches.map((product) => (
+            {matches.map((product, index) => (
               <li key={product.product_id} role='none'>
                 <button
-                  aria-selected={product.product_id === selectedProductId}
-                  className='grid min-h-11 w-full min-w-0 rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+                  id={optionId(index)}
+                  tabIndex={-1}
+                  aria-selected={product.product_id === (activeId ?? selectedProductId)}
+                  className='grid min-h-11 w-full min-w-0 rounded-md px-3 py-2 text-left text-sm text-foreground aria-selected:bg-accent hover:bg-accent focus-visible:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                   onClick={() => {
-                    onSelect(product);
-                    setOpen(false);
+                    inputRef.current?.focus();
+                    selectProduct(product);
                   }}
                   role='option'
                   type='button'
@@ -572,7 +615,7 @@ function ProductSearch({
             {status === 'loading-more' ? <li className='px-3 py-2 text-xs text-muted-foreground'>{loadingMoreText}</li> : null}
           </ul>
         ) : status === 'ready' ? (
-          <p className='px-1 py-2 text-sm text-muted-foreground'>{noMatches}</p>
+          <p role='status' className='px-1 py-2 text-sm text-muted-foreground'>{noMatches}</p>
         ) : null
       ) : null}
     </div>

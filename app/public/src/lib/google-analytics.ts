@@ -7,3 +7,23 @@ export function getGoogleAnalyticsMeasurementId() {
     ? measurementId
     : null;
 }
+
+// Never forward browser URLs, query strings, dynamic identifiers or document titles.
+export function getAnalyticsPage(pathname: string) {
+  const routes: Record<string, string> = {
+    '/': 'Home', '/products': 'Products', '/cards': 'Cards', '/loans': 'Loans',
+    '/compare': 'Comparison', '/calculator': 'Calculator', '/methodology': 'Methodology',
+    '/guides': 'Guides'
+  };
+  let path = pathname;
+  let title = routes[path];
+  if (!title && /^\/products\/[^/]+$/.test(pathname)) {
+    path = '/products/detail'; title = 'Product detail';
+  } else if (!title && /^\/guides\/[^/]+$/.test(pathname)) {
+    path = '/guides/article'; title = 'Guide';
+  } else if (!title && /^\/ca\/[^/]+$/.test(pathname)) {
+    path = '/ca/comparison'; title = 'Canadian comparison';
+  }
+  if (!title) return null;
+  return { page_location: `https://www.switchabank.com${path}`, page_title: `${title} | SwitchaBank`, page_referrer: '' };
+}

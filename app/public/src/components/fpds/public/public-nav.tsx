@@ -32,6 +32,9 @@ export function PublicNav() {
         return (
           <Link
             key={item.href}
+            aria-current={active ? "page" : undefined}
+            aria-label={item.label}
+            title={item.label}
             href={href}
             className={cn(
               "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-2.5 font-medium transition-colors first:hidden sm:first:inline-flex lg:px-3.5",

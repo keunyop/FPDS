@@ -41,7 +41,7 @@ inline on each product.
 Only one bottom action is visible. The bank action takes precedence over the
 comparison return dock; comparison remains reachable in the header. The measured
 dock height plus spacing is reserved after page content, with safe-area padding.
-Consent, open modal surfaces, input/select focus and a shortened visual viewport
+Open modal surfaces, input/select focus and a shortened visual viewport
 hide the action. No action appears for a missing, failed or unsafe product.
 
 ## Operator URL report

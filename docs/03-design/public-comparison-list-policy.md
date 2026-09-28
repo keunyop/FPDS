@@ -9,7 +9,7 @@ One memory-only list per country holds at most four public product IDs across
 search, filters, sort, continuous loading, Grid/List, curated pages and detail.
 Locale changes preserve it; country changes select a separate list. Unsaved
 selection ends on a full reload. The header and footer open `/compare`; a small
-mobile bottom action returns to it from long catalogs/details. Consent and open
+mobile bottom action returns to it from long catalogs/details. Open
 modal surfaces hide that action. The existing inline ledger remains available.
 
 Detail offers Add to comparison and a same-type catalog scoped to other

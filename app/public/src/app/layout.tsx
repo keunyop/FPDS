@@ -6,7 +6,7 @@ import { ComparisonProvider } from "@/components/fpds/public/comparison-provider
 import { ComparisonDock } from "@/components/fpds/public/comparison-controls";
 import { PublicFooter } from "@/components/fpds/public/public-footer";
 import { PublicHeader } from "@/components/fpds/public/public-header";
-import { AnalyticsConsent } from "@/components/fpds/public/analytics-consent";
+import { GoogleAnalytics } from "@/components/fpds/public/google-analytics";
 import {
   PUBLIC_SITE_STRUCTURED_DATA,
   PublicStructuredData
@@ -51,14 +51,14 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <div className="relative isolate min-h-screen">
           <ComparisonProvider>
             <PublicHeader />
-            <div className="min-h-[calc(100vh-4rem)]">{children}</div>
+            <div id="main-content" tabIndex={-1} className="min-h-[calc(100vh-4rem)] scroll-mt-16 focus:outline-none">{children}</div>
             <PublicFooter />
             <Suspense fallback={null}><ComparisonDock /></Suspense>
           </ComparisonProvider>
         </div>
         {googleAnalyticsMeasurementId ? (
           <Suspense fallback={null}>
-            <AnalyticsConsent measurementId={googleAnalyticsMeasurementId} />
+            <GoogleAnalytics measurementId={googleAnalyticsMeasurementId} />
           </Suspense>
         ) : null}
       </body>

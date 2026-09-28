@@ -125,3 +125,12 @@ FPDS-owned index/article composition uses existing typography, semantic colors,
 flat ruled sections, Button, Link and the feedback dialog. A native disclosure
 keeps editorial detail secondary. Home/footer/curated wrappers receive concise
 links; no vendor primitive, asset, font or token family changed.
+
+
+## 2026-09-28 - Public UI and interaction review
+
+Existing FPDS-owned Home, catalog and shell compositions use the same semantic
+tokens, Button, native form controls and Radix menu. Compact headings, persistent
+search visibility, focus-preserving filters, keyboard suggestions, visible
+Grid/List controls and tablet menu improve existing tasks. No vendor primitive,
+new visual token, asset, financial rule or external data flow was introduced.

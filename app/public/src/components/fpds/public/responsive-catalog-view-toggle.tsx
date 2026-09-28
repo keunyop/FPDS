@@ -71,7 +71,7 @@ function ViewLink({
       aria-current={active ? "page" : undefined}
       aria-label={label}
       className={cn(
-        "inline-flex size-10 shrink-0 items-center justify-center rounded-md transition-colors",
+        "inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors",
         active
           ? "bg-foreground text-background"
           : "text-muted-foreground hover:bg-muted hover:text-foreground"

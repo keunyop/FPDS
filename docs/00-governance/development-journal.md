@@ -25,6 +25,63 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-28 - Public UI and interaction review
+
+- WBS 5.71 improves existing Public tasks: visible catalog search, short family
+  headings, stable focused inputs and disclosure, IME completion, wrapped chips,
+  pinned 44px Grid/List controls, named tablet navigation and a skip link.
+  Home starts with product search, pairs optional filters and supports keyboard
+  suggestion selection. Existing financial, comparison and publication rules stay.
+- Key files: catalog-filter-controls, product-grid-surface, instant-filter-form,
+  product-recommendation-finder, dashboard-hero, Public header/nav/layout and
+  responsive view toggle. No vendor primitive or dependency was added.
+- Browser verification found and fixed last-filter panel closure, focused-search
+  back/forward restoration and skip-link placement. Initial fixture code/label
+  mismatches and load-event waits were corrected in QA; a mixed-currency sample
+  correctly remained unavailable and the calculator test now uses two CAD records.
+- Verification: 74 Public tests, lint, standalone typecheck and production build
+  pass; 111 reusable browser checks and 18 extra state/flow cases pass.
+  EN/KO/JA at exact 390/768/1440px, approved-record replay, keyboard, IME,
+  browser history, comparison/save/calculator/bank paths and loading/error/retry
+  show no remaining observed overflow, browser exception or hydration warning.
+  Final Home/catalog screenshots were inspected in all three languages.
+- [Review findings](public-ui-ux-review-2026-09-28.md) and Public README document
+  the outcome and repeatable audit. Preserved the user's proposal deletion and
+  removed its two broken links while retaining the historical journal entry.
+  Earlier unrelated edits/goals remain. No API/Worker/FPDS Admin runtime change,
+  canonical mutation, collection, new analytics event or deployment.
+- Repo doctor and git diff --check pass. Restored the Next-generated type
+  declaration; final new-file UTF-8/whitespace checks pass.
+- Next: separately scoped release and user observation. Chromium-based local
+  QA does not assert every browser/device or zero future bugs.
+
+
+
+## 2026-09-28 - Automatic Public Analytics without consent UI
+
+- Explicit Product Owner direction removes the prompt and footer choices while
+  keeping configured GA4 active. Replaced AnalyticsConsent with GoogleAnalytics;
+  removed obsolete EN/KO/JA copy and consent-only dock selectors. Legacy browser
+  choices are ignored; invalid IDs stay disabled and Admin stays excluded.
+- Automatic approval review rejected retaining full URL/title transmission.
+  The accepted safer implementation emits fixed screen-type URLs/titles with an
+  empty referrer, excluding query strings, dynamic identifiers and browser titles.
+  Advertising remains denied. Individual product/guide/curated URLs are grouped,
+  so GA cannot provide their prior per-URL/referral breakdown. D-064, FR-PUB-019,
+  Public README and relevant environment/UI policies record this change.
+- Verification: 74 Public tests, standalone typecheck and production build pass;
+  28 browser scenarios pass across fresh/denied/granted storage, EN/KO/JA and
+  exact 390/768/1440px. Checked automatic queue/script initialization, one view
+  per navigation, private-query omission, absent UI, no overflow/browser errors
+  and fresh Admin exclusion. Google requests were stubbed; no live GA delivery
+  or property configuration is claimed. Build used a test-only measurement ID.
+- The initial lint flagged Google's Arguments queue format; a documented local
+  exception passes its focused lint check. Final full Public lint and
+  git diff --check also pass.
+- No deployment, account changes or canonical mutations. Preserve the user's
+  deleted proposal and earlier open goals. Next: separately authorized release.
+
+
 ## 2026-09-26 - Public authored comparison guides
 
 - Implemented requested P2-1 as FR-PUB-027 / D-084 / WBS 5.70. Four short
@@ -426,7 +483,7 @@ As of 2026-09-16 (Public rate semantics correction, implementation complete):
 
 As of 2026-09-16 (SwitchaBank Public growth investigation, complete):
 
-- added the Korean [Public growth proposal](../01-planning/switchabank-public-growth-proposal-2026-09-16.md),
+- added the Korean Public growth proposal (subsequently removed by the Product Owner),
   distinguishing implemented features, reproduced friction, data dependencies,
   acquisition/engagement/outbound hypotheses, measurement limits, and approval
   boundaries; no implementation or release scope was changed

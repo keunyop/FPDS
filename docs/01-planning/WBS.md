@@ -355,6 +355,7 @@ Based on:
 | 5.68 | Completed | Same-amount Public calculator | separate two-product scenario, exact GIC rows, unconditional monthly fees, signed differences, local-only inputs, regression and browser verification | Frontend, QA | 5.65, 5.67 | 2026-09-26 |
 | 5.69 | Completed | Official bank handoff | compact approved-term confirmation, localized direct bank actions, mobile overlap protection, read-only URL failure/redirect report and regression/browser checks | Frontend, Operations, QA | 5.64, 5.67, 5.68 | 2026-09-26 |
 | 5.70 | Completed | Authored multilingual comparison guides | Four sourced Canadian EN/KO/JA guides, newcomer entry, existing comparison/calculator/bank journey, truthful editorial/correction disclosure and localized guide SEO | Frontend, Content, QA | 5.66, 5.67, 5.68, 5.69 | 2026-09-26 |
+| 5.71 | Completed | Public UI and interaction refinement | visible catalog search, compact hierarchy, focus/IME-safe filters, keyboard finder, tablet navigation, accessible view controls and regression verification | Frontend, UX, QA | 5.61, 5.67, 5.68, 5.70 | 2026-09-28 |
 
 ### 5.5 Scope Baseline
 

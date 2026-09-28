@@ -56,9 +56,10 @@ requirements, planning, or design material.
 - `docs/00-governance/foundation-ci-cd-baseline.md`: CI baseline
 - `docs/00-governance/codex-internet-domain-allowlist.md`: allowed external domains for source work
 
+- [Public UI/UX review](00-governance/public-ui-ux-review-2026-09-28.md): confirmed usability fixes and local regression verification
+
 ### 2.2 Planning
 
-- [SwitchaBank Public growth proposal](01-planning/switchabank-public-growth-proposal-2026-09-16.md): source/live-site findings and prioritized acquisition, engagement, and bank-outbound proposals; not an approved implementation plan
 - `docs/01-planning/plan.md`: execution plan
 - `docs/01-planning/WBS.md`: current work breakdown and task status
 - `docs/01-planning/fpds-admin-handover-minimum-playbook.md`: follow-in-order

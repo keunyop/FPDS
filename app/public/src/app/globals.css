@@ -169,8 +169,8 @@
   }
 }
 
-/* Keep the mobile return action clear of consent and open modal surfaces. */
-body:has(#analytics-consent-title, [role="dialog"][data-state="open"]) [data-comparison-dock] {
+/* Keep the mobile return action clear of open modal surfaces. */
+body:has([role="dialog"][data-state="open"]) [data-comparison-dock] {
   display: none;
 }
 
@@ -184,5 +184,5 @@ body:has(#analytics-consent-title, [role="dialog"][data-state="open"]) [data-com
   }
   body:has([data-bank-handoff-dock]) [data-comparison-dock] { display: none; }
 }
-body:has(#analytics-consent-title, [role="dialog"][data-state="open"], [role="menu"][data-state="open"]) [data-bank-handoff-dock],
+body:has([role="dialog"][data-state="open"], [role="menu"][data-state="open"]) [data-bank-handoff-dock],
 [data-bank-handoff-dock][data-keyboard="open"] { display: none; }
