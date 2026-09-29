@@ -36,6 +36,8 @@ class PublicRateTests(unittest.TestCase):
             'Special offer interest rate of 4.5%.': 'promotional',
             '0% APR for 12 months then 18.99% APR.': 'promotional',
             'Discounted interest rate of 5%.': 'conditional',
+            'Interest rate reduction of 0.375%.': 'conditional',
+            '1% annual savings bonus up to $100.': 'conditional',
             'Interest rate 9.99% with a 0.5% autopay discount.': 'conditional',
             '.25% interest rate discount for clients.': 'conditional',
             'Representative mortgage: 6.625% interest rate and 6.794% APR, 25% down payment.': 'conditional',

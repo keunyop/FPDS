@@ -7,7 +7,7 @@ from worker.pipeline.fpds_approval_policy import (
     comparison_quality,
     dynamic_repair_fields,
 )
-from worker.pipeline.fpds_market_profile import market_profile_metadata
+from worker.pipeline.fpds_market_profile import market_profile_metadata, country_product_profile
 
 
 class ComparisonQualityPolicyTests(unittest.TestCase):
@@ -105,7 +105,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
             ["interest_rate_summary", "rate_type", "term_length_text"],
         )
 
-    def test_known_collection_contract_drops_optional_legacy_fields(self) -> None:
+    def test_known_contract_drops_marketing_and_keeps_comparison_qualifiers(self) -> None:
         fields = collection_fields_for_product_type(
             product_type="savings",
             expected_fields=[
@@ -119,7 +119,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            fields,
+            fields[:7],
             (
                 "product_name",
                 "standard_rate",
@@ -130,6 +130,10 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
                 "minimum_balance",
             ),
         )
+
+        self.assertNotIn("eligibility_text", fields)
+        self.assertNotIn("application_method", fields)
+        self.assertIn("interest_calculation_method", fields)
 
     def test_deposit_contracts_require_their_comparison_essentials(self) -> None:
         chequing = comparison_quality(
@@ -381,7 +385,9 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         self.assertIn("fee_waiver_condition", checking_fields)
         self.assertNotIn("included_transactions", checking_fields)
         self.assertIn("early_withdrawal_penalty", cd_fields)
-        self.assertNotIn("redeemable_flag", cd_fields)
+        self.assertIn("redeemable_flag", cd_fields)
+        profile = country_product_profile(country_code="US", product_type="gic")
+        self.assertNotIn("redeemable_flag", [f for r in profile.requirements for f in r.alternatives])
 
     def test_unconfigured_market_metadata_keeps_requested_identity_and_fails_closed(self) -> None:
         metadata = market_profile_metadata(

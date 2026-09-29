@@ -16,6 +16,8 @@ from worker.pipeline.fpds_ai_runtime import (
     llm_provider_configured,
 )
 from worker.country_defaults import default_currency_for_country
+from worker.pipeline.fpds_market_profile import country_product_profile
+from worker.pipeline.fpds_comparison_instructions import COMPARISON_INSTRUCTIONS
 from worker.pipeline.fpds_field_contract import canonical_value_type, field_contract, field_contract_payload
 from worker.pipeline.fpds_evidence_retrieval.models import (
     EvidenceChunkCandidate,
@@ -26,6 +28,7 @@ from worker.pipeline.fpds_evidence_retrieval.models import (
 from worker.pipeline.fpds_evidence_retrieval.service import EvidenceRetrievalService
 from worker.pipeline.fpds_rate_safety import (
     bounded_rate_evidence_context,
+    rate_component_only,
     canonical_deposit_rate_suppression_reason,
     contains_explicit_rate_percentage,
     contains_unresolved_financial_placeholder,
@@ -4178,6 +4181,11 @@ def _extract_official_fields_with_ai(
         not in {"product_family", "product_type", "bank_code", "country_code", "source_language", "currency"}
         and (not registered_fields or field_name in registered_fields)
     ]
+    profile = country_product_profile(country_code=context.country_code, product_type=_infer_product_type(context))
+    requirement_fields = {name for requirement in (profile.requirements if profile else ())
+                          for name in requirement.alternatives}
+    supplemental_fields = [name for name in (profile.supplemental_fields if profile else ())
+                           if name in ai_requested_fields and name not in requirement_fields]
     schema = {
         "type": "object",
         "additionalProperties": False,
@@ -4272,8 +4280,10 @@ def _extract_official_fields_with_ai(
                 "Verify that product, not a neighboring "
                 "product, family overview, promotion landing page, calculator, or service flow. Compare every requested field "
                 "with current official facts and the supplied freshly captured evidence chunks. Missing requested comparison "
-                "fields are mandatory extraction targets; actively locate them on official rate, pricing, disclosure, or terms "
-                "pages. Never infer a missing value. "
+                "fields in required_comparison_fields are mandatory extraction targets; locate them on bounded official "
+                "rate, pricing, disclosure, or terms pages. Supplemental fields are opportunistic: use the already "
+                "supplied evidence and consulted pages, and return unverified if absent. Do not start extra searches "
+                "or retry solely to fill supplemental fields. Never infer a missing value. "
                 "Return a match or mismatch only when the value is supported by both an official URL actually consulted and "
                 "an exact quote copied from the selected evidence chunk. Otherwise return unverified. Preserve canonical units: "
                 "rates are numeric percentage points per annum, money is numeric in product currency, durations and counts are "
@@ -4289,7 +4299,8 @@ def _extract_official_fields_with_ai(
                 "or end mid-word; prefer one concise condition when a complete exhaustive list would be too long. "
                 "Cashback, rewards, prepayment, equity, down-payment, fund returns, transaction fees, ATM/ABM "
                 "assessment fees, other fee percentages, and personalized or expired offers are not product interest "
-                "rates. Do not approve, publish, or recommend a product."
+                "rates. Do not approve, publish, or recommend a product. "
+                + COMPARISON_INSTRUCTIONS
             ),
             payload={
                 "verification_date": _utc_now_iso()[:10],
@@ -4310,6 +4321,8 @@ def _extract_official_fields_with_ai(
                 "expected_fields": list(context.source_metadata.get("expected_fields", [])),
                 "field_contract": field_contract_payload(ai_requested_fields),
                 "requested_fields": ai_requested_fields,
+                "required_comparison_fields": [name for name in ai_requested_fields if name not in supplemental_fields],
+                "supplemental_fields": supplemental_fields,
                 "collected_fields": [
                     {
                         "field_name": field.field_name,
@@ -4530,6 +4543,9 @@ def _exact_quote_is_grounded(*, quote: str, excerpt: str) -> bool:
 
 
 _EXACT_QUOTE_PROSE_FIELDS = {
+    "interest_calculation_method",
+    "tier_definition_text",
+    "promotional_period_text",
     "early_withdrawal_penalty",
     "fee_waiver_condition",
     "interest_rate_summary",
@@ -4553,6 +4569,9 @@ def _ai_verified_value_is_supported_by_quote(
     normalized_value = _normalize_text(_json_value_for_coercion(value))
     normalized_quote = _normalize_text(evidence_quote)
     if not normalized_value or not normalized_quote:
+        return False
+    contract = field_contract(field_name)
+    if contract and contract.unit == "percentage_points" and rate_component_only(value=value, context=normalized_quote):
         return False
     if field_name in _EXACT_QUOTE_PROSE_FIELDS:
         return normalized_value.casefold() in normalized_quote.casefold()
@@ -5867,6 +5886,14 @@ def _extract_term_length_days(text: str) -> int | None:
 def _extract_term_match(text: str) -> re.Match[str] | None:
     lowered = text.lower()
     for match in _TERM_RE.finditer(text):
+        before = lowered[max(0, match.start() - 55):match.start()]
+        after = lowered[match.end():match.end() + 55]
+        # Funding/rate-guarantee windows and withdrawal penalties are not CD
+        # maturities. Inspect this duration, not an unrelated nearby term.
+        if (re.match(r"\s*(?:cd\s+)?rate guarantee\b|\s*(?:grace|funding) period\b", after)
+                or (match.group(2).lower().startswith("day") and re.match(r"\s*(?:of\s+)?interest\b", after))
+                or re.search(r"(?:fund(?:ed|ing)?|deposit|open(?:ed|ing)?)\b[^.;]{0,30}\bwithin\s+(?:the\s+)?(?:first\s+)?$", before)):
+            continue
         window_start = max(0, match.start() - 64)
         window_end = min(len(text), match.end() + 64)
         window = lowered[window_start:window_end]
@@ -6321,6 +6348,10 @@ def _extract_interest_calculation_method(text: str) -> str | None:
     for raw_sentence in re.split(r"(?<=[.!?])\s+", normalized):
         sentence = raw_sentence.strip()
         lowered = sentence.lower()
+        if not re.search(r"\b(?:interest|APY|annual percentage yield)\b", sentence, re.IGNORECASE):
+            continue
+        if re.search(r"\b(?:per annum|annual(?:ized)? (?:interest )?rate|APY|annual percentage yield)\b", sentence, re.IGNORECASE):
+            return _bounded_description_text(sentence, max_length=280)
         if any(token in lowered for token in ("calculated", "daily closing balance", "calculation", "daily interest")):
             daily_interest_match = re.search(r"earn\s+daily\s+interest\s+on\s+every\s+dollar", sentence, flags=re.IGNORECASE)
             if daily_interest_match is not None:
@@ -6364,7 +6395,7 @@ def _extract_interest_rate_summary(text: str) -> str | None:
     for index, sentence in enumerate(sentences):
         lowered = sentence.lower()
         if "%" not in sentence or not re.search(
-            r"\b(?:apr|annual percentage rate|interest rate|mortgage rate)\b",
+            r"\b(?:apr|apy|annual percentage rate|annual percentage yield|interest rate|mortgage rate|annual rate)\b",
             lowered,
         ):
             continue

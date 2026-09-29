@@ -296,3 +296,22 @@ profiles. Public may recover this whitelist from the exact version already
 pinned by an old snapshot, never from a newer canonical version. Raw payloads,
 operator notes and evidence remain private. Unknown annual/APY basis is an
 explicit unavailable state under the [comparison policy](public-deposit-comparison-policy.md).
+
+
+## 2026-09-29 Public comparison qualifiers
+
+D-085 / WBS 5.72 retain the country-owned essential approval denominator while
+requesting bounded supplemental comparison facts from the existing evidence pass.
+These fields are optional for publication, but missing basis, maturity or other
+conditions still prevents the corresponding Public comparison/calculation.
+Do not add searches or AI retries solely for optional omissions. Explicit US
+profiles may project this same bounded financial set; marketing and private
+operator/evidence data remain outside it. Existing approved records are corrected
+only with field evidence and version/change history; a partial repair never
+renews the product verification date.
+
+Shared collection/Review instructions distinguish annual rates from APY,
+opening deposits from ongoing balances, base fees from waivers, exact maturities
+from funding/guarantee/grace/penalty periods, and full rates from discounts or
+capped bonuses. Rate-basis, tier and promotional prose requires an exact quote.
+See [the audit](../00-governance/public-collection-alignment-2026-09-29.md).

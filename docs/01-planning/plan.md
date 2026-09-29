@@ -612,3 +612,16 @@ Canadian topics, official source checks, localized discovery and the existing
 comparison/calculator/bank journey. Verify all languages, data gates and existing
 product SEO. Future topic expansion, professional review, traffic experiments
 and deployment require their own scope. See [the guide policy](../03-design/public-comparison-guides-policy.md).
+
+
+## 2026-09-29 CA/US collection alignment
+
+The Product Owner authorizes alignment of existing CA/US collection and prompts
+with current Public comparisons, calculators and bank handoff, plus proportionate
+corrections to already collected products. D-085 / WBS 5.72 add optional
+comparison qualifiers within the existing official-evidence pass; required
+approval fields, source grounding and Public financial gates remain intact.
+Audit existing records before paid work; prioritize errors and reusable evidence,
+then bounded official-product checks. No full-catalog sweep, scheduler, new
+countries/types, guessed facts, candidate approval bypass or code deployment.
+Partial field repairs retain the original whole-product verification date.

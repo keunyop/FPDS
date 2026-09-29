@@ -136,6 +136,19 @@ If a topic is not covered here, follow document authority:
 
 ---
 
+## 2026-09-29 - D-085 Public-aligned bounded collection
+
+Under the Product Owner's CA/US collection and existing-data correction request,
+market profile v5 supplements D-036's Public field allowlist with bounded
+comparison qualifiers needed by D-079/D-082/D-083. Existing country/product
+approval requirements and 100% essential grounding stay authoritative. Missing
+supplemental fields do not trigger extra searches, Review fields or repeated AI
+passes. Preserve annual/APY, term/minimum/fee/withdrawal/security meaning and
+reject component rates. Operator-invoked, versioned field corrections preserve
+product verification dates; incomplete corrected products remain non-public.
+No scheduler, country/type expansion, release or candidate approval bypass.
+See [the outcome and limits](public-collection-alignment-2026-09-29.md), WBS 5.72.
+
 ## 4. Current Interpretation Notes
 
 - `WBS 5` is the active execution stage.

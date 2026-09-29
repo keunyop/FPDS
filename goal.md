@@ -486,3 +486,37 @@ lint/typecheck/build, 111 browser audit checks and 18 extra state/flow
 cases pass. Reviewed EN/KO/JA screenshots; no observed remaining regression
 in the checked scope. No deployment or canonical mutation. Preserve this file
 for the earlier unresolved Admin/data goals.
+
+## Active independent slice: 2026-09-29 Public-aligned collection and bounded repair
+
+Ownership: preserve earlier Admin/data goals and their separate acceptance.
+Objective: align CA/US collection and prompts with recent SwitchaBank financial
+comparison, calculator and bank-handoff requirements, and repair existing data
+where official evidence supports a proportionate correction.
+Scope: inspect Public consumers and country profiles, extraction/normalization,
+review/publication contracts; audit existing CA/US records; reuse stored evidence
+first and perform bounded official-source checks for high-impact gaps/errors.
+Cost boundary: no full-catalog recollection or optional marketing enrichment;
+start with zero-model-call audit and at most 20 distinct official product checks,
+with at most two supporting pages per selected product. Record unresolved gaps.
+Exclusions: UI redesign, new countries/types, relaxed approval/comparison gates,
+deployment, account changes, scheduler, inferred financial facts or freshness.
+Acceptance:
+- [x] Map recent Public requirements to confirmed collection/prompt gaps.
+- [x] Implement bounded reusable fixes with success/boundary/failure regressions.
+- [x] Audit both countries and apply evidence-backed targeted corrections via
+      guarded version/change-history paths; verify unrelated data and readback.
+- [x] Record actual work/cost limits, remaining gaps, tests and journal outcome;
+      inspect final diff and run git diff --check.
+Verification: relevant worker/API tests, official-source evidence review,
+rollback rehearsal before live changes, idempotence and Public readback.
+Keep this goal file while earlier independently owned acceptance remains open.
+
+Completion: all acceptance items for this slice are satisfied. Worker 536, API
+502, Public 74 and maintenance 6 tests pass; repo doctor and final diff checks
+pass. Six corrections were rehearsed, applied and independently read back through
+DB and live Public HTTP; idempotence, immutable prior payloads, 302 unrelated
+canonical products, 293 unrelated projection rows and verification dates pass.
+The dated report records eight inspected product identities, zero project model
+calls, unresolved conditions and separately scoped code release. Preserve this
+file for the earlier unresolved Admin and candidate-approval ownership.

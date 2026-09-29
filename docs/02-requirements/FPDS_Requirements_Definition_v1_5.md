@@ -2414,3 +2414,16 @@ LLM 사용량과 비용은 agent/run 단위로 추적 가능해야 한다.
 - `product_type_code`는 `savings`처럼 전 세계에서 공유할 수 있는 의미
   vocabulary로 유지한다. 국가별 차이는 `country_code`가 포함된 subtype
   taxonomy와 bank coverage에서 관리한다.
+
+
+## 2026-09-29 FR-ADM-017 comparison-qualifier clarification
+
+The Product Owner authorizes alignment of existing CA/US collection and prompts
+with current Public comparisons, calculators and bank handoff, plus proportionate
+corrections to already collected products. D-085 / WBS 5.72 add optional
+comparison qualifiers within the existing official-evidence pass; required
+approval fields, source grounding and Public financial gates remain intact.
+Audit existing records before paid work; prioritize errors and reusable evidence,
+then bounded official-product checks. No full-catalog sweep, scheduler, new
+countries/types, guessed facts, candidate approval bypass or code deployment.
+Partial field repairs retain the original whole-product verification date.

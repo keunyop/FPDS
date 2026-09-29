@@ -196,7 +196,7 @@ _RATE_LABEL = (
     r"(?:apr|annual\s+percentage\s+rate|apy|annual\s+percentage\s+yield|interest\s+rate|"
     r"mortgage\s+rate|(?:bank\s+)?prime(?:\s+rate)?|rate)"
 )
-_NUMERIC_PERCENTAGE = r"\d{1,3}(?:\.\d{1,6})?\s*%"
+_NUMERIC_PERCENTAGE = r"(?<![\d.])(?:\d{1,3}(?:\.\d{1,6})?|\.\d{1,6})\s*%"
 _EXPLICIT_RATE_PERCENTAGE_PATTERNS = (
     re.compile(rf"\b{_RATE_LABEL}\b[^\d%]{{0,24}}{_NUMERIC_PERCENTAGE}", re.IGNORECASE),
     re.compile(rf"{_NUMERIC_PERCENTAGE}[^\w%]{{0,12}}\b{_RATE_LABEL}\b", re.IGNORECASE),
@@ -209,13 +209,39 @@ def contains_unresolved_financial_placeholder(value: object) -> bool:
     return bool(_UNRESOLVED_FINANCIAL_PLACEHOLDER_RE.search(str(value or "")))
 
 
+def rate_component_only(*, value: object, context: str) -> bool:
+    """Reject a percentage whose occurrences only describe a discount/bonus.
+
+    A separate full rate in the same disclosure remains usable.
+    """
+    selected = _to_decimal(value)
+    if selected is None:
+        return False
+    matches = [m for m in re.finditer(r"(?<![\d.])((?:\d+(?:\.\d+)?|\.\d+))\s*%", context)
+               if _to_decimal(m.group(1)) == selected]
+    def component(match):
+        before = context[max(0, match.start() - 65):match.start()]
+        after = context[match.end():match.end() + 65]
+        return bool(re.search(
+            r"(?:discount|reduction|reduce(?:d)?(?:\s+your)?\s+(?:interest\s+)?rate|rate\s+reduc(?:tion|ed)|"
+            r"rate\s+discount|bonus\s+(?:of|up to))\s*(?:of|by|up to|:)?\s*$", before, re.I)
+            or re.match(r"\s*(?:(?:interest\s+rate|APY|APR|autopay)\s+)?(?:discount|reduction|rate boost|"
+                        r"annual savings bonus|savings bonus)\b", after, re.I))
+    return bool(matches) and all(component(m) for m in matches)
+
+
 def contains_explicit_rate_percentage(value: object) -> bool:
     """Require a numeric percentage tied locally to a rate/APR/APY label."""
 
     text = str(value or "")
     if contains_unresolved_financial_placeholder(text):
         return False
-    return any(pattern.search(text) is not None for pattern in _EXPLICIT_RATE_PERCENTAGE_PATTERNS)
+    for pattern in _EXPLICIT_RATE_PERCENTAGE_PATTERNS:
+        for match in pattern.finditer(text):
+            percentage = re.search(_NUMERIC_PERCENTAGE, match.group())
+            if percentage and not rate_component_only(value=percentage.group(), context=text):
+                return True
+    return False
 
 
 def canonical_deposit_rate_suppression_reason(
@@ -232,6 +258,8 @@ def canonical_deposit_rate_suppression_reason(
     normalized_context = _normalize_context(context)
     if not normalized_context:
         return "implausible_annual_deposit_rate" if implausible_value else None
+    if rate_component_only(value=value, context=normalized_context):
+        return "rate_component_not_total"
     if expired_promotional_offer_end_date(normalized_context, reference_date=reference_date) is not None:
         return "expired_promotional_offer"
     if any(marker in normalized_context for marker in _NON_ANNUAL_RETURN_MARKERS):

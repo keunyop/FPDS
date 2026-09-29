@@ -182,6 +182,15 @@ As of `2026-08-15`:
 
 This is still not a full FPDS product yet, but the ingestion core is now actively being implemented.
 
+## 2026-09-29 collection alignment
+
+CA/US collection now requests bounded comparison qualifiers alongside existing
+approval essentials, with shared financial prompts and component-rate/maturity
+safety checks. Six existing products were corrected through versioned history;
+full recollection and extra project AI calls were avoided. See the
+[results, cost limits and remaining gaps](docs/00-governance/public-collection-alignment-2026-09-29.md).
+Code release remains separately scoped.
+
 ## Start Here
 
 - [FPDS Admin purpose and complete feature guide (Korean)](docs/03-design/fpds-admin-purpose-and-features.md): source-verified current screens, roles, collection/review/publication flow, and deferred or removed features (2026-09-12)

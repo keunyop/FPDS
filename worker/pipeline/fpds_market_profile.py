@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 
-MARKET_PROFILE_VERSION = "2026-08-21-v4"
+MARKET_PROFILE_VERSION = "2026-09-29-v5"
 
 
 @dataclass(frozen=True)
@@ -214,6 +214,23 @@ _COUNTRY_OVERRIDES: dict[tuple[str, str], tuple[ComparisonRequirement, ...]] = {
 }
 
 
+# Opportunistic comparison qualifiers: extract from the same bounded evidence
+# pass, without making an undisclosed fact a new publication requirement.
+_DEPOSIT_COMPARISON_FIELDS = (
+    "interest_rate_summary", "interest_calculation_method",
+    "interest_payment_frequency", "compounding_frequency", "payout_option",
+    "tiered_rate_flag", "tier_definition_text", "promotional_rate",
+    "promotional_period_text", "introductory_rate_flag",
+)
+_TYPE_SUPPLEMENTAL_FIELDS = {
+    "chequing": ("minimum_deposit", "fee_waiver_condition"),
+    "savings": (*_DEPOSIT_COMPARISON_FIELDS, "minimum_deposit", "fee_waiver_condition"),
+    "gic": (*_DEPOSIT_COMPARISON_FIELDS, "redeemable_flag", "non_redeemable_flag",
+            "early_withdrawal_penalty"),
+    "mortgage": ("secured_flag",),
+    "personal-loan": ("secured_flag",),
+}
+
 _COUNTRY_SUPPLEMENTAL_FIELDS: dict[tuple[str, str], tuple[str, ...]] = {
     # A simple APY needs no prose, but a new-customer, balance-qualified, or
     # relationship APY must carry its material conditions into Public.
@@ -247,10 +264,10 @@ def country_product_profile(
         product_type=normalized_type,
         profile_version=MARKET_PROFILE_VERSION,
         requirements=requirements,
-        supplemental_fields=_COUNTRY_SUPPLEMENTAL_FIELDS.get(
-            (normalized_country, normalized_type),
-            (),
-        ),
+        supplemental_fields=tuple(dict.fromkeys((
+            *_TYPE_SUPPLEMENTAL_FIELDS.get(normalized_type, ()),
+            *_COUNTRY_SUPPLEMENTAL_FIELDS.get((normalized_country, normalized_type), ()),
+        ))),
     )
 
 

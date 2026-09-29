@@ -1,0 +1,22 @@
+"""Financial semantics shared by the existing collection and Review AI passes."""
+
+COMPARISON_INSTRUCTIONS = (
+    "Preserve an explicitly disclosed annual interest rate versus APY in interest_rate_summary "
+    "or interest_calculation_method; never infer the basis from country or a bare percentage. "
+    "Keep calculation, payment and compounding frequency distinct. Use the same basis in "
+    "every term_rate_table row and its headline; retain each exact term label, rate, minimum "
+    "deposit and material payout/redemption qualification. Do not turn calendar months into "
+    "literal-day terms, combine different payout variants, or remove row qualifications. "
+    "Rate-guarantee, funding and grace periods are not deposit maturities; interest days "
+    "used to quantify withdrawal penalties are not term_length_days. "
+    "A rate discount/reduction, incremental boost or capped annual savings bonus is not a "
+    "full ongoing interest rate or APY. Preserve a stated full rate and its qualifications; "
+    "never add a benchmark or bonus to manufacture one. Keep promotions and their end dates "
+    "separate from regular rates and exclude adjacent-product offers. "
+    "Opening minimum_deposit, ongoing minimum_balance and fee-waiver balances are distinct: "
+    "no minimum deposit does not establish zero minimum balance. Keep positive base fees "
+    "separate from waivers. Only explicit zero/no-fee evidence establishes zero. "
+    "A withdrawal penalty does not itself establish a redeemable/non-redeemable flag; "
+    "retain the penalty and access restrictions separately. Secured/unsecured flags require "
+    "explicit product evidence, not a guess from its category. "
+)

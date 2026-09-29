@@ -25,6 +25,51 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-29 - Restore Korean collection report text
+
+- Restored Korean prose in `public-collection-alignment-2026-09-29.md`:
+  the PowerShell-to-Python input pipe had replaced non-ASCII source characters
+  with literal question marks. Wrote the restored report directly through .NET
+  as UTF-8 without BOM, avoiding that pipe.
+- Verified UTF-8 decoding, actual Hangul content and absence of replacement
+  characters/question-mark runs across current changed files; compared existing
+  tracked Hangul text with HEAD. Runtime code and product data are unchanged by
+  this repair. Application test suites were not rerun for this document fix.
+
+## 2026-09-29 - Public-aligned CA/US collection and bounded correction
+
+- D-085 / WBS 5.72: market profile v5 adds financial comparison qualifiers to
+  the existing grounding pass while retaining country essentials and the Review
+  denominator. Shared collection/Review prompts distinguish annual/APY, minimums,
+  waivers, maturity, withdrawal and security. Exact basis/tier/promo prose must
+  be quoted; discount/capped bonuses and CD guarantee/funding/penalty durations
+  cannot become total rates or maturities. FX questions cannot be interest methods.
+- Audited 308 active canonical / 216 Public records. Checked eight official
+  product identities within the 20-product / two-companion bound. Applied six
+  reviewed existing-product corrections (24 fields) after rollback rehearsal:
+  Vancity regular rate, EQ basis, Marcus Savings minimum and nine CD maturities;
+  unsupported Regions bonus-as-rate and Laurentian scalar are removed and those
+  incomplete projections become non-public. CA 164 / US 50 remain published.
+- No full recollection, new-product collection, project extraction/Review AI
+  calls, candidate approval, scheduler or code deployment. Two old pending goals
+  remain independent. All original verification dates stay; 302 unrelated
+  canonical records and 293 unrelated projection rows are unchanged.
+- Key files: fpds_market_profile, fpds_comparison_instructions, extraction,
+  rate_safety, ai_verification/public_rates, read-only gap report and the dated
+  public_alignment_20260929 manifest/script. The [report](public-collection-alignment-2026-09-29.md)
+  records source methods, hidden-data boundary, operator commands and remaining
+  basis/term/tier/conditional/verification limits. WAF/empty captures are not evidence.
+- Verification: Worker 536, API 502, Public 74 and maintenance 6 tests pass;
+  rollback/apply/idempotence, previous versions, unrelated records and timestamps
+  checked. Real CA/US Public HTTP rows match DB serialization. Repo doctor,
+  final diff and new-file UTF-8/whitespace checks pass. Initial profile
+  expectation tests and a leading-decimal component case were corrected before
+  completion. UI layout/build checks were not rerun because UI files are unchanged.
+- Next: separately scoped code release; future small official-source checks for
+  high-impact unresolved data. Existing pending US candidate approvals remain;
+  no claim of full-catalog current pricing or five records for every Home preset.
+
+
 ## 2026-09-28 - Public UI and interaction review
 
 - WBS 5.71 improves existing Public tasks: visible catalog search, short family

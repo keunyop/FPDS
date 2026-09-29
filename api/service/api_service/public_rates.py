@@ -19,7 +19,7 @@ _SPREAD = re.compile(rf"(?:plus|minus|[+−–-])\s*(?:a\s+)?(?:margin\s+of\s+)?
 _RANGE = re.compile(rf"{_NUMBER}\s*%?\s*(?:APR|APY)?\s*(?:to|through|and|[-–—])\s*{_NUMBER}\s*%", re.I)
 _PROMOTION = re.compile(r"\b(?:intro(?:ductory)?|promo(?:tion(?:al)?)?|special offer|welcome rate|bonus rate|limited.time)\b|\bfirst\s+\d+\s+(?:months?|days?|billing cycles?)\b", re.I)
 _CONDITIONAL = re.compile(
-    r"\b(?:discount(?:ed|s)?|as low as|up to|starting (?:at|from)|representative|example|sample|assum(?:es|ing|ption)|"
+    r"\b(?:discount(?:ed|s)?|(?:interest )?rate reduction|annual savings bonus|as low as|up to|starting (?:at|from)|representative|example|sample|assum(?:es|ing|ption)|"
     r"creditworthiness|credit score|credit profile|excellent credit|qualif(?:y|ying|ied)|"
     r"stress test|LTV|CLTV|loan.to.value|down payment|points?|rate cap|maximum APR|"
     r"automatic payments?|autopay|tiered|boosted|preferential|conditional|depending|depends|"
@@ -103,7 +103,7 @@ def public_rate(row: dict[str, Any]) -> dict[str, Any]:
             r"eligible for (?:CDIC|FDIC|deposit insurance)(?: coverage)?", "insured", description, flags=re.I)
         qualifies_rate = re.search(
             r"(?:tiered|boosted|preferential|conditional)\W{0,5}(?:interest\s+)?rates?"
-            r"|(?:interest|rate|APY|APR).{0,80}(?:autopay|discount|eligible|new clients|new customers)"
+            r"|(?:interest|rate|APY|APR).{0,80}(?:autopay|discount|reduction|eligible|new clients|new customers)"
             r"|interest.{0,60}when.{0,50}balance", qualification_text, re.I)
         if _REFERENCE.search(description) or _PROMOTION.search(description) or qualifies_rate:
             description_rate = interpret_rate_text(description)

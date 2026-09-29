@@ -180,3 +180,21 @@ approved version pinned by the snapshot; aggregates preserve these qualifiers
 for future refreshes. Missing basis is never inferred from country. API release
 precedes Public; old cached contracts fail closed. No live refresh or migration
 is needed for the version-pinned bridge. See the policy for current data limits.
+
+
+## Public-aligned comparison collection (2026-09-29)
+
+Market profile v5 retains the existing approval essentials and adds bounded
+comparison qualifiers from the same evidence pass: annual/APY basis, calculation,
+payment/compounding, promotions/tiers, opening minimums, fee waivers, redemption
+and explicit security flags. Supplemental gaps never add approval requirements
+or extra Review AI fields. Collection marks them opportunistic in the existing
+single grounding call; no extra search/retry is requested for their absence.
+Exact quoted prose must support the basis and rate conditions. Discount/reduction
+and capped savings bonuses cannot supply full rates; CD rate-guarantee/funding,
+grace and penalty days cannot supply maturity. US projections retain these
+approved financial qualifiers while continuing to omit private evidence/copy.
+
+See the [bounded CA/US audit and correction report](../docs/00-governance/public-collection-alignment-2026-09-29.md) for six applied
+existing-product repairs, preserved verification dates, remaining gaps and the
+read-only `scripts/maintenance/public_collection_gap_report.py` command.

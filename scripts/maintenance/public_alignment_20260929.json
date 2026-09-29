@@ -1,0 +1,299 @@
+{
+  "operation_id": "public-alignment-20260929",
+  "authorization": "Product Owner 2026-09-29 request to align CA/US collection and correct existing product data with bounded time/cost. Existing approved products only; no candidate review bypass.",
+  "items": [
+    {
+      "product_id": "prod_NH7Vb_SO1LC8Ll2c",
+      "country_code": "CA",
+      "bank_code": "VANCITY",
+      "product_type": "savings",
+      "product_name": "Jumpstart™ High Interest Savings",
+      "expected_version": 1,
+      "expected_payload_sha256": "c67c852e66c68a751595b2ad34e5adb9e1308ac6591e4291608702b01d5c22ca",
+      "changes": {
+        "standard_rate": 0.6,
+        "public_display_rate": 0.6,
+        "interest_rate_summary": "0.60% annual interest rate for all balances.",
+        "interest_calculation_method": "Annual interest rate; calculated on the closing daily balance and paid monthly."
+      },
+      "field_evidence": [
+        {
+          "fields": [],
+          "source_url": "https://www.vancity.com/bank/accounts/jumpstart-high-interest",
+          "fact": "Exact regular Jumpstart identity; 4.60% is advertised as a new-member offer, not the regular account rate.",
+          "checked_at": "2026-09-29",
+          "method": "current browser capture"
+        },
+        {
+          "fields": [
+            "standard_rate",
+            "public_display_rate",
+            "interest_rate_summary",
+            "interest_calculation_method"
+          ],
+          "source_url": "https://www.vancity.com/rates/accounts",
+          "fact": "Regular non-registered Jumpstart: 0.60% across balances; annual basis, daily calculation and monthly payment. Excludes TFSA/FHSA/RRSP variants.",
+          "checked_at": "2026-09-29",
+          "method": "current browser capture"
+        }
+      ],
+      "expected_public": {
+        "active": true,
+        "basis": "annual",
+        "reason": null,
+        "comparable_rate": 0.6
+      }
+    },
+    {
+      "product_id": "prod_qCwZrieZzPmZ3Xfs",
+      "country_code": "CA",
+      "bank_code": "EQBANK",
+      "product_type": "savings",
+      "product_name": "US Dollar Account",
+      "expected_version": 1,
+      "expected_payload_sha256": "71fe3963e6300b96604ee453e4547c707662097b75cb5ebe0f2c2c94b81fd732",
+      "changes": {
+        "interest_rate_summary": "2.50% interest per annum.",
+        "interest_calculation_method": "Annual interest rate; calculated daily on the total closing balance and paid monthly."
+      },
+      "field_evidence": [
+        {
+          "fields": [
+            "interest_rate_summary",
+            "interest_calculation_method"
+          ],
+          "source_url": "https://www.eqbank.ca/personal-banking/savings/usd",
+          "fact": "USD account remains 2.50% per annum; daily closing balance calculation and monthly payment. Replace an FX conversion question incorrectly stored as the interest method.",
+          "checked_at": "2026-09-29",
+          "method": "current HTTPS capture"
+        }
+      ],
+      "expected_public": {
+        "active": true,
+        "basis": "annual",
+        "reason": null,
+        "comparable_rate": 2.5
+      }
+    },
+    {
+      "product_id": "prod__my4qoaQjP-UpMZU",
+      "country_code": "CA",
+      "bank_code": "LAURENTIAN",
+      "product_type": "line-of-credit",
+      "product_name": "STUDENT LINE OF CREDIT",
+      "expected_version": 1,
+      "expected_payload_sha256": "baed16673b2ba97a688cbd57a4ba017a0a985307d69254a00ccd9573f03bcbf1",
+      "changes": {
+        "interest_rate": null,
+        "interest_rate_summary": "Variable interest rate based on the Laurentian Bank line of credit base rate."
+      },
+      "field_evidence": [
+        {
+          "fields": [
+            "interest_rate",
+            "interest_rate_summary"
+          ],
+          "source_url": "https://www.laurentianbank.ca/en/personal/lending/student-line-of-credit",
+          "fact": "Exact student product states variable base-rate pricing. The legacy 6.70% scalar lacks current full-rate evidence; remove it without inventing a replacement.",
+          "checked_at": "2026-09-29",
+          "method": "current HTTPS capture"
+        }
+      ],
+      "expected_public": {
+        "active": false,
+        "comparable_rate": null,
+        "missing_fields": [
+          "interest_rate_summary"
+        ]
+      }
+    },
+    {
+      "product_id": "prod_3wkwO1IVQLo9MCUu",
+      "country_code": "US",
+      "bank_code": "RB",
+      "product_type": "savings",
+      "product_name": "Regions LifeGreen® Savings",
+      "expected_version": 2,
+      "expected_payload_sha256": "04ec9300f3a0885cbfe9e39977e7377b4f164f258eaa7ef6890b6c9ff69d966f",
+      "changes": {
+        "standard_rate": null,
+        "public_display_rate": null,
+        "fee_waiver_condition": "A Regions checking account is required. Without it, the account converts to regular Savings with a $5 monthly fee.",
+        "interest_calculation_method": "Interest compounded daily and paid monthly on collected balances."
+      },
+      "field_evidence": [
+        {
+          "fields": [
+            "standard_rate",
+            "public_display_rate",
+            "fee_waiver_condition",
+            "interest_calculation_method"
+          ],
+          "source_url": "https://www.regions.com/personal-banking/savings/lifegreen-savings-account",
+          "fact": "The 1% annual savings bonus is conditional and capped at $100, not the ongoing APY. Remove the unsupported rate; preserve the checking-account condition and daily compounding. The opening amount varies by channel, so no single new minimum is inferred.",
+          "checked_at": "2026-09-29",
+          "method": "official page retrieved through web tool; local challenge rejected"
+        }
+      ],
+      "expected_public": {
+        "active": false,
+        "comparable_rate": null,
+        "missing_fields": [
+          "standard_rate"
+        ]
+      }
+    },
+    {
+      "product_id": "prod_hiJANQ-L5-J0pziJ",
+      "country_code": "US",
+      "bank_code": "GSBU",
+      "product_type": "savings",
+      "product_name": "Online Savings Account",
+      "expected_version": 3,
+      "expected_payload_sha256": "87cecc56fc8e7a750cfcdd1057ef09ab809316d980b6935e00be9ede1e19aec9",
+      "changes": {
+        "minimum_balance": 0
+      },
+      "field_evidence": [
+        {
+          "fields": [
+            "minimum_balance"
+          ],
+          "source_url": "https://www.marcus.com/us/en/faqs",
+          "fact": "Online Savings Account FAQ explicitly states no minimum balance; a non-positive balance for 60 days may lead to account closure. This is separate from the no-opening-deposit rule.",
+          "checked_at": "2026-09-29",
+          "method": "official page retrieved through web tool; local challenge rejected"
+        }
+      ],
+      "expected_public": {
+        "active": true,
+        "basis": "apy",
+        "reason": null,
+        "comparable_rate": 3.5
+      }
+    },
+    {
+      "product_id": "prod_Kl8WVmRrIdr46cUq",
+      "country_code": "US",
+      "bank_code": "GSBU",
+      "product_type": "gic",
+      "product_name": "High-Yield Certificates of Deposit",
+      "expected_version": 3,
+      "expected_payload_sha256": "e85624989bdd4d5857bbda113de4028ce8987c951400438acd450a3e742209aa",
+      "changes": {
+        "public_display_rate": 4.35,
+        "promotional_rate": null,
+        "introductory_rate_flag": false,
+        "description_short": null,
+        "term_length_days": null,
+        "term_length_text": "[\"6 months\", \"9 months\", \"12 months\", \"18 months\", \"2 years\", \"3 years\", \"4 years\", \"5 years\", \"6 years\"]",
+        "term_rate_table": [
+          {
+            "term_label": "6 months",
+            "term_length_days": 180,
+            "rate": 3.95,
+            "minimum_deposit": 500,
+            "notes": null
+          },
+          {
+            "term_label": "9 months",
+            "term_length_days": 270,
+            "rate": 4.3,
+            "minimum_deposit": 500,
+            "notes": null
+          },
+          {
+            "term_label": "12 months",
+            "term_length_days": 360,
+            "rate": 3.9,
+            "minimum_deposit": 500,
+            "notes": null
+          },
+          {
+            "term_label": "18 months",
+            "term_length_days": 540,
+            "rate": 4.35,
+            "minimum_deposit": 500,
+            "notes": null
+          },
+          {
+            "term_label": "2 years",
+            "term_length_days": 730,
+            "rate": 4.35,
+            "minimum_deposit": 500,
+            "notes": null
+          },
+          {
+            "term_label": "3 years",
+            "term_length_days": 1095,
+            "rate": 4.35,
+            "minimum_deposit": 500,
+            "notes": null
+          },
+          {
+            "term_label": "4 years",
+            "term_length_days": 1460,
+            "rate": 4.35,
+            "minimum_deposit": 500,
+            "notes": null
+          },
+          {
+            "term_label": "5 years",
+            "term_length_days": 1825,
+            "rate": 4.35,
+            "minimum_deposit": 500,
+            "notes": null
+          },
+          {
+            "term_label": "6 years",
+            "term_length_days": 2190,
+            "rate": 4.35,
+            "minimum_deposit": 500,
+            "notes": null
+          }
+        ],
+        "interest_calculation_method": "Annual percentage yield (APY); interest compounds daily.",
+        "compounding_frequency": "daily",
+        "interest_payment_frequency": "monthly",
+        "early_withdrawal_penalty": "No partial principal withdrawal before maturity. Full early withdrawal costs interest on original principal at the CD rate: 90 days for terms up to 1 year, 180 days for terms over 1 through 5 years, and 270 days for terms over 5 years."
+      },
+      "field_evidence": [
+        {
+          "fields": [
+            "public_display_rate",
+            "promotional_rate",
+            "introductory_rate_flag",
+            "description_short",
+            "term_length_days",
+            "term_length_text",
+            "term_rate_table",
+            "interest_calculation_method",
+            "compounding_frequency"
+          ],
+          "source_url": "https://www.marcus.com/us/en/savings/high-yield-cds",
+          "fact": "As of September 29: APYs for 6/9/12/18 months are 3.95/4.30/3.90/4.35%; 2-6 years are 4.35%. Each term has $500 minimum. The 10-day rate guarantee is a funding window, not maturity or a promotional APY. Daily compounding.",
+          "checked_at": "2026-09-29",
+          "method": "official page retrieved through web tool; local challenge rejected"
+        },
+        {
+          "fields": [
+            "early_withdrawal_penalty",
+            "interest_payment_frequency"
+          ],
+          "source_url": "https://www.marcus.com/us/en/faqs",
+          "fact": "High-Yield CD FAQ quantifies early withdrawal interest penalties as 90/180/270 days for <=1/>1-5/>5 year terms on original principal. Partial principal withdrawals are prohibited. Use the High-Yield section, not the separate Rate Bump table.",
+          "checked_at": "2026-09-29",
+          "method": "official page retrieved through web tool; local challenge rejected"
+        }
+      ],
+      "expected_public": {
+        "active": true,
+        "basis": "apy",
+        "reason": null,
+        "comparable_rate": null,
+        "option_count": 9,
+        "withdrawal": "unknown"
+      }
+    }
+  ]
+}

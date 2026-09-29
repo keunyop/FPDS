@@ -35,6 +35,8 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [CA/US collection alignment](00-governance/public-collection-alignment-2026-09-29.md): bounded comparison fields, six applied corrections, cost and remaining gaps
+
 - [Official bank link sample](00-governance/public-bank-link-check-2026-09-26.md): initial P1-4 URL checks and operator follow-up
 
 - [Home Top 5 bounded data completion](00-governance/home-top5-data-completion-2026-09-24.md): official-source corrections, condition counts and pending US reviews

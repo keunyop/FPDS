@@ -1257,6 +1257,8 @@ def _record_verification_audit(
 
 
 def _verification_instructions() -> str:
+    from worker.pipeline.fpds_comparison_instructions import COMPARISON_INSTRUCTIONS
+
     return (
         "You are the FPDS financial-product verification agent. You must use web search before answering. "
         "Search only the supplied official bank domain allowlist and verify the exact named product, not a "
@@ -1290,7 +1292,8 @@ def _verification_instructions() -> str:
         "corrected verified value whenever the exact product agreement states the complete current purchase APR. In that "
         "case the contiguous quote must include 'APR for Purchases', the Prime Rate formula, its as-of date, and the APR range. "
         "Do not approve, publish, or recommend a "
-        "financial product."
+        "financial product. "
+        + COMPARISON_INSTRUCTIONS
     )
 
 

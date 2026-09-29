@@ -361,3 +361,16 @@ Canada-scoped authored EN/KO/JA explanations, a newcomer entry and existing
 comparison/calculator/bank paths. Source and creation/correction transparency
 are included. Product-condition translation, other markets, news publishing,
 new analytics, canonical changes and deployment remain outside this slice.
+
+
+## 2026-09-29 Authorized CA/US collection and bounded correction
+
+The Product Owner authorizes alignment of existing CA/US collection and prompts
+with current Public comparisons, calculators and bank handoff, plus proportionate
+corrections to already collected products. D-085 / WBS 5.72 add optional
+comparison qualifiers within the existing official-evidence pass; required
+approval fields, source grounding and Public financial gates remain intact.
+Audit existing records before paid work; prioritize errors and reusable evidence,
+then bounded official-product checks. No full-catalog sweep, scheduler, new
+countries/types, guessed facts, candidate approval bypass or code deployment.
+Partial field repairs retain the original whole-product verification date.

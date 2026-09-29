@@ -356,6 +356,7 @@ Based on:
 | 5.69 | Completed | Official bank handoff | compact approved-term confirmation, localized direct bank actions, mobile overlap protection, read-only URL failure/redirect report and regression/browser checks | Frontend, Operations, QA | 5.64, 5.67, 5.68 | 2026-09-26 |
 | 5.70 | Completed | Authored multilingual comparison guides | Four sourced Canadian EN/KO/JA guides, newcomer entry, existing comparison/calculator/bank journey, truthful editorial/correction disclosure and localized guide SEO | Frontend, Content, QA | 5.66, 5.67, 5.68, 5.69 | 2026-09-26 |
 | 5.71 | Completed | Public UI and interaction refinement | visible catalog search, compact hierarchy, focus/IME-safe filters, keyboard finder, tablet navigation, accessible view controls and regression verification | Frontend, UX, QA | 5.61, 5.67, 5.68, 5.70 | 2026-09-28 |
+| 5.72 | Completed | Public-aligned CA/US collection and bounded data repair | market profile v5 supplemental conditions, shared financial prompts, component-rate and maturity guards, zero-model audit, six versioned corrections and live readback | Backend, Data, QA | 5.63, 5.65, 5.68, 5.69 | 2026-09-29 |
 
 ### 5.5 Scope Baseline
 
