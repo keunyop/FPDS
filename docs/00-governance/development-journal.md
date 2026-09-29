@@ -25,6 +25,33 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-29 - Public official bank logo coverage
+
+- Replaced 21 bank-code placeholders with official local branding: 19 new
+  website/CDN assets and the US BMO/TD aliases. Current direct Public API
+  coverage is complete for 19 CA and 15 US banks; the existing Regions asset
+  remains registered. The earlier web BFF response held 214 products/31 banks,
+  so the direct API recheck also covered Coast Capital, Desjardins and Servus.
+- Key files: Public bank-logo registry/test, public/bank-logos assets and
+  SOURCES.md, and Public README. All new assets have official provenance;
+  Capital One/Marcus SVGs were extracted from the official page. No generated
+  brand artwork, remote browser image requests, financial data or Admin change.
+- Verification: 74 Public tests, full lint, standalone typecheck, final build,
+  final changed-file lint and logo regressions pass. Browser decoding passes
+  for all 35 registered codes; imported SVG parsing and safety checks pass.
+  44 distinct final-build screen scenarios pass across CA/US Home/catalog,
+  EN/KO/JA, 390/768/1440px, plus card/loan/detail/comparison checks. Reviewed
+  the complete logo sheet and real mobile screenshots; no image failures,
+  bank-code fallback, overflow or browser exceptions in the checked screens.
+- The initial US deposit test selected Chase, which currently has no deposit
+  rows; its honest empty state was confirmed, then Marcus was used for image
+  verification. Browser writes/analytics were blocked. No deployment or live
+  data mutation. Final provenance/new-file whitespace and git diff --check pass.
+- Next: deploy the Public change through the normal release workflow. Future
+  bank codes still require an official local asset and registry entry. Earlier
+  unresolved goal ownership is preserved.
+
+
 ## 2026-09-29 - Restore Korean collection report text
 
 - Restored Korean prose in `public-collection-alignment-2026-09-29.md`:

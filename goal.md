@@ -520,3 +520,22 @@ canonical products, 293 unrelated projection rows and verification dates pass.
 The dated report records eight inspected product identities, zero project model
 calls, unresolved conditions and separately scoped code release. Preserve this
 file for the earlier unresolved Admin and candidate-approval ownership.
+
+## Independent slice: 2026-09-29 Public bank logos
+
+Preserve earlier goals and their unresolved ownership.
+Objective: replace bank-code placeholders for banks in current CA/US Public
+products with verified official logo assets served locally.
+Scope: Public logo registry/assets, provenance, relevant verification and docs.
+Exclusions: financial/canonical data, Admin, remote runtime images, deployment.
+Acceptance:
+- [x] Audit current public bank coverage and verify missing logos at official sources.
+- [x] Add local assets/mappings without changing bank identity or layout contracts.
+- [x] Verify assets, Public checks and representative 390/768/1440px EN/KO/JA views.
+- [x] Update provenance/journal, review diff and run git diff --check.
+Keep this file for earlier unresolved acceptance after this slice completes.
+
+Completion: 19 official assets and two US brand aliases cover all 34 current
+Public bank codes. Public 74 tests, lint/typecheck/final build, 35-code image
+decoding, 44 browser scenarios and final diff checks pass. No deployment or
+financial-data mutation. Preserve this file for earlier unresolved goals.

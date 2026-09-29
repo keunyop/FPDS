@@ -270,8 +270,9 @@ The only submission-list surface is the password-gated Public `/admin`; the
 anonymous Public experience and FPDS Admin application expose no feedback list.
 
 Verified bank logo assets live under `public/bank-logos/`; asset provenance is
-recorded in `public/bank-logos/SOURCES.md`. The registry includes the banks
-currently appearing in CA/US Home Top 5. `BankLogo` never
+recorded in `public/bank-logos/SOURCES.md`. The registry covers the banks observed
+across the CA/US Public catalog in the 2026-09-29 audit, including US BMO/TD
+code aliases. `BankLogo` never
 loads an institution image from a third-party origin: banks without a local
 asset render an unframed, accessible bank-code mark while retaining the
 institution name for assistive technology. Rendered image assets have explicit

@@ -28,8 +28,14 @@ test("derives a fallback when a bank code is missing", () => {
   });
 });
 
-test("Top 5 bank mappings point to actual local image files", () => {
-  for (const code of ["AB", "RB", "FCB", "KEYBANK", "BOAN", "USBN", "VANCITY", "MANULIFE", "LAURENTIAN", "BMO", "CIBC", "RBC", "SCOTIA", "TD"]) {
+test("CA/US public bank mappings point to actual local image files", () => {
+  for (const code of [
+    "ALTERNA", "B2B", "EQBANK", "NATIONAL", "OAKEN", "SIMPLII", "TANGERINE",
+    "WEALTHONE", "CCS", "SCU", "DESJARDINS", "CONA", "CN", "GSBU",
+    "HU", "JCBN", "PBNA", "TB", "WFBN", "BB", "TBNA",
+    "AB", "RB", "FCB", "KEYBANK", "BOAN", "USBN", "VANCITY",
+    "MANULIFE", "LAURENTIAN", "BMO", "CIBC", "RBC", "SCOTIA", "TD"
+  ]) {
     const { asset } = resolvePublicBankLogo(code.toLowerCase(), code);
     assert.ok(asset?.startsWith("/bank-logos/"), code);
     const bytes = readFileSync(new URL("../../public" + asset, import.meta.url));
