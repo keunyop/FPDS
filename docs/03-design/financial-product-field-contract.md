@@ -1,7 +1,16 @@
 # Financial Product Field Contract
 
+## Current acceptance contract — 2026-09-30
+
+The [collection accuracy policy](collection-accuracy-policy.md) supersedes
+review-based or heuristic exceptions below. Native finite values and exact
+financial meaning are mandatory; unknowns are omitted. No human approval may
+fill or waive missing product facts. The executable version is `2026-09-30`.
+New arbitrary `field_notes` or tags cannot carry facts around the typed gate;
+qualified source text belongs in its explicitly registered string field.
+
 Status: Active
-Last updated: 2026-07-23
+Last updated: 2026-09-30
 
 ## Purpose
 
@@ -18,8 +27,7 @@ The executable contract is `worker/pipeline/fpds_field_contract.py`. Database pr
 | count or duration | integer | field-specific count or days | `365` |
 | yes/no characteristic | boolean | `true` or `false` only | `true` |
 | descriptive value | string | concise source-grounded text | `Non-redeemable` |
-| term-rate schedule | array | rows with typed term and numeric `rate` | `[{'term':'1 year','rate':3.3}]` |
-| tags or methods | array | strings | `['online']` |
+| term-rate schedule | array | rows with typed term and numeric `rate` | `[{"term_label":"1 year","rate":3.3}]` |
 
 Numeric rate fields must never contain a sentence, a term table, a prepayment percentage, a withdrawal percentage, cashback, down payment, equity, or loan-to-value value. Money fields must not contain currency prose. Boolean fields must not contain `yes`, `no`, or explanatory text.
 
@@ -45,10 +53,10 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
 4. Reconstruct split structured tables from a bounded set of relevant evidence chunks, then deduplicate identical rows.
 5. Reject cross-product navigation, nearby product tables, calculators, unresolved templates, marketing percentages, and service-fee waivers that do not describe the product field.
 6. Preserve the supporting source document id on every merged field link.
-7. If an official value is unavailable or genuinely ambiguous, omit it and route the candidate to review; do not infer it.
+7. If an official value is unavailable or genuinely ambiguous, omit it and automatically exclude the candidate if essential; do not infer it.
 8. For term-rate tables, support both adjacent `term -> rate` and `rate -> term` layouts and select the orientation with more complete grounded pairs; never shift a rate from one row onto the next term.
-9. A page containing multiple named product sections is not one canonical product. Preserve its evidence for review, mark the product boundary ambiguous, and do not publish a composite candidate.
-10. A promotion with an explicit end date earlier than the collection date is historical evidence, not a current rate. Remove its rate fields before merging a current official rate source; if no current value is available, omit the rate and route to review.
+9. A page containing multiple named product sections is not one canonical product. Preserve its private evidence, mark the product boundary ambiguous, and do not publish a composite candidate.
+10. A promotion with an explicit end date earlier than the collection date is historical evidence, not a current rate. Remove its rate fields before merging a current official rate source; if no current value is available, omit the rate and automatically exclude incomplete candidates.
 11. Supporting merge is missing-value-only after unsafe or expired detail values are removed. Current official rate evidence may replace an expired detail-page promotion, but it must not silently replace a different current product value without a boundary-safe rule.
 12. Extraction artifacts used for a normalization run must belong to that same `run_id`; a failed current source must never fall back to an older successful extraction as if it were current evidence.
 13. Fields whose evidence anchor identifies another-products or related-products content are cross-product context and must be omitted, including boolean or structured fields that are not caught by prose cleanup.

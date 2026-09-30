@@ -1,5 +1,42 @@
 # Admin pre-handover review and fixes
 
+## Active slice: 2026-09-30 accuracy-first autonomous collection
+
+Latest Product Owner direction supersedes human review requirements for product
+collection. Preserve all independently owned goals below and existing edits.
+Objective: accept fewer, evidence-proven, consistently typed product facts with
+automatic validation and exclusion, without any human review/approval step.
+Scope: trace discovery through extraction, normalization, validation, canonical
+promotion and Public; improve shared contracts/prompts, remove collection review
+actions, audit and safely retract/correct existing unsafe data, update active rules.
+Exclusions: new countries/types, personalized advice, private evidence exposure,
+account/security changes, external deployment and unbounded paid recollection.
+Acceptance:
+- [x] Record concrete accuracy/type/review gaps and implement fail-closed fixes.
+- [x] New collection: only exact official, product-scoped, contract-valid facts can be promoted;
+      missing optional facts are omitted and unverifiable products excluded.
+- [x] New collection completes automatically with accepted/excluded outcomes; human
+      decisions cannot bypass the current product-fact gate.
+- [ ] Audit existing data, apply necessary scoped versioned correction/retraction
+      with rehearsal/readback, and refresh affected public snapshots when needed.
+- [x] Align Admin/Public workflow and EN/KO/JA copy where affected; preserve auth,
+      CSRF, country boundaries, private evidence and historical change records.
+- [x] Pass relevant behavior/runtime and responsive UI checks, update governing
+      rules/journal, inspect final diff and run git diff --check.
+Verification: deterministic adversarial financial/type/evidence tests, API/worker
+and affected frontend suites, bounded live read-only audit before any remediation,
+transaction rehearsal and idempotent readback. Do not claim infallible AI accuracy.
+Keep this file while unrelated earlier acceptance remains unresolved.
+
+Current boundary: code, rules and local verification completed. Automatic approval
+review blocked a blanket historical gate/API retirement. Final read-only impact:
+355 active products, 0 fully proven by retained evidence, and 470 legacy pending
+reviews. Concrete manifest and versioned retraction plan are documented in
+`docs/00-governance/collection-accuracy-audit-2026-09-30.md`. Historical data/APIs
+remain unchanged; Public could become empty after cutover. No live mutation,
+model recollection, deployment or service restart. Await the concrete cutover
+approval and verify it before completing the unchecked criterion above.
+
 ## Objective
 Review FPDS Admin against descent/README.md, repair reproducible handover defects,
 and leave an evidence-based readiness record for the Product Owner.
@@ -653,3 +690,26 @@ repo doctor/foundation and final diff checks pass. Local API restarted with
 zero active runs and health confirmed. No paid project model call, actual
 collection, external deployment, canonical/review/history mutation or inactive
 coverage restoration. Preserve this file for the earlier unresolved ownership.
+
+## Active independent slice: 2026-09-30 authorized targeted recollection
+
+Objective: execute the Product Owner's requested recollection after D-089.
+Scope: US Santander checking/savings/CD and CNB CD/savings only; verify and
+restore the two CNB coverage items through the existing registry service,
+then request explicit precision preparation with normal pipeline/approval gates.
+Exclude CNB/WAB LOC and WAB mortgage while their eligibility remains unresolved.
+No bulk historical cleanup, manual Review approval, new domains or policy bypass.
+Acceptance:
+- [x] Confirm current scope, no duplicate work and fresh official CNB evidence.
+- [x] Restore only the verified CNB coverage and launch the five requested scopes.
+- [x] Verify accepted preparation/start state and record identifiers and limits.
+Verification: scoped readback, existing service validation, background plan/log
+and database monitoring; preserve other independently owned goal acceptance.
+
+Completion: the requested five-scope precision recollection has been started.
+Two verified CNB coverage items were restored through the registry service;
+one background batch has five confirmed reservations; CNB CD passed preparation
+and its actual run has three successful snapshots. Three held lending scopes remain inactive. This completion means the
+requested launch was executed and verified, not that all collection results
+have completed. The worker continues in the background; monitor Banks and
+collection_h9A43rSXmXf0M3rj for actual run/Review outcomes. Preserve earlier goals.

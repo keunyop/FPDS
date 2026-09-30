@@ -1,5 +1,14 @@
 # FPDS Review, Run, Publish, and Audit State Design
 
+## Current product review override — 2026-09-30
+
+D-090 removes human product-review decisions from new collection. Automatically
+accepted candidates proceed through existing canonical/publication boundaries;
+unproven candidates are excluded. Review history remains private and read-only
+in Admin. New stamped candidates cannot use legacy manual mutation APIs.
+Historical unstamped APIs/data remain a pending cutover, not new-flow behavior.
+See [collection policy](collection-accuracy-policy.md).
+
 Version: 1.0
 Date: 2026-04-01
 Status: Approved Baseline for WBS 1.3.2 - 1.3.5

@@ -1,5 +1,14 @@
 # FPDS Admin Information Architecture
 
+## Current collection IA override — 2026-09-30
+
+D-090: daily navigation is Overview, Runs, Banks. Review routes are read-only
+historical records under More tools. Remove collection review attention cards,
+approval/edit/defer/AI actions and bulk selection; retain evidence and past
+outcomes privately. Run detail shows automatic exclusions. The new collection
+flow has no human review stage. Signup approval is unchanged.
+[Collection policy](collection-accuracy-policy.md) supersedes older review IA.
+
 Version: 1.3
 Date: 2026-09-12
 Status: Approved Baseline for WBS 1.7.4 plus source-registry follow-on

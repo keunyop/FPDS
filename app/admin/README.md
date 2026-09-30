@@ -1,5 +1,14 @@
 # FPDS Admin
 
+## Product collection workflow — 2026-09-30
+
+Daily work is Overview, Runs and Banks. Collection automatically accepts proven
+facts or excludes candidates. Runs show automatic exclusions. Review has moved
+to More tools as read-only history; the detail route has no approval/edit/defer
+or AI action, and list rows have no bulk selection. Signup approval remains.
+Earlier reviewer workflow descriptions are historical for product collection.
+See [policy](../../docs/03-design/collection-accuracy-policy.md).
+
 This package is the authenticated operator workspace. It keeps collection,
 review, and canonical-change context private while the Public package
 reads only approved projections.

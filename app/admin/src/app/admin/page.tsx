@@ -1,7 +1,7 @@
 import { adminEnvironmentLabel } from "@/lib/admin-auth-client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Activity, ArrowUpRight, Gauge, ShieldCheck, UserCheck } from "lucide-react";
+import { Activity, ArrowUpRight, Gauge, ShieldCheck } from "lucide-react";
 
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
@@ -9,7 +9,6 @@ import { SignupRequestReviewPanel } from "@/components/fpds/admin/signup-request
 import {
   fetchAdminSession,
   fetchDashboardHealth,
-  fetchReviewQueue,
   fetchRunStatusList,
   fetchSignupRequests,
   getAdminApiOrigin,
@@ -31,8 +30,6 @@ const OVERVIEW_COPY = {
     clear: "Clear",
     unavailableState: "Unavailable",
     blocked: "Blocked",
-    reviewQueue: "Review queue",
-    reviewQueueHint: "Queued or deferred",
     runAttention: "Run attention",
     runAttentionHint: "Failed or partial",
     dashboardHealth: "Dashboard health",
@@ -57,8 +54,6 @@ const OVERVIEW_COPY = {
     clear: "정상",
     unavailableState: "확인 불가",
     blocked: "차단됨",
-    reviewQueue: "검토 대기열",
-    reviewQueueHint: "대기 또는 보류",
     runAttention: "실행 확인 필요",
     runAttentionHint: "실패 또는 부분 완료",
     dashboardHealth: "Dashboard 상태",
@@ -83,8 +78,6 @@ const OVERVIEW_COPY = {
     clear: "正常",
     unavailableState: "確認不可",
     blocked: "ブロック中",
-    reviewQueue: "審査キュー",
-    reviewQueueHint: "待機または保留",
     runAttention: "実行の確認",
     runAttentionHint: "失敗または部分完了",
     dashboardHealth: "Dashboard 健全性",
@@ -110,8 +103,6 @@ const OVERVIEW_COPY = {
     clear: string;
     unavailableState: string;
     blocked: string;
-    reviewQueue: string;
-    reviewQueueHint: string;
     runAttention: string;
     runAttentionHint: string;
     dashboardHealth: string;
@@ -165,15 +156,13 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
   }
 
   const activeSession = session!;
-  const [signupRequests, reviewQueue, runs, dashboardHealth] = await Promise.all([
+  const [signupRequests, runs, dashboardHealth] = await Promise.all([
     activeSession.user.role === "admin" ? fetchOptional(fetchSignupRequests()) : Promise.resolve(null),
-    fetchOptional(fetchReviewQueue(buildReviewQueueParams())),
     fetchOptional(fetchRunStatusList(buildRunStatusParams())),
     fetchOptional(fetchDashboardHealth()),
   ]);
 
   const envLabel = adminEnvironmentLabel(activeSession.environment);
-  const reviewCount = reviewQueue?.summary.active_items ?? null;
   const runAttentionCount = runs?.summary.attention_items ?? null;
   const dashboardIssueCount = dashboardHealth
     ? dashboardHealth.summary.failed_domains + dashboardHealth.summary.stale_domains + dashboardHealth.summary.empty_domains
@@ -197,15 +186,6 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
       available: runAttentionCount !== null,
       icon: Activity,
       href: buildAdminHref("/admin/runs", runLinkParams(), locale),
-    },
-    {
-      label: copy.reviewQueue,
-      value: formatCount(reviewCount, copy.unavailable),
-      hint: copy.reviewQueueHint,
-      needsAttention: reviewCount !== null && reviewCount > 0,
-      available: reviewCount !== null,
-      icon: UserCheck,
-      href: buildAdminHref("/admin/reviews", reviewQueueLinkParams(), locale),
     },
     {
       label: copy.dashboardHealth,
@@ -326,15 +306,6 @@ async function fetchOptional<T>(promise: Promise<T | null>) {
   }
 }
 
-function buildReviewQueueParams() {
-  const params = new URLSearchParams();
-  params.append("state", "queued");
-  params.append("state", "deferred");
-  params.set("sort_by", "priority");
-  params.set("sort_order", "desc");
-  params.set("page", "1");
-  return params;
-}
 
 function buildRunStatusParams() {
   const params = new URLSearchParams();
@@ -344,12 +315,6 @@ function buildRunStatusParams() {
   return params;
 }
 
-function reviewQueueLinkParams() {
-  const params = new URLSearchParams();
-  params.append("state", "queued");
-  params.append("state", "deferred");
-  return params;
-}
 
 function runLinkParams() {
   const params = new URLSearchParams();

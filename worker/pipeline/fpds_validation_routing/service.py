@@ -16,6 +16,8 @@ from worker.pipeline.fpds_rate_safety import (
     canonical_deposit_rate_suppression_reason,
 )
 
+from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid, RECEIPT_KEY
+
 from .models import (
     ValidationEvidenceLink,
     ValidationInput,
@@ -254,8 +256,10 @@ class ValidationRoutingService:
                 runtime_notes.append(
                     f"Candidate routed to review in `{routing_config.routing_mode}` mode with primary reason `{route_decision['review_reason_code']}`."
                 )
+            elif route_decision["candidate_state"] == "rejected":
+                runtime_notes.append("Candidate automatically excluded; no human review is required.")
             else:
-                runtime_notes.append("Candidate met auto-validation policy and did not create a review task.")
+                runtime_notes.append("Candidate met automatic accuracy policy.")
 
             artifact_payload = _build_validation_artifact_payload(
                 run_id=run_id,
@@ -362,7 +366,7 @@ class ValidationRoutingService:
                 parsed_document_id=item.parsed_document_id,
                 candidate_id=item.candidate_id,
                 candidate_run_id=item.candidate_run_id,
-                validation_action="review_queued" if route_decision["review_required"] else "auto_validated",
+                validation_action="excluded" if route_decision["candidate_state"] == "rejected" else "auto_validated",
                 validation_model_execution_id=validation_model_execution_id,
                 validation_storage_key=validation_storage_key,
                 metadata_storage_key=metadata_storage_key,
@@ -1105,55 +1109,20 @@ def _route_candidate(
     dynamic_product_type: bool = False,
     collection_ai_assessment: dict[str, object] | None = None,
 ) -> dict[str, object]:
-    queue_reason_codes: list[str] = []
-    if validation_status == "error":
-        queue_reason_codes.append("validation_error")
-    for code in (
-        "ambiguous_product_boundary",
-        "required_field_missing",
-        "conflicting_evidence",
-        "ambiguous_mapping",
-    ):
-        if code in validation_issue_codes and code not in queue_reason_codes:
-            queue_reason_codes.append(code)
-    ai_grounding_eligible = bool((collection_ai_assessment or {}).get("eligible"))
-    if dynamic_product_type and not ai_grounding_eligible and "ai_grounding_insufficient" not in queue_reason_codes:
-        queue_reason_codes.append("ai_grounding_insufficient")
-
-    blocking_issue_codes = {
-        "ambiguous_product_boundary",
-        "required_field_missing",
-        "invalid_taxonomy_code",
-        "invalid_numeric_range",
-        "invalid_field_type",
-        "invalid_term_value",
-        "conflicting_evidence",
-        "ambiguous_mapping",
-        "inconsistent_cross_field_logic",
-    }
-    force_review = any(
-        code in routing_config.force_review_issue_codes and code in blocking_issue_codes
-        for code in validation_issue_codes
-    )
-    passes_phase1_auto = validation_status != "error" and not force_review
-
-    if dynamic_product_type and not ai_grounding_eligible:
-        review_required = True
-    elif routing_config.routing_mode == "prototype":
-        if "manual_sampling_review" not in queue_reason_codes:
-            queue_reason_codes.append("manual_sampling_review")
-        review_required = True
-    else:
-        review_required = not passes_phase1_auto
-        if review_required and not queue_reason_codes:
-            queue_reason_codes.append("manual_sampling_review")
-
-    review_reason_code = queue_reason_codes[0] if queue_reason_codes else None
+    # Current collections terminate in automatic acceptance or exclusion.
+    reasons = [code for code in validation_issue_codes
+               if code not in {"partial_source_failure", "low_confidence"}]
+    if validation_status == "error" and "validation_error" not in reasons:
+        reasons.append("validation_error")
+    if not bool((collection_ai_assessment or {}).get("eligible")):
+        reasons.append("ai_grounding_insufficient")
+        reasons.extend(str(reason) for reason in (collection_ai_assessment or {}).get("reason_codes", []))
+    excluded = bool(reasons)
     return {
-        "review_required": review_required,
-        "candidate_state": "in_review" if review_required else "auto_validated",
-        "review_reason_code": review_reason_code,
-        "queue_reason_codes": queue_reason_codes,
+        "review_required": False,
+        "candidate_state": "rejected" if excluded else "auto_validated",
+        "review_reason_code": reasons[0] if reasons else None,
+        "queue_reason_codes": list(dict.fromkeys(reasons)),
     }
 
 
@@ -1171,100 +1140,24 @@ def _assess_collection_ai_grounding(
     dynamic_product_type: bool,
     threshold: float,
 ) -> dict[str, object]:
-    """Decide whether official AI evidence can replace blanket manual review.
+    """Require the exact accepted payload for every product type.
 
-    The assessment intentionally ignores optional marketing and operational
-    copy. It covers only product identity and one usable field for every
-    essential comparison requirement. Validation and safety rules still run
-    independently afterward.
+    Confidence thresholds and optional field counts cannot waive this gate.
+    Validation and existing source safety rules still run independently.
     """
 
-    normalized_threshold = max(0.0, min(1.0, float(threshold)))
-    if not dynamic_product_type:
-        return {
-            "required": False,
-            "eligible": True,
-            "threshold": normalized_threshold,
-            "assessed_fields": [],
-            "verified_fields": [],
-            "unverified_fields": [],
-            "verified_ratio": 1.0,
-            "product_identity_verified": False,
-            "official_sources": [],
-            "reason_codes": [],
-        }
-
-    product_type = _string_or_none(candidate_record.get("product_type"))
-    mapping_metadata = candidate_record.get("field_mapping_metadata")
-    mappings = mapping_metadata if isinstance(mapping_metadata, dict) else {}
-    quality = comparison_quality(
-        product_type=product_type,
-        country_code=_string_or_none(candidate_record.get("country_code")),
-        expected_fields=expected_fields,
-        candidate_payload=candidate_payload,
-    )
-    decision_fields = comparison_assessment_fields(
-        product_type=product_type,
-        country_code=_string_or_none(candidate_record.get("country_code")),
-        expected_fields=expected_fields,
-        candidate_payload=candidate_payload,
-    )
-    assessed_fields = {"product_name", *decision_fields}
-
-    verified_fields: list[str] = []
-    official_sources: dict[str, dict[str, str]] = {}
-    for field_name in sorted(assessed_fields):
-        metadata = mappings.get(field_name)
-        if not isinstance(metadata, dict):
-            continue
-        sources = metadata.get("official_web_sources")
-        valid_sources = [
-            source
-            for source in sources
-            if isinstance(source, dict) and str(source.get("url") or "").strip()
-        ] if isinstance(sources, list) else []
-        if (
-            metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
-            and str(metadata.get("official_verification_status") or "") in {"match", "mismatch"}
-            and str(metadata.get("official_evidence_quote") or "").strip()
-            and valid_sources
-        ):
-            verified_fields.append(field_name)
-            for source in valid_sources:
-                url = str(source.get("url") or "").strip()
-                official_sources[url] = {
-                    "url": url,
-                    "title": str(source.get("title") or url),
-                }
-
-    assessed = sorted(assessed_fields)
-    verified = sorted(set(verified_fields))
-    verified_ratio = len(verified) / len(assessed) if assessed else 0.0
-    product_identity_verified = "product_name" in verified
-    reason_codes: list[str] = []
-    if not product_identity_verified:
-        reason_codes.append("product_identity_unverified")
-    if len(verified) < 2:
-        reason_codes.append("verified_field_count_below_minimum")
-    if not official_sources:
-        reason_codes.append("official_source_missing")
-    if not quality.contract_defined or not quality.complete:
-        reason_codes.append("essential_fields_missing")
-    if verified_ratio < normalized_threshold:
-        reason_codes.append("verified_field_ratio_below_threshold")
+    receipt = candidate_payload.get(RECEIPT_KEY, {})
+    valid = acceptance_receipt_valid(candidate_record, candidate_payload)
+    receipt = receipt if isinstance(receipt, dict) else {}
     return {
-        "required": True,
-        "eligible": not reason_codes,
-        "contract_version": "collection-official-grounding-v2",
-        "threshold": normalized_threshold,
-        "minimum_verified_field_count": 2,
-        "assessed_fields": assessed,
-        "verified_fields": verified,
-        "unverified_fields": [field_name for field_name in assessed if field_name not in set(verified)],
-        "verified_ratio": round(verified_ratio, 6),
-        "product_identity_verified": product_identity_verified,
-        "official_sources": [official_sources[url] for url in sorted(official_sources)],
-        "reason_codes": reason_codes,
+        "required": True, "eligible": valid, "threshold": 1.0,
+        "contract_version": receipt.get("version"),
+        "assessed_fields": receipt.get("verified_fields", []),
+        "verified_fields": receipt.get("verified_fields", []) if valid else [],
+        "unverified_fields": receipt.get("missing_fields", []),
+        "verified_ratio": 1.0 if valid else 0.0,
+        "product_identity_verified": valid,
+        "reason_codes": [] if valid else (receipt.get("reasons") or ["accuracy_check_failed"]),
     }
 
 
@@ -1482,7 +1375,7 @@ def _build_run_source_item_record(
         "error_count": 1 if error_summary else 0,
         "error_summary": error_summary,
         "stage_metadata": {
-            "validation_action": "failed" if stage_status == "failed" else ("review_queued" if review_task_id else "auto_validated"),
+            "validation_action": "failed" if stage_status == "failed" else ("excluded" if candidate_state == "rejected" else "auto_validated"),
             "candidate_id": item.candidate_id,
             "candidate_run_id": item.candidate_run_id,
             "validation_model_execution_id": validation_model_execution_id,

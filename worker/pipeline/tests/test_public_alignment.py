@@ -83,12 +83,13 @@ class PublicAlignmentTests(unittest.TestCase):
                 self.assertEqual(canonical_deposit_rate_suppression_reason(value=value, context=text), "rate_component_not_total")
                 self.assertFalse(_ai_verified_value_is_supported_by_quote(field_name="standard_rate", value=value, evidence_quote=text))
 
-    def test_full_rate_with_separate_discount_remains_supported(self):
+    def test_discounted_rate_requires_its_full_summary(self):
         text = "Interest rate 5.25% includes a 0.25% discount for autopay."
         self.assertTrue(contains_explicit_rate_percentage(text))
         self.assertFalse(rate_component_only(value=5.25, context=text))
         self.assertTrue(rate_component_only(value=0.25, context=text))
-        self.assertTrue(_ai_verified_value_is_supported_by_quote(field_name="interest_rate", value=5.25, evidence_quote=text))
+        self.assertFalse(_ai_verified_value_is_supported_by_quote(field_name="interest_rate", value=5.25, evidence_quote=text))
+        self.assertTrue(_ai_verified_value_is_supported_by_quote(field_name="interest_rate_summary", value=text, evidence_quote=text))
         self.assertFalse(_ai_verified_value_is_supported_by_quote(field_name="interest_rate", value=0.25, evidence_quote=text))
         self.assertTrue(contains_explicit_rate_percentage("APR 9.99%-17.49% including 0.5% autopay discount."))
 

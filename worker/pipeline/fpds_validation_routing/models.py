@@ -112,6 +112,7 @@ class ValidationResult:
                 "source_total": len(self.source_results),
                 "queued_count": queued_count,
                 "auto_validated_count": auto_validated_count,
+                "excluded_count": sum(1 for item in self.source_results if item.validation_action == "excluded"),
                 "failed_count": failed_count,
                 "review_task_count": review_task_count,
             },

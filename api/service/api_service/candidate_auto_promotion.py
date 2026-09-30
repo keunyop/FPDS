@@ -18,6 +18,7 @@ from api_service.db import open_connection
 from api_service.review_detail import _apply_canonical_approval, _approved_product_name, _coerce_mapping
 from api_service.security import new_id, utc_now
 from worker.pipeline.fpds_approval_policy import comparison_quality
+from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid, RECEIPT_KEY, ACCURACY_VERSION
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -69,6 +70,16 @@ def promote_auto_validated_candidates(
 
     for row in rows:
         candidate_id = str(row["candidate_id"])
+        receipt = _coerce_mapping(_coerce_mapping(row.get("candidate_payload")).get(RECEIPT_KEY))
+        if receipt.get("version") != ACCURACY_VERSION:
+            # Historical candidates are left untouched. No implicit migration.
+            skipped_items.append({"candidate_id": candidate_id, "skip_reason": "legacy_accuracy_not_assessed", "action": "unchanged"})
+            continue
+        if not acceptance_receipt_valid(row):
+            _mark_candidate_auto_rejected(connection, candidate_id=candidate_id,
+                                          reason_code="accuracy_check_failed", decided_at=decided_at)
+            skipped_items.append({"candidate_id": candidate_id, "skip_reason": "accuracy_check_failed", "action": "rejected"})
+            continue
         issue_codes = _coerce_string_list(row.get("validation_issue_codes"))
         force_review_hits = sorted(
             set(issue_codes)
@@ -90,7 +101,7 @@ def promote_auto_validated_candidates(
                 row=row,
                 decided_at=decided_at,
                 previous_state="auto_validated",
-                new_state="in_review",
+                new_state="rejected",
                 reason_code="force_review_issue_code",
                 reason_text="Candidate passed validation but matched an active force-review issue policy.",
                 review_task_id=review_task_id,
@@ -103,7 +114,7 @@ def promote_auto_validated_candidates(
                 {
                     "candidate_id": candidate_id,
                     "skip_reason": "force_review_issue_code",
-                    "action": "queued_for_review",
+                    "action": "rejected",
                     "issue_codes": force_review_hits,
                 }
             )
@@ -131,7 +142,7 @@ def promote_auto_validated_candidates(
                 row=row,
                 decided_at=decided_at,
                 previous_state="auto_validated",
-                new_state="in_review",
+                new_state="rejected",
                 reason_code=reason_code,
                 reason_text="Candidate lacked mandatory comparison-grade rate, price, amount, or term fields.",
                 review_task_id=review_task_id,
@@ -145,7 +156,7 @@ def promote_auto_validated_candidates(
                 {
                     "candidate_id": candidate_id,
                     "skip_reason": reason_code,
-                    "action": "queued_for_review",
+                    "action": "rejected",
                     "missing_fields": list(quality.missing_fields),
                 }
             )
@@ -169,7 +180,7 @@ def promote_auto_validated_candidates(
                 row=row,
                 decided_at=decided_at,
                 previous_state="auto_validated",
-                new_state="in_review",
+                new_state="rejected",
                 reason_code=reason_code,
                 reason_text="Dynamic candidate lacked the persisted official-source AI assessment required for automatic publication.",
                 review_task_id=review_task_id,
@@ -179,7 +190,7 @@ def promote_auto_validated_candidates(
                 },
             )
             skipped_items.append(
-                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "queued_for_review"}
+                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "rejected"}
             )
             continue
         discovery_role = str(row.get("discovery_role") or "").strip().lower()
@@ -199,14 +210,14 @@ def promote_auto_validated_candidates(
                 row=row,
                 decided_at=decided_at,
                 previous_state="auto_validated",
-                new_state="in_review",
+                new_state="rejected",
                 reason_code=reason_code,
                 reason_text="Candidate source role was missing, so automatic publication was unsafe.",
                 review_task_id=review_task_id,
                 event_payload={"source_confidence": float(row["source_confidence"])},
             )
             skipped_items.append(
-                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "queued_for_review"}
+                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "rejected"}
             )
             continue
         if discovery_role != "detail":
@@ -281,14 +292,14 @@ def promote_auto_validated_candidates(
                 row=row,
                 decided_at=decided_at,
                 previous_state="auto_validated",
-                new_state="in_review",
+                new_state="rejected",
                 reason_code=reason_code,
                 reason_text="Candidate source contains multiple product sections that cannot be safely auto-promoted as one product.",
                 review_task_id=review_task_id,
                 event_payload={"source_confidence": float(row["source_confidence"])},
             )
             skipped_items.append(
-                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "queued_for_review"}
+                {"candidate_id": candidate_id, "skip_reason": reason_code, "action": "rejected"}
             )
             continue
         product_name_skip_reason = _non_product_name_skip_reason(str(row.get("product_name") or ""))
@@ -562,31 +573,15 @@ def _has_deterministic_sibling_lending_boundary(row: dict[str, Any]) -> bool:
 
 
 def _requires_collection_ai_grounding(row: dict[str, Any]) -> bool:
-    return str(row.get("product_type") or "").strip().lower() not in {"chequing", "savings", "gic"}
+    return True
 
 
 def _collection_ai_assessment_is_eligible(assessment: dict[str, Any]) -> bool:
-    verified_fields = _coerce_string_list(assessment.get("verified_fields"))
-    official_sources = assessment.get("official_sources")
-    has_official_source = isinstance(official_sources, list) and any(
-        isinstance(source, dict) and str(source.get("url") or "").strip()
-        for source in official_sources
-    )
-    try:
-        verified_ratio = float(assessment.get("verified_ratio") or 0.0)
-        threshold = float(assessment.get("threshold") or 1.0)
-    except (TypeError, ValueError):
-        return False
-    return (
-        assessment.get("contract_version") == "collection-official-grounding-v2"
-        and assessment.get("required") is True
-        and assessment.get("eligible") is True
-        and assessment.get("product_identity_verified") is True
-        and has_official_source
-        and "product_name" in verified_fields
-        and len(set(verified_fields)) >= 2
-        and verified_ratio >= threshold
-    )
+    return (assessment.get("contract_version") == ACCURACY_VERSION
+            and assessment.get("required") is True
+            and assessment.get("eligible") is True
+            and assessment.get("product_identity_verified") is True
+            and assessment.get("verified_ratio") == 1.0)
 
 
 def _non_product_source_reason(source_metadata: object) -> str | None:
@@ -829,7 +824,13 @@ def _queue_candidate_for_review(
     queue_reason_code: str,
     issue_codes: list[str],
     decided_at: datetime,
-) -> str:
+) -> str | None:
+    receipt = _coerce_mapping(_coerce_mapping(row.get("candidate_payload")).get(RECEIPT_KEY))
+    if receipt.get("version") == ACCURACY_VERSION:
+        # Only a new, explicitly versioned collection can enter this branch.
+        _mark_candidate_auto_rejected(connection, candidate_id=str(row["candidate_id"]),
+                                      reason_code=queue_reason_code, decided_at=decided_at)
+        return None
     candidate_id = str(row["candidate_id"])
     issue_summary = [
         {

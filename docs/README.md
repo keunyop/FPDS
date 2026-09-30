@@ -35,6 +35,8 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [Collection accuracy assessment](00-governance/collection-accuracy-audit-2026-09-30.md): new automatic gates, verification and existing-data impact
+
 - [CA/US collection alignment](00-governance/public-collection-alignment-2026-09-29.md): bounded comparison fields, six applied corrections, cost and remaining gaps
 
 - [Official bank link sample](00-governance/public-bank-link-check-2026-09-26.md): initial P1-4 URL checks and operator follow-up

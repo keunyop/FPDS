@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 import unittest
 from unittest.mock import patch
 
+from worker.pipeline.fpds_collection_accuracy import ACCURACY_VERSION, RECEIPT_KEY, payload_digest
+
 from api_service.candidate_auto_promotion import (
     _has_ambiguous_product_boundary,
     _review_row_from_candidate,
@@ -30,6 +32,15 @@ class _Cursor:
 
 class _Connection:
     def __init__(self, responses: list[object]) -> None:
+        # These are DB fixtures after normalization/validation, not raw AI input.
+        # The composed evidence-to-receipt path is tested separately.
+        for response in responses:
+            for row in response if isinstance(response, list) else []:
+                if isinstance(row, dict) and "candidate_payload" in row and not row.get("legacy_fixture"):
+                    row["candidate_payload"][RECEIPT_KEY] = {
+                        "version": ACCURACY_VERSION, "accepted": True,
+                        "digest": payload_digest(row, row["candidate_payload"]),
+                    }
         self._responses = list(responses)
         self.calls: list[tuple[str, dict[str, object]]] = []
 
@@ -73,10 +84,21 @@ def _candidate_row(*, validation_issue_codes: list[str] | None = None) -> dict[s
         },
         "discovery_role": "detail",
         "source_metadata": {},
+        "collection_ai_assessment": {"contract_version": ACCURACY_VERSION, "required": True,
+            "eligible": True, "verified_ratio": 1.0, "product_identity_verified": True},
     }
 
 
 class CandidateAutoPromotionTests(unittest.TestCase):
+    def test_legacy_candidate_is_unchanged_without_implicit_migration(self):
+        candidate = _candidate_row()
+        candidate["legacy_fixture"] = True
+        connection = _Connection([_policy_rows(), [candidate]])
+        result = promote_auto_validated_candidates(connection, run_id="run-001")
+        self.assertEqual(result["skipped_items"][0]["action"], "unchanged")
+        self.assertEqual(result["promoted_count"], 0)
+        self.assertFalse(any(sql.lstrip().startswith(("UPDATE ", "INSERT ", "DELETE ")) for sql, _ in connection.calls))
+
     def test_review_row_preserves_source_document_identity(self) -> None:
         candidate = _candidate_row()
         candidate["source_document_id"] = "src-detail-001"
@@ -126,7 +148,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
 
                 self.assertEqual(result["promoted_count"], 0)
                 self.assertEqual(result["skipped_items"][0]["skip_reason"], "ai_grounding_insufficient")
-                self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+                self.assertEqual(result["skipped_items"][0]["action"], "rejected")
                 self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
 
     def test_incomplete_lending_candidate_returns_to_review_even_with_eligible_ai_assessment(self) -> None:
@@ -227,7 +249,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
                 "subtype_code": "other",
                 "product_name": "Five-Year Fixed Mortgage",
                 "collection_ai_assessment": {
-                    "contract_version": "collection-official-grounding-v2",
+                    "contract_version": ACCURACY_VERSION,
                     "required": True,
                     "eligible": True,
                     "threshold": 0.8,
@@ -327,14 +349,14 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         self.assertEqual(result["promoted_count"], 0)
         self.assertEqual(result["skipped_count"], 1)
         self.assertEqual(result["skipped_items"][0]["skip_reason"], "force_review_issue_code")
-        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+        self.assertEqual(result["skipped_items"][0]["action"], "rejected")
         self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
-        review_insert_call = next(params for sql, params in connection.calls if "INSERT INTO review_task" in sql)
-        self.assertEqual(review_insert_call["candidate_id"], "cand-001")
-        self.assertEqual(review_insert_call["queue_reason_code"], "force_review_issue_code")
+        self.assertFalse(any("INSERT INTO review_task" in sql for sql, _ in connection.calls))
+        rejection = next(params for sql, params in connection.calls if "candidate_state = 'rejected'" in sql)
+        self.assertEqual(rejection["candidate_id"], "cand-001")
         audit_call = next(params for sql, params in connection.calls if "candidate_auto_promotion_skipped" in sql)
-        self.assertEqual(audit_call["new_state"], "in_review")
-        self.assertEqual(audit_call["review_task_id"], "review-auto-001")
+        self.assertEqual(audit_call["new_state"], "rejected")
+        self.assertIsNone(audit_call["review_task_id"])
 
     def test_non_product_page_title_candidate_is_not_promoted(self) -> None:
         candidate = _candidate_row()
@@ -374,7 +396,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
 
         self.assertEqual(result["promoted_count"], 0)
         self.assertEqual(result["skipped_items"][0]["skip_reason"], "ambiguous_product_boundary")
-        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+        self.assertEqual(result["skipped_items"][0]["action"], "rejected")
         self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
 
     def test_fully_grounded_sibling_loc_resolves_family_page_boundary(self) -> None:
@@ -446,7 +468,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
 
         self.assertEqual(result["promoted_count"], 0)
         self.assertEqual(result["skipped_items"][0]["skip_reason"], "ambiguous_product_boundary")
-        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+        self.assertEqual(result["skipped_items"][0]["action"], "rejected")
         self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
 
     def test_verified_coverage_source_is_queued_before_canonical_promotion(self) -> None:
@@ -464,7 +486,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
 
         self.assertEqual(result["promoted_count"], 0)
         self.assertEqual(result["skipped_items"][0]["skip_reason"], "ambiguous_product_boundary")
-        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+        self.assertEqual(result["skipped_items"][0]["action"], "rejected")
         self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
 
     def test_non_product_service_source_is_rejected_before_canonical_promotion(self) -> None:
@@ -513,7 +535,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
 
         self.assertEqual(result["promoted_count"], 0)
         self.assertEqual(result["skipped_items"][0]["skip_reason"], "source_role_missing")
-        self.assertEqual(result["skipped_items"][0]["action"], "queued_for_review")
+        self.assertEqual(result["skipped_items"][0]["action"], "rejected")
 
 
 if __name__ == "__main__":

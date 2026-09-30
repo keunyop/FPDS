@@ -1,5 +1,14 @@
 # FPDS Public
 
+## New collection accuracy — 2026-09-30
+
+Aggregate refresh admits new stamped canonical products only with a valid
+content-bound automatic acceptance result. The result and source evidence stay
+private; current projection/UI allowlists and comparison semantics remain.
+Unstamped historical data is preserved pending the separately reviewed cutover.
+See [policy](../../docs/03-design/collection-accuracy-policy.md) and
+[impact assessment](../../docs/00-governance/collection-accuracy-audit-2026-09-30.md).
+
 This package is the anonymous FPDS market view and product catalog. It presents
 only review-approved public projections; raw evidence, review state, and private
 source traces remain inside FPDS Admin. Its customer-facing identity is

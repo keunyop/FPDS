@@ -1,5 +1,13 @@
 # Public product verification freshness
 
+## Collection policy override — 2026-09-30
+
+New product facts are reverified through automatic collection and the
+[accuracy policy](collection-accuracy-policy.md), without manual product approval.
+Existing freshness/expiry and snapshot-date semantics remain; aggregate refresh
+alone never proves a fact is fresh. References below to human review cadence
+are superseded for new product-fact collection. Legacy cutover is pending.
+
 Date: 2026-09-21
 Status: Implemented and locally verified; no deployment
 

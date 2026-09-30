@@ -190,7 +190,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     validation_successful_target_source_ids = _successful_stage_source_ids(
         stage_output=validation_output,
         action_field="validation_action",
-        success_actions={"review_queued", "auto_validated"},
+        success_actions={"excluded", "auto_validated"},
     )
     superseded_review_count = _supersede_stale_logical_reviews_for_run(run_id=run_id, plan=plan)
     if superseded_review_count:
@@ -207,7 +207,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     )
     _persist_end_to_end_source_summary(run_id=run_id, summary=run_summary)
     promotion_result = _promote_auto_validated_candidates_for_run(run_id=run_id, plan=plan)
-    ai_autopilot_result = _run_collection_review_ai_autopilot_for_run(run_id=run_id, plan=plan)
+    ai_autopilot_result = {"approved_count": 0}  # New collections have no human review phase.
     approved_duplicate_review_count = _supersede_reviews_covered_by_approved_candidates_for_run(
         run_id=run_id,
         plan=plan,

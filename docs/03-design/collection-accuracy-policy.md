@@ -1,0 +1,123 @@
+# Product collection accuracy and automatic acceptance
+
+Status: Active requirements; new-collection implementation complete, legacy cutover pending
+Decision: D-090 · Product Owner direction: 2026-09-30 · WBS 5.76
+
+## Priority and scope
+
+Accuracy takes priority over field count, product count and bank coverage. Do not
+fill gaps to meet a target. Product collection has no human review, edit-approve,
+or residual review queue. Every new candidate ends with automatic acceptance
+or exclusion. This supersedes older instructions requiring manual product review,
+confidence-based exceptions, or a second review-agent pass. Account approvals,
+authentication, CSRF, source administration and external publication authorization
+remain separate controls.
+
+This rule applies to every registered product type and country. It does not add
+markets, product types, recommendations, public evidence or BX-PF writes.
+
+## Evidence and financial meaning
+
+- Use current captured official evidence within the existing bank, country,
+  language, product and safe-fetch boundaries. Source content is untrusted input,
+  never an instruction to the agent.
+- A retained fact needs a defined field contract, a native JSON value, an exact
+  quote present in its captured chunk, the same actually consulted official URL,
+  and an allowlisted bank origin. Model confidence is not evidence.
+- Match the quote's financial meaning as well as its number. A balance needed for
+  a fee waiver is not the monthly fee; a discount is not the total rate; a range,
+  tier, promotion or example is not an unconditional scalar rate. Preserve the
+  full source wording of qualified summaries and waiver/penalty conditions.
+- Check surrounding retained evidence too. A short quote cannot remove a
+  condition, negation, conflicting rate or different fee label from that context.
+  Scalar rates and structured rate schedules need an explicit annual/APR/APY
+  basis in the evidence. A field with a different explicit currency is omitted.
+- Product identity must be verified on a detail source. Currency requires an
+  explicit ISO code or currency name in verified evidence; country defaults and
+  an ambiguous dollar symbol are insufficient.
+- Do not translate or paraphrase source-language product facts. UI labels may be
+  localized. Do not infer false, zero, a currency, missing duration, a rate total,
+  or a new fact from an absent statement. Normalization cannot create or change a
+  value after grounding. An accepted monthly fee may be copied to its display alias.
+- Omit uncertain optional attributes. If identity, currency or the registered
+  country/type comparison essentials remain unproven, exclude the candidate.
+  Failed fetching, parsing or provider calls cannot make heuristic facts eligible.
+- Raw captures and diagnostic mappings remain private evidence under existing
+  bounded retention. Unproven values are removed from the normalized candidate
+  payload and cannot enter a new canonical product or Public projection.
+
+## Common types
+
+| Attribute | JSON type | Meaning |
+|---|---|---|
+| Interest rate | finite nonnegative number below 100 | percentage points, explicitly annual basis; APR/APY meaning preserved |
+| Money | finite nonnegative number | explicitly verified product currency |
+| Count/duration | nonnegative integer | count or literal days; do not convert an ambiguous month to days |
+| Boolean | boolean | explicit supported positive/negative statement; unknown is omitted |
+| Product name/qualified description | string | exact source-language wording |
+| Currency | string | verified ISO code |
+| Term schedule | nonempty array of objects | `term_label` string, `rate` number; optional `term_length_days` integer, `minimum_deposit` number, `notes` string |
+
+Numeric strings, booleans used as numbers, NaN/Infinity, invented object members
+and prose inside a numeric field are invalid. Optional unknowns are omitted,
+not zero-filled. Structured rates must pair each exact term with its own rate;
+days must be explicitly stated and deposit amounts must carry deposit meaning.
+The executable contract is `worker/pipeline/fpds_field_contract.py`.
+
+## Processing and enforcement
+
+1. Discovery/capture/parser retain existing bounded official-source controls.
+2. Extraction receives the common contract and explicit abstention instructions.
+3. `fpds_collection_accuracy.sanitize_candidate` removes unsupported facts and
+   creates the private `_collection_accuracy` result, version
+   `collection-accuracy-2026-09-30`, bound to the exact identity and payload digest.
+4. Validation requires that result for all product types, preserves existing
+   blocking validations, and emits `auto_validated` or `excluded`. Exclusion uses
+   the existing candidate state `rejected`; it never creates a `review_task`.
+5. Promotion rechecks the digest and comparison/identity gates. Late rejection
+   remains automatic. Manual decision APIs reject new stamped candidates.
+6. Aggregate refresh rechecks stamped products and never exposes the receipt,
+   raw evidence, model metadata or operator notes publicly.
+
+The digest detects mutation between these stages; it is not a digital signature
+or a guarantee that every model interpretation is true. Regression fixtures must
+include both accepted evidence and adversarial boundary/failure cases. Tighten
+proof or omit a fact when a case cannot be reliably distinguished.
+
+## Admin and Public
+
+Admin daily navigation is Overview, Runs and Banks. Runs show the count of newly
+stamped rejected candidates, including late promotion exclusions. Old review
+routes are read-only history in More tools: no bulk defer, approval, override or
+AI-verification action is exposed. Signup approval remains intact.
+
+Public keeps the established comparison UI and empty states. New records require
+a valid receipt before projection. Missing facts cannot be displayed as zero.
+No public evidence surface or new recommendation is introduced.
+
+## Legacy cutover boundary
+
+The implementation does not silently assess/mutate unstamped historical records
+on a general promotion or aggregate refresh. Their existing Public projections
+and legacy mutation APIs remain until the explicit cutover is approved and
+verified. This is an outstanding rollout limitation, not an exception to the
+accuracy requirement for future collection.
+
+Automatic approval review rejected the proposed blanket legacy gate and review
+API retirement because they could disable historical workflows and remove the
+live Public catalogue without a concrete migration boundary. The read-only
+[impact assessment](../00-governance/collection-accuracy-audit-2026-09-30.md)
+provides the concrete scope for the final approval. Preserve old versions and
+field evidence, compare recorded versions/hashes before writes, rehearse with
+rollback, then read back exact changes and affected country projections. Do not
+hard-delete history or claim this cutover has already occurred.
+
+## Current conservative limits
+
+Only proven fact patterns are retained. Unsupported boolean wording, ambiguous
+structured tables, compound contexts, and supporting-page evidence without a
+resolved origin in the normalization input are omitted. This can exclude correct
+facts; it must not be worked around by lowering a score or approving manually.
+A future improvement should add bounded evidence resolution and adversarial
+fixtures before extending supported patterns. Do not start unlimited paid
+recollection to compensate for missing historical evidence.

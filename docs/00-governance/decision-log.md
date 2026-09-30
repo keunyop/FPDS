@@ -1,5 +1,20 @@
 # FPDS Decision Log
 
+## D-090 — Accuracy-first autonomous product collection — 2026-09-30
+
+Accepted Product Owner direction: fewer accurate facts take priority over
+coverage. Product collection has no human review/override step. Share native
+types/units, retain only exact official grounded values, omit optional unknowns
+and automatically exclude incomplete/ambiguous candidates for every type.
+
+Supersedes product-review/score exceptions in older decisions, including residual
+review autopilot and manual fact re-verification. Preserve account/security and
+external publication controls. Implementation uses versioned content-bound
+acceptance on new records; historical mass remediation/API retirement remains
+pending after automatic approval review rejected blanket changes.
+[Policy](../03-design/collection-accuracy-policy.md) and
+[concrete impact assessment](collection-accuracy-audit-2026-09-30.md).
+
 Version: 2.0
 Date: 2026-04-22
 Status: Active current baseline

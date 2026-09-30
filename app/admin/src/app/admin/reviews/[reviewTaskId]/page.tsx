@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
-import { ReviewDetailSurface } from "@/components/fpds/admin/review-detail-surface";
+import { ReviewHistorySurface } from "@/components/fpds/admin/review-history-surface";
 import { fetchAdminSession, fetchReviewTaskDetail, getAdminApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 import { buildReviewQueueBrowserSearchParams, parseReviewQueueReturnFilters } from "@/lib/review-queue-query";
@@ -69,7 +69,7 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
         role: session.user.role,
       }}
     >
-      <ReviewDetailSurface csrfToken={session.csrf_token} detail={detail} locale={locale} returnTo={returnTo} />
+      <ReviewHistorySurface detail={detail} locale={locale} returnTo={returnTo} />
     </AdminShell>
   );
 }

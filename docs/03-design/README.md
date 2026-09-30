@@ -7,6 +7,8 @@ Use this file to avoid opening every design doc.
 
 ## Core Runtime Design
 
+- [Collection accuracy](collection-accuracy-policy.md): automatic acceptance/exclusion, common types and pending legacy cutover (D-090)
+
 - `domain-model-canonical-schema.md`: canonical fields, validation, and taxonomy
 - `financial-product-field-contract.md`: cross-bank field types, units, field notes, evidence merge, and collection verification
 - `workflow-state-ingestion-design.md`: ingestion workflow stages and state model

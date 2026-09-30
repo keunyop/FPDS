@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Any
 
 
-FIELD_CONTRACT_VERSION = "2026-08-12"
+FIELD_CONTRACT_VERSION = "2026-09-30"
 
 
 @dataclass(frozen=True)
@@ -15,6 +15,7 @@ class FieldContract:
 
 
 _STRING_FIELDS = {
+    "currency",
     "product_name",
     "description_short",
     "fee_waiver_condition",
@@ -150,10 +151,25 @@ def value_matches_contract(field_name: str, value: object) -> bool:
     if contract.value_type == "boolean":
         return isinstance(value, bool)
     if contract.value_type == "integer":
-        return isinstance(value, int) and not isinstance(value, bool)
+        return isinstance(value, int) and not isinstance(value, bool) and value >= 0
     if contract.value_type == "decimal":
-        return isinstance(value, (int, float, Decimal)) and not isinstance(value, bool)
+        return (isinstance(value, (int, float, Decimal)) and not isinstance(value, bool)
+                and Decimal(str(value)).is_finite() and value >= 0)
     if contract.value_type == "json":
+        if field_name == "term_rate_table":
+            if not isinstance(value, list) or not value:
+                return False
+            allowed = {"term_label", "term_length_days", "rate", "minimum_deposit", "notes"}
+            return all(
+                isinstance(row, dict) and not (set(row) - allowed)
+                and isinstance(row.get("term_label"), str) and bool(row["term_label"].strip())
+                and row.get("rate") is not None and value_matches_contract("standard_rate", row["rate"])
+                and row["rate"] < 100
+                and value_matches_contract("term_length_days", row.get("term_length_days"))
+                and value_matches_contract("minimum_deposit", row.get("minimum_deposit"))
+                and (row.get("notes") is None or isinstance(row["notes"], str))
+                for row in value
+            )
         return isinstance(value, (list, dict))
     return True
 

@@ -551,6 +551,10 @@ def apply_review_decision(
         raise ReviewTaskError(status_code=400, code="invalid_action", message="Unsupported review action.")
 
     review_row = _load_locked_review_task(connection, review_task_id=review_task_id)
+    from worker.pipeline.fpds_collection_accuracy import RECEIPT_KEY
+    if RECEIPT_KEY in _coerce_mapping(review_row.get("candidate_payload")):
+        raise ReviewTaskError(status_code=409, code="automatic_collection_only",
+                              message="New product collections require automatic verification and cannot be manually approved or edited.")
     current_state = str(review_row["review_state"])
     target_state = ACTION_TO_STATE[action_type]
     if current_state in TERMINAL_REVIEW_STATES:
@@ -775,6 +779,10 @@ def _apply_canonical_approval(
     decided_at: datetime,
     request_id: str,
 ) -> dict[str, Any]:
+    from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid, RECEIPT_KEY
+    if RECEIPT_KEY in approved_payload and not acceptance_receipt_valid(review_row, approved_payload):
+        raise ReviewTaskError(status_code=422, code="accuracy_check_failed",
+                              message="Canonical products require evidence-bound automatic acceptance.")
     current_product = _find_current_product(connection, review_row=review_row, approved_payload=approved_payload)
     product_id = current_product["product_id"] if current_product else new_id("prod")
     review_task_id = _string_or_none(review_row.get("review_task_id"))

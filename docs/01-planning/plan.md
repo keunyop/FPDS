@@ -1,5 +1,15 @@
 # FPDS Project Execution Plan
 
+## Current delivery slice — 2026-09-30
+
+WBS 5.76 / D-090: accuracy-first autonomous collection. Implement shared typed
+proof, abstaining prompts, automatic acceptance/exclusion, read-only historical
+review UI, and Public enforcement for new records. Audit existing data before
+legacy cutover. Local implementation/verification is separate from production
+activation and the pending mass data/API transition. See
+[policy](../03-design/collection-accuracy-policy.md) and
+[impact assessment](../00-governance/collection-accuracy-audit-2026-09-30.md).
+
 Version: 1.0
 Date: 2026-03-28
 Basis: `FPDS_Requirements_Definition_v1_5.md`

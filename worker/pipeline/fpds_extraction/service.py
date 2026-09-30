@@ -4181,6 +4181,7 @@ def _extract_official_fields_with_ai(
         not in {"product_family", "product_type", "bank_code", "country_code", "source_language", "currency"}
         and (not registered_fields or field_name in registered_fields)
     ]
+    ai_requested_fields = list(dict.fromkeys(["product_name", "currency", *ai_requested_fields]))
     profile = country_product_profile(country_code=context.country_code, product_type=_infer_product_type(context))
     requirement_fields = {name for requirement in (profile.requirements if profile else ())
                           for name in requirement.alternatives}
@@ -4385,6 +4386,9 @@ def _extract_official_fields_with_ai(
             verified_value = json.loads(str(item.get("verified_value_json") or ""))
         except (json.JSONDecodeError, TypeError, ValueError):
             continue
+        from worker.pipeline.fpds_field_contract import value_matches_contract
+        if not value_matches_contract(field_name, verified_value):
+            continue
         candidate_value = _coerce_ai_candidate_value(
             field_name=field_name,
             value=_json_value_for_coercion(verified_value),
@@ -4417,7 +4421,7 @@ def _extract_official_fields_with_ai(
                     "official_grounding_contract_version": "collection-official-grounding-v2",
                     "official_verification_status": str(item.get("status")),
                     "official_web_sources": cited_sources,
-                    "evidence_quote": evidence_quote[:500],
+                    "evidence_quote": evidence_quote,
                     "rationale": str(item.get("rationale") or "")[:600],
                     "dynamic_product_type": _uses_dynamic_product_type(context),
                 },
@@ -4567,24 +4571,16 @@ def _ai_verified_value_is_supported_by_quote(
     therefore must be copied in full rather than extended by the model.
     """
 
-    normalized_value = _normalize_text(_json_value_for_coercion(value))
-    normalized_quote = _normalize_text(evidence_quote)
-    if not normalized_value or not normalized_quote:
-        return False
+    from worker.pipeline.fpds_collection_accuracy import quote_supports_value
+    # Extraction historically represents decimal values as canonical strings.
     contract = field_contract(field_name)
-    if contract and contract.unit == "percentage_points" and rate_component_only(value=value, context=normalized_quote):
-        return False
-    if field_name in _EXACT_QUOTE_PROSE_FIELDS:
-        return normalized_value.casefold() in normalized_quote.casefold()
-    numeric_tokens = re.findall(r"\d+(?:\.\d+)?", normalized_value.replace(",", ""))
-    normalized_financial_quote = normalized_quote.replace(",", "")
-    return all(
-        re.search(
-            rf"(?<!\d){re.escape(token.rstrip('0').rstrip('.') if '.' in token else token)}(?:\.0+)?(?!\d)",
-            normalized_financial_quote,
-        )
-        for token in numeric_tokens
-    )
+    checked = value
+    if contract and contract.value_type == "decimal" and isinstance(value, str):
+        try:
+            checked = float(Decimal(value))
+        except (InvalidOperation, ValueError):
+            return False
+    return quote_supports_value(field_name, checked, evidence_quote)
 
 
 def _json_value_for_coercion(value: object) -> str:
@@ -4638,7 +4634,7 @@ def _coerce_ai_candidate_value(*, field_name: str, value: str, value_type: str) 
         return _normalize_decimal(normalized.strip("%$ ").replace(",", ""))
     if value_type == "integer":
         try:
-            return int(re.sub(r"[^0-9-]", "", normalized))
+            return int(normalized) if re.fullmatch(r"[0-9]+", normalized) else None
         except ValueError:
             return None
     if value_type == "boolean":

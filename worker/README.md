@@ -1,5 +1,15 @@
 # Worker Boundary
 
+## Accuracy gate — 2026-09-30
+
+`fpds_collection_accuracy` runs after normalization and before validation. It
+omits facts without exact official evidence, type, meaning and currency proof.
+All product types require its content-bound receipt. Validation emits
+`auto_validated` or `excluded` and creates no review task. Legacy confidence
+thresholds cannot weaken this rule. Earlier manual/residual-review instructions
+below are superseded for new collection. See
+[policy](../docs/03-design/collection-accuracy-policy.md).
+
 This directory holds private pipeline and integration workers.
 
 ## OpenAI model and reasoning

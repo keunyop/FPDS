@@ -19,6 +19,7 @@ import { buildReviewQueueBrowserSearchParams, type ReviewQueuePageFilters } from
 import { cn } from "@/lib/utils";
 
 type ReviewQueueResultsProps = {
+  readOnly: boolean;
   queue: ReviewQueueResponse;
   filters: ReviewQueuePageFilters;
   isLoading: boolean;
@@ -39,11 +40,11 @@ const ACTIVE_REVIEW_STATES = new Set(["queued", "deferred"]);
 const RESULTS_COPY = {
   en: {
     results: "Results",
-    tableTitle: "Review work",
+    tableTitle: "Historical records",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
       `Page ${page} of ${Math.max(totalPages, 1)} · ${totalItems} matching task${totalItems === 1 ? "" : "s"}`,
     noMatches: "No matching tasks",
-    emptyTitle: "No review work matches these filters.",
+    emptyTitle: "No historical records match these filters.",
     emptyBody: "Widen the state filter, clear the search term, or reset the queue controls.",
     resetQueueFilters: "Reset queue filters",
     select: "Select",
@@ -56,11 +57,11 @@ const RESULTS_COPY = {
     bulkFailed: (action: string, failed: number) => `${action} failed for ${failed} task${failed === 1 ? "" : "s"}.`,
     bank: "Bank",
     product: "Product",
-    issueSummary: "Issue & next step",
+    issueSummary: "Recorded issue",
     severity: "Severity & confidence",
     status: "Status & created",
     references: "References",
-    recommendation: "Next",
+    recommendation: "Past recommendation",
     confidence: "confidence",
     candidate: "Candidate",
     task: "Task",
@@ -73,11 +74,11 @@ const RESULTS_COPY = {
   },
   ko: {
     results: "결과",
-    tableTitle: "검토 작업",
+    tableTitle: "과거 기록",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
       `${Math.max(totalPages, 1)}페이지 중 ${page}페이지 · 일치 작업 ${totalItems}건`,
     noMatches: "일치하는 작업 없음",
-    emptyTitle: "현재 필터에 맞는 검토 작업이 없습니다.",
+    emptyTitle: "현재 필터에 맞는 과거 기록이 없습니다.",
     emptyBody: "상태 범위를 넓히거나 검색어를 지우고 대기열 필터를 초기화해 보세요.",
     resetQueueFilters: "대기열 필터 초기화",
     select: "선택",
@@ -90,11 +91,11 @@ const RESULTS_COPY = {
     bulkFailed: (action: string, failed: number) => `${action} ${failed}건 실패.`,
     bank: "은행",
     product: "상품",
-    issueSummary: "문제 및 다음 단계",
+    issueSummary: "기록된 문제",
     severity: "심각도 및 신뢰도",
     status: "상태 및 생성 시각",
     references: "참조",
-    recommendation: "다음 단계",
+    recommendation: "과거 제안",
     confidence: "신뢰도",
     candidate: "후보",
     task: "작업",
@@ -107,11 +108,11 @@ const RESULTS_COPY = {
   },
   ja: {
     results: "結果",
-    tableTitle: "審査作業",
+    tableTitle: "過去の記録",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
       `${Math.max(totalPages, 1)}ページ中${page}ページ · 該当${totalItems}件`,
     noMatches: "該当する作業なし",
-    emptyTitle: "現在のフィルターに一致する審査作業はありません。",
+    emptyTitle: "現在のフィルターに一致する過去の記録はありません。",
     emptyBody: "状態の範囲を広げるか、検索語を消去してキューフィルターをリセットしてください。",
     resetQueueFilters: "キューフィルターをリセット",
     select: "選択",
@@ -124,11 +125,11 @@ const RESULTS_COPY = {
     bulkFailed: (action: string, failed: number) => `${action}：${failed}件失敗。`,
     bank: "銀行",
     product: "商品",
-    issueSummary: "問題と次の手順",
+    issueSummary: "記録された問題",
     severity: "重大度と信頼度",
     status: "状態と作成日時",
     references: "参照",
-    recommendation: "次の手順",
+    recommendation: "過去の提案",
     confidence: "信頼度",
     candidate: "候補",
     task: "作業",
@@ -153,6 +154,7 @@ export function ReviewQueueResults({
   onReset,
   productTypes,
   csrfToken,
+  readOnly,
 }: ReviewQueueResultsProps) {
   const copy = RESULTS_COPY[locale];
   const productTypeLabelMap = buildAdminProductTypeLabelMap(productTypes);
@@ -160,7 +162,7 @@ export function ReviewQueueResults({
   const [pendingAction, setPendingAction] = useState<BulkAction | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
-  const selectableItems = queue.items.filter(isBulkSelectable);
+  const selectableItems = readOnly ? [] : queue.items.filter(isBulkSelectable);
   const selectableIds = selectableItems.map((item) => item.review_task_id);
   const visibleIdsKey = queue.items.map((item) => item.review_task_id).join("|");
   const allSelectableSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedSet.has(id));
@@ -197,6 +199,7 @@ export function ReviewQueueResults({
   }
 
   async function handleBulkAction(action: BulkAction) {
+    if (readOnly) return;
     const selectedItems = queue.items.filter((item) => selectedSet.has(item.review_task_id) && isBulkSelectable(item));
     if (selectedItems.length === 0) {
       setStatusMessage(copy.bulkUnavailable);
@@ -283,7 +286,7 @@ export function ReviewQueueResults({
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-2 border-b border-border bg-background/45 px-4 py-2.5 lg:flex-row lg:items-center lg:justify-between">
+          {!readOnly && <div className="flex flex-col gap-2 border-b border-border bg-background/45 px-4 py-2.5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <label className="inline-flex min-h-10 items-center gap-2 text-sm font-medium text-foreground">
                 <input
@@ -306,7 +309,7 @@ export function ReviewQueueResults({
               </Button>
               </div>
             ) : null}
-          </div>
+          </div>}
 
           {statusMessage ? (
             <div className="border-b border-border px-4 py-3">
@@ -320,7 +323,7 @@ export function ReviewQueueResults({
               return (
                 <li className="grid gap-3 px-4 py-4" key={item.review_task_id}>
                   <div className="flex min-w-0 items-start gap-2">
-                    <label className="-ml-2 inline-flex h-10 w-10 shrink-0 items-center justify-center">
+                    {!readOnly && <label className="-ml-2 inline-flex h-10 w-10 shrink-0 items-center justify-center">
                       <span className="sr-only">{copy.selectTask(item.product_name)}</span>
                       <input
                         checked={selectedSet.has(item.review_task_id)}
@@ -329,7 +332,7 @@ export function ReviewQueueResults({
                         onChange={(event) => toggleItem(item.review_task_id, event.currentTarget.checked)}
                         type="checkbox"
                       />
-                    </label>
+                    </label>}
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-muted-foreground">
                         {item.bank_name} <span aria-hidden="true">·</span> <span className="font-mono">{item.bank_code}</span>
@@ -395,7 +398,7 @@ export function ReviewQueueResults({
               <caption className="sr-only">{copy.tableTitle}</caption>
               <thead>
                 <tr className="text-left text-xs text-muted-foreground">
-                  <th className="w-12 border-b border-border px-2 py-2.5 text-center font-medium">{copy.select}</th>
+                  {!readOnly && <th className="w-12 border-b border-border px-2 py-2.5 text-center font-medium">{copy.select}</th>}
                   <th className="w-[13%] border-b border-border px-3 py-2.5 font-medium">{copy.bank}</th>
                   <th className="w-[18%] border-b border-border px-3 py-2.5 font-medium">{copy.product}</th>
                   <th className="w-[31%] border-b border-border px-3 py-2.5 font-medium">{copy.issueSummary}</th>
@@ -409,7 +412,7 @@ export function ReviewQueueResults({
                   const selectable = isBulkSelectable(item);
                   return (
                     <tr className="align-top" key={item.review_task_id}>
-                      <td className="border-b border-border/70 px-1 py-2">
+                      {!readOnly && <td className="border-b border-border/70 px-1 py-2">
                         <label className="inline-flex h-10 w-10 items-center justify-center">
                           <span className="sr-only">{copy.selectTask(item.product_name)}</span>
                           <input
@@ -420,7 +423,7 @@ export function ReviewQueueResults({
                             type="checkbox"
                           />
                         </label>
-                      </td>
+                      </td>}
                       <td className="border-b border-border/70 px-3 py-3">
                         <div className="grid gap-1">
                           <span className="font-medium text-foreground">{item.bank_name}</span>

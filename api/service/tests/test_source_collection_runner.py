@@ -213,7 +213,7 @@ class SourceCollectionRunnerTests(unittest.TestCase):
                     ]
                 }
             if module_name == "worker.pipeline.fpds_validation_routing":
-                return {"source_results": [{"source_id": "BMO-CHQ-002", "validation_action": "review_queued"}]}
+                return {"source_results": [{"source_id": "BMO-CHQ-002", "validation_action": "excluded"}]}
             return {}
 
         temp_dir = self._workspace_temp_path("filter-successes")

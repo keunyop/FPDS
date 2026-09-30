@@ -1,5 +1,19 @@
 # FPDS Codex Instructions
 
+## Mandatory product collection rule — 2026-09-30
+
+- Accuracy takes priority over coverage. Collect fewer verified facts; omit
+  uncertain optional attributes and automatically exclude candidates missing
+  proven identity, currency or comparison essentials.
+- Product collection must not depend on human review, edit-approval or a residual
+  review queue. An AI confidence score cannot replace source evidence or bypass
+  automatic validation. Preserve separate account/security approval controls.
+- Use the shared field contract and exact financial units/types across products.
+  Never infer missing values, false/zero, currency or rate/term semantics.
+- Read `docs/03-design/collection-accuracy-policy.md` for collection work. Add
+  regression evidence before extending accepted patterns; update all gates and
+  prompts together. Historical cutover remains an explicit pending operation.
+
 These instructions apply to the entire repository, including FPDS Admin and
 FPDS Public.
 
@@ -81,7 +95,7 @@ For any UI or visual task, also read before editing:
   traceability, reviewability, auditability, and security before visual polish.
 - Never invent a financial fact or silently coerce an ambiguous value. Preserve
   units, currency, rate semantics, term boundaries, source language, freshness,
-  and field-level evidence. Route uncertain facts to omission or review.
+  and field-level evidence. Route uncertain optional facts to omission and incomplete candidates to automatic exclusion.
 - Keep raw evidence private. Public surfaces may expose only approved,
   active public projections; they must not expose internal evidence traces,
   operator notes, secrets, or private object-storage access.

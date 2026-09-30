@@ -1,5 +1,15 @@
 # FPDS API Service
 
+## Autonomous collection — 2026-09-30
+
+New stamped candidates require automatic accuracy acceptance before canonical
+promotion; manual decision APIs return `automatic_collection_only` for them.
+Late failures are rejected without review tasks. The collection runner does not
+invoke review autopilot. Run detail returns `automatically_excluded_count` from
+stamped rejected candidates. Historical unstamped mutation APIs remain pending
+explicit cutover; do not present that as full legacy retirement. See
+[policy](../../docs/03-design/collection-accuracy-policy.md).
+
 This package is the live FastAPI runtime for authenticated Admin operations
 and Public aggregate reads, engagement, and feedback. The current endpoint
 map is implemented in `api_service/main.py`; historical WBS delivery numbers

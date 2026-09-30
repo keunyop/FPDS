@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from api_service.review_diagnosis import build_review_diagnosis, build_review_field_items
 from api_service.review_detail import (
@@ -45,6 +45,33 @@ class _FailingAuditConnection:
 
 
 class ReviewDetailTests(unittest.TestCase):
+    def test_new_collection_cannot_be_manually_decided(self):
+        from api_service.review_detail import apply_review_decision
+        from worker.pipeline.fpds_collection_accuracy import RECEIPT_KEY
+        connection = MagicMock()
+        for action in ("approve", "edit_approve", "defer", "reject"):
+            with patch("api_service.review_detail._load_locked_review_task", return_value={"candidate_payload": {RECEIPT_KEY: {"accepted": False}}}):
+                with self.assertRaises(ReviewTaskError) as error:
+                    apply_review_decision(connection, review_task_id="new", action_type=action,
+                        actor={"role":"admin"}, reason_code=None, reason_text=None,
+                        override_payload={"standard_rate":9}, context=MagicMock())
+                self.assertEqual(error.exception.status_code, 409)
+                self.assertEqual(error.exception.code, "automatic_collection_only")
+        connection.execute.assert_not_called()
+
+    def test_modified_new_facts_cannot_reach_canonical_write(self):
+        from datetime import datetime, UTC
+        from api_service.review_detail import _apply_canonical_approval
+        from worker.pipeline.fpds_collection_accuracy import RECEIPT_KEY
+        connection = MagicMock()
+        with self.assertRaises(ReviewTaskError) as error:
+            _apply_canonical_approval(connection, review_row={},
+                approved_payload={"standard_rate":9, RECEIPT_KEY:{"accepted":True}},
+                override_changed_fields=[], action_type="auto_promote", actor={"role":"system"},
+                decided_at=datetime.now(UTC), request_id="test")
+        self.assertEqual(error.exception.code, "accuracy_check_failed")
+        connection.execute.assert_not_called()
+
     def test_current_product_lookup_uses_unique_product_name_source_continuity(self) -> None:
         current_product = {
             "product_id": "prod-existing",

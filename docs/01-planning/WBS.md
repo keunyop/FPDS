@@ -1,5 +1,19 @@
 # FPDS Detailed WBS
 
+## 5.76 — Accuracy-first autonomous collection (2026-09-30)
+
+Status: Local implementation and verification complete; legacy cutover and
+production activation pending. D-090 replaces human product-review acceptance.
+
+- Shared finite/native field contracts, exact official evidence and financial
+  context gates; no invented values or post-grounding normalization changes.
+- Automatic acceptance/exclusion for all product types, canonical and Public
+  checks on new stamped records, no collection review-agent phase.
+- Admin daily navigation/results and read-only historical review records.
+- Read-only audit plus concrete version/hash manifest for existing products and
+  pending review records. No live canonical mutation or deployment in this slice.
+- Verification and remaining actions: [assessment](../00-governance/collection-accuracy-audit-2026-09-30.md).
+
 Version: 1.0
 Date: 2026-03-29
 Based on:

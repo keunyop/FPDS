@@ -240,6 +240,9 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
             ir.retry_of_run_id,
             ir.retried_by_run_id,
             ir.run_metadata,
+            (SELECT COUNT(*) FROM normalized_candidate AS excluded
+             WHERE excluded.run_id = ir.run_id AND excluded.candidate_state = 'rejected'
+               AND excluded.candidate_payload ? '_collection_accuracy') AS automatically_excluded_count,
             ir.started_at,
             ir.completed_at,
             COALESCE(rsi_counts.source_item_count, ir.source_scope_count) AS source_item_count
@@ -373,6 +376,7 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
             "correlation_id": _string_or_none(run_metadata.get("correlation_id")),
             "request_id": _string_or_none(run_metadata.get("request_id")),
             "source_ids": _coerce_string_list(run_metadata.get("source_ids")),
+            "automatically_excluded_count": int(run_row.get("automatically_excluded_count") or 0),
             "retry_action": describe_run_retry_action(
                 run_state=str(run_row["run_state"]),
                 partial_completion_flag=bool(run_row["partial_completion_flag"]),

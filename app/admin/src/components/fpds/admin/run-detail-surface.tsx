@@ -27,11 +27,11 @@ const RUN_DETAIL_COPY = {
     previousAttempt: "Previous attempt",
     nextAttempt: "Next attempt",
     partialCompletion: "Partial completion",
-    description: "Execution outcome, source impact, related reviews, and usage.",
+    description: "Collection results and source diagnostics. Unverified candidates are automatically excluded.",
     path: ["Operations", "Runs", "Run Detail"],
     sourceItems: "Source items",
     candidates: "Candidates",
-    reviewQueued: "Review queued",
+    reviewQueued: "Automatically excluded",
     started: "Started",
     completed: "Completed",
     trigger: "Trigger",
@@ -89,11 +89,11 @@ const RUN_DETAIL_COPY = {
     previousAttempt: "이전 attempt",
     nextAttempt: "다음 attempt",
     partialCompletion: "부분 완료",
-    description: "Execution 결과, source 영향, 관련 review, usage입니다.",
+    description: "수집 결과와 소스 상태를 확인합니다. 정확성을 확인할 수 없는 후보는 자동 제외됩니다.",
     path: ["운영", "Runs", "Run 상세"],
     sourceItems: "Source 항목",
     candidates: "Candidates",
-    reviewQueued: "Review queued",
+    reviewQueued: "자동 제외",
     correlation: "Correlation",
     started: "시작",
     completed: "완료",
@@ -164,11 +164,11 @@ const RUN_DETAIL_COPY = {
     previousAttempt: "前の attempt",
     nextAttempt: "次の attempt",
     partialCompletion: "部分完了",
-    description: "Execution 結果、source 影響、関連 review、usage です。",
+    description: "収集結果とソースの状態です。確認できない候補は自動除外されます。",
     path: ["運用", "Runs", "Run 詳細"],
     sourceItems: "Source 項目",
     candidates: "Candidates",
-    reviewQueued: "Review queued",
+    reviewQueued: "自動除外",
     correlation: "Correlation",
     started: "開始",
     completed: "完了",
@@ -324,7 +324,7 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
           <SummaryStat label={copy.success} value={String(detail.run.success_count)} />
           <SummaryStat label={copy.failure} value={String(detail.run.failure_count)} />
           <SummaryStat label={copy.candidates} value={String(detail.run.candidate_count)} />
-          <SummaryStat label={copy.reviewQueued} value={String(detail.run.review_queued_count)} />
+          <SummaryStat label={copy.reviewQueued} value={String(detail.run.automatically_excluded_count ?? 0)} />
         </div>
 
         <div className="grid divide-y divide-border border-t border-border md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">

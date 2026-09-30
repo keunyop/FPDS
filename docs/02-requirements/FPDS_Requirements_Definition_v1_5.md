@@ -1,4 +1,17 @@
 # FPDS Requirements Definition (PRD / Requirements Spec)
+
+## Product Owner collection override — 2026-09-30
+
+상품 수보다 정확성을 우선한다. 불확실한 선택 속성은 수집값에서 제외하고,
+상품 식별·통화·비교 필수 근거가 부족한 상품은 자동 제외한다. 상품수집에
+사람의 검토·수정 승인·잔여 검토 대기열을 두지 않는다. 모든 상품은 공통
+속성 타입과 금융 단위를 사용한다. 공식 원문의 정확한 근거 없이 추정,
+기본값, 모델 신뢰도만으로 값을 채우거나 승인해서는 안 된다.
+
+이 규칙은 아래의 수동 상품 Review·confidence 예외·review-agent 후처리
+요구사항보다 우선한다. 계정 승인과 보안 통제는 유지한다. 실행 계약과
+기존 데이터 전환의 미완료 경계는
+[수집 정확성 정책](../03-design/collection-accuracy-policy.md)에 정의한다.
 Version: 1.5
 Date: 2026-03-28
 Language: Korean-centered with English technical terms + English/Korean/Japanese UI support

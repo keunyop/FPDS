@@ -25,6 +25,84 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - Accuracy-first autonomous product collection
+
+- D-090 / WBS 5.76 implements the Product Owner's accuracy-over-coverage and
+  no-human-product-review direction. `fpds_collection_accuracy.py` now requires
+  exact current official chunk/URL grounding, source identity, explicit currency,
+  finite native field types and financial context. Omit unknown optional facts;
+  automatically reject candidates missing comparison essentials. Common prompts
+  forbid guesses, absence-derived booleans/zero, invented values and instructions
+  embedded in source text. Normalization cannot rewrite grounded facts.
+- Numeric label/unit/annual-basis and currency checks reject discounts/ranges as
+  scalar rates, waiver balances as fees, decimal-to-integer coercion, unsupported
+  boolean assertions, row-shifted term rates and stripped qualifying context.
+  The private versioned receipt binds identity/payload across validation,
+  canonical promotion and new Public projections. No raw evidence is exposed.
+- New validation and late promotion failures create no review task; collection
+  no longer calls review autopilot. New stamped candidates reject manual decisions.
+  Admin daily navigation is Overview/Runs/Banks, old Review routes are read-only
+  history, and Run detail counts stamped rejected candidates including late gates.
+  Reused existing UI primitives/tokens and retained signup/auth/CSRF controls.
+- The final live audit is read-only: active CA 212 + US 143 = 355; zero completely
+  meet the new proof requirement from retained evidence; queued 467 + deferred 3
+  = 470 historical tasks. Missing proof is not proof every fact is false. Private
+  `tmp/collection-accuracy-audit.json` stores exact IDs, versions, prior hashes,
+  proposed payloads and reasons; the tracked impact assessment records its hash.
+- Automatic approval review rejected blanket historical candidate/Public gating
+  and manual API retirement because of potential mass disruption without a
+  concrete transition boundary. The safe implementation applies new gates to
+  stamped collections only. Historical canonical/Public rows and mutation APIs
+  remain unchanged; read-only Admin UI is already implemented. No live canonical
+  write, paid collection, Public refresh, deployment or service restart occurred.
+- Verification: Worker 555, API 532, Admin 10 and Public 78 tests pass; Admin
+  typecheck/build pass. Local Chrome verifies 39 cases across EN/KO/JA, exact
+  390px/tablet/desktop, real historical data, loading/empty/error, keyboard focus
+  and overflow; zero JS errors/mutation requests. Screenshots inspected. Repo
+  doctor, foundation baseline and diff check pass. Existing package-type warning
+  in Admin test output is non-blocking and unchanged.
+- Rules updated in AGENTS, requirements/scope/plan/WBS/decision/RAID, active
+  collection/field/workflow/IA/freshness docs and boundary READMEs. See
+  `docs/03-design/collection-accuracy-policy.md` and
+  `docs/00-governance/collection-accuracy-audit-2026-09-30.md`.
+- Next: explicit approval of the concrete legacy cutover: versioned deactivation
+  of the 355 products (Public could become empty), automatic closure of the 470
+  historical tasks, retirement of legacy product-decision APIs, rollback rehearsal
+  and CA/US projection readback. Production activation remains unperformed.
+  Keep goal.md: this cutover and independently owned older goals are unresolved.
+
+
+## 2026-09-30 - Operator-authorized targeted recollection started
+
+- The Product Owner explicitly requested recollection after the D-089 diagnosis.
+  Scope is five US catalog items: Santander checking/CD/savings and CNB CD/savings.
+  CNB/WAB LOC and WAB mortgage remain inactive and were not selected.
+- Fresh CNB official reads passed with identity scores 10 (CD) and 9 (Savings),
+  zero negative signals and no unresolved family boundary. Restored only those
+  two catalog rows through `update_source_catalog_item`; existing official URLs
+  and verified domains remain. Metadata preserves prior quarantine context,
+  dated restoration reason, current title/H1 and an evidence SHA-256. Before-state
+  and fresh evidence are retained in ignored local `tmp/targeted-recollection-*`.
+- Launched exactly one sequential five-scope precision batch through the existing
+  catalog service, with an explicit system actor identifying the operator-requested
+  operation. No fabricated user identity, manual Review approval or validation bypass.
+  Normal collection/model/approval/aggregate behavior is part of this request.
+- Accepted at `2026-09-30T14:06:58Z` (07:06:58 America/Vancouver), collection
+  `collection_h9A43rSXmXf0M3rj`. Readback confirms five scoped reservations, active
+  background runner and four scopes still queued. CNB CD passed preparation and
+  created `run_20260930_140658_cnb_gic_collect_YIxMlChW`: run_state=started,
+  three successful snapshot sources, zero failed sources, parse/chunk progressing.
+  These are accepted/in-progress states, not completed collection results.
+- Verification: no active duplicate run before launch, exact five-scope/US checks,
+  concurrent-change checks before restoration, fresh official evidence, service
+  result/readback, runner process/log and unchanged three held scopes. No runtime
+  code changed; git diff --check passes. Existing historical Partial runs remain.
+- Next: Banks shows preparation results and actual run links when created.
+  The background worker continues sequentially after handoff. Inspect completed
+  run/Review outcomes before claiming successful recollection or retrying again.
+  Durable launch receipt: `tmp/targeted-recollection-launch.json`; plan/log:
+  `tmp/source-catalog-collections/collection_h9A43rSXmXf0M3rj.json` and `.log`.
+
 ## 2026-09-30 - Latest collection recurrence and preparation before ingestion
 
 - D-089 / WBS 5.75: read the latest batch started at `2026-09-30T12:01:40Z`

@@ -1,5 +1,14 @@
 # FPDS Workflow and State Design - End-to-End Ingestion Flow
 
+## Current collection state override — 2026-09-30
+
+D-090 replaces new product review routing with automatic `auto_validated` or
+`excluded` outcomes; exclusion persists candidate state `rejected`, with no
+review task. Promotion can still reject after its final gates. A failed external
+source/provider remains an operational failure, never an approval fallback.
+[Collection policy](collection-accuracy-policy.md) supersedes older human-review
+and residual-review paths; historical cutover remains pending.
+
 Version: 1.0
 Date: 2026-03-31
 Status: Approved Baseline for WBS 1.3.1

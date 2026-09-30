@@ -570,7 +570,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
         )
         self.assertIn("required_field_missing", missing_with_list_issues)
 
-    def test_prototype_routes_candidate_to_review_task(self) -> None:
+    def test_prototype_without_accuracy_receipt_is_excluded_without_review(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-service")
         try:
             storage_config = ValidationRoutingStorageConfig(
@@ -600,21 +600,21 @@ class ValidationRoutingServiceTests(unittest.TestCase):
 
             self.assertFalse(result.partial_completion_flag)
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_action, "excluded")
             self.assertEqual(source_result.validation_status, "pass")
-            self.assertEqual(source_result.candidate_state, "in_review")
-            self.assertEqual(source_result.review_reason_code, "manual_sampling_review")
-            self.assertIsNotNone(source_result.review_task_record)
+            self.assertEqual(source_result.candidate_state, "rejected")
+            self.assertEqual(source_result.review_reason_code, "ai_grounding_insufficient")
+            self.assertIsNone(source_result.review_task_record)
 
             artifact_path = temp_path / Path(str(source_result.validation_storage_key).replace("/", "\\"))
             self.assertTrue(artifact_path.exists())
             payload = json.loads(artifact_path.read_text(encoding="utf-8"))
-            self.assertEqual(payload["candidate_after"]["candidate_state"], "in_review")
+            self.assertEqual(payload["candidate_after"]["candidate_state"], "rejected")
             self.assertEqual(payload["review_task_id"], source_result.review_task_id)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_complete_essentials_auto_validate_despite_partial_source_warning(self) -> None:
+    def test_legacy_essentials_without_accuracy_receipt_are_excluded(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-nonblocking-partial")
         try:
             storage_config = ValidationRoutingStorageConfig(
@@ -651,9 +651,9 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "warning")
             self.assertIn("partial_source_failure", source_result.validation_issue_codes)
-            self.assertEqual(source_result.validation_action, "auto_validated")
-            self.assertEqual(source_result.candidate_state, "auto_validated")
-            self.assertEqual(source_result.queue_reason_codes, [])
+            self.assertEqual(source_result.validation_action, "excluded")
+            self.assertEqual(source_result.candidate_state, "rejected")
+            self.assertIn("ai_grounding_insufficient", source_result.queue_reason_codes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -746,7 +746,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
 
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "error")
-            self.assertEqual(source_result.candidate_state, "in_review")
+            self.assertEqual(source_result.candidate_state, "rejected")
             self.assertIn("ambiguous_product_boundary", source_result.validation_issue_codes)
             self.assertIn("ambiguous_product_boundary", source_result.queue_reason_codes)
         finally:
@@ -793,7 +793,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
 
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "error")
-            self.assertEqual(source_result.candidate_state, "in_review")
+            self.assertEqual(source_result.candidate_state, "rejected")
             self.assertIn("ambiguous_product_boundary", source_result.validation_issue_codes)
             self.assertIn("ambiguous_product_boundary", source_result.queue_reason_codes)
         finally:
@@ -850,7 +850,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
 
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "error")
-            self.assertEqual(source_result.candidate_state, "in_review")
+            self.assertEqual(source_result.candidate_state, "rejected")
             self.assertIn(
                 "ambiguous_product_boundary",
                 source_result.validation_issue_codes,
@@ -893,7 +893,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "pass")
             self.assertNotIn("invalid_taxonomy_code", source_result.validation_issue_codes)
-            self.assertEqual(source_result.validation_action, "auto_validated")
+            self.assertEqual(source_result.validation_action, "excluded")
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -1141,7 +1141,8 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             self.assertEqual(source_result.validation_status, "error")
             self.assertIn("invalid_taxonomy_code", source_result.validation_issue_codes)
             self.assertIn("chequing/package", " ".join(source_result.runtime_notes))
-            issue_codes = {item["code"] for item in source_result.review_task_record["issue_summary"]}
+            artifact = json.loads((temp_path / source_result.validation_storage_key).read_text(encoding="utf-8"))
+            issue_codes = {item["code"] for item in artifact["issue_summary"]}
             self.assertIn("taxonomy_registry_sync_missing", issue_codes)
         finally:
             rmtree(temp_path, ignore_errors=True)
@@ -1225,15 +1226,15 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "review_queued")
-            self.assertEqual(source_result.candidate_state, "in_review")
-            self.assertEqual(source_result.review_reason_code, "validation_error")
+            self.assertEqual(source_result.validation_action, "excluded")
+            self.assertEqual(source_result.candidate_state, "rejected")
+            self.assertIn("validation_error", source_result.queue_reason_codes)
             self.assertIn("required_field_missing", source_result.validation_issue_codes)
             self.assertIn("ai_grounding_insufficient", source_result.queue_reason_codes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_officially_grounded_dynamic_product_can_auto_validate(self) -> None:
+    def test_old_grounding_metadata_without_accuracy_receipt_cannot_auto_validate(self) -> None:
         temp_path = _prepare_workspace_temp_dir("validation-routing-dynamic-official-ai")
         try:
             storage_config = ValidationRoutingStorageConfig(
@@ -1324,13 +1325,13 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "auto_validated")
+            self.assertEqual(source_result.validation_action, "excluded")
             self.assertEqual(source_result.validation_status, "pass")
-            self.assertGreaterEqual(source_result.source_confidence or 0, 0.82)
+            self.assertLess(source_result.source_confidence or 0, 0.82)
             assessment = source_result.model_execution_record["execution_metadata"]["collection_ai_assessment"]
-            self.assertTrue(assessment["eligible"])
-            self.assertEqual(assessment["verified_ratio"], 1.0)
-            self.assertTrue(assessment["product_identity_verified"])
+            self.assertFalse(assessment["eligible"])
+            self.assertEqual(assessment["verified_ratio"], 0.0)
+            self.assertFalse(assessment["product_identity_verified"])
             self.assertIsNone(source_result.review_task_record)
         finally:
             rmtree(temp_path, ignore_errors=True)
@@ -1420,15 +1421,16 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_action, "excluded")
             self.assertIn("required_field_missing", source_result.validation_issue_codes)
             assessment = source_result.model_execution_record["execution_metadata"]["collection_ai_assessment"]
             self.assertEqual(
                 assessment["assessed_fields"],
-                ["annual_fee", "product_name", "purchase_interest_rate"],
+                [],  # Old metadata is not a content-bound acceptance receipt.
             )
             self.assertLess(assessment["verified_ratio"], 0.8)
-            self.assertEqual(assessment["unverified_fields"], ["purchase_interest_rate"])
+            self.assertEqual(assessment["unverified_fields"], [])
+            self.assertIn("accuracy_check_failed", assessment["reason_codes"])
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -1489,9 +1491,9 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_action, "excluded")
             self.assertEqual(source_result.validation_status, "error")
-            self.assertEqual(source_result.review_reason_code, "validation_error")
+            self.assertIn("validation_error", source_result.queue_reason_codes)
             self.assertIn("required_field_missing", source_result.validation_issue_codes)
             self.assertIn("partial_source_failure", source_result.validation_issue_codes)
             self.assertIn("required_field_missing", source_result.queue_reason_codes)
@@ -1562,9 +1564,9 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_action, "excluded")
             self.assertEqual(source_result.validation_status, "error")
-            self.assertEqual(source_result.review_reason_code, "validation_error")
+            self.assertIn("validation_error", source_result.queue_reason_codes)
             self.assertIn("required_field_missing", source_result.validation_issue_codes)
             self.assertIn("required_field_missing", source_result.queue_reason_codes)
         finally:
@@ -1666,7 +1668,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             source_result = result.source_results[0]
             self.assertEqual(source_result.validation_status, "error")
             self.assertIn("invalid_numeric_range", source_result.validation_issue_codes)
-            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_action, "excluded")
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -1699,12 +1701,12 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_action, "excluded")
             self.assertEqual(source_result.validation_status, "error")
             self.assertIn("invalid_field_type", source_result.validation_issue_codes)
             self.assertIn("conflicting_evidence", source_result.validation_issue_codes)
-            self.assertEqual(source_result.candidate_state, "in_review")
-            self.assertIsNotNone(source_result.review_task_record)
+            self.assertEqual(source_result.candidate_state, "rejected")
+            self.assertIsNone(source_result.review_task_record)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -1740,7 +1742,7 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             self.assertEqual(len(result.source_results), 98)
-            self.assertTrue(any(item.validation_action == "review_queued" for item in result.source_results))
+            self.assertTrue(any(item.validation_action == "excluded" for item in result.source_results))
             self.assertTrue(any(item.validation_status == "error" for item in result.source_results))
             self.assertTrue(any("invalid_field_type" in item.validation_issue_codes for item in result.source_results))
         finally:
@@ -1784,11 +1786,11 @@ class ValidationRoutingServiceTests(unittest.TestCase):
             )
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_action, "review_queued")
+            self.assertEqual(source_result.validation_action, "excluded")
             self.assertEqual(source_result.validation_status, "warning")
             self.assertIn("conflicting_evidence", source_result.validation_issue_codes)
             self.assertEqual(source_result.review_reason_code, "conflicting_evidence")
-            self.assertIsNotNone(source_result.review_task_record)
+            self.assertIsNone(source_result.review_task_record)
         finally:
             rmtree(temp_path, ignore_errors=True)
 
@@ -1848,8 +1850,8 @@ class ValidationRoutingPersistenceTests(unittest.TestCase):
         self.assertEqual(taxonomy["savings"], {"standard", "high_interest", "other"})
         self.assertEqual(config.auto_approve_min_confidence, 0.95)
         self.assertEqual(config.ai_auto_approve_min_verified_ratio, 0.85)
-        self.assertEqual(persist_result.review_task_count, 1)
-        self.assertEqual(runner.last_variables()["review_queued_count"], "1")
+        self.assertEqual(persist_result.review_task_count, 0)
+        self.assertEqual(runner.last_variables()["review_queued_count"], "0")
 
 
 class _FakeRunner:

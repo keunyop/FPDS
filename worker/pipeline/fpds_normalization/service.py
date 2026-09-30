@@ -196,6 +196,21 @@ class NormalizationService:
                 normalization_model_execution_id=normalization_model_execution_id,
                 item=item,
             )
+            from worker.pipeline.fpds_collection_accuracy import sanitize_candidate
+            normalized_candidate_record, accuracy = sanitize_candidate(
+                normalized_candidate_record,
+                source_metadata=item.source_metadata,
+                evidence=[{
+                    "evidence_chunk_id": link.evidence_chunk_id,
+                    "evidence_excerpt": link.evidence_text_excerpt,
+                    "source_url": item.normalized_source_url or item.source_metadata.get("normalized_source_url") or item.source_metadata.get("source_url")
+                        if link.source_document_id == item.source_document_id else None,
+                } for link in item.evidence_links],
+            )
+            accepted_fields = set(accuracy["verified_fields"])
+            evidence_links = [link for link in evidence_links if link["field_name"] in accepted_fields]
+            runtime_notes.append("Automatic accuracy check: " + ("accepted" if accuracy["accepted"] else "excluded")
+                                 + "; omitted fields: " + ", ".join(sorted(accuracy["omitted_fields"])))
             agent_name = str(normalization_meta.get("agent_name") or self.agent_name)
             model_id = str(normalization_meta.get("model_id") or self.model_id)
             usage_metadata = dict(normalization_meta.get("usage_metadata") or {
@@ -4989,7 +5004,9 @@ def _normalize_dynamic_fields_with_ai(
                 "Keep only values grounded in the extracted inputs and return only fields listed in expected_fields. "
                 "Never map cashback, rewards, prepayment, equity, down-payment, instalment-plan, transaction-fee, or ATM/ABM assessment percentages to generic annual rate fields. "
                 "Boolean fields must remain booleans, and navigation or whole-page marketing copy must be omitted. "
-                "Use subtype_code `other` unless the subtype is obvious from the product definition and extracted evidence."
+                "Do not change an officially grounded value, infer missing fields, convert months to literal days, "
+                "or derive flags from absence. Human review is unavailable; omit uncertain values. "
+                "Keep source-language prose verbatim and use subtype_code `other` for uncertain classification."
             ),
             payload={
                 "product_type": item.source_metadata.get("product_type"),
@@ -5037,6 +5054,12 @@ def _normalize_dynamic_fields_with_ai(
             value_type=str(item_payload.get("value_type") or "string"),
         )
         if normalized_value is None:
+            continue
+        extracted = extracted_by_field.get(field_name)
+        if extracted is None:
+            continue
+        original_value = _normalize_field_value(field_name=field_name, value=extracted.candidate_value, value_type=extracted.value_type)
+        if normalized_value != original_value:
             continue
         normalized_payload[field_name] = normalized_value
     notes = []

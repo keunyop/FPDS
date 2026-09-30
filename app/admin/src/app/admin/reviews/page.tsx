@@ -47,7 +47,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
   }
 
   if (!session || !queue || !productTypeList || !bankList || apiUnavailable) {
-    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "검토 대기열을 불러올 수 없습니다." : locale === "ja" ? "レビューキューを読み込めません。" : "Review queue could not load."} />;
+    return <AdminApiUnavailable locale={locale} title={locale === "ko" ? "과거 검토 기록을 불러올 수 없습니다." : locale === "ja" ? "過去の審査記録を読み込めません。" : "Review history could not load."} />;
   }
 
   const envLabel = adminEnvironmentLabel(session.environment);

@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Iterable
 
 from worker.pipeline.fpds_approval_policy import comparison_quality
+from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid, RECEIPT_KEY
 from worker.pipeline.fpds_market_profile import country_product_profile
 
 from .models import AggregateRefreshResult, CanonicalAggregateRow
@@ -66,7 +67,15 @@ class AggregateRefreshService:
             ).applicable
             and (not quality.contract_defined or not quality.complete)
         ]
-        eligible_rows = [item for item in canonical_rows if item not in excluded_incomplete_rows]
+        # Apply the new guard only to explicitly versioned new collections.
+        # Historical rows remain unchanged until their separate migration.
+        excluded_accuracy_rows = [item for item in canonical_rows
+            if RECEIPT_KEY in item.canonical_payload and not acceptance_receipt_valid(
+                {"country_code": item.country_code, "bank_code": item.bank_code,
+                 "product_type": item.product_type, "product_name": item.product_name,
+                 "currency": item.currency}, item.canonical_payload)]
+        eligible_rows = [item for item in canonical_rows
+                         if item not in excluded_incomplete_rows and item not in excluded_accuracy_rows]
         projection_rows = [
             self._build_projection_row(
                 snapshot_id=snapshot_id,
@@ -107,6 +116,7 @@ class AggregateRefreshService:
             "source_counts": {
                 "projection_rows": len(projection_rows),
                 "excluded_incomplete_comparison_rows": len(excluded_incomplete_rows),
+                "excluded_accuracy_rows": len(excluded_accuracy_rows),
                 "active_rows": len(active_rows),
                 "metric_scopes": len(metric_snapshots),
                 "ranking_rows": len(ranking_rows),

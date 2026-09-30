@@ -1,5 +1,15 @@
 # FPDS Workspace
 
+## Current collection policy — 2026-09-30
+
+New collection accepts only explicitly evidenced, consistently typed facts and
+ends automatically in acceptance or exclusion. No human product review is needed.
+Admin Review routes now show read-only history under More tools. Earlier review
+workflow descriptions below are historical for product collection; account
+approval remains. Read [the accuracy policy](docs/03-design/collection-accuracy-policy.md)
+and [legacy impact assessment](docs/00-governance/collection-accuracy-audit-2026-09-30.md).
+The existing-data cutover and production deployment have not been executed.
+
 This repository is the implementation and operating workspace for `FPDS`
 (Finance Product Data Service), an evidence-grounded financial product data
 platform with separate authenticated Admin and anonymous Public experiences.

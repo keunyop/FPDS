@@ -87,12 +87,12 @@ type ShellCopy = {
 
 const primaryItems: NavItem[] = [
   { key: "overview", href: "/admin", icon: LayoutDashboard },
-  { key: "reviews", href: "/admin/reviews", icon: FileClock },
   { key: "runs", href: "/admin/runs", icon: Activity },
   { key: "banks", href: "/admin/banks", icon: Building2 },
 ];
 
 const toolItems: NavItem[] = [
+  { key: "reviews", href: "/admin/reviews", icon: FileClock },
   { key: "sources", href: "/admin/sources", icon: Database },
   { key: "productTypes", href: "/admin/product-types", icon: Shapes },
   { key: "countries", href: "/admin/countries", icon: Globe2 },
@@ -108,7 +108,7 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
     account: "Account",
     items: {
       overview: "Overview",
-      reviews: "Review",
+      reviews: "Review history",
       runs: "Runs",
       banks: "Banks",
       sources: "Sources",
@@ -124,7 +124,7 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
     account: "계정",
     items: {
       overview: "개요",
-      reviews: "검토",
+      reviews: "과거 검토 기록",
       runs: "실행",
       banks: "은행",
       sources: "소스",
@@ -140,7 +140,7 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
     account: "アカウント",
     items: {
       overview: "概要",
-      reviews: "審査",
+      reviews: "過去の審査記録",
       runs: "実行",
       banks: "銀行",
       sources: "ソース",

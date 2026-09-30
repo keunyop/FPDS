@@ -191,6 +191,7 @@ export type RunStatusDetailResponse = {
     correlation_id: string | null;
     request_id: string | null;
     source_ids: string[];
+    automatically_excluded_count?: number;
     retry_action: {
       available: boolean;
       reason: string | null;

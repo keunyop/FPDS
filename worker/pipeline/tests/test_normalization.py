@@ -74,6 +74,18 @@ from worker.pipeline.fpds_normalization.supporting_merge import (
 
 
 class NormalizationServiceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        # These historical bank fixtures isolate draft mapping/storage. They do
+        # not provide official acceptance evidence and must never produce an
+        # acceptance receipt. The real composed gate has separate integration tests.
+        gate = patch("worker.pipeline.fpds_collection_accuracy.sanitize_candidate",
+                     side_effect=lambda record, **kwargs: (record, {
+                         "accepted": False, "omitted_fields": {},
+                         "verified_fields": list(record.get("field_mapping_metadata", {})),
+                     }))
+        gate.start()
+        self.addCleanup(gate.stop)
+
     def test_hyphenated_index_linked_gic_is_not_misclassified_from_renewal_copy(self) -> None:
         subtype, source_label = _infer_subtype_code(
             product_type="gic",
@@ -4295,7 +4307,7 @@ class NormalizationServiceTests(unittest.TestCase):
             self.assertEqual(source_result.usage_record["usage_metadata"]["usage_mode"], "openai-dynamic-product-normalization")
             self.assertEqual(candidate["product_type"], "tfsa-savings")
             self.assertEqual(candidate["subtype_code"], "other")
-            self.assertEqual(candidate["candidate_payload"]["eligibility_text"], "Available to Canadian residents aged 18 or older.")
+            self.assertNotIn("eligibility_text", candidate["candidate_payload"])
             self.assertLess(source_result.source_confidence or 1.0, 0.75)
             self.assertIn("AI normalized TFSA-specific eligibility and subtype.", source_result.runtime_notes)
         finally:
@@ -4483,10 +4495,10 @@ class NormalizationServiceTests(unittest.TestCase):
 
             source_result = result.source_results[0]
             payload = source_result.normalized_candidate_record["candidate_payload"]
-            self.assertEqual(payload["minimum_deposit"], 1000.0)
-            self.assertEqual(payload["monthly_fee"], 0.0)
-            self.assertEqual(payload["public_display_fee"], 0.0)
-            self.assertEqual(payload["public_display_rate"], 4.25)
+            self.assertNotIn("minimum_deposit", payload)
+            self.assertNotIn("monthly_fee", payload)
+            self.assertNotIn("public_display_fee", payload)
+            self.assertNotIn("public_display_rate", payload)
             self.assertNotIn("promotional_period_text", payload)
             self.assertNotIn("invalid_numeric_range", source_result.validation_issue_codes)
         finally:
@@ -6567,6 +6579,18 @@ class SupportingMergeTests(unittest.TestCase):
 
 
 class NormalizationPersistenceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        # These historical bank fixtures isolate draft mapping/storage. They do
+        # not provide official acceptance evidence and must never produce an
+        # acceptance receipt. The real composed gate has separate integration tests.
+        gate = patch("worker.pipeline.fpds_collection_accuracy.sanitize_candidate",
+                     side_effect=lambda record, **kwargs: (record, {
+                         "accepted": False, "omitted_fields": {},
+                         "verified_fields": list(record.get("field_mapping_metadata", {})),
+                     }))
+        gate.start()
+        self.addCleanup(gate.stop)
+
     def test_load_latest_extraction_artifacts_reads_joined_rows(self) -> None:
         runner = _FakeRunner(
             outputs=[
