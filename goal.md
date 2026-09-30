@@ -570,3 +570,27 @@ Six currently active scopes are held, seven remain eligible, and two previously
 inactive scopes need governed restoration after release. No deployment, live
 collection, review/canonical mutation or paid project model call. Preserve this
 file for the earlier unresolved independent goals.
+
+
+## Independent slice: 2026-09-30 GPT-6 Luna and reasoning settings
+
+Ownership: preserve earlier goals and their unresolved acceptance.
+Objective: switch all active OpenAI model defaults and local configuration to
+gpt-6-luna with the Product Owner's explicit reasoning settings.
+Scope: API and worker requests, environment examples/local model selection,
+request regression tests and current operating documentation.
+Exclusions: deployment, paid model calls, collection, canonical mutations,
+prompt/approval-policy changes, historical records and unrelated goals.
+Acceptance:
+- [x] Use gpt-6-luna for active defaults, examples and local model configuration.
+- [x] Send medium for bank research, candidate scoring, route discovery and
+      dynamic normalization; none for keywords; high for extraction and Review.
+- [x] Verify actual request payloads, routing and failure behavior with mocks,
+      run API/worker suites, update journal/docs and inspect git diff --check.
+Verification: mocked Responses requests, existing API/worker regression suites,
+repository checks and secret-safe configuration inspection. No live model claims.
+
+Completion: Worker 539 and API 515 tests, repo doctor, foundation baseline
+validation and final diff checks pass. Local model selection is verified without
+printing secrets. No live model request or deployment; restart/release remains
+an operator step. Preserve this file for earlier unresolved goals.

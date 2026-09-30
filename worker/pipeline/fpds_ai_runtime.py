@@ -14,7 +14,7 @@ def llm_provider_configured() -> bool:
     return provider == "openai" and bool(api_key)
 
 
-def configured_model_id(*, default: str = "gpt-5.6-luna") -> str:
+def configured_model_id(*, default: str = "gpt-6-luna") -> str:
     return os.getenv("FPDS_LLM_MODEL", default).strip() or default
 
 
@@ -25,6 +25,7 @@ def invoke_openai_json_schema(
     schema_name: str,
     schema: dict[str, Any],
     model_id: str | None = None,
+    reasoning_effort: str = "medium",
     web_search_allowed_domains: list[str] | None = None,
     require_web_search: bool = False,
     max_web_search_tool_calls: int = 4,
@@ -40,8 +41,12 @@ def invoke_openai_json_schema(
     ):
         raise ValueError("max_web_search_tool_calls must be an integer between 1 and 20.")
 
+    if reasoning_effort not in ("none", "low", "medium", "high", "xhigh", "max"):
+        raise ValueError("Unsupported reasoning effort.")
+
     request_body = {
         "model": model_id or configured_model_id(),
+        "reasoning": {"effort": reasoning_effort},
         "instructions": instructions,
         "input": [
             {

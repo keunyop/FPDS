@@ -1439,6 +1439,7 @@ def _invoke_bank_ai_model_stage(
                 schema_name=schema_name,
                 schema=schema,
                 model_id=model_id,
+                reasoning_effort="medium",
                 require_web_search=True,
                 max_web_search_tool_calls=max_web_search_tool_calls,
             )

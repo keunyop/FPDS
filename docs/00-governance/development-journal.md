@@ -25,6 +25,31 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - GPT-6 Luna and task reasoning settings
+
+- Applied the Product Owner's model/effort table (D-087): every active OpenAI
+  default, dev/prod example and local `.env.dev` model line now selects
+  `gpt-6-luna`. Candidate scoring and keywords share the common model resolver.
+- Explicit effort: bank ranking/official evidence, page scoring, route discovery
+  and dynamic normalization use `medium`; keywords use `none`; extraction and
+  Review verification use `high`. The common Responses helper accepts and
+  validates effort. No global effort override or prompt/approval-policy change.
+- Key files: `fpds_ai_runtime.py`, extraction/normalization services, API bank
+  onboarding/source catalog/product types/AI verification, request regressions,
+  environment spec, runtime READMEs and external-service inventory.
+- Verification: Worker 539 and API 515 tests pass, including wire-payload model/
+  effort checks, task routing, default/blank/override selection, invalid-effort
+  rejection before network access and existing evidence/failure boundaries.
+  Focused shared-runtime 9 and source-catalog 179 tests also pass.
+  Repo doctor, foundation baseline validation and git diff --check pass.
+- No paid model requests, live collection, canonical changes or deployment.
+  Quality, model access and high-effort latency under the existing 90-second
+  shared request timeout remain unmeasured. Existing cost estimates remain
+  approximate; this slice does not introduce a billing/pricing implementation.
+- Next: configure the deployed API/worker model to `gpt-6-luna`, release/restart
+  through the normal workflow, then assess representative live quality/latency
+  under separately authorized collection. Preserve earlier unresolved goals.
+
 ## 2026-09-30 - Generic collection eligibility and Review prevention
 
 - D-086 / WBS 5.73: inspected September 29 in America/Vancouver

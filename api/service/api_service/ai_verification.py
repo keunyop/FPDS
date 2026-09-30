@@ -250,6 +250,7 @@ def run_review_ai_verification(
             schema_name=AI_VERIFICATION_SCHEMA_NAME,
             schema=AI_VERIFICATION_SCHEMA,
             model_id=model_id,
+            reasoning_effort="high",
             web_search_allowed_domains=allowed_domains,
             require_web_search=True,
         )

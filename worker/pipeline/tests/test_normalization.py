@@ -473,7 +473,7 @@ class NormalizationServiceTests(unittest.TestCase):
                 ),
                 patch(
                     "worker.pipeline.fpds_normalization.service.configured_model_id",
-                    return_value="gpt-5.6-luna",
+                    return_value="gpt-6-luna",
                 ),
                 patch(
                     "worker.pipeline.fpds_normalization.service.invoke_openai_json_schema",
@@ -486,15 +486,19 @@ class NormalizationServiceTests(unittest.TestCase):
                             "normalized_fields": [],
                         },
                         {
-                            "model_id": "gpt-5.6-luna",
+                            "model_id": "gpt-6-luna",
                             "prompt_tokens": 10,
                             "completion_tokens": 5,
                             "provider_request_id": "response-test",
                         },
                     ),
-                ),
+                ) as invoke_model,
             ):
                 result = service.normalize_inputs(run_id="run-vancity-student", inputs=[item])
+
+            invoke_model.assert_called()
+            for call in invoke_model.call_args_list:
+                self.assertEqual(call.kwargs["reasoning_effort"], "medium")
 
             self.assertEqual(len(result.source_results), 2)
             payloads = [value.normalized_candidate_record["candidate_payload"] for value in result.source_results]
@@ -4254,7 +4258,7 @@ class NormalizationServiceTests(unittest.TestCase):
 
             with (
                 patch("worker.pipeline.fpds_normalization.service.llm_provider_configured", return_value=True),
-                patch("worker.pipeline.fpds_normalization.service.configured_model_id", return_value="gpt-5.6-luna"),
+                patch("worker.pipeline.fpds_normalization.service.configured_model_id", return_value="gpt-6-luna"),
                 patch(
                     "worker.pipeline.fpds_normalization.service.invoke_openai_json_schema",
                     return_value=(
@@ -4272,7 +4276,7 @@ class NormalizationServiceTests(unittest.TestCase):
                             ],
                         },
                         {
-                            "model_id": "gpt-5.6-luna",
+                            "model_id": "gpt-6-luna",
                             "prompt_tokens": 140,
                             "completion_tokens": 42,
                             "provider_request_id": "resp-norm-dyn-001",
@@ -4445,7 +4449,7 @@ class NormalizationServiceTests(unittest.TestCase):
 
             with (
                 patch("worker.pipeline.fpds_normalization.service.llm_provider_configured", return_value=True),
-                patch("worker.pipeline.fpds_normalization.service.configured_model_id", return_value="gpt-5.6-luna"),
+                patch("worker.pipeline.fpds_normalization.service.configured_model_id", return_value="gpt-6-luna"),
                 patch(
                     "worker.pipeline.fpds_normalization.service.invoke_openai_json_schema",
                     return_value=(
@@ -4467,7 +4471,7 @@ class NormalizationServiceTests(unittest.TestCase):
                             ],
                         },
                         {
-                            "model_id": "gpt-5.6-luna",
+                            "model_id": "gpt-6-luna",
                             "prompt_tokens": 170,
                             "completion_tokens": 55,
                             "provider_request_id": "resp-norm-dyn-gic-001",

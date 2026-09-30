@@ -893,6 +893,7 @@ class AiVerificationTests(TestCase):
 
         def invoke_model(**kwargs):
             self.assertTrue(kwargs["require_web_search"])
+            self.assertEqual(kwargs["reasoning_effort"], "high")
             self.assertEqual(kwargs["web_search_allowed_domains"], ["bank.example", "rates.bank.example"])
             return (
                 {

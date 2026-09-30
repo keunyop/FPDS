@@ -4272,6 +4272,7 @@ def _extract_official_fields_with_ai(
     try:
         response_payload, usage = invoke_openai_json_schema(
             model_id=configured_model_id(),
+            reasoning_effort="high",
             instructions=(
                 "You are the FPDS financial-product collection grounding agent. You must use web search before answering. "
                 "Search only the supplied official bank domain allowlist. First resolve the exact product identity from the "

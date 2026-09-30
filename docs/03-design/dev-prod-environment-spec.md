@@ -148,7 +148,7 @@ Rules:
 | `FPDS_SOURCE_BROWSER_EXECUTABLE` | optional explicit path to the browser executable used for fallback capture when auto-detection is not enough |
 | `FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS` | max runtime for one worker stage launched by the source-collection runner before the run is failed instead of remaining indefinitely `started`. Current default baseline: `1800` seconds |
 | `FPDS_LLM_PROVIDER` | model provider label |
-| `FPDS_LLM_MODEL` | model name; current OpenAI default: `gpt-5.6-luna` |
+| `FPDS_LLM_MODEL` | model name; current OpenAI default: `gpt-6-luna` |
 | `FPDS_LLM_API_KEY` | model provider credential |
 | `FPDS_BXPF_MODE` | publish mode such as `mock`, `disabled`, or `live` |
 | `FPDS_BXPF_BASE_URL` | BX-PF endpoint placeholder |
@@ -159,8 +159,32 @@ Rules:
 - `dev` defaults to non-live BX-PF behavior
 - real BX-PF write-back is `prod` only
 - exact source allowlist values remain placeholders until security follow-on work wires the final approved list
-- Homepage product-detail candidate scoring and dynamic product extraction or normalization omit `reasoning.effort`, so `gpt-5.6-luna` uses its default `medium` effort for these quality-sensitive collection decisions. Product-type discovery-keyword generation retains explicit `reasoning.effort=none` as a high-volume, latency-sensitive task. Any further effort increase needs measured evaluation before adoption.
-- Before a production rollout, the deployment secret/configuration store must set `FPDS_LLM_MODEL=gpt-5.6-luna` and the configured OpenAI project must confirm read access to that exact model ID.
+- All OpenAI calls resolve the model through `configured_model_id()`; the
+  default and environment examples are `gpt-6-luna`. `FPDS_LLM_MODEL` remains
+  an explicit deployment override.
+- Each task sends `reasoning.effort` explicitly, per the Product Owner's
+  September 30 instruction (D-087). The shared runtime defaults to `medium`
+  and rejects unsupported effort values before sending a request. There is
+  no `FPDS_LLM_REASONING_EFFORT` environment variable; task settings live at
+  the call sites so a global override cannot erase the approved differences.
+
+| OpenAI task | Reasoning effort |
+|---|---|
+| Bank onboarding: ranking research and official bank evidence | `medium` |
+| Product Type discovery keywords | `none` |
+| Homepage candidate scoring/classification | `medium` |
+| Missing/stale coverage route discovery | `medium` |
+| Product extraction and official-domain grounding | `high` |
+| Dynamic product field normalization | `medium` |
+| Review AI verification and correction proposals | `high` |
+
+- Requests retain Responses API structured outputs and existing official-source
+  gates. No prompt, approval threshold, search budget or timeout changed.
+  Higher-effort quality, token usage and latency require a separately scoped
+  live comparison; mocked request tests establish configuration correctness.
+- Restart local API/worker processes after updating `.env.dev` so they read the
+  new model configuration. Existing stored executions are historical records.
+- Before a production rollout, the deployment secret/configuration store must set `FPDS_LLM_MODEL=gpt-6-luna` and the configured OpenAI project must confirm read access to that exact model ID.
 
 ### 4.6 Security and Browser Policy
 

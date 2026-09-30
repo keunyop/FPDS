@@ -2,6 +2,15 @@
 
 This directory holds private pipeline and integration workers.
 
+## OpenAI model and reasoning
+
+The model defaults to `gpt-6-luna`, selected through `FPDS_LLM_MODEL` and the
+shared `fpds_ai_runtime` helper. Extraction/official grounding explicitly uses
+`high`; dynamic normalization uses `medium`. Financial evidence, field contracts,
+provider-failure fallback and approval gates remain unchanged. See the
+[environment contract](../docs/03-design/dev-prod-environment-spec.md)
+for all API/worker task settings and deployment configuration.
+
 Current boundary:
 - `discovery/` for source discovery and registry-driven fetch entry
 - `pipeline/` for parse, chunk, extraction, normalization, validation, and review routing work

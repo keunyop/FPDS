@@ -2398,6 +2398,7 @@ def repair_catalog_coverage_route(
             schema_name=_COVERAGE_ROUTE_RESOLUTION_SCHEMA_NAME,
             schema=_COVERAGE_ROUTE_RESOLUTION_SCHEMA,
             model_id=model_id,
+            reasoning_effort="medium",
             require_web_search=True,
         )
         result = _sanitize_coverage_route_resolution(
@@ -4726,7 +4727,7 @@ def _score_candidate_links_with_ai(
         }
         for item in candidates
     ]
-    model_id = os.getenv("FPDS_LLM_MODEL", "gpt-5.6-luna").strip() or "gpt-5.6-luna"
+    model_id = configured_model_id()
     started_at = datetime.now(UTC)
     try:
         resolution, usage = _invoke_openai_parallel_scorer(
@@ -4889,6 +4890,7 @@ def _score_candidate_links_with_ai(
 def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     request_body = {
         "model": model_id,
+        "reasoning": {"effort": "medium"},
         "instructions": (
             "You score bounded bank candidate URLs for homepage-first product discovery in the supplied country. "
             "Do not invent URLs. Score only the candidate links provided. "

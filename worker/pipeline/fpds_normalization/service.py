@@ -4982,6 +4982,7 @@ def _normalize_dynamic_fields_with_ai(
     try:
         response_payload, usage = invoke_openai_json_schema(
             model_id=configured_model_id(),
+            reasoning_effort="medium",
             instructions=(
                 "You are the FPDS Normalization Agent for operator-defined financial product types. "
                 "Map extracted fields into a conservative canonical candidate payload. "

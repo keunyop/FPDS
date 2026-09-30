@@ -5,6 +5,19 @@ and Public aggregate reads, engagement, and feedback. The current endpoint
 map is implemented in `api_service/main.py`; historical WBS delivery numbers
 do not by themselves describe the current enabled surface.
 
+## OpenAI model and reasoning
+
+All OpenAI requests use the shared model selection, defaulting to `gpt-6-luna`.
+Bank onboarding research (including official bank evidence), candidate page
+scoring and coverage route discovery explicitly use `medium`; Product Type
+keyword generation uses `none`; Review AI uses `high`. Worker extraction uses
+`high` and dynamic normalization uses `medium`. Settings are fixed per task;
+there is no global effort environment override. See the
+[environment contract](../../docs/03-design/dev-prod-environment-spec.md).
+Set `FPDS_LLM_MODEL=gpt-6-luna` in each deployed runtime and restart/redeploy it
+to apply the change. Local tests do not establish deployed model access,
+latency or accuracy; canonical approval and official-evidence gates are unchanged.
+
 Current scope:
 - anonymous public aggregate-backed product, product-detail, and dashboard read
   APIs plus credential-bound bounded product-engagement and anonymous-feedback

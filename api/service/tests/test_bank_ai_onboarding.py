@@ -642,6 +642,8 @@ class BankAiOnboardingTests(unittest.TestCase):
             "alpha.example",
         )
         self.assertEqual(invoke_model.call_count, 3)
+        for call in invoke_model.call_args_list:
+            self.assertEqual(call.kwargs["reasoning_effort"], "medium")
         ranking_call = invoke_model.call_args_list[0].kwargs
         alpha_evidence_call = invoke_model.call_args_list[1].kwargs
         beta_evidence_call = invoke_model.call_args_list[2].kwargs

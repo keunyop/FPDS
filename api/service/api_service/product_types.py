@@ -18,6 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
     sys.path.insert(0, str(REPO_ROOT))
 
+from worker.pipeline.fpds_ai_runtime import configured_model_id
 from worker.pipeline.fpds_approval_policy import collection_fields_for_product_type
 
 if TYPE_CHECKING:
@@ -977,7 +978,7 @@ def _generate_ai_discovery_keywords(*, display_name: str, description: str, prov
         ),
     }
     request_body = {
-        "model": os.getenv("FPDS_LLM_MODEL", "gpt-5.6-luna").strip() or "gpt-5.6-luna",
+        "model": configured_model_id(),
         "reasoning": {"effort": "none"},
         "instructions": (
             "You generate high-quality discovery keywords for FPDS Canadian banking product types. "

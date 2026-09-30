@@ -2963,6 +2963,7 @@ class SourceCatalogTests(unittest.TestCase):
         connection = _QueuedConnection([None, None, None])
 
         def invoke_model(**_kwargs):
+            self.assertEqual(_kwargs["reasoning_effort"], "medium")
             return (
                 {
                     "status": "current_offering",
@@ -3851,7 +3852,7 @@ class SourceCatalogTests(unittest.TestCase):
                             "source_document_id": None,
                             "stage_name": "source_catalog_collection",
                             "agent_name": "fpds-homepage-ai-parallel-scorer",
-                            "model_id": "gpt-5.6-luna",
+                            "model_id": "gpt-6-luna",
                             "execution_status": "completed",
                             "execution_metadata": {"candidate_link_count": 1},
                             "started_at": "2026-04-28T20:39:48+00:00",
@@ -3871,7 +3872,7 @@ class SourceCatalogTests(unittest.TestCase):
                             "usage_metadata": {
                                 "usage_mode": "openai-homepage-parallel-scoring",
                                 "provider": "openai",
-                                "model_id": "gpt-5.6-luna",
+                                "model_id": "gpt-6-luna",
                             },
                             "recorded_at": "2026-04-28T20:39:49+00:00",
                         },
@@ -6600,12 +6601,12 @@ class SourceCatalogTests(unittest.TestCase):
         for bank_code in ("NATIONAL", "TANGERINE", "EQBANK", "MANULIFE", "ALTERNA", "FNBC", "SIMPLII", "VERSABANK"):
             self.assertIn(f"'{bank_code}'", migration_sql)
 
-    def test_homepage_parallel_scorer_uses_default_medium_reasoning_effort_when_omitted(self) -> None:
+    def test_homepage_parallel_scorer_sends_explicit_medium_reasoning_effort(self) -> None:
         response = MagicMock()
         response.read.return_value = json.dumps(
             {
                 "id": "resp-homepage-score-001",
-                "model": "gpt-5.6-luna",
+                "model": "gpt-6-luna",
                 "output": [
                     {
                         "type": "message",
@@ -6624,31 +6625,38 @@ class SourceCatalogTests(unittest.TestCase):
         with patch("api_service.source_catalog.urllib.request.urlopen") as urlopen:
             urlopen.return_value.__enter__.return_value = response
             result, metadata = _invoke_openai_parallel_scorer(
-                model_id="gpt-5.6-luna",
+                model_id="gpt-6-luna",
                 api_key="test-key",
                 payload={"product_type": "chequing", "candidates": []},
             )
 
         request_body = json.loads(urlopen.call_args.args[0].data.decode("utf-8"))
-        self.assertEqual(request_body["model"], "gpt-5.6-luna")
-        self.assertNotIn("reasoning", request_body)
+        self.assertEqual(request_body["model"], "gpt-6-luna")
+        self.assertEqual(request_body["reasoning"], {"effort": "medium"})
         self.assertEqual(result, {"summary": "ok", "candidate_scores": []})
-        self.assertEqual(metadata["model_id"], "gpt-5.6-luna")
+        self.assertEqual(metadata["model_id"], "gpt-6-luna")
 
-    def test_gpt_5_6_luna_reasoning_effort_is_stage_specific(self) -> None:
-        repo_root = Path(__file__).resolve().parents[3]
-        default_medium_paths = (
-            repo_root / "worker" / "pipeline" / "fpds_ai_runtime.py",
-            repo_root / "api" / "service" / "api_service" / "source_catalog.py",
-        )
-        for source_path in default_medium_paths:
-            source = source_path.read_text(encoding="utf-8")
-            self.assertIn("gpt-5.6-luna", source)
-            self.assertNotIn('"reasoning": {"effort": "none"}', source)
+    def test_keyword_generation_sends_none_with_shared_model_selection(self) -> None:
+        import os
+        from api_service.product_types import _generate_ai_discovery_keywords
 
-        keyword_generator_source = (repo_root / "api" / "service" / "api_service" / "product_types.py").read_text(encoding="utf-8")
-        self.assertIn("gpt-5.6-luna", keyword_generator_source)
-        self.assertIn('"reasoning": {"effort": "none"}', keyword_generator_source)
+        for model, expected in (("", "gpt-6-luna"), ("  ", "gpt-6-luna"), ("test-model", "test-model")):
+            with self.subTest(model=model), patch.dict(os.environ, {
+                "FPDS_LLM_PROVIDER": "openai", "FPDS_LLM_API_KEY": "test-key", "FPDS_LLM_MODEL": model,
+            }, clear=True), patch("api_service.product_types.urllib.request.urlopen") as urlopen:
+                urlopen.return_value.__enter__.return_value.read.return_value = json.dumps({
+                    "output": [{"type": "message", "content": [{
+                        "type": "output_text", "text": '{"keywords":["savings account"]}'
+                    }]}]
+                }).encode()
+                keywords = _generate_ai_discovery_keywords(
+                    display_name="Savings", description="Retail savings accounts", provided=[]
+                )
+                request = json.loads(urlopen.call_args.args[0].data)
+                self.assertEqual(request["model"], expected)
+                self.assertEqual(request["reasoning"], {"effort": "none"})
+                self.assertEqual(request["text"]["format"]["type"], "json_schema")
+                self.assertEqual(keywords, ["savings account"])
 
 
 if __name__ == "__main__":

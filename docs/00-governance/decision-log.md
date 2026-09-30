@@ -175,6 +175,21 @@ outcome can be predicted, and no automatic product-retirement inference.
 No migration, deployment, live collection or historical data correction in this
 slice. See the September 30 development journal and WBS 5.73.
 
+## 2026-09-30 - D-087 GPT-6 Luna and explicit task reasoning
+
+The Product Owner selected `gpt-6-luna` for every active OpenAI workload.
+Bank research, candidate classification, coverage route discovery and dynamic
+normalization use `medium`; Product Type keyword generation uses `none`;
+extraction/official grounding and Review verification/correction use `high`.
+All tasks pass the effort explicitly. This supersedes the environment spec's
+previous implicit-medium baseline and pre-adoption effort-evaluation hold for
+these specifically approved settings. Financial prompts, evidence requirements,
+approval policy, search budgets and timeouts remain unchanged.
+
+Verification covers mocked Responses payloads and API/worker regression suites.
+Deployment, live collection and paid quality/latency evaluation are separate;
+no measured model-quality improvement is claimed by this configuration change.
+
 ## 4. Current Interpretation Notes
 
 - `WBS 5` is the active execution stage.

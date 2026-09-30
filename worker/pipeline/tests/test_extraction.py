@@ -7520,7 +7520,7 @@ X"""
             official_url = context.source_metadata["normalized_source_url"]
             with (
                 patch("worker.pipeline.fpds_extraction.service.llm_provider_configured", return_value=True),
-                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.6-luna"),
+                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-6-luna"),
                 patch(
                     "worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
                     return_value=(
@@ -7541,7 +7541,7 @@ X"""
                             ],
                         },
                         {
-                            "model_id": "gpt-5.6-luna",
+                            "model_id": "gpt-6-luna",
                             "prompt_tokens": 140,
                             "completion_tokens": 38,
                             "provider_request_id": "resp-standard-grounding-001",
@@ -7567,6 +7567,7 @@ X"""
             )
             call = invoke_model.call_args.kwargs
             self.assertTrue(call["require_web_search"])
+            self.assertEqual(call["reasoning_effort"], "high")
             self.assertEqual(call["web_search_allowed_domains"], ["td.com"])
             self.assertEqual(call["payload"]["requested_fields"], ["product_name", "eligibility_text"])
             self.assertEqual(
@@ -7634,7 +7635,7 @@ X"""
 
             with (
                 patch("worker.pipeline.fpds_extraction.service.llm_provider_configured", return_value=True),
-                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.6-luna"),
+                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-6-luna"),
                 patch(
                     "worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
                     return_value=(
@@ -7660,7 +7661,7 @@ X"""
                             ],
                         },
                         {
-                            "model_id": "gpt-5.6-luna",
+                            "model_id": "gpt-6-luna",
                             "prompt_tokens": 120,
                             "completion_tokens": 34,
                             "provider_request_id": "resp-dyn-001",
@@ -7759,7 +7760,7 @@ X"""
 
             with (
                 patch("worker.pipeline.fpds_extraction.service.llm_provider_configured", return_value=True),
-                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-5.6-luna"),
+                patch("worker.pipeline.fpds_extraction.service.configured_model_id", return_value="gpt-6-luna"),
                 patch(
                     "worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
                     return_value=(
@@ -7768,7 +7769,7 @@ X"""
                             "fields": [],
                         },
                         {
-                            "model_id": "gpt-5.6-luna",
+                            "model_id": "gpt-6-luna",
                             "prompt_tokens": 160,
                             "completion_tokens": 18,
                             "provider_request_id": "resp-bmo-gic-nav",
