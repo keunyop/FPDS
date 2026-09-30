@@ -14,7 +14,10 @@
   regression evidence before extending accepted patterns; update all gates and
   prompts together. The approved 355-product/470-review legacy data cutover was
   applied on 2026-09-30; preserve its history and do not restore manual review.
-  The additional legacy endpoint retirement code still needs API deployment.
+  The Product Owner reports the prior changes deployed. For recovery, diagnose
+  preserved evidence before paid collection; preflight essential evidence, reuse
+  identical current inputs, and bound batches/retries. Never restore historical
+  facts merely to fill Public. Keep runtime deployment separate from data results.
 
 These instructions apply to the entire repository, including FPDS Admin and
 FPDS Public.

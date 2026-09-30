@@ -20,7 +20,7 @@ class PublicAlignmentTests(unittest.TestCase):
             self.assertNotIn("eligibility_text", fields)
             self.assertEqual(len(fields), len(set(fields)))
 
-    def test_single_grounding_pass_separates_essential_and_opportunistic_fields(self):
+    def test_single_grounding_pass_keeps_comparison_essentials_and_required_semantics(self):
         fields = list(collection_fields_for_product_type(country_code="US", product_type="gic"))
         context = ExtractionDocumentContext("parsed", "document", "snapshot", "BANK", "US", "html", "en", {
             "product_type": "gic", "expected_fields": fields,
@@ -34,6 +34,8 @@ class PublicAlignmentTests(unittest.TestCase):
         self.assertIn("interest_rate_summary", payload["required_comparison_fields"])
         self.assertIn("interest_calculation_method", payload["supplemental_fields"])
         self.assertIn("redeemable_flag", payload["supplemental_fields"])
+        self.assertNotIn("interest_payment_frequency", payload["requested_fields"])
+        self.assertNotIn("payout_option", payload["requested_fields"])
         self.assertFalse(set(payload["required_comparison_fields"]) & set(payload["supplemental_fields"]))
         self.assertIn("Do not start extra searches", call.call_args.kwargs["instructions"])
 

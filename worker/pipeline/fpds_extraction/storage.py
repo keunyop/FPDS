@@ -45,6 +45,7 @@ class ExtractionStorageConfig:
         bank_code: str,
         source_document_id: str,
         parsed_document_id: str,
+        run_id: str | None = None,
     ) -> str:
         return self._join_key(
             self.env_prefix,
@@ -53,6 +54,7 @@ class ExtractionStorageConfig:
             bank_code,
             source_document_id,
             parsed_document_id,
+            run_id or "",
             "extracted.json",
         )
 
@@ -63,6 +65,7 @@ class ExtractionStorageConfig:
         bank_code: str,
         source_document_id: str,
         parsed_document_id: str,
+        run_id: str | None = None,
     ) -> str:
         return self._join_key(
             self.env_prefix,
@@ -71,6 +74,7 @@ class ExtractionStorageConfig:
             bank_code,
             source_document_id,
             parsed_document_id,
+            run_id or "",
             "metadata.json",
         )
 

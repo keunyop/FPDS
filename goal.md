@@ -1,5 +1,31 @@
 # Admin pre-handover review and fixes
 
+## Active follow-up: economical legacy recovery — 2026-09-30
+
+Product Owner reports deployment completed and authorizes the proposed recovery.
+Scope: diagnose the remaining manifest products without AI, check current official
+source equality before evidence reuse, automatically promote only current-policy
+passes, and run one bounded batch of at most 10 detail sources if needed. Reuse
+existing URLs; no full-bank rediscovery. Preserve history and private evidence.
+No manual product review, weakened field gates, new country/type, account changes,
+deployment, recurring scheduler, or unbounded paid retry. Existing goals stay.
+Acceptance:
+- [x] Classify all remaining manifest products with traceable reasons and zero AI calls.
+- [x] Implement/test safe reuse and bounded repeat suppression where evidence permits.
+- [x] Apply eligible automatic recovery; if needed execute at most 10 selected detail sources.
+- [x] Verify canonical/Public counts, types, no new reviews and bounded usage/results.
+- [x] Update policy/journal/report, run relevant tests and final diff checks.
+Verification: manifest-pinned read-only diagnosis, original artifact provenance,
+current official fetches, normal pipeline/promotion, independent DB/Public reads.
+
+Completion: 354 inactive diagnosed; ten official pages checked, four
+skipped before AI, six collected once; TD restored and corrected automatically.
+Public CA 2 / US 0, remaining 353 inactive, new/pending reviews 0. Six provider
+requests used 128,278 total tokens; real cached-input replay used zero. Worker
+569/API 535/maintenance 8, repository doctor, foundation and final diff checks
+pass. New collection runtime deployment is separate. Preserve earlier unresolved
+Admin ownership; this bounded recovery slice is complete.
+
 ## Active follow-up: bounded live accuracy recollection
 
 Latest Product Owner instruction authorizes the proposed next step: small live

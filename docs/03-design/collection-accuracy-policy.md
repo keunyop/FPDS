@@ -1,6 +1,6 @@
 # Product collection accuracy and automatic acceptance
 
-Status: Active; legacy data cutover applied, endpoint retirement awaits API redeployment
+Status: Active; prior deployment reported by Product Owner; economical recovery applied
 Decision: D-090 · Product Owner direction: 2026-09-30 · WBS 5.76
 
 ## Priority and scope
@@ -115,9 +115,9 @@ See [the applied record](../00-governance/collection-accuracy-audit-2026-09-30.m
 All five product-review mutation endpoints now return `410 product_review_retired`
 in code, preserving authentication, role, CSRF and country checks. History APIs
 advertise no available action or runnable Review AI. Account signup approvals
-remain separate. The prior build was deployed by the Product Owner; this
-additional API retirement code still needs API redeployment because the current
-CLI is logged out. Do not claim the deployed endpoints are retired until checked.
+remain separate. The Product Owner reports the endpoint/pilot build deployed. This is the
+operator's deployment report, not an authenticated endpoint probe by this slice.
+New recovery runtime changes require their own deployment.
 
 Do not reactivate historical facts by manual approval. Future collection must
 produce a fresh valid automatic receipt. General promotion/aggregation does not
@@ -127,6 +127,44 @@ A subsequent [bounded live pilot](../00-governance/collection-accuracy-pilot-202
 verified one automatic product restoration using exact original run evidence.
 AI fields with non-exact quotations remain excluded; private extraction notes
 record missing/invalid field evidence instead of silently losing the reason.
+
+## Economical collection and recovery
+
+- Diagnose saved candidates/evidence against current gates before paying for
+  recollection. A historical pass still needs current official-source identity
+  and equality checks; an old verification timestamp cannot become current by
+  rebuilding a projection. The legacy recovery diagnostic is read-only and
+  pinned to the authorized manifest.
+- No captured explicit supported currency means no official-grounding model
+  call: the model cannot provide an exact currency quote that is absent. This
+  preflight never establishes product ownership or proves the currency itself.
+- Request identity, currency and comparison essentials, including their available
+  alternatives. Retain existing annual/APY-basis and redemption qualifiers needed
+  for Public comparisons, opportunistically from the same evidence. Optional
+  descriptive fields do not justify model output or extra searches. Retain full
+  evidence context and financial qualifiers.
+- Reuse a completed extraction grounding result only when the complete input,
+  source/snapshot, parser chunks, allowlist/metadata, requested fields, model,
+  relevant code and UTC date match. Reuse retained omissions too. A source has
+  one private current cache entry under existing evidence retention. Provider
+  errors and corrupt/mismatched caches fall back to ordinary grounded extraction.
+- Fresh safe-fetch/capture remains ahead of parsing/extraction in the normal
+  runner. Extraction must use that run's selected successfully parsed snapshot,
+  never the latest unrelated historical parse. Reused facts still pass all gates.
+- Preserve original run/model provenance and run-specific extraction artifacts;
+  reuse does not invent a new provider request. Record zero new tokens on cache
+  hits in bounded execution metadata. This is an application result cache, not
+  a claim about provider prompt-cache billing. Dynamic normalization is separate.
+- Bound recovery batches and do not repeatedly sample an unchanged failed source.
+  The approved first batch checked 10 detail URLs and collected six once each.
+  Future broad recollection should first resolve missing official currency/rate/
+  condition documents, with explicit product applicability, rather than guess.
+- A balance for waiving transaction charges cannot be stored as the general
+  minimum balance or monthly-account-fee threshold. Omit that scalar when its
+  exact meaning does not fit the field. Preserve the base transaction fee only
+  under the existing adjacent-label contract.
+
+See [the recovery result](../00-governance/collection-accuracy-recovery-2026-09-30.md).
 
 ## Current conservative limits
 

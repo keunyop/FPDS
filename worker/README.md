@@ -12,6 +12,19 @@ below are superseded for new collection. See
 Live pilot regressions cover written transaction counts, standalone suitability
 headings versus actual fee conditions, and annual-fee/rate-basis separation.
 
+Economical recovery now skips official grounding when captured chunks contain no
+explicit supported currency. AI requests target identity/currency and registered
+comparison essentials, retaining annual/APY and redemption qualifiers needed for
+Public comparisons without extra searches. A private one-entry-per-source cache reuses completed
+positive or negative grounding only for identical source/snapshot/chunks, metadata,
+requested fields, model, relevant code and UTC date. Provider failures are not
+cached. Normalization/validation/promotion still run; dynamic normalization is
+not covered by this extraction cache. The normal CLI binds parsing to the current
+run's successful selected snapshot. New extraction artifacts use run-specific
+paths, preserving previous runs. Usage summaries stay in bounded model execution
+metadata; no standalone usage ledger/UI is introduced. See the
+[recovery report](../docs/00-governance/collection-accuracy-recovery-2026-09-30.md).
+
 This directory holds private pipeline and integration workers.
 
 ## OpenAI model and reasoning

@@ -9,7 +9,8 @@ invoke review autopilot. Run detail returns `automatically_excluded_count` from
 stamped rejected candidates. The approved legacy data cutover is applied. All
 five product-review mutation endpoints now return `410 product_review_retired`
 in code after auth/role/CSRF/country checks; historical reads expose no actions.
-This additional API change still requires redeployment. See
+The Product Owner reports this prior build deployed. New economical-recovery
+worker changes and shared accuracy fixes require the next runtime deployment. See
 [policy](../../docs/03-design/collection-accuracy-policy.md).
 
 This package is the live FastAPI runtime for authenticated Admin operations

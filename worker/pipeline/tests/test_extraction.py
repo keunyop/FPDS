@@ -7495,7 +7495,7 @@ X"""
                     page_no=None,
                     source_language="en",
                     evidence_excerpt=(
-                        "TD Every Day Savings Account\n"
+                        "TD Every Day Savings Account in Canadian dollars\n"
                         "Available to Canadian residents who meet TD account-opening requirements."
                     ),
                     retrieval_metadata={},
@@ -7560,16 +7560,14 @@ X"""
             source_result = result.source_results[0]
             fields_by_name = {item.field_name: item for item in source_result.extracted_fields}
             self.assertEqual(source_result.model_execution_record["agent_name"], "fpds-official-product-grounding-agent")
-            self.assertEqual(fields_by_name["eligibility_text"].extraction_method, "openai_official_grounding")
-            self.assertEqual(
-                fields_by_name["eligibility_text"].field_metadata["official_web_sources"][0]["url"],
-                official_url,
-            )
+            # Optional eligibility is no longer an AI target and an unsolicited
+            # response must not be accepted as grounded comparison data.
+            self.assertNotEqual(fields_by_name["eligibility_text"].extraction_method, "openai_official_grounding")
             call = invoke_model.call_args.kwargs
             self.assertTrue(call["require_web_search"])
             self.assertEqual(call["reasoning_effort"], "high")
             self.assertEqual(call["web_search_allowed_domains"], ["td.com"])
-            self.assertEqual(call["payload"]["requested_fields"], ["product_name", "currency", "eligibility_text"])
+            self.assertEqual(call["payload"]["requested_fields"], ["product_name", "currency"])
             self.assertEqual(
                 source_result.model_execution_record["execution_metadata"]["official_grounding_contract_version"],
                 "collection-official-grounding-v2",
@@ -7610,7 +7608,7 @@ X"""
                     page_no=None,
                     source_language="en",
                     evidence_excerpt=(
-                        "TD TFSA Savings Account\n"
+                        "TD TFSA Savings Account in Canadian dollars\n"
                         "Minimum deposit: $100. Available to Canadian residents aged 18 or older."
                     ),
                     retrieval_metadata={},

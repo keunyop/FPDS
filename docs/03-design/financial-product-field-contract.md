@@ -1,5 +1,11 @@
 # Financial Product Field Contract
 
+Current recovery clarification — 2026-09-30: a transaction-fee waiver balance is
+not a general `minimum_balance` or monthly-fee waiver threshold. Omit it from
+that scalar field; a separately evidenced base transaction charge retains its
+own numeric type. Extraction focuses on identity/currency and profile comparison
+essentials, preserving annual/APY and redemption qualifiers needed for comparisons. See [accuracy policy](collection-accuracy-policy.md).
+
 ## Current acceptance contract — 2026-09-30
 
 The [collection accuracy policy](collection-accuracy-policy.md) supersedes

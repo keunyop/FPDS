@@ -35,6 +35,8 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [Economical accuracy recovery](00-governance/collection-accuracy-recovery-2026-09-30.md): manifest diagnosis, bounded collection, reuse and actual Public results
+
 - [Live collection accuracy pilot](00-governance/collection-accuracy-pilot-2026-09-30.md): real-source exclusion fixes, automatic product recovery and operational checks
 
 - [Collection accuracy assessment](00-governance/collection-accuracy-audit-2026-09-30.md): new automatic gates, verification and existing-data impact

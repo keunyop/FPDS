@@ -9,7 +9,11 @@ The approved cutover deactivated 355 legacy products and replaced CA/US snapshot
 with empty projections. Old versions/evidence remain private; new verified
 collection can populate Public again.
 The subsequent [live pilot](../../docs/00-governance/collection-accuracy-pilot-2026-09-30.md)
-restored one verified CA product automatically; US remains empty.
+restored one verified CA product automatically. The subsequent
+[economical recovery](../../docs/00-governance/collection-accuracy-recovery-2026-09-30.md)
+restored TD U.S. Daily Interest Chequing; verified Public counts are CA 2 / US 0.
+Its transaction-fee waiver balance is omitted from the general minimum-balance
+field; missing rate and count values remain unknown.
 See [policy](../../docs/03-design/collection-accuracy-policy.md) and
 [impact assessment](../../docs/00-governance/collection-accuracy-audit-2026-09-30.md).
 

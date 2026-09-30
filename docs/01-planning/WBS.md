@@ -2,8 +2,9 @@
 
 ## 5.76 — Accuracy-first autonomous collection (2026-09-30)
 
-Status: Legacy data cutover applied and verified; additional API endpoint
-retirement code awaits redeployment. D-090 replaces human product-review acceptance.
+Status: Legacy cutover verified; prior endpoint/pilot deployment reported by the
+Product Owner. Economical recovery follow-up below is applied; its new runtime
+changes need deployment. D-090 replaces human product-review acceptance.
 
 - Shared finite/native field contracts, exact official evidence and financial
   context gates; no invented values or post-grounding normalization changes.
@@ -13,11 +14,22 @@ retirement code awaits redeployment. D-090 replaces human product-review accepta
 - Read-only audit plus concrete version/hash manifest for existing products and
   pending review records. Approved cutover applied: 355 versioned deactivations,
   470 automatic closures and atomic empty CA/US projections. The Product Owner
-  deployed the prior implementation; the new endpoint change needs API redeployment.
+  reports the endpoint/pilot build deployed; additional recovery changes below need deployment.
 - Bounded live pilot completed: two source documents, CA one automatically
   restored product, zero human reviews. Generic false-exclusion fixes and
   omission diagnostics pass Worker 560/API 535; deployment remains separate.
 - Verification and remaining actions: [assessment](../00-governance/collection-accuracy-audit-2026-09-30.md).
+
+### 5.76 follow-up — economical recovery
+
+Product Owner reports prior deployment complete and authorizes bounded recovery.
+354 remaining products diagnosed with zero AI calls; 10 official pages checked,
+four skipped before paid collection, six collected, one additional TD product
+restored. Public CA 2 / US 0; remaining 353 inactive; no human product reviews.
+Implemented extraction reuse, essential-only requests, current-run snapshot
+binding, per-run artifacts and transaction-waiver balance omission. Data is
+applied; these new runtime changes still need deployment. See
+[recovery report](../00-governance/collection-accuracy-recovery-2026-09-30.md).
 
 Version: 1.0
 Date: 2026-03-29

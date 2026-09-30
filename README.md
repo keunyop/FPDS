@@ -8,12 +8,14 @@ Admin Review routes now show read-only history under More tools. Earlier review
 workflow descriptions below are historical for product collection; account
 approval remains. Read [the accuracy policy](docs/03-design/collection-accuracy-policy.md)
 and [legacy impact assessment](docs/00-governance/collection-accuracy-audit-2026-09-30.md).
-The Product Owner deployed the prior implementation. The 355-product/470-review
-data cutover and CA/US empty projections are applied. Five legacy product-review
-endpoints return 410 in the added API code; that addition needs API redeployment.
-A bounded [live pilot](docs/00-governance/collection-accuracy-pilot-2026-09-30.md)
-now verifies one automatically accepted CA product in Public. Its additional
-extraction/validation fixes also need deployment to other collection runtimes.
+The Product Owner reports the previous accuracy/pilot changes deployed.
+The 355-product/470-review cutover preserved history. The subsequent
+[economical recovery](docs/00-governance/collection-accuracy-recovery-2026-09-30.md)
+diagnosed the remaining 354 products without AI, checked 10 official pages and
+collected six. TD U.S. Daily Interest Chequing is now restored automatically;
+Public has CA 2 / US 0, with 353 legacy products still inactive and no reviews.
+This slice's extraction reuse, essential-field selection and balance-semantic
+fixes require collection-runtime deployment. Its data changes are already applied.
 
 This repository is the implementation and operating workspace for `FPDS`
 (Finance Product Data Service), an evidence-grounded financial product data

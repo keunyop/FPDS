@@ -24,6 +24,25 @@ def candidate_fixture():
 
 
 class CollectionAccuracyTests(unittest.TestCase):
+    def test_transaction_fee_waiver_balance_is_not_a_general_minimum(self):
+        row, meta, evidence = candidate_fixture()
+        row["candidate_payload"]["minimum_balance"] = 1500
+        quote = "Minimum monthly balance for no transaction fees 2\n$1,500 CAD"
+        row["field_mapping_metadata"]["minimum_balance"].update(normalized_value=1500, official_evidence_quote=quote)
+        evidence[-1]["evidence_excerpt"] = quote
+        result, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
+        self.assertNotIn("minimum_balance", result["candidate_payload"])
+        self.assertEqual(receipt["omitted_fields"]["minimum_balance"], "transaction_waiver_balance_not_minimum")
+        self.assertFalse(receipt["accepted"])
+        row["field_mapping_metadata"]["minimum_balance"]["official_evidence_quote"] = "Minimum balance $1,500 CAD"
+        evidence[-1]["evidence_excerpt"] = "Minimum balance $1,500 CAD for no transaction fees"
+        self.assertEqual(sanitize_candidate(row, source_metadata=meta, evidence=evidence)[1]["omitted_fields"]["minimum_balance"],
+                         "transaction_waiver_balance_not_minimum")
+        quote = "Minimum balance $1,500 CAD"
+        row["field_mapping_metadata"]["minimum_balance"]["official_evidence_quote"] = quote
+        evidence[-1]["evidence_excerpt"] = quote
+        self.assertTrue(sanitize_candidate(row, source_metadata=meta, evidence=evidence)[1]["accepted"])
+
     def test_extraction_records_why_a_required_count_was_omitted(self):
         from unittest.mock import patch
         from worker.pipeline.fpds_extraction.models import ExtractionDocumentContext

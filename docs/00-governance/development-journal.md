@@ -25,6 +25,49 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - Economical legacy recovery and grounded extraction reuse
+
+- Product Owner reports the prior deployment complete and approves the proposed
+  evidence-first recovery. Diagnosed the 355-product manifest (354 still inactive)
+  in a repeatable-read read-only transaction, without model calls. No remaining
+  stored candidate/linked-evidence combination passed current gates. Missing
+  currency affected 348 products; no country/dollar-sign default was restored.
+- Safe-fetched and parsed ten registered official detail URLs. Four lacked explicit
+  product-currency evidence and were omitted before AI; six sources ran once each
+  in collection_qwFolGcVFTNT0mwe. Five were automatically excluded. TD U.S. Daily
+  Interest Chequing was restored through normal automatic validation/promotion.
+- Added manifest-scoped recovery diagnostic, private per-source same-day grounding
+  result reuse, essential-only AI targets, currency-absence preflight, current-run
+  selected-parse binding, run-specific extraction artifact paths and bounded usage
+  summaries. Cache invalidates on exact input/scope/model/code/date changes;
+  failures are not cached and downstream acceptance remains mandatory.
+- Final data inspection caught a transaction-fee waiver balance stored as a general
+  minimum. Shared accuracy rules now omit that meaning. Original extraction was
+  reprocessed with zero model calls. Same candidate cannot be promoted twice by
+  design, so the original candidate before-image was restored and a distinct
+  service-generated revision was normalized/validated/promoted automatically.
+  TD is version 5; minimum balance is absent, monthly fee 0 and base transaction
+  fee 1.25 are numeric USD facts. Historical versions/evidence remain.
+- Final independent DB/API and ordinary Public list/detail reads confirm CA 2 /
+  US 0, remaining 353 inactive, all other 354 manifest products unchanged, and
+  new/pending human reviews both zero. Private receipts/quotes are not public.
+  Snapshot agg_iaPQiX0Lf64fCGQj completed 16:59:11.953462Z.
+- Actual six new extraction requests used 103,667 input + 24,611 output tokens.
+  No dynamic AI normalization in these deposit runs. Read-only live Scotia cache
+  replay, with provider calls forbidden and output writes kept in memory, reused
+  original provenance with zero extra tokens/requests. No claimed dollar estimate.
+- Worker 569, API 535, maintenance 8 tests pass. Repository doctor, foundation
+  (including Admin/Public package checks/builds) and final diff/text checks pass.
+  Comparison narrowing retains annual/APY and redemption qualifiers needed for
+  Public comparisons. See the recovery report for scoped evidence and limits. No UI source changes,
+  deployment, account/registry mutation, mass reactivation or ongoing scheduler.
+- Next: deploy these additional collection-runtime changes. Further recovery needs
+  exact product-scoped currency/rate/condition support documents before more paid
+  extraction. Do not rerun the one-time cutover or the one-off mutation scripts.
+  [Recovery report](collection-accuracy-recovery-2026-09-30.md); private artifacts
+  are tmp/economical-recovery-*. Existing unrelated goal ownership is preserved.
+
+
 ## 2026-09-30 - Bounded live accuracy pilot and exclusion diagnosis
 
 - Product Owner authorized the proposed next step: bounded real collection and

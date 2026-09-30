@@ -165,6 +165,7 @@ COMMIT;
         self,
         *,
         source_document_ids: list[str],
+        run_id: str | None = None,
     ) -> list[ExtractionDocumentContext]:
         if not source_document_ids:
             return []
@@ -191,12 +192,18 @@ FROM (
     WHERE ss.source_document_id IN (
         SELECT jsonb_array_elements_text(:'source_document_ids_json'::jsonb)
     )
+    AND (NULLIF(:'run_id', '') IS NULL OR EXISTS (
+        SELECT 1 FROM run_source_item rsi
+        WHERE rsi.run_id=:'run_id' AND rsi.source_document_id=ss.source_document_id
+          AND rsi.selected_snapshot_id=ss.snapshot_id AND rsi.error_count=0
+          AND rsi.stage_metadata->>'parsed_document_id'=pd.parsed_document_id
+    ))
     ORDER BY ss.source_document_id, pd.parsed_at DESC, pd.created_at DESC
 ) AS context_rows;
 """
         output = self._execute(
             sql,
-            variables={"source_document_ids_json": json.dumps(source_document_ids, ensure_ascii=True)},
+            variables={"source_document_ids_json": json.dumps(source_document_ids, ensure_ascii=True), "run_id": run_id or ""},
         )
         payload = json.loads(output or "[]")
         return [ExtractionDocumentContext(**item) for item in payload]

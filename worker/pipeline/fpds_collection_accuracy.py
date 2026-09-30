@@ -276,6 +276,14 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             reason = "field_currency_mismatch"
         elif (field_contract(name).unit == "percentage_points" or name == "term_rate_table") and not _ANNUAL_RATE_BASIS.search(str(e.get("evidence_excerpt") or "")):
             reason = "annual_rate_basis_unproven"
+        elif name == "minimum_balance" and re.search(
+            r"balance.{0,40}(?:no|waiv\w*|avoid|free).{0,25}transaction|"
+            r"transaction.{0,25}(?:fee|charge).{0,25}(?:waiv\w*|avoid|free)",
+            text(quote) + " " + text(e.get("evidence_excerpt")), re.I,
+        ):
+            # A balance that waives transaction charges is not an opening or
+            # general minimum balance, nor a monthly-account-fee threshold.
+            reason = "transaction_waiver_balance_not_minimum"
         elif not quote_supports_value(name, value, str(quote)):
             reason = "field_meaning_unproven"
         elif field_contract(name).value_type in {"decimal", "integer", "boolean"} and not quote_supports_value(name, value, str(e.get("evidence_excerpt") or "")):

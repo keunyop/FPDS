@@ -128,7 +128,7 @@ def _load_contexts(
             source_ids=args.source_id,
             started_at=_utc_now_iso(),
         )
-        loaded_contexts = repository.load_latest_document_contexts(source_document_ids=source_document_ids)
+        loaded_contexts = repository.load_latest_document_contexts(source_document_ids=source_document_ids, run_id=args.run_id)
         context_by_source_document_id = {item.source_document_id: item for item in loaded_contexts}
         missing_source_ids = [
             source_id

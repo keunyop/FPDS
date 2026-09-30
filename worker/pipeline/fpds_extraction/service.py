@@ -43,6 +43,7 @@ from .models import (
     ExtractionSourceResult,
 )
 from .storage import ExtractionStorageConfig
+from .grounding_cache import grounded_with_reuse
 
 _DEFAULT_EXTRACTABLE_FIELDS = (
     "product_name",
@@ -551,8 +552,9 @@ class ExtractionService:
 
             ai_usage: dict[str, Any] | None = None
             if _uses_official_ai_grounding(context) and llm_provider_configured():
-                ai_fields, ai_notes, ai_usage = _extract_official_fields_with_ai(
-                    context=context,
+                ai_fields, ai_notes, ai_usage = grounded_with_reuse(
+                    object_store=self.object_store, storage_config=self.storage_config, run_id=run_id,
+                    extract=_extract_official_fields_with_ai, context=context,
                     candidates=extraction_input.candidates,
                     requested_fields=field_names,
                     collected_fields=extracted_fields,
@@ -567,10 +569,10 @@ class ExtractionService:
                     completion_tokens = int(ai_usage.get("completion_tokens") or 0)
                     provider_request_id = ai_usage.get("provider_request_id")
                     usage_metadata = {
-                        "usage_mode": "openai-official-product-grounding",
+                        "usage_mode": "reused-official-grounding" if ai_usage.get("reused") else "openai-official-product-grounding",
                         "provider": "openai",
                         "model_id": model_id,
-                        "require_web_search": True,
+                        "require_web_search": not bool(ai_usage.get("reused")),
                         "official_domain_allowlist": _official_domain_allowlist(context),
                         "official_web_sources": list(ai_usage.get("web_search_sources") or []),
                     }
@@ -602,12 +604,14 @@ class ExtractionService:
                 bank_code=context.bank_code,
                 source_document_id=context.source_document_id,
                 parsed_document_id=context.parsed_document_id,
+                run_id=run_id,
             )
             metadata_storage_key = self.storage_config.build_metadata_object_key(
                 country_code=context.country_code,
                 bank_code=context.bank_code,
                 source_document_id=context.source_document_id,
                 parsed_document_id=context.parsed_document_id,
+                run_id=run_id,
             )
             artifact_payload = _build_extracted_artifact_payload(
                 context=context,
@@ -660,6 +664,12 @@ class ExtractionService:
                     "parsed_document_id": context.parsed_document_id,
                     "snapshot_id": context.snapshot_id,
                     "requested_fields": field_names,
+                    "grounding_usage": {
+                        "reused": bool(ai_usage and ai_usage.get("reused")),
+                        "origin_run_id": ai_usage.get("origin_run_id") if ai_usage else None,
+                        "prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens,
+                        "provider_call_completed": bool(ai_usage and not ai_usage.get("reused")),
+                    },
                     "retrieval_mode": retrieval_result.applied_retrieval_mode,
                     "runtime_notes": runtime_notes,
                     "extracted_field_count": len(extracted_fields),
@@ -4185,6 +4195,16 @@ def _extract_official_fields_with_ai(
     profile = country_product_profile(country_code=context.country_code, product_type=_infer_product_type(context))
     requirement_fields = {name for requirement in (profile.requirements if profile else ())
                           for name in requirement.alternatives}
+    # Keep identity, comparison essentials and the proof needed to compare
+    # annual/APY rates and redemption categories. No extra searches for qualifiers.
+    comparison_qualifiers = set()
+    if _infer_product_type(context) in {"savings", "gic"}:
+        comparison_qualifiers.add("interest_calculation_method")
+    if _infer_product_type(context) == "gic":
+        comparison_qualifiers.update({"redeemable_flag", "non_redeemable_flag"})
+    if profile:
+        ai_requested_fields = [name for name in ai_requested_fields
+                               if name in requirement_fields | comparison_qualifiers | {"product_name", "currency"}]
     supplemental_fields = [name for name in (profile.supplemental_fields if profile else ())
                            if name in ai_requested_fields and name not in requirement_fields]
     schema = {
