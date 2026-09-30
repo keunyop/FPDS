@@ -31,6 +31,43 @@ binding, per-run artifacts and transaction-waiver balance omission. Data is
 applied; these new runtime changes still need deployment. See
 [recovery report](../00-governance/collection-accuracy-recovery-2026-09-30.md).
 
+### 5.76 follow-up - one-off TD operation
+
+Product Owner limits legacy recovery to one-off scripts. Eight TD products
+preflighted; five chequing candidates revalidated with current evidence and one
+shared CAD fee table. One restored, four excluded, zero new model calls/reviews.
+At completion, Public API CA 3 / US 0; 352 legacy products remained inactive. No runtime
+feature or deployment. [Result](../00-governance/collection-accuracy-oneoff-td-2026-09-30.md).
+
+### 5.76 follow-up - one-off Vancity operation
+
+Five excluded chequing products revalidated against current official detail
+evidence and exact URL-linked native currency properties. Essential Chequing
+restored automatically; four excluded. Zero new model calls/tokens or reviews.
+At completion, Public API CA 4 / US 0; 351 manifest products remained inactive. Other 433
+canonical rows and registry/history unchanged. No new feature or deployment.
+[Result](../00-governance/collection-accuracy-oneoff-vancity-2026-09-30.md).
+
+### 5.76 follow-up - CIBC/Scotiabank one-off operation
+
+Six CIBC cards stopped after read-only preflight: current rate contexts remain
+unsupported. Five Scotiabank accounts automatically revalidated; Basic Plus
+restored using directly linked official booklet currency and its exact current
+fee-table row. Ten other products remain excluded. Zero new model calls/tokens
+or reviews. Current Public API CA 5 / US 0; 350 manifest products inactive.
+Other 433 canonical rows, eleven original candidates and registry unchanged.
+[Result](../00-governance/collection-accuracy-oneoff-scotia-2026-09-30.md).
+
+### 5.76 follow-up - RBC/BMO preflight and zero-value correction
+
+Eleven further products checked across ten unique details and six support
+sources. No automatic passes; no model calls or data writes. Corrected the
+demonstrated shared defect where a no-fee benefit could prove zero minimum
+balance or another fee. Existing five active products still pass evidence replay.
+Worker 571 / API 535 / accuracy-maintenance 31 pass. Correction requires runtime
+deployment; Public remains CA 5 / US 0, with 350 manifest products inactive.
+[Report](../00-governance/collection-accuracy-oneoff-rbc-bmo-2026-09-30.md).
+
 Version: 1.0
 Date: 2026-03-29
 Based on:

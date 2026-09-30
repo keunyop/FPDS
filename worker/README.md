@@ -1,5 +1,10 @@
 # Worker Boundary
 
+The 2026-09-30 zero-value correction requires explicit evidence for the same
+financial attribute: a no-fee benefit cannot prove zero minimum balance or
+deposit. See the [RBC/BMO assessment](../docs/00-governance/collection-accuracy-oneoff-rbc-bmo-2026-09-30.md).
+This correction is tested locally and requires collection-runtime deployment.
+
 ## Accuracy gate — 2026-09-30
 
 `fpds_collection_accuracy` runs after normalization and before validation. It

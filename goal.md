@@ -774,3 +774,112 @@ and its actual run has three successful snapshots. Three held lending scopes rem
 requested launch was executed and verified, not that all collection results
 have completed. The worker continues in the background; monitor Banks and
 collection_h9A43rSXmXf0M3rj for actual run/Review outcomes. Preserve earlier goals.
+
+
+## Independent slice: 2026-09-30 one-off bank recovery
+
+Objective: recover a bounded 5-10 excluded products from one existing bank using
+current official product-specific and applicable shared evidence.
+Scope: read-only selection/preflight, private one-off scripts, normal automatic
+collection/validation/promotion, before-images and Public readback.
+No permanent recovery feature, UI, scheduler, manual fact approval, scope
+expansion or relaxed evidence rules. Only evidenced common defects justify code fixes.
+Preserve all earlier goal ownership.
+Acceptance:
+- [x] Select 5-10 inactive manifest products in one bank and check current evidence.
+- [x] Reuse official supporting documents only with exact product applicability;
+      bound paid calls and stop unchanged failures.
+- [x] Run eligible recovery through existing automatic gates; keep unsupported
+      products excluded and preserve all history with no human reviews.
+- [x] Verify data/Public outcomes, actual usage, unchanged outside scope,
+      document results and check final diff.
+Verification: private before/after snapshots, field/source provenance and type
+checks, existing regression suites if code changes, DB/API/Public readback.
+
+Completion: eight TD products preflighted, five automatically revalidated, one
+restored without new model calls/tokens or human review. Ordinary Public list,
+detail, BFF and API confirm three active products. Remaining 352 manifest products
+are inactive; all other canonical rows and registry/history are preserved. Six
+safety checks, 29 regression tests, repo doctor and final diff/text/link checks
+pass. Only one-off scripts/data and governance documents changed; no runtime
+feature or deployment. Preserve this file for earlier unresolved ownership.
+
+
+## Independent slice: 2026-09-30 remaining-product recovery continuation
+
+Objective: continue the authorized remaining-product recovery, prioritizing
+current identical evidence and explicit applicable shared documents.
+Scope: read-only remaining-manifest prioritization; next bank's 5-10 products,
+private one-off scripts, zero new model calls, normal automatic gates/readback.
+Exclude permanent features, UI, deployment, manual decisions, relaxed evidence,
+unchanged failed retries and unrelated product/registry mutations. Preserve
+all prior goal ownership and existing uncommitted changes.
+Acceptance:
+- [x] Confirm current inactive scope and select the strongest next bounded bank.
+- [x] Preflight current official detail/support applicability and exact reuse.
+- [x] Apply only automatically accepted candidates; otherwise record exclusions.
+- [x] Verify unchanged outside scope, zero reviews/model calls, Public outcome,
+      documentation, operation safety and final diff.
+
+
+Completion: five Vancity candidates revalidated; Essential Chequing restored,
+four automatically excluded. API, Public BFF and ordinary list/detail confirm
+CA 4 / US 0 at 18:22:46Z; 351 manifest products remain inactive. Other 433
+canonical rows, registry and historical candidates are unchanged. Zero new
+collection model calls/tokens or human reviews; no feature or deployment.
+Eight operation safety checks, 29 regression tests, repository doctor and final
+diff/text/link checks pass. Preserve this file for earlier unresolved ownership.
+
+
+## Independent slice: 2026-09-30 next-bank recovery
+
+Objective: continue authorized excluded-product recovery using current official
+facts and existing automatic gates, minimizing new model usage.
+Scope: rank remaining manifest products, preflight bounded bank batches with 5-10
+candidates each and applicable support, execute only proven automatic passes using
+private one-off scripts. Zero new model calls for this slice.
+Exclude permanent features, deployment, manual product approval, relaxed gates,
+unchanged retries and unrelated canonical/registry mutation. Preserve prior goals.
+Acceptance:
+- [x] Verify current scope and select a bounded next-bank batch.
+- [x] Prove current applicability, native types, complete conditions and provenance.
+- [x] Execute eligible automatic recovery or document evidence-based exclusions.
+- [x] Verify all outside-scope before-images, usage/reviews and Public outcomes;
+      update operational documents and complete diff/checks.
+
+
+Completion: checked six CIBC cards and five Scotiabank accounts. CIBC stopped
+at read-only preflight; five Scotiabank candidates processed automatically,
+restoring Basic Plus only. Other ten products remain inactive. API, Public BFF
+and ordinary list/detail confirm CA 5 / US 0 at 18:49:30Z; 350 manifest products
+remain inactive. All other 433 canonical rows, eleven original candidates and
+registry are unchanged. Zero new collection model calls/tokens or human reviews.
+Nine safety cases, 29 regression tests, repo doctor, final diff/text/link checks
+pass. No runtime feature or deployment. Preserve prior unresolved goal ownership.
+
+
+## Independent slice: 2026-09-30 remaining-bank continuation
+
+Objective: continue authorized recovery of remaining inactive manifest products.
+Scope: new bounded bank batches, current official preflight and private scripts,
+zero new collection model calls; existing automatic gates and full readback.
+No unchanged failed retries, permanent feature, deployment, human approval,
+relaxed financial evidence or unrelated canonical/registry changes.
+Include the demonstrated shared zero-value bug: a fee-free family benefit must
+not prove zero minimum balance. Add focused regression and active-data replay.
+Acceptance:
+- [x] Select previously unprocessed bounded bank/product scopes and verify live state.
+- [x] Check current detail/support applicability and native facts conservatively.
+- [x] Apply only automatic passes; record incomplete candidates as exclusions.
+- [x] Verify before-images, history, usage/reviews, Public results and documentation.
+Preserve prior goal ownership and uncommitted changes.
+
+
+Completion: six RBC and five BMO manifest products assessed against fresh details
+and six supporting sources; all remain excluded, with zero additional model
+calls/tokens or DB writes. Existing five active products pass corrected-validator
+replay and Public API/BFF/list checks. Found and fixed a demonstrated common
+cross-attribute zero-value bug; no new recovery feature. Worker 571, API 535,
+accuracy/maintenance 31 tests, repo doctor, foundation baseline, final diff and
+text/link checks pass. Runtime deployment remains required for the correction.
+Remaining 350 manifest products are still inactive. Preserve prior goal ownership.

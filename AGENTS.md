@@ -18,6 +18,8 @@
   preserved evidence before paid collection; preflight essential evidence, reuse
   identical current inputs, and bound batches/retries. Never restore historical
   facts merely to fill Public. Keep runtime deployment separate from data results.
+  Legacy recovery is a bounded one-off data operation. Do not add a permanent
+  recovery feature, menu or scheduler without a separate Product Owner request.
 
 These instructions apply to the entire repository, including FPDS Admin and
 FPDS Public.

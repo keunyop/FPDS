@@ -25,6 +25,96 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - RBC/BMO preflight and cross-attribute zero correction
+
+- Continued remaining recovery: six RBC and five BMO products (ten detail URLs,
+  six support sources). All remain excluded after full-context checks. RBC
+  Advantage's saved fee points to Signature cross-sell content; mixed BMO plan
+  currencies and conditional bonus balances were not inferred into facts.
+- Found a shared accuracy defect with current BMO evidence: a family no-fee
+  benefit could prove zero minimum balance. Fixed quote_supports_value to require
+  negation of the same money attribute. Two regressions reproduced five failures
+  before the fix and pass afterward; policy and worker instructions updated.
+- Worker 571, API 535 and accuracy/maintenance 31 tests pass. Five active products
+  pass independent revalidation from approved candidates and actual evidence.
+  No collection/model calls/tokens, human reviews, data or registry writes.
+- Public API/BFF/list remain five products; 350 manifest products inactive.
+  This actual common defect correction requires runtime deployment. No permanent
+  recovery feature or deployment was added. Repo doctor, foundation baseline,
+  final diff, UTF-8 and Markdown link checks pass.
+- See [assessment](collection-accuracy-oneoff-rbc-bmo-2026-09-30.md) and private
+  tmp/oneoff-rbc-* / tmp/oneoff-bmo-* / tmp/oneoff-rbc-bmo-* artifacts.
+  Next batches need new applicable evidence; do not retry unchanged exclusions.
+
+## 2026-09-30 - Remaining recovery: CIBC preflight and Scotiabank Basic Plus
+
+- Continued authorized one-off recovery in two bounded batches: six CIBC cards
+  and five Scotiabank accounts. CIBC stopped before collection because purchase,
+  cash and penalty rates share contexts and annual basis is unproven in details.
+  Currency mentions about airline rewards were not applied to card currency.
+- Scotiabank Basic Plus restored via unchanged automatic gates. Exact detail links,
+  H1, current fee-table row/product URL and pinned booklet with amendments prove
+  support applicability. Full parser contexts remain intact; native balance is
+  re-grounded without editing the value. Three real evidence origins retained.
+- Public API CA 5 / US 0, remaining 350 manifest products inactive; only Basic Plus
+  changed among all 434 canonical rows. Eleven original candidates and all registry
+  rows unchanged. Product version 11; aggregate agg_YdYdz1X2przB1Lza.
+  At 18:49:30Z API, Public BFF and ordinary list/detail URLs confirm the result
+  after normal cache revalidation; private receipts and quotations remain absent.
+- Zero new collection model calls/tokens or human reviews. No permanent feature,
+  runtime change or deployment. Temporary linked source documents are captured
+  normally and appear in the operation plan without changing the registry.
+- Nine safety checks, 29 accuracy/maintenance tests and repository doctor pass.
+  Final diff/text/link checks also pass.
+- See [report](collection-accuracy-oneoff-scotia-2026-09-30.md) and private
+  tmp/oneoff-cibc-* / tmp/oneoff-scotia-* artifacts. Do not rerun execution or
+  repeatedly send unchanged mixed rate contexts to a model.
+
+## 2026-09-30 - Remaining-product continuation: one-off Vancity recovery
+
+- Continued authorized legacy recovery with five inactive Vancity chequing
+  products. Existing catalogue currency properties bind only exact registered
+  product URLs/aliases; unchanged historical contexts are reused. Essential's
+  existing integer count is re-grounded in its complete current Perks component.
+- Normal automatic gates restored Essential Chequing and excluded four products.
+  Channel-only unlimited allowances are omitted. No new model calls/tokens,
+  human reviews, source-registry changes, runtime features or deployment.
+- Independent DB/API checks confirm CA 4 / US 0, 351 manifest products inactive,
+  other 433 canonical rows and historical candidates unchanged. Product version
+  6; aggregate agg_-0zxxdt9Hs3ctJke. At 18:22:46Z API, Public BFF and ordinary
+  list/detail URLs confirm the result after normal cache revalidation.
+- Eight operation safety checks, 29 accuracy/maintenance tests and repo doctor
+  pass, together with final diff/text/link checks.
+- See [operation report](collection-accuracy-oneoff-vancity-2026-09-30.md) and
+  private tmp/oneoff-vancity-* artifacts. Do not rerun execution. Remaining
+  batches need new applicable evidence before retrying unchanged exclusions.
+
+## 2026-09-30 - One-off TD recovery without new functionality
+
+- Product Owner clarifies legacy recovery is a one-off operation and authorizes
+  one bank / 5-10 products. Inspected eight TD products and five support sources;
+  executed five chequing details plus one shared CAD fee table. No runtime code,
+  UI, scheduler, registry row or deployment change; AGENTS/policy retain this scope.
+- Reused only previously grounded values whose entire evidence context matches
+  current captures. Deterministic DOM checks bind the sole active CAD tab to
+  exactly five product columns; persisted support evidence retains its real origin.
+  Existing sanitizer/validation/promotion restored TD Unlimited Chequing and
+  excluded four candidates without human review. Three savings products stayed
+  outside collection. New project model requests/tokens both zero.
+- Public API CA 3 / US 0, remaining 352 inactive; other 354 product payloads and
+  versions, registry rows and original candidates unchanged. Across all 434
+  canonical rows only the target changed. Current snapshot agg_czWJKhMNRdS8501M.
+  At 18:02:56Z API, BFF and ordinary Public list/detail confirm the product after
+  normal cache revalidation. Private receipts and quotations are absent.
+- Six safety checks and 29 accuracy/maintenance tests pass. First candidate
+  persistence rolled back on invalid state; corrected to draft and resumed the
+  same stored captures. No repeat fetch/model call or runtime change was needed.
+  Repo doctor, diff and Markdown/text checks pass.
+- See [one-off report](collection-accuracy-oneoff-td-2026-09-30.md) and private
+  tmp/oneoff-td-* before-images/results. Do not rerun mutation scripts. Subsequent
+  batches need a bounded current-evidence diagnosis, not a permanent recovery UI.
+
+
 ## 2026-09-30 - Economical legacy recovery and grounded extraction reuse
 
 - Product Owner reports the prior deployment complete and approves the proposed

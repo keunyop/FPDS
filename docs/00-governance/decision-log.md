@@ -14,8 +14,12 @@ acceptance on new records. After the initial automatic approval rejection, the
 Product Owner explicitly approved the concrete 355-product/470-review cutover.
 Data and the initial empty CA/US projections were applied. The Product Owner
 subsequently reports the endpoint/pilot build deployed and authorizes economical
-recovery. Public now contains two verified CA products. Additional recovery code
-requires its own collection-runtime deployment; no manual product approval returns.
+recovery. Subsequent one-off TD, Vancity and Scotiabank operations bring Public
+to five verified CA products, with 350 manifest products remaining inactive. Per
+Product Owner clarification, legacy recovery uses bounded one-off scripts; a
+permanent recovery feature requires a separate request.
+The prior recovery runtime code still requires its separate deployment;
+this one-off operation changes no runtime. No manual product approval returns.
 [Policy](../03-design/collection-accuracy-policy.md) and
 [concrete impact assessment](collection-accuracy-audit-2026-09-30.md).
 

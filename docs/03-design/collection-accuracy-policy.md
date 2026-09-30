@@ -36,6 +36,10 @@ markets, product types, recommendations, public evidence or BX-PF writes.
 - Product identity must be verified on a detail source. Currency requires an
   explicit ISO code or currency name in verified evidence; country defaults and
   an ambiguous dollar symbol are insufficient.
+- A zero money value needs evidence about that same attribute. No monthly fee
+  cannot prove no minimum balance/deposit, and no transaction fee cannot prove
+  no annual fee. Benefits for family or companion accounts cannot establish the
+  main account's fee or balance. Require exact product and attribute applicability.
 - Do not translate or paraphrase source-language product facts. UI labels may be
   localized. Do not infer false, zero, a currency, missing duration, a rate total,
   or a new fact from an absent statement. Normalization cannot create or change a
@@ -129,6 +133,11 @@ AI fields with non-exact quotations remain excluded; private extraction notes
 record missing/invalid field evidence instead of silently losing the reason.
 
 ## Economical collection and recovery
+
+Legacy recovery is a bounded one-off data operation, per the Product Owner's
+clarification. Use private scripts and the existing automatic accuracy, validation
+and promotion gates. A permanent recovery feature, menu or scheduler requires
+a separate request. Fix shared runtime defects only when demonstrated by evidence.
 
 - Diagnose saved candidates/evidence against current gates before paying for
   recollection. A historical pass still needs current official-source identity

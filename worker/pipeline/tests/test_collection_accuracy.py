@@ -24,6 +24,40 @@ def candidate_fixture():
 
 
 class CollectionAccuracyTests(unittest.TestCase):
+    def test_zero_money_requires_the_same_financial_attribute(self):
+        invalid = [
+            ("minimum_balance", "Minimum daily balance $4,000 for bonus points. Family members get no fee daily banking."),
+            ("minimum_deposit", "Minimum opening deposit $100. No monthly fee."),
+            ("annual_fee", "Annual fee $99. No transaction fee."),
+            ("transaction_fee", "Transaction fee $2. No annual fee."),
+        ]
+        for field, quote in invalid:
+            with self.subTest(field=field, quote=quote):
+                self.assertFalse(quote_supports_value(field, 0, quote))
+        valid = [
+            ("minimum_balance", "No minimum balance required"),
+            ("minimum_deposit", "No minimum deposit"),
+            ("monthly_fee", "No monthly account fee"),
+            ("annual_fee", "No annual fee"),
+            ("transaction_fee", "No transaction fee"),
+            ("minimum_balance", "Minimum balance $0 CAD"),
+        ]
+        for field, quote in valid:
+            with self.subTest(field=field, quote=quote):
+                self.assertTrue(quote_supports_value(field, 0, quote))
+
+    def test_family_fee_benefit_cannot_prove_zero_balance(self):
+        row, meta, evidence = candidate_fixture()
+        quote = ("Earn 500 Bonus Points every month with a minimum daily balance of $4,000 "
+                 "or more in your chequing account. Family members in your household get "
+                 "no fee daily banking with Family Bundle.")
+        row["field_mapping_metadata"]["minimum_balance"]["official_evidence_quote"] = quote
+        evidence[-1]["evidence_excerpt"] = quote
+        result, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
+        self.assertFalse(receipt["accepted"])
+        self.assertNotIn("minimum_balance", result["candidate_payload"])
+        self.assertEqual(receipt["omitted_fields"]["minimum_balance"], "field_meaning_unproven")
+
     def test_transaction_fee_waiver_balance_is_not_a_general_minimum(self):
         row, meta, evidence = candidate_fixture()
         row["candidate_payload"]["minimum_balance"] = 1500

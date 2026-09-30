@@ -35,6 +35,11 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [RBC/BMO recovery assessment](00-governance/collection-accuracy-oneoff-rbc-bmo-2026-09-30.md): 11 exclusions retained, cross-attribute zero validation corrected
+- [CIBC/Scotiabank one-off recovery](00-governance/collection-accuracy-oneoff-scotia-2026-09-30.md): 11 products checked, Basic Plus restored, no new model calls
+- [One-off Vancity recovery](00-governance/collection-accuracy-oneoff-vancity-2026-09-30.md): exact product currency properties, one automatic restoration, zero model calls
+- [One-off TD recovery](00-governance/collection-accuracy-oneoff-td-2026-09-30.md): zero-model evidence reuse, one automatic restoration and unchanged product scope
+
 - [Economical accuracy recovery](00-governance/collection-accuracy-recovery-2026-09-30.md): manifest diagnosis, bounded collection, reuse and actual Public results
 
 - [Live collection accuracy pilot](00-governance/collection-accuracy-pilot-2026-09-30.md): real-source exclusion fixes, automatic product recovery and operational checks

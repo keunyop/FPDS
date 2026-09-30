@@ -17,6 +17,22 @@ Public has CA 2 / US 0, with 353 legacy products still inactive and no reviews.
 This slice's extraction reuse, essential-field selection and balance-semantic
 fixes require collection-runtime deployment. Its data changes are already applied.
 
+A subsequent [one-off TD recovery](docs/00-governance/collection-accuracy-oneoff-td-2026-09-30.md)
+restored TD Unlimited Chequing with zero new model calls. Its Public API
+totals were CA 3 / US 0, with 352 legacy products inactive. That operation reused
+current identical evidence and applicable CAD support without runtime changes.
+The next [one-off Vancity batch](docs/00-governance/collection-accuracy-oneoff-vancity-2026-09-30.md)
+restored Essential Chequing, with four exclusions and zero new model calls.
+That batch ended with CA 4 / US 0 and 351 manifest products inactive.
+The next [CIBC/Scotiabank operation](docs/00-governance/collection-accuracy-oneoff-scotia-2026-09-30.md)
+checked 11 products and restored Scotiabank Basic Plus, with zero new model calls.
+Current Public API totals are CA 5 / US 0; 350 manifest products remain inactive.
+Those data-only operations require no runtime deployment. A subsequent
+[RBC/BMO assessment](docs/00-governance/collection-accuracy-oneoff-rbc-bmo-2026-09-30.md)
+checked 11 further products without restoration or model calls. It found and fixed
+a shared zero-value validation defect; that fix needs collection-runtime deployment.
+Current five active products still pass the corrected validator.
+
 This repository is the implementation and operating workspace for `FPDS`
 (Finance Product Data Service), an evidence-grounded financial product data
 platform with separate authenticated Admin and anonymous Public experiences.

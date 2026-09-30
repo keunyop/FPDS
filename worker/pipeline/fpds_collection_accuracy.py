@@ -174,7 +174,17 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         matching = {Decimal(v.replace(",", "")) for v in amounts}
         if number == 0 and _money_has_condition(quote, field_name):
             return False
-        if number == 0 and re.search(r"\b(?:no|zero)\b.{0,25}\b(?:fee|minimum)\b", q, re.I):
+        # Zero must negate this attribute, not an unrelated fee/balance nearby.
+        zero_labels = {
+            "monthly_fee": r"monthly(?: account)? (?:fees?|charges?)",
+            "public_display_fee": r"monthly(?: account)? (?:fees?|charges?)",
+            "annual_fee": r"annual (?:fees?|charges?)",
+            "transaction_fee": r"transaction (?:fees?|charges?)",
+            "minimum_balance": r"minimum(?: daily(?: closing)?)? balance",
+            "minimum_deposit": r"(?:minimum(?: opening)?|initial|opening) deposit",
+        }
+        zero_label = zero_labels.get(field_name)
+        if number == 0 and zero_label and re.search(rf"\b(?:no|zero)\s+(?:{zero_label})\b", q, re.I):
             return True
         if number not in _numbers(q) or number not in matching:
             return False
