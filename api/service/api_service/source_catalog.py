@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `
     sys.path.insert(0, str(REPO_ROOT))
 
 from api_service.errors import SourceRegistryError
+from api_service.collection_preflight import load_source_preflight_rows, source_block_reason, no_detail_result_is_structural
 from api_service.product_types import (
     canonicalize_product_type_code,
     expected_fields_for_product_type,
@@ -1693,6 +1694,14 @@ def start_source_catalog_collection(
     if len(rows) != len(set(catalog_item_ids)):
         raise SourceRegistryError(status_code=404, code="source_catalog_not_found", message="One or more source catalog items could not be found.")
 
+    rows, skipped_items = _preflight_catalog_items(
+        connection, rows=rows, precision_rediscovery=precision_rediscovery,
+    )
+    if retry_of_run_id and not rows:
+        raise SourceRegistryError(
+            status_code=409, code="collection_preflight_blocked",
+            message="This scope requires precision rediscovery or a verified coverage route before collection.",
+        )
     collection_id = new_id("collection")
     correlation_id = new_id("corr")
     plan = _build_source_catalog_collection_plan(
@@ -1703,6 +1712,7 @@ def start_source_catalog_collection(
         correlation_id=correlation_id,
         precision_rediscovery=precision_rediscovery,
     )
+    plan["skipped_items"] = skipped_items
     for group in plan["groups"]:
         _insert_collection_run_row(
             connection,
@@ -1736,8 +1746,57 @@ def start_source_catalog_collection(
             },
         },
     )
-    _launch_source_catalog_collection_runner(plan)
+    if plan["groups"]:
+        _launch_source_catalog_collection_runner(plan)
     return _serialize_source_catalog_collection_launch(plan=plan, catalog_item_ids=catalog_item_ids)
+
+
+def _preflight_catalog_items(
+    connection: Connection, *, rows: list[dict[str, Any]], precision_rediscovery: bool,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    if precision_rediscovery:
+        return rows, []
+    eligible, skipped = [], []
+    for row in rows:
+        sources = load_source_preflight_rows(
+            connection, country_code=str(row["country_code"]), bank_code=str(row["bank_code"]),
+            product_type=str(row["product_type"]), source_language=str(row["source_language"]),
+        )
+        details = [source for source in sources if source.get("discovery_role") == "detail"]
+        reasons = [source_block_reason(source) for source in details]
+        blocked = bool(details) and all(reasons)
+        if not details:
+            previous = connection.execute(
+                """
+                SELECT ir.run_metadata, ir.completed_at, sci.updated_at AS catalog_updated_at
+                FROM ingestion_run ir
+                JOIN source_registry_catalog_item sci ON sci.catalog_item_id = %(catalog_item_id)s
+                WHERE ir.country_code = sci.country_code
+                  AND ir.run_metadata ->> 'bank_code' = sci.bank_code
+                  AND ir.run_metadata ->> 'product_type' = sci.product_type
+                  AND ir.run_state IN ('completed', 'failed')
+                ORDER BY ir.started_at DESC, ir.run_id DESC LIMIT 1
+                """, {"catalog_item_id": str(row["catalog_item_id"])},
+            ).fetchone()
+            if previous and previous.get("completed_at"):
+                metadata = _mapping(previous.get("run_metadata"))
+                unchanged = (not previous.get("catalog_updated_at")
+                             or previous["catalog_updated_at"] <= previous["completed_at"])
+                blocked = (unchanged
+                           and metadata.get("discovery_status") == "no_detail_sources_discovered"
+                           and no_detail_result_is_structural(metadata.get("discovery_notes") or []))
+                if blocked:
+                    reasons = ["structural_zero_detail_requires_rediscovery"]
+        if blocked:
+            skipped.append({
+                "catalog_item_id": str(row["catalog_item_id"]), "bank_code": str(row["bank_code"]),
+                "product_type": str(row["product_type"]),
+                "reason_codes": sorted({reason for reason in reasons if reason}),
+                "revalidation": "precision_rediscovery",
+            })
+        else:
+            eligible.append(row)
+    return eligible, skipped
 
 
 def _build_source_catalog_collection_plan(
@@ -1860,7 +1919,8 @@ def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog
         ],
         "catalog_item_ids": list(catalog_item_ids),
         "materialized_items": [],
-        "workflow_state": "queued",
+        "workflow_state": "queued" if plan["groups"] else "skipped",
+        "skipped_items": list(plan.get("skipped_items") or []),
         "queued_catalog_item_count": len(plan["groups"]),
     }
 
@@ -5152,6 +5212,23 @@ def _promote_detail_candidates(
         notes.append(
             f"Kept {len(suppressed_family_urls)} multi-product family overview page(s) as supporting evidence because named detail pages were available."
         )
+    eligible_detail_rows = []
+    for row in detail_rows:
+        metadata = _mapping(row.get("discovery_metadata"))
+        reasons = set(metadata.get("selection_reason_codes") or []) | set(metadata.get("page_evidence_reason_codes") or [])
+        if "strong_named_page_ai_irrelevant_override" in reasons and "hub_page_not_detail" not in reasons:
+            for key in ("selection_reason_codes", "page_evidence_reason_codes"):
+                metadata[key] = [r for r in metadata.get(key, []) if r != "multi_product_family_overview"]
+            reasons.discard("multi_product_family_overview")
+        if reasons.intersection({
+            "multi_product_family_overview", "hub_page_not_detail",
+            "verified_coverage_review_source", "verified_coverage_lending_review_source",
+        }):
+            rejected_detail_urls.append(str(row["normalized_url"]))
+            rejection_counts["unresolved_product_boundary_before_collection"] += 1
+        else:
+            eligible_detail_rows.append(row)
+    detail_rows = eligible_detail_rows
     promoted_count = len(detail_rows)
     if promoted_count:
         fallback_parts = []
@@ -5266,6 +5343,9 @@ def _is_non_product_supporting_document(
 ) -> bool:
     parsed = urlparse(normalized_url)
     path = parsed.path.lower()
+    document_label = f"{path} {anchor_text.lower()}"
+    if re.search(r"budget(?:ing)?[-_ ](?:worksheet|planner|student|etudiant)|(?:student|etudiant)[-_ ]budget|financial[-_ ]planning[-_ ]worksheet", document_label):
+        return True
     if any(
         marker in path
         for marker in (
@@ -5611,6 +5691,8 @@ def _candidate_promotes_to_detail(
     ):
         return True
     if verified_coverage_review_source:
+        return True
+    if _single_section_overrides_hub_score(ai_score, page_evidence):
         return True
     if page_evidence.page_evidence_score < _PAGE_EVIDENCE_MINIMUM_SCORE:
         return _high_confidence_detail_overrides_low_page_score(
@@ -5959,6 +6041,10 @@ def _strong_named_page_overrides_ai_irrelevant(
     return (
         ai_score is not None
         and ai_score.predicted_role == "irrelevant"
+        and not set(ai_score.reason_codes).intersection({
+            "not_product_detail", "non_product_service_flow", "non_product_editorial_page",
+            "other_product_type", "supporting_terms_or_rates_page", "promo_or_apply_flow",
+        })
         and _page_has_specific_singular_product_identity(page_evidence)
         and _candidate_has_strong_page_detail_signal(
             candidate=candidate,
@@ -6002,6 +6088,9 @@ def _build_detail_discovery_metadata(
     verified_coverage_review_source = (
         verified_coverage_review_source or verified_coverage_lending_review_source
     )
+    resolved_ai_reasons = _coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else []
+    if _single_section_overrides_hub_score(ai_score, page_evidence):
+        resolved_ai_reasons = [code for code in resolved_ai_reasons if code != "hub_page_not_detail"]
     combined = _candidate_combined_score(candidate, {candidate.normalized_url: ai_score} if ai_score is not None else {})
     if page_evidence.page_evidence_score >= 7 and combined >= 8:
         confidence = "high"
@@ -6012,7 +6101,7 @@ def _build_detail_discovery_metadata(
     selection_reason_codes = list(
         dict.fromkeys(
             [
-                *(_coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else []),
+                *resolved_ai_reasons,
                 *page_evidence.page_evidence_reason_codes,
                 "seed_hint_alignment" if candidate.seed_source_id else "",
                 (
@@ -6062,7 +6151,8 @@ def _build_detail_discovery_metadata(
         "ai_parallel_score": ai_score.relevance_score if ai_score is not None else None,
         "ai_predicted_role": ai_score.predicted_role if ai_score is not None else None,
         "ai_confidence_band": ai_score.confidence_band if ai_score is not None else None,
-        "ai_reason_codes": _coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else [],
+        "ai_reason_codes": resolved_ai_reasons,
+        "raw_ai_reason_codes": _coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else [],
         "ai_short_rationale": ai_score.short_rationale if ai_score is not None else None,
         "page_evidence_score": page_evidence.page_evidence_score,
         "page_evidence_reason_codes": page_evidence.page_evidence_reason_codes,
@@ -6198,6 +6288,50 @@ def _coerce_reason_codes(values: list[str]) -> list[str]:
     return [str(item) for item in values if str(item).strip()]
 
 
+def _single_product_section_identity(
+    *, product_type: str, primary_heading: str, secondary_headings: list[str],
+) -> str | None:
+    """A plural page heading is not proof of several products.
+
+    Only use a single named account section; multiple variants and questions
+    remain ambiguous. Financial fields still require their own exact evidence.
+    """
+    generic = {
+        "savings": {"savings", "savings accounts", "saving accounts"},
+        "chequing": {"chequing", "checking", "chequing accounts", "checking accounts"},
+    }.get(_canonical_product_type_code(product_type), set())
+    if _collapse_whitespace(primary_heading).lower().strip(" .:-|") not in generic:
+        return None
+    pattern = r"\b(?:savings?|checking|chequing) account\b"
+    names = {
+        _collapse_whitespace(heading)
+        for heading in secondary_headings
+        if re.search(pattern, heading, re.I)
+        and not re.search(r"[?]|\b(?:how|what|why|open|apply|compare|choose)\b", heading, re.I)
+        and len(heading) <= 100
+    }
+    return next(iter(names)) if len(names) == 1 else None
+
+
+def _single_section_overrides_hub_score(
+    ai_score: AiParallelCandidateScore | None, page_evidence: PageEvidenceAssessment,
+) -> bool:
+    return (
+        "single_product_section_identity" in page_evidence.page_evidence_reason_codes
+        and "multi_product_family_overview" not in page_evidence.page_evidence_reason_codes
+        and page_evidence.negative_signal_count == 0
+        and page_evidence.page_evidence_score >= 7
+        and ai_score is not None
+        and ai_score.predicted_role == "supporting_html"
+        and ai_score.relevance_score >= 7
+        and ai_score.confidence_band != "low"
+        and set(ai_score.reason_codes).issubset({
+            "hub_page_not_detail", "product_type_semantic_match", "seed_hint_alignment",
+            "pricing_or_feature_signal", "detail_page_layout_signal",
+        })
+    )
+
+
 def _score_page_evidence(
     *,
     raw_url: str,
@@ -6227,6 +6361,12 @@ def _score_page_evidence(
     parser.feed(html_text)
     title_text = parser.title_text
     primary_heading = parser.primary_heading
+    section_identity = _single_product_section_identity(
+        product_type=product_type, primary_heading=primary_heading,
+        secondary_headings=parser.secondary_headings,
+    )
+    if section_identity:
+        primary_heading = section_identity
     heading_text = " ".join([primary_heading, *parser.secondary_headings]).strip()
     visible_body_text = " ".join(parser.body_chunks[:40]).strip()
     structured_sections = extract_structured_text_sections(html_text)
@@ -6276,6 +6416,8 @@ def _score_page_evidence(
     score = 0
     reason_codes: list[str] = []
     product_identity_match = bool(title_match or primary_heading_match or url_identity_match)
+    if section_identity and not multi_product_family_overview and not scope_exclusion_reason and attribute_hits >= 2:
+        reason_codes.append("single_product_section_identity")
     if product_identity_match:
         reason_codes.append("product_identity_signal")
     if structured_sections:
@@ -6373,7 +6515,7 @@ class _PageSignalParser(HTMLParser):
                 break
 
     def handle_data(self, data: str) -> None:
-        if self._ignore_depth > 0:
+        if self._ignore_depth > 0 or any(tag in self._tag_stack for tag in ("nav", "footer", "aside")):
             return
         text = _collapse_whitespace(data)
         if not text:
@@ -6931,6 +7073,11 @@ def _link_is_relevant_supporting_source(
     normalized_url: str,
     anchor_text: str,
 ) -> bool:
+    if _is_non_product_supporting_document(
+        product_type=discovery_product_type or product_type,
+        normalized_url=normalized_url, anchor_text=anchor_text,
+    ):
+        return False
     fingerprint = f"{normalized_url} {anchor_text}".lower()
     signal_product_type = discovery_product_type or product_type
     normalized_path = urlparse(normalized_url).path.lower().rstrip("/")
@@ -7334,6 +7481,18 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
     source_url = normalized_fingerprint.split(" ", 1)[0]
     source_path = urlparse(source_url).path.lower()
     source_slug = source_path.rstrip("/").rsplit("/", 1)[-1]
+    hostname = str(urlparse(source_url).hostname or "").lower()
+    if hostname.startswith(("blog.", "news.", "insights.")):
+        return "non_product_editorial_page"
+    if hostname.startswith(("appointment.", "appointments.", "login.", "signin.")):
+        return "non_product_service_flow"
+    if re.search(
+        r"(?:system[-_ ](?:modernization|maintenance|upgrade|migration)|"
+        r"(?:modernizing|upgrading|migrating).{0,60}(?:system|platform)|"
+        r"scheduled[-_ ]maintenance|service[-_ ]outage)",
+        normalized_fingerprint,
+    ):
+        return "non_product_service_flow"
     canonical_type = _canonical_product_type_code(product_type)
     explicit_slug_types = {
         "chequing": any(marker in source_slug for marker in ("chequing", "checking")),
@@ -7540,7 +7699,10 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         # A HELOC can be linked from a mortgage hub or even live below a
         # `/mortgage/` route, but its product identity is line-of-credit.
         return "other_product_type"
-    if any(keyword in fingerprint for keyword in ("investor", "investors", "shareholder", "shareholders")):
+    if (
+        re.search(r"(?:^|/)(?:investor(?:s|-relations)?|shareholders?)(?:[./-]|$)", source_path)
+        or re.search(r"\b(?:investor relations|shareholder(?:s)?(?: information| services| meeting)?|annual reports?|quarterly results)\b", normalized_fingerprint)
+    ):
         return "non_product_or_investor_page"
     registered_plan_signal = any(
         keyword in fingerprint for keyword in _REGISTERED_PLAN_WRAPPER_KEYWORDS

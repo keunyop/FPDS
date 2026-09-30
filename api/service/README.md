@@ -437,14 +437,27 @@ cd api/service
   relaxed location-gate evidence threshold only with high AI support,
   structured product copy, title identity, and no hard product/service veto;
   ordinary homepage links retain the stricter threshold.
-- A verified coverage route for any Product Type may cross an otherwise
-  insufficient page-score or family-overview boundary only when deterministic
-  product semantics, pricing/feature evidence, and AI relevance all satisfy
-  the bounded contract with no hard veto. The route is marked
-  `verified_coverage_review_source`, remains ineligible for auto-promotion,
-  and must go through Review rather than being treated as a confidently
-  singular detail page. Historical
-  `verified_coverage_lending_review_source` metadata remains fail-closed.
+- D-086 stops unresolved family/coverage Review exceptions before detail-source
+  materialization. Official URL ownership alone cannot justify creating a new
+  ambiguous candidate. Existing `verified_coverage_review_source` and historical
+  lending-equivalent candidates retain fail-closed validation/publication gates.
+- `collection_preflight.py` shares read-only eligibility across catalog launch,
+  queued source reuse and direct retry. Latest human defer/reject of one candidate
+  on the exact country/bank/type/language/URL holds ordinary recollection. Latest
+  approvals, system supersession and multiple candidates on a URL do not create
+  that veto. Latest terminal 404/410, post-browser challenges and PDF/content-type
+  failures hold the affected source; timeout/429/5xx remain retryable.
+- Catalog launch returns additive `skipped_items` with scope/reason/revalidation.
+  All held scopes return `workflow_state=skipped` and `run_ids=[]` before any run
+  insertion/background launch; mixed requests queue only eligible scopes. Direct
+  retry with no eligible target returns `409 collection_preflight_blocked`.
+  An unchanged structural zero-detail result is held even if old catalog status
+  remained active. Configuration changes or explicit `precision_rediscovery`
+  permit fresh evidence checks; inactive coverage must first be explicitly restored.
+- Source holds do not assert retirement or change canonical data. A newly created
+  uncertain candidate still uses ordinary Review. Queue-time human decisions are
+  rechecked before source work; a fully held queued scope completes with an explicit
+  `collection_preflight_skipped` reason. Actual attempted failures stay truthful.
 - When accessible discovery decisively produces no candidate-making detail
   source, the run remains truthfully Partial and the exact catalog/source
   scope is reversibly inactivated with

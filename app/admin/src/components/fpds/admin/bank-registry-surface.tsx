@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { collectionPreflightMessage } from "@/lib/admin-collection-feedback";
 import { Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -63,7 +64,7 @@ const BANK_COPY = {
     bankList: "Bank list",
     collecting: "Collecting...",
     collectSelected: (count: number) => `Collect selected${count > 0 ? ` (${count})` : ""}`,
-    collectionMode: "Collection mode for completed items",
+    collectionMode: "Collection mode",
     normalCollect: "Normal collect",
     detailedCollect: "Detailed collect",
     selectAllBanks: "Select all visible banks",
@@ -101,7 +102,7 @@ const BANK_COPY = {
     bankList: "은행 목록",
     collecting: "수집 중...",
     collectSelected: (count: number) => `선택 항목 수집${count > 0 ? ` (${count})` : ""}`,
-    collectionMode: "완료 항목 수집 방식",
+    collectionMode: "수집 방식",
     normalCollect: "일반 collect",
     detailedCollect: "상세 collect",
     selectAllBanks: "표시된 은행 모두 선택",
@@ -139,7 +140,7 @@ const BANK_COPY = {
     bankList: "銀行一覧",
     collecting: "収集中...",
     collectSelected: (count: number) => `選択項目を収集${count > 0 ? ` (${count})` : ""}`,
-    collectionMode: "完了項目の収集モード",
+    collectionMode: "収集モード",
     normalCollect: "通常 collect",
     detailedCollect: "詳細 collect",
     selectAllBanks: "表示中の銀行をすべて選択",
@@ -196,9 +197,6 @@ export function BankRegistrySurface({
     [banks.items, selectedBankCodes],
   );
   const selectedCoverageCount = selectedCatalogItems.length;
-  const selectedCompletedCoverageCount = selectedCatalogItems.filter(
-    (item) => item.has_completed_collection,
-  ).length;
   const allVisibleSelected = banks.items.length > 0 && banks.items.every((item) => selectedBankCodes.includes(item.bank_code));
   const detailModalOpen = bankDialogOpen && Boolean(bankDialogDetail);
   useEffect(() => {
@@ -215,10 +213,10 @@ export function BankRegistrySurface({
   }, [activeBankCode, activeBankDetail]);
 
   useEffect(() => {
-    if (selectedCompletedCoverageCount === 0) {
+    if (selectedCoverageCount === 0) {
       setBulkDetailedCollection(false);
     }
-  }, [selectedCompletedCoverageCount]);
+  }, [selectedCoverageCount]);
 
   function syncUrlWithParams(params: URLSearchParams, options?: { replace?: boolean }) {
     const href = buildAdminHref("/admin/banks", params, locale);
@@ -438,7 +436,7 @@ export function BankRegistrySurface({
             <button className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" onClick={openAddModal} type="button">
               {copy.addBank}
             </button>
-            {selectedCompletedCoverageCount > 0 ? (
+            {selectedCoverageCount > 0 ? (
               <div
                 aria-label={copy.collectionMode}
                 className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border border-border bg-background px-3 text-xs font-medium"
@@ -609,6 +607,9 @@ function buildBulkCollectMessage({
   selectedBankCount: number;
   selectedCoverageCount: number;
 }) {
+  const skippedMessage = collectionPreflightMessage(locale, payload);
+  if (skippedMessage) return skippedMessage;
+
   if (payload?.workflow_state === "queued") {
     const precisionCount = payload.groups.filter(
       (group) => group.source_coverage_mode === "precision",

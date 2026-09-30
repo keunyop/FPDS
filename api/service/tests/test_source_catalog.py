@@ -3644,7 +3644,9 @@ class SourceCatalogTests(unittest.TestCase):
                         "normalized_homepage_url": "https://www.atlasbank.ca",
                         "source_language": "en",
                     }
-                ]
+                ],
+                [],
+                None,
             ]
         )
 
@@ -4063,7 +4065,9 @@ class SourceCatalogTests(unittest.TestCase):
                         "normalized_homepage_url": "https://www.bmo.com/en-ca/main/personal",
                         "source_language": "en",
                     }
-                ]
+                ],
+                [],
+                None,
             ]
         )
 

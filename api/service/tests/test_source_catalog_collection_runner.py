@@ -724,6 +724,7 @@ class SourceCatalogCollectionRunnerTests(unittest.TestCase):
             request_id="req-001",
             collection_id="collection-001",
             correlation_id="corr-001",
+            revalidate=True,
             run_id_overrides={
                 ("CA", "TD", "savings", "en"): "run-001",
             },

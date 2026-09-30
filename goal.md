@@ -539,3 +539,34 @@ Completion: 19 official assets and two US brand aliases cover all 34 current
 Public bank codes. Public 74 tests, lint/typecheck/final build, 35-code image
 decoding, 44 browser scenarios and final diff checks pass. No deployment or
 financial-data mutation. Preserve this file for earlier unresolved goals.
+
+## Active independent slice: 2026-09-30 collection failure and review prevention
+
+Ownership: preserve all earlier goals and their unresolved acceptance.
+Objective: investigate September 29 failed/partial collections and deferred or
+rejected reviews, then prevent repeatable causes across banks.
+Scope: read-only operational diagnosis, reusable collection eligibility and
+pipeline fixes, regression tests and current contracts/operating documentation.
+Exclusions: deployment, broad recollection, canonical/review decisions, removal
+of historical runs, new countries/types, relaxed evidence or approval gates.
+Acceptance:
+- [x] Reconcile dated live run/review outcomes and identify evidenced causes.
+- [x] Fix recoverable defects and skip conclusively ineligible or unchanged
+      blocked work before expensive collection/review creation, with explicit
+      reasons and an evidence-led revalidation path.
+- [x] Preserve transient recovery, country/source boundaries, valid products,
+      human decisions, private evidence and truthful run outcomes.
+- [x] Verify success/boundary/failure regressions, affected runtime suites,
+      final diff and journal/contracts; record release and live-data limits.
+Verification: read-only DB snapshot/replay, deterministic cross-bank fixtures,
+API/worker tests and git diff --check. No paid model calls or live collection
+are needed for the initial investigation. Keep this file for earlier goals.
+
+Completion: investigated all 15 dated runs and the related human hold decisions.
+Shared eligibility and cross-bank discovery fixes are verified by API 515,
+Worker 536 and Admin 8 tests, Admin typecheck/build, 37 responsive/localized
+browser cases, live read-only preflight replay and repository/diff checks.
+Six currently active scopes are held, seven remain eligible, and two previously
+inactive scopes need governed restoration after release. No deployment, live
+collection, review/canonical mutation or paid project model call. Preserve this
+file for the earlier unresolved independent goals.

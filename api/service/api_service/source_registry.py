@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 else:  # pragma: no cover - keeps unit tests lightweight when psycopg is unavailable.
     Connection = Any
 
+from api_service.collection_preflight import load_source_preflight_rows, source_block_reason
 from api_service.errors import SourceRegistryError
 from api_service.product_types import load_product_type_definitions_map
 from api_service.security import new_id, utc_now
@@ -606,6 +607,7 @@ def prepare_source_collection(
     request_id: str | None,
     collection_id: str | None = None,
     correlation_id: str | None = None,
+    revalidate: bool = False,
     run_id_overrides: dict[tuple[str, str, str, str], str] | None = None,
 ) -> dict[str, Any]:
     selected_source_ids = _dedupe_preserve_order([item.strip() for item in source_ids if item and item.strip()])
@@ -726,6 +728,24 @@ def prepare_source_collection(
         active_only=False,
     )
 
+    history = {} if revalidate else {
+        str(row["source_id"]): row
+        for row in load_source_preflight_rows(connection, source_ids=list(included_rows_by_id))
+    }
+    original_sources = dict(included_rows_by_id)
+    skipped_sources = []
+    for source_id, source in list(included_rows_by_id.items()):
+        reason = source_block_reason({**source, **history.get(source_id, {})}, revalidate=revalidate)
+        if reason:
+            skipped_sources.append({"source_id": source_id, "reason_code": reason})
+            included_rows_by_id.pop(source_id)
+            selected_by_id.pop(source_id, None)
+    selected_source_ids = [source_id for source_id in selected_source_ids if source_id in selected_by_id]
+    if not any(_is_candidate_producing_collection_source(row) for row in selected_by_id.values()):
+        raise SourceRegistryError(
+            status_code=409, code="collection_preflight_blocked",
+            message="No eligible detail sources remain. Use precision rediscovery to revalidate held or failed sources.",
+        )
     resolved_collection_id = collection_id or new_id("collection")
     resolved_correlation_id = correlation_id or new_id("corr")
     plan = build_source_collection_plan(
@@ -738,6 +758,18 @@ def prepare_source_collection(
         request_id=request_id,
         run_id_overrides=run_id_overrides,
     )
+    plan["skipped_sources"] = skipped_sources
+    plan["groups"] = [group for group in plan["groups"] if group["target_source_ids"]]
+    retained_source_ids = {source_id for group in plan["groups"] for source_id in group["included_source_ids"]}
+    for key in ("selected_source_ids", "target_source_ids", "auto_included_source_ids"):
+        plan[key] = [source_id for source_id in plan[key] if source_id in retained_source_ids]
+    for group in plan["groups"]:
+        group["skipped_sources"] = [
+            item for item in skipped_sources
+            if _registry_group_key(original_sources[item["source_id"]]) == (
+                group["country_code"], group["bank_code"], group["product_type"], group["source_language"],
+            )
+        ]
     return {
         "collection_id": resolved_collection_id,
         "correlation_id": resolved_correlation_id,
@@ -977,6 +1009,7 @@ def _insert_collection_run_row(
         "product_family": group.get("product_family", "deposit"),
         "source_language": group["source_language"],
         "catalog_item_id": group.get("catalog_item_id"),
+        "collection_preflight_skipped_sources": list(group.get("skipped_sources") or []),
     }
     connection.execute(
         """

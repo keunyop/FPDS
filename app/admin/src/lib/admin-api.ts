@@ -930,7 +930,14 @@ export type SourceCatalogCollectionLaunchResponse = SourceCollectionLaunchRespon
       | "no_detail_sources_discovered"
       | "product_not_currently_offered";
   }>;
-  workflow_state?: "queued" | "completed";
+  workflow_state?: "queued" | "completed" | "skipped";
+  skipped_items?: Array<{
+    catalog_item_id: string;
+    bank_code: string;
+    product_type: string;
+    reason_codes: string[];
+    revalidation: "precision_rediscovery";
+  }>;
   queued_catalog_item_count?: number;
 };
 

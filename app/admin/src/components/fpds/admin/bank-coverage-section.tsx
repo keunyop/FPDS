@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { collectionPreflightMessage } from "@/lib/admin-collection-feedback";
 import { FileText, Layers3, Play } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
@@ -280,8 +281,7 @@ export function BankCoverageSection({
         body: JSON.stringify({
           catalog_item_ids: [item.catalog_item_id],
           precision_rediscovery:
-            item.has_completed_collection
-            && precisionRediscoveryIds.includes(item.catalog_item_id),
+            precisionRediscoveryIds.includes(item.catalog_item_id),
         }),
       });
       const payload = (await response.json()) as {
@@ -347,7 +347,7 @@ export function BankCoverageSection({
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     {copy.generatedSources(item.generated_source_count)}
                   </p>
-                  {item.has_completed_collection ? (
+                  {item.status === "active" ? (
                     <label className="mt-3 flex max-w-full items-start gap-2 text-sm text-foreground">
                       <input
                         checked={precisionRediscoveryIds.includes(item.catalog_item_id)}
@@ -368,11 +368,12 @@ export function BankCoverageSection({
                         </span>
                       </span>
                     </label>
-                  ) : (
+                  ) : null}
+                  {!item.has_completed_collection ? (
                     <p className="mt-3 text-xs font-medium text-primary">
                       {copy.firstPrecisionRequired}
                     </p>
-                  )}
+                  ) : null}
                   {item.change_reason ? (
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
                       {copy.latestNote}: {item.change_reason}
@@ -394,7 +395,7 @@ export function BankCoverageSection({
                     {copy.viewSources}
                   </Link>
                   <Button
-                    disabled={collectingId === item.catalog_item_id}
+                    disabled={collectingId === item.catalog_item_id || item.status !== "active"}
                     onClick={() => void handleCollect(item)}
                     type="button"
                   >
@@ -542,6 +543,9 @@ function buildSingleCoverageCollectMessage(
 ) {
   const copy = COVERAGE_COPY[locale];
   const label = formatProductType(productType, labelMap);
+
+  const skippedMessage = collectionPreflightMessage(locale, payload);
+  if (skippedMessage) return skippedMessage;
 
   if (payload?.workflow_state === "queued") {
     const mode = payload.groups?.[0]?.source_coverage_mode;

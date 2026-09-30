@@ -149,6 +149,32 @@ product verification dates; incomplete corrected products remain non-public.
 No scheduler, country/type expansion, release or candidate approval bypass.
 See [the outcome and limits](public-collection-alignment-2026-09-29.md), WBS 5.72.
 
+## 2026-09-30 - D-086 Prevent repeated ineligible collections
+
+The Product Owner requests generic prevention of failed/partial collection and
+avoidable deferred/rejected Review work. Supersede D-066/D-068 only where they
+allowed a fresh ambiguous official coverage page to become a Review candidate:
+exclude unresolved product boundaries before detail-source materialization.
+Existing candidates and approval/publication controls remain unchanged.
+
+Shared preflight uses the latest scoped source result and single-candidate human
+decision before ordinary launch/retry. Held scopes produce reasons and no new
+run; mixed batches retain eligible work. Unchanged structural zero-detail history
+also holds an otherwise active scope. Recheck eligibility at queue execution.
+Do not mistake system deduplication, multiple candidates, latest approval or
+transient transport errors for a human veto. Precision rediscovery is explicit,
+reversible evidence revalidation and is available for every active coverage.
+An inactive scope still needs the existing governed coverage-restoration action.
+
+Generic rules distinguish customer investment vocabulary from investor relations,
+single named product sections from family hubs, and real facts from service
+announcements/workbooks. Raw AI classifications remain inspectable; safe-fetch,
+country/language, canonical and financial evidence boundaries are unchanged.
+A first unsuccessful attempt stays truthful. No claim that every future Review
+outcome can be predicted, and no automatic product-retirement inference.
+No migration, deployment, live collection or historical data correction in this
+slice. See the September 30 development journal and WBS 5.73.
+
 ## 4. Current Interpretation Notes
 
 - `WBS 5` is the active execution stage.

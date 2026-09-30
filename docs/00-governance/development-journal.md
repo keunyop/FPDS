@@ -25,6 +25,77 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - Generic collection eligibility and Review prevention
+
+- D-086 / WBS 5.73: inspected September 29 in America/Vancouver
+  (`2026-09-29T07:00Z` through `2026-09-30T07:00Z`). All 15 run rows reached
+  `completed`; four truthfully show Partial. Related human decisions include
+  three deferred and three rejected reviews. These are not four terminal-failed
+  runs, and the investigation did not relabel or delete historical results.
+- Partial causes and generic fixes:
+  - CCS Savings (`run_20260929_194845_ccs_savings_collect_WFaBWp21`): plural
+    account heading/URL led AI to classify a single named account as a hub.
+    Recover one named product section only with sufficient facts and no family
+    or hard exclusion; ignore global navigation headings and retain raw AI reasons.
+  - Desjardins Chequing (`run_20260929_194845_desjardins_chequing_collect_RQXCtRnq`):
+    a student-budget PDF companion returned HTML. Exclude educational workbooks
+    before collection and share latest terminal-result suppression across paths.
+    Valid account details remain collectable.
+  - BNY Checking (`run_20260930_024210_bny_chequing_collect_wBfrN_dL`): configured
+    HTML coverage returned a legal PDF and a wealth route redirected outside the
+    discovery allowlist. Generic unavailable wording hid those structural causes.
+    Classify each failure separately; hold unchanged zero-detail coverage without
+    inferring product retirement or widening the allowlist.
+  - Schwab Checking (`run_20260930_024210_sb_chequing_collect_UQsVab9E`): the
+    broad `investor` exclusion rejected a real account aimed at investors.
+    Restrict the exclusion to investor-relations/shareholder pages.
+- Official-page checks confirm the
+  [single Coast Capital savings account](https://www.coastcapitalsavings.com/everyday-banking/savings-accounts)
+  and [Schwab checking account](https://www.schwab.com/checking).
+  Local safe-fetch scoring now gives them 10 and 8 respectively, without hard
+  exclusions. CCS Savings and Schwab Checking were already inactive in the
+  database; this slice leaves their status unchanged.
+- Review causes: CCS Card/LOC and MSPB LOC used weak official coverage exceptions
+  without sufficient product facts; Desjardins Card admitted a
+  [system announcement](https://www.desjardins.com/en/about-us/system-modernization.html);
+  MSPB Mortgage and SCU LOC were rejected after insufficient decision evidence.
+  Prevent new unresolved family/coverage exceptions before detail materialization
+  and prevent announcements from overriding an explicit non-product AI judgment.
+  This supersedes only D-066/D-068's fresh Review-exception creation policy.
+- Shared read-only `collection_preflight.py` checks the latest scoped source
+  result and latest single-candidate human hold before launch, queued reuse and
+  direct retry. All-held ordinary selection returns reasons and zero runs; mixed
+  selections retain valid work. Latest approval, multi-candidate URLs, system
+  supersession and transient failures are protected from false holds. Explicit
+  precision rediscovery checks fresh official evidence using all existing gates.
+  Newly found missing facts can still require Review; no outcome predictor can
+  safely eliminate every first-time defer/reject.
+- Final read-only replay: 13 active scopes produce six preflight exclusions
+  (CCS Card/LOC, SCU LOC, BNY Checking, MSPB LOC/Mortgage) and seven eligible scopes.
+  Desjardins retains valid Card/Chequing collection while excluding its rejected
+  announcement and failed PDF. Two already inactive scopes remain inactive.
+  This is an eligibility replay, not a claim of new successful live collection.
+- Key files: API collection_preflight/source_catalog/source_registry/queued runner,
+  focused regression fixtures, Admin collection-feedback helper and Banks controls.
+  Requirements, runtime READMEs, refresh policy, decision log, plan and WBS now
+  describe the same prevention/revalidation contract. No schema migration.
+- Verification: API 515, Worker 536 and Admin 8 tests pass; Admin standalone
+  typecheck and production build pass. Browser fixtures pass 37 EN/KO/JA cases
+  at 390/768/1440px, including all-skipped/mixed/single/precision and server-error
+  outcomes, no horizontal overflow, no browser exceptions and preserved CSRF.
+  Nine focused follow-up cases also pass after the browser harness waited for
+  scroll completion before calculating click coordinates. Reviewed Korean
+  mobile/desktop screenshots, including the new skipped feedback. The final
+  source-language-scoped replay was checked through read-only SQL. Repo doctor,
+  UTF-8/new-file whitespace and diff checks pass.
+  Admin has no lint script; its documented test/typecheck/build checks were run.
+- No live data mutations, review decisions, collection launches, paid project
+  model calls or deployment. Only read-only DB diagnosis and bounded official-page
+  fetches. Next: release API/Admin through the normal workflow. Then explicitly
+  restore the two inactive, verified account coverages and use precision discovery
+  if collection is authorized. Other held scopes need changed/confirmed official
+  evidence before explicit revalidation. Earlier goal ownership is preserved.
+
 ## 2026-09-29 - Public official bank logo coverage
 
 - Replaced 21 bank-code placeholders with official local branding: 19 new

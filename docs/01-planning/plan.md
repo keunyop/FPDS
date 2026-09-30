@@ -625,3 +625,13 @@ Audit existing records before paid work; prioritize errors and reusable evidence
 then bounded official-product checks. No full-catalog sweep, scheduler, new
 countries/types, guessed facts, candidate approval bypass or code deployment.
 Partial field repairs retain the original whole-product verification date.
+
+### 2026-09-30 collection eligibility hardening
+
+D-086 / WBS 5.73 implement the Product Owner's request to prevent repeat failed
+collections and avoidable deferred/rejected Reviews across banks. The slice adds
+read-only eligibility before launch, shared source/retry checks, generic identity
+and companion-document fixes, and explicit evidence revalidation in Admin.
+Historical outcomes and canonical data are unchanged. The September 30 journal
+records 15 inspected runs, final checks and the separately scoped release and
+coverage-restoration steps. No scheduler or broad recollection is introduced.

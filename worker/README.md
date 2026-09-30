@@ -33,12 +33,12 @@ Runtime invariants:
   public AEM content-tree aliases are converted to their canonical public path;
   the recovered URL still passes the ordinary official-domain, locale,
   Product-Type, page-evidence, and action-flow boundaries.
-- validation treats deterministic `multi_product_family_overview`, AI
-  `hub_page_not_detail`, and bounded
-  `verified_coverage_review_source` discovery evidence as ambiguous product
-  boundaries; each routes a candidate to Review rather than auto-validating a
-  family or review-only coverage page as one product. Historical
-  `verified_coverage_lending_review_source` evidence remains equivalent.
+- Admin discovery now excludes unresolved `multi_product_family_overview`,
+  `hub_page_not_detail` and verified-coverage Review exceptions before new
+  candidate-producing source materialization (D-086). Validation still routes
+  any historical/direct candidate carrying those reasons to Review, with
+  `verified_coverage_lending_review_source` equivalent. Canonical and publication
+  gates remain fail-closed; newly found missing facts still require Review.
 - an HTTP 403, a direct timeout/connection-close failure, or a high-confidence
   HTTP-200 JavaScript/access-challenge shell from an already SSRF-validated,
   allowlisted official HTML source receives one bounded headless-browser

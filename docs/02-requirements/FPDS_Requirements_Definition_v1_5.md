@@ -1016,13 +1016,22 @@ Current Phase 1 source-registry admin note:
   source coverage discovery before fact collection. Completion is determined
   from server-side completed ingestion history with a non-empty source scope,
   not from a browser flag or generated-source count.
-- after that first completed collection, Banks must let the operator choose
-  whether to repeat precision source discovery or collect from the current
-  active source scope. A mixed bulk selection forces first-time items to
-  precision and applies the shared option only to completed items.
-- a requested standard collection with no remaining active detail source must
-  fail safe into precision discovery rather than closing or collecting only
-  supporting sources.
+- Banks must offer explicit precision rediscovery for every active coverage
+  item, including a previously blocked first-time item. Required initial source
+  discovery remains server-owned; an ordinary first-time request cannot bypass it.
+- before creating runs, ordinary collection must omit exact scopes whose active
+  details are all held by the latest single-candidate human defer/reject decision,
+  unresolved product boundaries, or persisted terminal source failures. A prior
+  structural zero-detail result also holds an unchanged coverage configuration.
+  Mixed selections create runs only for eligible scopes; an all-held request
+  returns `workflow_state=skipped`, zero run IDs and explicit reasons.
+- latest approvals, multi-candidate URLs, system deduplication and transient
+  failures must not become a human-decision veto. Source reuse and direct retry
+  apply the same gate; explicit precision rediscovery rechecks official evidence
+  without overriding Review, canonical or publication requirements.
+- ordinary source loss with no conclusive hold still triggers precision discovery.
+  Supporting pages alone cannot produce a candidate. A first attempted failure
+  retains its truthful outcome; known holds must not generate repeat empty runs.
 
 ### FR-ADM-017 Dynamic Product Type Management (Implemented)
 FPDS should support an operator-managed product type registry, not only a fixed hard-coded product-type list.
@@ -1886,10 +1895,16 @@ Current live admin behavior:
   same work is not selected again. Transient timeout, connection, DNS,
   throttling, and upstream 5xx evidence must remain retryable and must not be
   interpreted as product absence
-- a verified official coverage page may cross the bounded low-page-score or
-  family-overview discovery boundary for any Product Type only as
-  `verified_coverage_review_source`; candidate validation, auto-promotion,
-  canonical, and publication paths must keep that evidence Review-only
+- D-086 supersedes creation through D-068's verified-coverage Review exception:
+  unresolved family hubs and insufficient detail pages must be excluded before
+  candidate-producing source materialization, even when the URL is official.
+  Historical `verified_coverage_review_source` and lending-equivalent candidates
+  retain their Review and publication safeguards. This does not suppress every
+  newly discovered product with missing fields or treat a hold as retirement.
+- generic discovery must distinguish investor customers from investor-relations
+  pages, a single named product section from a true family hub, and product facts
+  from system announcements or educational budget workbooks. A deterministic
+  identity recovery retains raw AI reasons and all hard evidence/security gates.
 
 Implemented Product Type management (FR-ADM-017, WBS 5.16):
 - `/admin/product-types` owns shared, searchable product-type definitions
@@ -1925,7 +1940,7 @@ Implemented Product Type management (FR-ADM-017, WBS 5.16):
 2. Admin creates or edits a bank profile if needed
 3. Admin adds one or more bank-owned coverage items for the desired product types
 4. Admin starts collection either from a single bank coverage item or from a multi-bank bank-list bulk selection
-5. System checks completed collection history per bank/Product Type. First-time items use precision discovery; completed items use the operator's precision-rediscovery choice.
+5. System checks collection eligibility before creating runs, reports held scopes, and applies server-required initial discovery or the operator's explicit precision-rediscovery choice to eligible scopes.
 6. Precision mode materializes or refreshes generated source rows from bounded verified homepage, coverage, registry, hub, and sibling-detail seeds. Standard mode reuses the current active source scope; if no active detail remains, it falls back to precision mode.
 7. If accessible discovery conclusively returns no candidate-producing detail
    source, the system records the Partial result and inactivates that exact

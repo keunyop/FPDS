@@ -421,6 +421,7 @@ class SourceRegistryTests(unittest.TestCase):
             [
                 [detail_row],
                 [support_row],
+                [],
                 None,
                 None,
             ]
@@ -485,6 +486,7 @@ class SourceRegistryTests(unittest.TestCase):
             [
                 [detail_row],
                 [support_row],
+                [],
                 None,
                 None,
             ]
@@ -547,6 +549,7 @@ class SourceRegistryTests(unittest.TestCase):
             [
                 [detail_row],
                 [support_row],
+                [],
                 None,
                 None,
             ]

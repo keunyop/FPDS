@@ -17,10 +17,11 @@ The shell puts four daily tasks first:
    guarded decision.
 3. **Runs** — find failed or partial collection work and inspect or retry it.
 4. **Banks** — add banks manually or through grounded AI research, manage
-   coverage, and launch collection. A bank/Product Type with no completed run
-   always performs precision source discovery. Completed items expose a
-   normal/detailed collection toggle; normal collection uses the current active
-   source scope, while detailed collection requests precision rediscovery.
+   coverage, and launch collection. Eligible first-time scopes require precision
+   source discovery. Every active coverage offers normal/detailed collection;
+   normal collection checks existing eligibility, while detailed collection
+   explicitly revalidates the source scope. Excluded scopes report a reason and
+   create no run when the complete selection is held.
 
 Before entering the workspace, the operator selects an enabled working country
 on the login form. The API persists that ISO alpha-2 code in the server-side
@@ -103,10 +104,14 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 - Do not expose evidence, review state, or private source traces to Public.
 - Keep `/admin/source-catalog/*` proxy handlers: Banks collection uses them even
   though the matching page routes redirect.
-- Treat `has_completed_collection` as server-owned history. The UI may request
-  precision rediscovery for completed items, but it must not provide a way to
-  bypass required first-time discovery. Mixed bulk selections apply the option
-  only to completed items.
+- Treat `has_completed_collection` as server-owned history. Offer explicit
+  precision rediscovery for every active coverage, including a held first-time
+  scope; the API still enforces required initial discovery. Inactive coverage
+  cannot collect until it is explicitly restored.
+- Render collection `skipped_items` in EN/KO/JA with the actual created-run count,
+  reasons and precision-rediscovery guidance. An all-skipped response is a valid
+  outcome with zero runs; mixed selections report both queued and excluded work.
+  Revalidation checks fresh evidence and never overrides a human Review decision.
 - Keep `data-admin-dirty` and mutation-pending signals so automatic refresh
   pauses during edits, dialogs, and writes.
 

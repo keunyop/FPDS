@@ -449,10 +449,32 @@ The following are intentionally out of scope for the first source-registry admin
 
 ---
 
-## 11. Change History
+## 11. Collection eligibility before launch (D-086)
+
+Ordinary operator collection and direct retry share a latest-evidence preflight.
+A single-candidate human defer/reject holds only its exact scoped source URL;
+newer approvals and multi-candidate sources remain eligible. Known terminal
+source failures and unresolved product boundaries are omitted, while transient
+failures remain retryable. If all candidate-producing details are held, create
+no run and report the reason. Mixed batches retain valid scopes. An unchanged
+structural zero-detail result also requires revalidation before another run.
+
+Explicit precision rediscovery checks official evidence again and applies all
+normal detail/approval gates. It is available for every active coverage item;
+inactive coverage first uses the existing governed restoration workflow. This
+does not alter historical run outcomes, human decisions or canonical products.
+The initial attempt can still be partial if a new failure cannot be predicted.
+
+D-086 supersedes D-068's creation of fresh Review candidates through unresolved
+family/coverage-page exceptions. Discovery now excludes those pages before
+candidate-producing source materialization. Existing ambiguous candidates retain
+Review-only validation. Missing new facts alone do not mean a product is absent.
+
+## 12. Change History
 
 | Date | Change |
 |---|---|
+| 2026-09-30 | D-086 adds shared preflight, reversible evidence revalidation and prevention of unresolved coverage-page candidates |
 | 2026-04-10 | Initial source registry refresh and approval policy added |
 | 2026-04-15 | Replaced the JSON-first approval baseline with a DB-backed admin-managed source registry baseline and defined `collect` as candidate-producing ingestion |
 | 2026-04-15 | Refined the MVP so operators manage banks and source catalog coverage while generated source rows remain read-only |
