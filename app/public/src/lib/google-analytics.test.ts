@@ -3,7 +3,7 @@ import test from 'node:test';
 import { getAnalyticsPage, getGoogleAnalyticsMeasurementId } from './google-analytics.ts';
 
 test('analytics sends fixed page metadata without dynamic identifiers', () => {
-  for (const path of ['/products/private-id', '/guides/private-slug', '/ca/private-slug']) {
+  for (const path of ['/products/private-id', '/guides/private-slug', '/blog/private-slug', '/ca/private-slug']) {
     const page = getAnalyticsPage(path)!;
     assert.ok(page);
     assert.equal(JSON.stringify(page).includes('private'), false);

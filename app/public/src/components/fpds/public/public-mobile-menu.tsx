@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CreditCard, House, Landmark, MapPin, Menu, Search } from "lucide-react";
+import { BookOpen, Check, CreditCard, House, Landmark, MapPin, Menu, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState, type ComponentType } from "react";
@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { formatPublicCountryName, getPublicCountryCopy } from "@/lib/public-country";
+import { blogCopy } from "@/lib/public-blog";
 import { getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
 import {
   buildCountryHref,
@@ -42,7 +43,8 @@ export function PublicMobileMenu() {
     { href: "/", icon: House, label: copy.nav.dashboard },
     { href: "/products", icon: Search, label: copy.nav.products },
     { href: "/cards", icon: CreditCard, label: copy.nav.card },
-    { href: "/loans", icon: Landmark, label: copy.nav.loan }
+    { href: "/loans", icon: Landmark, label: copy.nav.loan },
+    { href: "/blog", icon: BookOpen, label: blogCopy(locale).nav }
   ];
 
   return (
@@ -64,7 +66,7 @@ export function PublicMobileMenu() {
       >
         <DropdownMenuLabel className="px-2 py-1.5">{copy.nav.primaryLabel}</DropdownMenuLabel>
         {navItems.map((item) => {
-          const active = pathname === item.href;
+          const active = pathname === item.href || (item.href === "/blog" && pathname.startsWith("/blog/"));
           const Icon = item.icon;
           return (
             <DropdownMenuItem asChild className="min-h-11 px-2.5" key={item.href}>

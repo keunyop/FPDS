@@ -51,6 +51,8 @@ async function main() {
     "/cards",
     "/loans",
     "/methodology",
+    "/blog",
+    "/blog/eq-bank-vs-tangerine-vs-td-savings",
     ...PRIORITY_PRODUCTS.map((id) => "/products/" + id)
   ];
 
@@ -153,7 +155,7 @@ async function main() {
 
   const auditedSitemapPages = await mapWithConcurrency(
     sitemapEntries,
-    8,
+    Math.max(1, Math.min(8, Number.parseInt(process.env.SEO_AUDIT_CONCURRENCY ?? "8", 10) || 8)),
     async (entry) => {
       const remote = new URL(entry.loc);
       return auditIndexablePage(
@@ -292,8 +294,12 @@ function validateSitemapEntries(entries) {
 }
 
 function validateAllowedIndexUrl(url, context) {
+  const authoredRoute = /^\/(blog|guides|ca)(\/|$)/.test(url.pathname);
   for (const key of url.searchParams.keys()) {
-    check(key === "country_code", context + " contains forbidden parameter " + key);
+    const authoredLocale = authoredRoute && key === "locale" &&
+      url.searchParams.getAll(key).length === 1 &&
+      ["ko", "ja"].includes(url.searchParams.get(key));
+    check(key === "country_code" || authoredLocale, context + " contains forbidden parameter " + key);
   }
 }
 
@@ -381,6 +387,7 @@ function extractCleanProductHrefs(body) {
 async function readResponse(path, redirect = "manual") {
   const url = new URL(path, AUDIT_ORIGIN);
   const response = await fetch(url, {
+    signal: AbortSignal.timeout(30_000),
     redirect,
     headers: {
       accept: path.endsWith(".xml") ? "application/xml" : "text/html",
@@ -390,7 +397,7 @@ async function readResponse(path, redirect = "manual") {
   return {
     status: response.status,
     headers: response.headers,
-    body: await response.text()
+    body: await response.text().catch(error => { throw new Error(path + " response failed: " + error.message); })
   };
 }
 

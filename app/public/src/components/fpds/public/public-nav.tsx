@@ -1,10 +1,11 @@
 "use client";
 
-import { CreditCard, House, Landmark, Search } from "lucide-react";
+import { BookOpen, CreditCard, House, Landmark, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { ComponentType } from "react";
 
+import { blogCopy } from "@/lib/public-blog";
 import { getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
 import { buildScopedPublicHrefFromSearchParams, type PublicRoutePath } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
@@ -18,13 +19,14 @@ export function PublicNav() {
     { href: "/", icon: House, label: copy.nav.dashboard },
     { href: "/products", icon: Search, label: copy.nav.products },
     { href: "/cards", icon: CreditCard, label: copy.nav.card },
-    { href: "/loans", icon: Landmark, label: copy.nav.loan }
+    { href: "/loans", icon: Landmark, label: copy.nav.loan },
+    { href: "/blog", icon: BookOpen, label: blogCopy(locale).nav }
   ];
 
   return (
     <nav className="flex max-w-full items-center gap-0.5 text-sm" aria-label={copy.nav.primaryLabel}>
       {navItems.map((item) => {
-        const active = pathname === item.href;
+        const active = pathname === item.href || (item.href === "/blog" && pathname.startsWith("/blog/"));
         const Icon = item.icon;
 
         const href = buildScopedPublicHrefFromSearchParams(item.href, searchParams);

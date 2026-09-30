@@ -25,6 +25,49 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - SwitchaBank blog and first bank comparison
+
+- FR-PUB-028 / D-088 / WBS 5.74 add `/blog` and one original EQ Bank,
+  Tangerine and TD Canadian account comparison in EN/KO/JA. Existing Next.js
+  content, semantic tokens, official local logos and feedback are reused;
+  no CMS service or package dependency. Header/mobile/footer expose Blog.
+- Article includes a responsive comparison table, contents links, source dates,
+  official citations, hypothetical CAD 200/CAD 300 interest example, checklist,
+  related guides and the existing savings-catalog handoff. Bank percentages
+  are not inferred from unresolved templates. Authorship/AI/source checks and
+  correction policy are explicit; no professional review or rate winner claimed.
+- Clean localized URLs receive canonical/hreflang, six sitemap entries,
+  BlogPosting/breadcrumb data and a local PNG preview. Invalid slugs return
+  HTTP 404 and arbitrary query variants stay noindex. Fixed Blog screen types
+  retain the existing analytics boundary without article slugs or new events.
+- Browser inspection exposed a real JavaScript-free rendering issue: the root
+  loading boundary left the streamed article hidden behind a skeleton. The
+  unchanged loading component now belongs to the existing data routes and
+  Home's explicit Suspense wrapper. All blog languages are readable without JS.
+- Key files: Public `app/blog`, `public-blog*.ts`, blog visual, navigation,
+  loading wrappers, proxy/query/SEO/sitemap and audit scripts. The
+  [blog policy](../03-design/public-blog-policy.md) records exact source checks,
+  scope, authoring and manual editorial maintenance.
+- Verification: Public 78 tests, lint, standalone typecheck and final
+  production build pass. Blog audit 37 checks pass at 390/768/1440px in all
+  languages, plus separate 1024px, feedback, locale and keyboard checks.
+  Reviewed actual Korean index/article/table screenshots. The complete existing
+  UI audit passes 111 fixture cases in EN/KO/JA at 390/768/1440px with no browser
+  errors; separate focused search-history checks pass in all three languages.
+- Full SEO audit passes 281 sitemap URLs and 12 representative routes with two
+  concurrent requests. Initial eight-way API load returned one transient
+  noindex product; direct API/page recheck returned active/200/index. The audit
+  now accepts existing authored locale URLs, bounds request time and allows
+  lower concurrency. One existing UI test also needed an explicit sort-URL/
+  settled-state wait before entering its next search.
+- Repo doctor, foundation baseline, changed/new-file UTF-8/whitespace and diff
+  checks pass. No deployment, collection, canonical mutation, feedback
+  submission or new tracking event. Broader UI verification uses isolated
+  local fixtures and prior public snapshots after the live BFF timed out.
+- Next: release Public through the normal deployment workflow. Search traffic/indexing and independent language or
+  financial-expert review are not established by these checks. Preserve the
+  earlier unresolved goals.
+
 ## 2026-09-30 - GPT-6 Luna and task reasoning settings
 
 - Applied the Product Owner's model/effort table (D-087): every active OpenAI

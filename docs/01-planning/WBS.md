@@ -358,6 +358,7 @@ Based on:
 | 5.71 | Completed | Public UI and interaction refinement | visible catalog search, compact hierarchy, focus/IME-safe filters, keyboard finder, tablet navigation, accessible view controls and regression verification | Frontend, UX, QA | 5.61, 5.67, 5.68, 5.70 | 2026-09-28 |
 | 5.72 | Completed | Public-aligned CA/US collection and bounded data repair | market profile v5 supplemental conditions, shared financial prompts, component-rate and maturity guards, zero-model audit, six versioned corrections and live readback | Backend, Data, QA | 5.63, 5.65, 5.68, 5.69 | 2026-09-29 |
 | 5.73 | Completed | Generic collection eligibility and Review prevention | September 29 read-only RCA, shared preflight, terminal/human-hold suppression, precise product identity and document exclusions, explicit revalidation and localized skipped outcomes | Backend, Admin, QA | 5.51, 5.58, 5.72 | 2026-09-30 |
+| 5.74 | Completed | SwitchaBank blog and first bank comparison article | EN/KO/JA sourced EQ Bank/Tangerine/TD article, blog discovery, SEO, responsive comparison, catalog handoff and editorial workflow | Frontend, Content, QA | 5.70, 5.71 | 2026-09-30 |
 
 ### 5.5 Scope Baseline
 

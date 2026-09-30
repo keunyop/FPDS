@@ -1,3 +1,4 @@
+import { blogCountryDestination, isBlogSlug } from "@/lib/public-blog";
 import { guideCountryDestination, isGuideSlug } from "@/lib/public-guides";
 import { curatedCatalogHref, isCuratedSlug } from "@/lib/public-curated";
 import type { NextRequest } from "next/server";
@@ -37,6 +38,18 @@ export async function proxy(request: NextRequest) {
       return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
     }
     const destination = guideCountryDestination(path,
+      normalizePublicProductLocale(request.nextUrl.searchParams.get("locale") ?? ""),
+      normalizePublicProductCountry(request.nextUrl.searchParams.get("country_code") ?? ""));
+    if (destination) return NextResponse.redirect(new URL(destination, request.url), 308);
+  }
+  if (request.nextUrl.pathname === "/blog" || request.nextUrl.pathname.startsWith("/blog/")) {
+    const path = request.nextUrl.pathname;
+    // Next's metadata image is an asset route, not an article slug.
+    if (path === "/blog/opengraph-image") return NextResponse.next();
+    if (path !== "/blog" && !isBlogSlug(path.slice("/blog/".length))) {
+      return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
+    }
+    const destination = blogCountryDestination(path,
       normalizePublicProductLocale(request.nextUrl.searchParams.get("locale") ?? ""),
       normalizePublicProductCountry(request.nextUrl.searchParams.get("country_code") ?? ""));
     if (destination) return NextResponse.redirect(new URL(destination, request.url), 308);

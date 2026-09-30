@@ -134,3 +134,10 @@ tokens, Button, native form controls and Radix menu. Compact headings, persisten
 search visibility, focus-preserving filters, keyboard suggestions, visible
 Grid/List controls and tablet menu improve existing tasks. No vendor primitive,
 new visual token, asset, financial rule or external data flow was introduced.
+
+## 2026-09-30 - SwitchaBank blog
+
+FPDS-owned editorial routes and shell composition reuse Button, BankLogo,
+feedback, existing Radix menus and semantic tokens. Navigation adds Blog;
+article layout uses native headings, a contents list, responsive table and
+source links. No vendor primitive, external block, font or token family added.

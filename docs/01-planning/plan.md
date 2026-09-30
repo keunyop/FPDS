@@ -635,3 +635,12 @@ and companion-document fixes, and explicit evidence revalidation in Admin.
 Historical outcomes and canonical data are unchanged. The September 30 journal
 records 15 inspected runs, final checks and the separately scoped release and
 coverage-restoration steps. No scheduler or broad recollection is introduced.
+
+## 2026-09-30 SwitchaBank blog
+
+FR-PUB-028 / D-088 / WBS 5.74 implement the requested blog and one sourced
+Canadian bank/product comparison in EN/KO/JA. Reuse the Public runtime,
+semantic UI, existing catalog handoff and bounded search policy. Typed content
+keeps editing reviewable without a new CMS dependency. Verify source claims,
+financial examples, localized layouts and crawler signals before normal release.
+No deployment, canonical mutation or new analytics event is included.

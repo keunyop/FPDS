@@ -1,3 +1,4 @@
+import { BLOG_POSTS } from "@/lib/public-blog";
 import { GUIDE_SLUGS, GUIDE_REVIEWED_AT } from "@/lib/public-guides";
 import { buildCuratedComparison, CURATED_PAGES, type CuratedSlug } from "@/lib/public-curated";
 import { fetchCuratedProducts } from "@/lib/public-curated-data";
@@ -89,7 +90,16 @@ async function buildSitemapEntries(): Promise<SitemapEntry[]> {
       priority: 0.6,
       alternates: buildPublicLanguageAlternates(path, "CA")
     })));
-  return deduplicateEntries([...staticEntries, ...curatedEntries, ...guideEntries, ...productEntries]);
+  const blogPages = [
+    { path: '/blog' as const, modifiedAt: BLOG_POSTS.reduce((latest, post) => post.modifiedAt > latest ? post.modifiedAt : latest, '') },
+    ...BLOG_POSTS.map(post => ({ path: `/blog/${post.slug}` as const, modifiedAt: post.modifiedAt }))
+  ];
+  const blogEntries: SitemapEntry[] = blogPages.flatMap(({ path, modifiedAt }) => (['en', 'ko', 'ja'] as const).map(locale => ({
+    url: buildPublicSeoUrl(path, locale, 'CA'), lastModified: modifiedAt,
+    changeFrequency: 'monthly' as const, priority: 0.7,
+    alternates: buildPublicLanguageAlternates(path, 'CA')
+  })));
+  return deduplicateEntries([...staticEntries, ...curatedEntries, ...guideEntries, ...blogEntries, ...productEntries]);
 }
 
 async function loadPublishedCountryCodes() {

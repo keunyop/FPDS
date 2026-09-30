@@ -28,6 +28,8 @@ Use this file to avoid opening every design doc.
 
 ## Public Experience
 
+- [SwitchaBank blog](public-blog-policy.md): sourced bank comparison, localized editorial discovery and authoring workflow
+
 - [Authored comparison guides](public-comparison-guides-policy.md): localized explanations, sources/corrections and bounded search discovery
 
 - [Official bank handoff](public-bank-handoff-policy.md): disclosed conditions, mobile actions and read-only operator URL checks

@@ -13,12 +13,14 @@ export function getAnalyticsPage(pathname: string) {
   const routes: Record<string, string> = {
     '/': 'Home', '/products': 'Products', '/cards': 'Cards', '/loans': 'Loans',
     '/compare': 'Comparison', '/calculator': 'Calculator', '/methodology': 'Methodology',
-    '/guides': 'Guides'
+    '/guides': 'Guides', '/blog': 'Blog'
   };
   let path = pathname;
   let title = routes[path];
   if (!title && /^\/products\/[^/]+$/.test(pathname)) {
     path = '/products/detail'; title = 'Product detail';
+  } else if (!title && /^\/blog\/[^/]+$/.test(pathname)) {
+    path = '/blog/article'; title = 'Blog article';
   } else if (!title && /^\/guides\/[^/]+$/.test(pathname)) {
     path = '/guides/article'; title = 'Guide';
   } else if (!title && /^\/ca\/[^/]+$/.test(pathname)) {

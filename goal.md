@@ -594,3 +594,30 @@ Completion: Worker 539 and API 515 tests, repo doctor, foundation baseline
 validation and final diff checks pass. Local model selection is verified without
 printing secrets. No live model request or deployment; restart/release remains
 an operator step. Preserve this file for earlier unresolved goals.
+
+## Independent slice: 2026-09-30 SwitchaBank blog
+
+Ownership: preserve earlier unresolved goals and their separate acceptance.
+Objective: add a search-discoverable blog and one original bank/product comparison article.
+Scope: Public blog index/detail, EN/KO/JA authored content, official citations,
+navigation, canonical/hreflang/sitemap/social metadata and relevant documentation.
+Exclusions: deployment, CMS accounts, canonical data mutations, new countries/types,
+paid campaigns, personalized recommendations and invented expert review.
+Acceptance:
+- [x] Deliver a readable responsive blog with one substantive comparison article.
+- [x] Verify bank-specific statements against official sources with actual check dates.
+- [x] Connect discovery and comparison paths, preserving existing SEO boundaries.
+- [x] Pass Public tests/lint/typecheck/build and localized 390/768/1440px checks;
+      inspect final diff, run git diff --check and update the journal.
+Verification: bounded official-source research, meaningful route/SEO/content regressions,
+local browser checks with external writes blocked and actual screenshot review.
+Keep this goal file after completion because earlier ownership remains unresolved.
+
+Completion: all blog acceptance criteria are satisfied. Public 78 tests,
+lint/typecheck/final build, 37 blog browser/SEO checks, 111 existing-UI fixture
+checks and the full 281-URL / 12-route SEO audit pass. Additional 1024px,
+feedback, locale, keyboard and history checks pass; actual screenshots reviewed.
+Repo doctor, foundation baseline, UTF-8/whitespace and final diff checks pass.
+The source/maintenance policy and journal record the real checks, initial
+test-wait/API-load failures and successful verification. No deployment or data
+mutation. Keep this file for the earlier unresolved independent ownership.

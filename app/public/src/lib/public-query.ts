@@ -1,3 +1,4 @@
+import { blogCountryDestination, blogHref } from "./public-blog.ts";
 import { guideCountryDestination } from "./public-guides.ts";
 import { curatedCountryPath } from "@/lib/public-curated";
 import { buildProductDetailPath } from "@/lib/public-url-policy";
@@ -29,7 +30,7 @@ export type DashboardPageFilters = PublicScopeFilters & {
   axisPreset: string;
 };
 
-export type PublicRoutePath = "/" | "/products" | "/cards" | "/loans" | "/methodology" | `/products/${string}`;
+export type PublicRoutePath = "/blog" | "/" | "/products" | "/cards" | "/loans" | "/methodology" | `/products/${string}`;
 
 export const DEPOSIT_PRODUCT_TYPES = ["chequing", "savings", "gic"] as const;
 export const LOAN_PRODUCT_TYPES = ["mortgage", "personal-loan", "line-of-credit"] as const;
@@ -171,6 +172,7 @@ export function buildScopedFilterSearchParams(filters: PublicScopeFilters) {
 }
 
 export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
+  if (path === "/blog") return blogHref(null, state.locale);
   if (path.startsWith("/products/")) {
     return buildProductDetailPath(path, state.locale, state.countryCode);
   }
@@ -253,6 +255,8 @@ export function buildCountryHref(pathname: string, searchParams: SearchParamsRea
   const params = new URLSearchParams();
   const locale = normalizeLocaleValue(searchParams.get("locale") ?? "");
   const normalizedCountryCode = normalizeCountryCodeValue(countryCode);
+  const blogDestination = blogCountryDestination(pathname, locale, normalizedCountryCode);
+  if (blogDestination) return blogDestination;
   const guideDestination = guideCountryDestination(pathname, locale, normalizedCountryCode);
   if (guideDestination) return guideDestination;
   pathname = curatedCountryPath(pathname, normalizedCountryCode);

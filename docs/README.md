@@ -81,6 +81,7 @@ requirements, planning, or design material.
 Start from [docs/03-design/README.md](03-design/README.md).
 
 Most commonly needed:
+- [SwitchaBank blog](03-design/public-blog-policy.md): bank comparison article, source checks, SEO and content maintenance
 - [Authored comparison guides](03-design/public-comparison-guides-policy.md): newcomer entry, sources/corrections and localized guide discovery
 - [Deposit comparison conditions](03-design/public-deposit-comparison-policy.md): matching type/currency/basis/maturity and calculator eligibility
 - [Public verification freshness](03-design/public-verification-freshness-policy.md): separate snapshot/product dates, read-only overdue report, manual review cadence

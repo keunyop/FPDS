@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { blogCopy, blogHref } from "@/lib/public-blog";
 import { guideCopy, guideHref } from "@/lib/public-guides";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -59,6 +60,7 @@ function FooterContent() {
             <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
             <FooterLink href={comparisonHref([], { countryCode, locale })}>{comparisonCopy(locale).title}</FooterLink>
             {countryCode === "CA" ? <FooterLink href={guideHref(null, locale)}>{guideCopy(locale).nav}</FooterLink> : null}
+            <FooterLink href={blogHref(null, locale)}>{blogCopy(locale).nav}</FooterLink>
             <FooterLink href={methodologyHref}>{copy.nav.methodology}</FooterLink>
             <PublicFeedbackDialog countryCode={countryCode} locale={locale} mode="site_feedback" triggerStyle="footer" />
           </nav>

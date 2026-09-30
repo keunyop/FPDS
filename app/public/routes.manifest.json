@@ -136,6 +136,21 @@
         "gic-maturity-and-withdrawals",
         "switching-bank-accounts"
       ]
+    },
+    {
+      "route": "/blog",
+      "route_id": "public.blog",
+      "implementation_path": "src/app/blog/page.tsx",
+      "resource_key": "public_blog.nav"
+    },
+    {
+      "route": "/blog/[slug]",
+      "route_id": "public.blog_article",
+      "implementation_path": "src/app/blog/[slug]/page.tsx",
+      "resource_key": "public_blog.article",
+      "allowed_slugs": [
+        "eq-bank-vs-tangerine-vs-td-savings"
+      ]
     }
   ]
 }

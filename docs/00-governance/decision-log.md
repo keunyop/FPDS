@@ -190,6 +190,22 @@ Verification covers mocked Responses payloads and API/worker regression suites.
 Deployment, live collection and paid quality/latency evaluation are separate;
 no measured model-quality improvement is claimed by this configuration change.
 
+## 2026-09-30 - D-088 SwitchaBank blog and sourced comparison
+
+The Product Owner authorizes a Public blog and one professional-quality
+bank/product comparison article. Implement it within the existing Next.js
+runtime using typed, versioned editorial content and existing UI primitives.
+Initial Canadian EQ Bank/Tangerine/TD content is authored in EN/KO/JA with
+official citations, actual check dates and explicit hypothetical arithmetic.
+Do not introduce a CMS service for this bounded first article.
+
+Only authored blog URLs gain localized search discovery. Source-language
+product policy, private evidence, curated readiness, canonical financial data
+and existing comparison gates remain. Existing fixed-screen pageviews gain
+Blog/Blog article categories without slugs or new events. Release and observed
+search performance remain separate from local implementation.
+See FR-PUB-028 / WBS 5.74 and the [blog policy](../03-design/public-blog-policy.md).
+
 ## 4. Current Interpretation Notes
 
 - `WBS 5` is the active execution stage.

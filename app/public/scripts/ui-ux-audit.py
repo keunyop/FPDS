@@ -93,7 +93,7 @@ with sync_playwright() as pw:
                 expect(menu).to_be_focused()
             else:
                 links = page.locator('header nav a')
-                assert links.count() == 4
+                assert links.count() == 5
                 assert all(link.get_attribute('aria-label') for link in links.all())
             passed(f'navigation names and menu focus {locale} {width}')
 
@@ -128,7 +128,8 @@ with sync_playwright() as pw:
 
         goto(page, '/products', locale, q='Bank')
         page.locator('main a[href*="sort_by=monthly_fee"]').click()
-        page.wait_for_load_state('networkidle')
+        expect(page).to_have_url(re.compile(r'sort_by=monthly_fee'), timeout=20000)
+        settled(page)
         search = page.locator('input[name=q]')
         search.fill('Savings')
         expect(page).to_have_url(re.compile(r'q=Savings'), timeout=20000)

@@ -5,6 +5,21 @@ only review-approved public projections; raw evidence, review state, and private
 source traces remain inside FPDS Admin. Its customer-facing identity is
 `SwitchaBank`; `FPDS` remains the internal platform/runtime name.
 
+## Blog (2026-09-30)
+
+`/blog` and `/blog/eq-bank-vs-tangerine-vs-td-savings` provide a sourced
+Canadian bank-account comparison in EN/KO/JA, with a responsive table, explicit
+hypothetical interest example, original editorial content, checklist and
+existing savings-catalog handoff. Header/mobile/footer links expose the blog.
+Content is versioned in `src/lib/public-blog-content.ts`; no separate CMS or
+dependency is needed. Clean localized URLs get canonical/hreflang, BlogPosting/
+breadcrumb metadata, a local PNG social preview and six sitemap entries.
+Fixed Blog/Blog article screen types use existing page views without slugs.
+
+See [editorial checks, scope, maintenance and authoring](../../docs/03-design/public-blog-policy.md).
+Run `uv run --with playwright python app/public/scripts/blog-audit.py` from
+the repository root against a running local build for focused UI/SEO checks.
+
 ## Comparison guides (2026-09-26)
 
 `/guides` and four allowlisted `/guides/[slug]` pages provide original EN/KO/JA
@@ -382,7 +397,8 @@ through the local app; it needs at least two approved CAD savings products.
 Run `pnpm run seo:audit` against a locally started production build. It checks
 representative routes and every sitemap URL for status, metadata, canonical,
 robots, language, H1, JSON-LD, clean internal product links, redirects, and
-invalid-product 404 behavior.
+invalid-product 404 behavior. Set `SEO_AUDIT_CONCURRENCY=2` when the local API
+cannot sustain the default eight concurrent sitemap checks.
 
 ## Vercel Deployment
 

@@ -876,6 +876,23 @@ stay in the source language; KO/JA product noindex and existing curated/filter
 boundaries remain. Language market demand and search uplift are unvalidated.
 See [the guide policy](../03-design/public-comparison-guides-policy.md).
 
+### FR-PUB-028 SwitchaBank Blog
+
+The 2026-09-30 Product Owner request adds a blog index and one original
+bank/product comparison article to the existing Public application. Initial
+coverage is Canadian savings accounts, authored in EN/KO/JA with official
+citations, a real source-check date, honest authorship and correction disclosure,
+a responsive comparison table and an explicitly hypothetical interest example.
+Existing catalogs/comparison/calculator provide the next step.
+
+Clean editorial routes gain canonical/hreflang, sitemap, social and article
+structured data. Unknown slugs return 404; arbitrary query states remain
+noindex. Preserve product source-language policy, curated gates, private
+evidence and financial-data boundaries. Extend only existing fixed-screen
+pageview categories; do not transmit article identifiers or add tracking events.
+No CMS service, account, deployment or guaranteed search growth is implied.
+See [the blog policy](../03-design/public-blog-policy.md).
+
 ## 8.2 Admin Requirements
 
 ### FR-ADM-001 Admin Login
