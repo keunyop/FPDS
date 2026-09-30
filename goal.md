@@ -621,3 +621,35 @@ Repo doctor, foundation baseline, UTF-8/whitespace and final diff checks pass.
 The source/maintenance policy and journal record the real checks, initial
 test-wait/API-load failures and successful verification. No deployment or data
 mutation. Keep this file for the earlier unresolved independent ownership.
+
+## Active independent slice: 2026-09-30 latest collection recurrence
+
+Preserve earlier independently owned goals and acceptance.
+Objective: explain the latest 12-run collection batch and prevent avoidable
+failure before ingestion, using bank-agnostic fixes verified against real pages.
+Scope: read-only run/source/model/runtime diagnosis; generic discovery, source
+eligibility and launch sequencing fixes; regressions and operating contracts.
+Exclusions: canonical/review mutation, historical outcome relabeling, broad live
+recollection, new markets/types and weakening financial or SSRF evidence gates.
+Acceptance:
+- [x] Reconcile every latest partial run with persisted errors and code/runtime.
+- [x] Reproduce and fix false-negative discovery and companion-source failures
+      with cross-bank success/boundary/failure fixtures and official-page replay.
+- [x] Enforce eligibility before ingestion-run creation for first-time/precision
+      and ordinary/retry catalog paths; retain visible reasons and bounded revalidation.
+- [x] Verify affected suites, final diff, journal and contracts; state actual
+      runtime application and any remaining operator release/recovery steps.
+Verification: read-only DB checks, bounded official fetches without project AI
+calls, deterministic regression suites and relevant UI checks if changed.
+No deployment or live data mutation is inferred from diagnosis alone.
+
+Completion: all acceptance criteria for the recurrence slice are satisfied.
+Latest 12-run RCA identifies eight Partial outcomes and confirms the prior
+preflight was active but incomplete for first discovery. Generic identity,
+companion and browser-challenge fixes now precede catalog run creation.
+API 529, Worker 540 and Admin 10 tests, Admin typecheck/build, 54 localized
+responsive browser cases, actual official-page replay, read-only SQL EXPLAIN,
+repo doctor/foundation and final diff checks pass. Local API restarted with
+zero active runs and health confirmed. No paid project model call, actual
+collection, external deployment, canonical/review/history mutation or inactive
+coverage restoration. Preserve this file for the earlier unresolved ownership.

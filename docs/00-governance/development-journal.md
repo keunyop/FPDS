@@ -25,6 +25,75 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - Latest collection recurrence and preparation before ingestion
+
+- D-089 / WBS 5.75: read the latest batch started at `2026-09-30T12:01:40Z`
+  (05:01:40 America/Vancouver). All 12 rows reached completed; eight have a
+  truthful Partial flag, six with zero collection sources and two with one
+  failed companion. This is a different batch from the prior 15-run audit.
+- The prior D-086 code was running: the API started at 04:48 PDT, before the
+  batch, and persisted its new boundary/preflight metadata. All 12 scopes were
+  first-time collections with automatic precision discovery. Historical holds
+  could not prevent first-time discovery failures because API and runner still
+  created ingestion runs before discovery. The previous prevention was incomplete.
+
+| Latest Partial scope | Confirmed cause and generic correction |
+|---|---|
+| CNB CD/GIC | Plural Certificates of Deposit/CDs missed strong identity; token-aware plural matching now preserves identity without substring matches. |
+| CNB Savings | Savings Rates and Personal Savings Account Information were mistaken for distinct products under a plural SEO title; explanatory/FAQ headings no longer create variants. |
+| Santander CD/GIC | A real CD below `/personal/savings/certificates-of-deposit` was classified as Savings; precise plural CD leaf identity now overrides its parent path. |
+| CNB line of credit | Mixed personal-loan/line-of-credit hub has no proven single-product boundary; retain exclusion and end preparation before a run. |
+| WAB line of credit | Mixed home-equity-loan/line-of-credit hub remains excluded; business/HOA routes do not substitute for consumer products. |
+| WAB mortgage | AmeriHome returned a Cloudflare blocked page. Detect explicit blocked text plus vendor markers and validate every browser HTML recovery, including HTTP-error branches. |
+| Santander checking and savings | Both failed on the same fee schedule redirect to an unapproved asset domain; fresh access checks exclude the companion without widening the allowlist. |
+
+- Five failed GPT-6 Luna records in this batch were coverage-route evidence
+  validation failures (wrong/missing requested-type quote, service route, or
+  quote absent from fresh HTML), not provider transport failures. Forty-five
+  model records completed; changing the model is not the supported root-cause fix.
+- `catalog_preparation.py` reserves scoped work, retains one bounded latest
+  private coverage state, and rechecks ownership/configuration before run
+  insertion. First/precision/normal/catalog-retry paths now complete discovery,
+  bounded repair and source access checks first. No eligible detail means no
+  ingestion run/candidate/Review. Structural holds require explicit rediscovery;
+  transient errors permit retry. Forbidden redirects and format/challenge errors
+  also enter shared historical eligibility for source-selected compatibility paths.
+- Unavailable companions are removed from the prepared plan and cannot be
+  auto-included again. Valid details continue with existing required-field and
+  approval gates. No inferred financial facts, domain expansion or model-policy
+  relaxation. Batch error handling preserves later banks even if failure-state
+  persistence is unavailable; committed ingestion errors still mark real runs.
+- Bank list/coverage cards show EN/KO/JA pending, skipped, unavailable and actual
+  run links. Retry keeps the original outcome until a replacement is committed.
+  Pre-run model records keep standalone nullable-run/correlation lineage. No
+  schema migration, new log table or historical run relabeling.
+- Read-only official HTML replay: CNB CD score 3 -> 10, Santander CD 0 -> 7,
+  WAB named checking 3 -> 9; CNB Savings retains score 9 with the false family
+  flag removed. CNB/WAB mixed lending hubs retain exclusion. The final live
+  AmeriHome probe returns terminal_source_failure with zero available sources;
+  Santander's companion also fails before ingestion. These are discovery/access
+  checks, not evidence of a successful end-to-end paid collection.
+- Verification: API 529, Worker 540 and Admin 10 tests pass; Admin standalone
+  typecheck and production build pass. Production-build browser checks pass
+  54 EN/KO/JA x 390/768/1440px cases, including pending/structural/transient/run
+  states, launch response, overflow, link behavior and CSRF; no browser errors.
+  Reviewed actual Korean mobile coverage and desktop bank-list screenshots.
+  Four real-schema SQL EXPLAIN checks passed inside a read-only transaction.
+- Applied to the local API: confirmed zero active ingestion runs, restarted only
+  this workspace's localhost:4000 process, and verified `/healthz` returns ok.
+  Admin's existing dev process consumes the updated UI. No external deployment,
+  live collection, paid project model call, canonical/review or history mutation.
+- Existing inactive CNB CD/Savings/LOC and WAB LOC/mortgage scopes remain as
+  recorded by the old batch. CNB CD/Savings now have stronger verified discovery
+  signals but still require governed coverage restoration and explicit precision
+  revalidation; the mixed lending hubs and blocked mortgage route remain held.
+  No claim that preflight can predict later source changes or all human Review
+  decisions. Use Banks preparation results first, then inspect actual run/Review
+  outcomes for an operator-authorized collection.
+- Repo doctor, foundation baseline, changed/new-file UTF-8 and whitespace,
+  and final git diff --check pass. Generated build/type/bytecode changes were
+  restored. Preserve earlier independently owned goal acceptance.
+
 ## 2026-09-30 - SwitchaBank blog and first bank comparison
 
 - FR-PUB-028 / D-088 / WBS 5.74 add `/blog` and one original EQ Bank,

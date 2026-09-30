@@ -54,8 +54,9 @@ Runtime invariants:
   attempt regardless of bank or Product Type. Generic transport recovery uses
   browser DOM so the result remains ordinary inspectable HTML. A
   rendered page that remains a challenge is rejected as product evidence and
-  can trip the existing reversible structural zero-detail quarantine; a missing
-  browser or render failure remains transient. Other HTTP/upstream browser
+  is held before new catalog ingestion-run creation (D-089); legacy in-flight
+  plans retain their quarantine behavior. A missing browser or render failure
+  remains transient. Other HTTP/upstream browser
   fallback remains restricted to configured domains. Browser recoveries are
   serialized within one worker so concurrent source capture does not retrigger
   the same institution's WAF. A source declared as PDF must still return PDF
@@ -207,3 +208,9 @@ approved financial qualifiers while continuing to omit private evidence/copy.
 See the [bounded CA/US audit and correction report](../docs/00-governance/public-collection-alignment-2026-09-29.md) for six applied
 existing-product repairs, preserved verification dates, remaining gaps and the
 read-only `scripts/maintenance/public_collection_gap_report.py` command.
+
+D-089 validates every browser HTML fallback result, including HTTP 403/429
+paths, for a remaining managed-access challenge. Cloudflare blocked-page
+signatures need both explicit blocked text and vendor markers; ordinary product
+copy mentioning access does not trigger a hold. This uses the existing bounded
+browser attempt and does not add a challenge bypass or expand allowed domains.

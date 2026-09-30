@@ -608,6 +608,7 @@ def prepare_source_collection(
     collection_id: str | None = None,
     correlation_id: str | None = None,
     revalidate: bool = False,
+    excluded_source_ids: list[str] | None = None,
     run_id_overrides: dict[tuple[str, str, str, str], str] | None = None,
 ) -> dict[str, Any]:
     selected_source_ids = _dedupe_preserve_order([item.strip() for item in source_ids if item and item.strip()])
@@ -735,7 +736,8 @@ def prepare_source_collection(
     original_sources = dict(included_rows_by_id)
     skipped_sources = []
     for source_id, source in list(included_rows_by_id.items()):
-        reason = source_block_reason({**source, **history.get(source_id, {})}, revalidate=revalidate)
+        reason = ("source_access_preflight" if source_id in (excluded_source_ids or []) else
+                  source_block_reason({**source, **history.get(source_id, {})}, revalidate=revalidate))
         if reason:
             skipped_sources.append({"source_id": source_id, "reason_code": reason})
             included_rows_by_id.pop(source_id)

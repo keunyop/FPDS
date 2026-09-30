@@ -600,3 +600,12 @@ Minimum information:
 | 2026-04-15 | Added Source Registry Management as an operations surface for DB-backed source editing and multi-select candidate collection kickoff |
 | 2026-04-15 | Marked Source Registry Management as implemented in the live admin runtime and removed it from follow-on-only lists |
 | 2026-04-22 | Added the anonymous signup-request route and admin-overview approval panel to the active operator IA |
+
+## Collection preparation visibility (D-089)
+
+Banks list coverage and coverage cards expose the latest private preparation
+status through existing compact text and EN/KO/JA live status messages. Pending
+checks produce no run link; skipped/unavailable checks explain why collection
+did not start and how to revalidate/retry. Only an actual created run links to
+Runs. Existing list refresh, dialog/dirty pauses and country/locale boundaries
+remain. Catalog retry returns to Banks while preparation is pending.

@@ -206,6 +206,31 @@ Blog/Blog article categories without slugs or new events. Release and observed
 search performance remain separate from local implementation.
 See FR-PUB-028 / WBS 5.74 and the [blog policy](../03-design/public-blog-policy.md).
 
+## 2026-09-30 - D-089 Prepare catalog collection before creating a run
+
+The latest Product Owner request requires prevention on the first discovery,
+not only suppression after a known failure. D-086 historical preflight remains;
+its allowance for a new zero-detail ingestion run is superseded for new catalog
+plans. Reserve scoped preparation, perform discovery/one bounded route repair,
+then check detail and companion access before inserting ingestion_run. No
+eligible detail means skipped/unavailable preparation, without a run or Review.
+Only positive official retirement evidence may deactivate coverage.
+
+Store one bounded current state in private catalog metadata. Use scoped atomic
+ownership/configuration checks and a two-hour reservation window. Retry links
+an old attempt only after a replacement run exists. Standalone pre-run model
+records preserve lineage without inventing a run. UI shows preparation and
+links actual runs; run-created is not a success claim. Legacy in-flight plans,
+historical outcomes and existing inactive coverage retain their semantics.
+
+Plural/product-path identity fixes and unresolved browser-challenge checks are
+bank-agnostic. Inaccessible companions are omitted without allowlist expansion
+or weaker financial approval gates. New evidence/transport failures during
+actual ingestion and unpredictable human Review outcomes remain possible.
+No new countries/types, automatic retirement, paid project model calls, live
+collection, canonical/review mutations or external deployment in verification.
+See the September 30 recurrence journal and WBS 5.75.
+
 ## 4. Current Interpretation Notes
 
 - `WBS 5` is the active execution stage.

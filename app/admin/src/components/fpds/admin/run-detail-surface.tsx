@@ -256,6 +256,10 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
         },
       });
       const payload = (await response.json()) as { data?: RunRetryResponse; error?: { message?: string } };
+      if (response.ok && payload.data?.workflow_state === "preparing") {
+        router.push(buildAdminHref("/admin/banks", new URLSearchParams(), locale));
+        return;
+      }
       if (!response.ok || !payload.data?.retry_run_id) {
         setRetryError(payload.error?.message ?? copy.retryFailed);
         return;

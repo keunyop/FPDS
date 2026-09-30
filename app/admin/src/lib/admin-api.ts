@@ -270,7 +270,8 @@ export type RunStatusDetailResponse = {
 
 export type RunRetryResponse = {
   original_run_id: string;
-  retry_run_id: string;
+  retry_run_id: string | null;
+  workflow_state?: "preparing";
   run_type: string;
   collection_id: string | null;
   correlation_id: string | null;
@@ -760,6 +761,15 @@ export type SourceCollectionLaunchResponse = {
   }>;
 };
 
+export type CollectionPreparation = {
+  status?: "queued" | "checking" | "skipped" | "unavailable" | "collecting" | "run_created";
+  updated_at?: string;
+  reason_codes?: string[];
+  run_id?: string | null;
+  retryable?: boolean;
+  excluded_sources?: Array<{ source_id: string; reason_code: string }>;
+};
+
 export type BankItem = {
   bank_code: string;
   country_code: string;
@@ -782,6 +792,7 @@ export type BankItem = {
     status: string;
     generated_source_count: number;
     has_completed_collection: boolean;
+    collection_preparation?: CollectionPreparation;
   }>;
   generated_source_count: number;
 };
@@ -817,6 +828,7 @@ export type BankDetailResponse = {
     source_language: string;
     generated_source_count: number;
     has_completed_collection: boolean;
+    collection_preparation?: CollectionPreparation;
     change_reason: string | null;
     created_at: string | null;
     updated_at: string | null;
@@ -869,6 +881,7 @@ export type SourceCatalogItem = {
   source_language: string;
   generated_source_count: number;
   has_completed_collection: boolean;
+  collection_preparation?: CollectionPreparation;
   change_reason: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -930,7 +943,7 @@ export type SourceCatalogCollectionLaunchResponse = SourceCollectionLaunchRespon
       | "no_detail_sources_discovered"
       | "product_not_currently_offered";
   }>;
-  workflow_state?: "queued" | "completed" | "skipped";
+  workflow_state?: "queued" | "completed" | "skipped" | "preparing";
   skipped_items?: Array<{
     catalog_item_id: string;
     bank_code: string;

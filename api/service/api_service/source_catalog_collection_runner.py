@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from api_service.catalog_preparation import claim_preparation, update_preparation, probe_sources
 from api_service import source_collection_runner
 from api_service.config import Settings
 from api_service.db import open_connection
@@ -14,6 +15,8 @@ from api_service.collection_preflight import (
 )
 from api_service.source_catalog import (
     CatalogItemMaterializationResult,
+    DiscoveryFetchPolicy,
+    _coverage_allowed_domains,
     _canonical_product_type_code,
     _has_unrelated_product_type_signal,
     _is_non_product_supporting_document,
@@ -53,6 +56,10 @@ def main() -> int:
                 f"[source-catalog-runner] failed run {group['run_id']}: {exc}",
                 flush=True,
             )
+            if plan.get("preflight_before_run") and not group.get("ingestion_started"):
+                _mark_preparation_best_effort(plan=plan, group=group, status="unavailable",
+                                              reasons=["preparation_unavailable"], notes=[str(exc)], retryable=True)
+                continue
             _mark_run_failure_best_effort(
                 run_id=str(group["run_id"]),
                 run_metadata=_catalog_run_metadata(
@@ -67,7 +74,18 @@ def main() -> int:
                 ),
                 failure=exc,
             )
+            if plan.get("preflight_before_run") and group.get("ingestion_started"):
+                _mark_preparation_best_effort(plan=plan, group=group, status="run_created",
+                                              run_id=str(group["run_id"]))
     return 0
+
+
+def _mark_preparation_best_effort(*, plan: dict[str, Any], group: dict[str, Any], **state: Any) -> None:
+    try:
+        with open_connection(Settings.from_env()) as connection:
+            update_preparation(connection, group=group, plan=plan, **state)
+    except Exception as persistence_error:  # pragma: no cover - background resilience
+        print(f"[source-catalog-runner] could not persist preparation for {group['catalog_item_id']}: {persistence_error}", flush=True)
 
 
 def _mark_run_failure_best_effort(
@@ -187,11 +205,11 @@ def _quarantine_catalog_scope_after_no_detail(
 
 def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     source_catalog_product_type = str(group.get("source_catalog_product_type") or group["product_type"])
-    group = {
-        **group,
+    # Keep committed ingestion state visible to the batch exception handler.
+    group.update({
         "product_type": _canonical_product_type_code(group["product_type"]),
         "source_catalog_product_type": source_catalog_product_type,
-    }
+    })
     group["product_family"] = _catalog_product_family(group)
     settings = Settings.from_env()
     collection_plan: dict[str, Any] | None = None
@@ -199,17 +217,23 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     materialized_metadata: dict[str, Any] | None = None
 
     with open_connection(settings) as connection:
-        _insert_collection_run_row(
-            connection,
-            run_id=str(group["run_id"]),
-            triggered_by=str(plan.get("triggered_by", "admin")),
-            request_id=plan.get("request_id"),
-            correlation_id=str(plan["correlation_id"]),
-            collection_id=str(plan["collection_id"]),
-            group=_run_group_with_empty_collection_scope(group),
-            pipeline_stage="source_catalog_collection",
-            trigger_type="admin_source_collection",
-        )
+        deferred_run = bool(plan.get("preflight_before_run"))
+        if deferred_run:
+            if not claim_preparation(connection, group=group, plan=plan):
+                return
+            connection.commit()
+        else:
+            _insert_collection_run_row(
+                connection,
+                run_id=str(group["run_id"]),
+                triggered_by=str(plan.get("triggered_by", "admin")),
+                request_id=plan.get("request_id"),
+                correlation_id=str(plan["correlation_id"]),
+                collection_id=str(plan["collection_id"]),
+                group=_run_group_with_empty_collection_scope(group),
+                pipeline_stage="source_catalog_collection",
+                trigger_type="admin_source_collection",
+            )
         catalog_row = {
             "catalog_item_id": group["catalog_item_id"],
             "bank_code": group["bank_code"],
@@ -242,6 +266,10 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         if (source_coverage_mode == "standard" and existing_scope_before_repair
                 and not existing_scope_before_repair["target_source_ids"]
                 and existing_scope_before_repair.get("blocked_detail_source_ids")):
+            if deferred_run:
+                update_preparation(connection, group=group, plan=plan, status="skipped",
+                                   reasons=["preparation_requires_rediscovery"])
+                return
             _mark_run_finished(
                 connection=connection, run_id=str(group["run_id"]), run_state="completed",
                 partial_completion_flag=False, error_summary=None,
@@ -294,7 +322,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             materialized = _materialize_sources_for_catalog_item(
                 connection,
                 row=catalog_row,
-                run_id=str(group["run_id"]),
+                run_id=None if deferred_run else str(group["run_id"]),
                 correlation_id=str(plan["correlation_id"]),
                 request_id=plan.get("request_id"),
             )
@@ -326,11 +354,13 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                     row=catalog_row,
                     actor=_actor_from_plan(plan),
                     request_context={"request_id": plan.get("request_id")},
-                    run_id=str(group["run_id"]),
+                    run_id=None if deferred_run else str(group["run_id"]),
                     correlation_id=str(plan["correlation_id"]),
                 )
                 initial_discovery_notes.extend(repair.notes)
                 if repair.status == "current_offering" and repair.coverage_source_url:
+                    group["coverage_source_url"] = repair.coverage_source_url
+                    group["coverage_source_metadata"] = repair.coverage_source_metadata
                     catalog_row = {
                         **catalog_row,
                         "coverage_source_url": repair.coverage_source_url,
@@ -339,7 +369,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                     materialized = _materialize_sources_for_catalog_item(
                         connection,
                         row=catalog_row,
-                        run_id=str(group["run_id"]),
+                        run_id=None if deferred_run else str(group["run_id"]),
                         correlation_id=str(plan["correlation_id"]),
                         request_id=plan.get("request_id"),
                     )
@@ -354,6 +384,10 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                         discovery_metrics=materialized.discovery_metrics,
                     )
                 elif repair.status == "not_currently_offered":
+                    if deferred_run:
+                        update_preparation(connection, group=group, plan=plan, status="skipped",
+                                           reasons=["product_not_currently_offered"], notes=initial_discovery_notes)
+                        return
                     materialized_metadata = _catalog_run_metadata(
                         plan=plan,
                         group=group,
@@ -463,6 +497,12 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         )
 
         if not target_source_ids:
+            if deferred_run:
+                structural = _no_detail_result_is_structural(discovery_notes)
+                update_preparation(connection, group=group, plan=plan,
+                                   status="skipped" if structural else "unavailable",
+                                   reasons=["no_eligible_detail"], notes=discovery_notes, retryable=not structural)
+                return
             if _no_detail_result_is_structural(discovery_notes):
                 materialized_metadata = {
                     **materialized_metadata,
@@ -483,6 +523,36 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             )
             return
 
+        excluded_sources = []
+        if deferred_run:
+            policy = DiscoveryFetchPolicy.from_env(allowed_domains=_coverage_allowed_domains(
+                normalized_homepage_url=str(group["normalized_homepage_url"]),
+                normalized_coverage_source_url=group.get("coverage_source_url"),
+                coverage_source_metadata=group.get("coverage_source_metadata") or {},
+            ))
+            probe_rows = load_source_preflight_rows(connection, source_ids=collection_source_ids)
+            available_ids, excluded_sources = probe_sources(probe_rows, policy=policy,
+                                                            cache=plan.setdefault("_probe_cache", {}))
+            collection_source_ids = [sid for sid in collection_source_ids if sid in available_ids]
+            target_source_ids = [sid for sid in target_source_ids if sid in available_ids]
+            if not target_source_ids:
+                retryable = any(item.get("retryable") for item in excluded_sources)
+                update_preparation(connection, group=group, plan=plan,
+                                   status="unavailable" if retryable else "skipped",
+                                   reasons=sorted({item["reason_code"] for item in excluded_sources}) or ["no_eligible_detail"],
+                                   notes=discovery_notes, retryable=retryable, excluded_sources=excluded_sources)
+                return
+            materialized_metadata.update({"collection_preflight_skipped_sources": excluded_sources,
+                                          "collection_source_ids": collection_source_ids,
+                                          "source_ids": collection_source_ids, "target_source_ids": target_source_ids,
+                                          "collection_preparation_version": "catalog-preparation-v1"})
+            # A coverage edit/new reservation during network checks supersedes this work.
+            if not claim_preparation(connection, group=group, plan=plan):
+                connection.rollback()
+                update_preparation(connection, group=group, plan=plan, status="skipped",
+                                   reasons=["coverage_changed"], retryable=True)
+                return
+
         prepared = prepare_source_collection(
             connection,
             source_ids=collection_source_ids,
@@ -491,6 +561,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             collection_id=str(plan["collection_id"]),
             correlation_id=str(plan["correlation_id"]),
             revalidate=source_coverage_mode != "standard",
+            excluded_source_ids=[item["source_id"] for item in excluded_sources],
             run_id_overrides={
                 (
                     str(group["country_code"]),
@@ -516,7 +587,18 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             correlation_id=str(plan["correlation_id"]),
             collection_id=str(plan["collection_id"]),
             group=collection_group,
+            retry_of_run_id=plan.get("retry_of_run_id"),
         )
+        if deferred_run:
+            update_preparation(connection, group=group, plan=plan, status="collecting",
+                               run_id=str(group["run_id"]), excluded_sources=excluded_sources)
+            if plan.get("retry_of_run_id"):
+                connection.execute(
+                    """UPDATE ingestion_run SET run_state='retried', retried_by_run_id=%(new_run_id)s
+                    WHERE run_id=%(old_run_id)s AND retried_by_run_id IS NULL
+                      AND (run_state='failed' OR (run_state='completed' AND partial_completion_flag=true))""",
+                    {"new_run_id": group["run_id"], "old_run_id": plan["retry_of_run_id"]},
+                )
         connection.execute(
             """
             UPDATE ingestion_run
@@ -529,8 +611,13 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             },
         )
         connection.commit()
+        group["ingestion_started"] = True
 
     source_collection_runner._run_group(plan=collection_plan, group=collection_group)
+    if deferred_run:
+        with open_connection(settings) as connection:
+            update_preparation(connection, group=group, plan=plan, status="run_created",
+                               run_id=str(group["run_id"]), excluded_sources=excluded_sources)
 
 
 def _load_active_collection_scope(

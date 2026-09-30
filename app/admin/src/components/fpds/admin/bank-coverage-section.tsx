@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CollectionPreparationStatus } from "./collection-preparation-status";
 import { collectionPreflightMessage } from "@/lib/admin-collection-feedback";
 import { FileText, Layers3, Play } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -374,6 +375,7 @@ export function BankCoverageSection({
                       {copy.firstPrecisionRequired}
                     </p>
                   ) : null}
+                  <CollectionPreparationStatus locale={locale} state={item.collection_preparation} />
                   {item.change_reason ? (
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
                       {copy.latestNote}: {item.change_reason}

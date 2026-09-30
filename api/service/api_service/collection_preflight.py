@@ -22,6 +22,8 @@ def source_block_reason(row: dict[str, Any], *, revalidate: bool = False) -> str
         if any(marker in error for marker in (
             "html access challenge remained after bounded browser fallback",
             "pdf source returned non-pdf content after bounded fetch recovery",
+            "host not in discovery fetch allowlist",
+            "text fetch expected html content but received",
         )):
             return "terminal_source_failure"
         if re.search(r"(?:http(?: error)?|status)\s*[:=]?\s*(?:404|410)\b", error):

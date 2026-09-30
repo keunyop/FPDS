@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CollectionPreparationStatus } from "./collection-preparation-status";
 import { collectionPreflightMessage } from "@/lib/admin-collection-feedback";
 import { Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -537,6 +538,12 @@ export function BankRegistrySurface({
                       ) : (
                         <span className="text-muted-foreground">{copy.none}</span>
                       )}
+                      {item.catalog_items.filter((coverage) => coverage.collection_preparation?.status).map((coverage) => (
+                        <div className="mt-2" key={coverage.catalog_item_id}>
+                          <span className="text-xs font-medium">{formatProductTypeList([coverage.product_type], productTypeLabelMap)}</span>
+                          <CollectionPreparationStatus locale={locale} state={coverage.collection_preparation} />
+                        </div>
+                      ))}
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.generated_source_count}</td>
                   </tr>

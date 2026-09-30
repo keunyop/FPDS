@@ -130,6 +130,12 @@ def retry_failed_run(
             message="Retry is currently available only for failed or partially completed collection runs.",
         )
 
+    if result.get("workflow_state") == "preparing":
+        # Preserve the original outcome until a real replacement run exists.
+        return {"original_run_id": run_id, "retry_run_id": None, "run_type": normalized_run_type,
+                "collection_id": result.get("collection_id"), "correlation_id": result.get("correlation_id"),
+                "run_ids": [], "workflow_state": "preparing"}
+
     retry_run_ids = [str(item) for item in result.get("run_ids", []) if str(item).strip()]
     if len(retry_run_ids) != 1:
         raise RunRetryError(

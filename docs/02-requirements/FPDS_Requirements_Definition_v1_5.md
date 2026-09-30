@@ -1047,8 +1047,13 @@ Current Phase 1 source-registry admin note:
   apply the same gate; explicit precision rediscovery rechecks official evidence
   without overriding Review, canonical or publication requirements.
 - ordinary source loss with no conclusive hold still triggers precision discovery.
-  Supporting pages alone cannot produce a candidate. A first attempted failure
-  retains its truthful outcome; known holds must not generate repeat empty runs.
+  Supporting pages alone cannot produce a candidate. D-089 requires first-time,
+  precision, normal and retry catalog preparation to establish eligible detail
+  and accessible sources before creating an ingestion run. Unsuccessful
+  preparation records a bounded reason on coverage and creates no run/Review;
+  transient failures remain retryable and explicit precision can revalidate
+  structural holds. Historical and actual ingestion failures retain truthful
+  outcomes. Run-created status must not imply successful completion.
 
 ### FR-ADM-017 Dynamic Product Type Management (Implemented)
 FPDS should support an operator-managed product type registry, not only a fixed hard-coded product-type list.

@@ -99,6 +99,9 @@ class _QueuedConnection:
         self._responses = list(responses)
         self.calls: list[tuple[str, dict[str, object]]] = []
 
+    def commit(self):
+        self.committed = True
+
     def execute(self, sql: str, params: dict[str, object] | None = None) -> _QueuedCursor:
         self.calls.append((sql, params or {}))
         if not self._responses:
@@ -3655,6 +3658,7 @@ class SourceCatalogTests(unittest.TestCase):
             patch("api_service.source_catalog._build_source_catalog_collection_run_id", return_value="run-001"),
             patch("api_service.source_catalog.new_id", side_effect=["collection-001", "corr-001"]),
             patch("api_service.source_catalog._insert_collection_run_row") as queue_run,
+            patch("api_service.source_catalog.reserve_preparation", return_value=True),
             patch("api_service.source_catalog._launch_source_catalog_collection_runner") as launch_runner,
             patch("api_service.source_catalog._record_catalog_audit_event"),
         ):
@@ -3668,42 +3672,11 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(result["catalog_item_ids"], ["catalog-ca-atl-savings-12345678"])
         self.assertEqual(result["collection_id"], "collection-001")
         self.assertEqual(result["correlation_id"], "corr-001")
-        self.assertEqual(result["run_ids"], ["run-001"])
+        self.assertEqual(result["run_ids"], [])
         self.assertEqual(result["materialized_items"], [])
-        self.assertEqual(result["workflow_state"], "queued")
+        self.assertEqual(result["workflow_state"], "preparing")
         self.assertEqual(result["queued_catalog_item_count"], 1)
-        queue_run.assert_called_once_with(
-            connection,
-            run_id="run-001",
-            triggered_by="admin@example.com",
-            request_id="req-001",
-            correlation_id="corr-001",
-            collection_id="collection-001",
-            group={
-                "run_id": "run-001",
-                "catalog_item_id": "catalog-ca-atl-savings-12345678",
-                "bank_code": "ATL",
-                "bank_name": "Atlas Bank",
-                "country_code": "CA",
-                "product_type": "savings",
-                "source_catalog_product_type": "savings",
-                "product_family": "deposit",
-                "source_language": "en",
-                "homepage_url": "https://www.atlasbank.ca",
-                "normalized_homepage_url": "https://www.atlasbank.ca",
-                "coverage_source_url": None,
-                "coverage_source_metadata": {},
-                "has_completed_collection": False,
-                "source_coverage_mode": "precision",
-                "selected_source_ids": [],
-                "target_source_ids": [],
-                "included_source_ids": [],
-                "included_sources": [],
-            },
-            pipeline_stage="source_catalog_collection",
-            trigger_type="admin_source_collection",
-            retry_of_run_id=None,
-        )
+        queue_run.assert_not_called()
         launch_runner.assert_called_once()
 
     def test_record_catalog_audit_event_uses_current_audit_schema(self) -> None:
@@ -4075,6 +4048,7 @@ class SourceCatalogTests(unittest.TestCase):
         with (
             patch("api_service.source_catalog._build_source_catalog_collection_run_id", return_value="run-001"),
             patch("api_service.source_catalog.new_id", side_effect=["collection-001", "corr-001"]),
+            patch("api_service.source_catalog.reserve_preparation", return_value=True),
             patch("api_service.source_catalog._insert_collection_run_row"),
             patch("api_service.source_catalog._launch_source_catalog_collection_runner") as launch_runner,
             patch("api_service.source_catalog._record_catalog_audit_event"),
@@ -4086,10 +4060,10 @@ class SourceCatalogTests(unittest.TestCase):
                 request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
             )
 
-        self.assertEqual(result["run_ids"], ["run-001"])
+        self.assertEqual(result["run_ids"], [])
         self.assertEqual(result["selected_source_ids"], [])
         self.assertEqual(result["materialized_items"], [])
-        self.assertEqual(result["workflow_state"], "queued")
+        self.assertEqual(result["workflow_state"], "preparing")
         self.assertIn("sci.status = 'active'", connection.calls[0][0])
         self.assertIn("catalog_scope_quarantine,status", connection.calls[0][0])
         self.assertIn("active_detail.discovery_role = 'detail'", connection.calls[0][0])

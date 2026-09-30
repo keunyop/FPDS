@@ -168,3 +168,19 @@ order.
   document. TLS/HSTS and production cookie behavior still require deployment UAT.
 - The test script uses the installed Node TypeScript support (verified on Node
   24.13.0) for auth success/failure, safe navigation, and environment regressions.
+
+## Collection preparation (D-089)
+
+Banks Collect first returns `workflow_state=preparing` and zero created runs.
+The bank list and each coverage show pending, skipped, retryable-unavailable or
+run-created status in EN/KO/JA. Only a committed run gets a View run link;
+run-created does not assert successful ingestion. Existing auto refresh updates
+the bank list and pauses during dialogs/edits. After two hours an interrupted
+pending check can be requested again. Structural holds use explicit precision
+rediscovery after evidence/configuration review; inactive coverage must first
+be restored through the existing governed workflow.
+
+Run retry can also return preparing with a null replacement ID. It returns to
+Banks while eligibility is checked; the original Partial/failed outcome remains
+until a replacement run exists. No run or Review is fabricated for failed
+preparation. Fresh ingestion can still encounter new transport/evidence errors.

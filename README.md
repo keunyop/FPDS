@@ -50,6 +50,11 @@ As of `2026-08-15`:
   remain eligible. D-086 supersedes fresh Review-only family/coverage exceptions.
   See the September 30 development journal for diagnosis and release limits.
 - Admin collection now starts only from an authenticated operator action. Failed or partial runs can be retried from Runs, Review work remains operator-controlled, and approval-triggered aggregate refresh keeps using the existing guarded canonical path.
+- Banks collection now reserves preparation before creating an ingestion run
+  (D-089): first/precision discovery and ordinary/retry source access checks
+  must retain eligible detail. Skipped or unavailable checks remain visible in
+  Banks; blocked companions are excluded and actual ingestion failures stay
+  truthful. Existing inactive coverage requires governed restoration.
 - Public country readiness is now implemented end to end: bank-owned ISO alpha-2 country codes flow through canonical approval and country-specific aggregate refresh into Public APIs and URL state. The header selects among countries with active latest snapshots, the footer owns EN/KO/JA language selection, and current governed collection scope includes Canada and the United States; each later country remains fail-closed until its own product profiles and fixtures are registered.
 - Admin is now country-scoped from sign-in: operators select an enabled country before authentication, the server stores it in the session, the shell keeps the working country visible, and bank/source/collection/run/review/change operations are constrained to that country. Stable product/candidate/run IDs remain opaque; country is enforced through business keys, foreign keys, and lookup indexes.
 - Admin administrators can now manage that login allowlist from `/admin/countries`: countries are selected from a prepared ISO catalog, and reversible deactivation preserves historical data while protecting the current and final active country.

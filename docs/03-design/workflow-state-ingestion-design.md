@@ -188,9 +188,10 @@ Current official-grounding baseline:
 - if materialization leaves no eligible detail source, the catalog runner may
   invoke one audited live-search coverage repair. A verified current
   consumer-brand route is persisted with relationship evidence and discovery
-  resumes once. Explicit retirement evidence deactivates the stale coverage and
-  terminates the run as a clean no-current-product outcome; uncertainty retains
-  `no_detail_sources_discovered` Partial semantics.
+  resumes once. Under D-089 this happens before new catalog run creation.
+  Explicit retirement evidence deactivates stale coverage; no-detail uncertainty
+  records skipped/unavailable preparation with no ingestion run or Review.
+  Historical and legacy in-flight plans retain their original outcome semantics.
 
 - 입력: chunk set, canonical schema context, taxonomy registry
 - 처리:

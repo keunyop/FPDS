@@ -289,9 +289,10 @@ For this policy, `collect` means:
     country aggregate refresh; retain every other candidate in Review
 11. when no eligible detail source remains, perform one bounded current-coverage
     repair. A verified current route is persisted and discovery is retried once;
-    explicit official retirement evidence deactivates that catalog coverage and
-    closes the run as `product_not_currently_offered` without Partial; an
-    uncertain result remains a no-detail Partial
+    explicit official retirement evidence deactivates that catalog coverage.
+    D-089 performs this before new ingestion-run creation: no eligible detail
+    produces skipped/unavailable preparation with reasons and no run/Review.
+    Historical and legacy in-flight outcomes remain unchanged
 
 Configured collection extraction performs a bounded current-official-source
 grounding pass for each candidate-producing detail source before normalization.
@@ -404,7 +405,7 @@ Current repository state:
   only when prominent in the route, title, or primary heading; shared
   navigation and serialized application state do not independently disqualify
   coherent product and pricing evidence.
-- any already validated official HTML source whose direct fetch times out or is reset/closed by the remote host receives one browser DOM attempt, independent of bank or Product Type and without adding that bank to a rendering exception list. Configured dynamic-rendering domains retain their format-aware behavior; PDF routes do not enter this generic transport path. A high-confidence HTTP-200 access-challenge shell likewise receives one browser DOM attempt on any validated official domain. A recovered page re-enters all ordinary evidence gates; a still-challenged page is structurally rejected and may quarantine a zero-detail scope, while browser runtime failure remains transient. The requested output format is explicit, all attempts remain on the same validated official URL and per-bank domain boundary, snapshot metadata records `browser_html_fallback` plus `direct_transport_failure` when applicable, and downstream missing-field validation still protects publication.
+- any already validated official HTML source whose direct fetch times out or is reset/closed by the remote host receives one browser DOM attempt, independent of bank or Product Type and without adding that bank to a rendering exception list. Configured dynamic-rendering domains retain their format-aware behavior; PDF routes do not enter this generic transport path. A high-confidence HTTP-200 access-challenge shell likewise receives one browser DOM attempt on any validated official domain. A recovered page re-enters all ordinary evidence gates; a still-challenged page is structurally rejected before new catalog run creation (D-089; legacy in-flight plans retain quarantine), while browser runtime failure remains transient. The requested output format is explicit, all attempts remain on the same validated official URL and per-bank domain boundary, snapshot metadata records `browser_html_fallback` plus `direct_transport_failure` when applicable, and downstream missing-field validation still protects publication.
 - bounded browser recovery is serialized inside each worker process so a concurrent source batch does not amplify the institution's access challenge. A declared PDF source is fail-closed when recovery yields HTML instead of PDF bytes. On a later standard collection, a source whose latest result is either a persisted post-browser challenge or that PDF/content-type mismatch is omitted from the runtime scope without mutating the registry; precision rediscovery remains the explicit revalidation path, and browser-unavailable or timeout outcomes remain retryable.
 - exact-product companion selection rejects global user agreements and deposit-scope wealth/investment disclosures that contain no account, deposit, rate, or fee context. The same rule applies when a standard run reuses older active registry rows. Product-specific account/card agreements and pricing disclosures remain eligible, so the exclusion removes structurally irrelevant work without weakening comparison evidence.
 - corporate annual, climate, and climate-disclosure reports are not product-supporting evidence. Discovery excludes them before source materialization even when a broad PDF link heuristic matches, so their retirement cannot make otherwise healthy Product Type runs partial.
@@ -490,3 +491,19 @@ Review-only validation. Missing new facts alone do not mean a product is absent.
 | 2026-07-30 | Added the official-evidence, duplicate, logo-fallback, active-coverage, and atomicity rules for AI bank onboarding |
 | 2026-07-30 | Separated customer-facing bank display names from legal entity names and exact ranking labels; rejected fixed-width US regulatory abbreviations as registry display names |
 | 2026-08-06 | Excluded singular editorial article routes, preserved explicit local Product Type identity across sibling route vocabulary, and allowed narrowly bounded exact-origin grounding for labeled currency fees |
+
+## 12. Preparation before ingestion (D-089)
+
+Every Banks/catalog request reserves scoped preparation before discovery.
+The worker rechecks reservation ownership and the bank/type/language/URL/
+verified-domain signature, discovers detail pages, performs at most one existing
+coverage repair and probes selected sources. Only eligible accessible detail
+allows run creation. Inaccessible companions are excluded without relaxing
+financial requiredness; their absence can still require Review for missing facts.
+
+Keep one bounded current preparation under private coverage metadata, with
+reason codes, retryability, excluded source IDs and an actual run ID only once
+committed. No new audit/usage table or historical outcome relabeling. Concurrent
+preparation/collection is held for the two-hour reservation window. An unchanged
+structural result needs explicit precision rediscovery; changed configuration
+or transient errors can retry. Existing inactive coverage is not silently restored.

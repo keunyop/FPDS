@@ -526,7 +526,14 @@ def _fetch_response_via_browser_bounded(
     # that this fallback is intended to clear. Keep the recovery bounded and
     # serial within the worker process; direct HTTP fetches remain concurrent.
     with _BROWSER_FALLBACK_LOCK:
-        return _fetch_response_via_browser(url, policy, output_format=output_format)
+        response = _fetch_response_via_browser(url, policy, output_format=output_format)
+    remaining_challenge = _html_access_challenge_kind(response)
+    if remaining_challenge:
+        raise NonRetryableFetchError(
+            "HTML access challenge remained after bounded browser fallback "
+            f"for {url} ({remaining_challenge})."
+        )
+    return response
 
 
 def _fetch_response_via_browser(
@@ -643,6 +650,10 @@ def _html_access_challenge_kind(response: FetchedResponse) -> str | None:
         )
     ):
         return "javascript_access_challenge"
+    if ("sorry, you have been blocked" in decoded or "you are unable to access" in decoded) and any(
+        marker in decoded for marker in ("cloudflare ray id", "cf-error-details", "/cdn-cgi/styles/cf.errors.css")
+    ):
+        return "managed_access_challenge"
     if "just a moment" in decoded and any(
         marker in decoded
         for marker in ("/cdn-cgi/challenge-platform", "cf-chl-", "__cf_chl")

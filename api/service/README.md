@@ -441,10 +441,10 @@ cd api/service
   domain applies only to that bank/Product Type route. Migrations `0028` and
   `0031` are required; legacy rows with no evidence URL retain homepage fallback.
 - When no eligible detail source remains, the catalog runner makes one bounded
-  live-search repair. A verified route is persisted and materialized once in
-  the same run. Explicit sale, transfer, wind-down, or discontinuation evidence
-  deactivates stale coverage and completes as `product_not_currently_offered`
-  without Partial; uncertainty still fails closed as no-detail Partial.
+  live-search repair. A verified route is persisted and materialized once during
+  preparation. Explicit retirement evidence deactivates stale coverage and
+  records `product_not_currently_offered`; uncertainty ends preparation without
+  an ingestion run (D-089). Existing runs retain their recorded outcomes.
 - The queued collection runner forwards that coverage route through the
   materialization boundary. Exact verified coverage pages may use a narrowly
   relaxed location-gate evidence threshold only with high AI support,
@@ -467,22 +467,34 @@ cd api/service
   An unchanged structural zero-detail result is held even if old catalog status
   remained active. Configuration changes or explicit `precision_rediscovery`
   permit fresh evidence checks; inactive coverage must first be explicitly restored.
-- Source holds do not assert retirement or change canonical data. A newly created
-  uncertain candidate still uses ordinary Review. Queue-time human decisions are
-  rechecked before source work; a fully held queued scope completes with an explicit
-  `collection_preflight_skipped` reason. Actual attempted failures stay truthful.
-- When accessible discovery decisively produces no candidate-making detail
-  source, the run remains truthfully Partial and the exact catalog/source
-  scope is reversibly inactivated with
-  `structural_zero_detail_collection_result`. Operator launch queries reject
-  that quarantined scope until an official coverage route or
-  active detail source is explicitly restored. Timeout, 408/425/429/5xx,
-  connection, and DNS evidence does not trip this structural circuit breaker.
+- D-089 defers run insertion for all Banks/catalog launches, including first,
+  precision, normal reuse and catalog retry. The response is `preparing` with
+  `run_ids=[]`; group IDs reserve possible future runs. `catalog_preparation.py`
+  stores only the latest bounded state under private catalog coverage metadata.
+  Atomic reservations and ownership/configuration checks protect queued work.
+  Pending/collecting reservations expire after two hours; terminal holds require
+  explicit rediscovery or changed verified configuration. Transient checks can retry.
+- Discovery/route repair precede ingestion. Before inserting a run, probe all
+  selected detail and companion URLs with the worker fetch policy (direct at most
+  20 seconds; browser at most 45). Exclude forbidden redirects, unresolved browser
+  challenges, missing pages and invalid formats without widening domains. Require
+  at least one eligible detail. Excluded companions cannot be auto-included again.
+  Probe failures are bounded metadata, not failed source attempts on a new run.
+- Source holds do not assert retirement or change canonical data. Preparation
+  without eligible detail records `skipped` or retryable `unavailable`, with no
+  ingestion run/candidate/Review. New preparation does not quarantine uncertain
+  coverage. Legacy in-flight plans retain their old outcome/quarantine semantics;
+  previously inactive coverage still needs governed restoration.
+- Pre-run model calls retain standalone model-execution/correlation records with
+  nullable run IDs. Retry preserves the old outcome until a replacement run is
+  committed; the replacement then links the two attempts. Actual ingestion-stage
+  errors remain failed/Partial. Source-selected compatibility APIs retain their
+  shared historical eligibility checks; fresh catalog preparation is the Banks path.
 - An SSRF-validated official HTML URL that returns a high-confidence HTTP-200
   JavaScript/access-challenge shell receives one bank-agnostic browser DOM
   attempt. Recovered HTML re-enters the ordinary Product-Type and evidence
   gates. A challenge that remains after rendering is a structural no-detail
-  result and cannot use the seed-source fallback; browser absence, timeout, or
+  preparation hold and cannot use the seed-source fallback; browser absence, timeout, or
   render failure remains transient and does not quarantine the scope.
 - A direct timeout, socket timeout, connection reset, or remote connection
   close on any SSRF-validated official HTML URL receives the same single

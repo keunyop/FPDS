@@ -584,6 +584,27 @@ class FetchPolicyTests(unittest.TestCase):
         self.assertEqual(response, rendered)
         browser.assert_called_once()
 
+    def test_http_error_browser_recovery_rejects_cloudflare_block_page(self) -> None:
+        url = "https://www.examplebank.ca/accounts/savings"
+        policy = DiscoveryFetchPolicy(allowed_domains=("examplebank.ca",), block_private_networks=False,
+                                      browser_fallback_domains=("examplebank.ca",))
+        blocked = FetchedResponse(
+            body=b"<html><h1>Sorry, you have been blocked</h1><div>Cloudflare Ray ID</div></html>",
+            final_url=url, content_type="text/html", status_code=200,
+            headers={"content-type": "text/html"}, fetched_at="2026-09-30T00:00:00+00:00", redirect_count=0,
+        )
+        for status in (403, 429):
+            with self.subTest(status=status):
+                error = urllib.error.HTTPError(url, status, "Blocked", None, None)
+                opener = type("Opener", (), {"open": lambda self, request, timeout: (_ for _ in ()).throw(error)})()
+                with (
+                    patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=opener),
+                    patch("worker.discovery.fpds_discovery.fetch._fetch_response_via_browser", return_value=blocked) as browser,
+                ):
+                    with self.assertRaisesRegex(NonRetryableFetchError, "remained after bounded browser fallback"):
+                        fetch_text(url, policy)
+                browser.assert_called_once()
+
     def test_fetch_text_rejects_non_html_fallback_payloads(self) -> None:
         policy = DiscoveryFetchPolicy(allowed_domains=("bmo.com",), block_private_networks=False)
         with patch(

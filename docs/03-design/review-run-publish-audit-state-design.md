@@ -178,6 +178,12 @@ result preserves the Review state.
 ### 4.1 Run Boundary
 
 - A `run` is the top-level execution record created at Stage 0 of ingestion flow.
+  D-089 Banks/catalog preparation is earlier: discovery, route repair and source
+  access checks must leave eligible detail before that record is inserted.
+  Pending/skipped/unavailable preparation belongs to private coverage metadata,
+  creates no Review, and is visible in Banks. Actual ingestion failures still
+  use this run state machine. Retry links the old attempt only once the new
+  ingestion run is committed.
 - A run aggregates source-level and stage-level outcomes for one trigger scope.
 - There is no separate persisted `queued` run state in this baseline; the run record is created in `started`.
 - Retry creates a new run attempt and links it to a prior run; it does not mutate the retried attempt into a new execution.

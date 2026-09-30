@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `
     sys.path.insert(0, str(REPO_ROOT))
 
 from api_service.errors import SourceRegistryError
+from api_service.catalog_preparation import (preparation_block_reason, preparation_state, reserve_preparation, update_preparation)
 from api_service.collection_preflight import load_source_preflight_rows, source_block_reason, no_detail_result_is_structural
 from api_service.product_types import (
     canonicalize_product_type_code,
@@ -401,6 +402,7 @@ _PRODUCT_TYPE_IDENTITY_HINTS = {
         "certificate of deposit",
         "cd account",
         "bank cd",
+        "cd",
     ),
     "credit-card": ("credit card", "visa card", "mastercard", "american express card"),
     "mortgage": ("mortgage",),
@@ -1713,31 +1715,29 @@ def start_source_catalog_collection(
         precision_rediscovery=precision_rediscovery,
     )
     plan["skipped_items"] = skipped_items
+    plan["preflight_before_run"] = True
+    plan["retry_of_run_id"] = retry_of_run_id
+    reserved = []
     for group in plan["groups"]:
-        _insert_collection_run_row(
-            connection,
-            run_id=str(group["run_id"]),
-            triggered_by=str(plan["triggered_by"]),
-            request_id=request_context.get("request_id"),
-            correlation_id=correlation_id,
-            collection_id=collection_id,
-            group=group,
-            pipeline_stage="source_catalog_collection",
-            trigger_type="admin_source_collection",
-            retry_of_run_id=retry_of_run_id,
-        )
+        if reserve_preparation(connection, group=group, plan=plan):
+            reserved.append(group)
+        else:
+            plan["skipped_items"].append({"catalog_item_id": group["catalog_item_id"],
+                "bank_code": group["bank_code"], "product_type": group["product_type"],
+                "reason_codes": ["collection_preparation_in_progress"], "revalidation": "precision_rediscovery"})
+    plan["groups"] = reserved
 
     _record_catalog_audit_event(
         connection,
         actor=actor,
         request_context=request_context,
-        event_type="source_catalog_collection_started",
+        event_type="source_catalog_preparation_started",
         target_id=collection_id,
         target_type="source_catalog_collection",
-        diff_summary=f"Queued source catalog collection for {len(rows)} catalog item(s).",
+        diff_summary=f"Queued eligibility checks for {len(reserved)} catalog item(s).",
         metadata={
             "catalog_item_ids": list(catalog_item_ids),
-            "run_ids": [str(group["run_id"]) for group in plan["groups"]],
+            "planned_run_ids": [str(group["run_id"]) for group in plan["groups"]],
             "retry_of_run_id": retry_of_run_id,
             "precision_rediscovery_requested": precision_rediscovery,
             "source_coverage_modes": {
@@ -1747,17 +1747,33 @@ def start_source_catalog_collection(
         },
     )
     if plan["groups"]:
-        _launch_source_catalog_collection_runner(plan)
+        # The background reader must see the committed reservation before it starts.
+        connection.commit()
+        try:
+            _launch_source_catalog_collection_runner(plan)
+        except Exception:
+            for group in plan["groups"]:
+                update_preparation(connection, group=group, plan=plan, status="unavailable",
+                                   reasons=["preparation_unavailable"], retryable=True)
+            connection.commit()
+            raise
     return _serialize_source_catalog_collection_launch(plan=plan, catalog_item_ids=catalog_item_ids)
 
 
 def _preflight_catalog_items(
     connection: Connection, *, rows: list[dict[str, Any]], precision_rediscovery: bool,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    if precision_rediscovery:
-        return rows, []
     eligible, skipped = [], []
     for row in rows:
+        preparation_reason = preparation_block_reason(row, explicit=precision_rediscovery)
+        if preparation_reason:
+            skipped.append({"catalog_item_id": str(row["catalog_item_id"]), "bank_code": str(row["bank_code"]),
+                            "product_type": str(row["product_type"]), "reason_codes": [preparation_reason],
+                            "revalidation": "precision_rediscovery"})
+            continue
+        if precision_rediscovery:
+            eligible.append(row)
+            continue
         sources = load_source_preflight_rows(
             connection, country_code=str(row["country_code"]), bank_code=str(row["bank_code"]),
             product_type=str(row["product_type"]), source_language=str(row["source_language"]),
@@ -1899,7 +1915,7 @@ def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog
     return {
         "collection_id": str(plan["collection_id"]),
         "correlation_id": str(plan["correlation_id"]),
-        "run_ids": [str(group["run_id"]) for group in plan["groups"]],
+        "run_ids": [] if plan.get("preflight_before_run") else [str(group["run_id"]) for group in plan["groups"]],
         "selected_source_ids": [],
         "target_source_ids": [],
         "auto_included_source_ids": [],
@@ -1919,7 +1935,7 @@ def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog
         ],
         "catalog_item_ids": list(catalog_item_ids),
         "materialized_items": [],
-        "workflow_state": "queued" if plan["groups"] else "skipped",
+        "workflow_state": ("preparing" if plan.get("preflight_before_run") else "queued") if plan["groups"] else "skipped",
         "skipped_items": list(plan.get("skipped_items") or []),
         "queued_catalog_item_count": len(plan["groups"]),
     }
@@ -2347,7 +2363,7 @@ def repair_catalog_coverage_route(
     row: dict[str, Any],
     actor: dict[str, Any],
     request_context: dict[str, Any],
-    run_id: str,
+    run_id: str | None,
     correlation_id: str | None,
     invoke_model: Any | None = None,
 ) -> CoverageRouteRepairResult:
@@ -2505,7 +2521,8 @@ def repair_catalog_coverage_route(
                 status = 'active',
                 coverage_source_url = %(coverage_source_url)s,
                 normalized_coverage_source_url = %(normalized_coverage_source_url)s,
-                coverage_source_metadata = %(coverage_source_metadata)s::jsonb,
+                coverage_source_metadata = %(coverage_source_metadata)s::jsonb
+                    || jsonb_build_object('collection_preparation', coverage_source_metadata -> 'collection_preparation'),
                 change_reason = 'ai_verified_current_coverage_route',
                 updated_at = %(updated_at)s
             WHERE catalog_item_id = %(catalog_item_id)s
@@ -2540,7 +2557,8 @@ def repair_catalog_coverage_route(
             UPDATE source_registry_catalog_item
             SET
                 status = 'inactive',
-                coverage_source_metadata = %(coverage_source_metadata)s::jsonb,
+                coverage_source_metadata = %(coverage_source_metadata)s::jsonb
+                    || jsonb_build_object('collection_preparation', coverage_source_metadata -> 'collection_preparation'),
                 change_reason = 'ai_verified_product_not_currently_offered',
                 updated_at = %(updated_at)s
             WHERE catalog_item_id = %(catalog_item_id)s
@@ -2872,6 +2890,7 @@ def _coverage_quote_identifies_product_type(
         "cards": "card",
         "certificates": "certificate",
         "deposits": "deposit",
+        "lines": "line",
         "gics": "gic",
         "loans": "loan",
         "mortgages": "mortgage",
@@ -2891,9 +2910,9 @@ def _is_authoritative_government_domain(hostname: str) -> bool:
     return normalized.endswith(".gov") or ".gov." in normalized
 
 
-def _coverage_route_model_execution_id(*, run_id: str, catalog_item_id: str) -> str:
+def _coverage_route_model_execution_id(*, run_id: str | None, catalog_item_id: str) -> str:
     digest = hashlib.sha256(
-        f"{run_id}|{catalog_item_id}|coverage_route_resolution".encode("utf-8")
+        f"{run_id or new_id('preparation')}|{catalog_item_id}|coverage_route_resolution".encode("utf-8")
     ).hexdigest()[:20]
     return f"modelexec-{digest}"
 
@@ -4760,7 +4779,7 @@ def _score_candidate_links_with_ai(
     except Exception as exc:
         completed_at = datetime.now(UTC)
         model_execution_record = None
-        if run_id:
+        if run_id or correlation_id:
             model_execution_record = _build_source_catalog_ai_model_execution_record(
                 run_id=run_id,
                 bank_code=bank_code,
@@ -4825,12 +4844,13 @@ def _score_candidate_links_with_ai(
         notes.append("AI parallel scorer returned no usable candidate scores.")
     model_execution_record = None
     usage_record = None
-    if run_id:
+    if run_id or correlation_id:
         model_execution_id = _build_source_catalog_ai_model_execution_id(
             run_id=run_id,
             bank_code=bank_code,
             product_type=product_type,
             normalized_homepage_url=normalized_homepage_url,
+            operation_id=correlation_id,
         )
         model_execution_record = _build_source_catalog_ai_model_execution_record(
             run_id=run_id,
@@ -6387,15 +6407,20 @@ def _score_page_evidence(
     identity_terms = _product_type_identity_keywords(product_type, product_type_definition)
     semantic_terms = _product_type_semantic_terms(product_type_definition)
     attribute_terms = _product_type_attribute_keywords(product_type, product_type_definition)
-    title_match = _term_hits(title_text, identity_terms)
+    title_match = _identity_term_hits(title_text, identity_terms)
     if access_gate_detected and structured_sections and not title_match:
         title_match = _term_hits(
             title_text,
             list(_DISCOVERY_PROFILE_TERMS.get(_canonical_product_type_code(product_type), ())),
         )
-    primary_heading_match = _term_hits(primary_heading, identity_terms)
+    primary_heading_match = _identity_term_hits(primary_heading, identity_terms)
+    if product_type == "chequing":
+        def named_checking(value: str) -> bool:
+            return bool(re.fullmatch(r"(?:[a-z0-9'-]+\s+){0,5}(?:checking|chequing)", value.split("|", 1)[0].strip().lower()))
+        title_match += int(named_checking(title_text))
+        primary_heading_match += int(named_checking(primary_heading))
     normalized_url_path = re.sub(r"[-_/]+", " ", unquote(urlparse(raw_url).path).lower())
-    url_identity_match = _term_hits(normalized_url_path, identity_terms)
+    url_identity_match = _identity_term_hits(normalized_url_path, identity_terms)
     body_match = _term_hits(body_text, semantic_terms)
     attribute_hits = _distinct_term_hits(" ".join([heading_text, body_text]), attribute_terms)
     # Global navigation and serialized application state routinely contain
@@ -6540,6 +6565,16 @@ def _collapse_whitespace(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip()
 
 
+def _identity_term_hits(text: str, terms: list[str]) -> int:
+    plural_forms = {"accounts": "account", "certificates": "certificate",
+                    "deposits": "deposit", "cds": "cd", "gics": "gic",
+                    "cards": "card", "loans": "loan", "lines": "line"}
+    def normalize(value: str) -> str:
+        return " ".join(plural_forms.get(token, token) for token in re.findall(r"[a-z0-9]+", value.lower()))
+    normalized = " " + normalize(text) + " "
+    return sum(bool(normalize(term)) and (" " + normalize(term) + " ") in normalized for term in terms)
+
+
 def _term_hits(text: str, terms: list[str]) -> int:
     fingerprint = text.lower()
     return sum(1 for term in terms if term and term in fingerprint)
@@ -6570,6 +6605,12 @@ def _looks_like_multi_product_family_overview(
     }.get(normalized_type)
     if generic_identity_terms is None:
         return False
+
+    if normalized_type in {"line-of-credit", "personal-loan"} and re.search(
+        r"\bloans?\s*(?:&|and|/)\s*(?:lines? of credit|credit lines?)\b",
+        f"{title_text} {primary_heading}", re.IGNORECASE,
+    ):
+        return True
 
     heading_identity = _collapse_whitespace(primary_heading).lower().strip(" .:-|")
     title_identity = _collapse_whitespace(title_text.split("|", 1)[0]).lower().strip(" .:-|")
@@ -6676,6 +6717,8 @@ def _looks_like_multi_product_family_overview(
             heading
             for heading in normalized_secondary_headings
             if any(term in heading for term in variant_terms)
+            and not re.search(r"\b(?:rates?|fees?|benefits?|features?|information|faqs?|calculator|how|what|why)\b", heading)
+            and not heading.endswith("?")
         }
         if len(variant_headings) >= 2:
             return True
@@ -7501,7 +7544,7 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         "savings": any(marker in source_slug for marker in ("savings", "saving")),
         "gic": any(
             marker in source_slug
-            for marker in ("gic", "term-deposit", "term_deposit", "bank-cd", "certificate-of-deposit")
+            for marker in ("gic", "term-deposit", "term_deposit", "bank-cd", "certificate-of-deposit", "certificates-of-deposit")
         ) or bool(re.search(r"(?:^|-)cds?(?:-|$)", source_slug)),
     }
     explicit_other_types = {key for key, matched in explicit_slug_types.items() if matched and key != canonical_type}
@@ -7524,7 +7567,7 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
         ),
         "gic": bool(
             path_segments.intersection(
-                {"gic", "gics", "term-deposit", "term-deposits", "cd", "cds", "bank-cd", "certificate-of-deposit"}
+                {"gic", "gics", "term-deposit", "term-deposits", "cd", "cds", "bank-cd", "certificate-of-deposit", "certificates-of-deposit"}
             )
         ) or any(re.search(r"(?:^|-)cds?(?:-|$)", segment) for segment in path_segments),
     }
@@ -7764,20 +7807,21 @@ def _build_source_catalog_collection_run_id(*, bank_code: str, product_type: str
 
 def _build_source_catalog_ai_model_execution_id(
     *,
-    run_id: str,
+    run_id: str | None,
     bank_code: str,
     product_type: str,
     normalized_homepage_url: str,
+    operation_id: str | None = None,
 ) -> str:
     digest = hashlib.sha256(
-        f"{run_id}|{bank_code}|{product_type}|{normalized_homepage_url}|source_catalog_ai_parallel".encode("utf-8")
+        f"{run_id or operation_id or new_id('preparation')}|{bank_code}|{product_type}|{normalized_homepage_url}|source_catalog_ai_parallel".encode("utf-8")
     ).hexdigest()[:16]
     return f"modelexec-{digest}"
 
 
 def _build_source_catalog_ai_model_execution_record(
     *,
-    run_id: str,
+    run_id: str | None,
     bank_code: str,
     country_code: str,
     product_type: str,
@@ -7824,6 +7868,7 @@ def _build_source_catalog_ai_model_execution_record(
             bank_code=bank_code,
             product_type=product_type,
             normalized_homepage_url=normalized_homepage_url,
+            operation_id=correlation_id,
         ),
         "run_id": run_id,
         "source_document_id": None,
@@ -8045,6 +8090,7 @@ def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
             "status": str(item["status"]),
             "generated_source_count": int(item.get("generated_source_count") or 0),
             "has_completed_collection": bool(item.get("has_completed_collection", False)),
+            "collection_preparation": preparation_state(item),
         }
         for item in (row.get("catalog_items") or [])
     ]
@@ -8079,6 +8125,7 @@ def _serialize_source_catalog_row(row: dict[str, Any], *, bank_row: dict[str, An
         "status": str(row["status"]),
         "coverage_source_url": row.get("coverage_source_url"),
         "coverage_source_metadata": _mapping(row.get("coverage_source_metadata")),
+        "collection_preparation": preparation_state(row),
         "homepage_url": bank_row.get("homepage_url"),
         "normalized_homepage_url": bank_row.get("normalized_homepage_url"),
         "logo_url": bank_row.get("logo_url"),

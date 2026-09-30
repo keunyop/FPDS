@@ -644,3 +644,14 @@ semantic UI, existing catalog handoff and bounded search policy. Typed content
 keeps editing reviewable without a new CMS dependency. Verify source claims,
 financial examples, localized layouts and crawler signals before normal release.
 No deployment, canonical mutation or new analytics event is included.
+
+## 2026-09-30 latest collection recurrence
+
+D-089 / WBS 5.75 address the latest 12-run batch: eight Partial outcomes,
+including six zero-detail scopes and two inaccessible companion documents.
+Move catalog discovery/access checks before run insertion, retain bounded
+visible preparation state and generic identity/challenge/companion rules.
+Verify real official HTML, shared regressions and Admin states without a paid
+project model request or live recollection. Historical/canonical/review data
+and inactive coverage remain unchanged. Local runtime application and external
+release are recorded separately in the development journal.
