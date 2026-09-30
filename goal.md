@@ -1,5 +1,33 @@
 # Admin pre-handover review and fixes
 
+## Active follow-up: bounded live accuracy recollection
+
+Latest Product Owner instruction authorizes the proposed next step: small live
+recollection, diagnosis of false exclusions, and automatic Public readback.
+Preserve earlier goals and the pending API deployment boundary.
+Scope: start with at most two existing bank/type scopes or four exact detail
+sources; use current official captures and normal pipeline services. Diagnose
+and fix reproduced generic evidence failures with adversarial regressions.
+No manual fact approval, relaxed accuracy standards, new markets/types, mass
+reactivation, account changes or deployment. Stop expansion after representative
+results; do not run an unbounded paid batch.
+Acceptance:
+- [x] Record selected sources, absence of duplicate active runs and initial state.
+- [x] Execute bounded live extraction/normalization/automatic validation.
+- [x] Diagnose exclusion against captured official evidence and fix any proven
+      implementation defect without guessing missing financial facts.
+- [x] Verify accepted products through canonical/Public, zero new human reviews,
+      or document exact unresolved source/provider limits if none can pass.
+- [x] Run relevant regressions, update policy/journal, inspect diff and checks.
+Verification: persisted run/model/evidence records, deterministic real-evidence
+replay, affected suites and live Public reads. Preserve ignored evidence privately.
+Completion: two detail sources, five bounded collection runs, one same-run
+reprocessing through normal automatic services. Vancity USD Chequing is active
+version 4 and visible in live Public list/detail; CA 1, US 0, new reviews 0.
+TD remains excluded. Worker 560 / API 535 and repository checks pass. See the
+pilot report for precise evidence and remaining deployment scope. Preserve this
+file for the prior deployment and independently owned goals.
+
 ## Active slice: 2026-09-30 accuracy-first autonomous collection
 
 Latest Product Owner direction supersedes human review requirements for product

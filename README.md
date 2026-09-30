@@ -11,6 +11,9 @@ and [legacy impact assessment](docs/00-governance/collection-accuracy-audit-2026
 The Product Owner deployed the prior implementation. The 355-product/470-review
 data cutover and CA/US empty projections are applied. Five legacy product-review
 endpoints return 410 in the added API code; that addition needs API redeployment.
+A bounded [live pilot](docs/00-governance/collection-accuracy-pilot-2026-09-30.md)
+now verifies one automatically accepted CA product in Public. Its additional
+extraction/validation fixes also need deployment to other collection runtimes.
 
 This repository is the implementation and operating workspace for `FPDS`
 (Finance Product Data Service), an evidence-grounded financial product data

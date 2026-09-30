@@ -19,6 +19,36 @@ CONTEXT_FIELDS = {"status", "last_verified_at", "bank_name", "subtype_code"}
 CURRENCY_PATTERNS = {"CAD": r"\bCAD\b|Canadian dollars?", "USD": r"\bUSD\b|U\.?S\.? dollars?", "EUR": r"\bEUR\b|euros?", "GBP": r"\bGBP\b|pounds? sterling"}
 IDENTITY_FIELDS = ("country_code", "bank_code", "product_type", "product_name", "currency")
 _NUMBER = r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\w.])"
+_COUNT_WORDS = dict(zip(("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"), range(11)))
+_ANNUAL_RATE_BASIS = re.compile(
+    r"\bannual(?:ized)?\s+(?:(?:interest|percentage)\s+)?(?:rates?|yield)\b"
+    r"|\b(?:apr|apy|per annum|per year)\b|\bp\.?a\.?(?!\w)", re.I,
+)
+
+
+def _money_has_condition(quote: str, field_name: str) -> bool:
+    # A standalone suitability heading is not a condition on a preceding fee.
+    # Keep its following text, including any actual balance/waiver condition.
+    context = re.sub(r"(?mi)^Great if[ \t]*\r?\n(?=You (?:want|prefer)\b)", "Suitability\n", quote)
+    if re.search(r"\b(?:if|when|waived|waiver|provided|qualify|qualifying|maintain)\b|subject to", context, re.I):
+        return True
+    return field_name in {"monthly_fee", "public_display_fee", "annual_fee", "transaction_fee"} and bool(
+        re.search(r"minimum balance|at least", context, re.I))
+
+
+def _transaction_count_supported(value: int, quote: str) -> bool:
+    if re.search(r"\b(?:if|when|provided|qualify|qualifying)\b", quote, re.I):
+        return False
+    # Do not read the final word/digits of an unsupported composite count.
+    if re.search(r"\b(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|point|plus)\b", quote, re.I):
+        return False
+    tokens = "|".join(_COUNT_WORDS)
+    if re.search(rf"\b(?:up to|between)\s+(?:\d+|{tokens})\b|\b(?:\d+|{tokens})\s+(?:or|to)\s+(?:\d+|{tokens})\b|\b(?:minus|negative)\b", quote, re.I):
+        return False
+    matches = re.findall(rf"(?<![\w.,−-])(\d{{1,3}}(?:,\d{{3}})+|\d+|{tokens})\s+(?:(?:free|included|debit|everyday|monthly)\s+){{0,3}}transactions?\b", quote, re.I)
+    counts = {_COUNT_WORDS[token.lower()] if token.lower() in _COUNT_WORDS else int(token.replace(",", "")) for token in matches}
+    return counts == {value}
+
 
 
 def text(value: object) -> str:
@@ -134,7 +164,7 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if not label or not re.search(label, q, re.I):
         return False
     if field_name == "included_transactions":
-        return bool(re.search(rf"(?<![\d.]){int(number)}\s+(?:(?:free|included|debit)\s+)?transactions?\b", q, re.I))
+        return _transaction_count_supported(int(number), q)
     if field_name == "term_length_days":
         return bool(re.search(rf"(?<![\d.]){int(number)}\s*days?\b", q, re.I))
     if contract.unit == "currency_amount":
@@ -142,7 +172,7 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         amounts = re.findall(r"(?:[$€£]|\b(?:CAD|USD|EUR|GBP)\s*)(\d[\d,]*(?:\.\d+)?)", q, re.I)
         amounts += re.findall(r"(\d[\d,]*(?:\.\d+)?)\s*(?:dollars?|CAD|USD|EUR|GBP)\b", q, re.I)
         matching = {Decimal(v.replace(",", "")) for v in amounts}
-        if number == 0 and re.search(r"\b(?:if|when|waived|waiver|provided|qualify|qualifying)\b", q, re.I):
+        if number == 0 and _money_has_condition(quote, field_name):
             return False
         if number == 0 and re.search(r"\b(?:no|zero)\b.{0,25}\b(?:fee|minimum)\b", q, re.I):
             return True
@@ -244,7 +274,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             or ("£" in str(quote) and record.get("currency") != "GBP")
         ):
             reason = "field_currency_mismatch"
-        elif (field_contract(name).unit == "percentage_points" or name == "term_rate_table") and not re.search(r"\b(?:annual|annually|apr|apy|per annum|per year)\b|\bp\.?a\.?(?!\w)", str(e.get("evidence_excerpt") or ""), re.I):
+        elif (field_contract(name).unit == "percentage_points" or name == "term_rate_table") and not _ANNUAL_RATE_BASIS.search(str(e.get("evidence_excerpt") or "")):
             reason = "annual_rate_basis_unproven"
         elif not quote_supports_value(name, value, str(quote)):
             reason = "field_meaning_unproven"

@@ -9,6 +9,8 @@ All product types require its content-bound receipt. Validation emits
 thresholds cannot weaken this rule. Earlier manual/residual-review instructions
 below are superseded for new collection. See
 [policy](../docs/03-design/collection-accuracy-policy.md).
+Live pilot regressions cover written transaction counts, standalone suitability
+headings versus actual fee conditions, and annual-fee/rate-basis separation.
 
 This directory holds private pipeline and integration workers.
 

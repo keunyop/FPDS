@@ -25,6 +25,50 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - Bounded live accuracy pilot and exclusion diagnosis
+
+- Product Owner authorized the proposed next step: bounded real collection and
+  automatic Public readback after the empty-catalogue cutover. Selected only two
+  existing active CA detail sources: TD US Dollar Visa and Vancity USD Chequing.
+  Safe-fetch preflight passed both; no duplicate active ingestion or pending
+  human product review existed. Registry/account scope remains unchanged.
+- Initial collection `collection_B7zPcyzvnRkx4dNU` fetched current official pages
+  and completed extraction/normalization/validation. Both candidates were
+  excluded without Review. Captured evidence reproduces false exclusions:
+  written One free Everyday Transaction was unsupported; standalone Great if
+  suitability text was mistaken for a fee condition. A subsequent live pass
+  confirmed monthly fee zero but exposed the new count check treating transfers
+  between accounts as a numeric range. Restricted range checks to numeric counts.
+- Shared `fpds_collection_accuracy.py` now handles explicit zero-through-ten
+  transaction counts as native integers, preserves financial conditions while
+  recognizing the standalone suitability heading, and rejects annual-fee text
+  as proof of annual interest units. No bank/domain exceptions or manual fact
+  approval were added. Actual stored AI-grounded Vancity evidence passes a
+  read-only replay; qualifying conditions, conflicting counts, fractions and
+  wrong types remain rejected. TD remains excluded until annual rate evidence
+  is captured; its annual fee cannot supply that proof.
+- Prompt now requires field entries, exact quotes/IDs and native integer examples;
+  private omission diagnostics identify field-level failures. Later AI responses
+  failed exact-quote validation and stayed excluded. Reprocessed the same earlier
+  run's successful original extraction, whose identity/hash/quote/types were
+  verified, through normal normalization/validation/promotion; no manual receipt
+  or value was created. Service audit events and before-image preserve the change.
+- Actual result: Vancity USD Chequing `prod_bXW8_ClcruIYtt_B` is active version 4,
+  with valid automatic receipt, USD, numeric fee 0 and integer monthly count 1.
+  Unknown rates/minimum balance remain null in Public. CA snapshot
+  `agg_500uXr-YNHZaLAgZ` completed at 16:24:06Z. API/BFF report CA 1 / US 0;
+  ordinary Public list and detail show the product (list confirmed 16:26:11Z).
+  New review tasks and total pending reviews are both zero.
+- Final code passes Worker 560 and API 535 tests, including five new live-shape
+  regressions, repo doctor, foundation baseline and diff checks. No UI source
+  changes/build or deployment. Total scope: two detail sources, five collection
+  runs and one same-run reprocessing. Existing excluded history remains.
+- See [pilot result](collection-accuracy-pilot-2026-09-30.md) for source/run IDs,
+  the original extraction hash, automatic promotion and operational readbacks.
+  Private evidence uses ignored tmp/accuracy-pilot-* paths. Additional API/worker
+  deployment remains an operator step; production data is already updated.
+
+
 ## 2026-09-30 - Authorized legacy accuracy cutover applied
 
 - The Product Owner reports the prior D-090 code was production-deployed and

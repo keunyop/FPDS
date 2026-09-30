@@ -4286,6 +4286,12 @@ def _extract_official_fields_with_ai(
                 "rate, pricing, disclosure, or terms pages. Supplemental fields are opportunistic: use the already "
                 "supplied evidence and consulted pages, and return unverified if absent. Do not start extra searches "
                 "or retry solely to fill supplemental fields. Never infer a missing value. "
+                "Return one fields entry per requested field, including unverified entries when evidence is missing. "
+                "A fact mentioned only in summary is not collected. Explicit written counts such as one free transaction "
+                "per month may map to integer 1; copy the original words exactly in evidence_quote. "
+                "For that count verified_value_json is the string 1 containing JSON integer 1, not a JSON-encoded string. "
+                "Keep the exact evidence_chunk_id supplied with the quoted text. Never invent a chunk id. "
+                "An annual fee does not establish annual interest-rate units. A rate needs explicit annual, APR or APY evidence. "
                 "Return a match or mismatch only when the value is supported by both an official URL actually consulted and "
                 "an exact quote copied from the selected evidence chunk. Otherwise return unverified. Preserve canonical units: "
                 "rates are numeric percentage points per annum, money is numeric in product currency, durations and counts are "
@@ -4359,20 +4365,27 @@ def _extract_official_fields_with_ai(
     provider_source_by_url = {item["url"]: item for item in provider_sources}
     extracted_fields: list[ExtractedFieldCandidate] = []
     seen_fields: set[str] = set()
+    exclusions = {name: "model_field_missing" for name in ai_requested_fields}
     for item in response_payload.get("fields", []):
         field_name = str(item.get("field_name") or "").strip()
         if field_name in seen_fields:
             continue
         seen_fields.add(field_name)
         evidence_chunk_id = str(item.get("evidence_chunk_id") or "").strip()
-        if field_name not in ai_requested_fields or evidence_chunk_id not in candidate_map:
+        if field_name not in ai_requested_fields:
             continue
+        exclusions[field_name] = "model_unverified"
         if str(item.get("status") or "unverified") not in {"match", "mismatch"}:
             continue
+        exclusions[field_name] = "verified_value_missing"
         if not bool(item.get("has_verified_value")):
+            continue
+        exclusions[field_name] = "evidence_chunk_missing"
+        if evidence_chunk_id not in candidate_map:
             continue
         candidate = candidate_map[evidence_chunk_id]
         evidence_quote = str(item.get("evidence_quote") or "").strip()
+        exclusions[field_name] = "exact_quote_missing"
         if not _exact_quote_is_grounded(quote=evidence_quote, excerpt=candidate.evidence_excerpt):
             continue
         cited_sources = _validated_field_sources(
@@ -4380,13 +4393,16 @@ def _extract_official_fields_with_ai(
             provider_source_by_url=provider_source_by_url,
             allowed_domains=allowed_domains,
         )
+        exclusions[field_name] = "consulted_source_missing"
         if not cited_sources:
             continue
+        exclusions[field_name] = "invalid_json_value"
         try:
             verified_value = json.loads(str(item.get("verified_value_json") or ""))
         except (json.JSONDecodeError, TypeError, ValueError):
             continue
         from worker.pipeline.fpds_field_contract import value_matches_contract
+        exclusions[field_name] = "invalid_field_type"
         if not value_matches_contract(field_name, verified_value):
             continue
         candidate_value = _coerce_ai_candidate_value(
@@ -4394,14 +4410,17 @@ def _extract_official_fields_with_ai(
             value=_json_value_for_coercion(verified_value),
             value_type=canonical_value_type(field_name),
         )
+        exclusions[field_name] = "value_coercion_failed"
         if candidate_value is None:
             continue
+        exclusions[field_name] = "field_meaning_unproven"
         if not _ai_verified_value_is_supported_by_quote(
             field_name=field_name,
             value=candidate_value,
             evidence_quote=evidence_quote,
         ):
             continue
+        exclusions.pop(field_name, None)
         extracted_fields.append(
             ExtractedFieldCandidate(
                 field_name=field_name,
@@ -4428,6 +4447,8 @@ def _extract_official_fields_with_ai(
             )
         )
     notes = []
+    if exclusions:
+        notes.append("Official grounding omitted fields: " + json.dumps(exclusions, sort_keys=True))
     summary = str(response_payload.get("summary") or "").strip()
     if summary:
         notes.append(summary)

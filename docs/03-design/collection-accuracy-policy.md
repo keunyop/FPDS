@@ -31,7 +31,8 @@ markets, product types, recommendations, public evidence or BX-PF writes.
 - Check surrounding retained evidence too. A short quote cannot remove a
   condition, negation, conflicting rate or different fee label from that context.
   Scalar rates and structured rate schedules need an explicit annual/APR/APY
-  basis in the evidence. A field with a different explicit currency is omitted.
+  basis in the evidence. An annual fee is not annual interest-rate evidence.
+  A field with a different explicit currency is omitted.
 - Product identity must be verified on a detail source. Currency requires an
   explicit ISO code or currency name in verified evidence; country defaults and
   an ambiguous dollar symbol are insufficient.
@@ -57,6 +58,13 @@ markets, product types, recommendations, public evidence or BX-PF writes.
 | Product name/qualified description | string | exact source-language wording |
 | Currency | string | verified ISO code |
 | Term schedule | nonempty array of objects | `term_label` string, `rate` number; optional `term_length_days` integer, `minimum_deposit` number, `notes` string |
+
+Unambiguous written counts from zero through ten may map to native integers
+when directly attached to a transaction count; retain the exact source quote.
+Ranges, alternatives, fractions and qualifying conditions remain ineligible.
+A standalone suitability heading such as `Great if` followed by `You want` is
+not itself a fee-waiver condition. Keep its following text and reject actual
+balance, waiver or eligibility conditions; never remove a financial qualifier.
 
 Numeric strings, booleans used as numbers, NaN/Infinity, invented object members
 and prose inside a numeric field are invalid. Optional unknowns are omitted,
@@ -115,6 +123,10 @@ Do not reactivate historical facts by manual approval. Future collection must
 produce a fresh valid automatic receipt. General promotion/aggregation does not
 silently rewrite old records, and the fixed cutover cannot widen beyond its
 hash-pinned approved manifest. No unbounded paid recollection was started.
+A subsequent [bounded live pilot](../00-governance/collection-accuracy-pilot-2026-09-30.md)
+verified one automatic product restoration using exact original run evidence.
+AI fields with non-exact quotations remain excluded; private extraction notes
+record missing/invalid field evidence instead of silently losing the reason.
 
 ## Current conservative limits
 

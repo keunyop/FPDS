@@ -14,6 +14,9 @@ retirement code awaits redeployment. D-090 replaces human product-review accepta
   pending review records. Approved cutover applied: 355 versioned deactivations,
   470 automatic closures and atomic empty CA/US projections. The Product Owner
   deployed the prior implementation; the new endpoint change needs API redeployment.
+- Bounded live pilot completed: two source documents, CA one automatically
+  restored product, zero human reviews. Generic false-exclusion fixes and
+  omission diagnostics pass Worker 560/API 535; deployment remains separate.
 - Verification and remaining actions: [assessment](../00-governance/collection-accuracy-audit-2026-09-30.md).
 
 Version: 1.0

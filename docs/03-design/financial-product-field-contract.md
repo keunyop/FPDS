@@ -8,6 +8,9 @@ financial meaning are mandatory; unknowns are omitted. No human approval may
 fill or waive missing product facts. The executable version is `2026-09-30`.
 New arbitrary `field_notes` or tags cannot carry facts around the typed gate;
 qualified source text belongs in its explicitly registered string field.
+Explicit written transaction counts (zero through ten) may map to native
+integers with exact quote evidence. An annual fee cannot establish annual
+interest-rate units; the rate needs its own annual/APR/APY basis.
 
 Status: Active
 Last updated: 2026-09-30

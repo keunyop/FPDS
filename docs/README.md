@@ -35,6 +35,8 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [Live collection accuracy pilot](00-governance/collection-accuracy-pilot-2026-09-30.md): real-source exclusion fixes, automatic product recovery and operational checks
+
 - [Collection accuracy assessment](00-governance/collection-accuracy-audit-2026-09-30.md): new automatic gates, verification and existing-data impact
 
 - [CA/US collection alignment](00-governance/public-collection-alignment-2026-09-29.md): bounded comparison fields, six applied corrections, cost and remaining gaps

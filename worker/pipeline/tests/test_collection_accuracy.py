@@ -24,6 +24,98 @@ def candidate_fixture():
 
 
 class CollectionAccuracyTests(unittest.TestCase):
+    def test_extraction_records_why_a_required_count_was_omitted(self):
+        from unittest.mock import patch
+        from worker.pipeline.fpds_extraction.models import ExtractionDocumentContext
+        from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
+        from worker.pipeline.fpds_extraction.service import _extract_official_fields_with_ai
+        url = "https://bank.example/usd-chequing"
+        context = ExtractionDocumentContext("parsed", "source", "snapshot", "EXAMPLE", "CA", "html", "en",
+            {"product_type": "chequing", "discovery_role": "detail", "official_domain_allowlist": ["bank.example"],
+             "normalized_source_url": url, "expected_fields": ["included_transactions"]})
+        quote = "One free Everyday Transaction per month"
+        chunk = EvidenceChunkCandidate("chunk", "parsed", 0, "section", "account", None, "en", quote,
+            {}, "source", "snapshot", "EXAMPLE", "CA", "html")
+        field = {"field_name": "included_transactions", "status": "match", "has_verified_value": True,
+                 "verified_value_json": "1", "evidence_chunk_id": "chunk", "evidence_quote": quote,
+                 "confidence": 0.99, "sources": [{"url": url}]}
+        usage = {"model_id": "gpt-6-luna", "web_search_sources": [{"url": url}]}
+        cases = [(field, None), ({**field, "verified_value_json": '\"1\"'}, "invalid_field_type"),
+                 ({**field, "evidence_quote": "One free transaction"}, "exact_quote_missing"),
+                 ({**field, "evidence_chunk_id": "invented"}, "evidence_chunk_missing"),
+                 ({**field, "status": "unverified", "evidence_chunk_id": ""}, "model_unverified")]
+        for response_field, reason in cases:
+            with self.subTest(reason=reason), patch("worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
+                    return_value=({"fields": [response_field]}, usage)) as invoke:
+                fields, notes, _ = _extract_official_fields_with_ai(context=context, candidates=[chunk],
+                    requested_fields=["included_transactions"], collected_fields=[])
+                self.assertEqual(len(fields), 0 if reason else 1)
+                self.assertIn("A fact mentioned only in summary is not collected", invoke.call_args.kwargs["instructions"])
+                if reason:
+                    self.assertIn(reason, " ".join(notes))
+                else:
+                    self.assertIs(type(fields[0].candidate_value), int)
+                    self.assertEqual(fields[0].candidate_value, 1)
+
+    def test_written_transaction_counts_keep_native_integer_meaning(self):
+        quote = "One free Everyday Transaction per month, including Everyday In-Person, Cheque or Pre-Authorized Payments"
+        self.assertTrue(quote_supports_value("included_transactions", 1, quote))
+        self.assertFalse(quote_supports_value("included_transactions", 2, quote))
+        for invalid in ("One free transaction if you maintain $1000", "Up to one free transaction",
+                        "1.5 free transactions", "-1 free transaction", "One or two free transactions", "Between one and two free transactions",
+                        "Twenty one free transactions", "One hundred and one free transactions"):
+            self.assertFalse(quote_supports_value("included_transactions", 1, invalid), invalid)
+        self.assertFalse(quote_supports_value("included_transactions", "1", quote))
+        self.assertFalse(quote_supports_value("included_transactions", 2, "One or two free transactions"))
+        self.assertFalse(quote_supports_value("included_transactions", 0, "1,000 free transactions"))
+        self.assertTrue(quote_supports_value("included_transactions", 1000, "1,000 free transactions"))
+
+    def test_suitability_heading_is_separate_from_zero_fee_conditions(self):
+        quote = "USD Chequing\nA smarter way to keep your US dollars.\nOpen an account\nMonthly fee\n$0\nGreat if\nYou want protection from rate fluctuations"
+        self.assertTrue(quote_supports_value("monthly_fee", 0, quote))
+        for condition in ("\nif you maintain a balance of $1000", "\nMinimum balance $1000", "\nFee waived for qualifying members"):
+            self.assertFalse(quote_supports_value("monthly_fee", 0, quote + condition))
+        self.assertFalse(quote_supports_value("monthly_fee", 0, "Monthly fee $0\nIf you maintain a balance of $1000"))
+
+    def test_captured_chequing_layout_accepts_only_grounded_facts(self):
+        # Shape reproduced from the live pilot, including the original line breaks.
+        payload = {"product_name": "USD Chequing", "monthly_fee": 0, "included_transactions": 1}
+        quotes = {"product_name": "USD Chequing", "monthly_fee": "Monthly fee\n$0",
+                  "included_transactions": "One free Everyday Transaction per month"}
+        chunks = {"product_name": "USD Chequing\nA smarter way to keep your US dollars.",
+                  "monthly_fee": "USD Chequing\nOpen an account\nMonthly fee\n$0\nGreat if\nYou want protection from rate fluctuations",
+                  "included_transactions": "With this account you get:\nOne free Everyday Transaction per month, including Everyday In-Person, Cheque or Pre-Authorized Payments\nEasy transfers between your Canadian and US dollar accounts through the mobile app or online banking\nIncludes ATM transfers between accounts"}
+        mappings = {name: {"normalized_value": value, "evidence_chunk_id": name,
+                    "official_grounding_contract_version": "collection-official-grounding-v2",
+                    "official_verification_status": "match", "official_evidence_quote": quotes[name],
+                    "official_web_sources": [{"url": "https://bank.example/usd-chequing"}]}
+                    for name, value in payload.items()}
+        row = {"country_code": "CA", "bank_code": "EXAMPLE", "product_type": "chequing",
+               "product_name": "USD Chequing", "currency": "USD", "candidate_payload": payload,
+               "field_mapping_metadata": mappings}
+        evidence = [{"evidence_chunk_id": name, "source_url": "https://bank.example/usd-chequing", "evidence_excerpt": excerpt}
+                    for name, excerpt in chunks.items()]
+        meta = {"discovery_role": "detail", "official_domain_allowlist": ["bank.example"], "expected_fields": list(payload)}
+        result, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
+        self.assertTrue(receipt["accepted"], receipt)
+        self.assertTrue(acceptance_receipt_valid(result, result["candidate_payload"]))
+        self.assertIs(type(result["candidate_payload"]["included_transactions"]), int)
+        evidence[2]["evidence_excerpt"] += " if you maintain a $1000 balance"
+        _, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
+        self.assertFalse(receipt["accepted"])
+        self.assertEqual(receipt["omitted_fields"]["included_transactions"], "evidence_context_ambiguous")
+
+    def test_annual_fee_cannot_prove_annual_interest_basis(self):
+        row, meta, evidence = candidate_fixture()
+        quote = "Interest rate 2.5% CAD. Annual fee $39 CAD."
+        evidence[1]["evidence_excerpt"] = quote
+        row["field_mapping_metadata"]["standard_rate"]["official_evidence_quote"] = "Interest rate 2.5% CAD."
+        _, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
+        self.assertEqual(receipt["omitted_fields"]["standard_rate"], "annual_rate_basis_unproven")
+        evidence[1]["evidence_excerpt"] = "Interest rate 2.5% CAD. Annual interest payment date: December 31."
+        _, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
+        self.assertEqual(receipt["omitted_fields"]["standard_rate"], "annual_rate_basis_unproven")
+
     def test_native_finite_types_and_structured_rows(self):
         for v in ("2.5", True, float("nan"), float("inf"), -1):
             self.assertFalse(value_matches_contract("standard_rate",v))

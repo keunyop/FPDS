@@ -8,6 +8,8 @@ private; current projection/UI allowlists and comparison semantics remain.
 The approved cutover deactivated 355 legacy products and replaced CA/US snapshots
 with empty projections. Old versions/evidence remain private; new verified
 collection can populate Public again.
+The subsequent [live pilot](../../docs/00-governance/collection-accuracy-pilot-2026-09-30.md)
+restored one verified CA product automatically; US remains empty.
 See [policy](../../docs/03-design/collection-accuracy-policy.md) and
 [impact assessment](../../docs/00-governance/collection-accuracy-audit-2026-09-30.md).
 
