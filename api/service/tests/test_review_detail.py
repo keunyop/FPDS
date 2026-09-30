@@ -577,10 +577,10 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertIn("Notes: empty -> No monthly fee", summary)
 
     def test_available_actions_hide_mutations_for_read_only_and_closed_tasks(self) -> None:
-        self.assertEqual(_available_actions(review_state="queued", actor_role="admin"), ["approve", "reject", "edit_approve", "defer"])
+        self.assertEqual(_available_actions(review_state="queued", actor_role="admin"), [])
         self.assertEqual(_available_actions(review_state="queued", actor_role="read_only"), [])
-        self.assertEqual(_available_actions(review_state="approved", actor_role="admin"), ["edit_approve"])
-        self.assertEqual(_available_actions(review_state="edited", actor_role="admin"), ["edit_approve"])
+        self.assertEqual(_available_actions(review_state="approved", actor_role="admin"), [])
+        self.assertEqual(_available_actions(review_state="edited", actor_role="admin"), [])
         self.assertEqual(_available_actions(review_state="rejected", actor_role="admin"), [])
 
     def test_build_validation_issues_merges_summary_items_with_fallback_codes(self) -> None:

@@ -5,7 +5,9 @@
 Aggregate refresh admits new stamped canonical products only with a valid
 content-bound automatic acceptance result. The result and source evidence stay
 private; current projection/UI allowlists and comparison semantics remain.
-Unstamped historical data is preserved pending the separately reviewed cutover.
+The approved cutover deactivated 355 legacy products and replaced CA/US snapshots
+with empty projections. Old versions/evidence remain private; new verified
+collection can populate Public again.
 See [policy](../../docs/03-design/collection-accuracy-policy.md) and
 [impact assessment](../../docs/00-governance/collection-accuracy-audit-2026-09-30.md).
 

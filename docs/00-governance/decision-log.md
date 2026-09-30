@@ -10,8 +10,10 @@ and automatically exclude incomplete/ambiguous candidates for every type.
 Supersedes product-review/score exceptions in older decisions, including residual
 review autopilot and manual fact re-verification. Preserve account/security and
 external publication controls. Implementation uses versioned content-bound
-acceptance on new records; historical mass remediation/API retirement remains
-pending after automatic approval review rejected blanket changes.
+acceptance on new records. After the initial automatic approval rejection, the
+Product Owner explicitly approved the concrete 355-product/470-review cutover.
+Data and empty CA/US projections are now applied. API retirement code is complete
+but needs additional API redeployment; the local CLI has no deployment login.
 [Policy](../03-design/collection-accuracy-policy.md) and
 [concrete impact assessment](collection-accuracy-audit-2026-09-30.md).
 

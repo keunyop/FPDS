@@ -1,5 +1,18 @@
 # FPDS Database Baseline
 
+## Approved accuracy cutover — 2026-09-30
+
+The fixed-scope `scripts/maintenance/collection_accuracy_cutover.py` applied
+355 versioned inactive products, 470 automatic review closures and two empty
+CA/US Public snapshots in one transaction. It requires the original approved
+manifest SHA-256 and current version/value/state checks, defaults to rollback,
+and recognizes an already-applied operation without additional writes. Original
+versions/evidence and product verification timestamps are retained. This is a
+one-time data operation, not a schema migration or a fresh-DB seed. Preserve the
+private manifest and before-image identified in the
+[applied record](../docs/00-governance/collection-accuracy-audit-2026-09-30.md).
+
+
 This directory holds the database and migration baseline for WBS `2.3`.
 
 Current decisions:

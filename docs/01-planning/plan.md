@@ -5,8 +5,9 @@
 WBS 5.76 / D-090: accuracy-first autonomous collection. Implement shared typed
 proof, abstaining prompts, automatic acceptance/exclusion, read-only historical
 review UI, and Public enforcement for new records. Audit existing data before
-legacy cutover. Local implementation/verification is separate from production
-activation and the pending mass data/API transition. See
+legacy cutover. The approved 355-product/470-review transition and empty CA/US
+projections are applied. Additional endpoint retirement code awaits API
+redeployment; the Product Owner deployed the prior build. See
 [policy](../03-design/collection-accuracy-policy.md) and
 [impact assessment](../00-governance/collection-accuracy-audit-2026-09-30.md).
 

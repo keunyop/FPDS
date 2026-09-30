@@ -17,25 +17,32 @@ Acceptance:
       missing optional facts are omitted and unverifiable products excluded.
 - [x] New collection completes automatically with accepted/excluded outcomes; human
       decisions cannot bypass the current product-fact gate.
-- [ ] Audit existing data, apply necessary scoped versioned correction/retraction
+- [x] Audit existing data, apply necessary scoped versioned correction/retraction
       with rehearsal/readback, and refresh affected public snapshots when needed.
 - [x] Align Admin/Public workflow and EN/KO/JA copy where affected; preserve auth,
       CSRF, country boundaries, private evidence and historical change records.
 - [x] Pass relevant behavior/runtime and responsive UI checks, update governing
       rules/journal, inspect final diff and run git diff --check.
+- [ ] Activate the additional legacy review endpoint retirement in production
+      after API redeployment; current CLI is logged out.
 Verification: deterministic adversarial financial/type/evidence tests, API/worker
 and affected frontend suites, bounded live read-only audit before any remediation,
 transaction rehearsal and idempotent readback. Do not claim infallible AI accuracy.
 Keep this file while unrelated earlier acceptance remains unresolved.
 
-Current boundary: code, rules and local verification completed. Automatic approval
-review blocked a blanket historical gate/API retirement. Final read-only impact:
-355 active products, 0 fully proven by retained evidence, and 470 legacy pending
-reviews. Concrete manifest and versioned retraction plan are documented in
-`docs/00-governance/collection-accuracy-audit-2026-09-30.md`. Historical data/APIs
-remain unchanged; Public could become empty after cutover. No live mutation,
-model recollection, deployment or service restart. Await the concrete cutover
-approval and verify it before completing the unchecked criterion above.
+Current authorization and result (2026-09-30): Product Owner reports the prior
+code was deployed and explicitly approved the concrete legacy cutover even if
+Public becomes empty. Committed at 15:41:36Z: 355 history-preserving product
+deactivations, 470 automatic review closures and atomic empty CA/US snapshots.
+Rollback rehearsal, independent readback, preserved versions/evidence/decisions
+and idempotency checks pass. Production API/BFF report zero products; normal
+CA/US Home and catalogue HTML no longer contain historical product IDs after
+cache refresh (15:50:23Z). No recollection or account/security changes.
+All five legacy manual-review mutations return 410 in the tested code, retaining
+auth/role/CSRF/country checks and read-only history. API 535 and cutover tool 4
+tests pass. Additional API deployment remains required: Vercel CLI is logged out.
+Do not rerun the data cutover or request the same approval again. Preserve the
+private manifest/backup and unrelated goals below.
 
 ## Objective
 Review FPDS Admin against descent/README.md, repair reproducible handover defects,

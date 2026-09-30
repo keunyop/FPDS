@@ -10,7 +10,7 @@
 
 이 규칙은 아래의 수동 상품 Review·confidence 예외·review-agent 후처리
 요구사항보다 우선한다. 계정 승인과 보안 통제는 유지한다. 실행 계약과
-기존 데이터 전환의 미완료 경계는
+기존 데이터 전환 결과와 추가 API 배포 경계는
 [수집 정확성 정책](../03-design/collection-accuracy-policy.md)에 정의한다.
 Version: 1.5
 Date: 2026-03-28

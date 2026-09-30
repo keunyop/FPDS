@@ -1,7 +1,48 @@
 # 상품수집 정확성 개선 및 기존 데이터 영향
 
 날짜: 2026-09-30 · D-090 / WBS 5.76
-상태: 새 수집 로직·화면 구현, 기존 데이터 전환 및 운영 배포 대기
+상태: 기존 데이터 전환 완료 · 과거 검토 API 종료 코드의 추가 배포 필요
+
+## 승인 후 실제 적용 — 2026-09-30
+
+Product Owner가 기존 코드의 운영 배포 완료와 공개 목록이 비더라도 데이터
+전환 진행을 명시적으로 승인했다. 새 읽기 전용 감사는 원래 승인 목록의
+355개 상품 및 470개 검토와 값·버전·상태까지 일치했다.
+
+`2026-09-30T15:41:36Z`에 `collection_accuracy_cutover_20260930` 적용 완료:
+
+- 상품 **355개 비활성화**: CA 212개, US 143개. 이전 버전·근거는 보존하고
+  상품별 새 버전과 `Updated` 변경 이력 355건을 기록했다. 이는 은행의 판매
+  중단 판정이 아니며, `last_verified_at`을 새 검증 시각으로 바꾸지 않았다.
+- 과거 미처리 검토 **470건 자동 종료**: 후보와 검토 상태를 rejected로
+  전환하고 서비스에 의한 정책 종료 사유를 기록했다. 기존 결정은 보존했다.
+  남은 queued/deferred는 **0건**이다. 금융 사실을 수동 승인하지 않았다.
+- CA/US 새 Public 스냅샷을 같은 트랜잭션에서 저장했다:
+  `agg_accuracy_cutover_20260930_CA`, `agg_accuracy_cutover_20260930_US`.
+  두 국가 모두 상품 **0건**이며 운영 API와 Public BFF HTTP 200/0건을 확인했다.
+- 전체 트랜잭션 롤백 리허설 후 별도 연결에서 원상복구를 확인했고, 실제
+  적용 후 재실행은 `already_applied`로 종료했다. 추가 버전·결정·스냅샷 없음.
+- 이전 상태 백업: 비공개 로컬 `tmp/collection-accuracy-cutover-before.json`.
+  SHA-256: `2d440f6b7c5fcfd01cf7c95f5c80a5fc2fe2e5b70b066068f9adba3c9b15e578`.
+  승인 manifest와 백업은 후속 검증/복구용이므로 덮어쓰거나 임의 삭제하지 않는다.
+- 실행 도구: `scripts/maintenance/collection_accuracy_cutover.py`. 승인 manifest
+  해시 고정, 현재 버전/값 대조, concurrent writer 잠금, 활성 run 검사,
+  기본 rollback, `--apply`에서만 commit. 원문/계정/은행 registry/BX-PF 변경 없음.
+
+### 남은 운영 반영
+
+검토 approve/reject/edit-approve/defer/ai-verify 5개 endpoint는 추가 코드에서
+`410 product_review_retired`로 종료된다. 인증·역할·CSRF·국가 검사는 유지하고,
+조회 응답도 `available_actions=[]`, `ai_verification.can_run=false`로 바꿨다.
+현재 Vercel CLI는 logged out이므로 이 추가 변경을 배포하지 못했다.
+**API 서비스만 다시 배포해야 과거 endpoint의 운영 종료가 완료된다.**
+이미 적용한 DB 전환은 재실행할 필요가 없다. 새 유료 수집도 실행하지 않았다.
+
+추가 검증: API 전체 535개, 전환 도구 회귀 4개 통과. 운영 `/healthz`,
+CA/US products API 및 Public BFF 모두 HTTP 200/상품 0건. 페이지 캐시 갱신 후
+`15:50:23Z`에 CA/US 홈과 상품 목록 4개 URL 모두 HTTP 200이며 HTML에 과거
+상품 ID가 없음을 확인했다. 첫 조회의 남은 캐시와 최종 결과를 비공개 실행 기록에 보관했다.
+독립 DB 조회로 이전 상품 버전 355개, 기존 결정 5건, 근거 연결 22,519개의 보존도 확인했다.
 
 ## 확인한 문제와 변경
 
@@ -28,7 +69,7 @@ Admin 주요 메뉴는 개요·실행·은행으로 정리했다. 과거 검토�
 
 ## 기존 데이터 읽기 전용 감사
 
-명령: `.venv/Scripts/python.exe scripts/maintenance/collection_accuracy_audit.py --output tmp/collection-accuracy-audit.json`
+명령: `.venv/Scripts/python.exe scripts/maintenance/collection_accuracy_audit.py --output tmp/collection-accuracy-audit-latest.json`
 
 최종 확인: `2026-09-30T15:18:22.721757+00:00`. Manifest SHA-256:
 `1f79a61b737b1e25d35c94253b8f98e19135dcdb480034e3c499e234d0204f1c`.
@@ -48,7 +89,7 @@ DB 트랜잭션은 `REPEATABLE READ, READ ONLY`다. 모델 호출·외부 은행
 미지원 표현도 보수적으로 제외된다. 인용문 자체만 검사한 중간 결과의
 1개 통과는 주변 조건 검사 후 0개로 변경되었다.
 
-## 검토 가능한 기존 데이터 전환안 — 미실행
+## 승인 전 준비했던 전환안 — 위 적용 기록으로 완료 상태 확인
 
 1. 적용 직전에 manifest의 상품 ID·현재 버전·payload 해시와 review ID·상태·
    갱신 시각을 대조한다. 하나라도 달라지면 변경하지 말고 감사 목록을 갱신한다.
@@ -69,9 +110,9 @@ DB 트랜잭션은 `REPEATABLE READ, READ ONLY`다. 모델 호출·외부 은행
 
 자동 승인 검토가 과거 데이터 전체에 대한 즉시 gate 적용과 기존 변경 API의
 일괄 종료를 거절했다. 이유는 새 수집 경계 없이 과거 업무와 공개 상품이 대량
-중단될 수 있다는 점이었다. 따라서 현재 구현은 새 버전 검증 표시가 있는
-데이터에 적용하며, 과거 데이터와 API는 아직 유지한다. 위 구체적인 영향을
-포함한 전환 승인과 적용 검증이 남아 있다.
+중단될 수 있다는 점이었다. 따라서 첫 구현은 새 버전 검증 표시가 있는
+데이터에 적용했고, 당시에는 과거 데이터와 API를 유지했다. 이후 Product Owner가 위 영향을 포함해 전환을 승인했으며, 실제 적용 결과와
+추가 API 배포 경계는 문서 상단에 기록했다.
 
 ## 검증
 
@@ -86,8 +127,8 @@ DB 트랜잭션은 `REPEATABLE READ, READ ONLY`다. 모델 호출·외부 은행
   390/1440px 스크린샷 육안 확인. JS 오류 및 mutation 요청 0건.
 - repo-doctor, foundation baseline, `git diff --check` 통과.
 
-외부 운영 배포,
-실제 유료 수집, 기존 canonical 변경, live Public 스냅샷 갱신은 실행하지 않았다.
+최초 구현 시점에는 운영 배포·유료 수집·canonical 변경·Public 갱신을 실행하지
+않았다. 이후 승인된 데이터 전환은 문서 상단의 실제 적용 기록을 따른다.
 브라우저 검증은 로컬 fixture API와 실제 저장된 비공개 이력 사본을 사용했다.
 
 ## 개발 규칙

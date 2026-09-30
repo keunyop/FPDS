@@ -6,7 +6,8 @@ D-090 removes human product-review decisions from new collection. Automatically
 accepted candidates proceed through existing canonical/publication boundaries;
 unproven candidates are excluded. Review history remains private and read-only
 in Admin. New stamped candidates cannot use legacy manual mutation APIs.
-Historical unstamped APIs/data remain a pending cutover, not new-flow behavior.
+The approved legacy data cutover is applied. All five product-review mutation
+endpoints are retired in code; operational retirement awaits API redeployment.
 See [collection policy](collection-accuracy-policy.md).
 
 Version: 1.0

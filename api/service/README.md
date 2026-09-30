@@ -3,11 +3,13 @@
 ## Autonomous collection — 2026-09-30
 
 New stamped candidates require automatic accuracy acceptance before canonical
-promotion; manual decision APIs return `automatic_collection_only` for them.
+promotion; automatic exclusion cannot be bypassed by a manual decision.
 Late failures are rejected without review tasks. The collection runner does not
 invoke review autopilot. Run detail returns `automatically_excluded_count` from
-stamped rejected candidates. Historical unstamped mutation APIs remain pending
-explicit cutover; do not present that as full legacy retirement. See
+stamped rejected candidates. The approved legacy data cutover is applied. All
+five product-review mutation endpoints now return `410 product_review_retired`
+in code after auth/role/CSRF/country checks; historical reads expose no actions.
+This additional API change still requires redeployment. See
 [policy](../../docs/03-design/collection-accuracy-policy.md).
 
 This package is the live FastAPI runtime for authenticated Admin operations
@@ -20,7 +22,7 @@ do not by themselves describe the current enabled surface.
 All OpenAI requests use the shared model selection, defaulting to `gpt-6-luna`.
 Bank onboarding research (including official bank evidence), candidate page
 scoring and coverage route discovery explicitly use `medium`; Product Type
-keyword generation uses `none`; Review AI uses `high`. Worker extraction uses
+keyword generation uses `none`. The retired Review AI implementation used `high`. Worker extraction uses
 `high` and dynamic normalization uses `medium`. Settings are fixed per task;
 there is no global effort environment override. See the
 [environment contract](../../docs/03-design/dev-prod-environment-spec.md).
@@ -43,7 +45,7 @@ Current scope:
   deactivation and session revocation
 - review queue list route backed by `review_task` and `normalized_candidate`, including source role, missing expected fields, and a recommended next action
 - review-task detail read route with field-level trace, evidence metadata, model-run references, and decision history context
-- official-domain AI verification for a review task, with structured field comparison, safe correction proposals, bounded model-result state, and official sources
+- read-only historical AI verification results; launching a new Review AI check is retired
 - run list route backed by `ingestion_run` with protected run-state diagnostics
 - run detail read route with source processing summary, error summary, and related review tasks
 - change-history list route backed by `change_event` with protected canonical chronology and review-decision context
@@ -64,11 +66,10 @@ Current scope:
   create/update handlers return `405`
 - shared Product Type registry list/detail/create/update/delete routes; writes
   require admin, while collection/publication profiles remain country-owned
-- approve, reject, defer, and edit-approve review mutations
-- approved and edited review tasks can be reopened through `edit_approve` for follow-up operator corrections without reopening reject/defer paths
-- canonical product/version creation or update side effects for approved decisions
-- edit-approve manual overrides can now carry reviewer-corrected product names and sync that name into both the canonical product record and the stored normalized candidate
-- review decisions plus canonical change-event emission
+- retired product-review mutation routes: approve, reject, defer, edit-approve and ai-verify return 410
+- historical review tasks cannot be reopened through the retired endpoints
+- canonical product/version creation and change events for automatically accepted facts
+- preserved historical review decisions and evidence, with no manual correction path
 - bounded login failure tracking for throttling and lockout enforcement
 - bootstrap CLI for the first operator account
 
@@ -98,7 +99,7 @@ Current routes:
 - `DELETE /api/admin/countries/:countryCode`
 - `GET /api/admin/review-tasks`
 - `GET /api/admin/review-tasks/:reviewTaskId`
-- `POST /api/admin/review-tasks/:reviewTaskId/ai-verify`
+- `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` — retired, 410
 - `GET /api/admin/runs`
 - `GET /api/admin/runs/:runId`
 - `POST /api/admin/runs/:runId/retry`
@@ -127,10 +128,10 @@ Current routes:
 - `PATCH /api/admin/product-types/:productTypeCode`
 - `DELETE /api/admin/product-types/:productTypeCode`
 - `POST /api/admin/source-collections`
-- `POST /api/admin/review-tasks/:reviewTaskId/approve`
-- `POST /api/admin/review-tasks/:reviewTaskId/reject`
-- `POST /api/admin/review-tasks/:reviewTaskId/edit-approve`
-- `POST /api/admin/review-tasks/:reviewTaskId/defer`
+- `POST /api/admin/review-tasks/:reviewTaskId/approve` — retired, 410
+- `POST /api/admin/review-tasks/:reviewTaskId/reject` — retired, 410
+- `POST /api/admin/review-tasks/:reviewTaskId/edit-approve` — retired, 410
+- `POST /api/admin/review-tasks/:reviewTaskId/defer` — retired, 410
 - `GET /healthz`
 
 ## Local Run
@@ -282,7 +283,7 @@ cd api/service
 
 - Source-catalog collection starts only from authenticated Admin collection or
   retry actions. The collection runner still performs its bounded in-run
-  validation, promotion, Review routing, and guarded aggregate-refresh work.
+  validation, automatic acceptance/exclusion, promotion and guarded aggregate refresh.
 - Public reads are country-scoped by bank-owned ISO alpha-2 codes.
   `/api/public/countries` and `countries[]` in `/api/public/filters` expose only
   countries with active products in their latest completed public snapshot.
@@ -300,8 +301,8 @@ cd api/service
   `product_type_code` remains a global semantic code while country-specific
   subtype taxonomy and bank coverage carry `country_code`.
 - Public product list/detail and dashboard-ranking responses may expose a single `product_url` for direct navigation to the bank's public product page; raw evidence traces, source excerpts, and source URL lists remain excluded from public responses.
-- Approve and edit-approve now queue `aggregate_refresh_request` rows inside the same review-decision transaction, then launch a background aggregate refresh runner after commit so public serving can stay on the latest successful snapshot without blocking review writes.
-- Review approval and automatic promotion queue the approved product's country,
+- Retired manual Review endpoints create no decisions, canonical writes or refresh requests.
+- Automatic promotion queues the accepted product's country,
   and the runner claims pending work by country/scope instead of assuming
   Canada.
 - Source collection runs the same guarded canonical upsert path for `auto_validated` pass candidates; promoted candidates queue `auto_promotion` aggregate refresh requests, while non-product page-title false positives are rejected before they can become public canonical products.
@@ -321,14 +322,12 @@ cd api/service
 - Public signup creates a pending `user_signup_request`; it does not create an active account until an existing `admin` approves the request and assigns a role.
 - The review queue route defaults to active `queued` and `deferred` tasks and supports search, filters, pagination, and sort against the persisted prototype review-task data.
 - Review detail now returns candidate fields, field-selectable trace groups, enriched evidence metadata, model execution references, current canonical continuity match, and append-only decision history for `/admin/reviews/:reviewTaskId`.
-- Review detail also returns the latest AI verification attempt. `POST /api/admin/review-tasks/:reviewTaskId/ai-verify` is CSRF-protected, limited to admin/reviewer roles, forces OpenAI Responses web search within registered official bank domains, persists bounded execution/result/source context, and returns only field-contract-safe correction proposals. Applying a proposal remains local UI staging until the operator submits the existing edit-and-approve decision.
-- Review AI official-domain lookup explicitly types the optional country
-  parameter in its PostgreSQL query, so psycopg prepared statements preserve
-  the session/candidate country boundary without raising an ambiguous-parameter
-  server error before model execution begins.
-- The explicit Review Queue AI backfill workflow reuses that verification contract for active `queued`/`deferred` tasks. It may persist only sanitized cited mismatches to `normalized_candidate`, records bounded field-mapping/correction metadata, and stores the approval assessment in the model execution. Review AI v19 requests only `product_name` plus one field for each missing or populated essential comparison requirement. Optional marketing and operational fields are outside the default request and denominator. Official matches and safely applied mismatches pass; identity and `100%` of requested essentials are required. Every match/mismatch also requires a short exact quote: ellipsized/composite quotes are invalid, a separate rate/fee/disclosure source must name the exact candidate product, the exact origin detail URL may carry the product boundary directly, Product-Type-conflicting routes are rejected, and all numeric tokens in a proposed value must occur in the quote. Decision-critical prose such as a waiver, penalty, or qualified rate summary must itself occur in full in that quote. Same-bank evidence for another product is downgraded to `unverified`. APR ranges, reference-rate formulas, and representative examples remain qualified source-language text in `interest_rate_summary` or the card-specific `purchase_interest_rate_summary`. A current successful attempt is reusable for 24 hours only when its approval fields still match the candidate. For a US card, a deterministic fallback may repair only an exact `$0`/no-annual-fee quote and an exact Purchase APR range from the normalized product-detail route or a separately named exact-product agreement/disclosure; generic agreements, ellipses, and sibling products remain ineligible. When search leaves identity `unverified`, the persisted official detail source may establish it from a normalized candidate/H1 match with `product_identity_match=true`; a trailing descriptor registered for the Product Type is allowed, while unrelated marketing suffixes are not. An unchanged labeled currency fee or qualified exact-origin lending comparison field may likewise reuse its persisted official grounding when Review AI abstains. AI mismatches, non-detail sources, composites, incomplete essential contracts, invalid values, and ambiguous mappings cannot use these fallbacks. A partial-source or legacy confidence warning by itself does not block a complete essential contract.
-- Review AI v19 prefers evidence-preserving `interest_rate_summary` and `security_requirement` alternatives before scalar rate/boolean fields. Every consulted result must also match the candidate country and source language; a sibling locale or other-market route is ineligible even on the same registered parent domain.
-- Collection, Review, manual approval, and aggregate refresh resolve the same
+- Review detail returns the latest historical AI verification attempt with
+  `can_run=false`; all product Review actions are retired with HTTP 410.
+  Earlier Review AI/backfill contracts remain in historical model records and
+  internal test fixtures. They are not an active collection or correction path.
+  Recollect through the automatic accuracy gate to verify changed product facts.
+- Collection, automatic promotion and aggregate refresh resolve the same
   versioned `(country_code, product_type)` market profile. Generated source
   metadata records the profile key/version. US Checking does not inherit the
   Canadian transaction-count requirement, US CDs use an early-withdrawal

@@ -6,7 +6,7 @@ D-090 supersedes manual product review and coverage-first collection criteria.
 Accept only evidence-proven, consistently typed facts; omit optional unknowns
 and automatically exclude incomplete candidates without human review.
 [Collection policy](../03-design/collection-accuracy-policy.md) defines the
-new-run boundary and pending legacy cutover. No country/type, public evidence,
+new-run boundary and applied legacy cutover (API endpoint redeployment pending). No country/type, public evidence,
 security or BX-PF scope is expanded.
 
 Version: 1.0

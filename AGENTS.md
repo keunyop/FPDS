@@ -12,7 +12,9 @@
   Never infer missing values, false/zero, currency or rate/term semantics.
 - Read `docs/03-design/collection-accuracy-policy.md` for collection work. Add
   regression evidence before extending accepted patterns; update all gates and
-  prompts together. Historical cutover remains an explicit pending operation.
+  prompts together. The approved 355-product/470-review legacy data cutover was
+  applied on 2026-09-30; preserve its history and do not restore manual review.
+  The additional legacy endpoint retirement code still needs API deployment.
 
 These instructions apply to the entire repository, including FPDS Admin and
 FPDS Public.

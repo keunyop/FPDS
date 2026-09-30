@@ -25,6 +25,42 @@ Historical gate and prototype material now lives under `docs/archive/`.
 
 ## 2. Current Resume Context
 
+## 2026-09-30 - Authorized legacy accuracy cutover applied
+
+- The Product Owner reports the prior D-090 code was production-deployed and
+  explicitly approves 355 product deactivations, 470 automatic review closures
+  and retirement of legacy manual product decisions, accepting an empty Public.
+  This resolves the previous approval boundary; no repeat confirmation needed.
+- Added `scripts/maintenance/collection_accuracy_cutover.py`: hash-pinned exact
+  manifest, current identity/version/payload/state checks, active-run checks,
+  writer locks, private immutable before-image, default rollback and explicit
+  commit. A full transaction rehearsal and independent rollback readback passed.
+- Committed at 2026-09-30T15:41:36Z: CA 212 + US 143 products are inactive with
+  new versions and 355 Updated events. Previous 355 versions, source evidence,
+  22,519 evidence links, original 5 review decisions and last_verified_at remain.
+  Closed 470 queued/deferred tasks and candidates with service policy reasons;
+  remaining pending count is zero. No claim that the banks discontinued products.
+- Empty CA/US Public snapshots were committed in the same transaction. Independent
+  DB reads and production API/BFF reads confirm zero products and the cutover
+  snapshots. Initial HTML had cached products; after refresh at 15:50:23Z, all
+  four normal CA/US Home/catalogue URLs returned 200 with no old product IDs.
+  A second apply returns already_applied without extra versions/decisions/snapshots.
+- API main/review_detail now retire approve/reject/edit-approve/defer/ai-verify
+  with 410 product_review_retired, available_actions=[] and AI can_run=false.
+  Auth, role, CSRF and country isolation remain. History stays readable; signup
+  approval is unchanged. API suite 535 and cutover regression tests 4 pass.
+  Repo doctor, foundation baseline and final diff checks pass. Public visible
+  text confirms normal empty states rather than a data-loading failure.
+- No new collection, paid model call, account/registry change or deployment was
+  executed. Vercel CLI is logged out: the additional API retirement code still
+  needs API production redeployment. The data cutover is already committed and
+  must not be rerun for deployment. Keep goal.md for this and earlier ownership.
+- Updated active policy, requirements/scope, plan/WBS, decision/RAID, API contract,
+  boundary READMEs and AGENTS. Evidence and backup hashes are in
+  `collection-accuracy-audit-2026-09-30.md`; preserve the ignored private manifest,
+  before-image and execution reports under tmp. Next: deploy the API changes and
+  verify retirement using an authorized operator session.
+
 ## 2026-09-30 - Accuracy-first autonomous product collection
 
 - D-090 / WBS 5.76 implements the Product Owner's accuracy-over-coverage and

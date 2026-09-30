@@ -1540,13 +1540,8 @@ def _find_current_product(
 
 
 def _available_actions(*, review_state: str, actor_role: str) -> list[str]:
-    if actor_role not in MUTATION_ROLES:
-        return []
-    if review_state in {"approved", "edited"}:
-        return ["edit_approve"]
-    if review_state in TERMINAL_REVIEW_STATES:
-        return []
-    return ["approve", "reject", "edit_approve", "defer"]
+    # D-090 cutover: all product Review routes are historical reads.
+    return []
 
 
 def _can_reedit_review(*, current_state: str, action_type: str) -> bool:

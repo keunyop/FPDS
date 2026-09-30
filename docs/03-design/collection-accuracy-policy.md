@@ -1,6 +1,6 @@
 # Product collection accuracy and automatic acceptance
 
-Status: Active requirements; new-collection implementation complete, legacy cutover pending
+Status: Active; legacy data cutover applied, endpoint retirement awaits API redeployment
 Decision: D-090 · Product Owner direction: 2026-09-30 · WBS 5.76
 
 ## Priority and scope
@@ -75,7 +75,7 @@ The executable contract is `worker/pipeline/fpds_field_contract.py`.
    blocking validations, and emits `auto_validated` or `excluded`. Exclusion uses
    the existing candidate state `rejected`; it never creates a `review_task`.
 5. Promotion rechecks the digest and comparison/identity gates. Late rejection
-   remains automatic. Manual decision APIs reject new stamped candidates.
+   remains automatic. All manual product-decision endpoints are retired.
 6. Aggregate refresh rechecks stamped products and never exposes the receipt,
    raw evidence, model metadata or operator notes publicly.
 
@@ -95,22 +95,26 @@ Public keeps the established comparison UI and empty states. New records require
 a valid receipt before projection. Missing facts cannot be displayed as zero.
 No public evidence surface or new recommendation is introduced.
 
-## Legacy cutover boundary
+## Legacy cutover — applied 2026-09-30
 
-The implementation does not silently assess/mutate unstamped historical records
-on a general promotion or aggregate refresh. Their existing Public projections
-and legacy mutation APIs remain until the explicit cutover is approved and
-verified. This is an outstanding rollout limitation, not an exception to the
-accuracy requirement for future collection.
+Following explicit Product Owner approval, the exact manifest's 355 active
+products were deactivated with new versions/change events and 470 unresolved
+reviews were automatically rejected. Previous versions, evidence, decisions and
+fact-verification timestamps remain. CA/US empty Public projections were created
+in the same transaction. A full rollback rehearsal and idempotent readback passed.
+See [the applied record](../00-governance/collection-accuracy-audit-2026-09-30.md).
 
-Automatic approval review rejected the proposed blanket legacy gate and review
-API retirement because they could disable historical workflows and remove the
-live Public catalogue without a concrete migration boundary. The read-only
-[impact assessment](../00-governance/collection-accuracy-audit-2026-09-30.md)
-provides the concrete scope for the final approval. Preserve old versions and
-field evidence, compare recorded versions/hashes before writes, rehearse with
-rollback, then read back exact changes and affected country projections. Do not
-hard-delete history or claim this cutover has already occurred.
+All five product-review mutation endpoints now return `410 product_review_retired`
+in code, preserving authentication, role, CSRF and country checks. History APIs
+advertise no available action or runnable Review AI. Account signup approvals
+remain separate. The prior build was deployed by the Product Owner; this
+additional API retirement code still needs API redeployment because the current
+CLI is logged out. Do not claim the deployed endpoints are retired until checked.
+
+Do not reactivate historical facts by manual approval. Future collection must
+produce a fresh valid automatic receipt. General promotion/aggregation does not
+silently rewrite old records, and the fixed cutover cannot widen beyond its
+hash-pinned approved manifest. No unbounded paid recollection was started.
 
 ## Current conservative limits
 

@@ -7,7 +7,8 @@ D-090 replaces new product review routing with automatic `auto_validated` or
 review task. Promotion can still reject after its final gates. A failed external
 source/provider remains an operational failure, never an approval fallback.
 [Collection policy](collection-accuracy-policy.md) supersedes older human-review
-and residual-review paths; historical cutover remains pending.
+and residual-review paths. The 355-product/470-review legacy cutover is applied;
+additional endpoint retirement code awaits API redeployment.
 
 Version: 1.0
 Date: 2026-03-31

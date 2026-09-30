@@ -1,5 +1,16 @@
 # FPDS API and Interface Contracts
 
+## Product review retirement — 2026-09-30 (D-090)
+
+`POST /api/admin/review-tasks/:id/{approve,reject,edit-approve,defer,ai-verify}`
+returns `410 product_review_retired` after existing authentication, admin/reviewer
+role, CSRF and country ownership checks. No decision write, model call, canonical
+mutation or aggregate request occurs. Read endpoints retain historical records
+and return `available_actions=[]` and `ai_verification.can_run=false`.
+Signup review routes remain unchanged. Code is verified; this additional API
+change needs redeployment. The approved legacy data cutover is already applied.
+
+
 Version: 1.0
 Date: 2026-04-01
 Status: Approved Baseline for WBS 1.5.1-1.5.5

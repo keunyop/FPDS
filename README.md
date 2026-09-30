@@ -8,7 +8,9 @@ Admin Review routes now show read-only history under More tools. Earlier review
 workflow descriptions below are historical for product collection; account
 approval remains. Read [the accuracy policy](docs/03-design/collection-accuracy-policy.md)
 and [legacy impact assessment](docs/00-governance/collection-accuracy-audit-2026-09-30.md).
-The existing-data cutover and production deployment have not been executed.
+The Product Owner deployed the prior implementation. The 355-product/470-review
+data cutover and CA/US empty projections are applied. Five legacy product-review
+endpoints return 410 in the added API code; that addition needs API redeployment.
 
 This repository is the implementation and operating workspace for `FPDS`
 (Finance Product Data Service), an evidence-grounded financial product data

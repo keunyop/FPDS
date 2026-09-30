@@ -7,7 +7,7 @@ Use this file to avoid opening every design doc.
 
 ## Core Runtime Design
 
-- [Collection accuracy](collection-accuracy-policy.md): automatic acceptance/exclusion, common types and pending legacy cutover (D-090)
+- [Collection accuracy](collection-accuracy-policy.md): automatic acceptance/exclusion, common types and applied legacy data cutover (D-090; API retirement deployment pending)
 
 - `domain-model-canonical-schema.md`: canonical fields, validation, and taxonomy
 - `financial-product-field-contract.md`: cross-bank field types, units, field notes, evidence merge, and collection verification

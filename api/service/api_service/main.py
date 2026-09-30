@@ -27,14 +27,12 @@ from api_service.aggregate_refresh import (
     AggregateRefreshError,
     launch_aggregate_refresh_runner,
     load_dashboard_health,
-    queue_review_aggregate_refresh_request,
     request_manual_aggregate_refresh,
 )
 from api_service.bank_ai_onboarding import run_bank_ai_onboarding
 from api_service.ai_verification import (
     AiVerificationError,
     load_latest_ai_verification,
-    run_review_ai_verification,
 )
 from api_service.change_history import load_change_history_list, normalize_change_history_filters
 from api_service.config import Settings
@@ -91,9 +89,7 @@ from api_service.product_types import (
     update_product_type_definition,
 )
 from api_service.review_detail import (
-    ReviewRequestContext,
     ReviewTaskError,
-    apply_review_decision,
     load_review_task_detail,
 )
 from api_service.review_queue import load_review_queue, normalize_review_queue_filters
@@ -1583,58 +1579,30 @@ async def review_task_detail(request: Request, review_task_id: str) -> JSONRespo
                 actor_role=str(actor["role"]),
                 review_state=str(payload["review_task"].get("review_state") or ""),
             )
+            payload["ai_verification"]["can_run"] = False
     if not payload:
         return _error(status_code=404, code="review_task_not_found", message="Review task was not found.", request=request)
     return _success(payload, request)
 
 
-@app.post("/api/admin/review-tasks/{review_task_id}/ai-verify")
-def ai_verify_review_task(request: Request, review_task_id: str) -> JSONResponse:
+def _retired_product_review_response(request: Request, review_task_id: str) -> JSONResponse:
     actor, session_info = _resolve_session(request)
     _require_csrf(request, session_info=session_info)
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
+    if str(actor.get("role")) not in {"admin", "reviewer"}:
+        raise ReviewTaskError(status_code=403, code="forbidden", message="This account cannot change review decisions.")
+    with open_connection(request.app.state.settings) as connection:
         _require_review_task_country(
-            connection,
-            review_task_id=review_task_id,
+            connection, review_task_id=review_task_id,
             country_code=_session_country(session_info),
         )
-        detail = load_review_task_detail(
-            connection,
-            review_task_id=review_task_id,
-            actor_role=str(actor["role"]),
-        )
-        if not detail:
-            return _error(
-                status_code=404,
-                code="review_task_not_found",
-                message="Review task was not found.",
-                request=request,
-            )
-        result = run_review_ai_verification(
-            connection,
-            detail=detail,
-            actor=actor,
-            request_context={
-                "request_id": request.state.request_id,
-                "ip_address": _request_ip(request),
-                "user_agent": request.headers.get("user-agent"),
-            },
-        )
-    if not result["ok"]:
-        return JSONResponse(
-            status_code=int(result["status_code"]),
-            content={
-                "error": {
-                    "code": result["error"]["code"],
-                    "message": result["error"]["message"],
-                    "details": {},
-                },
-                "data": {"ai_verification": result["ai_verification"]},
-                "meta": _meta(request),
-            },
-        )
-    return _success({"ai_verification": result["ai_verification"]}, request)
+    return _error(status_code=410, code="product_review_retired",
+                  message="Product review is read-only history. Collect products to verify facts automatically.",
+                  request=request)
+
+
+@app.post("/api/admin/review-tasks/{review_task_id}/ai-verify")
+def ai_verify_review_task(request: Request, review_task_id: str) -> JSONResponse:
+    return _retired_product_review_response(request, review_task_id)
 
 
 @app.get("/api/admin/runs")
@@ -1789,54 +1757,7 @@ async def _handle_review_decision(
     action_type: Literal["approve", "reject", "edit_approve", "defer"],
     payload: ReviewDecisionRequest,
 ) -> JSONResponse:
-    actor, session_info = _resolve_session(request)
-    _require_csrf(request, session_info=session_info)
-    settings: Settings = request.app.state.settings
-    aggregate_refresh_request: dict[str, Any] | None = None
-    with open_connection(settings) as connection:
-        _require_review_task_country(
-            connection,
-            review_task_id=review_task_id,
-            country_code=_session_country(session_info),
-        )
-        result = apply_review_decision(
-            connection,
-            review_task_id=review_task_id,
-            action_type=action_type,
-            actor=actor,
-            reason_code=payload.reason_code,
-            reason_text=payload.reason_text,
-            override_payload=payload.override_payload,
-            context=ReviewRequestContext(
-                request_id=request.state.request_id,
-                ip_address=_request_ip(request),
-                user_agent=request.headers.get("user-agent"),
-            ),
-        )
-        if action_type in {"approve", "edit_approve"} and result.get("product_id"):
-            aggregate_refresh_request = queue_review_aggregate_refresh_request(
-                connection,
-                actor=actor,
-                request_context={
-                    "request_id": request.state.request_id,
-                    "ip_address": _request_ip(request),
-                    "user_agent": request.headers.get("user-agent"),
-                },
-                review_task_id=review_task_id,
-                product_id=str(result["product_id"]),
-                action_type=action_type,
-                change_event_types=[str(item) for item in result.get("change_event_types", [])],
-                country_code=str(result["country_code"]),
-            )
-    if aggregate_refresh_request:
-        aggregate_refresh_request["launch"] = launch_aggregate_refresh_runner()
-    return _success(
-        {
-            "result": result,
-            "aggregate_refresh": aggregate_refresh_request,
-        },
-        request,
-    )
+    return _retired_product_review_response(request, review_task_id)
 
 
 @app.post("/api/admin/review-tasks/{review_task_id}/approve")
