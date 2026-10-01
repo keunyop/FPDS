@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -73,6 +73,9 @@ class NormalizationInput:
     runtime_notes: list[str]
     normalized_source_url: str | None = None
     candidate_key: str | None = None
+
+    # Populated only from current-run captured evidence by the repository.
+    evidence_origins: dict[str, dict[str, object]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

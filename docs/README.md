@@ -1,5 +1,9 @@
 # FPDS Docs Map
 
+Latest: [supporting-origin code correction and two Scotiabank restorations](00-governance/supporting-evidence-recovery-2026-10-01.md); Public API CA 9 / US 2, 417 remain unpublished. Collection-runtime deployment remains separate. Earlier operation counts below are historical.
+
+Latest data operation: [four hidden products restored and one legal-document record deleted](00-governance/additional-product-recovery-2026-10-01.md); Public CA 7 / US 2, with 419 records still unpublished. The publication counts immediately below are historical.
+
 Latest publication: [17 products recovered after policy deployment](00-governance/collection-policy-recovery-2026-10-01.md); original manifest has 24 active, 326 inactive and [5 deleted non-products](00-governance/nonproduct-cleanup-2026-10-01.md).
 
 Status: Active navigation index

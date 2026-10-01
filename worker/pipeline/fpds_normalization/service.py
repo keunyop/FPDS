@@ -109,6 +109,34 @@ _RATE_CONTEXT_FIELDS = {
 }
 
 
+def _accuracy_evidence(*, item: NormalizationInput, run_id: str) -> list[dict[str, object]]:
+    """Bind supporting URLs to captured current-run evidence, never model URLs."""
+    from worker.pipeline.fpds_collection_accuracy import text
+
+    evidence = []
+    for link in item.evidence_links:
+        origin = item.evidence_origins.get(link.evidence_chunk_id)
+        source_url = None
+        if origin is not None:
+            if (origin.get("run_id") == run_id
+                    and origin.get("bank_code") == item.bank_code
+                    and origin.get("country_code") == item.country_code
+                    and origin.get("source_document_id") == link.source_document_id
+                    and origin.get("snapshot_id") == link.source_snapshot_id
+                    and origin.get("evidence_chunk_id") == link.evidence_chunk_id
+                    and text(origin.get("evidence_excerpt")) == text(link.evidence_text_excerpt)):
+                source_url = origin.get("source_url")
+        elif (link.source_document_id == item.source_document_id
+                and link.source_snapshot_id == item.snapshot_id):
+            source_url = (item.normalized_source_url
+                          or item.source_metadata.get("normalized_source_url")
+                          or item.source_metadata.get("source_url"))
+        evidence.append({"evidence_chunk_id": link.evidence_chunk_id,
+                         "evidence_excerpt": link.evidence_text_excerpt,
+                         "source_url": source_url})
+    return evidence
+
+
 class NormalizationService:
     def __init__(
         self,
@@ -202,12 +230,7 @@ class NormalizationService:
             normalized_candidate_record, accuracy = sanitize_candidate(
                 normalized_candidate_record,
                 source_metadata=item.source_metadata,
-                evidence=[{
-                    "evidence_chunk_id": link.evidence_chunk_id,
-                    "evidence_excerpt": link.evidence_text_excerpt,
-                    "source_url": item.normalized_source_url or item.source_metadata.get("normalized_source_url") or item.source_metadata.get("source_url")
-                        if link.source_document_id == item.source_document_id else None,
-                } for link in item.evidence_links],
+                evidence=_accuracy_evidence(item=item, run_id=run_id),
             )
             accepted_fields = set(accuracy["verified_fields"])
             evidence_links = [link for link in evidence_links if link["field_name"] in accepted_fields]

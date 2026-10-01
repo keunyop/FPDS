@@ -1,5 +1,25 @@
 # FPDS Development Journal
 
+## 2026-10-01 - Supporting-document origins preserved; two Scotiabank accounts restored
+
+- Product Owner approved the next two-product recovery and a shared code fix when useful for future collection. Reproduced the common defect: normalization supplied no official URL for links whose document differed from the product detail, dropping valid linked booklet currency.
+- Added one bounded current-run DB origin lookup before normalization. Origins must match the exact chunk, text, document, selected snapshot/parse, run, bank and country. Extraction/model artifacts cannot supply this trusted map. Input expansion preserves it; existing official-domain, consulted-URL, exact-quote, native-type, applicability and publication gates remain. No Admin/Public UI or financial rule change, new model call, schema migration or permanent recovery feature.
+- Worker 596 and API 539 tests pass (200 focused normalization/accuracy tests included), with positive linked-currency, wrong origin/run/snapshot/bank/country/text/domain, invented artifact origin and normal validation/exclusion cases. Repository doctor and final diff checks passed.
+- Current official captures of Ultimate Package, Preferred Package, the linked booklet and fee table matched the prepared exact-product evidence. Both passed fresh normal normalization/validation/promotion using repository-resolved origins. Two new approved versions, one completed run, no new human reviews or collection-model calls; CA aggregate completed. API now CA 9 / US 2, total 11. Other 426 canonical products, 21 target historical candidates, prior target versions and source registry remain unchanged. All 9 actual API/BFF/list/detail URL checks passed after normal cache revalidation; both restored products and all previously public products are present.
+- Final DB: 428 products, 26 active / 402 inactive; 15 active remain hidden, hence 417 unpublished. Original manifest: 26 active / 323 inactive / 6 deleted. No further deletion in this slice.
+- Code is reflected locally and was used for this successful one-off data operation. Deploy the collection runtime (API/worker package) to apply origin preservation to future Admin-triggered collections. No deployment was performed; current serving accuracy/profile gates already match and validate these receipts. Details and private artifact references: [supporting-evidence recovery](supporting-evidence-recovery-2026-10-01.md).
+
+
+## 2026-10-01 - Four hidden products restored and one confirmed non-product removed
+
+- Completed the Product Owner's requested bounded data-only operation. Live policy/profile v7 was deployed; actual Public initially had CA 4 / US 1, despite 24 active canonical records. Replayed existing evidence for all 405 inactive records and included 19 active-but-hidden records in scope.
+- Captured 12 unique official sources. Four hidden accounts passed fresh normal normalization/validation/promotion: TD All-Inclusive, TD Student, Vancity youth and Western Alliance Personal Interest Checking. Public API/BFF now show CA 7 / US 2. No collection-model calls/provider tokens, human reviews, runtime/Admin edits or deployment.
+- Deleted the single proven Bank of America legal-document record `Deposit Agreement and Disclosures`, with fresh exact-link evidence, before-image backup and rollback rehearsal. Candidate/raw evidence/review history preserved. Final DB: 24 active / 404 inactive; 15 active remain hidden, so 419 remain unpublished. Original cutover manifest: 24 active / 325 inactive / 6 deleted.
+- Retained prepared Scotiabank Ultimate/Preferred evidence: normalizer loses supporting-document origins, so they remain excluded. TD finite accounts were held because unlimited public-transit benefits cannot establish general pricing; current count/excess-fee full-context parsing also blocks reuse. No gate workaround or repeated equivalent collection. These limitations require a separately scoped runtime change.
+- Verification: 31 accuracy/recovery/cutover tests passed; four fresh evidence receipts replay, three runs and CA/US aggregate refreshes completed. All 424 unrelated surviving products, 1,536 historical candidates, prior target versions and source registry unchanged. All 11 actual API/BFF/list/detail URL checks passed after normal CA list cache revalidation. Final diff check passed; private artifacts retain the readbacks. See [operation record](additional-product-recovery-2026-10-01.md).
+- Next: retain the 419 uncertain/unready records and current evidence. Further restoration needs new applicable evidence or separately approved runtime corrections; do not rerun the completed private execution scripts.
+
+
 
 ## 2026-10-01 - SwitchaBank required facts and optional detail information
 

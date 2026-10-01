@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Callable, Sequence
 
 from worker.psql_cli import run_psql_command
 
-from .models import NormalizationArtifactLookup, NormalizationResult
+from .models import NormalizationArtifactLookup, NormalizationInput, NormalizationResult
 
 _SCHEMA_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
@@ -211,6 +211,44 @@ FROM (
         )
         payload = json.loads(output or "[]")
         return [NormalizationArtifactLookup(**item) for item in payload]
+
+    def resolve_evidence_origins(
+        self, *, run_id: str, inputs: list[NormalizationInput],
+    ) -> list[NormalizationInput]:
+        """Resolve only referenced chunks from successful captures in this run."""
+        chunk_ids = sorted({link.evidence_chunk_id for item in inputs
+                            for link in item.evidence_links})
+        if not chunk_ids:
+            return [replace(item, evidence_origins={}) for item in inputs]
+        schema = self.active_schema
+        sql = f"""
+SET search_path TO {schema};
+SELECT COALESCE(json_agg(row_to_json(origins)), '[]'::json)::text
+FROM (
+    SELECT DISTINCT ec.evidence_chunk_id, ec.evidence_excerpt,
+        ss.snapshot_id, ss.source_document_id, sd.normalized_source_url AS source_url,
+        sd.bank_code, sd.country_code, rsi.run_id
+    FROM evidence_chunk ec
+    JOIN parsed_document pd USING (parsed_document_id)
+    JOIN source_snapshot ss USING (snapshot_id)
+    JOIN source_document sd ON sd.source_document_id = ss.source_document_id
+    JOIN run_source_item rsi ON rsi.source_document_id = ss.source_document_id
+        AND rsi.selected_snapshot_id = ss.snapshot_id
+        AND rsi.stage_metadata ->> 'parsed_document_id' = pd.parsed_document_id
+        AND rsi.error_count = 0
+    WHERE rsi.run_id = :'run_id'
+        AND ec.evidence_chunk_id IN (
+            SELECT jsonb_array_elements_text(:'chunk_ids_json'::jsonb)
+        )
+) AS origins;
+"""
+        output = self._execute(sql, variables={"run_id": run_id,
+                               "chunk_ids_json": json.dumps(chunk_ids, ensure_ascii=True)})
+        origins = {row["evidence_chunk_id"]: row for row in json.loads(output or "[]")}
+        return [replace(item, evidence_origins={
+            link.evidence_chunk_id: origins[link.evidence_chunk_id]
+            for link in item.evidence_links if link.evidence_chunk_id in origins
+        }) for item in inputs]
 
     def persist_normalization_result(
         self,

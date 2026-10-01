@@ -1,5 +1,7 @@
 # Worker Boundary
 
+Supporting evidence origin correction (2026-10-01): normalization resolves the official URL from referenced evidence chunks in the current run's successful selected snapshot/parse. Exact document, snapshot, text, run, bank and country must match; model/extraction metadata cannot provide this provenance. Existing same-product supporting selection and accuracy gates remain. Local Worker 596 / API 539 tests pass; two Scotiabank accounts were recovered with this code and no model calls. Deploy the collection runtime for future Admin collections.
+
 
 Current optional collection rule (2026-10-01): required facts determine publication;
 profile and explicitly registered typed optional facts are also extracted when

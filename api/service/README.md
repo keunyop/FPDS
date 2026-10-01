@@ -1,5 +1,7 @@
 # FPDS API Service
 
+The shared normalization worker now preserves database-resolved current-run supporting-document origins (2026-10-01). Deploy the collection runtime/API package to apply this fix to future Admin collection. No API route, UI, receipt version, publication prerequisite or schema changed. Two prepared Scotiabank products were published using the local corrected worker and existing deployed gates; code deployment remains separate.
+
 
 Public list/detail now serialize optional `deposit_conditions` for Savings/GIC:
 only six explicit nonempty source-language strings from the approved projection

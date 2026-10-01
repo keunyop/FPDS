@@ -1,5 +1,8 @@
 # FPDS Project Execution Plan
 
+Latest approved follow-up: shared normalization now preserves trusted current-run supporting-document origins. Worker 596 / API 539 tests pass. The prepared Scotiabank Ultimate and Preferred Packages were restored through normal automatic validation with zero collection-model calls; Public API is CA 9 / US 2. Collection-runtime deployment remains required for future Admin collections. No UI, financial acceptance rule or schema change. See [operation](../00-governance/supporting-evidence-recovery-2026-10-01.md).
+
+
 
 Latest approved slice: SwitchaBank lists/comparisons and Home Top 5 present
 required product facts; detail shows verified optional information with clear

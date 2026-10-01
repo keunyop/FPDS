@@ -151,6 +151,8 @@ def main() -> int:
             )
         )
 
+    inputs = repository.resolve_evidence_origins(run_id=args.run_id, inputs=inputs)
+
     service = NormalizationService(
         storage_config=storage_config,
         object_store=object_store,

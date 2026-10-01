@@ -239,3 +239,11 @@ Verified optional information belongs in detail; absent rows are omitted and
 never filled with zero/false. Top 5 does not use optional coverage as a score or
 eligibility prerequisite; actual known financial qualifications remain binding.
 See [the presentation contract](product-grid-information-architecture.md).
+
+## Supporting-document provenance - 2026-10-01 correction
+
+Normalization retains official origins for supporting evidence selected by the existing product-specific merge/grounding paths. Before normalization, the repository loads only referenced chunks joined to this run's successful selected snapshot and parsed document. The URL comes from the stored source document, not extraction/model-provided URLs. The normalizer verifies chunk/document/snapshot, full text, run, bank and country before passing that origin to the unchanged shared accuracy gate. Missing or mismatched supporting origins remain excluded; unrelated source documents are never relabelled as the product detail.
+
+The extraction artifact cannot populate the trusted origin map. The ordinary same-document path remains compatible, with matching snapshot required. Input expansion retains the map. Existing official-domain, actually-consulted URL, exact quote, product applicability, financial semantics and required-field checks remain binding. This change adds no requests to the collection model and does not broaden supporting-source selection. No accuracy/profile version or prompt change is needed because accepted financial patterns and extraction instructions are unchanged.
+
+The corrected local worker restored the two prepared Scotiabank accounts through normal automatic gates. Future Admin collection requires deployment of the collection runtime/API package. Public reads use the existing compatible receipts and continue to hide private provenance. See [the operation and tests](../00-governance/supporting-evidence-recovery-2026-10-01.md).
