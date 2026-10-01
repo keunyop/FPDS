@@ -25,9 +25,7 @@ export function loanRankingGroups(products: PublicProduct[], country: string, lo
     const rate = getComparablePublicRate(product);
     if (rate === null) continue;
     const conditions: Array<{ key: string; label: string }> = [{ key: '0-all', label: copy.all }];
-    // Missing flags and source-language text never imply secured/unsecured.
-    if (product.secured_flag === true) conditions.push({ key: '1-secured', label: copy.secured });
-    if (product.secured_flag === false) conditions.push({ key: '2-unsecured', label: copy.unsecured });
+    // Security is shown with each LOC row; optional mortgage/loan flags never narrow Home ranking.
     for (const condition of conditions) {
       const key = `${country}|${product.product_type}|${currency}|${condition.key}`;
       const group = groups.get(key) ?? {

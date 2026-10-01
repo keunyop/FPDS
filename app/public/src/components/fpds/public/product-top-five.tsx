@@ -1,3 +1,5 @@
+import { buildPublicProductMetrics } from "@/lib/public-product-presentation";
+import { publicFactCopy } from "@/lib/public-fact-copy";
 import { getComparablePublicRate } from "@/lib/public-rate";
 import { ArrowRight, ExternalLink, Landmark, PiggyBank } from "lucide-react";
 import Link from "next/link";
@@ -12,6 +14,7 @@ import { buildPublicHref, type DashboardPageFilters } from "@/lib/public-query";
 export function ProductTopFive({
   controls,
   rates,
+  termLabel,
   accent,
   emptyText,
   filters,
@@ -26,6 +29,7 @@ export function ProductTopFive({
 }: {
   controls?: ReactNode;
   rates?: Record<string, number>;
+  termLabel?: string | null;
   accent: "deposit" | "loan";
   emptyText: string;
   filters: DashboardPageFilters;
@@ -63,6 +67,7 @@ export function ProductTopFive({
         </div>
       </div>
       {controls}
+      <p className="px-4 py-3 text-xs leading-5 text-muted-foreground md:px-5">{publicFactCopy(filters.locale).ranking}</p>
       {unavailable ? (
         <div className="p-4 md:p-5">
           <EmptyPanel text={unavailableText} />
@@ -101,6 +106,12 @@ export function ProductTopFive({
                   </TrackedOfficialBankLink>
                 ) : null}
               </div>
+              <dl className="col-span-full mt-3 grid min-w-0 gap-3 border-t border-border/70 pt-3 sm:grid-cols-2">
+                {buildPublicProductMetrics(product, filters.locale).slice(1).map((metric, index) => <div className="min-w-0" key={metric.label}>
+                  <dt className="text-xs text-muted-foreground">{metric.label}</dt>
+                  <dd className="mt-1 break-words text-sm leading-6">{product.product_type === "gic" && index === 0 && termLabel ? termLabel : metric.value}</dd>
+                </div>)}
+              </dl>
             </li>
           ))}
         </ol>

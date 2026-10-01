@@ -9,6 +9,10 @@
   profile/registered typed optional facts when the same official evidence proves
   them. Omit uncertain optional facts; do not add searches, retries or human review
   solely for optional completeness. Preserve them through normalization.
+- Public lists, comparisons and Home Top 5 use current required decision facts.
+  Detail shows verified optional facts and omits unknown rows. Missing optional
+  information must not become zero/false or a ranking penalty; preserve actual
+  financial conditions and comparable-rate/term boundaries.
 - Product collection must not depend on human review, edit-approval or a residual
   review queue. An AI confidence score cannot replace source evidence or bypass
   automatic validation. Preserve separate account/security approval controls.

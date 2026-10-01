@@ -3,9 +3,9 @@ import { depositCopy, depositGroupKey, depositOptions, depositPeriod } from './p
 
 const HOME_CURRENCIES: Record<string, string> = { CA: 'CAD', US: 'USD' };
 const CONDITIONS = {
-  en: { all: 'All', noMonthlyFee: 'No monthly fee', noMinimumBalance: 'No minimum balance' },
-  ko: { all: '전체', noMonthlyFee: '월 수수료 없음', noMinimumBalance: '최소 잔액 없음' },
-  ja: { all: 'すべて', noMonthlyFee: '月額手数料なし', noMinimumBalance: '最低残高なし' }
+  en: { all: 'All', noMonthlyFee: 'No monthly fee' },
+  ko: { all: '전체', noMonthlyFee: '월 수수료 없음' },
+  ja: { all: 'すべて', noMonthlyFee: '月額手数料なし' }
 } as const;
 
 type DepositRankingGroup = {
@@ -13,6 +13,7 @@ type DepositRankingGroup = {
   label: string;
   currency: string;
   basis: string;
+  term: string | null;
   items: PublicProduct[];
   rates: Record<string, number>;
 };
@@ -35,8 +36,6 @@ export function depositRankingGroups(products: PublicProduct[], country: string,
         // A conditional fee waiver is not an unconditional zero monthly fee.
         if (product.public_display_fee === 0 && !product.fee_waiver_condition?.trim())
           conditions.push({ key: '1-no-monthly-fee', label: copy.noMonthlyFee });
-        if (product.minimum_balance === 0)
-          conditions.push({ key: '2-no-minimum-balance', label: copy.noMinimumBalance });
       }
       for (const condition of conditions) {
         const key = `${country}|${depositGroupKey(product, option)}|${condition.key}`;
@@ -44,7 +43,7 @@ export function depositRankingGroups(products: PublicProduct[], country: string,
           ? `${product.product_type_label} · ${depositPeriod(option, locale)} · ${labels[terms!.withdrawal]}`
           : `${product.product_type_label} · ${condition.label}`;
         const group = groups.get(key) ?? {
-          key, label, currency, basis: terms!.basis === 'apy' ? labels.apy : labels.annual, items: [], rates: {}
+          key, label, currency, term: product.product_type === 'gic' ? depositPeriod(option, locale) : null, basis: terms!.basis === 'apy' ? labels.apy : labels.annual, items: [], rates: {}
         };
         if (!group.items.some(item => item.product_id === product.product_id)) group.items.push(product);
         group.rates[product.product_id] = option.rate;

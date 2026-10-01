@@ -1,7 +1,14 @@
 # FPDS Detailed WBS
 
 
-Latest approved slice: collect proven optional fields from the current product
+Latest approved slice: SwitchaBank lists/comparisons and Home Top 5 present
+required product facts; detail shows verified optional information with clear
+empty states. Optional completeness does not affect ranking. Public/API changes
+are implemented; release verification is recorded in the development journal.
+Deployment and live data changes have not been performed.
+
+
+Previous approved slice: collect proven optional fields from the current product
 profile and registered typed source fields in the existing official grounding
 pass. Unknown optional facts are omitted without extra searches or retries;
 publication prerequisites remain unchanged. Worker 589 and API 538 tests pass.

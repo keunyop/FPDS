@@ -1,5 +1,18 @@
 # FPDS Public
 
+
+## Required facts first - 2026-10-01
+
+Catalogue cards and compact lists, comparison and curated tables share the current
+required-fact presentation. Detail separates core metrics from verified optional
+facts; empty optional rows/columns are omitted and zero/false retain their meaning.
+Home Top 5 uses comparable rates, displays other required facts, and removes optional
+balance/security presets. Existing financial qualifications and exact GIC terms
+still constrain ranking; missing optional information is never a score penalty.
+`public-product-presentation.ts` and `public-fact-copy.ts` own these rules/EN-KO-JA
+labels. API adds an allowlisted optional `deposit_conditions` object for detail.
+Deploy API then Public; this slice does not collect or publish products.
+
 ## New collection accuracy — 2026-09-30
 
 Aggregate refresh admits new stamped canonical products only with a valid
@@ -71,11 +84,10 @@ input persistence. See [the complete contract](../../docs/03-design/public-compa
   and the deposit basis/term conditions below. Deposit, Credit Card, and Loan
   remain equal direct next actions. The main content places Deposit Top 5
   on the left and Loan Top 5 on the right at desktop, stacking both lists below
-  that breakpoint. Deposit offers Savings conditions (all, no monthly fee,
-  no minimum balance)
+  that breakpoint. Deposit offers Savings conditions (all, no monthly fee)
   and GIC exact term/redemption choices within the selected country's home
   currency (CA CAD / US USD) and matching rate basis. Loan offers exact Product
-  Type plus All / Secured / Unsecured where an explicit security flag exists,
+  Type; security is shown for credit lines without optional security presets,
   within the same home-currency policy. It orders comparable full rates ascending.
   Both lists read all snapshot pages before ranking; later-page failure or a
   changing snapshot shows unavailable rather than a partial result. Neither list is a personalized

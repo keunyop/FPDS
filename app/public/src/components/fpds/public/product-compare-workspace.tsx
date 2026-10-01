@@ -9,7 +9,7 @@ import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/p
 import { Button } from "@/components/ui/button";
 import { formatPublicMessage, getPublicDiscoveryCopy, getPublicMessages } from "@/lib/public-locale";
 import type { PublicProduct, PublicProductsResponse } from "@/lib/public-api";
-import { buildPublicAccessMetric, buildPublicProductMetrics, buildPublicSortMetric } from "@/lib/public-product-presentation";
+import { buildPublicProductMetrics } from "@/lib/public-product-presentation";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
 
@@ -245,8 +245,7 @@ function ProductCompareListItem({
   selected
 }: ProductPresentationProps) {
   const copy = getPublicMessages(locale);
-  const sortMetric = buildPublicSortMetric(product, locale, filters.sortBy);
-  const accessMetric = buildPublicAccessMetric(product, locale);
+  const [primaryMetric, ...secondaryMetrics] = buildPublicProductMetrics(product, locale, "card");
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
   return (
@@ -265,7 +264,7 @@ function ProductCompareListItem({
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
               <span className="truncate text-xs font-medium text-muted-foreground">{product.bank_name}</span>
               <span className="whitespace-nowrap rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                {product.product_type_label}
+                {product.product_type_label} · {product.currency}
               </span>
             </div>
             <h2 className="mt-0.5 text-sm font-semibold leading-snug text-foreground sm:text-base">
@@ -282,13 +281,13 @@ function ProductCompareListItem({
           product.product_family === "lending" ? "border-loan" : "border-primary",
           selected && "border-maple"
         )}>
-          <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{sortMetric.label}</dt>
+          <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{primaryMetric.label}</dt>
           <dd className={cn(
             "mt-1 max-w-64 break-words font-display text-xl font-semibold leading-tight tracking-[-0.03em] text-primary tabular-nums",
             product.product_family === "lending" && "text-loan",
             selected && "text-maple"
           )}>
-            {sortMetric.value}
+            {primaryMetric.value}
           </dd>
         </dl>
 
@@ -305,12 +304,12 @@ function ProductCompareListItem({
           ) : null}
         </div>
       </div>
-      {accessMetric ? (
-        <dl className="border-t border-border px-4 py-3 text-sm sm:px-5">
-          <dt className="text-xs text-muted-foreground">{accessMetric.label}</dt>
-          <dd className="mt-1 break-words leading-6 text-foreground">{accessMetric.value}</dd>
-        </dl>
-      ) : null}
+      <dl className="grid gap-4 border-t border-border px-4 py-3 text-sm sm:grid-cols-2 sm:px-5">
+        {secondaryMetrics.map(metric => <div className="min-w-0" key={metric.label}>
+          <dt className="text-xs text-muted-foreground">{metric.label}</dt>
+          <dd className="mt-1 break-words leading-6 text-foreground">{metric.value}</dd>
+        </div>)}
+      </dl>
       {compareDisabled ? <p className="px-4 pb-3 text-xs leading-5 text-muted-foreground sm:px-5">{copy.compare.limit}</p> : null}
     </article>
   );
@@ -325,7 +324,7 @@ function ProductCompareCard({
   selected
 }: ProductPresentationProps) {
   const copy = getPublicMessages(locale);
-  const metrics = buildPublicProductMetrics(product, locale, "card").slice(0, 3);
+  const metrics = buildPublicProductMetrics(product, locale, "card");
   const [primaryMetric, ...secondaryMetrics] = metrics;
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
@@ -345,7 +344,7 @@ function ProductCompareCard({
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
               <span className="truncate text-xs font-medium text-muted-foreground">{product.bank_name}</span>
             </div>
-            <span className="inline-flex whitespace-nowrap rounded-full bg-muted px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{product.product_type_label}</span>
+            <span className="inline-flex whitespace-nowrap rounded-full bg-muted px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{product.product_type_label} · {product.currency}</span>
           </div>
           <div className="min-w-0">
             <h2 className="text-lg font-semibold leading-snug tracking-[-0.02em]">

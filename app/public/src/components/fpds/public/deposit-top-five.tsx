@@ -14,7 +14,7 @@ export function DepositTopFive({ products, filters, unavailable }: { products: P
   const [selected, setSelected] = useState('');
   const group = groups.find(entry => entry.key === selected) ?? groups[0];
   return <ProductTopFive accent="deposit" filters={filters} headingId="deposit-top-title" title={copy.depositTopTitle}
-    subtitle={copy.depositTopSubtitle} products={group?.items ?? []} rates={group?.rates}
+    subtitle={copy.depositTopSubtitle} products={group?.items ?? []} rates={group?.rates} termLabel={group?.term}
     href={buildPublicHref('/products', { ...filters, page: 1 })} linkLabel={copy.moreDeposits}
     unavailable={unavailable} unavailableText={copy.depositTopUnavailable} emptyText={labels.empty}
     controls={group ? <label className="grid min-w-0 gap-1.5 border-b border-border px-4 py-3 text-xs font-medium md:px-5">

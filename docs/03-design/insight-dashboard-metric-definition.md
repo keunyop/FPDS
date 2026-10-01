@@ -1,5 +1,32 @@
 # FPDS Insight Dashboard Metric Definition
 
+
+## Required and optional facts on SwitchaBank - 2026-10-01
+
+Product Owner direction: catalogue cards/compact lists, comparisons and Home Top 5
+show the current type's required comparison facts and currency. Checking shows
+monthly fees and transaction costs; savings rate and monthly fee; GIC/CD rate,
+term and withdrawal consequences; cards annual fee and purchase rate; mortgages
+rate, type and term; personal loans rate and term; credit lines rate and security.
+Preserve complete rate conditions and conditional essentials, including explicit
+unsecured false and prohibited withdrawal without an invented penalty.
+
+Product detail puts these facts first, then shows verified optional facts under
+Additional verified information. Omit absent optional rows; if none are available,
+show one clear empty message. Unknown does not mean zero, free or no restriction.
+Opening deposit and ongoing balance remain distinct. Term tables omit wholly
+empty optional columns and label individual unknown cells when a column has data.
+
+Home ranks only comparable rates, preserving country, currency, annual/APY basis
+and exact GIC term/access boundaries. Optional completeness never contributes to
+a score or tie-breaker. Removed minimum-balance and optional loan security presets;
+loan groups use type and currency. Known fee waivers still qualify zero-fee claims;
+known rate conditions still prevent misleading scalar comparisons. Fewer than five
+eligible products is valid. Each row also shows the remaining required facts.
+Explicit optional catalogue filters remain available with a confirmed-value note;
+missing values do not match a selected filter. Default visible sorts use core
+fees/rates or bank names. No new publication gate or live data operation.
+
 Version: 1.0
 Date: 2026-04-05
 Status: Approved Baseline for WBS 1.7.2

@@ -43,6 +43,7 @@ export type PublicProduct = {
   card_display_rate: number | null;
   rate?: PublicRate;
   deposit_terms?: DepositTerms | null;
+  deposit_conditions?: Partial<Record<"interest_calculation_method" | "interest_payment_frequency" | "compounding_frequency" | "payout_option" | "tier_definition_text" | "promotional_period_text", string>>;
   public_display_fee: number | null;
   annual_fee: number | null;
   purchase_interest_rate: number | null;

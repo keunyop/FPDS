@@ -1,6 +1,16 @@
   # FPDS Scope Baseline and Build Start Approval
 
 
+## Approved Public required/optional presentation - 2026-10-01
+
+The Product Owner requests that lists and Home Top 5 use required product facts,
+with verified optional information in detail. Missing optional information is not
+zero/false and must not lower ranking. Required cost/access/security information
+stays visible; comparable-rate, currency and exact-term safeguards remain. This
+supersedes earlier optional-balance metrics and Home security/balance presets.
+See [Public presentation](../03-design/product-grid-information-architecture.md).
+
+
 ## Approved collection of proven optional facts - 2026-10-01
 
 Required facts are a publication minimum, not a collection ceiling. The Product

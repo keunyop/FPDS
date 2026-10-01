@@ -14,7 +14,7 @@ function savings(id: string, rate = 3, overrides: Partial<PublicProduct> = {}): 
 }
 const ids = (group: ReturnType<typeof depositRankingGroups>[number]) => group.items.map(p => p.product_id);
 
-test('Home conditions use exact disclosed zeros, excluding unknowns and fee waivers', () => {
+test('Home uses required fees and does not offer optional balance presets', () => {
   const groups = depositRankingGroups([
     savings('free'), savings('paid', 4, {public_display_fee: 5, minimum_balance: 100}),
     savings('missing', 5, {public_display_fee: null, minimum_balance: null}),
@@ -22,11 +22,10 @@ test('Home conditions use exact disclosed zeros, excluding unknowns and fee waiv
     savings('balance-only', 2, {public_display_fee: null}),
     savings('fee-only', 1, {minimum_balance: null})
   ], 'CA', 'en');
-  assert.equal(groups.length, 3);
+  assert.equal(groups.length, 2);
   assert.deepEqual(ids(groups[0]), ['waived', 'missing', 'paid', 'free', 'balance-only']);
   assert.deepEqual(ids(groups[1]), ['free', 'fee-only']);
-  assert.deepEqual(ids(groups[2]), ['free', 'balance-only']);
-  assert.deepEqual(groups.map(g => g.label), ['Savings · All', 'Savings · No monthly fee', 'Savings · No minimum balance']);
+  assert.deepEqual(groups.map(g => g.label), ['Savings · All', 'Savings · No monthly fee']);
 });
 
 test('Home currency follows country, never falls back to foreign or unknown-country products', () => {
@@ -45,13 +44,13 @@ test('annual and APY conditions stay separate and have distinct localized labels
   const apy = savings('apy'); apy.deposit_terms!.basis = 'apy';
   for (const locale of ['en', 'ko', 'ja']) {
     const groups = depositRankingGroups([savings('annual'), apy], 'CA', locale);
-    assert.equal(groups.length, 6);
+    assert.equal(groups.length, 4);
     assert.ok(groups.every(g => !g.label.includes('?')));
-    assert.equal(new Set(groups.map(g => g.label)).size, 6);
+    assert.equal(new Set(groups.map(g => g.label)).size, 4);
     assert.ok(groups.every(g => g.items.length === 1));
     assert.ok(groups.some(g => g.label.endsWith('APY')));
     if (locale === 'ko') assert.ok(groups.some(g => g.label.includes('월 수수료 없음')));
-    if (locale === 'ja') assert.ok(groups.some(g => g.label.includes('最低残高なし')));
+    if (locale === 'ja') assert.ok(groups.some(g => g.label.includes('月額手数料なし')));
   }
 });
 
@@ -93,4 +92,12 @@ test('Top 5 deduplicates, orders ties deterministically and does not mutate inpu
   const before = structuredClone(rows);
   assert.deepEqual(ids(depositRankingGroups(rows, 'CA', 'en')[0]), ['5', '6', '4', '3', '2']);
   assert.deepEqual(rows, before);
+});
+
+
+test('optional balance and deposit omissions cannot change Home rankings', () => {
+  const rows = [savings('a', 4), savings('b', 3)];
+  const before = depositRankingGroups(rows, 'CA', 'en').map(g => [g.key, ids(g)]);
+  for (const p of rows) { p.minimum_balance = null; p.minimum_deposit = null; p.deposit_terms!.options[0].minimum_deposit = null; }
+  assert.deepEqual(depositRankingGroups(rows, 'CA', 'en').map(g => [g.key, ids(g)]), before);
 });

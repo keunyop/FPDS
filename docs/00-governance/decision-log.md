@@ -1,5 +1,15 @@
 # FPDS Decision Log
 
+
+## Approved Public required/optional presentation - 2026-10-01
+
+The Product Owner requests that lists and Home Top 5 use required product facts,
+with verified optional information in detail. Missing optional information is not
+zero/false and must not lower ranking. Required cost/access/security information
+stays visible; comparable-rate, currency and exact-term safeguards remain. This
+supersedes earlier optional-balance metrics and Home security/balance presets.
+See [Public presentation](../03-design/product-grid-information-architecture.md).
+
 ## Approved restoration of essential costs and restrictions - 2026-10-01
 
 The Product Owner subsequently restores checking transaction costs, GIC/CD early-withdrawal access and material consequences, and line-of-credit security as conditional essentials. Unlimited transactions need no excess charge; prohibited early withdrawal needs no penalty value; explicit unsecured status satisfies security. Other optional fields and approved country currency defaults remain unchanged. All collection, automatic promotion and Public gates follow [the current policy](../03-design/collection-accuracy-policy.md); there is no human product review. Code deployment is separate from data operations.

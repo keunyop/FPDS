@@ -11,19 +11,17 @@ function loan(id: string, rate = 4, overrides: Partial<PublicProduct> = {}): Pub
 }
 const ids = (group: ReturnType<typeof loanRankingGroups>[number]) => group.items.map(p => p.product_id);
 
-test('Loan Home groups by exact type and explicit security without interpreting names or unknown flags', () => {
+test('Loan Home uses exact type; optional security flags do not change eligibility', () => {
   const groups = loanRankingGroups([
     loan('unknown', 3, {product_name: 'Secured mortgage'}), loan('secured', 4, {secured_flag: true}),
     loan('unsecured', 5, {secured_flag: false}), loan('missing', 6, {secured_flag: undefined}),
     loan('personal', 0, {product_type: 'personal-loan', product_type_label: 'Personal Loan'}),
     loan('credit', 8, {product_type: 'line-of-credit', product_type_label: 'Line of Credit', secured_flag: false})
   ], 'CA', 'en');
-  assert.equal(groups.length, 6);
+  assert.equal(groups.length, 3);
   assert.deepEqual(ids(groups[0]), ['unknown', 'secured', 'unsecured', 'missing']);
-  assert.deepEqual(ids(groups[1]), ['secured']); assert.deepEqual(ids(groups[2]), ['unsecured']);
-  assert.deepEqual(ids(groups[3]), ['personal']); assert.equal(groups[3].rates.personal, 0);
-  assert.deepEqual(groups.map(g => g.label), ['Mortgage · All', 'Mortgage · Secured', 'Mortgage · Unsecured',
-    'Personal Loan · All', 'Line of Credit · All', 'Line of Credit · Unsecured']);
+  assert.deepEqual(ids(groups[1]), ['personal']); assert.equal(groups[1].rates.personal, 0);
+  assert.deepEqual(groups.map(g => g.label), ['Mortgage · All', 'Personal Loan · All', 'Line of Credit · All']);
 });
 
 test('Loan groups isolate country and home currency without fallback', () => {
@@ -66,11 +64,19 @@ test('Loan condition labels are translated, unambiguous and use English fallback
   for (const locale of ['en', 'ko', 'ja']) {
     const copy = loanRankingCopy(locale);
     const groups = loanRankingGroups([loan('yes', 3, {secured_flag: true}), loan('no', 5, {secured_flag: false})], 'CA', locale);
-    assert.equal(groups.length, 3); assert.equal(new Set(groups.map(g => g.label)).size, 3);
+    assert.equal(groups.length, 1); assert.equal(new Set(groups.map(g => g.label)).size, 1);
     assert.ok(groups.every(g => !g.label.includes('?')));
-    assert.ok(groups[1].label.endsWith(copy.secured)); assert.ok(groups[2].label.endsWith(copy.unsecured));
+    assert.ok(groups[0].label.endsWith(copy.all));
   }
   assert.equal(loanRankingCopy('ko').unsecured, '무담보');
   assert.equal(loanRankingCopy('ja').secured, '担保あり');
   assert.deepEqual(loanRankingCopy('fr'), loanRankingCopy('en'));
+});
+
+
+test('missing optional loan amount, limit or security does not alter ranking', () => {
+  const rows = [loan('a', 2, {secured_flag: true, loan_amount_text: '$5,000'}), loan('b', 4, {secured_flag: false})];
+  const before = loanRankingGroups(rows, 'CA', 'en').map(g => [g.key, ids(g)]);
+  rows.forEach(p => {p.secured_flag = null; p.loan_amount_text = null; p.credit_limit_text = null;});
+  assert.deepEqual(loanRankingGroups(rows, 'CA', 'en').map(g => [g.key, ids(g)]), before);
 });

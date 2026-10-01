@@ -1,6 +1,16 @@
 # FPDS Development Journal
 
 
+## 2026-10-01 - SwitchaBank required facts and optional detail information
+
+- Implemented the Product Owner's presentation direction across catalogue grid/compact lists, comparison tables, curated comparisons, Home Top 5 and finder result summaries. Shared `public-product-presentation.ts` defines essentials for all seven supported types; currency remains visible. Optional balances, deposits and lending amounts/limits no longer consume required metric slots. GIC schedule-only alternatives remain visible without inventing a scalar; literal day terms stay days.
+- Detail separates key comparison facts and verified additional information. Missing optional rows and wholly empty optional term-table columns are omitted; partial cells say unverified. Explicit zero/false survive, opening deposits and ongoing balances remain distinct. Empty optional sections explain absence without asserting no costs/restrictions. Bank handoff no longer repeats unknown optional placeholders in comparison. A curated waiver claim still includes its exact qualifying condition.
+- Home drops minimum-balance and loan security presets that depend on optional attributes. Ranking keeps comparable-rate, country/currency, annual/APY and exact GIC term/access boundaries, with other essential facts beside each result. Optional completeness contributes no score or tie-breaker; known financial qualifications remain binding. Deliberately selected optional catalogue filters explain that only confirmed values match.
+- API serializes six allowlisted deposit-condition strings from existing approved projection metadata; invalid types, arbitrary keys and private evidence stay out. Public tolerates old responses without this optional object. No schema migration, gate change, paid collection, canonical mutation or deployment. Existing saved comparison format is unchanged.
+- Verification: Public 87 and API 539 tests passed; Public lint, explicit typecheck and production build passed. Initial browser matrix passed 85 checks at 1440/768/390px in EN/KO/JA, with absent/partial optional data, zero/false, Home conditions, empty/error states, and real published product readback. Additional curated/comparison/loading/focus checks passed (47), plus 3 localized finder checks: 135 browser checks total, no JS errors or horizontal overflow. Home and detail screenshots were visually inspected. Repository doctor and final diff checks passed. Private logs/screenshots use `tmp/public-facts-*`.
+- Updated AGENTS, requirements/scope/decision, collection/display/ranking policy, boundary READMEs and delivery status. Next: deploy API before Public. Previously collected products are not re-collected or republished by this change.
+
+
 ## 2026-10-01 - Proven optional facts collected in the existing grounding pass
 
 - Product Owner requests optional information when exact official evidence is available. Removed the essential-only AI request filter: all current profile fields and explicitly registered typed optional targets now reach grounding. Required alternatives/conditions remain separate; missing optional response entries are omitted without failure placeholders or added repair/search calls.

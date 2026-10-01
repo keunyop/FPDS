@@ -1,5 +1,13 @@
 # FPDS API Service
 
+
+Public list/detail now serialize optional `deposit_conditions` for Savings/GIC:
+only six explicit nonempty source-language strings from the approved projection
+(interest calculation/payment, compounding, payout, tiers, promotion period).
+Wrong types and arbitrary metadata are omitted; absent objects serialize as `{}`.
+No raw evidence, private payload or receipt is exposed. Deploy before Public to
+show additional verified detail facts; no migration or data mutation is required.
+
 ## Autonomous collection — 2026-09-30
 
 New stamped candidates require automatic accuracy acceptance before canonical

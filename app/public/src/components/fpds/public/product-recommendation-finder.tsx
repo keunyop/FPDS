@@ -1,5 +1,7 @@
 'use client';
 
+import { buildPublicProductMetrics } from "@/lib/public-product-presentation";
+
 import { allProductPages, depositCopy, depositOptions, depositPeriod, depositRate, depositReason, sameComparisonScope } from '@/lib/public-deposit';
 
 import { getComparablePublicRate, getRateComparisonUnavailable } from '@/lib/public-rate';
@@ -360,6 +362,8 @@ function RecommendationResult({
         ) : null}
       </div>
 
+      <FinderEssentialFacts product={result.currentProduct} locale={locale} term={selectedTerm ? depositPeriod(selectedTerm, locale) : undefined} />
+
       {result.status === 'metric-unavailable' ? (
         <div className='grid gap-1'>
           <FinderMessage>{['savings', 'gic'].includes(result.currentProduct.product_type)
@@ -409,6 +413,7 @@ function RecommendationResult({
                     </p>
                   </div>
                 </div>
+                <FinderEssentialFacts product={product} locale={locale} term={selectedTerm ? depositPeriod(selectedTerm, locale) : undefined} />
                 <div className='flex flex-wrap items-center gap-x-4 gap-y-1 sm:pl-[5.5rem]'>
                   <TrackedProductLink
                     className='inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-primary hover:underline'
@@ -440,6 +445,15 @@ function RecommendationResult({
       )}
     </div>
   );
+}
+
+function FinderEssentialFacts({ product, locale, term }: { product: PublicProduct; locale: string; term?: string }) {
+  return <dl className="grid min-w-0 gap-3 text-xs sm:grid-cols-2">
+    {buildPublicProductMetrics(product, locale, "card").slice(1).map((metric, index) => <div className="min-w-0" key={metric.label}>
+      <dt className="text-muted-foreground">{metric.label}</dt>
+      <dd className="mt-1 break-words leading-5">{product.product_type === "gic" && index === 0 && term ? term : metric.value}</dd>
+    </div>)}
+  </dl>;
 }
 
 function FinderSelect({

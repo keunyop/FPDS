@@ -1,9 +1,8 @@
-import { accessCopy, transactionCosts, withdrawalConditions } from "@/lib/public-access";
+import { publicFactCopy } from "@/lib/public-fact-copy";
 import { BankHandoffPanel } from "@/components/fpds/public/bank-handoff-panel";
 import { BankHandoffDock } from "@/components/fpds/public/bank-handoff-dock";
 import { AddToComparison } from "@/components/fpds/public/comparison-controls";
 import { comparisonCopy } from "@/lib/public-comparison-copy";
-import { getPublicRateMetric } from "@/lib/public-rate";
 import { ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -20,9 +19,9 @@ import { getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
 import type { PublicProduct, PublicProductDetailResponse } from "@/lib/public-api";
 import {
   buildPublicProductMetrics,
+  buildPublicOptionalMetrics,
   formatPublicCurrency as formatCurrency,
   formatPublicRate as formatRate,
-  formatPublicSecurity as formatSecurity,
   formatPublicTerm as formatTerm,
   getCardLabel as cardLabel,
   getLoanLabel as loanLabel
@@ -97,7 +96,8 @@ export function ProductDetailSurface({
       ? loanLabel("back", filters.locale)
       : copy.detail.backToList;
   const metricCards = buildMetricCards(product, filters.locale);
-  const detailFacts = buildDetailFacts(product, filters.locale);
+  const detailFacts = buildPublicOptionalMetrics(product, filters.locale);
+  const factCopy = publicFactCopy(filters.locale);
   const disclosureDate = formatIsoDate(product.verification ? product.verification.last_verified_at : product.last_verified_at, copy.common.noDate);
   const similarHref = buildPublicHref(catalogPath, {
     ...filters,
@@ -146,7 +146,7 @@ export function ProductDetailSurface({
                 <h1 className="text-balance mt-2 font-display text-4xl font-semibold leading-[0.98] tracking-[-0.05em] text-foreground [overflow-wrap:anywhere] md:text-6xl">{displayName}</h1>
                 {product.description_short ? <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground md:text-base">{product.description_short}</p> : null}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Badge>{product.product_type_label}</Badge>
+                  <Badge>{`${product.product_type_label} · ${product.currency}`}</Badge>
                   {product.subtype_label ? <Badge muted>{product.subtype_label}</Badge> : null}
                   {product.product_highlight_badge_label ? <Badge muted>{product.product_highlight_badge_label}</Badge> : null}
                 </div>
@@ -164,7 +164,8 @@ export function ProductDetailSurface({
             </div>
           </div>
 
-          <dl className="mt-7 grid border-y border-border sm:grid-cols-3 sm:divide-x sm:divide-border">
+          <h2 className="mt-7 text-sm font-semibold">{factCopy.core}</h2>
+          <dl className={cn("mt-3 grid border-y border-border sm:divide-x sm:divide-border", metricCards.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3")}>
             {metricCards.map((metric, index) => (
               <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
             ))}
@@ -198,18 +199,16 @@ export function ProductDetailSurface({
             <section aria-labelledby="product-facts-title">
               <div className="border-b border-foreground/15 pb-3">
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{designCopy.verified}</p>
-                <h2 id="product-facts-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{designCopy.availableFacts}</h2>
+                <h2 id="product-facts-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{factCopy.additional}</h2>
               </div>
-              <dl className="grid sm:grid-cols-2">
-                <div className="border-b border-border py-4 sm:pr-5">
-                  <Fact label={copy.grid.productTypes} value={product.product_type_label} />
-                </div>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{factCopy.note}</p>
+              {detailFacts.length ? <dl className="grid sm:grid-cols-2">
                 {detailFacts.map((fact, index) => (
-                  <div className={cn("border-b border-border py-4", index % 2 === 0 ? "sm:pl-5" : "sm:pr-5")} key={fact.label}>
+                  <div className={cn("border-b border-border py-4", index % 2 === 0 ? "sm:pr-5" : "sm:pl-5")} key={fact.label}>
                     <Fact label={fact.label} value={fact.value} />
                   </div>
                 ))}
-              </dl>
+              </dl> : <p className="py-4 text-sm text-muted-foreground">{factCopy.empty}</p>}
             </section>
 
             {termRateRows.length ? <TermRateTable currency={product.currency} locale={filters.locale} rows={termRateRows} /> : null}
@@ -452,68 +451,7 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
 }
 
 function buildMetricCards(product: PublicProduct, locale: string): DetailFact[] {
-  return buildPublicProductMetrics(product, locale).slice(0, 3);
-}
-
-function buildDetailFacts(product: PublicProduct, locale: string) {
-  const facts: DetailFact[] = [];
-  const rate = getPublicRateMetric(product, locale);
-  if (product.product_type === "credit-card") {
-    addFact(facts, cardLabel("annualFee", locale), formatCurrency(product.annual_fee, product.currency, locale), locale);
-    addFact(facts, rate.label, rate.value, locale);
-    addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
-    addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
-    addFact(facts, getPublicDesignCopy(locale).sourceLanguage, product.source_language, locale);
-    return facts;
-  }
-  if (product.product_family === "lending") {
-    addFact(
-      facts,
-      rate.label,
-      rate.value,
-      locale
-    );
-    addFact(facts, loanLabel("rateType", locale), product.rate_type, locale);
-    addFact(facts, loanLabel("term", locale), product.term_length_text, locale);
-    addFact(facts, loanLabel("amortization", locale), product.amortization_text, locale);
-    addFact(facts, loanLabel("payment", locale), product.payment_frequency, locale);
-    addFact(facts, loanLabel("prepayment", locale), product.prepayment_privileges, locale);
-    addFact(facts, loanLabel("loanAmount", locale), product.loan_amount_text ?? product.credit_limit_text, locale);
-    addFact(facts, getPublicDesignCopy(locale).monthlyPayment, product.monthly_payment_text, locale);
-    addFact(facts, getPublicDesignCopy(locale).securityRequirement, formatSecurity(product, locale), locale);
-    addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
-    addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
-    addFact(facts, getPublicDesignCopy(locale).sourceLanguage, product.source_language, locale);
-    return facts;
-  }
-  if (product.product_type === "chequing") {
-    addFact(facts, accessCopy(locale).costs, transactionCosts(product, locale), locale);
-  }
-  if (product.product_type === "gic") {
-    addFact(facts, accessCopy(locale).withdrawal, withdrawalConditions(product, locale), locale);
-  }
-  const depositAmount = product.minimum_deposit ?? product.minimum_balance;
-  if (depositAmount != null) {
-    addFact(facts, detailLabel("depositAmount", locale), formatCurrency(depositAmount, product.currency, locale), locale);
-  }
-  if (product.base_12_month_rate != null) {
-    addFact(facts, detailLabel("base12MonthRate", locale), formatRate(product.base_12_month_rate, locale), locale);
-  }
-  addFact(facts, detailLabel("customerTags", locale), product.target_customer_tag_labels.join(", "), locale);
-  addFact(facts, detailLabel("eligibility", locale), product.eligibility_text, locale);
-  addFact(facts, detailLabel("applicationMethod", locale), product.application_method, locale);
-  addFact(facts, detailLabel("postMaturityRate", locale), product.post_maturity_interest_rate, locale);
-  addFact(facts, detailLabel("taxBenefits", locale), product.tax_benefits, locale);
-  addFact(facts, detailLabel("depositInsurance", locale), product.deposit_insurance, locale);
-  addFact(facts, getPublicDesignCopy(locale).sourceLanguage, product.source_language, locale);
-  return facts;
-}
-
-function addFact(facts: DetailFact[], label: string, value: string | null, locale = "en") {
-  const notDisclosed = getPublicMessages(locale).common.notDisclosed;
-  if (value && value.trim() && value !== notDisclosed) {
-    facts.push({ label, value });
-  }
+  return buildPublicProductMetrics(product, locale);
 }
 
 function TermRateTable({
@@ -525,19 +463,21 @@ function TermRateTable({
   locale: string;
   rows: PublicProduct["term_rate_table"];
 }) {
+  const showMinimum = rows.some(row => row.minimum_deposit != null);
+  const showNotes = rows.some(row => row.notes?.trim());
   return (
     <Card className="border-border/80 shadow-sm">
       <CardHeader>
         <h2 className="text-base font-semibold">{getPublicMessages(locale).detail.termRates}</h2>
       </CardHeader>
       <CardContent className="overflow-x-auto">
-        <table className="w-full min-w-[36rem] text-left text-sm">
+        <table className="w-full text-left text-sm">
           <thead className="border-b border-border text-xs font-medium text-muted-foreground">
             <tr>
               <th className="py-2 pr-4">{detailLabel("term", locale)}</th>
               <th className="py-2 pr-4">{detailLabel("rate", locale)}</th>
-              <th className="py-2 pr-4">{detailLabel("minimumDeposit", locale)}</th>
-              <th className="py-2">{detailLabel("notes", locale)}</th>
+              {showMinimum ? <th className="py-2 pr-4">{detailLabel("minimumDeposit", locale)}</th> : null}
+              {showNotes ? <th className="py-2">{detailLabel("notes", locale)}</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -545,8 +485,8 @@ function TermRateTable({
               <tr className="border-b border-border/60 last:border-0" key={`${row.term_label ?? row.term_length_days ?? "term"}-${index}`}>
                 <td className="py-3 pr-4 font-medium text-foreground">{row.term_label ?? formatTerm(row.term_length_days, locale)}</td>
                 <td className="py-3 pr-4 tabular-nums text-foreground">{formatRate(row.rate, locale)}</td>
-                <td className="py-3 pr-4 tabular-nums text-muted-foreground">{formatCurrency(row.minimum_deposit ?? null, currency, locale)}</td>
-                <td className="py-3 text-muted-foreground">{row.notes ?? ""}</td>
+                {showMinimum ? <td className="py-3 pr-4 tabular-nums text-muted-foreground">{row.minimum_deposit == null ? publicFactCopy(locale).missing : formatCurrency(row.minimum_deposit, currency, locale)}</td> : null}
+                {showNotes ? <td className="py-3 text-muted-foreground">{row.notes || publicFactCopy(locale).missing}</td> : null}
               </tr>
             ))}
           </tbody>

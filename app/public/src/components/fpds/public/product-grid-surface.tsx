@@ -1,3 +1,4 @@
+import { publicFactCopy } from "@/lib/public-fact-copy";
 import { ArrowDownUp, ChevronDown, LoaderCircle, RefreshCw, Search, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -87,7 +88,7 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
     : [
         { value: "display_rate", label: copy.grid.sortDisplayRate, order: "desc" },
         { value: "monthly_fee", label: copy.grid.sortMonthlyFee, order: "asc" },
-        { value: "minimum_balance", label: copy.grid.sortMinimumBalance, order: "asc" }
+        { value: "bank_name", label: copy.grid.sortBankName, order: "asc" }
       ];
 
   return (
@@ -199,6 +200,7 @@ export function ProductGridSurface({ apiUnavailable, catalog, filterOptions, fil
                   </div>
                 ) : null}
 
+                <p className="text-xs leading-5 text-muted-foreground">{publicFactCopy(filters.locale).optionalFilter}</p>
                 <div className="flex justify-end border-t border-border/70 pt-4">
                   <Button asChild type="button" variant="outline">
                     <Link href={clearHref}>{copy.common.clearFilters}</Link>

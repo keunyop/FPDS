@@ -230,3 +230,12 @@ Receipts now use `collection-accuracy-2026-10-01-cost-access` and market profile
 - Extraction receives grouped alternatives and conditional requirements, not an instruction to fill every field. Missing essentials cause automatic exclusion; no human review or extra repair loop is introduced. Transaction fee fields remain native nonnegative money values and raw source-language withdrawal/security prose remains exact.
 - Promotion, receipt compatibility and aggregate refresh enforce this contract. Public reads recheck the exact snapshot-pinned approved version for affected types so old projections cannot bypass it; country counts use the same eligible rows. Private payloads/receipts never enter responses. Checking costs and GIC access/consequences appear in shared catalog, detail, comparison and curated displays in EN/KO/JA.
 - Code changes require API/worker and Public deployment. Read-only impact on the current 24 active products: 5 pass, 19 need more official evidence. No live canonical mutation or paid collection is part of this change. Existing versions remain preserved; deploy API first, then Public, and allow cache expiry. A later normal aggregate refresh applies the same gate without resetting verification dates.
+
+
+## Public display of optional information - subsequent 2026-10-01 direction
+
+Public lists, comparisons and Top 5 present current required decision facts.
+Verified optional information belongs in detail; absent rows are omitted and
+never filled with zero/false. Top 5 does not use optional coverage as a score or
+eligibility prerequisite; actual known financial qualifications remain binding.
+See [the presentation contract](product-grid-information-architecture.md).

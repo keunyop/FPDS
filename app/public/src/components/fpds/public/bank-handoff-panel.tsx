@@ -11,20 +11,20 @@ export function BankHandoffPanel({ product, locale, compact = false }: { product
   const destination = officialDestination(product.product_url);
   const rate = getPublicRateMetric(product, locale);
   const cost = handoffCost(product, locale);
-  const conditions = handoffConditions(product, locale);
-  const facts = compact ? conditions : [
+  const conditions = handoffConditions(product, locale).filter(fact => fact.value !== copy.bank);
+  const facts = compact ? [] : [
     { key: 'currency', label: copy.currency, value: product.currency || copy.bank },
     ...((product.product_type !== 'chequing' || product.rate?.source_text || product.rate?.comparable_rate != null) ? [{ key: 'rate', label: rate.label, value: product.rate?.source_text || rate.value }] : []),
     ...(cost ? [cost] : []), ...conditions
   ];
   return <section className="mt-5 min-w-0 border-t border-border pt-4" data-bank-handoff aria-label={copy.title}>
     <h2 className="text-sm font-semibold">{copy.title}</h2>
-    <dl className={compact ? 'mt-3 grid gap-3' : 'mt-3 grid grid-cols-2 gap-x-6 gap-y-3 lg:grid-cols-3'}>
+    {facts.length ? <dl className={compact ? 'mt-3 grid gap-3' : 'mt-3 grid grid-cols-2 gap-x-6 gap-y-3 lg:grid-cols-3'}>
       {facts.map(fact => <div key={fact.key} className="min-w-0">
         <dt className="text-xs text-muted-foreground">{fact.label}</dt>
         <dd className="mt-1 text-sm leading-5 [overflow-wrap:anywhere]">{fact.value}</dd>
       </div>)}
-    </dl>
+    </dl> : null}
     {!compact ? <ProductVerification product={product} locale={locale} /> : null}
     <div className={compact ? 'mt-4 grid gap-2' : 'mt-4 flex flex-wrap items-center gap-x-5 gap-y-2'}>
       {destination ? <>

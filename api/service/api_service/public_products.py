@@ -469,6 +469,7 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str, evaluated_at: st
         "card_display_rate": rate["comparable_rate"],
         "rate": rate,
         "deposit_terms": deposit_terms(row),
+        "deposit_conditions": _public_deposit_conditions(metadata) if row.get("product_type") in {"savings", "gic"} else {},
         "public_display_fee": serialize_decimal(row.get("effective_fee")),
         "annual_fee": serialize_decimal(metadata.get("annual_fee")),
         "purchase_interest_rate": serialize_decimal(metadata.get("purchase_interest_rate")),
@@ -516,6 +517,20 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str, evaluated_at: st
         "last_changed_at": serialize_datetime(row.get("last_changed_at")),
     }
 
+
+
+def _public_deposit_conditions(metadata: dict[str, Any]) -> dict[str, str]:
+    """Only approved projection wording, never arbitrary metadata or evidence."""
+    conditions = metadata.get("deposit_conditions")
+    if not isinstance(conditions, dict):
+        return {}
+    return {
+        name: value.strip()
+        for name in ("interest_calculation_method", "interest_payment_frequency",
+                     "compounding_frequency", "payout_option", "tier_definition_text",
+                     "promotional_period_text")
+        if isinstance(value := conditions.get(name), str) and value.strip()
+    }
 
 def _card_display_rate(row: dict[str, Any]) -> float | None:
     return comparable_rate(row)

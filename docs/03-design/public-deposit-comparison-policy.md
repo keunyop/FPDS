@@ -10,15 +10,15 @@ Home Deposit Top 5 uses one selected Product Type, currency, annual-rate/APY
 basis and, for GIC/CD, exact term and known redemption category. It ranks the
 selected term row, never a representative rate from a different maturity.
 Savings and GIC no longer share an ordered list. The Product Owner's Home
-refinement replaces currency choices with Savings All / No monthly fee / No
-minimum balance, and GIC/CD exact term plus redemption conditions. Home uses
+refinement replaces currency choices with Savings All / No monthly fee, and GIC/CD exact term plus redemption conditions. Home uses
 CAD for Canada and USD for the United States, visibly shown alongside the
 selected annual/APY basis. Other currencies remain available in the catalog;
 there is no foreign-currency fallback or inferred currency for another country.
 
 No monthly fee requires an explicit zero public fee and no fee-waiver condition.
-No minimum balance requires an explicit zero minimum balance; this does not
-claim a zero opening deposit. Unknown values never qualify. Presets appear only
+The optional minimum-balance preset is removed by the subsequent 2026-10-01
+Product Owner instruction. Missing minimum balances/deposits do not affect
+Top 5 ordering. Unknown fee values never qualify for the no-monthly-fee preset. Presets appear only
 when compatible records exist, with rate-basis labels added to distinguish
 otherwise identical choices. Each preset retains rate-descending Top 5 order.
 The single compact selector retains the existing Home layout and Loan list.
@@ -102,3 +102,14 @@ Use the Public package checks, the full API suite and worker aggregate tests.
 Browser verification covers 1440/768/exact 390px, EN/KO/JA, real Oaken/INDEXED
 GIC, Home product conditions and currency isolation, fixture GIC/APY/promotion
 cases, finder loading/error/empty, and existing deposit/card/loan catalogs. Block analytics/feedback writes in QA.
+
+
+## Public presentation amendment - 2026-10-01
+
+Catalogue, comparison and Home rows now retain type-specific required facts;
+optional facts appear in detail without empty field grids. Home GIC rows use the
+selected exact term, while literal day durations stay days in generic displays.
+Deposit detail receives only six allowlisted source-language condition strings
+from the approved projection's existing `deposit_conditions`; evidence, notes,
+receipts and arbitrary metadata remain private. Older cached API responses omit
+these optional fields safely. Release API before Public to populate them.

@@ -1,7 +1,8 @@
-import { accessCopy, transactionCosts, withdrawalConditions } from "./public-access";
-import { getPublicRateMetric } from "@/lib/public-rate";
-import type { PublicProduct } from "@/lib/public-api";
-import { getIntlLocale, getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
+import { publicFactCopy } from "./public-fact-copy.ts";
+import { accessCopy, transactionCosts, withdrawalConditions } from "./public-access.ts";
+import { getPublicRateMetric } from "./public-rate.ts";
+import type { PublicProduct } from "./public-api.ts";
+import { getIntlLocale, getPublicMessages, normalizePublicLocale } from "./public-locale.ts";
 
 export type PublicProductMetric = {
   label: string;
@@ -51,18 +52,22 @@ export function buildPublicProductMetrics(
   if (product.product_type === "chequing") {
     return [
       { label: copy.grid.metricMonthlyFee, value: formatPublicCurrency(product.public_display_fee, product.currency, locale) },
-      { label: accessCopy(locale).costs, value: transactionCosts(product, locale) },
-      { label: copy.grid.metricMinBalance, value: formatPublicCurrency(product.minimum_balance ?? product.minimum_deposit, product.currency, locale) },
-      { label: getMarketLabel("feeWaiver", locale), value: product.fee_waiver_condition ?? copy.common.notDisclosed }
+      { label: accessCopy(locale).costs, value: transactionCosts(product, locale) }
     ];
   }
 
   if (product.product_type === "gic") {
+    // An accepted schedule is a required-rate alternative, not a missing scalar.
+    // Show each term/rate with its qualifications; never manufacture a ranking rate.
+    if ((!product.rate || product.rate.kind === "unknown") && !product.rate?.source_text && product.term_rate_table?.length) {
+      rateMetric.value = product.term_rate_table.map(row =>
+        `${row.term_label || formatPublicTerm(row.term_length_days, locale)}: ${formatPublicRate(row.rate, locale)}${row.notes ? ` (${row.notes})` : ""}`
+      ).join("; ");
+    }
     return [
       rateMetric,
       { label: copy.grid.metricTerm, value: formatPublicProductTerm(product, locale) },
-      { label: accessCopy(locale).withdrawal, value: withdrawalConditions(product, locale) },
-      { label: copy.grid.metricMinDeposit, value: formatPublicCurrency(product.minimum_deposit, product.currency, locale) }
+      { label: accessCopy(locale).withdrawal, value: withdrawalConditions(product, locale) }
     ];
   }
 
@@ -84,7 +89,6 @@ export function buildPublicProductMetrics(
   if (product.product_type === "personal-loan") {
     return [
       rateMetric,
-      { label: getEssentialLabel("loanAmount", locale), value: product.loan_amount_text ?? copy.common.notDisclosed },
       { label: getLoanLabel("term", locale), value: formatPublicProductTerm(product, locale) }
     ];
   }
@@ -92,16 +96,53 @@ export function buildPublicProductMetrics(
   if (product.product_type === "line-of-credit") {
     return [
       rateMetric,
-      { label: getEssentialLabel("creditLimit", locale), value: product.credit_limit_text ?? copy.common.notDisclosed },
       { label: getEssentialLabel("security", locale), value: formatPublicSecurity(product, locale) }
     ];
   }
 
   return [
     rateMetric,
-    { label: copy.grid.metricMonthlyFee, value: formatPublicCurrency(product.public_display_fee, product.currency, locale) },
-    { label: copy.grid.metricMinBalance, value: formatPublicCurrency(product.minimum_balance, product.currency, locale) }
+    { label: copy.grid.metricMonthlyFee, value: formatPublicCurrency(product.public_display_fee, product.currency, locale) }
   ];
+}
+
+/** Missing optional values never become placeholders, zero or false. */
+export function buildPublicOptionalMetrics(product: PublicProduct, locale: string): PublicProductMetric[] {
+  const copy = getPublicMessages(locale);
+  const labels = publicFactCopy(locale);
+  const facts: PublicProductMetric[] = [];
+  const add = (label: string, value: string | null | undefined) => {
+    if (value?.trim() && value !== copy.common.notDisclosed) facts.push({ label, value });
+  };
+  const money = (label: string, value: number | null | undefined) => {
+    if (typeof value === "number" && Number.isFinite(value)) add(label, formatPublicCurrency(value, product.currency, locale));
+  };
+  if (["chequing", "savings", "gic"].includes(product.product_type)) {
+    money(copy.grid.metricMinBalance, product.minimum_balance);
+    money(copy.grid.metricMinDeposit, product.minimum_deposit);
+    add(labels.waiver, product.fee_waiver_condition);
+    add(labels.insurance, product.deposit_insurance);
+    add(labels.tax, product.tax_benefits);
+    add(labels.maturityRate, product.post_maturity_interest_rate);
+    const conditions = product.deposit_conditions;
+    add(labels.calculation, conditions?.interest_calculation_method);
+    add(labels.frequency, conditions?.interest_payment_frequency);
+    add(labels.compounding, conditions?.compounding_frequency);
+    add(labels.payout, conditions?.payout_option);
+    add(labels.tiers, conditions?.tier_definition_text);
+    add(labels.promotion, conditions?.promotional_period_text);
+  } else if (product.product_family === "lending" && product.product_type !== "credit-card") {
+    add(getEssentialLabel("loanAmount", locale), product.loan_amount_text);
+    add(getEssentialLabel("creditLimit", locale), product.credit_limit_text);
+    add(getLoanLabel("amortization", locale), product.amortization_text);
+    add(getLoanLabel("payment", locale), product.payment_frequency);
+    add(getLoanLabel("prepayment", locale), product.prepayment_privileges);
+    add(labels.payment, product.monthly_payment_text);
+    if (product.product_type !== "line-of-credit") add(getEssentialLabel("security", locale), formatPublicSecurity(product, locale));
+  }
+  add(labels.eligibility, product.eligibility_text);
+  add(labels.application, product.application_method);
+  return facts;
 }
 
 export function buildPublicAccessMetric(product: PublicProduct, locale: string): PublicProductMetric | null {
@@ -135,7 +176,7 @@ export function buildPublicSortMetric(product: PublicProduct, locale: string, so
 }
 
 export function formatPublicCurrency(value: number | null, currency: string, locale: string) {
-  if (value === null || !Number.isFinite(value)) {
+  if (value == null || !Number.isFinite(value)) {
     return getPublicMessages(locale).common.notDisclosed;
   }
   return new Intl.NumberFormat(getIntlLocale(locale), {
@@ -153,19 +194,20 @@ export function formatPublicProductTerm(product: PublicProduct, locale: string) 
   if (product.term_length_text) {
     return product.term_length_text;
   }
-  if (product.term_length_days !== null) {
+  if (product.term_length_days != null) {
     return formatPublicTerm(product.term_length_days, locale);
   }
-  const firstRow = product.term_rate_table[0];
-  if (product.term_rate_table.length === 1 && firstRow) {
+  const rows = product.term_rate_table ?? [];
+  const firstRow = rows[0];
+  if (rows.length === 1 && firstRow) {
     return firstRow.term_label ?? formatPublicTerm(firstRow.term_length_days, locale);
   }
-  if (product.term_rate_table.length > 1) {
+  if (rows.length > 1) {
     return locale === "ko"
-      ? `${product.term_rate_table.length}개 기간`
+      ? `${rows.length}개 기간`
       : locale === "ja"
-        ? `${product.term_rate_table.length}期間`
-        : `${product.term_rate_table.length} terms`;
+        ? `${rows.length}期間`
+        : `${rows.length} terms`;
   }
   return getPublicMessages(locale).common.notDisclosed;
 }
@@ -175,7 +217,7 @@ export function formatPublicPurchaseRate(product: PublicProduct, locale: string)
 }
 
 export function formatPublicRate(value: number | null, locale: string) {
-  if (value === null || !Number.isFinite(value)) {
+  if (value == null || !Number.isFinite(value)) {
     return getPublicMessages(locale).common.notDisclosed;
   }
   return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
@@ -198,7 +240,7 @@ export function formatPublicSecurity(product: PublicProduct, locale: string) {
   if (stated) {
     return stated;
   }
-  if (product.secured_flag === null) {
+  if (typeof product.secured_flag !== "boolean") {
     return getPublicMessages(locale).common.notDisclosed;
   }
   if (product.secured_flag) {
@@ -237,26 +279,6 @@ export function getMarketLabel(key: MarketLabelKey, locale: string) {
 export function formatPublicTerm(termLengthDays: number | null, locale: string) {
   if (termLengthDays === null || !Number.isFinite(termLengthDays)) {
     return getPublicMessages(locale).common.notDisclosed;
-  }
-  if (termLengthDays % 365 === 0) {
-    const years = termLengthDays / 365;
-    if (locale === "ko") {
-      return `${years}년`;
-    }
-    if (locale === "ja") {
-      return `${years}年`;
-    }
-    return `${years} year${years === 1 ? "" : "s"}`;
-  }
-  if (termLengthDays % 30 === 0) {
-    const months = Math.round(termLengthDays / 30);
-    if (locale === "ko") {
-      return `${months}개월`;
-    }
-    if (locale === "ja") {
-      return `${months}か月`;
-    }
-    return `${months} month${months === 1 ? "" : "s"}`;
   }
   if (locale === "ko") {
     return `${termLengthDays}일`;
