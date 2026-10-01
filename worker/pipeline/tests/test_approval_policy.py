@@ -139,7 +139,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         chequing = comparison_quality(
             product_type="chequing",
             expected_fields=[],
-            candidate_payload={"monthly_fee": 0, "minimum_balance": 0, "included_transactions": 25},
+            candidate_payload={"monthly_fee": 0, "minimum_balance": 0, "included_transactions": 25, "additional_transaction_fee": 1.25},
         )
         savings = comparison_quality(
             product_type="savings",
@@ -165,13 +165,13 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
             country_code="CA",
             product_type="chequing",
             expected_fields=[],
-            candidate_payload={"monthly_fee": 0, "included_transactions": 40},
+            candidate_payload={"monthly_fee": 0, "included_transactions": 40, "additional_transaction_fee": 1.25},
         )
         fee_bearing = comparison_quality(
             country_code="CA",
             product_type="chequing",
             expected_fields=[],
-            candidate_payload={"monthly_fee": 9.75, "included_transactions": 25},
+            candidate_payload={"monthly_fee": 9.75, "included_transactions": 25, "additional_transaction_fee": 1.25},
         )
 
         self.assertTrue(no_fee.complete)
@@ -187,7 +187,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
             candidate_payload={
                 "monthly_fee": 3.95,
                 "fee_waiver_condition": "Fee waived for eligible GIS, RDSP, Indigenous, or Newcomer customers.",
-                "included_transactions": 12,
+                "included_transactions": 12, "additional_transaction_fee": 1.25,
             },
         )
         us_dollar_account = comparison_quality(
@@ -200,7 +200,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         self.assertTrue(minimum_account.complete)
         self.assertNotIn("fee_waiver_condition", minimum_account.assessed_fields)
         self.assertTrue(us_dollar_account.complete)
-        self.assertNotIn("transaction_fee", us_dollar_account.assessed_fields)
+        self.assertIn("transaction_fee", us_dollar_account.satisfied_fields)
 
     def test_repair_fields_do_not_reverify_populated_alternatives_for_same_requirement(self) -> None:
         fields = dynamic_repair_fields(
@@ -216,17 +216,17 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
             },
         )
 
-        self.assertEqual(fields, ["monthly_fee"])
+        self.assertEqual(fields, ["monthly_fee", "included_transactions", "additional_transaction_fee"])
 
-    def test_line_of_credit_security_is_optional(self) -> None:
+    def test_line_of_credit_requires_security(self) -> None:
         quality = comparison_quality(
             product_type="line-of-credit",
             expected_fields=[],
             candidate_payload={"interest_rate_summary": "Prime + 2.0%", "credit_limit_text": "$5,000-$50,000"},
         )
 
-        self.assertTrue(quality.complete)
-        self.assertEqual(quality.missing_fields, ())
+        self.assertFalse(quality.complete)
+        self.assertEqual(quality.missing_fields, ("secured_flag",))
 
     def test_canadian_line_of_credit_repair_prefers_evidence_preserving_fields(self) -> None:
         self.assertEqual(
@@ -243,35 +243,35 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
                 ],
                 candidate_payload={"product_name": "TD Personal Line of Credit"},
             ),
-            ["interest_rate_summary"],
+            ["interest_rate_summary", "secured_flag"],
         )
 
-    def test_us_checking_replaces_transaction_count_with_conditional_fee_waiver(self) -> None:
+    def test_us_checking_requires_transaction_structure_without_requiring_waivers(self) -> None:
         no_fee = comparison_quality(
             country_code="US",
             product_type="chequing",
             expected_fields=[],
-            candidate_payload={"monthly_fee": 0, "minimum_deposit": 25},
+            candidate_payload={"unlimited_transactions_flag": True, "monthly_fee": 0, "minimum_deposit": 25},
         )
         positive_fee_without_waiver = comparison_quality(
             country_code="US",
             product_type="chequing",
             expected_fields=[],
-            candidate_payload={"monthly_fee": 12, "minimum_balance": 1500},
+            candidate_payload={"unlimited_transactions_flag": True, "monthly_fee": 12, "minimum_balance": 1500},
         )
         positive_fee_with_waiver = comparison_quality(
             country_code="US",
             product_type="chequing",
             expected_fields=[],
             candidate_payload={
-                "monthly_fee": 12,
+                "unlimited_transactions_flag": True, "monthly_fee": 12,
                 "minimum_balance": 1500,
                 "fee_waiver_condition": "Waived with $1,500 daily balance or qualifying direct deposit.",
             },
         )
 
         self.assertTrue(no_fee.complete)
-        self.assertNotIn("included_transactions", no_fee.assessed_fields)
+        self.assertIn("unlimited_transactions_flag", no_fee.satisfied_fields)
         self.assertTrue(positive_fee_without_waiver.complete)
         self.assertEqual(positive_fee_without_waiver.missing_fields, ())
         self.assertTrue(positive_fee_with_waiver.complete)
@@ -301,7 +301,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         self.assertTrue(with_waiver.complete)
         self.assertIn("interest_rate_summary", fields)
 
-    def test_us_cd_uses_early_withdrawal_penalty_not_redeemability(self) -> None:
+    def test_us_cd_requires_access_and_withdrawal_consequences(self) -> None:
         quality = comparison_quality(
             country_code="US",
             product_type="gic",
@@ -309,12 +309,13 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
             candidate_payload={
                 "term_rate_table": [{"term_label": "12 months", "rate": 4.1}],
                 "minimum_deposit": 500,
-                "early_withdrawal_penalty": "90 days of interest for terms of 12 months or less.",
+                "redeemable_flag": True,
+                "early_withdrawal_penalty": "Early withdrawal penalty: 90 days of interest for terms of 12 months or less.",
             },
         )
 
         self.assertTrue(quality.complete)
-        self.assertNotIn("redeemable_flag", quality.assessed_fields)
+        self.assertIn("redeemable_flag", quality.assessed_fields)
 
     def test_us_mortgage_requires_qualified_summary_not_bare_scalar(self) -> None:
         scalar_only = comparison_quality(
@@ -383,11 +384,11 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         )
 
         self.assertIn("fee_waiver_condition", checking_fields)
-        self.assertNotIn("included_transactions", checking_fields)
+        self.assertIn("included_transactions", checking_fields)
         self.assertIn("early_withdrawal_penalty", cd_fields)
         self.assertIn("redeemable_flag", cd_fields)
         profile = country_product_profile(country_code="US", product_type="gic")
-        self.assertNotIn("redeemable_flag", [f for r in profile.requirements for f in r.alternatives])
+        self.assertIn("redeemable_flag", [f for r in profile.requirements for f in r.alternatives])
 
     def test_unconfigured_market_metadata_keeps_requested_identity_and_fails_closed(self) -> None:
         metadata = market_profile_metadata(

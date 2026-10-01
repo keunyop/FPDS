@@ -715,3 +715,7 @@ one newcomer link, the footer an index link, and curated comparisons contextual
 topic links. The primary guide action uses the existing curated readiness gate
 or a typed catalog fallback. Native editorial disclosures reuse site feedback.
 See [the guide policy](public-comparison-guides-policy.md).
+
+## Restored financial essentials - 2026-10-01
+
+Both compact and card catalog layouts expose checking transaction costs, GIC/CD withdrawal access with material consequences, and line-of-credit security. The shared metrics also serve comparison/detail; curated comparisons retain the same checking and withdrawal facts. Long official conditions wrap at desktop, tablet and 390px widths. Unknown values stay unavailable, without fabricated zero/no-penalty/unsecured defaults. These domain rows reuse the existing primitives and semantic tokens; no new menu or review action is introduced.

@@ -67,13 +67,13 @@ class CountryCurrencyPolicyTests(unittest.TestCase):
 
     def test_core_requirements_and_optional_collection(self):
         fixtures={
-            'chequing':({'monthly_fee':0},'minimum_balance'),
+            'chequing':({'monthly_fee':0,'unlimited_transactions_flag':True},'minimum_balance'),
             'savings':({'standard_rate':2.5,'monthly_fee':0},'minimum_balance'),
-            'gic':({'standard_rate':3.5,'term_length_text':'1 year'},'minimum_deposit'),
+            'gic':({'standard_rate':3.5,'term_length_text':'1 year','non_redeemable_flag':True},'minimum_deposit'),
             'credit-card':({'annual_fee':29,'purchase_interest_rate':13.99},None),
             'mortgage':({'interest_rate_summary':'Annual rate 4.5%','rate_type':'fixed','term_length_text':'5 years'},None),
             'personal-loan':({'interest_rate_summary':'Annual rate 8%','term_length_text':'2 years'},'loan_amount_text'),
-            'line-of-credit':({'interest_rate_summary':'Annual rate 8%'},'credit_limit_text'),
+            'line-of-credit':({'interest_rate_summary':'Annual rate 8%','secured_flag':False},'credit_limit_text'),
         }
         for country in ['CA','US']:
             for kind,(payload,optional) in fixtures.items():

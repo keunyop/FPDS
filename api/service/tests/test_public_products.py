@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from decimal import Decimal
 import unittest
+from unittest.mock import patch
 
 from api_service.public_products import (
     load_available_public_countries,
@@ -95,12 +96,16 @@ class PublicProductsTests(unittest.TestCase):
             latest_attempt=None,
             rows=[],
             countries=[
-                {"code": "ca", "count": 14, "bank_count": 5},
-                {"code": "US", "count": 8, "bank_count": 3},
+                {"code": "ca", "snapshot_id": "snapshot-ca"},
+                {"code": "US", "snapshot_id": "snapshot-us"},
             ],
         )
 
-        countries = load_available_public_countries(connection)
+        with patch("api_service.public_products.load_public_projection_rows", side_effect=[
+            [{"bank_code": str(i % 5)} for i in range(14)],
+            [{"bank_code": str(i % 3)} for i in range(8)],
+        ]):
+            countries = load_available_public_countries(connection)
 
         self.assertEqual(
             countries,
@@ -110,8 +115,7 @@ class PublicProductsTests(unittest.TestCase):
             ],
         )
         self.assertIn("DISTINCT ON (country_code)", connection.calls[0][0])
-        self.assertIn("COUNT(DISTINCT projection.bank_code)", connection.calls[0][0])
-        self.assertIn("projection.status = 'active'", connection.calls[0][0])
+        self.assertIn("snapshot_id FROM latest_completed", connection.calls[0][0])
 
     def test_load_public_products_sorts_and_paginates_snapshot_rows(self) -> None:
         connection = _PublicConnection(
@@ -484,7 +488,7 @@ class PublicProductsTests(unittest.TestCase):
         self.assertIsNone(by_id["mortgage-multiple-examples"]["card_display_rate"])
 
     def test_load_public_products_handles_bad_numeric_values_in_visible_sorts(self) -> None:
-        bad_row = dict(_projection_rows()[0])
+        bad_row = dict(next(row for row in _projection_rows() if row["product_type"] == "savings"))
         bad_row.update(
             {
                 "product_id": "bad-numeric-row",
@@ -700,7 +704,7 @@ def _latest_success_snapshot_attempt() -> dict[str, object]:
     }
 
 
-def _projection_rows() -> list[dict[str, object]]:
+def _projection_rows_without_versions() -> list[dict[str, object]]:
     return [
         {
             "product_id": "chq-rbc-student",
@@ -945,7 +949,7 @@ def _credit_card_projection(
     }
 
 
-def _lending_projection(
+def _lending_projection_without_version(
     product_id: str,
     *,
     product_type: str,
@@ -987,3 +991,13 @@ def _lending_projection(
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _projection_rows():
+    from tests.public_collection_fixtures import with_approved_version
+    return [with_approved_version(row) for row in _projection_rows_without_versions()]
+
+
+def _lending_projection(*args, **kwargs):
+    from tests.public_collection_fixtures import with_approved_version
+    return with_approved_version(_lending_projection_without_version(*args, **kwargs))

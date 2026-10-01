@@ -212,6 +212,7 @@ class AggregateRefreshServiceTests(unittest.TestCase):
                     payload={
                         "monthly_fee": 0,
                         "minimum_deposit": 25,
+                        "unlimited_transactions_flag": True,
                         "eligibility_text": "Misclassified transfer limit",
                         "description_short": "Navigation copy",
                         "application_method": "Apply online",
@@ -229,7 +230,8 @@ class AggregateRefreshServiceTests(unittest.TestCase):
                     payload={
                         "term_rate_table": [{"term_label": "12 months", "rate": 4.1}],
                         "minimum_deposit": 500,
-                        "early_withdrawal_penalty": "90 days of interest for terms of 12 months or less.",
+                        "redeemable_flag": True,
+                        "early_withdrawal_penalty": "Early withdrawal penalty: 90 days of interest for terms of 12 months or less.",
                     },
                 ),
                 _row(
@@ -279,7 +281,7 @@ class AggregateRefreshServiceTests(unittest.TestCase):
         cd_row = next(row for row in result.projection_rows if row["product_id"] == "cd-12-month")
         self.assertEqual(
             cd_row["refresh_metadata"]["early_withdrawal_penalty"],
-            "90 days of interest for terms of 12 months or less.",
+            "Early withdrawal penalty: 90 days of interest for terms of 12 months or less.",
         )
         line_row = next(row for row in result.projection_rows if row["product_id"] == "line-of-credit")
         self.assertEqual(line_row["refresh_metadata"]["credit_limit_text"], "$5,000-$50,000")
@@ -389,7 +391,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="package",
             product_name="RBC Student Banking",
             last_changed_at="2026-04-10T00:00:00+00:00",
-            payload={"public_display_rate": 1.0, "monthly_fee": 0, "minimum_balance": 0, "included_transactions": 25, "target_customer_tags": ["student"]},
+            payload={"public_display_rate": 1.0, "monthly_fee": 0, "minimum_balance": 0, "included_transactions": 25, "additional_transaction_fee": 1.25, "target_customer_tags": ["student"]},
         ),
         _row(
             product_id="chq-cibc-smart",
@@ -398,7 +400,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="standard",
             product_name="CIBC Smart Account",
             last_changed_at="2026-03-20T00:00:00+00:00",
-            payload={"public_display_rate": 0.5, "monthly_fee": 4.95, "minimum_balance": 1500, "included_transactions": 12},
+            payload={"public_display_rate": 0.5, "monthly_fee": 4.95, "minimum_balance": 1500, "included_transactions": 12, "additional_transaction_fee": 1.25},
         ),
         _row(
             product_id="chq-scotia-premium",
@@ -416,7 +418,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="standard",
             product_name="TD Everyday Chequing Account",
             last_changed_at="2026-04-01T00:00:00+00:00",
-            payload={"monthly_fee": 16.95, "minimum_balance": 5000, "included_transactions": 25},
+            payload={"monthly_fee": 16.95, "minimum_balance": 5000, "included_transactions": 25, "additional_transaction_fee": 1.25},
         ),
         _row(
             product_id="sav-td-epremium",
@@ -491,7 +493,7 @@ def _build_rows() -> list[CanonicalAggregateRow]:
             subtype_code="redeemable",
             product_name="TD 6 Month Cashable GIC",
             last_changed_at="2026-04-03T00:00:00+00:00",
-            payload={"public_display_rate": 4.3, "minimum_deposit": 250, "term_length_days": 180, "redeemable_flag": True},
+            payload={"public_display_rate": 4.3, "minimum_deposit": 250, "term_length_days": 180, "redeemable_flag": True, "early_withdrawal_penalty": "Early redemption without penalty after 30 days."},
         ),
         _row(
             product_id="sav-cibc-inactive",

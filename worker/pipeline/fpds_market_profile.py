@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 
-MARKET_PROFILE_VERSION = "2026-10-01-v6"
+MARKET_PROFILE_VERSION = "2026-10-01-v7"
 
 
 @dataclass(frozen=True)
@@ -19,6 +19,10 @@ class ComparisonRequirement:
     def applies(self, candidate_payload: Mapping[str, Any]) -> bool:
         if self.required_when == "always":
             return True
+        if self.required_when == "limited_transactions":
+            return candidate_payload.get("unlimited_transactions_flag") is not True and candidate_payload.get("included_transactions") is not None
+        if self.required_when == "early_access_not_prohibited":
+            return not (candidate_payload.get("non_redeemable_flag") is True or candidate_payload.get("redeemable_flag") is False)
         if self.required_when == "positive_monthly_fee":
             for field_name in ("monthly_fee", "public_display_fee"):
                 value = candidate_payload.get(field_name)
@@ -241,7 +245,7 @@ _COUNTRY_SUPPLEMENTAL_FIELDS: dict[tuple[str, str], tuple[str, ...]] = {
 }
 
 
-# Product Owner override 2026-10-01: only these facts block publication.
+# Core prerequisites; conditional cost/access/security requirements are added below.
 # Other grounded comparison fields remain available as optional information.
 _REQUIRED_COMPARISON_KEYS = {
     "chequing": {"monthly_fee"},
@@ -274,16 +278,28 @@ def country_product_profile(
         return None
     optional_requirements = tuple(r for r in requirements if r.key not in _REQUIRED_COMPARISON_KEYS[normalized_type])
     requirements = tuple(r for r in requirements if r.key in _REQUIRED_COMPARISON_KEYS[normalized_type])
+    if normalized_type == "chequing":
+        requirements += (
+            _requirement("transaction_structure", "unlimited_transactions_flag", "included_transactions", "transaction_fee"),
+            _requirement("excess_transaction_cost", "additional_transaction_fee", "transaction_fee", required_when="limited_transactions"),
+        )
+    elif normalized_type == "gic":
+        requirements += (
+            _requirement("withdrawal_access", "redeemable_flag", "non_redeemable_flag"),
+            _requirement("withdrawal_consequences", "early_withdrawal_penalty", required_when="early_access_not_prohibited"),
+        )
+    elif normalized_type == "line-of-credit":
+        requirements += (_requirement("security", "secured_flag", "security_requirement", "collateral_text"),)
     return CountryProductProfile(
         country_code=resolved_country,
         product_type=normalized_type,
         profile_version=MARKET_PROFILE_VERSION,
         requirements=requirements,
-        supplemental_fields=tuple(dict.fromkeys((
+        supplemental_fields=tuple(field for field in dict.fromkeys((
             *(field for r in optional_requirements for field in r.alternatives),
             *_TYPE_SUPPLEMENTAL_FIELDS.get(normalized_type, ()),
             *_COUNTRY_SUPPLEMENTAL_FIELDS.get((normalized_country, normalized_type), ()),
-        ))),
+        )) if field not in {f for r in requirements for f in r.alternatives}),
     )
 
 

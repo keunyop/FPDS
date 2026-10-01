@@ -530,3 +530,9 @@ Existing header comparison access and three-field click events remain.
 The [handoff policy and operator commands](../../docs/03-design/public-bank-handoff-policy.md)
 describe the bounded read-only failure/redirect report. Reports do not update
 facts, product verification or official destinations.
+
+## Conditional transaction, withdrawal and security requirements - 2026-10-01
+
+The shared market profile v7 restores checking transaction costs, GIC/CD early-access rules and consequences, and line-of-credit security. Unlimited checking needs no excess fee; explicitly blocked early withdrawal needs no penalty value; explicit unsecured status is valid. Collection prompts expose grouped alternatives and conditions. Automatic acceptance/exclusion remains the only product workflow; no new Admin action or review queue is added.
+
+The Public API rechecks affected snapshot-pinned versions under the current contract, including older receipts, and exposes numeric `transaction_fee`/`additional_transaction_fee`. Country counts use the same eligible products. Shared Public metrics show checking transaction costs and both GIC access and consequences in all supported locales. Deploy API/worker before Public; previous cached responses can remain until normal expiry. Read-only current-data assessment: 5 eligible of 24 active products, 19 needing evidence. No live mutations, paid collection or deployment were performed in this implementation slice.

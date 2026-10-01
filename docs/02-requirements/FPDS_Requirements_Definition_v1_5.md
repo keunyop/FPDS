@@ -1,5 +1,10 @@
 # FPDS Requirements Definition (PRD / Requirements Spec)
 
+## Approved restoration of essential costs and restrictions - 2026-10-01
+
+The Product Owner subsequently restores checking transaction costs, GIC/CD early-withdrawal access and material consequences, and line-of-credit security as conditional essentials. Unlimited transactions need no excess charge; prohibited early withdrawal needs no penalty value; explicit unsecured status satisfies security. Other optional fields and approved country currency defaults remain unchanged. All collection, automatic promotion and Public gates follow [the current policy](../03-design/collection-accuracy-policy.md); there is no human product review. Code deployment is separate from data operations.
+
+
 ## Product Owner collection override - 2026-10-01
 
 Explicitly approved: use the registered country currency (CA/CAD, US/USD) when a product does not disclose currency; retain explicit currencies and reject unresolved conflicts. Reduce publication prerequisites to core fee/rate/term facts in [the current collection policy](../03-design/collection-accuracy-policy.md). Optional missing balances, deposits, transaction allowances, waivers, redemption/penalties and lending amounts/limits/security do not block publication; uncertain facts are omitted. No human product review. Eligible excluded products may be restored after fresh evidence, normal automatic validation and deployed-policy verification. This overrides prior blanket prohibitions on currency defaults and older comparison prerequisites, without changing country selection, supported markets, native types or financial-condition safeguards.

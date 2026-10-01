@@ -1,5 +1,10 @@
 # FPDS Decision Log
 
+## Approved restoration of essential costs and restrictions - 2026-10-01
+
+The Product Owner subsequently restores checking transaction costs, GIC/CD early-withdrawal access and material consequences, and line-of-credit security as conditional essentials. Unlimited transactions need no excess charge; prohibited early withdrawal needs no penalty value; explicit unsecured status satisfies security. Other optional fields and approved country currency defaults remain unchanged. All collection, automatic promotion and Public gates follow [the current policy](../03-design/collection-accuracy-policy.md); there is no human product review. Code deployment is separate from data operations.
+
+
 ## D-090 amendment - approved 2026-10-01
 
 The Product Owner explicitly approves the concrete currency-default and reduced-prerequisite proposal and publication of eligible excluded products. CA/CAD and US/USD defaults apply only to undisclosed currency; explicit/conflicting currency facts retain priority. Core fees/rates/terms remain required while optional missing comparison details no longer veto acceptance. New receipts are versioned with compatibility for previously accepted strict receipts. Revalidate current evidence and verify the serving policy before promotion; do not bulk-reactivate legacy records or reintroduce human review. See [the applied policy](../03-design/collection-accuracy-policy.md).

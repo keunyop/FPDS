@@ -170,7 +170,7 @@ def _latest_failed_attempt() -> dict[str, object]:
     }
 
 
-def _projection_rows() -> list[dict[str, object]]:
+def _projection_rows_without_versions() -> list[dict[str, object]]:
     return [
         {
             "product_id": "chq-rbc-student",
@@ -327,3 +327,8 @@ def _projection_rows() -> list[dict[str, object]]:
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _projection_rows():
+    from tests.public_collection_fixtures import with_approved_version
+    return [with_approved_version(row) for row in _projection_rows_without_versions()]

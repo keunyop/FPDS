@@ -9,7 +9,11 @@
   review queue. An AI confidence score cannot replace source evidence or bypass
   automatic validation. Preserve separate account/security approval controls.
 - Use the shared field contract and exact financial units/types across products.
-  Never infer missing values, false/zero, currency or rate/term semantics.
+  Never infer missing values, false/zero or rate/term semantics. The explicitly
+  approved undisclosed-currency defaults are CA/CAD and US/USD; preserve explicit
+  currencies and reject conflicts. Checking transaction costs, GIC/CD withdrawal
+  access/consequences and line-of-credit security are conditional essentials
+  under the current collection policy. Do not make them optional to increase coverage.
 - Read `docs/03-design/collection-accuracy-policy.md` for collection work. Add
   regression evidence before extending accepted patterns; update all gates and
   prompts together. The approved 355-product/470-review legacy data cutover was

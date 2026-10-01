@@ -4191,8 +4191,10 @@ def _extract_official_fields_with_ai(
         not in {"product_family", "product_type", "bank_code", "country_code", "source_language", "currency"}
         and (not registered_fields or field_name in registered_fields)
     ]
-    ai_requested_fields = list(dict.fromkeys(["product_name", "currency", *ai_requested_fields]))
     profile = country_product_profile(country_code=context.country_code, product_type=_infer_product_type(context))
+    # Versioned prerequisites supersede historical source field lists.
+    required_targets = [field for r in (profile.requirements if profile and profile.product_type in {"chequing", "gic", "line-of-credit"} else ()) for field in r.alternatives]
+    ai_requested_fields = list(dict.fromkeys(["product_name", "currency", *ai_requested_fields, *required_targets]))
     requirement_fields = {name for requirement in (profile.requirements if profile else ())
                           for name in requirement.alternatives}
     # Keep identity, comparison essentials and the proof needed to compare
@@ -4301,8 +4303,9 @@ def _extract_official_fields_with_ai(
                 "and may be a feature heading. Return product_name as a mismatch with the corrected exact name when that occurs. "
                 "Verify that product, not a neighboring "
                 "product, family overview, promotion landing page, calculator, or service flow. Compare every requested field "
-                "with current official facts and the supplied freshly captured evidence chunks. Missing requested comparison "
-                "fields in required_comparison_fields are mandatory extraction targets; locate them on bounded official "
+                "with current official facts and the supplied freshly captured evidence chunks. "
+                "required_comparison_fields lists possible targets, not fields that must all be populated. "
+                "comparison_requirements defines alternatives and conditional requirements; locate applicable facts on bounded official "
                 "rate, pricing, disclosure, or terms pages. Supplemental fields are opportunistic: use the already "
                 "supplied evidence and consulted pages, and return unverified if absent. Do not start extra searches "
                 "or retry solely to fill supplemental fields. Never infer a missing value. "
@@ -4350,6 +4353,10 @@ def _extract_official_fields_with_ai(
                 "field_contract": field_contract_payload(ai_requested_fields),
                 "requested_fields": ai_requested_fields,
                 "required_comparison_fields": [name for name in ai_requested_fields if name not in supplemental_fields],
+                "comparison_requirements": [
+                    {"key": r.key, "alternatives": list(r.alternatives), "required_when": r.required_when}
+                    for r in (profile.requirements if profile else ())
+                ],
                 "supplemental_fields": supplemental_fields,
                 "collected_fields": [
                     {

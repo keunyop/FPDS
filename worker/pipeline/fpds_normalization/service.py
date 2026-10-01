@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import replace
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from hashlib import sha256
@@ -15,6 +16,7 @@ from worker.pipeline.fpds_ai_runtime import (
     llm_provider_configured,
 )
 from worker.pipeline.fpds_approval_policy import populated_dynamic_decision_fields
+from worker.pipeline.fpds_market_profile import country_product_profile
 from worker.country_defaults import default_currency_for_country
 from worker.pipeline.fpds_field_contract import (
     canonical_value_type,
@@ -427,6 +429,14 @@ def _normalize_candidate(
         str(item.schema_context.get("product_type", "")) or None,
         str(item.source_metadata.get("product_type", "")) or None,
     )
+    profile = country_product_profile(country_code=item.country_code, product_type=product_type)
+    if profile is not None and product_type in {"chequing", "gic", "line-of-credit"}:
+        # Keep current essentials available even for pre-policy source registrations.
+        expected = list(dict.fromkeys([
+            *item.source_metadata.get("expected_fields", []),
+            *(field for r in profile.requirements for field in r.alternatives),
+        ]))
+        item = replace(item, source_metadata={**item.source_metadata, "expected_fields": expected})
     dynamic_product_type = _uses_dynamic_product_type(product_type=product_type, item=item)
     product_type_family = _canonical_product_type_family(product_type)
     product_name = _refine_product_name_from_source_metadata(

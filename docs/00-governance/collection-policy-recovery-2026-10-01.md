@@ -1,6 +1,6 @@
-# Approved currency/default policy and recovery readiness
+# Approved currency/default policy and completed recovery
 
-Status: code implemented; operating API deployment is required before publication.
+Status: completed. Product Owner deployed; serving policy versions verified; 17 products automatically published and actual Public results checked on 2026-10-01.
 
 ## Implemented
 
@@ -9,16 +9,16 @@ Status: code implemented; operating API deployment is required before publicatio
 - Removed the duplicate GIC opening-deposit prerequisite in fresh normalization; missing core rate/term still fails. No historical validation-error records were edited.
 - Existing strict-policy receipts remain compatible. Missing currency no longer aborts grounding. Health metadata exposes the running policy versions.
 
-## Verification
+## Pre-deployment verification
 
 - Worker: 578 tests passed. API: 536 tests passed. Maintenance: 8 tests passed.
-- Actual 7 active product receipts remain compatible. No runtime data writes or collection-model calls in this turn.
+- Actual 7 active product receipts remain compatible. No runtime data writes or collection-model calls occurred during that preparation step.
 - Read-only diagnosis covered 350 surviving original records: 7 active and 343 excluded. The 5 deleted non-products were not reconsidered.
 - Combined saved evidence and current diagnosis produced 25 source candidates. All 25 current detail captures succeeded; exact identity and full evidence contexts yielded 18 proposals.
 - Fresh NormalizationService and ValidationRoutingService accepted 17; one still lacks a retained monthly-fee fact after normalization. No review task was created.
 - A prior attempt to remove stale error flags in a reconstructed candidate was blocked by automatic approval review. The completed safer path creates fresh candidates through normal normalization and recalculates validation from current evidence.
 
-## Ready products
+## Published products
 
 | Product | Currency |
 |---|---|
@@ -40,12 +40,15 @@ Status: code implemented; operating API deployment is required before publicatio
 | 1-Year Better-than-Cash GIC | CAD |
 | Chase Premier Plus Checking℠ | USD |
 
-These 17 comprise CA 10 / US 7. If all still pass the fresh execution checks, Public becomes CA 17 / US 7 (24 total), leaving 326 of the original manifest inactive. These are projected counts, not the current catalogue.
+All 17 passed fresh execution: CA 10 / US 7 restored. Public now has CA 17 / US 7 (24 total), leaving 326 of the original manifest inactive and 5 previously deleted.
 
-## Remaining dependency and resume
+## Completed publication and verification
 
-Vercel CLI authentication is unavailable in this environment (no login/auth file/token). The live API health check still returns only status, so serving the new receipt version is not confirmed. The user has been asked to deploy `switchabank-api` through their existing process. No candidate has been promoted before that dependency.
+- Live `/healthz` confirms `collection-accuracy-2026-10-01` and `2026-10-01-v6` after the Product Owner's deployment.
+- The prepared one-off operation fetched official sources again and ran normal fresh normalization, automatic validation and promotion. All 17 candidates were approved across 9 completed runs. No human review tasks or collection-model calls were used.
+- Both countries' aggregate refreshes completed. Actual API and Public BFF return CA 17 / US 7. Deposit lists show CA 16 / US 7; the existing Canadian card remains visible. All 17 new detail pages return the expected products. Initial stale list responses refreshed normally; final 24 URL checks pass, including private-field exclusion.
+- Independent database readback and full captured-document evidence replay passed for all 24 active receipts. Exactly 17 canonical products advanced one version; all 412 unrelated products, the source registry, 150 historical candidates and each target's previous version payload remained unchanged. There are 429 canonical products in total (24 active / 405 inactive); within the original 355-product manifest, 24 are active, 326 inactive and 5 deleted.
+- Previously completed regression coverage remains Worker 578 / API 536 / maintenance 8. This publication turn changed no runtime code; it ran the operation, independent database/evidence checks, actual Public checks and final diff verification.
+- The remaining 326 original exclusions are outside this completed 17-product batch. They require adequate official evidence before any further publication.
 
-After deployment, `/healthz` must report `collection_accuracy_version=collection-accuracy-2026-10-01` and `market_profile_version=2026-10-01-v6`. The prepared private `tmp/policy-recovery-operation.py --execute` refuses all live writes until this matches. It then checks inactive version baselines, captures current official detail sources again, creates fresh candidates, runs normal automatic validation/promotion, and refreshes aggregates. Check survivors, original versions, active receipts, run completion and actual Public counts afterward. Do not rerun if `tmp/policy-recovery-plan.json` already exists; inspect partial progress instead.
-
-Private artifacts: `tmp/policy-live-diagnosis.json`, `tmp/policy-recovery-preflight.json`, `tmp/policy-recovery-assessment.json`, `tmp/policy-recovery-selected.json`, `tmp/policy-recovery-dryrun-v2.json`, and the operation script. These contain evidence/internal payloads and are not Public assets.
+Private operation evidence: `tmp/policy-recovery-before.json`, `tmp/policy-recovery-plan.json`, per-run captures/results, `tmp/policy-recovery-result.json`, `tmp/policy-recovery-db-readback.json` and `tmp/policy-recovery-public-readback.json`. These include internal evidence and must remain private. Do not rerun the completed execution script. The legacy database audit view does not persist writes; this operation's durable local artifacts and this journal record retain its verification trail.

@@ -9,7 +9,7 @@ import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/p
 import { Button } from "@/components/ui/button";
 import { formatPublicMessage, getPublicDiscoveryCopy, getPublicMessages } from "@/lib/public-locale";
 import type { PublicProduct, PublicProductsResponse } from "@/lib/public-api";
-import { buildPublicProductMetrics, buildPublicSortMetric } from "@/lib/public-product-presentation";
+import { buildPublicAccessMetric, buildPublicProductMetrics, buildPublicSortMetric } from "@/lib/public-product-presentation";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { cn } from "@/lib/utils";
 
@@ -246,6 +246,7 @@ function ProductCompareListItem({
 }: ProductPresentationProps) {
   const copy = getPublicMessages(locale);
   const sortMetric = buildPublicSortMetric(product, locale, filters.sortBy);
+  const accessMetric = buildPublicAccessMetric(product, locale);
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
   return (
@@ -304,6 +305,12 @@ function ProductCompareListItem({
           ) : null}
         </div>
       </div>
+      {accessMetric ? (
+        <dl className="border-t border-border px-4 py-3 text-sm sm:px-5">
+          <dt className="text-xs text-muted-foreground">{accessMetric.label}</dt>
+          <dd className="mt-1 break-words leading-6 text-foreground">{accessMetric.value}</dd>
+        </dl>
+      ) : null}
       {compareDisabled ? <p className="px-4 pb-3 text-xs leading-5 text-muted-foreground sm:px-5">{copy.compare.limit}</p> : null}
     </article>
   );

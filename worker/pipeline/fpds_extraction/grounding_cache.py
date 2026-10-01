@@ -13,7 +13,7 @@ def input_digest(context, candidates, requested_fields, collected_fields, *, day
     root = Path(__file__).resolve().parents[1]
     files = [root / name for name in (
         "fpds_extraction/service.py", "fpds_extraction/grounding_cache.py",
-        "fpds_field_contract.py", "fpds_collection_accuracy.py", "fpds_market_profile.py",
+        "fpds_field_contract.py", "fpds_collection_accuracy.py", "fpds_market_profile.py", "fpds_approval_policy.py",
         "fpds_comparison_instructions.py", "fpds_ai_runtime.py", "fpds_rate_safety.py",
         "../country_defaults.py")]
     value = {"version": 1, "day": day or datetime.now(UTC).date().isoformat(),

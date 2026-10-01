@@ -84,7 +84,7 @@ The executable contract is `worker/pipeline/fpds_field_contract.py`.
 2. Extraction receives the common contract and explicit abstention instructions.
 3. `fpds_collection_accuracy.sanitize_candidate` removes unsupported facts and
    creates the private `_collection_accuracy` result, version
-   `collection-accuracy-2026-09-30`, bound to the exact identity and payload digest.
+   `collection-accuracy-2026-10-01-cost-access`, bound to the exact identity and payload digest.
 4. Validation requires that result for all product types, preserves existing
    blocking validations, and emits `auto_validated` or `excluded`. Exclusion uses
    the existing candidate state `rejected`; it never creates a `review_task`.
@@ -197,14 +197,23 @@ The Product Owner explicitly approved country currency defaults, reduced publica
 
 | Product | Required comparison facts (CA and US) |
 |---|---|
-| Chequing/checking | Monthly fee |
+| Chequing/checking | Monthly fee and transaction cost structure: unlimited ordinary transactions, or finite allowance plus excess fee, or explicit per-use fee |
 | Savings | Ongoing annual rate/APY and monthly fee |
-| GIC/CD | Rate or valid term schedule, and exact term |
+| GIC/CD | Rate or valid term schedule, exact term, and explicit early-withdrawal access; permitted access additionally needs material consequences or explicit no penalty |
 | Credit card | Annual fee and purchase rate (US qualified APR/range allowed) |
 | Mortgage | Rate (US qualified summary), fixed/variable type and term |
 | Personal loan | Rate/range and term |
-| Line of credit | Rate/range |
+| Line of credit | Rate/range and explicit secured/unsecured or collateral requirements |
 
-Minimum balances/deposits, transaction allowances, waiver conditions, redemption/penalty details, lending amounts/limits and security requirements are optional. Missing optional facts do not block publication; invalid ones are omitted. They remain available in the shared collection field catalog. Core rate/fee/term conditions remain binding; no introductory, conditional, tiered or penalty value may be presented as an unconditional scalar.
+Minimum balances/deposits, fee-waiver conditions and lending amounts/limits remain optional. The subsequent Product Owner instruction restores checking transaction costs, GIC/CD withdrawal access/consequences and line-of-credit security as conditional essentials. Missing optional facts do not block publication; invalid ones are omitted. They remain available in the shared collection field catalog. Core rate/fee/term conditions remain binding; no introductory, conditional, tiered or penalty value may be presented as an unconditional scalar.
 
-Receipts use `collection-accuracy-2026-10-01`; valid prior strict-policy receipts remain compatible without changing their digest. New defaults carry a private `currency_basis` and mapping provenance. Neither provenance nor evidence is exposed through Public projections. Grounding-cache fingerprints include country-default code. `/healthz` exposes policy/profile versions to verify the serving runtime before restoring products. A stricter historical error state is not deleted to force acceptance; generate fresh candidates through normal normalization and automatic validation.
+Receipts now use `collection-accuracy-2026-10-01-cost-access` and market profile `2026-10-01-v7`. Older receipt digests remain compatible only when the payload also passes the current comparison requirements. New defaults carry a private `currency_basis` and mapping provenance. Neither provenance nor evidence is exposed through Public projections. Grounding-cache fingerprints include country-default code. `/healthz` exposes policy/profile versions to verify the serving runtime before restoring products. A stricter historical error state is not deleted to force acceptance; generate fresh candidates through normal normalization and automatic validation.
+
+## Conditional cost/access/security essentials - subsequent 2026-10-01 approval
+
+- CA and US checking: unlimited ordinary transactions do not require an excess fee. A finite included count (including explicit zero) requires an additional/per-transaction fee. Explicit per-use pricing can satisfy the structure without fabricating an included count. A fee solely for ATM, wire, international or e-transfer transactions cannot establish general account pricing. A count alone or `unlimited_transactions_flag=false` alone is insufficient. Contradictory unlimited/finite fields fail closed.
+- CA GIC and US CD: explicit `redeemable_flag=false` or `non_redeemable_flag=true` establishes no access before maturity, so no separate penalty is required. Permitted access needs complete official withdrawal restrictions and a material penalty/lost-interest formula or explicit no-penalty statement in `early_withdrawal_penalty`. Numeric penalty amounts are not universally required. A penalty alone does not prove withdrawal permission; conflicting access flags fail closed.
+- CA/US line of credit: a proven `secured_flag=false` is a valid unsecured fact. A security/collateral description must explicitly establish the requirement; generic approval language and optional/ambiguous security do not satisfy it. Conflicting alternatives fail closed.
+- Extraction receives grouped alternatives and conditional requirements, not an instruction to fill every field. Missing essentials cause automatic exclusion; no human review or extra repair loop is introduced. Transaction fee fields remain native nonnegative money values and raw source-language withdrawal/security prose remains exact.
+- Promotion, receipt compatibility and aggregate refresh enforce this contract. Public reads recheck the exact snapshot-pinned approved version for affected types so old projections cannot bypass it; country counts use the same eligible rows. Private payloads/receipts never enter responses. Checking costs and GIC access/consequences appear in shared catalog, detail, comparison and curated displays in EN/KO/JA.
+- Code changes require API/worker and Public deployment. Read-only impact on the current 24 active products: 5 pass, 19 need more official evidence. No live canonical mutation or paid collection is part of this change. Existing versions remain preserved; deploy API first, then Public, and allow cache expiry. A later normal aggregate refresh applies the same gate without resetting verification dates.

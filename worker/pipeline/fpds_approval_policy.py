@@ -11,6 +11,7 @@ from worker.pipeline.fpds_market_profile import (
     market_profile_product_type_is_known,
 )
 from worker.pipeline.fpds_rate_safety import contains_explicit_rate_percentage
+from worker.pipeline.fpds_field_contract import value_matches_contract
 
 
 _SCALAR_NUMBER_RE = re.compile(r"^\s*\$?\s*\d{1,6}(?:\.\d{1,6})?\s*%?\s*$")
@@ -127,6 +128,20 @@ def comparison_quality(
             missing_fields.append(alternatives[0])
         else:
             satisfied_fields.append(satisfied)
+    # Contradictory alternatives cannot waive a conditional requirement.
+    if normalized_type == "line-of-credit":
+        meanings = [security_meaning(candidate_payload.get(k)) for k in ("security_requirement", "collateral_text")]
+        flag = candidate_payload.get("secured_flag")
+        if isinstance(flag, bool):
+            meanings.append(flag)
+        if True in meanings and False in meanings:
+            missing_fields.append("secured_flag")
+    if normalized_type == "gic":
+        yes, no = candidate_payload.get("redeemable_flag"), candidate_payload.get("non_redeemable_flag")
+        if isinstance(yes, bool) and isinstance(no, bool) and yes == no:
+            missing_fields.append("redeemable_flag")
+    if normalized_type == "chequing" and candidate_payload.get("unlimited_transactions_flag") is True and candidate_payload.get("included_transactions") is not None:
+        missing_fields.append("included_transactions")
     return ComparisonQuality(
         applicable=True,
         contract_defined=contract_defined,
@@ -164,6 +179,14 @@ def _comparison_value_is_usable(*, field_name: str, value: object) -> bool:
             and (is_populated(row.get("term_label")) or is_populated(row.get("term_length_days")))
             for row in value
         )
+    if field_name in {"transaction_fee", "additional_transaction_fee", "included_transactions"}:
+        return value_matches_contract(field_name, value)
+    if field_name == "secured_flag":
+        return isinstance(value, bool)
+    if field_name in {"security_requirement", "collateral_text"}:
+        return security_meaning(value) is not None
+    if field_name == "early_withdrawal_penalty":
+        return withdrawal_consequences_usable(value)
     if field_name == "unlimited_transactions_flag":
         return value is True
     if field_name in {"redeemable_flag", "non_redeemable_flag"}:
@@ -279,3 +302,32 @@ def dynamic_repair_fields(
     if quality_fields:
         return quality_fields
     return decision_fields[:1]
+
+
+def security_meaning(value: object) -> bool | None:
+    """Require an explicit security statement, never a generic approval clause."""
+    if not isinstance(value, str) or re.search(r"\b(?:may|might|could|optional|depending)\b|not unsecured", value, re.I):
+        return None
+    unsecured = bool(re.search(r"\bunsecured\b|no collateral (?:is )?required|\bnot secured\b", value, re.I))
+    positive_context = re.sub(r"\bnot secured\b|\bno collateral (?:is )?required\b", "", value, flags=re.I)
+    secured = bool(re.search(r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b", positive_context, re.I))
+    return None if secured == unsecured else secured
+
+
+def withdrawal_consequences_usable(value: object) -> bool:
+    """Require an actual consequence, not access/grace days or a terms pointer."""
+    if not isinstance(value, str):
+        return False
+    if re.search(r"penalt(?:y|ies)\s+(?:may|might|could)\s+apply|see (?:the )?terms|contact (?:us|the bank)", value, re.I):
+        return False
+    if re.search(r"(?:no|without) (?:early[- ]withdrawal |redemption )?penalt|penalty[- ]free", value, re.I):
+        return True
+    interest_loss = re.search(
+        r"(?:\d+|one|two|three|six|twelve)\s*(?:days?|months?|years?)[\s'\u2019-]*(?:of )?(?:earned |accrued )?interest"
+        r"|(?:lose|forfeit|loss of)\s+(?:all |any |the |accrued |earned )*interest", value, re.I,
+    )
+    quantified_penalty = re.search(
+        r"(?:penalt(?:y|ies)|fee|charge).{0,45}(?:[$]\s*\d|\d+(?:\.\d+)?\s*(?:%|dollars?))", value, re.I,
+    )
+    loss_context = bool(re.search(r"penalt|forfeit|lose|loss|deduct|cost|reduc|withhold", value, re.I))
+    return bool((interest_loss and loss_context) or quantified_penalty)

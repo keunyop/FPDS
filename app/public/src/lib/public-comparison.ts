@@ -51,7 +51,7 @@ const FACT_KEYS = [
   'standard_rate', 'base_12_month_rate', 'public_display_rate', 'public_display_fee',
   'annual_fee', 'purchase_interest_rate', 'purchase_interest_rate_summary', 'rate', 'deposit_terms',
   'minimum_balance', 'minimum_deposit', 'fee_waiver_condition', 'included_transactions',
-  'unlimited_transactions_flag', 'redeemable_flag', 'non_redeemable_flag', 'early_withdrawal_penalty',
+  'transaction_fee', 'additional_transaction_fee', 'unlimited_transactions_flag', 'redeemable_flag', 'non_redeemable_flag', 'early_withdrawal_penalty',
   'secured_flag', 'eligibility_text', 'application_method', 'post_maturity_interest_rate',
   'tax_benefits', 'deposit_insurance', 'mortgage_rate', 'interest_rate', 'interest_rate_summary',
   'rate_type', 'term_length_text', 'amortization_text', 'payment_frequency', 'prepayment_privileges',

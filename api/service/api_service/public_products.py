@@ -309,28 +309,19 @@ def load_available_public_countries(connection) -> list[dict[str, Any]]:
                 attempted_at DESC,
                 snapshot_id DESC
         )
-        SELECT
-            latest_completed.country_code AS code,
-            COUNT(projection.product_id)::integer AS count,
-            COUNT(DISTINCT projection.bank_code)::integer AS bank_count
-        FROM latest_completed
-        JOIN public_product_projection AS projection
-          ON projection.snapshot_id = latest_completed.snapshot_id
-         AND projection.country_code = latest_completed.country_code
-         AND projection.status = 'active'
-        GROUP BY latest_completed.country_code
-        ORDER BY latest_completed.country_code ASC
+        SELECT country_code AS code, snapshot_id FROM latest_completed
+        ORDER BY country_code ASC
         """,
         {},
     ).fetchall()
-    return [
-        {
-            "code": str(row["code"]).upper(),
-            "count": int(row["count"]),
-            "bank_count": int(row.get("bank_count") or 0),
-        }
-        for row in rows
-    ]
+    countries = []
+    for row in rows:
+        code = str(row["code"]).upper()
+        visible = load_public_projection_rows(connection, snapshot_id=str(row["snapshot_id"]), country_code=code)
+        if visible:
+            countries.append({"code": code, "count": len(visible), "bank_count": len({p["bank_code"] for p in visible})})
+    return countries
+
 
 
 def _sort_rows(rows: list[dict[str, Any]], *, query: PublicProductsQuery) -> list[dict[str, Any]]:
@@ -485,6 +476,8 @@ def _serialize_product_row(row: dict[str, Any], *, locale: str, evaluated_at: st
         "minimum_balance": serialize_decimal(row.get("minimum_balance")),
         "minimum_deposit": serialize_decimal(row.get("minimum_deposit")),
         "fee_waiver_condition": _string_or_none(metadata.get("fee_waiver_condition")),
+        "transaction_fee": serialize_decimal(metadata.get("transaction_fee")),
+        "additional_transaction_fee": serialize_decimal(metadata.get("additional_transaction_fee")),
         "included_transactions": _coerce_int(metadata.get("included_transactions")),
         "unlimited_transactions_flag": _bool_or_none(metadata.get("unlimited_transactions_flag")),
         "redeemable_flag": _bool_or_none(metadata.get("redeemable_flag")),

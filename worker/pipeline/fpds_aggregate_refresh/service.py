@@ -494,7 +494,7 @@ def _build_product_refresh_metadata(
         if value is not None:
             metadata[field_name] = value
 
-    for field_name in ("standard_rate", "base_12_month_rate", "highest_rate", "annual_fee"):
+    for field_name in ("standard_rate", "base_12_month_rate", "highest_rate", "annual_fee", "transaction_fee", "additional_transaction_fee"):
         if allowed_field_names is not None and field_name not in allowed_field_names:
             continue
         value = _coerce_float(payload.get(field_name))

@@ -10,12 +10,12 @@ from urllib.parse import urlsplit, urlunsplit
 
 from worker.country_defaults import default_currency_for_country
 from worker.pipeline.fpds_field_contract import field_contract, value_matches_contract
-from worker.pipeline.fpds_approval_policy import comparison_quality
+from worker.pipeline.fpds_approval_policy import comparison_quality, security_meaning, withdrawal_consequences_usable
 from worker.pipeline.fpds_rate_safety import rate_component_only
 
-ACCURACY_VERSION = "collection-accuracy-2026-10-01"
-# Earlier strict-policy acceptances satisfy the relaxed prerequisites.
-_COMPATIBLE_RECEIPT_VERSIONS = {ACCURACY_VERSION, "collection-accuracy-2026-09-30"}
+ACCURACY_VERSION = "collection-accuracy-2026-10-01-cost-access"
+# Earlier receipts retain digest compatibility, subject to the current comparison gate.
+_COMPATIBLE_RECEIPT_VERSIONS = {ACCURACY_VERSION, "collection-accuracy-2026-10-01", "collection-accuracy-2026-09-30"}
 RECEIPT_KEY = "_collection_accuracy"
 # Registry/workflow metadata is not a collected financial attribute.
 CONTEXT_FIELDS = {"status", "last_verified_at", "bank_name", "subtype_code"}
@@ -88,10 +88,24 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         return value in CURRENCY_PATTERNS and bool(re.search(CURRENCY_PATTERNS[value], q, re.I)) and not any(
             code != value and re.search(pattern, q, re.I) for code, pattern in CURRENCY_PATTERNS.items())
     if contract.value_type == "string":
+        if field_name in {"security_requirement", "collateral_text"}:
+            return text(value).casefold() == q.casefold() and security_meaning(value) is not None
+        if field_name == "early_withdrawal_penalty":
+            return text(value).casefold() == q.casefold() and withdrawal_consequences_usable(value)
         if field_name in {"interest_rate_summary", "purchase_interest_rate_summary", "fee_waiver_condition", "early_withdrawal_penalty"}:
             return text(value).casefold() == q.casefold()
         return bool(text(value)) and text(value).casefold() in q.casefold()
+    if field_name in {"transaction_fee", "additional_transaction_fee", "unlimited_transactions_flag", "included_transactions"} and re.search(r"\b(?:ATM|ABM|wire|international|foreign|e[- ]?transfer)\s+(?:(?:debit|cash)\s+)?transactions?\b|\bunlimited\s+(?:ATM|ABM|wire|e[- ]?transfer)\b", q, re.I):
+        # A charge/allowance for one special channel cannot prove general account pricing.
+        return False
+    if field_name == "transaction_fee" and re.search(r"\b(?:additional|extra|excess|overage)\s+transactions?", q, re.I):
+        # Excess-only pricing must retain its distinct field; it is not per-use pricing.
+        return False
     if contract.value_type == "boolean":
+        if field_name == "unlimited_transactions_flag" and re.search(r"\b(?:if|when|provided|qualify|qualifying)\b", q, re.I):
+            return False
+        if field_name == "secured_flag":
+            return security_meaning(q) is value
         # Absence of a positive statement never proves false.
         patterns = {
             "secured_flag": (r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b", r"\bunsecured\b|no collateral required|\bnot secured\b"),
@@ -169,6 +183,7 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         "minimum_deposit": r"(?:minimum|initial|opening).{0,30}deposit|deposit.{0,30}(?:minimum|to open)|open.{0,25}(?:at least|minimum)",
         "minimum_balance": r"minimum.{0,25}balance|balance.{0,25}(?:at least|minimum)",
         "transaction_fee": r"transaction.{0,20}(?:fee|charge)|per transaction",
+        "additional_transaction_fee": r"(?:additional|extra|excess|overage).{0,30}transactions?.{0,20}(?:fee|charge)?|(?:fee|charge).{0,25}(?:additional|extra|excess) transactions?",
         "included_transactions": r"transactions?",
         "term_length_days": r"days?",
     }
@@ -192,6 +207,7 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             "public_display_fee": r"monthly(?: account)? (?:fees?|charges?)",
             "annual_fee": r"annual (?:fees?|charges?)",
             "transaction_fee": r"transaction (?:fees?|charges?)",
+            "additional_transaction_fee": r"(?:additional|extra|excess) transaction (?:fees?|charges?)",
             "minimum_balance": r"minimum(?: daily(?: closing)?)? balance",
             "minimum_deposit": r"(?:minimum(?: opening)?|initial|opening) deposit",
         }
@@ -200,7 +216,7 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return True
         if number not in _numbers(q) or number not in matching:
             return False
-        if field_name in {"monthly_fee", "public_display_fee", "annual_fee", "minimum_deposit", "minimum_balance", "transaction_fee"}:
+        if field_name in {"monthly_fee", "public_display_fee", "annual_fee", "minimum_deposit", "minimum_balance", "transaction_fee", "additional_transaction_fee"}:
             label_match = re.search(label, q, re.I)
             local = q[label_match.end():label_match.end() + 90]
             local_amount = re.search(r"(?:[$€£]|\b(?:CAD|USD|EUR|GBP)\s*)(\d[\d,]*(?:\.\d+)?)", local, re.I)
@@ -246,6 +262,9 @@ def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) ->
     p = payload if payload is not None else record.get("candidate_payload", {})
     receipt = p.get(RECEIPT_KEY, {}) if isinstance(p, Mapping) else {}
     if not isinstance(receipt, Mapping) or receipt.get("version") not in _COMPATIBLE_RECEIPT_VERSIONS:
+        return False
+    quality = comparison_quality(product_type=record.get("product_type"), country_code=record.get("country_code"), expected_fields=list(p), candidate_payload=p)
+    if not quality.complete:
         return False
     digest = payload_digest(record, p)
     return bool(digest and receipt.get("accepted") is True and receipt.get("digest") == digest

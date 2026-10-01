@@ -150,12 +150,12 @@ class CollectionAccuracyTests(unittest.TestCase):
                     for name, excerpt in chunks.items()]
         meta = {"discovery_role": "detail", "official_domain_allowlist": ["bank.example"], "expected_fields": list(payload)}
         result, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
-        self.assertTrue(receipt["accepted"], receipt)
-        self.assertTrue(acceptance_receipt_valid(result, result["candidate_payload"]))
+        self.assertFalse(receipt["accepted"], receipt)
+        self.assertFalse(acceptance_receipt_valid(result, result["candidate_payload"]))
         self.assertIs(type(result["candidate_payload"]["included_transactions"]), int)
         evidence[2]["evidence_excerpt"] += " if you maintain a $1000 balance"
         _, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
-        self.assertTrue(receipt["accepted"])  # Invalid optional count is omitted, not a publication veto.
+        self.assertFalse(receipt["accepted"])  # Missing transaction structure now prevents publication.
         self.assertEqual(receipt["omitted_fields"]["included_transactions"], "evidence_context_ambiguous")
 
     def test_annual_fee_cannot_prove_annual_interest_basis(self):

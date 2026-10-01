@@ -30,14 +30,28 @@ class PublicAlignmentTests(unittest.TestCase):
             _extract_official_fields_with_ai(context=context, candidates=[], requested_fields=fields, collected_fields=[])
         call.assert_called_once()
         payload = call.call_args.kwargs["payload"]
-        self.assertNotIn("early_withdrawal_penalty", payload["required_comparison_fields"])
+        self.assertIn("early_withdrawal_penalty", payload["required_comparison_fields"])
         self.assertIn("interest_rate_summary", payload["required_comparison_fields"])
         self.assertIn("interest_calculation_method", payload["supplemental_fields"])
-        self.assertIn("redeemable_flag", payload["supplemental_fields"])
+        self.assertIn("redeemable_flag", payload["required_comparison_fields"])
         self.assertNotIn("interest_payment_frequency", payload["requested_fields"])
         self.assertNotIn("payout_option", payload["requested_fields"])
         self.assertFalse(set(payload["required_comparison_fields"]) & set(payload["supplemental_fields"]))
         self.assertIn("Do not start extra searches", call.call_args.kwargs["instructions"])
+
+    def test_old_source_field_list_cannot_drop_restored_checking_targets(self):
+        context = ExtractionDocumentContext("parsed", "document", "snapshot", "BANK", "US", "html", "en", {
+            "product_type": "chequing", "expected_fields": ["product_name", "monthly_fee"],
+            "allowed_domains": ["bank.example"], "source_url": "https://bank.example/checking",
+        })
+        with patch("worker.pipeline.fpds_extraction.service.invoke_openai_json_schema", return_value=({"fields": []}, {})) as call:
+            _extract_official_fields_with_ai(context=context, candidates=[], requested_fields=["monthly_fee"], collected_fields=[])
+        payload = call.call_args.kwargs["payload"]
+        self.assertIn("additional_transaction_fee", payload["requested_fields"])
+        self.assertIn("unlimited_transactions_flag", payload["requested_fields"])
+        conditional = next(r for r in payload["comparison_requirements"] if r["key"] == "excess_transaction_cost")
+        self.assertEqual(conditional["required_when"], "limited_transactions")
+        call.assert_called_once()
 
     def test_us_projection_preserves_conditions_and_hides_private_fields(self):
         row = CanonicalAggregateRow("id", "BANK", "Bank", "US", "deposit", "gic", None, "CD", "en", "USD", "active", "2026-09-01", None, "v1", {

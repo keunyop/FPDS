@@ -1,6 +1,6 @@
-# Currency defaults and reduced publication prerequisites - proposed
+# Currency defaults and reduced publication prerequisites - approved
 
-Status: Explicitly approved by the Product Owner; code implemented and tested. Serving deployment and eligible recovery pending verification.
+Status: Explicitly approved by the Product Owner; code implemented, tested and deployed. Final automatic recovery published 17 products; actual Public readback confirms 24 total. See [completed recovery](collection-policy-recovery-2026-10-01.md).
 
 ## Requested policy
 

@@ -332,3 +332,7 @@ opening deposits from ongoing balances, base fees from waivers, exact maturities
 from funding/guarantee/grace/penalty periods, and full rates from discounts or
 capped bonuses. Rate-basis, tier and promotional prose requires an exact quote.
 See [the audit](../00-governance/public-collection-alignment-2026-09-29.md).
+
+## Conditional essentials - 2026-10-01
+
+The current collection policy restores checking cost structure, GIC/CD access/consequences and line-of-credit security. `transaction_fee` and `additional_transaction_fee` are native nonnegative money numbers in product currency; included transaction counts are integers and flags are actual booleans. Excess fees do not establish ordinary per-use pricing. Withdrawal loss formulas and security requirements retain exact source-language strings; no numeric penalty or personal credit limit is invented. Conditional requirements are resolved by market profile v7 and shared comparison validation; unknown or contradictory essentials exclude automatically.

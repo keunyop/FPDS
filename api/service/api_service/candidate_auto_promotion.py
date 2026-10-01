@@ -75,11 +75,6 @@ def promote_auto_validated_candidates(
             # Historical candidates are left untouched. No implicit migration.
             skipped_items.append({"candidate_id": candidate_id, "skip_reason": "legacy_accuracy_not_assessed", "action": "unchanged"})
             continue
-        if not acceptance_receipt_valid(row):
-            _mark_candidate_auto_rejected(connection, candidate_id=candidate_id,
-                                          reason_code="accuracy_check_failed", decided_at=decided_at)
-            skipped_items.append({"candidate_id": candidate_id, "skip_reason": "accuracy_check_failed", "action": "rejected"})
-            continue
         issue_codes = _coerce_string_list(row.get("validation_issue_codes"))
         force_review_hits = sorted(
             set(issue_codes)
@@ -160,6 +155,11 @@ def promote_auto_validated_candidates(
                     "missing_fields": list(quality.missing_fields),
                 }
             )
+            continue
+        if not acceptance_receipt_valid(row):
+            _mark_candidate_auto_rejected(connection, candidate_id=candidate_id,
+                                          reason_code="accuracy_check_failed", decided_at=decided_at)
+            skipped_items.append({"candidate_id": candidate_id, "skip_reason": "accuracy_check_failed", "action": "rejected"})
             continue
         collection_ai_assessment = _coerce_mapping(row.get("collection_ai_assessment"))
         if _requires_collection_ai_grounding(row) and not _collection_ai_assessment_is_eligible(

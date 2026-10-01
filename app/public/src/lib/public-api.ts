@@ -50,6 +50,8 @@ export type PublicProduct = {
   minimum_balance: number | null;
   minimum_deposit: number | null;
   fee_waiver_condition: string | null;
+  transaction_fee: number | null;
+  additional_transaction_fee: number | null;
   included_transactions: number | null;
   unlimited_transactions_flag: boolean | null;
   redeemable_flag: boolean | null;

@@ -1,3 +1,4 @@
+import { accessCopy, transactionCosts, withdrawalConditions } from "@/lib/public-access";
 import { BankHandoffPanel } from "@/components/fpds/public/bank-handoff-panel";
 import { BankHandoffDock } from "@/components/fpds/public/bank-handoff-dock";
 import { AddToComparison } from "@/components/fpds/public/comparison-controls";
@@ -21,14 +22,10 @@ import {
   buildPublicProductMetrics,
   formatPublicCurrency as formatCurrency,
   formatPublicRate as formatRate,
-  formatPublicRedeemability as formatRedeemability,
   formatPublicSecurity as formatSecurity,
   formatPublicTerm as formatTerm,
-  formatPublicTransactions as formatTransactions,
   getCardLabel as cardLabel,
-  getEssentialLabel as essentialLabel,
-  getLoanLabel as loanLabel,
-  getMarketLabel as marketTextLabel
+  getLoanLabel as loanLabel
 } from "@/lib/public-product-presentation";
 import { buildPublicHref, type ProductGridPageFilters } from "@/lib/public-query";
 import { buildBrandedProductName } from "@/lib/public-seo";
@@ -490,14 +487,10 @@ function buildDetailFacts(product: PublicProduct, locale: string) {
     return facts;
   }
   if (product.product_type === "chequing") {
-    addFact(facts, essentialLabel("transactions", locale), formatTransactions(product, locale), locale);
+    addFact(facts, accessCopy(locale).costs, transactionCosts(product, locale), locale);
   }
   if (product.product_type === "gic") {
-    if (product.country_code === "US") {
-      addFact(facts, marketTextLabel("earlyWithdrawalPenalty", locale), product.early_withdrawal_penalty, locale);
-    } else {
-      addFact(facts, essentialLabel("redeemability", locale), formatRedeemability(product, locale), locale);
-    }
+    addFact(facts, accessCopy(locale).withdrawal, withdrawalConditions(product, locale), locale);
   }
   const depositAmount = product.minimum_deposit ?? product.minimum_balance;
   if (depositAmount != null) {

@@ -12,19 +12,20 @@ import { Button } from '@/components/ui/button';
 import type { PublicProduct } from '@/lib/public-api';
 import type { CuratedComparison, CuratedSlug } from '@/lib/public-curated';
 import { curatedCopy, curatedGroupTitle } from '@/lib/public-curated-copy';
+import { accessCopy, transactionCosts, withdrawalConditions } from '@/lib/public-access';
 import { depositOptions } from '@/lib/public-deposit';
 import { getPublicMessages } from '@/lib/public-locale';
-import { formatPublicCurrency, formatPublicRate, formatPublicTransactions } from '@/lib/public-product-presentation';
+import { formatPublicCurrency, formatPublicRate } from '@/lib/public-product-presentation';
 import { buildPublicHref, parseProductGridPageFilters } from '@/lib/public-query';
 
 function facts(product: PublicProduct, slug: CuratedSlug, locale: string) {
   const copy = curatedCopy(locale);
   const missing = getPublicMessages(locale).common.notDisclosed;
   const options = depositOptions(product);
-  const transactions = formatPublicTransactions(product, locale);
+  const transactions = transactionCosts(product, locale);
   if (slug === 'no-monthly-fee-chequing') return [
     { label: copy.monthlyFee, value: formatPublicCurrency(product.public_display_fee, 'CAD', locale) },
-    { label: copy.transactions, value: transactions },
+    { label: accessCopy(locale).costs, value: transactions },
     { label: copy.conditions, value: [product.fee_waiver_condition, ...(product.target_customer_tag_labels ?? []), product.minimum_balance !== null ? `${copy.minimumBalance}: ${formatPublicCurrency(product.minimum_balance, 'CAD', locale)}` : null].filter(Boolean).join(' · ') || missing }
   ];
   if (slug === 'savings-accounts') return [
@@ -36,7 +37,7 @@ function facts(product: PublicProduct, slug: CuratedSlug, locale: string) {
   return [
     { label: copy.termRate, value: formatPublicRate(option?.rate ?? null, locale) },
     { label: copy.minimum, value: formatPublicCurrency(option?.minimum_deposit ?? product.minimum_deposit, 'CAD', locale) },
-    { label: copy.conditions, value: [product.deposit_terms?.withdrawal === 'redeemable' ? copy.redeemable : copy.non_redeemable, product.early_withdrawal_penalty].filter(Boolean).join(' · ') }
+    { label: accessCopy(locale).withdrawal, value: withdrawalConditions(product, locale) }
   ];
 }
 

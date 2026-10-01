@@ -1,6 +1,6 @@
 # FPDS Docs Map
 
-Latest data cleanup: [five confirmed non-products deleted](00-governance/nonproduct-cleanup-2026-10-01.md); original manifest has 7 active and 343 inactive products.
+Latest publication: [17 products recovered after policy deployment](00-governance/collection-policy-recovery-2026-10-01.md); original manifest has 24 active, 326 inactive and [5 deleted non-products](00-governance/nonproduct-cleanup-2026-10-01.md).
 
 Status: Active navigation index
 Last updated: 2026-09-16

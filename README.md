@@ -1,6 +1,8 @@
 # FPDS Workspace
 
-Approved policy update (2026-10-01): undisclosed currency uses CA/CAD or US/USD; reduced core comparison prerequisites apply. Code and regression changes are ready. Operating API deployment and final automatic promotion of eligible excluded products are pending; the live catalogue remains 7 until those steps complete. See [policy](docs/03-design/collection-accuracy-policy.md).
+Latest approved slice: restore conditional checking transaction costs, GIC/CD withdrawal access/consequences and line-of-credit security. Implementation and regression/UI verification are complete; deployment and live data changes have not been performed. Read-only impact: 5 of 24 active products meet the restored prerequisites, with 19 requiring additional evidence.
+
+Approved policy update (2026-10-01): undisclosed currency uses CA/CAD or US/USD; reduced core comparison prerequisites apply. Deployment and publication are verified: 17 eligible excluded products were restored through fresh automatic validation. The live catalogue now has 24 products (CA 17 / US 7); 326 original-manifest products remain inactive. See [policy](docs/03-design/collection-accuracy-policy.md).
 
 
 Latest cleanup: [five confirmed non-products deleted](docs/00-governance/nonproduct-cleanup-2026-10-01.md); Public remains at 7 products.

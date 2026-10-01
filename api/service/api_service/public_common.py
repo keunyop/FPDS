@@ -291,6 +291,7 @@ def load_public_projection_rows(
     rows = connection.execute(
         """
         SELECT
+            approved_version.normalized_payload AS approved_collection_payload,
             p.product_id,
             p.bank_code,
             p.bank_name,
@@ -370,7 +371,28 @@ def load_public_projection_rows(
         """,
         {"snapshot_id": snapshot_id, "country_code": country_code},
     ).fetchall()
-    return [dict(row) for row in rows]
+    from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid
+    result = []
+    for row in rows:
+        item = dict(row)
+        payload = item.pop("approved_collection_payload", None)
+        if item.get("product_type") in {"chequing", "gic", "line-of-credit"}:
+            # Check the exact snapshot-pinned version; an old snapshot/receipt
+            # must not bypass the current cost/access/security prerequisites.
+            if not isinstance(payload, dict) or not acceptance_receipt_valid(item, payload):
+                continue
+            metadata = dict(item.get("refresh_metadata") or {})
+            for field in (
+                "transaction_fee", "additional_transaction_fee", "included_transactions",
+                "unlimited_transactions_flag", "redeemable_flag", "non_redeemable_flag",
+                "early_withdrawal_penalty", "secured_flag", "security_requirement", "collateral_text",
+            ):
+                metadata.pop(field, None)
+                if field in payload:
+                    metadata[field] = payload[field]
+            item["refresh_metadata"] = metadata
+        result.append(item)
+    return result
 
 
 def apply_public_filters(rows: list[dict[str, Any]], *, filters: PublicQueryFilters) -> list[dict[str, Any]]:

@@ -1,3 +1,4 @@
+import { accessCopy, transactionCosts, withdrawalConditions } from "./public-access";
 import { getPublicRateMetric } from "@/lib/public-rate";
 import type { PublicProduct } from "@/lib/public-api";
 import { getIntlLocale, getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
@@ -50,10 +51,9 @@ export function buildPublicProductMetrics(
   if (product.product_type === "chequing") {
     return [
       { label: copy.grid.metricMonthlyFee, value: formatPublicCurrency(product.public_display_fee, product.currency, locale) },
+      { label: accessCopy(locale).costs, value: transactionCosts(product, locale) },
       { label: copy.grid.metricMinBalance, value: formatPublicCurrency(product.minimum_balance ?? product.minimum_deposit, product.currency, locale) },
-      product.country_code === "US"
-        ? { label: getMarketLabel("feeWaiver", locale), value: product.fee_waiver_condition ?? copy.common.notDisclosed }
-        : { label: getEssentialLabel("transactions", locale), value: formatPublicTransactions(product, locale) }
+      { label: getMarketLabel("feeWaiver", locale), value: product.fee_waiver_condition ?? copy.common.notDisclosed }
     ];
   }
 
@@ -61,10 +61,8 @@ export function buildPublicProductMetrics(
     return [
       rateMetric,
       { label: copy.grid.metricTerm, value: formatPublicProductTerm(product, locale) },
-      { label: copy.grid.metricMinDeposit, value: formatPublicCurrency(product.minimum_deposit, product.currency, locale) },
-      product.country_code === "US"
-        ? { label: getMarketLabel("earlyWithdrawalPenalty", locale), value: product.early_withdrawal_penalty ?? copy.common.notDisclosed }
-        : { label: getEssentialLabel("redeemability", locale), value: formatPublicRedeemability(product, locale) }
+      { label: accessCopy(locale).withdrawal, value: withdrawalConditions(product, locale) },
+      { label: copy.grid.metricMinDeposit, value: formatPublicCurrency(product.minimum_deposit, product.currency, locale) }
     ];
   }
 
@@ -104,6 +102,13 @@ export function buildPublicProductMetrics(
     { label: copy.grid.metricMonthlyFee, value: formatPublicCurrency(product.public_display_fee, product.currency, locale) },
     { label: copy.grid.metricMinBalance, value: formatPublicCurrency(product.minimum_balance, product.currency, locale) }
   ];
+}
+
+export function buildPublicAccessMetric(product: PublicProduct, locale: string): PublicProductMetric | null {
+  if (product.product_type === "chequing") return { label: accessCopy(locale).costs, value: transactionCosts(product, locale) };
+  if (product.product_type === "gic") return { label: accessCopy(locale).withdrawal, value: withdrawalConditions(product, locale) };
+  if (product.product_type === "line-of-credit") return { label: getEssentialLabel("security", locale), value: formatPublicSecurity(product, locale) };
+  return null;
 }
 
 export function buildPublicSortMetric(product: PublicProduct, locale: string, sortBy: string): PublicProductMetric {
