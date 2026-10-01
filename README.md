@@ -1,8 +1,22 @@
 # FPDS Workspace
 
+Approved policy update (2026-10-01): undisclosed currency uses CA/CAD or US/USD; reduced core comparison prerequisites apply. Code and regression changes are ready. Operating API deployment and final automatic promotion of eligible excluded products are pending; the live catalogue remains 7 until those steps complete. See [policy](docs/03-design/collection-accuracy-policy.md).
+
+
+Latest cleanup: [five confirmed non-products deleted](docs/00-governance/nonproduct-cleanup-2026-10-01.md); Public remains at 7 products.
+
+Latest one-off recovery: [remaining 182 products across 20 banks](docs/00-governance/collection-accuracy-oneoff-remaining-2026-09-30.md)
+checked; Scotiabank Value Visa restored automatically. Public API is CA 7 / US 0,
+with 343 original-manifest products inactive and 5 confirmed non-products deleted. All 355 original products now have
+an accepted result or a source preflight disposition; no unchecked source queue
+remains. No new collection model calls, human reviews or runtime changes.
+The preceding [120-product batch](docs/00-governance/collection-accuracy-oneoff-broad-2026-09-30.md)
+restored Tangerine. Historical slice counts below record their completion state.
+
 ## Current collection policy — 2026-09-30
 
-New collection accepts only explicitly evidenced, consistently typed facts and
+New collection accepts consistently typed, officially evidenced facts and approved
+country currency defaults for undisclosed currency, and
 ends automatically in acceptance or exclusion. No human product review is needed.
 Admin Review routes now show read-only history under More tools. Earlier review
 workflow descriptions below are historical for product collection; account

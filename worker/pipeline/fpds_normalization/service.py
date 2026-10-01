@@ -1019,8 +1019,7 @@ def _compute_validation_issue_codes(
             and not _has_dynamic_gic_rate_mechanism(candidate_payload)
         ):
             issues.append("required_field_missing")
-        if candidate_payload.get("minimum_deposit") in {None, ""}:
-            issues.append("required_field_missing")
+        # Approved 2026-10-01 policy: opening deposit is optional.
         if (
             candidate_payload.get("term_length_days") in {None, ""}
             and candidate_payload.get("term_length_text") in {None, ""}
@@ -1029,8 +1028,7 @@ def _compute_validation_issue_codes(
             issues.append("required_field_missing")
         if _truthy(candidate_payload.get("redeemable_flag")) and _truthy(candidate_payload.get("non_redeemable_flag")):
             issues.append("inconsistent_cross_field_logic")
-        if candidate_payload.get("minimum_balance") not in {None, ""} and candidate_payload.get("minimum_deposit") in {None, ""}:
-            issues.append("inconsistent_cross_field_logic")
+        # A disclosed balance does not require an undisclosed opening deposit.
     if dynamic_product_type:
         populated_decision_fields = populated_dynamic_decision_fields(
             product_type=product_type,

@@ -3,12 +3,10 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from hashlib import sha256
 import json
-import re
 from pathlib import Path
 
 from worker.pipeline.fpds_ai_runtime import configured_model_id
 from .models import ExtractedFieldCandidate
-from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
 
 
 def input_digest(context, candidates, requested_fields, collected_fields, *, day=None):
@@ -16,7 +14,8 @@ def input_digest(context, candidates, requested_fields, collected_fields, *, day
     files = [root / name for name in (
         "fpds_extraction/service.py", "fpds_extraction/grounding_cache.py",
         "fpds_field_contract.py", "fpds_collection_accuracy.py", "fpds_market_profile.py",
-        "fpds_comparison_instructions.py", "fpds_ai_runtime.py", "fpds_rate_safety.py")]
+        "fpds_comparison_instructions.py", "fpds_ai_runtime.py", "fpds_rate_safety.py",
+        "../country_defaults.py")]
     value = {"version": 1, "day": day or datetime.now(UTC).date().isoformat(),
         "model": configured_model_id(), "code": [sha256(p.read_bytes()).hexdigest() for p in files],
         "context": asdict(context), "candidates": [asdict(c) for c in candidates],
@@ -26,11 +25,8 @@ def input_digest(context, candidates, requested_fields, collected_fields, *, day
 
 def grounded_with_reuse(*, object_store, storage_config, run_id, context, candidates,
                         requested_fields, collected_fields, extract):
-    # No model can supply the required exact captured currency quote if none
-    # exists. This is an omission preflight, never proof of a product's currency.
-    if not any(re.search(pattern, c.evidence_excerpt, re.I)
-               for c in candidates for pattern in CURRENCY_PATTERNS.values()):
-        return [], ["Official grounding skipped: no explicit currency in captured evidence."], None
+    # Missing currency text does not block grounding of actual product facts.
+    # The shared validator resolves and records the country default afterward.
     key = storage_config._join_key(storage_config.env_prefix, storage_config.extraction_object_prefix,
         context.country_code, context.bank_code, context.source_document_id, "grounding-cache.json")
     fingerprint = input_digest(context, candidates, requested_fields, collected_fields)

@@ -883,3 +883,85 @@ cross-attribute zero-value bug; no new recovery feature. Worker 571, API 535,
 accuracy/maintenance 31 tests, repo doctor, foundation baseline, final diff and
 text/link checks pass. Runtime deployment remains required for the correction.
 Remaining 350 manifest products are still inactive. Preserve prior goal ownership.
+
+
+## 2026-09-30 larger remaining-product recovery batch
+
+Objective: assess 120 previously unchecked inactive manifest products across
+banks, honoring the Product Owner request for larger batches and low token use.
+Scope: read-only current official captures and full-context evidence reuse;
+normal automatic validation/promotion only for proven candidates. Preserve history.
+No permanent feature, deployment, human review, relaxed evidence or unrelated writes.
+Acceptance:
+- [x] Select 120 unprocessed products using live status and prior operation receipts.
+- [x] Deduplicate official fetches; assess complete current context and native types.
+- [x] Promote only automatic passes or record concrete exclusion/fetch reasons.
+- [x] Verify final canonical/Public state, usage, reviews and operation documentation.
+Verification: before/after DB snapshots, accuracy gate receipts, official source
+hashes, relevant checks and git diff --check. Preserve other goal ownership.
+
+Completion: 120 products across 40 banks checked; 116 deduplicated source URLs,
+114 successful source captures and four targeted support URLs. One Tangerine
+product automatically restored, 119 remain excluded. Public API/BFF/list/detail
+verified at six CA products; 349 original-manifest products remain inactive.
+Other 433 canonical rows, 311 historical candidates and registry unchanged;
+previous version payload preserved. Collection model calls/tokens and new human
+reviews zero. All six active evidence replays, 31 regression tests, private
+section positive/negative checks and final diff/text/link checks pass. No runtime
+code or deployment. Next unchecked queue: 182 products across 20 banks.
+Preserve other goal ownership; this file remains for the independent goals above.
+
+
+## 2026-09-30 remaining unchecked recovery continuation
+
+Objective: finish first-pass assessment of the remaining 182 queued products
+across 20 banks, in deduplicated bounded fetch batches. Restore only automatic
+passes with current full official evidence and native types; no human review.
+Scope: one-off data operations, history preservation and necessary documentation.
+No permanent feature, deployment, weaker evidence, unrelated mutations or
+unchanged paid retries. Preserve all existing work and independent goals.
+Acceptance:
+- [x] Verify live status and select all remaining unchecked queue products.
+- [x] Capture unique current official sources and assess complete evidence.
+- [x] Process eligible candidates through normal automatic promotion; log exclusions.
+- [x] Verify canonical/history/Public state, usage/reviews and final documentation.
+Verification: before/after images, live evidence replay, appropriate regression
+checks and git diff --check. Keep source evidence and execution scripts private.
+
+Completion: all 182 queued products assessed across 161 sources (157 fetched,
+four source-policy exclusions). Value Visa restored with CAD 29 annual fee and
+13.99% annual purchase rate; 181 remain excluded. Public API/BFF total seven,
+card catalog/detail verified, deposit catalog six. All 355 manifest products now
+have first-pass dispositions; 348 exclusions remain and unchecked queue is zero.
+Other 433 canonical rows, 607 historical candidates and registry preserved.
+Seven active evidence replays, 31 tests, exact applicability positive/negative
+checks and final diff/UTF-8/98-link checks pass. Zero collection model calls/tokens
+and human reviews. No runtime feature or deployment. Preserve prior goal ownership.
+
+## Evidence strengthening batch (2026-10-01)
+- Objective: recover additional excluded products using shared official evidence with minimal model/token use.
+- Scope: cached evidence triage, targeted current official support, one-off automatic validation and eligible data restoration; no new permanent feature or relaxed accuracy gates.
+- Acceptance: exact product applicability and native financial types; uncertain facts omitted; unrelated data/history preserved; actual Public readback checked for any restoration.
+- Verification: targeted accuracy tests, before/after database checks, evidence replay, git diff check.
+- Status: complete for this bounded batch. Assessed 15 cards; strengthened 9 currency bindings; 0 eligible restorations. All 434 canonical rows unchanged, active 7/inactive manifest 348. One fresh source fetch, zero collection-model calls; development token usage not measured. Focused 31 tests passed. No deployment or human review needed.
+
+## Product-specific disclosure follow-up
+- Objective: fill remaining evidence gaps using linked official product disclosures; restore only automatically accepted products.
+- Scope: bounded one-off evidence/data work, cached support reuse, no runtime or gate changes.
+- Acceptance: preserve precise rate conditions and native types; no human review; publish only after current evidence passes; preserve unrelated data.
+- Verification: automatic evidence replay, targeted tests, DB readback and Public checks if any promotion, final diff check.
+- Status: completed bounded disclosure investigation. Two official documents checked; exact-context false exclusion reproduced. No eligible promotions under unchanged gate; active 7, original-manifest inactive 348. No data/runtime changes. Focused 31 tests passed; private report and journal record the prerequisite validator correction.
+
+## Remove conclusively invalid excluded products
+- Objective: delete excluded records proven not to be publishable products, as explicitly requested by the Product Owner.
+- Scope: original cutover manifest only; preserve recoverable or uncertain products and active products; inspect dependencies, retain private rollback data and audit.
+- Acceptance: evidence-bound exact deletion scope, no inference of retirement from missing evidence/inactive sources, no unrelated changes.
+- Verification: transactional before/after checks, foreign-key integrity and active catalogue counts, diff check.
+- Status: complete. Five verified non-product records deleted after rollback rehearsal; 429 survivors unchanged. Original manifest: 7 active, 343 inactive, 5 deleted. Public/API checks passed. Private recovery and audit artifacts retained; obsolete DB audit view is a no-op. No deployment required.
+
+## Country currency defaults and lean required fields
+- Objective: apply latest Product Owner policy: country currency when undisclosed, fewer publication-blocking fields.
+- Scope: shared collection validation/profiles/prompts, grounding preflight, regression tests and authoritative docs. Product Owner now explicitly approves code changes and restoration of excluded products that pass the new policy. Verify serving-runtime compatibility before promotion.
+- Acceptance: CA/CAD and US/USD defaults have explicit internal provenance; explicit or conflicting currencies never silently overwritten; optional unknown facts omitted; essential fee/rate/term meaning preserved; no human review.
+- Verification: cached field coverage, focused and affected runtime regressions, existing receipt compatibility, diff checks.
+- Status: code complete and tested (Worker 578 / API 536 / maintenance 8). Fresh automatic dry run accepts 17 products; no live data changes yet. Publication awaits user deployment: no Vercel authentication is available and the serving API still lacks the new policy versions. User was notified asynchronously. Resume via docs/00-governance/collection-policy-recovery-2026-10-01.md; do not mark this goal complete until actual publication/readback.

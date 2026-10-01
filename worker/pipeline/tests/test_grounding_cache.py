@@ -37,14 +37,13 @@ class GroundingReuseTests(unittest.TestCase):
             self.assertNotEqual(method(**kwargs, run_id="run-one"), method(**kwargs, run_id="run-two"))
             self.assertNotEqual(method(**kwargs), method(**kwargs, run_id="run-one"))
 
-    def test_absent_currency_abstains_without_model_or_cache_access(self):
+    def test_absent_currency_still_grounds_product_facts(self):
         fields, notes, usage = grounded_with_reuse(**{**self.args,
             "candidates": [replace(self.chunk, evidence_excerpt="Savings Account monthly fee $0")]})
-        self.assertEqual(fields, [])
-        self.assertIsNone(usage)
-        self.extract.assert_not_called()
-        self.assertIn("no explicit currency", notes[0])
-        self.assertEqual(self.store.data, {})
+        self.assertEqual(fields, [self.field])
+        self.assertIsNotNone(usage)
+        self.extract.assert_called_once()
+        self.assertTrue(self.store.data)
 
     def test_same_input_reuses_original_provenance_without_new_tokens(self):
         grounded_with_reuse(**self.args)

@@ -1,5 +1,10 @@
 # FPDS Requirements Definition (PRD / Requirements Spec)
 
+## Product Owner collection override - 2026-10-01
+
+Explicitly approved: use the registered country currency (CA/CAD, US/USD) when a product does not disclose currency; retain explicit currencies and reject unresolved conflicts. Reduce publication prerequisites to core fee/rate/term facts in [the current collection policy](../03-design/collection-accuracy-policy.md). Optional missing balances, deposits, transaction allowances, waivers, redemption/penalties and lending amounts/limits/security do not block publication; uncertain facts are omitted. No human product review. Eligible excluded products may be restored after fresh evidence, normal automatic validation and deployed-policy verification. This overrides prior blanket prohibitions on currency defaults and older comparison prerequisites, without changing country selection, supported markets, native types or financial-condition safeguards.
+
+
 ## Product Owner collection override — 2026-09-30
 
 상품 수보다 정확성을 우선한다. 불확실한 선택 속성은 수집값에서 제외하고,

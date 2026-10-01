@@ -225,7 +225,7 @@ class CollectionAiAutopilotTests(TestCase):
         verify.assert_not_called()
         decide.assert_not_called()
 
-    def test_retains_review_when_correction_introduces_missing_conditional_field(self):
+    def test_retains_review_when_correction_introduces_missing_core_field(self):
         first_execution = {
             "model_execution_id": "modelexec-001",
             "execution_status": "completed",
@@ -251,7 +251,7 @@ class CollectionAiAutopilotTests(TestCase):
                 "api_service.collection_ai_autopilot.load_review_task_detail",
                 side_effect=[
                     _us_savings_detail(monthly_fee=0),
-                    _us_savings_detail(monthly_fee=12),
+                    _us_savings_detail(monthly_fee=None),
                 ],
             ),
             patch("api_service.collection_ai_autopilot._load_latest_verification_execution", return_value=None),
@@ -293,7 +293,7 @@ class CollectionAiAutopilotTests(TestCase):
         )
         self.assertEqual(
             result["assessment"]["missing_comparison_fields"],
-            ["fee_waiver_condition"],
+            ["monthly_fee"],
         )
         self.assertEqual(persist.call_count, 2)
         decide.assert_not_called()

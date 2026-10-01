@@ -34,14 +34,16 @@ markets, product types, recommendations, public evidence or BX-PF writes.
   basis in the evidence. An annual fee is not annual interest-rate evidence.
   A field with a different explicit currency is omitted.
 - Product identity must be verified on a detail source. Currency requires an
-  explicit ISO code or currency name in verified evidence; country defaults and
-  an ambiguous dollar symbol are insufficient.
+  explicit ISO code or currency name when disclosed. If absent, use the registered
+  country default (CA: CAD, US: USD), with private `country_default` provenance.
+  Explicit or unresolved conflicting/foreign-currency cues block this fallback;
+  an unknown country has no default. A bare dollar symbol is not a foreign-currency disclosure.
 - A zero money value needs evidence about that same attribute. No monthly fee
   cannot prove no minimum balance/deposit, and no transaction fee cannot prove
   no annual fee. Benefits for family or companion accounts cannot establish the
   main account's fee or balance. Require exact product and attribute applicability.
 - Do not translate or paraphrase source-language product facts. UI labels may be
-  localized. Do not infer false, zero, a currency, missing duration, a rate total,
+  localized. Do not infer false, zero, missing duration, a rate total,
   or a new fact from an absent statement. Normalization cannot create or change a
   value after grounding. An accepted monthly fee may be copied to its display alias.
 - Omit uncertain optional attributes. If identity, currency or the registered
@@ -56,7 +58,7 @@ markets, product types, recommendations, public evidence or BX-PF writes.
 | Attribute | JSON type | Meaning |
 |---|---|---|
 | Interest rate | finite nonnegative number below 100 | percentage points, explicitly annual basis; APR/APY meaning preserved |
-| Money | finite nonnegative number | explicitly verified product currency |
+| Money | finite nonnegative number | official product currency, or traced country default when undisclosed |
 | Count/duration | nonnegative integer | count or literal days; do not convert an ambiguous month to days |
 | Boolean | boolean | explicit supported positive/negative statement; unknown is omitted |
 | Product name/qualified description | string | exact source-language wording |
@@ -144,9 +146,9 @@ a separate request. Fix shared runtime defects only when demonstrated by evidenc
   and equality checks; an old verification timestamp cannot become current by
   rebuilding a projection. The legacy recovery diagnostic is read-only and
   pinned to the authorized manifest.
-- No captured explicit supported currency means no official-grounding model
-  call: the model cannot provide an exact currency quote that is absent. This
-  preflight never establishes product ownership or proves the currency itself.
+- Missing explicit currency no longer skips official grounding. Resolve the
+  authorized country default while continuing to verify product identity and
+  comparison essentials; never fabricate a currency quote.
 - Request identity, currency and comparison essentials, including their available
   alternatives. Retain existing annual/APY-basis and redemption qualifiers needed
   for Public comparisons, opportunistically from the same evidence. Optional
@@ -184,3 +186,25 @@ facts; it must not be worked around by lowering a score or approving manually.
 A future improvement should add bounded evidence resolution and adversarial
 fixtures before extending supported patterns. Do not start unlimited paid
 recollection to compensate for missing historical evidence.
+
+## Deleting excluded non-products
+
+Exclusion is not proof that a product can never be published. Do not delete a product solely because evidence is missing, a source is inactive/unreachable, or automatic validation fails. Under an explicit deletion authorization, remove only exact records with affirmative evidence that they are not individual in-scope products or have another conclusively established deletion basis. Preserve shared sources, recoverable products and private operation/rollback evidence. The 2026-10-01 authorized cleanup removed five non-product records; it does not authorize deletion of the remaining uncertain exclusions.
+
+## Product Owner override: 2026-10-01
+
+The Product Owner explicitly approved country currency defaults, reduced publication prerequisites, and restoration of excluded products that pass the new policy. This supersedes prior requirements to prove every product currency explicitly and older market-profile minimums. No human review is introduced.
+
+| Product | Required comparison facts (CA and US) |
+|---|---|
+| Chequing/checking | Monthly fee |
+| Savings | Ongoing annual rate/APY and monthly fee |
+| GIC/CD | Rate or valid term schedule, and exact term |
+| Credit card | Annual fee and purchase rate (US qualified APR/range allowed) |
+| Mortgage | Rate (US qualified summary), fixed/variable type and term |
+| Personal loan | Rate/range and term |
+| Line of credit | Rate/range |
+
+Minimum balances/deposits, transaction allowances, waiver conditions, redemption/penalty details, lending amounts/limits and security requirements are optional. Missing optional facts do not block publication; invalid ones are omitted. They remain available in the shared collection field catalog. Core rate/fee/term conditions remain binding; no introductory, conditional, tiered or penalty value may be presented as an unconditional scalar.
+
+Receipts use `collection-accuracy-2026-10-01`; valid prior strict-policy receipts remain compatible without changing their digest. New defaults carry a private `currency_basis` and mapping provenance. Neither provenance nor evidence is exposed through Public projections. Grounding-cache fingerprints include country-default code. `/healthz` exposes policy/profile versions to verify the serving runtime before restoring products. A stricter historical error state is not deleted to force acceptance; generate fresh candidates through normal normalization and automatic validation.

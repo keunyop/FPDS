@@ -1,5 +1,8 @@
 # FPDS Detailed WBS
 
+Approved policy update (2026-10-01): undisclosed currency uses CA/CAD or US/USD; reduced core comparison prerequisites apply. Code and regression changes are ready. Operating API deployment and final automatic promotion of eligible excluded products are pending; the live catalogue remains 7 until those steps complete. See [policy](../03-design/collection-accuracy-policy.md).
+
+
 ## 5.76 — Accuracy-first autonomous collection (2026-09-30)
 
 Status: Legacy cutover verified; prior endpoint/pilot deployment reported by the
@@ -67,6 +70,28 @@ balance or another fee. Existing five active products still pass evidence replay
 Worker 571 / API 535 / accuracy-maintenance 31 pass. Correction requires runtime
 deployment; Public remains CA 5 / US 0, with 350 manifest products inactive.
 [Report](../00-governance/collection-accuracy-oneoff-rbc-bmo-2026-09-30.md).
+
+### 5.76 follow-up - larger one-off recovery batch
+
+120 previously unchecked products across 40 banks assessed from 116 unique
+sources; four support URLs fetched for targeted follow-ups. Tangerine No-fee
+daily Chequing restored automatically; 119 products remain excluded. Public API
+CA 6 / US 0; 349 original-manifest products inactive. No model calls or human
+reviews; 433 other canonical rows, 311 historical candidates and registry unchanged.
+Accuracy/maintenance 31 tests and all six active evidence replays pass. No new
+runtime feature or deployment. Next unchecked queue: 182 products across 20 banks.
+[Report](../00-governance/collection-accuracy-oneoff-broad-2026-09-30.md).
+
+### 5.76 follow-up - remaining 182-product batch
+
+182 remaining queued products across 20 banks assessed; 161 unique sources and
+five support URLs checked. Scotiabank Value Visa restored; 181 retain exclusions.
+Public API CA 7 / US 0; 343 manifest products inactive; 5 confirmed non-products deleted. First-pass coverage of all
+355 original products complete, unchecked source queue zero. No model calls or
+human reviews. Other 433 canonical rows, 607 historical candidates and registry
+unchanged; seven active evidence replays and 31 regression tests pass. No runtime
+feature or deployment. Continue only with concrete evidence improvements.
+[Report](../00-governance/collection-accuracy-oneoff-remaining-2026-09-30.md).
 
 Version: 1.0
 Date: 2026-03-29

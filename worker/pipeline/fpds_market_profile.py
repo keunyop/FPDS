@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 
-MARKET_PROFILE_VERSION = "2026-09-29-v5"
+MARKET_PROFILE_VERSION = "2026-10-01-v6"
 
 
 @dataclass(frozen=True)
@@ -241,6 +241,19 @@ _COUNTRY_SUPPLEMENTAL_FIELDS: dict[tuple[str, str], tuple[str, ...]] = {
 }
 
 
+# Product Owner override 2026-10-01: only these facts block publication.
+# Other grounded comparison fields remain available as optional information.
+_REQUIRED_COMPARISON_KEYS = {
+    "chequing": {"monthly_fee"},
+    "savings": {"ongoing_rate", "ongoing_apy", "monthly_fee"},
+    "gic": {"rate", "apy_or_rate_schedule", "term"},
+    "credit-card": {"annual_fee", "purchase_rate"},
+    "mortgage": {"rate", "qualified_rate_or_apr", "rate_type", "term"},
+    "personal-loan": {"rate", "apr_or_rate_range", "term", "term_range"},
+    "line-of-credit": {"rate"},
+}
+
+
 def country_product_profile(
     *,
     country_code: str | None,
@@ -259,12 +272,15 @@ def country_product_profile(
         resolved_country = "*"
     if requirements is None:
         return None
+    optional_requirements = tuple(r for r in requirements if r.key not in _REQUIRED_COMPARISON_KEYS[normalized_type])
+    requirements = tuple(r for r in requirements if r.key in _REQUIRED_COMPARISON_KEYS[normalized_type])
     return CountryProductProfile(
         country_code=resolved_country,
         product_type=normalized_type,
         profile_version=MARKET_PROFILE_VERSION,
         requirements=requirements,
         supplemental_fields=tuple(dict.fromkeys((
+            *(field for r in optional_requirements for field in r.alternatives),
             *_TYPE_SUPPLEMENTAL_FIELDS.get(normalized_type, ()),
             *_COUNTRY_SUPPLEMENTAL_FIELDS.get((normalized_country, normalized_type), ()),
         ))),

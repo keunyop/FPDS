@@ -1,5 +1,7 @@
 # FPDS Docs Map
 
+Latest data cleanup: [five confirmed non-products deleted](00-governance/nonproduct-cleanup-2026-10-01.md); original manifest has 7 active and 343 inactive products.
+
 Status: Active navigation index
 Last updated: 2026-09-16
 
@@ -35,6 +37,8 @@ requirements, planning, or design material.
 
 ### 2.1 Governance
 
+- [Remaining 182-product recovery](00-governance/collection-accuracy-oneoff-remaining-2026-09-30.md): Value Visa restored, Public 7, first-pass manifest coverage complete
+- [Larger recovery batch](00-governance/collection-accuracy-oneoff-broad-2026-09-30.md): 120 products across 40 banks, Tangerine restored, zero new model calls
 - [RBC/BMO recovery assessment](00-governance/collection-accuracy-oneoff-rbc-bmo-2026-09-30.md): 11 exclusions retained, cross-attribute zero validation corrected
 - [CIBC/Scotiabank one-off recovery](00-governance/collection-accuracy-oneoff-scotia-2026-09-30.md): 11 products checked, Basic Plus restored, no new model calls
 - [One-off Vancity recovery](00-governance/collection-accuracy-oneoff-vancity-2026-09-30.md): exact product currency properties, one automatic restoration, zero model calls

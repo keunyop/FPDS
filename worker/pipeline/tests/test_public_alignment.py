@@ -15,7 +15,7 @@ class PublicAlignmentTests(unittest.TestCase):
             fields = collection_fields_for_product_type(country_code=country, product_type="savings")
             payload = {"standard_rate": 1, "monthly_fee": 0, "minimum_balance": 0}
             self.assertTrue(comparison_quality(country_code=country, product_type="savings", expected_fields=fields, candidate_payload=payload).complete)
-            self.assertEqual(dynamic_repair_fields(country_code=country, product_type="savings", expected_fields=fields, candidate_payload=payload), ["standard_rate", "monthly_fee", "minimum_balance"])
+            self.assertEqual(dynamic_repair_fields(country_code=country, product_type="savings", expected_fields=fields, candidate_payload=payload), ["standard_rate", "monthly_fee"])
             self.assertIn("interest_calculation_method", fields)
             self.assertNotIn("eligibility_text", fields)
             self.assertEqual(len(fields), len(set(fields)))
@@ -30,7 +30,7 @@ class PublicAlignmentTests(unittest.TestCase):
             _extract_official_fields_with_ai(context=context, candidates=[], requested_fields=fields, collected_fields=[])
         call.assert_called_once()
         payload = call.call_args.kwargs["payload"]
-        self.assertIn("early_withdrawal_penalty", payload["required_comparison_fields"])
+        self.assertNotIn("early_withdrawal_penalty", payload["required_comparison_fields"])
         self.assertIn("interest_rate_summary", payload["required_comparison_fields"])
         self.assertIn("interest_calculation_method", payload["supplemental_fields"])
         self.assertIn("redeemable_flag", payload["supplemental_fields"])

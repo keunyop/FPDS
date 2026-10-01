@@ -1,5 +1,46 @@
 # FPDS Development Journal
 
+## 2026-10-01 - Approved country defaults and lean prerequisites implemented
+
+- The Product Owner explicitly approved the code change and eligible excluded-product publication. Implemented country defaults with private provenance, reduced shared market prerequisites/prompts, currency preflight/cache changes, compatible versioned receipts and health policy metadata. Aligned fresh GIC normalization's duplicated minimum-deposit rule; actual missing rate/term remains an error. Authoritative requirements/scope/decision/policy docs updated.
+- Verification: Worker 578, API 536, maintenance 8 tests pass; 7 live accepted receipts remain compatible. Full manifest readback/diagnosis covers 343 exclusions; checked 25 current sources; fresh normal normalization/validation accepts 17 candidates, creates no human review and uses no provider calls. No live data writes or publications yet.
+- Directly stripping historical missing-field flags was rejected by automatic review. Used the safe normal fresh-candidate pipeline; no historical error records were modified.
+- [Recovery readiness and exact resume](collection-policy-recovery-2026-10-01.md): CA 10 / US 7 ready; live catalogue remains 7. Vercel CLI is unauthenticated and serving `/healthz` still lacks new policy metadata. User deployment is the external dependency; the private execution script blocks live writes until policy/profile versions match. Once deployed, execute the prepared recovery and verify normal promotion, aggregate refresh and actual Public results. Goal stays open.
+
+
+## 2026-10-01 - Currency/default and required-field proposal blocked before code edit
+
+- Product Owner requests country currency for undisclosed currency and fewer publication prerequisites. Cached diagnosis of 350 surviving manifest records supports dropping optional balances/deposits, allowances, waivers, redemption/penalty and loan limit/security requirements while retaining core fees/rates/terms.
+- Prepared [concrete policy and test scope](collection-policy-change-proposal-2026-10-01.md). Automatic approval review rejected the attempted local multi-file acceptance/profile/prompt edit as insufficiently authorized broad publication-gate change; none of those runtime edits ran. No new tests, deployment or data operations claimed.
+- Next: obtain approval for the documented exact scope, implement and run the listed regressions. Existing runtime policy remains until then.
+
+
+## 2026-10-01 - Deleted five confirmed non-product records
+
+- Applied the Product Owner's explicit deletion request only to 5 positively identified non-products: educational article, calculator, enrollment, service agreement and CIBC GIC category. Fresh official links establish each classification; unresolved/repairable exclusions remain.
+- Canonical 5, versions 10, version evidence links 24, change events 11 and historical projections 59 removed transactionally; 5 review references cleared while decisions/candidates/raw evidence remain. All 429 surviving canonical rows unchanged; original manifest now active 7 / inactive 343 / deleted 5.
+- Rollback rehearsal, execution checks, independent manifest counts, Public API/BFF/card/detail checks and final diff check passed. No deployment or model calls. Private backup and operation evidence retained; migration 0040 makes the legacy audit view a no-op, so no durable DB audit insertion is claimed.
+- Record: [confirmed non-product cleanup](nonproduct-cleanup-2026-10-01.md). Do not rerun the completed private operation. Next: preserve the 343 uncertain exclusions and address the recorded validator false exclusions.
+
+
+## 2026-09-30 - Product-specific disclosure follow-up
+
+- Fetched the linked Platinum American Express welcome kit and an official 2022 amendment notice (2 fetches; 2 web discovery queries). The kit supplies no separate rate disclosure. The old notice corroborates annual basis but mixes prior/new/penalty rates and cannot alone establish current terms.
+- Reproduced a concrete automatic-validation false exclusion: the current detail explicitly states the preferred annual purchase rate; its full 900-character evidence chunk also contains unrelated promotional eligibility wording, including "switch from an existing ... card". The generic percentage conditional-word check rejects `from` anywhere in that chunk. Exact rate quote passes; full retained context fails. This is not evidence that the product has no accurate rate information.
+- No gate bypass, shortened evidence publication, runtime changes, canonical writes, or human reviews. Additional restoration 0; live canonical active 7, all-canonical inactive 427 (348 belong to the original cutover manifest); started runs 0. Collection-model calls 0; coding-assistant usage is separate.
+- Evidence/reproducer: private `tmp/oneoff-disclosure-report.json` and captured kit/notice files. Focused 31 tests passed. Next work should address exact field/section applicability in the existing automatic validator with positive and adversarial regressions, then deployment verification; do not keep fetching equivalent documents for this cohort or add recovery UI. Preserve introductory, penalty, tier and conditional distinctions.
+
+
+## 2026-09-30 - Shared evidence strengthening with bounded token use
+
+- Assessed 15 remaining Scotiabank cards against cached current product details and a shared official agreement. Exact product URL, detail H1 and agreement scope established CAD for 9; the newly fetched official rates table linked 12 exact product rows, of which 11 matched historical purchase rates.
+- Additional restoration: **0**. All 15 still fail required-field/full-context checks; retain 7 active Public products and 348 inactive manifest products. No canonical, registry, review, or deployment writes. Read-only DB snapshot confirmed 434 canonical rows unchanged.
+- Evidence and replay: private `tmp/oneoff-strength-report.json`, `tmp/oneoff-strength-assess.py`, and existing per-source snapshots. Rate rows alone lack annual basis in the same retained evidence chunk; shared terms must not be applied to unlisted student variants or Mastercard accounts.
+- Verification: 31 focused accuracy/recovery/cutover tests passed; incorrect product URL rejected by exact scope/row membership. The Platinum dry run also excluded the candidate; its execution path was not run.
+- Cost rule for further one-off recovery: reuse saved evidence and product dispositions, batch shared bank documents, fetch only missing support, print summaries instead of full documents, and stop unchanged failed retries. This batch made 1 fresh source fetch and 0 collection-model calls. These counts exclude coding-assistant conversation tokens; do not describe total token usage as zero.
+- Next step: target product-specific disclosure boxes with explicit annual purchase rates and complete conditions. Keep existing gates and no-human-review policy; do not refetch all excluded products or add a permanent recovery feature.
+
+
 Version: 1.2
 Date: 2026-04-22
 Status: Active
@@ -24,6 +65,58 @@ Historical gate and prototype material now lives under `docs/archive/`.
 ---
 
 ## 2. Current Resume Context
+
+## 2026-09-30 - Remaining 182-product recovery and Value Visa restoration
+
+- Assessed remaining 182 queued products across 20 banks (CA 94 / US 88),
+  161 unique sources and 607 historical candidates. 178 products fetched;
+  four source exclusions are two inactive sources and two category entries.
+- Restored Scotiabank Value Visa using current ongoing annual fee/rate and
+  exact linked credit-agreement applicability/CAD billing proof. Native CAD 29
+  annual fee and 13.99% purchase rate; no model calls or human reviews.
+- Canonical/Public API CA 7 / US 0; 348 original products remain inactive.
+  All 355 manifest products now have a source assessment or active result;
+  unchecked source queue zero. This does not mean exclusions are resolved.
+- Other 433 canonical rows, 607 historical candidates and registry unchanged;
+  prior version payload preserved; all seven active evidence replays pass.
+- Accuracy/maintenance 31 tests and exact-product applicability positive/negative
+  checks pass. No running ingestion or pending/new reviews. Public API/BFF
+  show seven; card catalog/detail verified after normal cache revalidation.
+  Deposit-only catalog retains six accounts. Final diff, UTF-8 and 98 links pass.
+- No runtime changes or deployment. Prior zero-value correction remains pending
+  deployment confirmation. Five support URLs checked, including CIBC Smart Start
+  age/fee conditions; no unconditional zero inferred from those benefits.
+- [Report](collection-accuracy-oneoff-remaining-2026-09-30.md), private
+  `tmp/oneoff-broad2-*` and `tmp/oneoff-scotiavalue-*` retain scope and receipts.
+  Next: evidence-driven follow-up on 348 exclusions, not repeated unchanged
+  collection or more unprocessed-source batches.
+
+---
+
+## 2026-09-30 - Larger recovery batch: 120 products across 40 banks
+
+- Followed the Product Owner request to increase batch size: 120 previously
+  unchecked manifest products, 116 unique sources, 311 historical candidates.
+  118 products fetched successfully; two fetch exclusions retained.
+- Restored Tangerine No-fee daily Chequing with native fee/balance zero and
+  unlimited daily transactions. Exact product detail and linked account terms
+  establish CAD. Automatic validation/promotion, no human review/model call.
+- Canonical/Public API CA 6 / US 0; 349 manifest products remain inactive.
+  Other 433 canonical rows, 311 historical candidates and registry unchanged.
+- The private terms-section check initially stopped before candidate writes
+  because it matched the TOC. Corrected actual H2 section binding, tested its
+  failure path, and resumed the exact stored captures without another fetch.
+- Accuracy/maintenance 31 tests pass; all six active evidence receipts replay
+  successfully; no running ingestion jobs or pending/new human reviews.
+- No runtime code or deployment. Earlier zero-value runtime correction remains
+  pending deployment confirmation. Public API/BFF/list/detail checks passed
+  after normal cache revalidation; final diff and UTF-8/94 relative-link checks pass.
+- [Operation report](collection-accuracy-oneoff-broad-2026-09-30.md) and ignored
+  `tmp/oneoff-broad-*` / `tmp/oneoff-tangerine-*` preserve scope and diagnostics.
+  Next: 182 previously unchecked products across 20 banks, in 100-120 batches;
+  skip unchanged failed evidence instead of paying for repeated extraction.
+
+---
 
 ## 2026-09-30 - RBC/BMO preflight and cross-attribute zero correction
 

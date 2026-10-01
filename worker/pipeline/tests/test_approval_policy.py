@@ -176,8 +176,8 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
 
         self.assertTrue(no_fee.complete)
         self.assertNotIn("minimum_balance", no_fee.assessed_fields)
-        self.assertFalse(fee_bearing.complete)
-        self.assertEqual(fee_bearing.missing_fields, ("minimum_balance",))
+        self.assertTrue(fee_bearing.complete)
+        self.assertEqual(fee_bearing.missing_fields, ())
 
     def test_canadian_chequing_accepts_explicit_non_balance_waiver_or_transaction_fee(self) -> None:
         minimum_account = comparison_quality(
@@ -198,9 +198,9 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         )
 
         self.assertTrue(minimum_account.complete)
-        self.assertIn("fee_waiver_condition", minimum_account.satisfied_fields)
+        self.assertNotIn("fee_waiver_condition", minimum_account.assessed_fields)
         self.assertTrue(us_dollar_account.complete)
-        self.assertIn("transaction_fee", us_dollar_account.satisfied_fields)
+        self.assertNotIn("transaction_fee", us_dollar_account.assessed_fields)
 
     def test_repair_fields_do_not_reverify_populated_alternatives_for_same_requirement(self) -> None:
         fields = dynamic_repair_fields(
@@ -216,17 +216,17 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
             },
         )
 
-        self.assertEqual(fields, ["monthly_fee", "included_transactions"])
+        self.assertEqual(fields, ["monthly_fee"])
 
-    def test_line_of_credit_requires_security_fact(self) -> None:
+    def test_line_of_credit_security_is_optional(self) -> None:
         quality = comparison_quality(
             product_type="line-of-credit",
             expected_fields=[],
             candidate_payload={"interest_rate_summary": "Prime + 2.0%", "credit_limit_text": "$5,000-$50,000"},
         )
 
-        self.assertFalse(quality.complete)
-        self.assertEqual(quality.missing_fields, ("security_requirement",))
+        self.assertTrue(quality.complete)
+        self.assertEqual(quality.missing_fields, ())
 
     def test_canadian_line_of_credit_repair_prefers_evidence_preserving_fields(self) -> None:
         self.assertEqual(
@@ -243,7 +243,7 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
                 ],
                 candidate_payload={"product_name": "TD Personal Line of Credit"},
             ),
-            ["interest_rate_summary", "credit_limit_text", "security_requirement"],
+            ["interest_rate_summary"],
         )
 
     def test_us_checking_replaces_transaction_count_with_conditional_fee_waiver(self) -> None:
@@ -272,8 +272,8 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
 
         self.assertTrue(no_fee.complete)
         self.assertNotIn("included_transactions", no_fee.assessed_fields)
-        self.assertFalse(positive_fee_without_waiver.complete)
-        self.assertEqual(positive_fee_without_waiver.missing_fields, ("fee_waiver_condition",))
+        self.assertTrue(positive_fee_without_waiver.complete)
+        self.assertEqual(positive_fee_without_waiver.missing_fields, ())
         self.assertTrue(positive_fee_with_waiver.complete)
 
     def test_us_savings_requires_positive_fee_waiver_and_collects_conditional_rate_summary(self) -> None:
@@ -296,8 +296,8 @@ class ComparisonQualityPolicyTests(unittest.TestCase):
         )
         fields = collection_fields_for_product_type(country_code="US", product_type="savings")
 
-        self.assertFalse(without_waiver.complete)
-        self.assertEqual(without_waiver.missing_fields, ("fee_waiver_condition",))
+        self.assertTrue(without_waiver.complete)
+        self.assertEqual(without_waiver.missing_fields, ())
         self.assertTrue(with_waiver.complete)
         self.assertIn("interest_rate_summary", fields)
 

@@ -8,7 +8,7 @@ This correction is tested locally and requires collection-runtime deployment.
 ## Accuracy gate — 2026-09-30
 
 `fpds_collection_accuracy` runs after normalization and before validation. It
-omits facts without exact official evidence, type, meaning and currency proof.
+omits facts without exact official evidence, type and financial meaning, plus official currency or an authorized country default.
 All product types require its content-bound receipt. Validation emits
 `auto_validated` or `excluded` and creates no review task. Legacy confidence
 thresholds cannot weaken this rule. Earlier manual/residual-review instructions
@@ -17,8 +17,9 @@ below are superseded for new collection. See
 Live pilot regressions cover written transaction counts, standalone suitability
 headings versus actual fee conditions, and annual-fee/rate-basis separation.
 
-Economical recovery now skips official grounding when captured chunks contain no
-explicit supported currency. AI requests target identity/currency and registered
+Currency absence no longer skips official grounding. The approved 2026-10-01
+policy uses CA/CAD or US/USD only when currency is undisclosed and retains private
+default provenance. Explicit/conflicting currency evidence takes precedence. AI requests target identity/currency and registered
 comparison essentials, retaining annual/APY and redemption qualifiers needed for
 Public comparisons without extra searches. A private one-entry-per-source cache reuses completed
 positive or negative grounding only for identical source/snapshot/chunks, metadata,

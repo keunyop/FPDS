@@ -341,7 +341,6 @@ class ReviewDetailTests(unittest.TestCase):
             {
                 "product_name",
                 "interest_rate_summary",
-                "loan_amount_text",
                 "term_length_text",
                 "fees_text",
                 "monthly_payment_text",

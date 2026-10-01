@@ -717,3 +717,7 @@ approved financial qualifiers while continuing to omit private evidence/copy.
 See the [bounded CA/US audit and correction report](../../docs/00-governance/public-collection-alignment-2026-09-29.md) for six applied
 existing-product repairs, preserved verification dates, remaining gaps and the
 read-only `scripts/maintenance/public_collection_gap_report.py` command.
+
+## Approved collection policy update - 2026-10-01
+
+Shared worker/API profiles now apply country currency defaults only when undisclosed and require the reduced core comparison fields documented in the collection policy. `/healthz` returns `collection_accuracy_version` and `market_profile_version` in addition to status. Deploy this API before publishing newly validated receipts; existing strict-policy receipts remain valid. Local verification does not establish deployment. The current one-off recovery has 17 fresh candidates passing normal normalization and automatic validation, pending serving-version confirmation; no human reviews or model calls are needed.

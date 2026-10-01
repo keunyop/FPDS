@@ -8,15 +8,27 @@ import json
 import re
 from urllib.parse import urlsplit, urlunsplit
 
+from worker.country_defaults import default_currency_for_country
 from worker.pipeline.fpds_field_contract import field_contract, value_matches_contract
 from worker.pipeline.fpds_approval_policy import comparison_quality
 from worker.pipeline.fpds_rate_safety import rate_component_only
 
-ACCURACY_VERSION = "collection-accuracy-2026-09-30"
+ACCURACY_VERSION = "collection-accuracy-2026-10-01"
+# Earlier strict-policy acceptances satisfy the relaxed prerequisites.
+_COMPATIBLE_RECEIPT_VERSIONS = {ACCURACY_VERSION, "collection-accuracy-2026-09-30"}
 RECEIPT_KEY = "_collection_accuracy"
 # Registry/workflow metadata is not a collected financial attribute.
 CONTEXT_FIELDS = {"status", "last_verified_at", "bank_name", "subtype_code"}
-CURRENCY_PATTERNS = {"CAD": r"\bCAD\b|Canadian dollars?", "USD": r"\bUSD\b|U\.?S\.? dollars?", "EUR": r"\bEUR\b|euros?", "GBP": r"\bGBP\b|pounds? sterling"}
+CURRENCY_PATTERNS = {"CAD": r"\bCAD\b|Canadian dollars?|\bC\$|\bCA\$", "USD": r"\bUSD\b|U\.?S\.? dollars?|\bUS\$", "EUR": r"\bEUR\b|euros?|\u20ac", "GBP": r"\bGBP\b|pounds? sterling|\u00a3"}
+CURRENCY_PATTERNS.update({
+    "JPY": r"\bJPY\b|Japanese yen|\byen\b|[\u00a5\uffe5]",
+    "HKD": r"\bHKD\b|Hong Kong dollars?|\bHK\$",
+    "CNY": r"\bCNY\b|\bRMB\b|Chinese yuan|renminbi",
+    "AUD": r"\bAUD\b|Australian dollars?|\bA\$",
+    "NZD": r"\bNZD\b|New Zealand dollars?|\bNZ\$",
+    "CHF": r"\bCHF\b|Swiss francs?",
+    "SGD": r"\bSGD\b|Singapore dollars?",
+})
 IDENTITY_FIELDS = ("country_code", "bank_code", "product_type", "product_name", "currency")
 _NUMBER = r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\w.])"
 _COUNT_WORDS = dict(zip(("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"), range(11)))
@@ -233,11 +245,31 @@ def payload_digest(record: Mapping, payload: Mapping) -> str:
 def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) -> bool:
     p = payload if payload is not None else record.get("candidate_payload", {})
     receipt = p.get(RECEIPT_KEY, {}) if isinstance(p, Mapping) else {}
-    if not isinstance(receipt, Mapping) or receipt.get("version") != ACCURACY_VERSION:
+    if not isinstance(receipt, Mapping) or receipt.get("version") not in _COMPATIBLE_RECEIPT_VERSIONS:
         return False
     digest = payload_digest(record, p)
     return bool(digest and receipt.get("accepted") is True and receipt.get("digest") == digest
                 and all(value_matches_contract(k, v) for k, v in p.items() if k != RECEIPT_KEY))
+
+
+
+def country_currency_fallback(record: Mapping, evidence: list[dict]) -> str | None:
+    """Resolve undisclosed currency without discarding conflicting source context."""
+    currency = default_currency_for_country(record.get("country_code"))
+    if not currency:
+        return None
+    context = " ".join([str(record.get("product_name") or ""),
+                        *(str(e.get("evidence_excerpt") or "") for e in evidence)])
+    if any(re.search(pattern, context, re.I) for pattern in CURRENCY_PATTERNS.values()):
+        return None
+    declared = str(record.get("currency") or "")
+    if re.fullmatch(r"[A-Z]{3}", declared) and declared != "XXX" and re.search(r"\b" + re.escape(declared) + r"\b", context):
+        return None
+    if re.search(r"\b(?:currency|denomination)\s*[:=]\s*[A-Z]{3}\b", context):
+        return None
+    if re.search(r"foreign[- ]currency|multi[- ]currency|other currenc|denominated in", context, re.I):
+        return None
+    return currency
 
 
 def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list[dict]) -> tuple[dict, dict]:
@@ -248,7 +280,15 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     """
     result = dict(record)
     payload = dict(record.get("candidate_payload") or {})
-    mappings = record.get("field_mapping_metadata") or {}
+    mappings = dict(record.get("field_mapping_metadata") or {})
+    fallback = country_currency_fallback(record, evidence)
+    if fallback:
+        result["currency"] = fallback
+        mappings["currency"] = {"normalized_value": fallback,
+            "extraction_method": "country_default", "country_code": record.get("country_code"),
+            "policy_version": ACCURACY_VERSION}
+        result["field_mapping_metadata"] = mappings
+    record = result
     chunks = {str(e.get("evidence_chunk_id")): e for e in evidence}
     omitted = {}
     verified = []
@@ -315,7 +355,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         reasons.append("product_identity_unverified")
     if source_metadata.get("discovery_role") != "detail":
         reasons.append("source_is_not_product_detail")
-    # Currency needs explicit ISO/name evidence, not merely a country default.
+    # Explicit official evidence takes precedence over a traced country default.
     currency = str(record.get("currency") or "")
     currency_verified = any(
         quote_supports_value("currency", currency, str(mappings.get(name, {}).get("official_evidence_quote") or ""))
@@ -332,6 +372,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         and exact_quote(currency_mapping.get("official_evidence_quote"), currency_evidence.get("evidence_excerpt"))
         and quote_supports_value("currency", currency, str(currency_mapping.get("official_evidence_quote") or ""))):
         currency_verified = True
+    currency_verified = currency_verified or bool(fallback)
     if not currency_verified:
         reasons.append("product_currency_unverified")
     else:
@@ -340,6 +381,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     if not quality.applicable or not quality.contract_defined or not quality.complete:
         reasons.append("essential_fields_missing")
     receipt = {"version": ACCURACY_VERSION, "accepted": not reasons, "verified_fields": sorted(set(verified)), "omitted_fields": omitted, "reasons": reasons, "missing_fields": list(quality.missing_fields)}
+    receipt["currency_basis"] = "country_default" if fallback else "official_evidence" if currency_verified else "unverified"
     receipt["digest"] = payload_digest(record, payload)
     payload[RECEIPT_KEY] = receipt
     result["candidate_payload"] = payload

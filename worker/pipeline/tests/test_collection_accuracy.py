@@ -54,7 +54,7 @@ class CollectionAccuracyTests(unittest.TestCase):
         row["field_mapping_metadata"]["minimum_balance"]["official_evidence_quote"] = quote
         evidence[-1]["evidence_excerpt"] = quote
         result, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
-        self.assertFalse(receipt["accepted"])
+        self.assertTrue(receipt["accepted"])
         self.assertNotIn("minimum_balance", result["candidate_payload"])
         self.assertEqual(receipt["omitted_fields"]["minimum_balance"], "field_meaning_unproven")
 
@@ -67,7 +67,7 @@ class CollectionAccuracyTests(unittest.TestCase):
         result, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
         self.assertNotIn("minimum_balance", result["candidate_payload"])
         self.assertEqual(receipt["omitted_fields"]["minimum_balance"], "transaction_waiver_balance_not_minimum")
-        self.assertFalse(receipt["accepted"])
+        self.assertTrue(receipt["accepted"])
         row["field_mapping_metadata"]["minimum_balance"]["official_evidence_quote"] = "Minimum balance $1,500 CAD"
         evidence[-1]["evidence_excerpt"] = "Minimum balance $1,500 CAD for no transaction fees"
         self.assertEqual(sanitize_candidate(row, source_metadata=meta, evidence=evidence)[1]["omitted_fields"]["minimum_balance"],
@@ -77,7 +77,7 @@ class CollectionAccuracyTests(unittest.TestCase):
         evidence[-1]["evidence_excerpt"] = quote
         self.assertTrue(sanitize_candidate(row, source_metadata=meta, evidence=evidence)[1]["accepted"])
 
-    def test_extraction_records_why_a_required_count_was_omitted(self):
+    def test_extraction_records_why_a_requested_count_was_omitted(self):
         from unittest.mock import patch
         from worker.pipeline.fpds_extraction.models import ExtractionDocumentContext
         from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
@@ -98,7 +98,7 @@ class CollectionAccuracyTests(unittest.TestCase):
                  ({**field, "evidence_chunk_id": "invented"}, "evidence_chunk_missing"),
                  ({**field, "status": "unverified", "evidence_chunk_id": ""}, "model_unverified")]
         for response_field, reason in cases:
-            with self.subTest(reason=reason), patch("worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
+            with self.subTest(reason=reason), patch("worker.pipeline.fpds_extraction.service.country_product_profile", return_value=None), patch("worker.pipeline.fpds_extraction.service.invoke_openai_json_schema",
                     return_value=({"fields": [response_field]}, usage)) as invoke:
                 fields, notes, _ = _extract_official_fields_with_ai(context=context, candidates=[chunk],
                     requested_fields=["included_transactions"], collected_fields=[])
@@ -155,7 +155,7 @@ class CollectionAccuracyTests(unittest.TestCase):
         self.assertIs(type(result["candidate_payload"]["included_transactions"]), int)
         evidence[2]["evidence_excerpt"] += " if you maintain a $1000 balance"
         _, receipt = sanitize_candidate(row, source_metadata=meta, evidence=evidence)
-        self.assertFalse(receipt["accepted"])
+        self.assertTrue(receipt["accepted"])  # Invalid optional count is omitted, not a publication veto.
         self.assertEqual(receipt["omitted_fields"]["included_transactions"], "evidence_context_ambiguous")
 
     def test_annual_fee_cannot_prove_annual_interest_basis(self):
@@ -312,6 +312,10 @@ class CollectionAccuracyIntegrationTests(unittest.TestCase):
         from worker.pipeline.fpds_validation_routing.storage import ValidationRoutingStorageConfig
         from worker.pipeline.fpds_field_contract import canonical_value_type
         row, meta, evidence = candidate_fixture()
+        # Integration: absent optional balance and currency text must not create review.
+        row["candidate_payload"].pop("minimum_balance")
+        for mapping in row["field_mapping_metadata"].values():
+            mapping["official_evidence_quote"] = mapping["official_evidence_quote"].replace(" in Canadian dollars", "").replace(" in CAD", "").replace(" CAD", "")
         meta = {**meta, "normalized_source_url":"https://bank.example/savings", "product_type":"savings"}
         fields=[]; links=[]
         for name,value in row["candidate_payload"].items():
@@ -343,6 +347,8 @@ class CollectionAccuracyIntegrationTests(unittest.TestCase):
                 candidate=normalized.normalized_candidate_record
                 receipt=candidate["candidate_payload"][RECEIPT_KEY]
                 self.assertEqual(receipt["accepted"],supported,receipt)
+                self.assertEqual(receipt["currency_basis"], "country_default")
+                self.assertNotIn("minimum_balance", candidate["candidate_payload"])
                 v=ValidationInput(source_id="source-1",source_document_id="src-1",snapshot_id="snap-1",parsed_document_id="parsed-1",
                     candidate_id=candidate["candidate_id"],candidate_run_id="run-1",normalization_model_execution_id="normalize-1",
                     normalized_storage_key="normalized",metadata_storage_key=None,bank_code="EXAMPLE",country_code="CA",

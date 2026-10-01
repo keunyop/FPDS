@@ -355,7 +355,7 @@ class AiVerificationTests(TestCase):
         )
         self.assertEqual(
             [item["field_name"] for item in payload["fields_to_verify"]],
-            ["product_name", "standard_rate", "monthly_fee", "minimum_balance"],
+            ["product_name", "standard_rate", "monthly_fee"],
         )
         self.assertEqual(payload["official_domain_allowlist"], ["bank.example"])
         self.assertTrue(payload["approval_policy"]["empty_requested_fields_block_approval"])
@@ -952,7 +952,7 @@ class AiVerificationTests(TestCase):
         )
         self.assertEqual(
             connection.execution_metadata["approval_field_names"],
-            ["product_name", "standard_rate", "monthly_fee", "minimum_balance"],
+            ["product_name", "standard_rate", "monthly_fee"],
         )
         self.assertEqual(connection.execution_metadata["hard_blocking_issue_codes"], [])
         audit = next(params for sql, params in connection.calls if "INSERT INTO audit_event" in sql)

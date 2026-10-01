@@ -4152,7 +4152,7 @@ class NormalizationServiceTests(unittest.TestCase):
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_gic_missing_minimum_deposit_sets_error_status(self) -> None:
+    def test_gic_missing_optional_minimum_deposit_can_pass(self) -> None:
         temp_path = _prepare_workspace_temp_dir("normalization-gic-error")
         try:
             storage_config = NormalizationStorageConfig(
@@ -4178,8 +4178,8 @@ class NormalizationServiceTests(unittest.TestCase):
             result = service.normalize_inputs(run_id="run-gic-002", inputs=[input_item])
 
             source_result = result.source_results[0]
-            self.assertEqual(source_result.validation_status, "error")
-            self.assertIn("required_field_missing", source_result.validation_issue_codes)
+            self.assertEqual(source_result.validation_status, "pass")
+            self.assertNotIn("required_field_missing", source_result.validation_issue_codes)
         finally:
             rmtree(temp_path, ignore_errors=True)
 

@@ -386,7 +386,10 @@ def _require_review_task_country(connection: Any, *, review_task_id: str, countr
 
 @app.get("/healthz")
 async def healthz() -> dict[str, str]:
-    return {"status": "ok"}
+    from worker.pipeline.fpds_collection_accuracy import ACCURACY_VERSION
+    from worker.pipeline.fpds_market_profile import MARKET_PROFILE_VERSION
+    return {"status": "ok", "collection_accuracy_version": ACCURACY_VERSION,
+            "market_profile_version": MARKET_PROFILE_VERSION}
 
 
 @app.get("/api/admin/auth/countries")

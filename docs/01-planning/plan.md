@@ -1,5 +1,8 @@
 # FPDS Project Execution Plan
 
+Approved policy update (2026-10-01): undisclosed currency uses CA/CAD or US/USD; reduced core comparison prerequisites apply. Code and regression changes are ready. Operating API deployment and final automatic promotion of eligible excluded products are pending; the live catalogue remains 7 until those steps complete. See [policy](../03-design/collection-accuracy-policy.md).
+
+
 ## Current delivery slice — 2026-09-30
 
 WBS 5.76 / D-090: accuracy-first autonomous collection. Implement shared typed
@@ -8,7 +11,11 @@ review UI, and Public enforcement for new records. Audit existing data before
 legacy cutover. The approved 355-product/470-review transition and empty CA/US
 projections were applied. The Product Owner reports the endpoint/pilot build
 deployed. Authorized recovery, including one-off TD, Vancity and Scotiabank
-operations, now has Public API CA 5 / US 0; 350 manifest products remain inactive.
+operations and two larger batches (120 then 182 products), now has Public API
+CA 7 / US 0; 343 manifest products remain inactive; 5 confirmed non-products were deleted. The batches restored
+Tangerine No-fee daily Chequing and Scotiabank Value Visa with no new model
+calls or runtime changes. First-pass coverage of all 355 products is complete;
+the unchecked source queue is empty, while evidence exclusions remain.
 RBC/BMO preflight adds 11 checked products with no restoration or model calls;
 the demonstrated cross-attribute zero-value fix also needs runtime deployment.
 Legacy recovery remains a bounded data operation; new

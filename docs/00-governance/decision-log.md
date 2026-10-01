@@ -1,5 +1,10 @@
 # FPDS Decision Log
 
+## D-090 amendment - approved 2026-10-01
+
+The Product Owner explicitly approves the concrete currency-default and reduced-prerequisite proposal and publication of eligible excluded products. CA/CAD and US/USD defaults apply only to undisclosed currency; explicit/conflicting currency facts retain priority. Core fees/rates/terms remain required while optional missing comparison details no longer veto acceptance. New receipts are versioned with compatibility for previously accepted strict receipts. Revalidate current evidence and verify the serving policy before promotion; do not bulk-reactivate legacy records or reintroduce human review. See [the applied policy](../03-design/collection-accuracy-policy.md).
+
+
 ## D-090 — Accuracy-first autonomous product collection — 2026-09-30
 
 Accepted Product Owner direction: fewer accurate facts take priority over
