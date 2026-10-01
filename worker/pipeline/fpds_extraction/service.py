@@ -4192,23 +4192,22 @@ def _extract_official_fields_with_ai(
         and (not registered_fields or field_name in registered_fields)
     ]
     profile = country_product_profile(country_code=context.country_code, product_type=_infer_product_type(context))
-    # Versioned prerequisites supersede historical source field lists.
-    required_targets = [field for r in (profile.requirements if profile and profile.product_type in {"chequing", "gic", "line-of-credit"} else ()) for field in r.alternatives]
-    ai_requested_fields = list(dict.fromkeys(["product_name", "currency", *ai_requested_fields, *required_targets]))
+    # Current profiles include both prerequisites and optional facts. Historical
+    # source lists must not silently narrow that collection contract.
+    profile_fields = profile.collection_fields if profile else ()
+    ai_requested_fields = list(dict.fromkeys([
+        "product_name", "currency", *profile_fields, *ai_requested_fields,
+    ]))
+    if profile:
+        allowed_fields = set(profile_fields) | registered_fields | {"currency"}
+        ai_requested_fields = [name for name in ai_requested_fields if name in allowed_fields]
+    ai_requested_fields = [name for name in ai_requested_fields if field_contract(name) is not None]
     requirement_fields = {name for requirement in (profile.requirements if profile else ())
                           for name in requirement.alternatives}
-    # Keep identity, comparison essentials and the proof needed to compare
-    # annual/APY rates and redemption categories. No extra searches for qualifiers.
-    comparison_qualifiers = set()
-    if _infer_product_type(context) in {"savings", "gic"}:
-        comparison_qualifiers.add("interest_calculation_method")
-    if _infer_product_type(context) == "gic":
-        comparison_qualifiers.update({"redeemable_flag", "non_redeemable_flag"})
-    if profile:
-        ai_requested_fields = [name for name in ai_requested_fields
-                               if name in requirement_fields | comparison_qualifiers | {"product_name", "currency"}]
-    supplemental_fields = [name for name in (profile.supplemental_fields if profile else ())
-                           if name in ai_requested_fields and name not in requirement_fields]
+    supplemental_fields = [
+        name for name in ai_requested_fields
+        if profile and name not in requirement_fields | {"product_name", "currency"}
+    ]
     schema = {
         "type": "object",
         "additionalProperties": False,
@@ -4307,9 +4306,11 @@ def _extract_official_fields_with_ai(
                 "required_comparison_fields lists possible targets, not fields that must all be populated. "
                 "comparison_requirements defines alternatives and conditional requirements; locate applicable facts on bounded official "
                 "rate, pricing, disclosure, or terms pages. Supplemental fields are opportunistic: use the already "
-                "supplied evidence and consulted pages, and return unverified if absent. Do not start extra searches "
+                "supplied evidence and consulted pages. Collect them when exact official evidence proves the value, "
+                "its full conditions and native type. Omit absent or uncertain supplemental entries. Do not start extra searches "
                 "or retry solely to fill supplemental fields. Never infer a missing value. "
-                "Return one fields entry per requested field, including unverified entries when evidence is missing. "
+                "Return one fields entry per required target, including unverified entries when evidence is missing. "
+                "For supplemental_fields return only proven facts; missing optional entries never justify a retry. "
                 "A fact mentioned only in summary is not collected. Explicit written counts such as one free transaction "
                 "per month may map to integer 1; copy the original words exactly in evidence_quote. "
                 "For that count verified_value_json is the string 1 containing JSON integer 1, not a JSON-encoded string. "
@@ -4349,7 +4350,7 @@ def _extract_official_fields_with_ai(
                 "product_type": _infer_product_type(context),
                 "product_type_name": context.source_metadata.get("product_type_name"),
                 "product_type_description": context.source_metadata.get("product_type_description"),
-                "expected_fields": list(context.source_metadata.get("expected_fields", [])),
+                "expected_fields": ai_requested_fields,
                 "field_contract": field_contract_payload(ai_requested_fields),
                 "requested_fields": ai_requested_fields,
                 "required_comparison_fields": [name for name in ai_requested_fields if name not in supplemental_fields],
@@ -4392,7 +4393,7 @@ def _extract_official_fields_with_ai(
     provider_source_by_url = {item["url"]: item for item in provider_sources}
     extracted_fields: list[ExtractedFieldCandidate] = []
     seen_fields: set[str] = set()
-    exclusions = {name: "model_field_missing" for name in ai_requested_fields}
+    exclusions = {name: "model_field_missing" for name in ai_requested_fields if name not in supplemental_fields}
     for item in response_payload.get("fields", []):
         field_name = str(item.get("field_name") or "").strip()
         if field_name in seen_fields:

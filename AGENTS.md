@@ -5,6 +5,10 @@
 - Accuracy takes priority over coverage. Collect fewer verified facts; omit
   uncertain optional attributes and automatically exclude candidates missing
   proven identity, currency or comparison essentials.
+- Required fields are the publication minimum, not a collection ceiling. Collect
+  profile/registered typed optional facts when the same official evidence proves
+  them. Omit uncertain optional facts; do not add searches, retries or human review
+  solely for optional completeness. Preserve them through normalization.
 - Product collection must not depend on human review, edit-approval or a residual
   review queue. An AI confidence score cannot replace source evidence or bypass
   automatic validation. Preserve separate account/security approval controls.

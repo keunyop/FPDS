@@ -1,5 +1,13 @@
 # Worker Boundary
 
+
+Current optional collection rule (2026-10-01): required facts determine publication;
+profile and explicitly registered typed optional facts are also extracted when
+proven by the same captured/consulted official evidence. Missing optional entries
+are omitted without extra searches, retries or human review. Normalization preserves
+verified optional values even for older source field lists. Collection-runtime
+deployment is required; this change performs no live recollection or data writes.
+
 The 2026-09-30 zero-value correction requires explicit evidence for the same
 financial attribute: a no-fee benefit cannot prove zero minimum balance or
 deposit. See the [RBC/BMO assessment](../docs/00-governance/collection-accuracy-oneoff-rbc-bmo-2026-09-30.md).

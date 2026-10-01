@@ -1,5 +1,13 @@
 # FPDS Admin
 
+
+Current optional collection rule (2026-10-01): required facts determine publication;
+profile and explicitly registered typed optional facts are also extracted when
+proven by the same captured/consulted official evidence. Missing optional entries
+are omitted without extra searches, retries or human review. Normalization preserves
+verified optional values even for older source field lists. Collection-runtime
+deployment is required; this change performs no live recollection or data writes.
+
 ## Product collection workflow — 2026-09-30
 
 Daily work is Overview, Runs and Banks. Collection automatically accepts proven

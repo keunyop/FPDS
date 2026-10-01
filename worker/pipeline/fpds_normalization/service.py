@@ -430,11 +430,11 @@ def _normalize_candidate(
         str(item.source_metadata.get("product_type", "")) or None,
     )
     profile = country_product_profile(country_code=item.country_code, product_type=product_type)
-    if profile is not None and product_type in {"chequing", "gic", "line-of-credit"}:
-        # Keep current essentials available even for pre-policy source registrations.
+    if profile is not None:
+        # Preserve the current required and optional catalog for older registrations.
         expected = list(dict.fromkeys([
             *item.source_metadata.get("expected_fields", []),
-            *(field for r in profile.requirements for field in r.alternatives),
+            *profile.collection_fields,
         ]))
         item = replace(item, source_metadata={**item.source_metadata, "expected_fields": expected})
     dynamic_product_type = _uses_dynamic_product_type(product_type=product_type, item=item)
@@ -5010,6 +5010,7 @@ def _normalize_dynamic_fields_with_ai(
                 "You are the FPDS Normalization Agent for operator-defined financial product types. "
                 "Map extracted fields into a conservative canonical candidate payload. "
                 "Keep only values grounded in the extracted inputs and return only fields listed in expected_fields. "
+                "Preserve proven optional values as well as required values; never fill missing optional fields. "
                 "Never map cashback, rewards, prepayment, equity, down-payment, instalment-plan, transaction-fee, or ATM/ABM assessment percentages to generic annual rate fields. "
                 "Boolean fields must remain booleans, and navigation or whole-page marketing copy must be omitted. "
                 "Do not change an officially grounded value, infer missing fields, convert months to literal days, "

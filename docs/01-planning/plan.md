@@ -1,6 +1,13 @@
 # FPDS Project Execution Plan
 
-Latest approved slice: restore conditional checking transaction costs, GIC/CD withdrawal access/consequences and line-of-credit security. Implementation and regression/UI verification are complete; deployment and live data changes have not been performed. Read-only impact: 5 of 24 active products meet the restored prerequisites, with 19 requiring additional evidence.
+
+Latest approved slice: collect proven optional fields from the current product
+profile and registered typed source fields in the existing official grounding
+pass. Unknown optional facts are omitted without extra searches or retries;
+publication prerequisites remain unchanged. Worker 589 and API 538 tests pass.
+Collection-runtime deployment is pending; no live recollection/data writes.
+
+Previous approved slice: restore conditional checking transaction costs, GIC/CD withdrawal access/consequences and line-of-credit security. Implementation and regression/UI verification are complete; deployment and live data changes have not been performed. Read-only impact: 5 of 24 active products meet the restored prerequisites, with 19 requiring additional evidence.
 
 Approved policy update (2026-10-01): undisclosed currency uses CA/CAD or US/USD; reduced core comparison prerequisites apply. Deployment and publication are verified: 17 eligible excluded products were restored through fresh automatic validation. The live catalogue now has 24 products (CA 17 / US 7); 326 original-manifest products remain inactive. See [policy](../03-design/collection-accuracy-policy.md).
 

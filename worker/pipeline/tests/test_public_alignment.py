@@ -34,8 +34,8 @@ class PublicAlignmentTests(unittest.TestCase):
         self.assertIn("interest_rate_summary", payload["required_comparison_fields"])
         self.assertIn("interest_calculation_method", payload["supplemental_fields"])
         self.assertIn("redeemable_flag", payload["required_comparison_fields"])
-        self.assertNotIn("interest_payment_frequency", payload["requested_fields"])
-        self.assertNotIn("payout_option", payload["requested_fields"])
+        self.assertIn("interest_payment_frequency", payload["supplemental_fields"])
+        self.assertIn("payout_option", payload["supplemental_fields"])
         self.assertFalse(set(payload["required_comparison_fields"]) & set(payload["supplemental_fields"]))
         self.assertIn("Do not start extra searches", call.call_args.kwargs["instructions"])
 

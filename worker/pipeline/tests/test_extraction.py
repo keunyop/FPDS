@@ -7560,14 +7560,16 @@ X"""
             source_result = result.source_results[0]
             fields_by_name = {item.field_name: item for item in source_result.extracted_fields}
             self.assertEqual(source_result.model_execution_record["agent_name"], "fpds-official-product-grounding-agent")
-            # Optional eligibility is no longer an AI target and an unsolicited
-            # response must not be accepted as grounded comparison data.
-            self.assertNotEqual(fields_by_name["eligibility_text"].extraction_method, "openai_official_grounding")
+            # Explicitly registered optional eligibility is collected from the
+            # same official evidence pass without becoming a prerequisite.
+            self.assertEqual(fields_by_name["eligibility_text"].extraction_method, "openai_official_grounding")
             call = invoke_model.call_args.kwargs
             self.assertTrue(call["require_web_search"])
             self.assertEqual(call["reasoning_effort"], "high")
             self.assertEqual(call["web_search_allowed_domains"], ["td.com"])
-            self.assertEqual(call["payload"]["requested_fields"], ["product_name", "currency"])
+            self.assertIn("eligibility_text", call["payload"]["supplemental_fields"])
+            self.assertNotIn("eligibility_text", call["payload"]["required_comparison_fields"])
+            invoke_model.assert_called_once()
             self.assertEqual(
                 source_result.model_execution_record["execution_metadata"]["official_grounding_contract_version"],
                 "collection-official-grounding-v2",

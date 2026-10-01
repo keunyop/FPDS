@@ -1,5 +1,15 @@
   # FPDS Scope Baseline and Build Start Approval
 
+
+## Approved collection of proven optional facts - 2026-10-01
+
+Required facts are a publication minimum, not a collection ceiling. The Product
+Owner requests optional fields from the current profile or registered typed field
+list when supported by exact official evidence already supplied or consulted.
+Preserve them through normalization; omit unknowns without extra searches,
+retries or human review. Existing conditional essentials and accuracy gates remain.
+See [collection policy](../03-design/collection-accuracy-policy.md).
+
 ## Approved restoration of essential costs and restrictions - 2026-10-01
 
 The Product Owner subsequently restores checking transaction costs, GIC/CD early-withdrawal access and material consequences, and line-of-credit security as conditional essentials. Unlimited transactions need no excess charge; prohibited early withdrawal needs no penalty value; explicit unsecured status satisfies security. Other optional fields and approved country currency defaults remain unchanged. All collection, automatic promotion and Public gates follow [the current policy](../03-design/collection-accuracy-policy.md); there is no human product review. Code deployment is separate from data operations.

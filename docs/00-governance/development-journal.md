@@ -1,5 +1,14 @@
 # FPDS Development Journal
 
+
+## 2026-10-01 - Proven optional facts collected in the existing grounding pass
+
+- Product Owner requests optional information when exact official evidence is available. Removed the essential-only AI request filter: all current profile fields and explicitly registered typed optional targets now reach grounding. Required alternatives/conditions remain separate; missing optional response entries are omitted without failure placeholders or added repair/search calls.
+- Extraction and normalization prompts preserve proven optional facts. Normalization augments historical source lists with the complete current profile so newly grounded optional values survive. Existing cache fingerprints include changed extraction/prompt code and invalidate old narrow results. Shared native-type, exact-quote, consulted-source and automatic acceptance gates are unchanged; no human review or new UI.
+- Updated AGENTS, requirements/scope, accuracy policy, Admin/Worker READMEs and plan/WBS status. The new optional-field rule supersedes the earlier instruction that optional descriptive fields did not justify model output. Field lists stay bounded; additional proven output can still increase tokens.
+- Verification: Worker 589 and API 538 tests passed, including 14 country/type request cases, registered optional attributes, native number/boolean preservation, extraction-to-normalization-to-acceptance with old source lists, invalid/missing optional omission and missing-required rejection. Provider responses were mocked; no paid collection or live canonical mutation. Repository doctor and final diff checks passed. Private logs: `tmp/optional-collection-worker.log`, `tmp/optional-collection-api.log`, `tmp/optional-collection-doctor.log`.
+- Next: deploy the collection runtime to apply these rules to subsequent Admin collection. Existing products are not automatically enriched by deployment; no recollection/publication was executed in this slice.
+
 ## 2026-10-01 - Conditional cost, withdrawal and security essentials restored
 
 - Product Owner explicitly requested restoring checking transaction costs, GIC/CD early-withdrawal access/consequences and line-of-credit security. Implemented market profile v7 and receipt version `collection-accuracy-2026-10-01-cost-access`. Unlimited transactions waive excess-fee requiredness; proven no early access waives penalty requiredness; proven unsecured false is valid. Counts alone, unknown consequences, special-channel fees, generic approval copy and contradictory alternatives cannot satisfy the essentials. Currency defaults and other optional fields remain.

@@ -150,10 +150,23 @@ a separate request. Fix shared runtime defects only when demonstrated by evidenc
   authorized country default while continuing to verify product identity and
   comparison essentials; never fabricate a currency quote.
 - Request identity, currency and comparison essentials, including their available
-  alternatives. Retain existing annual/APY-basis and redemption qualifiers needed
-  for Public comparisons, opportunistically from the same evidence. Optional
-  descriptive fields do not justify model output or extra searches. Retain full
-  evidence context and financial qualifiers.
+  alternatives, plus the current profile's optional fields and explicitly registered
+  typed optional fields. Requiredness is the publication minimum, not a collection
+  ceiling. Collect proven optional facts from supplied captures and official pages
+  already consulted for the essentials. Keep complete financial conditions and
+  field-level evidence; unknown or invalid optional facts are omitted.
+- Optional information alone must not trigger extra searches, model calls, repairs
+  or retries. Omit absent optional entries from AI output rather than generating
+  verbose unverified placeholders. Required targets still report missing evidence.
+  Optional omissions neither block an otherwise complete product nor create human
+  review. Historical source lists cannot suppress current profile fields during
+  extraction or normalization. Existing cache fingerprints invalidate changed
+  prompts/field selection automatically.
+- This optional-collection rule follows the Product Owner's subsequent 2026-10-01
+  instruction and supersedes the earlier essential-only AI request economy rule.
+  Field contracts, exact official proof and conditional publication gates remain
+  unchanged. Additional proven output may use tokens; no token reduction is
+  guaranteed. No live recollection or data mutation is part of this code change.
 - Reuse a completed extraction grounding result only when the complete input,
   source/snapshot, parser chunks, allowlist/metadata, requested fields, model,
   relevant code and UTC date match. Reuse retained omissions too. A source has
