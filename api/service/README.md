@@ -1,5 +1,19 @@
 # FPDS API Service
 
+## Collection Run visibility - 2026-10-02
+
+Catalog collection persists all accepted requested scopes as queued ingestion
+Runs before background discovery. Known structural exclusions are terminal
+skipped Runs; concurrent active preparations create no duplicate. Access/identity
+preflight and automatic validation still precede candidate-producing collection.
+Run reads expose `queued/discovering/skipped` refinements of existing database
+lifecycle states through private `collection_phase`; default lifecycle filters
+remain compatible. Retry returns the registered replacement ID while preserving
+the original failed/partial outcome until collection starts. Launch and preparation
+failures finish the queued Run. Deploy API/runner and Admin together; no migration,
+live collection, canonical write or deployment is part of this code slice.
+
+
 Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. [Implementation and verification](../../docs/00-governance/generic-collection-evidence-improvements-2026-10-02.md).
 
 Latest optional-interest correction (2026-10-02): CA/US checking requests verified deposit rates and existing qualifiers as optional facts; retrieval uses current profile fields even with older registry lists. The shared gate distinguishes separate deposit-insurance limits from standalone annual rates and extraction rejects companion-account/overdraft interest. Worker 643 / API 539 pass. No live collection, data writes or deployment; deploy the collection runtime/API for future Admin collections. [Diagnosis and verification](../../docs/00-governance/optional-checking-rates-2026-10-02.md).
@@ -215,6 +229,11 @@ cd ..\..
 $env:FPDS_ENV_FILE=".env.dev"
 uv run --directory api/service uvicorn api_service.main:app --reload --host localhost --port 4000
 ```
+
+The shared product-availability policy uses Python's standard-library HTML
+parser so this independent API environment does not need Worker-only
+BeautifulSoup dependencies. The 2026-10-02 startup repair was verified with the
+actual API virtualenv and a successful Uvicorn `/healthz` response.
 
 ## Vercel API Deployment
 

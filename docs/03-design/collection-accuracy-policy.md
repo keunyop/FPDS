@@ -1,5 +1,16 @@
 # Product collection accuracy and automatic acceptance
 
+## Requested Run visibility - 2026-10-02
+
+The latest Product Owner instruction supersedes the prior D-089 boundary that
+held all preflight work before Run creation. Persist requested bank/type attempts
+before background exploration and show queued/discovering/skipped/failed outcomes.
+A persisted attempt is not an eligible source, accepted candidate or published
+product. Existing discovery/access/identity/evidence gates still block candidate
+production and publication; no manual product review or additional source/model
+calls are introduced. Already active preparations remain single-owner work.
+
+
 Status: Active; prior deployment reported by Product Owner; economical recovery applied
 Decision: D-090 · Product Owner direction: 2026-09-30 · WBS 5.76
 

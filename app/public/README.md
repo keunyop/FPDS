@@ -1,5 +1,23 @@
 # FPDS Public
 
+## Home and product detail clarity - 2026-10-02
+
+Home renders each successfully loaded complete Top 5 product scope even if its
+separate summary API fails. Empty lists distinguish no published target products,
+home-currency gaps and unknown annual/APY basis or rate/term/access conditions.
+Ranking eligibility and arithmetic are unchanged. Read-only API/BFF diagnosis on
+October 2 found CA 30 products with no savings/GIC/loan records and US 5 products,
+including two savings records with unknown rate basis; these counts are a dated
+observation, not a promised live catalogue size.
+
+Detail emphasizes required fees, rates, terms and access/security facts and puts
+GIC term/rate tables before optional facts. Removes the repeated generated overview,
+product-ID prose exceptions, optional-fact explanation and duplicate snapshot/
+disclosure/private-evidence explanations. Product check dates/status, material
+conditions, bank confirmation, methodology and reporting remain available.
+No financial facts, collection gates, canonical data or deployment are changed.
+
+
 
 ## Required facts first - 2026-10-01
 

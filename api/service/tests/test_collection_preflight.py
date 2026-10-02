@@ -72,18 +72,19 @@ class CollectionPreflightTests(unittest.TestCase):
         self.assertFalse(no_detail_result_is_structural([
             "HTML access challenge remained after bounded browser fallback", "Other page fetch was unavailable: timeout"]))
 
-    def test_all_held_launch_creates_no_run_and_no_background_job(self):
-        connection = _QueuedConnection([[catalog()]])
+    def test_all_held_launch_records_skipped_run_without_background_job(self):
+        connection = _QueuedConnection([[catalog()], None])
         held = source(latest_review_state="deferred", latest_review_action="defer", latest_review_actor="operator")
         with (patch("api_service.source_catalog.load_source_preflight_rows", return_value=[held]),
               patch("api_service.source_catalog._insert_collection_run_row") as insert,
               patch("api_service.source_catalog._launch_source_catalog_collection_runner") as launch,
               patch("api_service.source_catalog._record_catalog_audit_event")):
             result = start_source_catalog_collection(connection, catalog_item_ids=["catalog-1"], actor={"user_id": "operator"}, request_context={})
-        self.assertEqual(result["run_ids"], [])
+        self.assertEqual(len(result["run_ids"]), 1)
         self.assertEqual(result["workflow_state"], "skipped")
         self.assertEqual(result["skipped_items"][0]["reason_codes"], ["review_deferred"])
-        insert.assert_not_called()
+        insert.assert_called_once()
+        self.assertEqual(insert.call_args.kwargs["group"]["collection_phase"], "skipped")
         launch.assert_not_called()
 
     def test_mixed_scopes_keep_valid_collection_and_explicit_rediscovery_reopens(self):
@@ -108,6 +109,15 @@ class CollectionPreflightTests(unittest.TestCase):
             self.assertEqual(skipped[0]["reason_codes"], ["structural_zero_detail_requires_rediscovery"])
             eligible, _ = _preflight_catalog_items(_QueuedConnection([{**previous, "catalog_updated_at": now + timedelta(seconds=1)}]), rows=[catalog()], precision_rediscovery=False)
             self.assertEqual(len(eligible), 1)
+
+    def test_visible_skipped_run_keeps_structural_zero_detail_hold_on_repeat(self):
+        now = datetime.now(UTC)
+        previous = {"run_metadata": {"collection_phase": "skipped", "preparation_reason_codes": ["structural_zero_detail_requires_rediscovery"]},
+                    "completed_at": now, "catalog_updated_at": now - timedelta(days=1)}
+        with patch("api_service.source_catalog.load_source_preflight_rows", return_value=[]):
+            eligible, skipped = _preflight_catalog_items(_QueuedConnection([previous]), rows=[catalog()], precision_rediscovery=False)
+        self.assertEqual(eligible, [])
+        self.assertEqual(skipped[0]["reason_codes"], ["structural_zero_detail_requires_rediscovery"])
 
     def test_direct_retry_does_not_reenter_held_review(self):
         held = source(latest_review_state="rejected", latest_review_action="reject", latest_review_actor="operator")

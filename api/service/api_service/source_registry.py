@@ -998,6 +998,7 @@ def _insert_collection_run_row(
     started_at = utc_now()
     run_metadata = {
         "pipeline_stage": pipeline_stage,
+        "collection_phase": group.get("collection_phase", "collecting"),
         "collection_id": collection_id,
         "correlation_id": correlation_id,
         "request_id": request_id,

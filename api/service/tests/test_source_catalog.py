@@ -3672,11 +3672,13 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertEqual(result["catalog_item_ids"], ["catalog-ca-atl-savings-12345678"])
         self.assertEqual(result["collection_id"], "collection-001")
         self.assertEqual(result["correlation_id"], "corr-001")
-        self.assertEqual(result["run_ids"], [])
+        self.assertEqual(result["run_ids"], ["run-001"])
         self.assertEqual(result["materialized_items"], [])
-        self.assertEqual(result["workflow_state"], "preparing")
+        self.assertEqual(result["workflow_state"], "queued")
         self.assertEqual(result["queued_catalog_item_count"], 1)
-        queue_run.assert_not_called()
+        queue_run.assert_called_once()
+        self.assertEqual(queue_run.call_args.kwargs["group"]["collection_phase"], "queued")
+        self.assertTrue(launch_runner.call_args.args[0]["runs_registered"])
         launch_runner.assert_called_once()
 
     def test_record_catalog_audit_event_uses_current_audit_schema(self) -> None:
@@ -4060,10 +4062,10 @@ class SourceCatalogTests(unittest.TestCase):
                 request_context={"request_id": "req-001", "ip_address": "127.0.0.1", "user_agent": "test"},
             )
 
-        self.assertEqual(result["run_ids"], [])
+        self.assertEqual(result["run_ids"], ["run-001"])
         self.assertEqual(result["selected_source_ids"], [])
         self.assertEqual(result["materialized_items"], [])
-        self.assertEqual(result["workflow_state"], "preparing")
+        self.assertEqual(result["workflow_state"], "queued")
         self.assertIn("sci.status = 'active'", connection.calls[0][0])
         self.assertIn("catalog_scope_quarantine,status", connection.calls[0][0])
         self.assertIn("active_detail.discovery_role = 'detail'", connection.calls[0][0])

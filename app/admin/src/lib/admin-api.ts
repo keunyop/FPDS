@@ -124,7 +124,11 @@ export type ReviewDecisionAction = "approve" | "reject" | "edit_approve" | "defe
 export type RunStatusListItem = {
   run_id: string;
   run_type: string;
-  run_status: "started" | "completed" | "failed" | "retried";
+  run_status: "queued" | "discovering" | "started" | "completed" | "skipped" | "failed" | "retried";
+  bank_code?: string | null;
+  product_type?: string | null;
+  preparation_reason_codes?: string[];
+  discovery_notes?: string[];
   trigger_type: string;
   triggered_by: string | null;
   started_at: string | null;
@@ -172,7 +176,11 @@ export type RunStatusDetailResponse = {
   run: {
     run_id: string;
     run_type: string;
-    run_status: "started" | "completed" | "failed" | "retried";
+    run_status: "queued" | "discovering" | "started" | "completed" | "skipped" | "failed" | "retried";
+  bank_code?: string | null;
+  product_type?: string | null;
+  preparation_reason_codes?: string[];
+  discovery_notes?: string[];
     trigger_type: string;
     triggered_by: string | null;
     source_item_count: number;

@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 
-import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
+import { collectionPreparationMessage } from "@/lib/admin-collection-feedback";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import type { RunStatusListResponse } from "@/lib/admin-api";
-import { buildAdminHref, formatAdminDateTime, translateRunState, type AdminLocale } from "@/lib/admin-i18n";
+import { buildAdminHref, formatAdminDateTime, translateRunState, translateProductType, type AdminLocale } from "@/lib/admin-i18n";
 import { cn } from "@/lib/utils";
 
-const RUN_STATES = ["started", "completed", "failed", "retried"] as const;
+const RUN_STATES = ["queued", "discovering", "started", "completed", "skipped", "failed", "retried"] as const;
 const COMMON_RUN_TYPES = ["snapshot_capture", "parse_chunk", "extraction", "normalization", "validation_routing"] as const;
 
 const RUN_STATUS_COPY = {
@@ -257,8 +257,6 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
 
   return (
     <section className="grid min-w-0 gap-5">
-      <AdminTableAutoRefresh locale={locale} />
-
       <AdminPageHeader
         description={copy.headerDescription}
         path={copy.path}
@@ -267,6 +265,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
 
       <article className="min-w-0 border border-border bg-card p-4">
         <form action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)} className="grid gap-4">
+          <input name="locale" type="hidden" value={locale} />
           <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1.45fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_auto]">
             <label className="grid min-w-0 gap-2 text-sm">
               <span className="font-medium text-foreground">{copy.search}</span>
@@ -457,6 +456,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                           <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", runStateBadgeClasses(item.run_status))}>
                             {translateRunState(locale, item.run_status)}
                           </span>
+                          {item.preparation_reason_codes?.length ? <p className="max-w-xs text-xs text-muted-foreground">{collectionPreparationMessage(locale, { status: "skipped", reason_codes: item.preparation_reason_codes })}</p> : null}
                           {item.partial_completion_flag ? (
                             <span className="inline-flex w-fit rounded-full bg-warning-soft px-2.5 py-1 text-xs font-medium text-warning">
                               {copy.partialCompletion}
@@ -470,8 +470,9 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                       <td className="border-b border-border/70 px-3 py-4">
                         <div className="grid gap-2">
                           <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
-                            {item.run_id}
+                            {item.bank_code ? `${item.bank_code} · ${translateProductType(locale, item.product_type ?? "")}` : item.run_id}
                           </Link>
+                          {item.bank_code ? <p className="text-xs text-muted-foreground">{item.run_id}</p> : null}
                           <span className="w-fit rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
                             {toTitleCase(item.run_type)}
                           </span>

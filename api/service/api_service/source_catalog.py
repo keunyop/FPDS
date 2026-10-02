@@ -1697,6 +1697,7 @@ def start_source_catalog_collection(
     if len(rows) != len(set(catalog_item_ids)):
         raise SourceRegistryError(status_code=404, code="source_catalog_not_found", message="One or more source catalog items could not be found.")
 
+    original_rows = list(rows)
     rows, skipped_items = _preflight_catalog_items(
         connection, rows=rows, precision_rediscovery=precision_rediscovery,
     )
@@ -1717,16 +1718,53 @@ def start_source_catalog_collection(
     )
     plan["skipped_items"] = skipped_items
     plan["preflight_before_run"] = True
+    plan["runs_registered"] = True
     plan["retry_of_run_id"] = retry_of_run_id
     reserved = []
     for group in plan["groups"]:
         if reserve_preparation(connection, group=group, plan=plan):
+            _insert_collection_run_row(
+                connection, run_id=str(group["run_id"]),
+                triggered_by=str(plan["triggered_by"]), request_id=plan.get("request_id"),
+                correlation_id=correlation_id, collection_id=collection_id,
+                group={**group, "collection_phase": "queued"},
+                pipeline_stage="source_catalog_collection",
+                retry_of_run_id=retry_of_run_id,
+            )
             reserved.append(group)
         else:
             plan["skipped_items"].append({"catalog_item_id": group["catalog_item_id"],
                 "bank_code": group["bank_code"], "product_type": group["product_type"],
                 "reason_codes": ["collection_preparation_in_progress"], "revalidation": "precision_rediscovery"})
     plan["groups"] = reserved
+    # Previously excluded scopes remain visible as terminal attempts. An already
+    # active reservation is represented by its existing Run, never a duplicate.
+    skipped_rows = {str(row["catalog_item_id"]): row for row in original_rows}
+    plan["skipped_run_ids"] = []
+    for item in plan["skipped_items"]:
+        if "collection_preparation_in_progress" in item["reason_codes"]:
+            continue
+        skipped_plan = _build_source_catalog_collection_plan(
+            rows=[skipped_rows[str(item["catalog_item_id"])]], actor=actor,
+            request_context=request_context, collection_id=collection_id,
+            correlation_id=correlation_id, precision_rediscovery=precision_rediscovery,
+        )
+        group = skipped_plan["groups"][0]
+        _insert_collection_run_row(
+            connection, run_id=str(group["run_id"]), triggered_by=str(plan["triggered_by"]),
+            request_id=plan.get("request_id"), correlation_id=correlation_id,
+            collection_id=collection_id, group={**group, "collection_phase": "skipped"},
+            pipeline_stage="source_catalog_collection", retry_of_run_id=retry_of_run_id,
+        )
+        connection.execute(
+            """UPDATE ingestion_run SET run_state='completed', completed_at=%(completed_at)s,
+            run_metadata=run_metadata || %(metadata)s::jsonb WHERE run_id=%(run_id)s""",
+            {"run_id": group["run_id"], "completed_at": utc_now(),
+             "metadata": json.dumps({"collection_phase": "skipped",
+                 "preparation_reason_codes": item["reason_codes"]})},
+        )
+        item["run_id"] = group["run_id"]
+        plan["skipped_run_ids"].append(str(group["run_id"]))
 
     _record_catalog_audit_event(
         connection,
@@ -1754,6 +1792,12 @@ def start_source_catalog_collection(
             _launch_source_catalog_collection_runner(plan)
         except Exception:
             for group in plan["groups"]:
+                connection.execute(
+                    """UPDATE ingestion_run SET run_state='failed', completed_at=%(completed_at)s,
+                    error_summary='Collection worker could not start.'
+                    WHERE run_id=%(run_id)s AND run_state='started'""",
+                    {"run_id": group["run_id"], "completed_at": utc_now()},
+                )
                 update_preparation(connection, group=group, plan=plan, status="unavailable",
                                    reasons=["preparation_unavailable"], retryable=True)
             connection.commit()
@@ -1800,8 +1844,10 @@ def _preflight_catalog_items(
                 unchanged = (not previous.get("catalog_updated_at")
                              or previous["catalog_updated_at"] <= previous["completed_at"])
                 blocked = (unchanged
-                           and metadata.get("discovery_status") == "no_detail_sources_discovered"
-                           and no_detail_result_is_structural(metadata.get("discovery_notes") or []))
+                           and ((metadata.get("discovery_status") == "no_detail_sources_discovered"
+                                 and no_detail_result_is_structural(metadata.get("discovery_notes") or []))
+                                or "structural_zero_detail_requires_rediscovery" in
+                                    (metadata.get("preparation_reason_codes") or [])))
                 if blocked:
                     reasons = ["structural_zero_detail_requires_rediscovery"]
         if blocked:
@@ -1916,7 +1962,7 @@ def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog
     return {
         "collection_id": str(plan["collection_id"]),
         "correlation_id": str(plan["correlation_id"]),
-        "run_ids": [] if plan.get("preflight_before_run") else [str(group["run_id"]) for group in plan["groups"]],
+        "run_ids": ([str(group["run_id"]) for group in plan["groups"]] + list(plan.get("skipped_run_ids") or [])) if plan.get("runs_registered") or not plan.get("preflight_before_run") else [],
         "selected_source_ids": [],
         "target_source_ids": [],
         "auto_included_source_ids": [],
@@ -1936,9 +1982,10 @@ def _serialize_source_catalog_collection_launch(*, plan: dict[str, Any], catalog
         ],
         "catalog_item_ids": list(catalog_item_ids),
         "materialized_items": [],
-        "workflow_state": ("preparing" if plan.get("preflight_before_run") else "queued") if plan["groups"] else "skipped",
+        "workflow_state": ("preparing" if plan.get("preflight_before_run") and not plan.get("runs_registered") else "queued") if plan["groups"] else "skipped",
         "skipped_items": list(plan.get("skipped_items") or []),
         "queued_catalog_item_count": len(plan["groups"]),
+        "preflight_pending": bool(plan.get("runs_registered") and plan["groups"]),
     }
 
 

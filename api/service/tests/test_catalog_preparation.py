@@ -123,9 +123,9 @@ class CatalogPreparationTests(unittest.TestCase):
         self.assertFalse(claim_preparation(c, group=g, plan=plan))
         self.assertEqual(len(c.calls), 1)
 
-    def run_preparation(self, *, detail=True, probe_result=None, claims=None):
+    def run_preparation(self, *, detail=True, probe_result=None, claims=None, registered=False):
         g = group(); plan = {"collection_id": "operation", "correlation_id": "corr", "actor": {},
-                            "preflight_before_run": True, "triggered_by": "tester"}
+                            "preflight_before_run": True, "triggered_by": "tester", "runs_registered": registered}
         c = MagicMock(); c.__enter__.return_value = c
         rows = [source(), source("FEES", "supporting_html")] if detail else []
         generated = catalog.CatalogItemMaterializationResult(generated_rows=rows,
@@ -147,6 +147,49 @@ class CatalogPreparationTests(unittest.TestCase):
             runner._run_group(plan=plan, group=g)
         return SimpleNamespace(group=g, connection=c, materialize=materialize, prepare=prepare, insert=insert,
                                finish=finish, collect=collect, update=update, claim=claim)
+
+    def test_registered_discovery_without_details_finishes_visible_skipped_run(self):
+        result = self.run_preparation(detail=False, registered=True)
+        result.insert.assert_not_called()
+        result.collect.assert_not_called()
+        result.finish.assert_called_once()
+        self.assertEqual(result.finish.call_args.kwargs["run_state"], "completed")
+        self.assertEqual(result.finish.call_args.kwargs["run_metadata"]["collection_phase"], "skipped")
+        self.assertEqual(result.finish.call_args.kwargs["run_metadata"]["preparation_reason_codes"], ["no_eligible_detail"])
+        self.assertEqual(result.materialize.call_args.kwargs["run_id"], "future-run")
+        self.assertTrue(any('"collection_phase":"discovering"' in call.args[0] for call in result.connection.execute.call_args_list))
+
+    def test_registered_inaccessible_detail_finishes_skipped_run(self):
+        result = self.run_preparation(registered=True, probe_result=([], [{"source_id": "DETAIL", "reason_code": "terminal_source_failure"}]))
+        result.collect.assert_not_called()
+        self.assertEqual(result.finish.call_args.kwargs["run_metadata"]["collection_phase"], "skipped")
+
+    def test_registered_transient_detail_failure_is_retryable_failed_run(self):
+        result = self.run_preparation(registered=True, probe_result=([], [{"source_id": "DETAIL", "reason_code": "source_temporarily_unavailable", "retryable": True}]))
+        self.assertEqual(result.finish.call_args.kwargs["run_state"], "failed")
+        self.assertFalse(result.finish.call_args.kwargs["partial_completion_flag"])
+        result.collect.assert_not_called()
+
+    def test_registered_superseded_coverage_finishes_only_own_run(self):
+        result = self.run_preparation(registered=True, claims=[False])
+        result.materialize.assert_not_called()
+        result.finish.assert_called_once()
+        result.collect.assert_not_called()
+        self.assertEqual(result.finish.call_args.kwargs["run_id"], "future-run")
+        self.assertEqual(result.finish.call_args.kwargs["run_state"], "failed")
+
+    def test_registered_coverage_changed_during_probe_does_not_leave_discovering(self):
+        result = self.run_preparation(registered=True, claims=[True, False])
+        result.connection.rollback.assert_called_once()
+        self.assertEqual(result.finish.call_args.kwargs["run_state"], "failed")
+        result.collect.assert_not_called()
+
+    def test_registered_detail_reuses_run_id_for_collection_and_commits_first(self):
+        result = self.run_preparation(registered=True)
+        result.insert.assert_called_once()
+        result.collect.assert_called_once()
+        self.assertEqual(result.insert.call_args.kwargs["run_id"], "future-run")
+        self.assertGreaterEqual(result.connection.commit.call_count, 2)
 
     def test_first_discovery_without_detail_never_creates_or_finishes_a_run(self):
         result = self.run_preparation(detail=False)
@@ -175,6 +218,16 @@ class CatalogPreparationTests(unittest.TestCase):
         result = self.run_preparation(claims=[True, False])
         result.insert.assert_not_called(); result.collect.assert_not_called()
         result.connection.rollback.assert_called_once()
+
+    def test_registered_retry_exposes_queue_id_without_superseding_original_outcome(self):
+        c = _QueuedConnection([{"run_id": "old", "run_state": "completed", "partial_completion_flag": True,
+                               "retried_by_run_id": None, "run_type": "source_catalog_collection",
+                               "run_metadata": {"catalog_item_id": "catalog"}}])
+        with patch("api_service.run_retry.start_source_catalog_collection", return_value={"workflow_state": "queued", "preflight_pending": True, "run_ids": ["new"], "collection_id": "operation"}):
+            result = retry_failed_run(c, run_id="old", actor={}, request_context={})
+        self.assertEqual(result["retry_run_id"], "new")
+        self.assertEqual(result["workflow_state"], "queued")
+        self.assertFalse(any("UPDATE ingestion_run" in sql for sql, _ in c.calls))
 
     def test_retry_preparation_preserves_the_original_partial_until_replacement_exists(self):
         c = _QueuedConnection([{"run_id": "old", "run_state": "completed", "partial_completion_flag": True,

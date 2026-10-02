@@ -145,6 +145,12 @@ def retry_failed_run(
         )
 
     retry_run_id = retry_run_ids[0]
+    if result.get("preflight_pending"):
+        return {"original_run_id": run_id, "retry_run_id": retry_run_id,
+                "run_type": normalized_run_type, "collection_id": result.get("collection_id"),
+                "correlation_id": result.get("correlation_id"), "run_ids": retry_run_ids,
+                "workflow_state": "queued"}
+
     retry_requested_at = utc_now()
     retry_requested_at_iso = retry_requested_at.isoformat()
     connection.execute(

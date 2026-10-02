@@ -117,6 +117,10 @@ export function buildPublicOptionalMetrics(product: PublicProduct, locale: strin
   const money = (label: string, value: number | null | undefined) => {
     if (typeof value === "number" && Number.isFinite(value)) add(label, formatPublicCurrency(value, product.currency, locale));
   };
+  if (product.product_type === "chequing" && product.rate && product.rate.kind !== "unknown") {
+    const rate = getPublicRateMetric(product, locale);
+    add(rate.label, product.rate.source_text || rate.value);
+  }
   if (["chequing", "savings", "gic"].includes(product.product_type)) {
     money(copy.grid.metricMinBalance, product.minimum_balance);
     money(copy.grid.metricMinDeposit, product.minimum_deposit);

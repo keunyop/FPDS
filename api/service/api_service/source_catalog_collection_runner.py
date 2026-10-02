@@ -59,7 +59,8 @@ def main() -> int:
             if plan.get("preflight_before_run") and not group.get("ingestion_started"):
                 _mark_preparation_best_effort(plan=plan, group=group, status="unavailable",
                                               reasons=["preparation_unavailable"], notes=[str(exc)], retryable=True)
-                continue
+                if not plan.get("runs_registered"):
+                    continue
             _mark_run_failure_best_effort(
                 run_id=str(group["run_id"]),
                 run_metadata=_catalog_run_metadata(
@@ -78,6 +79,26 @@ def main() -> int:
                 _mark_preparation_best_effort(plan=plan, group=group, status="run_created",
                                               run_id=str(group["run_id"]))
     return 0
+
+
+def _finish_registered_preparation(connection: Any, *, plan: dict[str, Any], group: dict[str, Any],
+                                   reasons: list[str], notes: list[str] | None = None,
+                                   retryable: bool = False,
+                                   excluded_sources: list[dict[str, Any]] | None = None) -> None:
+    if not plan.get("runs_registered"):
+        return
+    metadata = _catalog_run_metadata(
+        plan=plan, group=group, discovery_status="collection_preflight_skipped",
+        discovery_notes=list(notes or []), generated_source_ids=[],
+        collection_source_ids=[], target_source_ids=[],
+    )
+    metadata.update(collection_phase="skipped", preparation_reason_codes=reasons,
+                    collection_preflight_skipped_sources=list(excluded_sources or []))
+    _mark_run_finished(connection=connection, run_id=str(group["run_id"]),
+                       run_state="failed" if retryable else "completed",
+                       partial_completion_flag=False,
+                       error_summary="; ".join(reasons) if retryable else None,
+                       run_metadata=metadata)
 
 
 def _mark_preparation_best_effort(*, plan: dict[str, Any], group: dict[str, Any], **state: Any) -> None:
@@ -220,7 +241,16 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         deferred_run = bool(plan.get("preflight_before_run"))
         if deferred_run:
             if not claim_preparation(connection, group=group, plan=plan):
+                _finish_registered_preparation(connection, plan=plan, group=group,
+                                               reasons=["coverage_changed"], retryable=True)
                 return
+            if plan.get("runs_registered"):
+                connection.execute(
+                    """UPDATE ingestion_run SET run_metadata=run_metadata ||
+                    '{"collection_phase":"discovering"}'::jsonb
+                    WHERE run_id=%(run_id)s AND run_state='started'""",
+                    {"run_id": group["run_id"]},
+                )
             connection.commit()
         else:
             _insert_collection_run_row(
@@ -269,6 +299,8 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             if deferred_run:
                 update_preparation(connection, group=group, plan=plan, status="skipped",
                                    reasons=["preparation_requires_rediscovery"])
+                _finish_registered_preparation(connection, plan=plan, group=group,
+                                               reasons=["preparation_requires_rediscovery"])
                 return
             _mark_run_finished(
                 connection=connection, run_id=str(group["run_id"]), run_state="completed",
@@ -322,7 +354,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             materialized = _materialize_sources_for_catalog_item(
                 connection,
                 row=catalog_row,
-                run_id=None if deferred_run else str(group["run_id"]),
+                run_id=None if deferred_run and not plan.get("runs_registered") else str(group["run_id"]),
                 correlation_id=str(plan["correlation_id"]),
                 request_id=plan.get("request_id"),
             )
@@ -354,7 +386,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                     row=catalog_row,
                     actor=_actor_from_plan(plan),
                     request_context={"request_id": plan.get("request_id")},
-                    run_id=None if deferred_run else str(group["run_id"]),
+                    run_id=None if deferred_run and not plan.get("runs_registered") else str(group["run_id"]),
                     correlation_id=str(plan["correlation_id"]),
                 )
                 initial_discovery_notes.extend(repair.notes)
@@ -369,7 +401,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                     materialized = _materialize_sources_for_catalog_item(
                         connection,
                         row=catalog_row,
-                        run_id=None if deferred_run else str(group["run_id"]),
+                        run_id=None if deferred_run and not plan.get("runs_registered") else str(group["run_id"]),
                         correlation_id=str(plan["correlation_id"]),
                         request_id=plan.get("request_id"),
                     )
@@ -387,6 +419,8 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                     if deferred_run:
                         update_preparation(connection, group=group, plan=plan, status="skipped",
                                            reasons=["product_not_currently_offered"], notes=initial_discovery_notes)
+                        _finish_registered_preparation(connection, plan=plan, group=group,
+                            reasons=["product_not_currently_offered"], notes=initial_discovery_notes)
                         return
                     materialized_metadata = _catalog_run_metadata(
                         plan=plan,
@@ -502,6 +536,8 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 update_preparation(connection, group=group, plan=plan,
                                    status="skipped" if structural else "unavailable",
                                    reasons=["no_eligible_detail"], notes=discovery_notes, retryable=not structural)
+                _finish_registered_preparation(connection, plan=plan, group=group,
+                    reasons=["no_eligible_detail"], notes=discovery_notes, retryable=not structural)
                 return
             if _no_detail_result_is_structural(discovery_notes):
                 materialized_metadata = {
@@ -541,6 +577,9 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                                    status="unavailable" if retryable else "skipped",
                                    reasons=sorted({item["reason_code"] for item in excluded_sources}) or ["no_eligible_detail"],
                                    notes=discovery_notes, retryable=retryable, excluded_sources=excluded_sources)
+                _finish_registered_preparation(connection, plan=plan, group=group,
+                    reasons=sorted({item["reason_code"] for item in excluded_sources}) or ["no_eligible_detail"],
+                    notes=discovery_notes, retryable=retryable, excluded_sources=excluded_sources)
                 return
             materialized_metadata.update({"collection_preflight_skipped_sources": excluded_sources,
                                           "collection_source_ids": collection_source_ids,
@@ -551,6 +590,8 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
                 connection.rollback()
                 update_preparation(connection, group=group, plan=plan, status="skipped",
                                    reasons=["coverage_changed"], retryable=True)
+                _finish_registered_preparation(connection, plan=plan, group=group,
+                                               reasons=["coverage_changed"], retryable=True)
                 return
 
         prepared = prepare_source_collection(
@@ -778,6 +819,7 @@ def _catalog_run_metadata(
 ) -> dict[str, Any]:
     metadata = {
         "pipeline_stage": "source_catalog_collection",
+        "collection_phase": "collecting",
         "collection_id": str(plan["collection_id"]),
         "correlation_id": str(plan["correlation_id"]),
         "request_id": plan.get("request_id"),

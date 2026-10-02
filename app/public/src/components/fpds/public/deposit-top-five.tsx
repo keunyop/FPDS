@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { rankingEmptyMessage } from "@/lib/public-ranking-empty";
 import { ProductTopFive } from "@/components/fpds/public/product-top-five";
 import { depositCopy } from "@/lib/public-deposit";
 import { depositRankingGroups } from "@/lib/public-deposit-ranking";
@@ -16,7 +17,7 @@ export function DepositTopFive({ products, filters, unavailable }: { products: P
   return <ProductTopFive accent="deposit" filters={filters} headingId="deposit-top-title" title={copy.depositTopTitle}
     subtitle={copy.depositTopSubtitle} products={group?.items ?? []} rates={group?.rates} termLabel={group?.term}
     href={buildPublicHref('/products', { ...filters, page: 1 })} linkLabel={copy.moreDeposits}
-    unavailable={unavailable} unavailableText={copy.depositTopUnavailable} emptyText={labels.empty}
+    unavailable={unavailable} unavailableText={copy.depositTopUnavailable} emptyText={rankingEmptyMessage(products, "deposit", filters.countryCode, filters.locale)}
     controls={group ? <label className="grid min-w-0 gap-1.5 border-b border-border px-4 py-3 text-xs font-medium md:px-5">
       <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <span>{labels.scope}</span>

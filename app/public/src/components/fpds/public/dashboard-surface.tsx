@@ -39,7 +39,7 @@ export function DashboardSurface({
   const copy = getPublicMessages(filters.locale);
   const productsHref = buildPublicHref("/products", { ...filters, page: 1 });
 
-  if (apiUnavailable || !summary) {
+  if ((apiUnavailable || !summary) && !depositProducts && !loanProducts) {
     return (
       <Card className="border-destructive/25">
         <CardHeader>
@@ -61,7 +61,7 @@ export function DashboardSurface({
     );
   }
 
-  const activeChips = buildScopeChips(filters, summary);
+  const activeChips = summary ? buildScopeChips(filters, summary) : [];
   const hasScatter = Boolean(scatter?.points.length && scatter.x_axis && scatter.y_axis);
 
   return (

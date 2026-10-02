@@ -38,7 +38,7 @@ The shell puts four daily tasks first:
    source discovery. Every active coverage offers normal/detailed collection;
    normal collection checks existing eligibility, while detailed collection
    explicitly revalidates the source scope. Excluded scopes report a reason and
-   create no run when the complete selection is held.
+   retain skipped Runs when preparation excludes a requested scope.
 
 Before entering the workspace, the operator selects an enabled working country
 on the login form. The API persists that ISO alpha-2 code in the server-side
@@ -126,8 +126,9 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
   scope; the API still enforces required initial discovery. Inactive coverage
   cannot collect until it is explicitly restored.
 - Render collection `skipped_items` in EN/KO/JA with the actual created-run count,
-  reasons and precision-rediscovery guidance. An all-skipped response is a valid
-  outcome with zero runs; mixed selections report both queued and excluded work.
+  reasons and precision-rediscovery guidance. All-skipped requests retain terminal
+  Runs; already active preparations reuse their existing work without duplicates.
+  Mixed selections report both queued and excluded work.
   Revalidation checks fresh evidence and never overrides a human Review decision.
 - Keep `data-admin-dirty` and mutation-pending signals so automatic refresh
   pauses during edits, dialogs, and writes.
@@ -186,21 +187,31 @@ order.
 - The test script uses the installed Node TypeScript support (verified on Node
   24.13.0) for auth success/failure, safe navigation, and environment regressions.
 
-## Collection preparation (D-089)
+## Collection Run visibility - 2026-10-02
 
-Banks Collect first returns `workflow_state=preparing` and zero created runs.
-The bank list and each coverage show pending, skipped, retryable-unavailable or
-run-created status in EN/KO/JA. Only a committed run gets a View run link;
-run-created does not assert successful ingestion. Existing auto refresh updates
-the bank list and pauses during dialogs/edits. After two hours an interrupted
-pending check can be requested again. Structural holds use explicit precision
-rediscovery after evidence/configuration review; inactive coverage must first
-be restored through the existing governed workflow.
+The Product Owner supersedes D-089's deferred Run creation. Banks Collect
+registers every eligible bank/type Run before committing and starting background
+work, returns `workflow_state=queued` and its actual `run_ids`. Runs display
+Queued, Discovering sources, Collecting, Skipped, Completed or Failed in EN/KO/JA.
+Known preflight exclusions get terminal skipped Runs; active reservations never
+create duplicates. Discovery/access failures finish the registered Run without
+creating candidates or weakening collection gates. Existing older plans remain
+compatible with deferred preparation.
 
-Run retry can also return preparing with a null replacement ID. It returns to
-Banks while eligibility is checked; the original Partial/failed outcome remains
-until a replacement run exists. No run or Review is fabricated for failed
-preparation. Fresh ingestion can still encounter new transport/evidence errors.
+Runs has no Refresh button or automatic refresh; submit the existing Search
+form to load current results. The bank list retains its existing refresh behavior. Bank/type identity, Run IDs and exclusion reasons
+remain visible; filters support the added preparation states. Database lifecycle
+values remain `started/completed/failed/retried`, refined by private collection
+phase metadata. The existing `started`/`completed` filters include their child
+preparation states for compatibility.
+
+Retry returns the queued replacement ID immediately. The original failed/partial
+outcome is preserved until the replacement actually begins collecting. Coverage
+changes and transient preparation failures remain visible as failed attempts;
+structural exclusions remain skipped. Inactive coverage requires restoration;
+precision rediscovery and all financial/security boundaries remain unchanged.
+Deploy API/collection runner and Admin together; no live collection or deployment
+was performed in this implementation slice.
 
 ## Conditional transaction, withdrawal and security requirements - 2026-10-01
 

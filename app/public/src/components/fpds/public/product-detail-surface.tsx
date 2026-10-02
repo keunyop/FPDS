@@ -12,7 +12,6 @@ import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { PublicInformationNotice } from "@/components/fpds/public/public-information-notice";
 import { PublicFeedbackDialog } from "@/components/fpds/public/public-feedback-dialog";
 import { InterestCalculator } from "@/components/fpds/public/interest-calculator";
-import { PublicFreshness } from "@/components/fpds/public/public-freshness";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { getPublicDesignCopy, getPublicMessages } from "@/lib/public-locale";
@@ -98,7 +97,6 @@ export function ProductDetailSurface({
   const metricCards = buildMetricCards(product, filters.locale);
   const detailFacts = buildPublicOptionalMetrics(product, filters.locale);
   const factCopy = publicFactCopy(filters.locale);
-  const disclosureDate = formatIsoDate(product.verification ? product.verification.last_verified_at : product.last_verified_at, copy.common.noDate);
   const similarHref = buildPublicHref(catalogPath, {
     ...filters,
     bankCodes: [product.bank_code],
@@ -137,7 +135,7 @@ export function ProductDetailSurface({
           </Link>
         </Button>
 
-        <section className="border-y border-foreground/15 py-6 md:py-9">
+        <section className="border-y border-foreground/15 py-6 md:py-9" data-seo-product-content>
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
             <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} />
@@ -165,43 +163,22 @@ export function ProductDetailSurface({
           </div>
 
           <h2 className="mt-7 text-sm font-semibold">{factCopy.core}</h2>
-          <dl className={cn("mt-3 grid border-y border-border sm:divide-x sm:divide-border", metricCards.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3")}>
+          <dl className={cn("mt-3 grid gap-px border border-border bg-border", metricCards.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3")}>
             {metricCards.map((metric, index) => (
               <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
             ))}
           </dl>
-          <BankHandoffPanel product={product} locale={filters.locale} />
-        </section>
-
-        <section
-          aria-labelledby="product-overview-title"
-          className="min-w-0 border-b border-foreground/15 pb-6"
-          data-seo-product-content
-        >
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">
-            {designCopy.verified}
-          </p>
-          <h2
-            id="product-overview-title"
-            className="mt-2 text-2xl font-semibold tracking-[-0.03em] [overflow-wrap:anywhere]"
-          >
-            {overviewTitle(displayName, filters.locale)}
-          </h2>
-          <div className="mt-3 grid max-w-4xl gap-3 text-sm leading-7 text-muted-foreground md:text-base">
-            {buildProductOverview(product, disclosureDate, filters.locale).map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
+          <BankHandoffPanel product={product} locale={filters.locale} compact />
         </section>
 
         <section className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_23rem] lg:items-start">
           <div className="grid gap-4">
+            {termRateRows.length ? <TermRateTable currency={product.currency} locale={filters.locale} rows={termRateRows} /> : null}
             <section aria-labelledby="product-facts-title">
               <div className="border-b border-foreground/15 pb-3">
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{designCopy.verified}</p>
                 <h2 id="product-facts-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{factCopy.additional}</h2>
               </div>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{factCopy.note}</p>
               {detailFacts.length ? <dl className="grid sm:grid-cols-2">
                 {detailFacts.map((fact, index) => (
                   <div className={cn("border-b border-border py-4", index % 2 === 0 ? "sm:pr-5" : "sm:pl-5")} key={fact.label}>
@@ -211,7 +188,6 @@ export function ProductDetailSurface({
               </dl> : <p className="py-4 text-sm text-muted-foreground">{factCopy.empty}</p>}
             </section>
 
-            {termRateRows.length ? <TermRateTable currency={product.currency} locale={filters.locale} rows={termRateRows} /> : null}
           </div>
 
           <div className="grid gap-4">
@@ -223,8 +199,6 @@ export function ProductDetailSurface({
               <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{designCopy.officialRecord}</p>
               <h2 className="mt-2 text-xl font-semibold tracking-[-0.02em]">{copy.detail.disclosureTitle}</h2>
               <ProductVerification product={product} locale={filters.locale} detailed />
-              <PublicFreshness className="mt-4" freshness={detail.freshness} locale={filters.locale} />
-              <p className="mt-4 text-xs leading-5 text-muted-foreground">{buildDisclosure(disclosureDate, filters.locale)}</p>
               <div className="mt-4 grid gap-2">
                 <Button asChild className="min-h-11 w-full rounded-full" size="sm" variant="outline">
                   <Link href={buildPublicHref("/methodology", filters)}>{copy.nav.methodology}</Link>
@@ -240,7 +214,6 @@ export function ProductDetailSurface({
                   }}
                 />
               </div>
-              <p className="mt-4 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">{designCopy.evidenceBoundary}</p>
             </aside>
           </div>
         </section>
@@ -312,16 +285,6 @@ function catalogLabel(product: PublicProduct, locale: string) {
   return product.product_family === "lending" ? copy.nav.loan : copy.nav.products;
 }
 
-function overviewTitle(displayName: string, locale: string) {
-  if (locale === "ko") {
-    return displayName + " 개요";
-  }
-  if (locale === "ja") {
-    return displayName + "の概要";
-  }
-  return "About " + displayName;
-}
-
 function relatedTitle(bankName: string, locale: string) {
   if (locale === "ko") {
     return bankName + "의 관련 상품";
@@ -332,103 +295,11 @@ function relatedTitle(bankName: string, locale: string) {
   return "Related products from " + bankName;
 }
 
-function buildProductOverview(
-  product: PublicProduct,
-  verifiedDate: string,
-  locale: string
-) {
-  const displayName = buildBrandedProductName(product);
-  const intro = localizedOverviewIntro(
-    displayName,
-    product.product_type_label,
-    verifiedDate,
-    locale
-  );
-  const details: string[] = [];
-
-  if (product.product_id === "prod_IbZVSqaogb3BkWBd") {
-    addSentence(details, product.interest_rate_summary);
-    addSentence(details, product.credit_limit_text);
-    addSentence(details, product.collateral_text);
-  } else if (product.product_id === "prod_vIoiSSdl3kwJjM1d") {
-    addSentence(details, product.description_short);
-    addLabeledSentence(details, "Available terms", product.term_length_text);
-    addSentence(details, cleanPublicSummary(product.prepayment_privileges));
-  } else if (product.product_id === "prod_g-yAIYCGJyxWOm8d") {
-    details.push(
-      'The verified product name is Vancity Fair and Fast Loan™; this is the Vancity loan sometimes searched as "Vancity Fast and Fair Loan."'
-    );
-    addLabeledSentence(details, "Published loan amount", product.loan_amount_text);
-    addLabeledSentence(details, "Published term", product.term_length_text);
-  } else if (product.product_id === "prod_h18VyAGREB3optuJ") {
-    addSentence(details, product.description_short);
-    addLabeledSentence(details, "Eligibility", product.eligibility_text);
-    addLabeledSentence(details, "Available terms", product.term_length_text);
-    addLabeledSentence(details, "Payment frequency", product.payment_frequency);
-    addLabeledSentence(details, "Application method", product.application_method);
-  } else {
-    addSentence(details, product.description_short);
-    addLabeledSentence(details, "Rate type", product.rate_type);
-    addLabeledSentence(details, "Available terms", product.term_length_text);
-    addLabeledSentence(details, "Published amount or limit", product.loan_amount_text ?? product.credit_limit_text);
-  }
-
-  return [intro, ...details.slice(0, 4)];
-}
-
-function localizedOverviewIntro(
-  displayName: string,
-  productType: string,
-  verifiedDate: string,
-  locale: string
-) {
-  if (locale === "ko") {
-    return `SwitchaBank의 검토된 공개 스냅샷은 ${displayName}을(를) ${productType} 상품으로 표시합니다. 최종 검증일은 ${verifiedDate}입니다.`;
-  }
-  if (locale === "ja") {
-    return `SwitchaBankの確認済み公開スナップショットでは、${displayName}を${productType}商品として掲載しています。最終確認日は${verifiedDate}です。`;
-  }
-  return `SwitchaBank lists ${displayName} as a ${productType} in its reviewed public snapshot. Product information was last checked ${verifiedDate}.`;
-}
-
-function addSentence(sentences: string[], value: string | null) {
-  const normalized = cleanPublicSummary(value);
-  if (normalized) {
-    sentences.push(withTerminalPunctuation(normalized));
-  }
-}
-
-function addLabeledSentence(
-  sentences: string[],
-  label: string,
-  value: string | null
-) {
-  const normalized = cleanPublicSummary(value);
-  if (normalized) {
-    sentences.push(`${label}: ${withTerminalPunctuation(normalized)}`);
-  }
-}
-
-function cleanPublicSummary(value: string | null) {
-  if (
-    !value ||
-    value.length > 260 ||
-    /(calculator|view tool|click|learn more)/i.test(value)
-  ) {
-    return null;
-  }
-  return value.replace(/\s+/g, " ").trim();
-}
-
-function withTerminalPunctuation(value: string) {
-  return /[.!?]$/.test(value) ? value : value + ".";
-}
-
 function MetricTile({ highlight, label, value }: { highlight?: boolean; label: string; value: string }) {
   return (
-    <div className={cn("min-h-28 px-1 py-5 sm:px-5", highlight && "bg-verification-soft/45")}>
-      <dt className={cn("font-mono text-[10px] font-semibold uppercase tracking-wide", highlight ? "text-verification" : "text-muted-foreground")}>{label}</dt>
-      <dd className={cn("mt-2 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums", value.length > 24 ? "text-lg" : "text-3xl")}>{value}</dd>
+    <div className={cn("min-w-0 bg-card px-4 py-5 sm:px-5", highlight && "bg-verification-soft")}>
+      <dt className={cn("text-xs font-semibold", highlight ? "text-verification" : "text-muted-foreground")}>{label}</dt>
+      <dd className={cn("mt-2 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums", value.length > 24 ? "text-lg leading-relaxed tracking-normal" : highlight ? "text-4xl" : "text-3xl")}>{value}</dd>
     </div>
   );
 }
@@ -484,7 +355,7 @@ function TermRateTable({
             {rows.map((row, index) => (
               <tr className="border-b border-border/60 last:border-0" key={`${row.term_label ?? row.term_length_days ?? "term"}-${index}`}>
                 <td className="py-3 pr-4 font-medium text-foreground">{row.term_label ?? formatTerm(row.term_length_days, locale)}</td>
-                <td className="py-3 pr-4 tabular-nums text-foreground">{formatRate(row.rate, locale)}</td>
+                <td className="py-3 pr-4 text-base font-semibold tabular-nums text-foreground">{formatRate(row.rate, locale)}</td>
                 {showMinimum ? <td className="py-3 pr-4 tabular-nums text-muted-foreground">{row.minimum_deposit == null ? publicFactCopy(locale).missing : formatCurrency(row.minimum_deposit, currency, locale)}</td> : null}
                 {showNotes ? <td className="py-3 text-muted-foreground">{row.notes || publicFactCopy(locale).missing}</td> : null}
               </tr>
@@ -546,25 +417,4 @@ function detailLabel(key: string, locale: string) {
     return jaLabels[key] ?? labels[key] ?? key;
   }
   return labels[key] ?? key;
-}
-
-function formatIsoDate(value: string | null, fallback: string) {
-  if (!value) {
-    return fallback;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return fallback;
-  }
-  return date.toISOString().slice(0, 10);
-}
-
-function buildDisclosure(date: string, locale: string) {
-  if (locale === "ko") {
-    return `${date} 상품 정보 확인 기준입니다. 금리와 가입 조건은 변경될 수 있으므로 신청 전 은행 공식 페이지에서 다시 확인하세요.`;
-  }
-  if (locale === "ja") {
-    return `${date} 時点の商品情報の確認記録です。金利や申込条件は変更される場合があるため、申込前に銀行の公式ページで再確認してください。`;
-  }
-  return `Product information last checked: ${date}. Rates and eligibility can change, so confirm them on the bank's official page before applying.`;
 }

@@ -11,10 +11,17 @@ from api_service.run_retry import describe_run_retry_action
 if TYPE_CHECKING:
     from psycopg import Connection
 
-RUN_STATES = ("started", "completed", "failed", "retried")
+RUN_STATES = ("queued", "discovering", "started", "completed", "skipped", "failed", "retried")
 DEFAULT_RUN_STATES = ("started", "completed", "failed")
 
 _RUN_TYPE_SQL = "COALESCE(NULLIF(ir.run_metadata ->> 'pipeline_stage', ''), ir.trigger_type)"
+# The database lifecycle remains started/completed/failed/retried. Display states
+# refine that lifecycle using the persisted collection phase, without migration.
+_DISPLAY_RUN_STATE_SQL = """CASE
+    WHEN ir.run_state = 'started' AND ir.run_metadata ->> 'collection_phase' = 'queued' THEN 'queued'
+    WHEN ir.run_state = 'started' AND ir.run_metadata ->> 'collection_phase' = 'discovering' THEN 'discovering'
+    WHEN ir.run_state = 'completed' AND ir.run_metadata ->> 'collection_phase' = 'skipped' THEN 'skipped'
+    ELSE ir.run_state::text END"""
 _SAFE_SOURCE_METADATA_KEYS = {
     "attempt_count",
     "candidate_id",
@@ -112,10 +119,10 @@ def load_run_status_list(connection: Connection, *, filters: RunStatusFilters) -
 
     state_rows = connection.execute(
         f"""
-        SELECT ir.run_state, COUNT(*) AS item_count
+        SELECT {_DISPLAY_RUN_STATE_SQL} AS run_state, COUNT(*) AS item_count
         FROM ingestion_run AS ir
         WHERE {where_sql}
-        GROUP BY ir.run_state
+        GROUP BY {_DISPLAY_RUN_STATE_SQL}
         """,
         params,
     ).fetchall()
@@ -160,6 +167,7 @@ def load_run_status_list(connection: Connection, *, filters: RunStatusFilters) -
             ir.retried_by_run_id,
             ir.started_at,
             ir.completed_at,
+            ir.run_metadata,
             COALESCE(ir.run_metadata ->> 'pipeline_stage', '') AS pipeline_stage,
             COALESCE(ir.run_metadata ->> 'correlation_id', '') AS correlation_id,
             COALESCE(rsi_counts.source_item_count, ir.source_scope_count) AS source_item_count
@@ -357,7 +365,11 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
         "run": {
             "run_id": str(run_row["run_id"]),
             "run_type": str(run_row["run_type"]),
-            "run_status": str(run_row["run_state"]),
+            "run_status": _display_run_state(run_row),
+            "bank_code": _string_or_none(run_metadata.get("bank_code")),
+            "product_type": _string_or_none(run_metadata.get("product_type")),
+            "preparation_reason_codes": _coerce_string_list(run_metadata.get("preparation_reason_codes")),
+            "discovery_notes": _coerce_string_list(run_metadata.get("discovery_notes")),
             "trigger_type": str(run_row["trigger_type"]),
             "triggered_by": _string_or_none(run_row.get("triggered_by")),
             "source_item_count": int(run_row["source_item_count"]) if run_row.get("source_item_count") is not None else 0,
@@ -395,7 +407,7 @@ def load_run_status_detail(connection: Connection, *, run_id: str) -> dict[str, 
 
 def _build_where_clause(filters: RunStatusFilters) -> tuple[str, dict[str, Any]]:
     clauses = [
-        "ir.run_state = ANY(%(states)s)",
+        f"(ir.run_state::text = ANY(%(states)s) OR ({_DISPLAY_RUN_STATE_SQL}) = ANY(%(states)s))",
         "ir.country_code = %(country_code)s",
     ]
     params: dict[str, Any] = {
@@ -423,6 +435,8 @@ def _build_where_clause(filters: RunStatusFilters) -> tuple[str, dict[str, Any]]
                 OR COALESCE(ir.triggered_by, '') ILIKE %(search)s
                 OR COALESCE(ir.run_metadata ->> 'pipeline_stage', '') ILIKE %(search)s
                 OR COALESCE(ir.run_metadata ->> 'correlation_id', '') ILIKE %(search)s
+                OR COALESCE(ir.run_metadata ->> 'bank_code', '') ILIKE %(search)s
+                OR COALESCE(ir.run_metadata ->> 'product_type', '') ILIKE %(search)s
             )
             """
         )
@@ -444,11 +458,24 @@ def _build_order_by_clause(filters: RunStatusFilters) -> str:
     return f"ir.started_at {direction}, ir.run_id DESC"
 
 
+def _display_run_state(row: dict[str, Any]) -> str:
+    state = str(row["run_state"])
+    phase = _coerce_mapping(row.get("run_metadata")).get("collection_phase")
+    if state == "started" and phase in {"queued", "discovering"}:
+        return phase
+    if state == "completed" and phase == "skipped":
+        return "skipped"
+    return state
+
+
 def _serialize_run_list_row(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "run_id": str(row["run_id"]),
         "run_type": str(row["run_type"]),
-        "run_status": str(row["run_state"]),
+        "run_status": _display_run_state(row),
+        "bank_code": _string_or_none(_coerce_mapping(row.get("run_metadata")).get("bank_code")),
+        "product_type": _string_or_none(_coerce_mapping(row.get("run_metadata")).get("product_type")),
+        "preparation_reason_codes": _coerce_string_list(_coerce_mapping(row.get("run_metadata")).get("preparation_reason_codes")),
         "trigger_type": str(row["trigger_type"]),
         "triggered_by": _string_or_none(row.get("triggered_by")),
         "started_at": row["started_at"].isoformat() if row.get("started_at") else None,
@@ -693,7 +720,7 @@ def _resolve_stage_status(*, status_counts: dict[str, int], partial_completion_f
 
 
 def _fallback_run_stage_status(run_row: dict[str, Any]) -> str:
-    run_state = str(run_row["run_state"])
+    run_state = _display_run_state(run_row)
     if run_state == "completed" and bool(run_row["partial_completion_flag"]):
         return "degraded"
     return run_state

@@ -89,18 +89,18 @@ export function collectionPreparationMessage(
   const hasRun = Boolean(state.run_id);
   if (locale === "ko") {
     if (interrupted) return "사전 검사가 지연됐거나 중단됐습니다. 다시 수집을 요청할 수 있습니다.";
-    if (pending) return "수집 가능 여부 확인 중입니다. 상품 상세 페이지와 접근 검사를 통과하면 run을 생성합니다. 결과는 은행 목록과 coverage에서 확인할 수 있습니다.";
-    if (hasRun) return `수집 run을 생성했습니다.${state.excluded_sources?.length ? ` 접근할 수 없는 소스 ${state.excluded_sources.length}개는 제외했습니다.` : ""}`;
+    if (pending) return hasRun ? "수집 Run이 등록되었습니다. 사전 탐색 진행 상황은 Runs에서 확인할 수 있습니다." : "수집 가능 여부 확인 중입니다. 결과는 은행 목록에서 확인할 수 있습니다.";
+    if (hasRun && ["collecting", "run_created"].includes(state.status)) return `수집 run을 생성했습니다.${state.excluded_sources?.length ? ` 접근할 수 없는 소스 ${state.excluded_sources.length}개는 제외했습니다.` : ""}`;
     return `수집을 시작하지 않았습니다: ${reasons || REASONS.ko.unknown}. ${state.retryable ? "다시 수집을 요청할 수 있습니다." : "근거를 확인한 뒤 정밀 재탐색으로 재검사할 수 있습니다."}`;
   }
   if (locale === "ja") {
     if (interrupted) return "事前確認が遅延または中断しました。収集を再度要求できます。";
-    if (pending) return "収集可否を確認中です。商品詳細とアクセスの確認後に run を作成します。結果は銀行一覧と coverage で確認できます。";
-    if (hasRun) return `収集 run を作成しました。${state.excluded_sources?.length ? `アクセスできない参照元${state.excluded_sources.length}件を除外しました。` : ""}`;
+    if (pending) return hasRun ? "収集 Run を登録しました。事前探索の進行状況は Runs で確認できます。" : "収集可否を確認中です。結果は銀行一覧で確認できます。";
+    if (hasRun && ["collecting", "run_created"].includes(state.status)) return `収集 run を作成しました。${state.excluded_sources?.length ? `アクセスできない参照元${state.excluded_sources.length}件を除外しました。` : ""}`;
     return `収集を開始しませんでした: ${reasons || REASONS.ja.unknown}。${state.retryable ? "収集を再度要求できます。" : "根拠を確認し、精密再探索で再検証できます。"}`;
   }
   if (interrupted) return "The eligibility check was delayed or interrupted. You can request collection again.";
-  if (pending) return "Checking collection eligibility. A run is created after product detail and source access checks pass. See results in the bank list and coverage.";
-  if (hasRun) return `Collection run created.${state.excluded_sources?.length ? ` Excluded ${state.excluded_sources.length} unavailable source(s).` : ""}`;
+  if (pending) return hasRun ? "Collection Runs registered. Follow source discovery in Runs." : "Checking collection eligibility. See results in the bank list.";
+  if (hasRun && ["collecting", "run_created"].includes(state.status)) return `Collection run created.${state.excluded_sources?.length ? ` Excluded ${state.excluded_sources.length} unavailable source(s).` : ""}`;
   return `Collection did not start: ${reasons || REASONS.en.unknown}. ${state.retryable ? "You can request collection again." : "Check the evidence, then use precision rediscovery to revalidate."}`;
 }

@@ -32,6 +32,7 @@ test("preparation response announces checks without claiming a run exists", () =
   for (const locale of ["en", "ko", "ja"]) {
     const message = collectionPreflightMessage(locale, { workflow_state: "preparing", run_ids: [], groups: [], skipped_items: [] });
     assert.ok(message);
+    assert.ok(!message.includes("registered"));
     assert.notEqual(message, collectionPreparationMessage(locale, { status: "run_created", run_id: "run" }));
   }
 });
@@ -42,4 +43,11 @@ test("preparation terminal, transient, stale and missing states remain distingui
   assert.ok(collectionPreparationMessage("en", {status:"unavailable",retryable:true}).includes("request collection again"));
   assert.ok(collectionPreparationMessage("en", {status:"checking",updated_at:"2020-01-01T00:00:00Z"}).includes("interrupted"));
   assert.ok(collectionPreparationMessage("en", {status:"run_created",run_id:"run",excluded_sources:[{source_id:"fees",reason_code:"terminal_source_failure"}]}).includes("Excluded 1"));
+});
+
+test("registered queued/discovering and skipped states never misreport collection", () => {
+  assert.match(collectionPreparationMessage("en", {status:"queued",run_id:"run"}), /registered.*Runs/);
+  assert.match(collectionPreparationMessage("ko", {status:"checking",run_id:"run"}), /사전 탐색/);
+  assert.match(collectionPreparationMessage("ja", {status:"checking",run_id:"run"}), /事前探索/);
+  assert.match(collectionPreparationMessage("en", {status:"skipped",run_id:"run",reason_codes:["no_eligible_detail"]}), /did not start.*no eligible product detail/);
 });

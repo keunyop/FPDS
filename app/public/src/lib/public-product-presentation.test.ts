@@ -70,3 +70,12 @@ test('a required GIC schedule is shown even without a representative scalar', ()
   assert.equal(buildPublicProductMetrics(p, 'en', 'card')[0].value, '18 months: 3.75% (Interest paid at maturity.)');
   assert.equal(p.rate!.comparable_rate, null);
 });
+
+test('checking detail retains optional deposit interest and full qualifiers after compact bank handoff', () => {
+  for (const locale of ['en','ko','ja']) {
+    assert.equal(buildPublicOptionalMetrics(product('chequing', {rate:{kind:'absolute',comparable_rate:0,source_text:null}}), locale)[0].value, '0%');
+    const source_text = '0.05% on daily deposit balances; overdraft charges are separate.';
+    assert.equal(buildPublicOptionalMetrics(product('chequing', {rate:{kind:'conditional',comparable_rate:null,source_text}}), locale)[0].value, source_text);
+    assert.deepEqual(buildPublicOptionalMetrics(product('chequing', {rate:{kind:'unknown',comparable_rate:null,source_text:null}}), locale), []);
+  }
+});

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { collectionPreparationMessage } from "@/lib/admin-collection-feedback";
+import { translateRunState } from "@/lib/admin-i18n";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -303,7 +305,7 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
         badges={
           <>
             <span className={cn("rounded-full px-3 py-1 text-xs font-medium", runStateBadgeClasses(detail.run.run_status))}>
-              {toTitleCase(detail.run.run_status)}
+              {translateRunState(locale, detail.run.run_status)}
             </span>
             <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
               {toTitleCase(detail.run.run_type)}
@@ -317,6 +319,17 @@ export function RunDetailSurface({ csrfToken, detail, locale }: RunDetailSurface
         path={copy.path}
         title={detail.run.run_id}
       />
+      {detail.run.preparation_reason_codes?.length ? <p role="status" className="border border-border bg-muted/30 p-4 text-sm">{collectionPreparationMessage(locale, { status: "skipped", reason_codes: detail.run.preparation_reason_codes })}</p> : null}
+
+
+      {detail.run.discovery_notes?.length ? (
+        <details className="border border-border bg-card p-4">
+          <summary className="cursor-pointer text-sm font-medium">{locale === "ko" ? "사전 탐색 결과" : locale === "ja" ? "事前探索の結果" : "Source discovery results"}</summary>
+          <ul className="mt-3 grid gap-2 text-sm text-muted-foreground">
+            {detail.run.discovery_notes.map((note, index) => <li className="break-words" key={index}>{note}</li>)}
+          </ul>
+        </details>
+      ) : null}
 
       <article className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="grid divide-y divide-border md:grid-cols-5 md:divide-x md:divide-y-0">

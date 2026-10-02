@@ -1,5 +1,41 @@
 # Admin pre-handover review and fixes
 
+## Independent slice: 2026-10-02 collection Run visibility and Public clarity
+
+Ownership: preserve earlier unresolved goals and unrelated in-progress changes.
+Objective: show every requested bank/type Run immediately, including discovery;
+remove Runs auto refresh; diagnose missing Home Top 5; simplify product detail
+and emphasize verified decision facts.
+Scope: catalog collection enqueue/runner/status/retry and Admin Runs; Public
+Home ranking diagnosis and necessary fixes, detail hierarchy and EN/KO/JA copy.
+Exclusions: live collection/model calls, canonical/data mutations, deployment,
+weakened financial comparison gates, new products/markets or account controls.
+Acceptance:
+- [x] Persist all requested Runs before background discovery; show queued and
+      discovery states, and keep excluded/failed preparation outcomes visible.
+- [x] Remove Runs automatic refresh; use the existing Search to reload results.
+- [x] Explain missing Top 5 with current evidence; fix reproduced runtime defects
+      without inventing facts or widening comparison eligibility.
+- [x] Remove redundant detail explanations and emphasize key verified metrics
+      and conditions without hiding material financial qualifiers.
+- [x] Verify API/affected frontends, EN/KO/JA and 390/768/1440 layouts, update
+      relevant docs/journal, inspect final diff and run git diff --check.
+Verification: enqueue/runner/status failure and boundary regressions, current
+anonymous read-only catalogue diagnosis, frontend tests/builds/browser checks.
+
+Completion: immediate persisted Runs and discovery visibility, Search-based Runs reload,
+read-only Top 5 diagnosis plus independent-summary failure fix, and simplified
+verified detail hierarchy are complete. API 570/Admin 11/Public 91, affected
+builds/typechecks/Public lint, 64 browser cases (EN/KO/JA, 390/768/1440 and
+failure/loading/manual-refresh states), read-only PostgreSQL filters, repository
+doctor and final diff checks pass. No live collection, financial data writes or
+deployment. Current CA ranking types are absent and US deposit basis remains
+unknown; the interface cannot manufacture comparison facts. Preserve this file
+for the independently owned unresolved goals below.
+Latest Product Owner clarification: remove the redundant Refresh button and keep
+Search as the reload action. Search now preserves EN/KO/JA through GET submission;
+Admin 11 tests, typecheck/build and nine responsive locale browser checks pass.
+
 ## Active follow-up: economical legacy recovery — 2026-09-30
 
 Product Owner reports deployment completed and authorizes the proposed recovery.
@@ -1129,3 +1165,21 @@ Exclusions: financial prerequisite relaxation, bank-specific exceptions, optiona
 Acceptance: reproduce identified defects before fixes; prevent unavailable/service/alias false candidates with proven boundaries; retain applicable already-captured evidence and exact origins/annual semantics/conditions; preserve grounded names and verified optional deposit details without cross-product leakage; demonstrate other-bank and adversarial cases; affected Worker/API suites and proportionate checks pass; document residual evidence limits and deployment separately.
 Verification: deterministic saved-evidence fixtures, focused positive/boundary/failure tests, full affected runtime suites, repository doctor when relevant, git diff --check and final goal review.
 Status: complete for this authorized runtime implementation slice. Demonstrated generic defects reproduced before fixes; product/availability/service/alias and PDF/query boundaries, captured companion and atomic table evidence, grounded identity and descriptive deposit-interest preservation implemented with matching instructions. Sixteen new Worker and eleven new API regressions cover saved official evidence, CA/US, other-bank identities and adversarial isolation; full Worker 659 / API 550, repository doctor, report-link/fixture/log assertions and git diff --check pass. Final goal/diff review satisfies this slice. No live model calls, registry/canonical writes, publication, new collection or deployment. Deploy API/collection runtime together before fresh operator collection; preserve earlier shared goal ownership.
+
+
+## Authorized slice: API startup dependency boundary repair - 2026-10-02
+Objective: restore API startup in its independent virtual environment after the shared product-source policy introduced a Worker-only bs4 import.
+Scope: standard-library parsing in the shared availability policy, dependency-isolation and HTML boundary regressions, actual API environment startup/health verification and documentation. Preserve earlier goal ownership.
+Exclusions: dependency installs, collection/model calls, DB/canonical writes, publication or deployment.
+Acceptance: reproduce the actual API import failure; shared policy runs without Worker-only dependencies and preserves proven product/date/HTML isolation; relevant suites pass; actual API virtualenv starts Uvicorn and serves healthz; journal and diff review complete.
+Verification: dependency-blocked subprocess regression, HTML positive/boundary tests, affected API/Worker tests, actual API interpreter smoke test and git diff --check.
+Status: complete. Original committed policy reproduces missing bs4 in the actual independent API environment; repaired shared policy needs only the standard library. Six new dependency/HTML boundary regressions, API 556 and Worker 659 tests pass. Actual API virtualenv without bs4 starts Uvicorn and serves HTTP 200 /healthz with status ok; smoke server terminated. API README and journal updated; final diff/whitespace review passes. No dependency installs, model calls, collection, DB/canonical writes, publication or deployment. Preserve this file for earlier unresolved goal ownership.
+
+
+## Read-only slice: 11:46 Alterna/B2B run count diagnosis - 2026-10-02
+Objective: explain why the operator sees only two Alterna Runs after requesting both banks at approximately 11:46 America/Vancouver.
+Scope: read-only latest DB runs, collection preparation/catalog metadata, retained local logs and run-list filtering code; preserve existing goal ownership.
+Exclusions: new collection/model calls, registry/canonical writes, deployment or runtime fixes.
+Acceptance: distinguish requested scopes, prepared/skipped scopes, created runs and display behavior using current evidence; document exact reasons and any unresolved limitation.
+Verification: read-only repeatable-read DB inspection, local source/log correlation, journal and final diff check.
+Status: complete. Exact twelve-scope plan, sequential processing, preflight-only skips and persisted Run creation verified. Final read-only 11:57:06 Vancouver snapshot shows three completed Alterna Runs and Savings started, LOC/Mortgage skipped without Runs, all six B2B scopes queued. No lost B2B selection. User-screen filter/refresh state not captured; cannot assert a separate display defect. Journal updated and final diff check passed; no new collection/model calls or runtime/data changes. Preserve earlier unresolved goal ownership.

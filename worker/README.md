@@ -111,8 +111,9 @@ Runtime invariants:
   attempt regardless of bank or Product Type. Generic transport recovery uses
   browser DOM so the result remains ordinary inspectable HTML. A
   rendered page that remains a challenge is rejected as product evidence and
-  is held before new catalog ingestion-run creation (D-089); legacy in-flight
-  plans retain their quarantine behavior. A missing browser or render failure
+  is excluded before candidate-producing collection (D-089). The 2026-10-02
+  Product Owner instruction registers queued Runs before preparation and keeps
+  their exclusion outcome visible; legacy plans retain their deferred behavior. A missing browser or render failure
   remains transient. Other HTTP/upstream browser
   fallback remains restricted to configured domains. Browser recoveries are
   serialized within one worker so concurrent source capture does not retrigger

@@ -1,5 +1,19 @@
 # FPDS API and Interface Contracts
 
+## Registered collection and Run states - 2026-10-02
+
+Catalog collection returns persisted `run_ids`, `workflow_state=queued` and
+`preflight_pending=true` for queued work. Known excluded scopes return terminal
+Run IDs in `skipped_items`; active reservations do not create duplicate attempts.
+Run list/detail `run_status` adds `queued`, `discovering` and `skipped`, derived
+from private collection-phase metadata while DB lifecycle states remain unchanged.
+Added read fields: `bank_code`, `product_type`, `preparation_reason_codes` and detail
+`discovery_notes`. State filters accept the added states; default started/completed
+filters retain lifecycle compatibility. Retry can return a real `retry_run_id`
+with `workflow_state=queued` before collection starts, preserving the old outcome.
+Authentication, role, CSRF and server-owned country gates remain unchanged.
+
+
 ## Product review retirement — 2026-09-30 (D-090)
 
 `POST /api/admin/review-tasks/:id/{approve,reject,edit-approve,defer,ai-verify}`

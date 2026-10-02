@@ -13,15 +13,15 @@ class _AggregateConnection(_QueuedConnection):
         super().__init__([{"total_items": len(rows)}, [], [], []])
         self.database = sqlite3.connect(":memory:")
         self.database.row_factory = sqlite3.Row
-        self.database.execute("CREATE TABLE ingestion_run (country_code text, run_state text, partial_completion_flag boolean)")
-        self.database.executemany("INSERT INTO ingestion_run VALUES (?, ?, ?)", rows)
+        self.database.execute("CREATE TABLE ingestion_run (country_code text, run_state text, partial_completion_flag boolean, run_metadata text DEFAULT '{}')")
+        self.database.executemany("INSERT INTO ingestion_run (country_code, run_state, partial_completion_flag) VALUES (?, ?, ?)", rows)
 
     def execute(self, sql, params=None):
         if "AS attention_items" not in sql:
             return super().execute(sql, params)
         # Execute the production aggregate; adapt only the PostgreSQL parameter/ANY syntax.
         names = [":state" + str(i) for i in range(len(params["states"]))]
-        query = sql.replace("= ANY(%(states)s)", "IN (" + ",".join(names) + ")")
+        query = sql.replace("ir.run_state::text", "CAST(ir.run_state AS TEXT)").replace("= ANY(%(states)s)", "IN (" + ",".join(names) + ")")
         query = re.sub(r"%\((\w+)\)s", r":\1", query)
         bindings = {**params, **{"state"+str(i): state for i, state in enumerate(params["states"])}}
         return _QueuedCursor(dict(self.database.execute(query, bindings).fetchone()))

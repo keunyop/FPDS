@@ -1,5 +1,18 @@
 # FPDS Review, Run, Publish, and Audit State Design
 
+## Collection preparation within Runs - 2026-10-02
+
+Register all requested eligible bank/type Runs before background discovery.
+Persist `collection_phase=queued`, then `discovering`, then `collecting` under the
+existing started lifecycle. Structural preflight exclusion completes with phase
+`skipped`; transient failures and changed coverage finish as failed. API/UI derive
+preparation states without changing the DB lifecycle enum. Existing default
+started/completed filters include their preparation refinements. No candidate or
+review is fabricated for a preparation attempt. Retry keeps the old outcome until
+the registered replacement actually enters collection. Legacy plans still use
+the old deferred behavior. Runs refresh is manual; Banks refresh is unchanged.
+
+
 ## Current product review override — 2026-09-30
 
 D-090 removes human product-review decisions from new collection. Automatically

@@ -49,7 +49,7 @@ def preparation_block_reason(row: dict[str, Any], *, explicit: bool) -> str | No
 def reserve_preparation(connection: Any, *, group: dict[str, Any], plan: dict[str, Any]) -> bool:
     state = {"operation_id": plan["collection_id"], "status": "queued",
              "signature": preparation_signature(group), "updated_at": datetime.now(UTC).isoformat(),
-             "reason_codes": [], "run_id": None}
+             "reason_codes": [], "run_id": group["run_id"] if plan.get("runs_registered") else None}
     row = connection.execute(
         """
         UPDATE source_registry_catalog_item
@@ -75,7 +75,7 @@ def update_preparation(connection: Any, *, group: dict[str, Any], plan: dict[str
     state = {"operation_id": plan["collection_id"], "status": status,
              "signature": preparation_signature(group), "updated_at": datetime.now(UTC).isoformat(),
              "reason_codes": list(reasons or []), "notes": [str(n)[:800] for n in (notes or [])[:12]],
-             "run_id": run_id, "retryable": retryable,
+             "run_id": run_id or (group["run_id"] if plan.get("runs_registered") else None), "retryable": retryable,
              "excluded_sources": list(excluded_sources or [])[:40]}
     row = connection.execute(
         """
