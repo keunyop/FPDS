@@ -1,5 +1,11 @@
 # Worker Boundary
 
+Card bulk recovery (2026-10-01): complete current preferred annual card declarations can bind distinct purchase/cash rates to their explicit labels while preserving full conditions. Repeated declarations, extra percentages, ranges and missing annual basis remain excluded. Shared extraction/card normalization instructions match. Worker 608 / API 539 pass. Two cards published with zero model calls; collection-runtime deployment remains required for future collections.
+
+Card-rate context correction (2026-10-01): a separate switch-from offer exclusion preceding Rates and Fees/current preferred annual rates no longer invalidates that explicit rate. All other from/lower-bound/temporal and existing conditional, scalar, annual-basis, currency and evidence checks remain. Extraction and requested card-rate dynamic normalization share the short instruction; other normalization prompts receive none. Worker 605 / API 539 tests pass. Platinum was restored with the corrected local worker and zero provider calls; deploy collection runtime/API for future Admin collection.
+
+Checking-row correction (2026-10-01): the shared accuracy gate accepts exact ordinary allowance/excess fee rows with native values, preserved line boundaries and full context. It rejects transit/channel-only unlimited, conditional/ambiguous/conflicting rows and excess-as-general costs. Extraction instructions match the shared normalization gate. Worker 601 / API 539 tests pass. Two hidden TD accounts were published by the corrected local worker with zero model calls; deploy the collection runtime for future Admin collection.
+
 Supporting evidence origin correction (2026-10-01): normalization resolves the official URL from referenced evidence chunks in the current run's successful selected snapshot/parse. Exact document, snapshot, text, run, bank and country must match; model/extraction metadata cannot provide this provenance. Existing same-product supporting selection and accuracy gates remain. Local Worker 596 / API 539 tests pass; two Scotiabank accounts were recovered with this code and no model calls. Deploy the collection runtime for future Admin collections.
 
 

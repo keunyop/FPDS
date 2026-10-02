@@ -1,5 +1,15 @@
 """Financial semantics shared by the existing collection and Review AI passes."""
 
+CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    "A separate card-offer exclusion for switching from an existing card does not qualify an "
+    "explicit current preferred annual rate declared under its own Rates and Fees heading. "
+    "For a complete current preferred annual card-rate declaration, bind purchase and cash "
+    "advance percentages to their own explicit labels; do not treat them as competing purchase rates. "
+    "Reject extra percentages, repeated declarations or qualifications; never swap the labels. "
+    "Retain the full context. Rates from a lower bound or from a later period remain qualified; "
+    "never discard rate conditions, introductory periods, penalty rates or ranges. "
+)
+
 COMPARISON_INSTRUCTIONS = (
     "Accuracy takes priority over coverage. Human review is unavailable: return unverified "
     "or omit any uncertain fact, even when it is a required field. Never guess, interpolate, "
@@ -18,6 +28,10 @@ COMPARISON_INSTRUCTIONS = (
     "balances, deposit amounts, waivers and loan limits instead of guessing or requesting human review. "
     "Checking requires its transaction cost structure: proven unlimited ordinary transactions, "
     "or a finite included allowance plus the excess per-transaction fee, or explicit per-use pricing. "
+    "Read ordinary allowance and excess cost from their exact account-fee rows; label footnote "
+    "numbers are not transaction counts. Preserve row line breaks and the full retained context. Unlimited public transit "
+    "or another specific channel never proves unlimited ordinary transactions. Store excess-only "
+    "charges in additional_transaction_fee, not general transaction_fee. "
     "An ATM, wire, foreign or e-transfer charge does not prove general transaction pricing. "
     "Do not require an excess fee for a genuinely unlimited account. Do not invent a zero allowance. "
     "GIC/CD requires explicit early-withdrawal access. If early withdrawal is prohibited, no "
@@ -26,7 +40,8 @@ COMPARISON_INSTRUCTIONS = (
     "A penalty statement alone does not prove withdrawal permission. Line-of-credit requires "
     "explicit secured/unsecured or collateral requirements; false must mean proven unsecured. "
     "Collect fewer verified facts. "
-    "Preserve an explicitly disclosed annual interest rate versus APY in interest_rate_summary "
+    + CARD_RATE_CONTEXT_INSTRUCTIONS
+    + "Preserve an explicitly disclosed annual interest rate versus APY in interest_rate_summary "
     "or interest_calculation_method; never infer the basis from country or a bare percentage. "
     "Keep calculation, payment and compounding frequency distinct. Use the same basis in "
     "every term_rate_table row and its headline; retain each exact term label, rate, minimum "

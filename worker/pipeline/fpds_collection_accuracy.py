@@ -48,6 +48,93 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
         re.search(r"minimum balance|at least", context, re.I))
 
 
+# Flattened official fee tables retain one label/value per line. Footnote markers
+# belong to the label, never to the native count or price on the next line.
+_COUNT_ROW_LABEL = r"Transactions? included per month(?:[ \t]+\d+(?:[ \t]*,[ \t]*\d+)*)?"
+_EXCESS_ROW_LABEL = r"(?:Additional|Extra|Excess|Overage) transaction (?:fee|charge)s?(?:[ \t]+\d+)?"
+
+_ORDINARY_UNLIMITED = r"\bunlimited\s+(?:(?:ordinary|free|no fee|debit|everyday|banking|monthly)\s+){0,3}transactions?\b"
+
+
+def _checking_table_value(field_name: str, value: object, quote: str) -> bool | None:
+    if field_name not in {"included_transactions", "additional_transaction_fee"}:
+        return None
+    label = _COUNT_ROW_LABEL if field_name == "included_transactions" else _EXCESS_ROW_LABEL
+    labels = list(re.finditer(rf"(?mi)^[ \t]*(?:{label})[ \t]*\r?$", quote))
+    if not labels:
+        return None
+    # Multiple rows may belong to different products; do not guess applicability.
+    if len(labels) != 1 or re.search(r"\b(?:if|when|provided|qualify|qualifying|waived|waiver)\b", quote, re.I):
+        return False
+    if re.search(_ORDINARY_UNLIMITED, quote, re.I):
+        return False
+    tail = quote[labels[0].end():]
+    if field_name == "included_transactions":
+        match = re.match(r"[ \t]*\r?\n[ \t]*(\d+)[ \t]*(?:\r?\n|$)", tail)
+        if not match or int(match[1]) != value:
+            return False
+        # Another ordinary count in the same retained context is a conflict.
+        other = re.findall(r"(?<![\w.,−-])(\d+)\s+(?:(?:free|included|debit|everyday|monthly)\s+){0,3}transactions?\b", quote, re.I)
+        return all(int(count) == value for count in other)
+    match = re.match(r"[ \t]*\r?\n[ \t]*(?:CAD[ \t]*)?\$(\d+(?:\.\d+)?)(?:[ \t]+CAD)?[ \t]+each\.?[ \t]*(?:\r?\n|$)", tail, re.I)
+    return bool(match and Decimal(match[1]) == Decimal(str(value)))
+
+
+def _rate_from_is_condition(field_name: str, quote: str) -> bool:
+    occurrences = list(re.finditer(r"\bfrom\b", quote, re.I))
+    if not occurrences:
+        return False
+    # Only the demonstrated card-offer exclusion is separate from an explicit
+    # current preferred annual declaration under its own Rates and Fees heading.
+    # All other uses of "from", including temporal qualifiers, stay fail-closed.
+    marker = re.search(r"(?mi)^[ \t]*Rates and Fees:", quote)
+    if field_name not in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate"} or not marker:
+        return True
+    if not re.search(r"\bThe current preferred annual interest rates for (?:the|this) Account are:", quote[marker.end():]):
+        return True
+    rate_context = quote[marker.end():]
+    if re.search(
+        r"\b(?:provided|conditional|penalty|default)\b|\bonly\s+for\b"
+        r"|\bfor\s+(?:new|selected|eligible)\s+(?:customers|cardholders)\b", rate_context, re.I,
+    ):
+        return True
+    prefix = quote[:marker.start()]
+    allowed = set()
+    for switch in re.finditer(
+        r"\bincluding those that switch\s+(from)\s+an existing\s+"
+        r"(?:[^\W\d_]+[®™*†]?\s+){0,6}credit card\b", prefix, re.I,
+    ):
+        exclusion = re.match(r"[^.%]*?\bare not eligible for the Offer\.", prefix[switch.end():], re.I)
+        if exclusion:
+            allowed.add(switch.start(1))
+    return any(occurrence.start() not in allowed for occurrence in occurrences)
+
+
+def _labelled_current_card_rate(field_name: str, value: Decimal, quote: str) -> bool:
+    if field_name not in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate"}:
+        return False
+    heading = quote.lower().find("rates and fees:")
+    rate_context = quote[heading:] if heading >= 0 else quote
+    if re.search(r"\b(?:provided|conditional|penalty|default|only|eligible)\b", rate_context, re.I):
+        return False
+    pattern = (
+        r"\bThe current preferred annual interest rates for (?:the|this) Account are:\s*"
+        r"(\d+(?:\.\d+)?)% on purchases and (\d+(?:\.\d+)?)% on cash advances"
+        r"(\s*\(including balance transfers and cash-like transactions\))?\."
+    )
+    matches = list(re.finditer(pattern, quote, re.I))
+    if len(matches) != 1:
+        return False
+    match = matches[0]
+    # Every percentage must belong to this complete, explicit declaration.
+    percentages = list(re.finditer(r"\d+(?:\.\d+)?\s*%", quote))
+    if len(percentages) != 2 or any(not (match.start() <= p.start() < match.end()) for p in percentages):
+        return False
+    if field_name == "balance_transfer_rate" and not match[3]:
+        return False
+    return value == Decimal(match[1 if field_name == "purchase_interest_rate" else 2])
+
+
 def _transaction_count_supported(value: int, quote: str) -> bool:
     if re.search(r"\b(?:if|when|provided|qualify|qualifying)\b", quote, re.I):
         return False
@@ -95,7 +182,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name in {"interest_rate_summary", "purchase_interest_rate_summary", "fee_waiver_condition", "early_withdrawal_penalty"}:
             return text(value).casefold() == q.casefold()
         return bool(text(value)) and text(value).casefold() in q.casefold()
-    if field_name in {"transaction_fee", "additional_transaction_fee", "unlimited_transactions_flag", "included_transactions"} and re.search(r"\b(?:ATM|ABM|wire|international|foreign|e[- ]?transfer)\s+(?:(?:debit|cash)\s+)?transactions?\b|\bunlimited\s+(?:ATM|ABM|wire|e[- ]?transfer)\b", q, re.I):
+    table_value = _checking_table_value(field_name, value, quote)
+    if table_value is not None:
+        return table_value
+    if field_name in {"transaction_fee", "additional_transaction_fee", "unlimited_transactions_flag", "included_transactions"} and re.search(r"\b(?:ATM|ABM|wire|international|foreign|e[- ]?transfer)\s+(?:(?:additional|extra|excess|overage|debit|cash)\s+)*transactions?\b|\bunlimited\s+(?:ATM|ABM|wire|e[- ]?transfer)\b", q, re.I):
         # A charge/allowance for one special channel cannot prove general account pricing.
         return False
     if field_name == "transaction_fee" and re.search(r"\b(?:additional|extra|excess|overage)\s+transactions?", q, re.I):
@@ -104,12 +194,24 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if contract.value_type == "boolean":
         if field_name == "unlimited_transactions_flag" and re.search(r"\b(?:if|when|provided|qualify|qualifying)\b", q, re.I):
             return False
+        if field_name == "unlimited_transactions_flag" and re.search(
+            r"\b(?:public transit|ATM|ABM|wire|e[- ]?transfer)(?: transactions?)?\s*[:–-]?\s*unlimited\b"
+            r"|\bunlimited\s+(?:(?:ordinary|debit|monthly)\s+)?transactions?\s+"
+            r"(?:only\s+)?(?:for|on|at)\s+(?:public transit|ATMs?|ABMs?|wire|e[- ]?transfer)\b", q, re.I,
+        ):
+            return False
+        if field_name == "unlimited_transactions_flag" and (
+            re.search(r"\b(?:not|no)\s+unlimited\b", q, re.I)
+            or (value is True and (re.search(r"\b\d+\s+(?:(?:free|included|debit|monthly)\s+)*transactions?\b", q, re.I)
+                                   or re.search(r"(?mi)^" + _COUNT_ROW_LABEL + r"[ \t]*\r?$", quote)))
+        ):
+            return False
         if field_name == "secured_flag":
             return security_meaning(q) is value
         # Absence of a positive statement never proves false.
         patterns = {
             "secured_flag": (r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b", r"\bunsecured\b|no collateral required|\bnot secured\b"),
-            "unlimited_transactions_flag": (r"\bunlimited\b.{0,35}\btransactions?\b", r"\b(?:limited to|maximum of) \d+.{0,20}transactions?"),
+            "unlimited_transactions_flag": (_ORDINARY_UNLIMITED, r"\b(?:limited to|maximum of) \d+.{0,20}transactions?"),
             "redeemable_flag": (r"(?<!non-)\bredeemable\b|can be (?:redeemed|cashed) before maturity", r"non[- ]redeemable|cannot be (?:redeemed|cashed) before maturity"),
             "non_redeemable_flag": (r"non[- ]redeemable|cannot be (?:redeemed|cashed) before maturity", r"(?<!non-)\bredeemable\b"),
         }
@@ -161,10 +263,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return False
         rates = re.findall(r"(?<![\d.])(\d+(?:\.\d+)?)\s*%", q)
         # A scalar cannot represent a tier, range, conditional offer or example.
-        if re.search(r"\b(?:up to|from|between|as low as|bonus|introductory|promotional|example|illustration|if|when|qualify|qualifying|depending)\b", q, re.I):
+        if re.search(r"\b(?:up to|between|as low as|bonus|introductory|promotional|example|illustration|if|when|qualify|qualifying|depending)\b", q, re.I) or _rate_from_is_condition(field_name, quote):
             return False
         if len({Decimal(v) for v in rates}) != 1:
-            return False
+            return number < 100 and _labelled_current_card_rate(field_name, number, quote)
         rate_labels = {
             "purchase_interest_rate": r"purchase",
             "cash_advance_rate": r"cash advance",

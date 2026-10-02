@@ -1,5 +1,11 @@
 # FPDS Detailed WBS
 
+Latest approved continuation: 14-card bounded Scotiabank batch completed with two normal automatic publications, shared labelled-current-rate regressions and zero provider calls. Public API CA 14 / US 2. Worker 608 / API 539 pass. See [report](../00-governance/card-bulk-recovery-2026-10-01.md).
+
+Latest approved continuation: a bounded distinction between separate card-offer switch exclusions and explicit current annual rates fixes the prepared Platinum false exclusion. Shared extraction/card normalization instructions match; all other financial guards remain. One card restored with current official evidence and no provider calls: Public API CA 12 / US 2. Worker 605 / API 539 tests pass. No UI/schema/required-field change or deployment. See [operation](../00-governance/platinum-card-recovery-2026-10-01.md).
+
+Latest approved continuation: exact checking allowance/excess fee rows and ordinary-versus-transit transaction scope are corrected in the shared gate and instructions. Two hidden TD accounts passed normal automatic publication with no model calls: Public API CA 11 / US 2. Worker 601 / API 539 tests pass. Future Admin collection needs runtime deployment. No UI, schema, financial prerequisite or permanent recovery feature changed. See [operation](../00-governance/td-checking-recovery-2026-10-01.md).
+
 Latest approved follow-up: shared normalization now preserves trusted current-run supporting-document origins. Worker 596 / API 539 tests pass. The prepared Scotiabank Ultimate and Preferred Packages were restored through normal automatic validation with zero collection-model calls; Public API is CA 9 / US 2. Collection-runtime deployment remains required for future Admin collections. No UI, financial acceptance rule or schema change. See [operation](../00-governance/supporting-evidence-recovery-2026-10-01.md).
 
 

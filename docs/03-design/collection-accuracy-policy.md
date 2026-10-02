@@ -247,3 +247,26 @@ Normalization retains official origins for supporting evidence selected by the e
 The extraction artifact cannot populate the trusted origin map. The ordinary same-document path remains compatible, with matching snapshot required. Input expansion retains the map. Existing official-domain, actually-consulted URL, exact quote, product applicability, financial semantics and required-field checks remain binding. This change adds no requests to the collection model and does not broaden supporting-source selection. No accuracy/profile version or prompt change is needed because accepted financial patterns and extraction instructions are unchanged.
 
 The corrected local worker restored the two prepared Scotiabank accounts through normal automatic gates. Future Admin collection requires deployment of the collection runtime/API package. Public reads use the existing compatible receipts and continue to hide private provenance. See [the operation and tests](../00-governance/supporting-evidence-recovery-2026-10-01.md).
+
+
+## Exact checking account-fee rows - 2026-10-01 correction
+
+The shared gate accepts a single exact multiline ordinary Transactions included per month row and Additional/Extra/Excess/Overage transaction fee row with a separately delimited native value. Label footnotes cannot become counts; LF and CRLF preserve row meaning. Conditional, duplicate, ambiguous or conflicting ordinary rows fail closed. Full captured context and existing official origin, exact quote, currency and applicability checks remain mandatory. Other ATM/e-transfer fees elsewhere in the same fee table cannot replace the adjacent ordinary price.
+
+Only explicit ordinary unlimited wording proves account-wide unlimited transactions. Public transit, ATM, wire or e-transfer scope, including preceding/following qualifiers, cannot prove it. Excess-only pricing retains its distinct field. Matching extraction instructions preserve row line breaks and these distinctions; deterministic checking normalization and validation share the corrected accuracy gate. No publication essential, field type/unit or receipt/profile version changed; new code/prompt fingerprints invalidate unchanged-input extraction cache reuse as applicable.
+
+The local corrected worker restored two hidden TD accounts through normal automatic gates. Public API is CA 11 / US 2; existing receipts remain compatible. Deploy the collection-runtime/API package to apply the shared correction to future Admin collection. See [operation and regression evidence](../00-governance/td-checking-recovery-2026-10-01.md).
+
+
+## Separated card-offer eligibility and current annual rates - 2026-10-01 correction
+
+A switch-from existing-card offer exclusion can be distinguished only when it precedes a separate Rates and Fees heading and an explicit current preferred annual Account-rate declaration. The bounded existing-card phrase and exclusion must match; any other from use remains conditional, including lower bounds and later periods. The rate section must also have no payment-provision, customer-only, conditional, default or penalty language for this exception. Entire original chunks and exact quotations remain; no qualifiers are removed. Unique scalar percentages, exact field labels, annual basis, currency, official origins and all other condition checks remain mandatory. Missing/ambiguous boundaries, conflicting or qualified rates fail closed.
+
+Extraction and requested card-rate dynamic normalization share the same short instruction. Other dynamic prompts receive no additional card text. Existing field registration and required/optional policies remain. Current receipts keep the same policy/profile versions and types; cache fingerprints include changed code/instructions. The local corrected worker restored the verified Platinum card through normal automatic gates, with no model calls or human review. Deploy collection-runtime/API for future Admin collection. See [operation and regressions](../00-governance/platinum-card-recovery-2026-10-01.md).
+
+
+## Bounded labelled current card rates — 2026-10-01
+
+A complete explicit current preferred annual Account-rate declaration may prove distinct purchase and cash-advance percentages when each has its own label. Every percentage in the retained context must belong to that single declaration; additional/repeated rates, scalar ranges, conditions and missing annual basis remain excluded. Balance-transfer applicability needs its explicit inclusion. Preserve the full source context and official field proof through all normal gates. Shared extraction and requested card normalization instructions match.
+
+The [14-card one-off batch](../00-governance/card-bulk-recovery-2026-10-01.md) produced two normal automatic passes and retained twelve exclusions, with no provider calls or weaker prerequisites. A direct evidence pass alone does not bypass subsequent normalization/validation. Code remains local; future runtime deployment is separate.

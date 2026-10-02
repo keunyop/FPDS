@@ -15,6 +15,7 @@ from worker.pipeline.fpds_ai_runtime import (
     invoke_openai_json_schema,
     llm_provider_configured,
 )
+from worker.pipeline.fpds_comparison_instructions import CARD_RATE_CONTEXT_INSTRUCTIONS
 from worker.pipeline.fpds_approval_policy import populated_dynamic_decision_fields
 from worker.pipeline.fpds_market_profile import country_product_profile
 from worker.country_defaults import default_currency_for_country
@@ -3993,6 +3994,11 @@ def _has_exact_official_card_purchase_rate(
         or official_grounding_metadata.get("evidence_quote")
         or ""
     )
+    from worker.pipeline.fpds_collection_accuracy import exact_quote, quote_supports_value
+    if (exact_quote(quote, context)
+            and quote_supports_value(field_name, value, quote)
+            and quote_supports_value(field_name, value, context)):
+        return True
     evidence_values = [quote]
     if official_grounding_metadata.get("official_grounding_method") in {
         "deterministic_card_comparison_origin",
@@ -5038,7 +5044,8 @@ def _normalize_dynamic_fields_with_ai(
                 "Boolean fields must remain booleans, and navigation or whole-page marketing copy must be omitted. "
                 "Do not change an officially grounded value, infer missing fields, convert months to literal days, "
                 "or derive flags from absence. Human review is unavailable; omit uncertain values. "
-                "Keep source-language prose verbatim and use subtype_code `other` for uncertain classification."
+                "Keep source-language prose verbatim and use subtype_code `other` for uncertain classification. "
+                + (CARD_RATE_CONTEXT_INSTRUCTIONS if {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate"}.intersection(item.source_metadata.get("expected_fields", [])) else "")
             ),
             payload={
                 "product_type": item.source_metadata.get("product_type"),

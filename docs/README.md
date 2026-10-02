@@ -1,5 +1,11 @@
 # FPDS Docs Map
 
+Latest bulk recovery: [14 Scotiabank cards assessed; two automatically published](00-governance/card-bulk-recovery-2026-10-01.md). Public API CA 14 / US 2; total 16. Twelve exclusions retained; no provider calls or deployment.
+
+Latest: [current card-rate context correction and Platinum restoration](00-governance/platinum-card-recovery-2026-10-01.md); Public API CA 12 / US 2, with 414 unpublished records. Worker 605 / API 539 tests pass; collection-runtime deployment remains separate. Earlier counts below are historical.
+
+Latest: [exact checking fee rows and two TD restorations](00-governance/td-checking-recovery-2026-10-01.md); Public API CA 11 / US 2, with 415 records still unpublished. Shared collection code is corrected locally; deployment remains separate. Earlier counts below are historical.
+
 Latest: [supporting-origin code correction and two Scotiabank restorations](00-governance/supporting-evidence-recovery-2026-10-01.md); Public API CA 9 / US 2, 417 remain unpublished. Collection-runtime deployment remains separate. Earlier operation counts below are historical.
 
 Latest data operation: [four hidden products restored and one legal-document record deleted](00-governance/additional-product-recovery-2026-10-01.md); Public CA 7 / US 2, with 419 records still unpublished. The publication counts immediately below are historical.

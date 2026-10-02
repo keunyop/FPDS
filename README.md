@@ -1,5 +1,11 @@
 # FPDS Workspace
 
+Latest bulk recovery: [two Scotiabank cards published together](docs/00-governance/card-bulk-recovery-2026-10-01.md). Public API CA 14 / US 2, total 16; 412 remain unpublished. Fourteen cards checked, two normal automatic passes, zero collection-model calls. Worker 608 / API 539 tests pass. Shared code is local; future collection-runtime deployment remains separate.
+
+Latest recovery: [Platinum card published after bounded current-rate context correction](docs/00-governance/platinum-card-recovery-2026-10-01.md). Public API CA 12 / US 2, total 14; 414 records remain unpublished. Worker 605 / API 539 tests pass. Fifteen retained cards were diagnosed without new fetches or model calls; only one current verified pass was restored. Shared code is local; future Admin collection requires runtime deployment. Earlier counts below are historical.
+
+Latest recovery: [two TD checking accounts additionally published with exact fee-row validation](docs/00-governance/td-checking-recovery-2026-10-01.md). Public API CA 11 / US 2, total 13; 415 remain unpublished. Worker 601 / API 539 tests pass. Shared collection instructions and evidence checking are corrected locally; future Admin collection requires runtime deployment. No paid collection-model calls or UI changes. Earlier counts below are historical.
+
 Latest recovery: [Scotiabank Ultimate and Preferred published after shared supporting-origin correction](docs/00-governance/supporting-evidence-recovery-2026-10-01.md). Public API: CA 9 / US 2; 26 canonical active, 402 inactive, with 15 active still hidden. Worker 596 / API 539 tests pass. Code is reflected locally; deploy the collection runtime for future Admin collections. No model calls or UI changes. Earlier counts below are historical.
 
 Latest data-only operation: [four hidden accounts restored and one confirmed non-product deleted](docs/00-governance/additional-product-recovery-2026-10-01.md). Current Public API/BFF: CA 7 / US 2. Canonical remains 24 active; 15 fail the current Public gate, alongside 404 inactive records. No Admin/runtime edits, deployment or collection-model calls. Earlier counts below describe their historical slice.

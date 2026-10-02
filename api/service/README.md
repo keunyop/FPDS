@@ -1,5 +1,11 @@
 # FPDS API Service
 
+Card bulk recovery (2026-10-01): shared exact labelled current annual-card-rate handling and matching normalization/extraction instructions are updated locally. Two cards published through normal gates; Public API CA 14 / US 2. Worker 608 / API 539 pass. No route/UI/schema change or deployment.
+
+Shared card-rate context correction (2026-10-01): the current Platinum annual-rate false exclusion is fixed with a bounded separate-offer distinction and matching collection/card-normalization instructions. Existing publication prerequisites and receipt/profile versions remain. One card was published through the local corrected worker and compatible serving API. Worker 605 / API 539 tests pass. Future Admin collection requires collection-runtime/API deployment; no route/UI/schema changed.
+
+Shared checking evidence correction (2026-10-01): exact allowance/excess rows and ordinary-versus-channel scope are enforced with matching collection instructions. Existing financial prerequisites and receipt/profile versions are unchanged. Two hidden TD accounts were published through the local corrected worker and compatible serving API. Worker 601 / API 539 tests pass. Future Admin collection requires collection-runtime/API deployment; no route, UI or schema changed.
+
 The shared normalization worker now preserves database-resolved current-run supporting-document origins (2026-10-01). Deploy the collection runtime/API package to apply this fix to future Admin collection. No API route, UI, receipt version, publication prerequisite or schema changed. Two prepared Scotiabank products were published using the local corrected worker and existing deployed gates; code deployment remains separate.
 
 

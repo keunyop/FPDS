@@ -1,5 +1,33 @@
 # FPDS Development Journal
 
+
+## 2026-10-01 - Scotiabank cards assessed and published as one batch
+
+- Authorized bulk continuation assessed 14 saved cards and captured only 14 current detail pages plus shared essential scope/PDF. Reproduced distinct purchase/cash-rate and normalization-label failures before adding bounded full-context acceptance and matching shared extraction/card normalization instructions. No UI/schema, prerequisite relaxation, new registration or permanent recovery feature.
+- Direct gate accepted three; real normalization accepted two. Gold lost its purchase rate in another context filter; other eleven need admissible fee/rate/currency proof. Twelve records retained without overrides, deletion or paid retries. Operation-local stale discovery formatting was removed after exact current H1 proof; registry unchanged.
+- One normal run published Passport Visa Infinite Privilege and Passport Visa Infinite + (CAD annual fees 599/150; preferred annual purchase 20.99%). One CA aggregate completed. Provider calls/tokens and human reviews zero.
+- Independent readback preserves other 426 canonical records, six saved target candidates, prior versions and registry. Current receipts replay; Public API CA 14 / US 2, total 16. Canonical 29 active / 399 inactive, thirteen active hidden; 412 unpublished.
+- Worker 608 / API 539 and seven focused tests pass. [Report](card-bulk-recovery-2026-10-01.md) and private `tmp/card-bulk-*` preserve evidence, exclusions, before-images and result. Runtime deployment remains separate. All 11 actual API/BFF/list/card/detail checks pass after ordinary cache revalidation; both website fee/rate texts match. Final numeric-bound regression, repository doctor, independent evidence/DB, diff and goal checks pass.
+
+## 2026-10-01 - Separated card-rate context; Platinum additionally published
+
+- Continued the approved unpublished-product recovery. Reproduced a current annual purchase-rate false exclusion caused by a separate existing-card switch-from offer exclusion. Added a bounded shared condition distinction requiring separate Rates and Fees/current preferred annual declarations; lower bounds, temporal rates, ranges, incomplete/conditional/introductory evidence and missing annual basis remain excluded. Full original evidence is retained.
+- Matching short instructions now reach extraction and card-rate dynamic normalization only. Registered field gates are unchanged; other dynamic prompts receive no additional card text. Worker 605 / API 539 tests, focused 37 and repository doctor pass. No Admin/Public UI, schema, human review or permanent recovery feature.
+- Replayed 15 saved cards with no fetch/model/DB writes: one pass, 14 retained purchase-rate mapping mismatches excluded. Fresh preflight and normal capture checked Platinum, its linked scope page and linked current agreement once each per stage. Current primary annual fee CAD 399, preferred annual purchase rate 9.99% and exact CAD applicability passed normal normalization/validation/promotion. One run and CA aggregate completed; zero collection-model calls/provider tokens.
+- Independent readback preserved other 427 canonical rows, four target historical candidates, prior versions and registry. Current receipt replay passed; API CA 12 / US 2, total 14. Canonical 27 active / 401 inactive; 414 remain unpublished. All nine API/BFF/deposit-list/card-list/detail checks passed after normal cache revalidation, with exact card/detail fee/rate and all previously public products preserved. No deletion or new reviews.
+- Key files: shared accuracy gate, shared card-rate instructions, normalization prompt and rate-context regressions. [Operation report](platinum-card-recovery-2026-10-01.md) and private artifacts retain applicability, before-images and UTC run/capture lineage. Shared code is local; future Admin collection needs runtime/API deployment, which was not performed.
+- Final payment/customer/penalty exception regressions, full runtime suites, independent evidence replay and diff/goal checks passed. Next separate slice: trace retained purchase-rate mapping/value mismatches before paid recollection.
+
+
+## 2026-10-01 - Exact checking fee rows; two TD accounts additionally published
+
+- Continued the Product Owner-approved unpublished-product recovery with a reusable collection fix. Reproduced the ordinary allowance/fee-row exclusion and public-transit-only unlimited false positive before implementation. Added exact multiline row handling, footnote boundaries, conditional/conflict and channel checks, plus matching shared collection instructions. Existing financial prerequisites, receipts, native units, private evidence and automatic exclusion remain.
+- Fresh preflight and normal capture/parse/normalization/validation/promotion published TD Every Day and TD Minimum, with 25/12 ordinary monthly transactions and CAD 1.25 excess cost. No model calls/provider tokens, manual review, Admin/Public UI or permanent feature. One run and CA aggregate completed. These two canonical-active records were previously hidden; canonical totals stay 26 active / 402 inactive, while unpublished falls to 415.
+- Independent readback preserves other 426 products, 26 target historical candidates, previous target versions and registry. Both current receipts replay against complete official evidence. All 11 API/BFF/list/detail/card URL checks passed after normal cache revalidation: CA 11 / US 2, with exact actual detail costs and existing Public products preserved.
+- Worker 601 / API 539 tests, focused 33 tests and repository doctor pass. Runtime deployment remains separate: direct Vercel CLI unavailable; no-install npx lookup also lacks the package. Future Admin collection needs the collection-runtime/API build deployed.
+- Key files: shared accuracy gate, comparison instructions, new checking-row regressions and [operation report](td-checking-recovery-2026-10-01.md). Private artifacts retain current inputs, before-images, lineage and checks. Final diff/goal checks passed. Next separate slice: consider the preserved card-rate context defect with adversarial fixtures before expanding patterns.
+
+
 ## 2026-10-01 - Supporting-document origins preserved; two Scotiabank accounts restored
 
 - Product Owner approved the next two-product recovery and a shared code fix when useful for future collection. Reproduced the common defect: normalization supplied no official URL for links whose document differed from the product detail, dropping valid linked booklet currency.
