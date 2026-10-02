@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from api_service.catalog_preparation import claim_preparation, update_preparation, probe_sources
+from api_service.catalog_preparation import PREPARATION_VERSION, claim_preparation, update_preparation, probe_sources
 from api_service import source_collection_runner
 from api_service.config import Settings
 from api_service.db import open_connection
@@ -545,7 +545,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             materialized_metadata.update({"collection_preflight_skipped_sources": excluded_sources,
                                           "collection_source_ids": collection_source_ids,
                                           "source_ids": collection_source_ids, "target_source_ids": target_source_ids,
-                                          "collection_preparation_version": "catalog-preparation-v1"})
+                                          "collection_preparation_version": PREPARATION_VERSION})
             # A coverage edit/new reservation during network checks supersedes this work.
             if not claim_preparation(connection, group=group, plan=plan):
                 connection.rollback()

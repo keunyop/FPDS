@@ -1,5 +1,7 @@
 # FPDS Docs Map
 
+Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. [Implementation and verification](00-governance/generic-collection-evidence-improvements-2026-10-02.md).
+
 Latest shared collection correction: [verified optional checking rates](00-governance/optional-checking-rates-2026-10-02.md). Saved Alterna input failures reproduced and fixed generically for CA/US; Worker 643 / API 539 pass. Deployment and live data changes remain separate.
 
 Latest authorized staged data operation: [10 additional products published and unsupported targets excluded](00-governance/staged-unpublished-recovery-2026-10-01.md). Public API CA 29 / US 5, total 34; all 404 initially unpublished assessed, 394 removed from this one-off publication work list with records/history preserved. Worker 624 / API 539 and repository doctor pass, zero model calls or manual reviews. Shared collection changes remain local; runtime deployment is separate. Earlier dated results below are historical.

@@ -34,6 +34,7 @@ _NUMBER = r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\w.])"
 _COUNT_WORDS = dict(zip(("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"), range(11)))
 _ANNUAL_RATE_BASIS = re.compile(
     r"\bannual(?:ized)?\s+(?:(?:interest|percentage)\s+)?(?:rates?|yield)\b"
+    r"|\binterest rates? (?:is|are) annualized\b"
     r"|\b(?:apr|apy|per annum|per year)\b|\bp\.?a\.?(?!\w)", re.I,
 )
 
@@ -292,6 +293,16 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return False
         if field_name == "secured_flag":
             return security_meaning(q) is value
+        if field_name in {"redeemable_flag", "non_redeemable_flag"}:
+            maturity_only = re.search(
+                r"(?:^|[.!?]\s+)(?:Cashable|Redeemable) (?:upon|at) maturity only(?:[.](?:$|\s)|$)"
+                r"|(?:^|[.!?]\s+)Can only be (?:redeemed|cashed) at maturity(?:[.](?:$|\s)|$)", q, re.I)
+            if maturity_only:
+                if re.search(r"\b(?:except|unless|however|but)\b.{0,100}\b(?:withdraw|redeem|cash|maturity)", q, re.I):
+                    return False
+                if re.search(r"(?:can be|may be|is) (?:redeemed|cashed) before maturity|early (?:withdrawal|redemption) (?:is )?(?:allowed|permitted)", q, re.I):
+                    return False
+                return value is (field_name == "non_redeemable_flag")
         # Absence of a positive statement never proves false.
         patterns = {
             "secured_flag": (r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b", r"\bunsecured\b|no collateral required|\bnot secured\b"),

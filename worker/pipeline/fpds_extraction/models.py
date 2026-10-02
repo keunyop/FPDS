@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
 
@@ -22,6 +22,7 @@ class ExtractionDocumentContext:
 class ExtractionInput:
     context: ExtractionDocumentContext
     candidates: list[EvidenceChunkCandidate]
+    grounding_candidates: list[EvidenceChunkCandidate] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

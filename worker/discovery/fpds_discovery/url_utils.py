@@ -20,7 +20,7 @@ _SOURCE_IDENTITY_QUERY_KEYS = {
     "zip",
     "zipcode",
 }
-_DISCLOSURE_IDENTITY_QUERY_KEYS = {"cid", "offerid", "pocd"}
+_DISCLOSURE_IDENTITY_QUERY_KEYS = {"cid", "offerid", "pocd", "doc", "form", "file", "id"}
 _DISCLOSURE_PATH_MARKERS = (
     "agreement",
     "disclosure",
@@ -61,7 +61,7 @@ def normalize_source_url(url: str) -> str:
 
 def infer_source_type(url: str) -> str:
     parsed = urlparse(url)
-    if parsed.path.lower().endswith(".pdf"):
+    if parsed.path.lower().endswith(".pdf") or parsed.path.lower().rstrip("/").split("/")[-1] == "pdf":
         return "pdf"
     return "html"
 

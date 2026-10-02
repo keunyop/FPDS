@@ -463,11 +463,14 @@ def _normalize_candidate(
         item = replace(item, source_metadata={**item.source_metadata, "expected_fields": expected})
     dynamic_product_type = _uses_dynamic_product_type(product_type=product_type, item=item)
     product_type_family = _canonical_product_type_family(product_type)
-    product_name = _refine_product_name_from_source_metadata(
-        product_name=_coalesce_string(_field_value(extracted_by_field, "product_name")),
-        source_metadata=item.source_metadata,
-        runtime_notes=runtime_notes,
-    )
+    product_name_field = extracted_by_field.get("product_name")
+    product_name = _coalesce_string(_field_value(extracted_by_field, "product_name"))
+    if not _is_exact_grounded_product_identity(product_name_field):
+        product_name = _refine_product_name_from_source_metadata(
+            product_name=product_name,
+            source_metadata=item.source_metadata,
+            runtime_notes=runtime_notes,
+        )
     source_language = _coalesce_string(_field_value(extracted_by_field, "source_language"), item.source_language, "und")
     currency = _coalesce_string(
         _field_value(extracted_by_field, "currency"),
@@ -904,16 +907,11 @@ def _is_exact_grounded_product_identity(
     if field is None:
         return False
     metadata = field.field_metadata
+    # Identity was already decided against exact captured official evidence.
+    # Discovery labels and subsequent model formatting must not mutate it.
     return bool(
-        metadata.get("official_grounding_contract_version")
-        == "collection-official-grounding-v2"
-        and metadata.get("official_verification_status") == "match"
-        and metadata.get("official_grounding_method")
-        in {
-            "deterministic_detail_h1",
-            "deterministic_sibling_product_block",
-            "deterministic_sibling_lending_table",
-        }
+        metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+        and metadata.get("official_verification_status") in {"match", "mismatch"}
     )
 
 

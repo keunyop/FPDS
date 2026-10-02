@@ -39,6 +39,7 @@ from api_service.source_registry_utils import (
     load_seed_source_registry_rows,
     normalize_source_url,
 )
+from worker.product_source_policy import unavailable_for_new_customers
 from worker.discovery.fpds_discovery.discovery import (
     ExtractedLink,
     extract_links,
@@ -5219,6 +5220,13 @@ def _promote_detail_candidates(
             ),
             discovery_metadata=metadata,
         )
+        captured_html = page_html_by_url.get(candidate.normalized_url) if page_html_by_url is not None else None
+        if captured_html:
+            parser = _PageSignalParser()
+            parser.feed(captured_html)
+            row["discovery_metadata"]["captured_content_fingerprint"] = hashlib.sha256(json.dumps(
+                [parser.title_text, parser.primary_heading, parser.secondary_headings, parser.body_chunks,
+                 extract_structured_text_sections(captured_html)], ensure_ascii=True).encode()).hexdigest()
         if candidate.seed_source_id:
             row["source_id"] = candidate.seed_source_id
         detail_rows.append(row)
@@ -5429,14 +5437,22 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
         anchor_text=anchor_text,
     ):
         return 0
-    if _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
+    shared_lending_pricing = (
+        _canonical_product_type_code(product_type) in {"mortgage", "personal-loan", "line-of-credit"}
+        and bool(re.search(r"\b(?:rates?|APR|pricing)\b", anchor, re.I))
+        and bool(re.search(r"(?:^|[-_/])(?:rates?|pricing)(?:$|[-_/])", parsed.path.lower()))
+    )
+    # This helper is used only for links from a selected detail page. A bank
+    # may publish several lending types in one rate schedule; keep it as
+    # evidence-only, and require exact product proof later in grounding.
+    if not shared_lending_pricing and _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
         return 0
 
     anchor_hits = sum(marker in anchor for marker in _DETAIL_COMPANION_ANCHOR_MARKERS)
     url_hits = sum(marker in path_and_query for marker in _DETAIL_COMPANION_URL_MARKERS)
-    if not anchor_hits and not url_hits:
+    if not anchor_hits and not url_hits and not shared_lending_pricing:
         return 0
-    score = anchor_hits * 5 + url_hits * 3
+    score = anchor_hits * 5 + url_hits * 3 + (3 if shared_lending_pricing else 0)
     if parsed.query:
         score += 2
     if infer_source_type(normalized_url) == "pdf" or "pdf" in anchor or "pdf" in parsed.path.lower():
@@ -5494,7 +5510,7 @@ def _detail_rejection_reason(
 
 
 def _dedupe_detail_rows_by_product_identity(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
-    by_identity: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    by_identity: dict[tuple[str, ...], dict[str, Any]] = {}
     unkeyed: list[dict[str, Any]] = []
     duplicate_urls: list[str] = []
     for row in rows:
@@ -5545,12 +5561,25 @@ def _dedupe_detail_rows_by_product_identity(rows: list[dict[str, Any]]) -> tuple
                 "non_product_or_investor_page",
                 "non_product_editorial_page",
                 "non_product_service_flow",
+                "product_unavailable_for_new_customers",
             }.intersection(_coerce_reason_codes(metadata.get("page_evidence_reason_codes") or []))
         )
-        if (not metadata.get("product_identity_match") and not strong_returned_identity) or not page_title or not primary_heading:
+        if (not metadata.get("product_identity_match") and not strong_returned_identity) or not page_title:
             unkeyed.append(row)
             continue
-        identity = (str(row["bank_code"]), str(row["product_type"]), page_title, primary_heading)
+        scope = (str(row["bank_code"]), str(row.get("country_code") or ""), str(row["product_type"]), str(row.get("source_language") or ""))
+        if not primary_heading:
+            fingerprint = metadata.get("captured_content_fingerprint")
+            if not fingerprint or not distinctive_returned_identity or int(metadata.get("attribute_signal_count") or 0) < 2 or int(metadata.get("negative_signal_count") or 0):
+                unkeyed.append(row)
+                continue
+            url = urlparse(str(row.get("normalized_url") or ""))
+            segments = [p for p in url.path.split("/") if p]
+            if segments and segments[0].lower() == str(row.get("source_language") or "").lower():
+                segments = segments[1:]
+            identity = (*scope, str(url.hostname or "").removeprefix("www."), "/".join(segments), url.query, page_title, str(fingerprint))
+        else:
+            identity = (*scope, page_title, primary_heading)
         current = by_identity.get(identity)
         if current is None:
             by_identity[identity] = row
@@ -5665,7 +5694,7 @@ def _candidate_promotes_to_detail(
 ) -> bool:
     if _page_is_audience_offer_hub(page_evidence):
         return False
-    if "non_product_service_flow" in page_evidence.page_evidence_reason_codes:
+    if {"non_product_service_flow", "product_unavailable_for_new_customers"}.intersection(page_evidence.page_evidence_reason_codes):
         return False
     verified_coverage_review_source = (
         (allow_verified_coverage_review_source or allow_verified_lending_review_source)
@@ -5810,6 +5839,7 @@ def _verified_coverage_page_requires_review(
             "insufficient_evidence",
             "non_product_editorial_page",
             "non_product_service_flow",
+            "product_unavailable_for_new_customers",
             "not_product_detail",
             "other_product_type",
             "promo_or_apply_flow",
@@ -5873,6 +5903,7 @@ def _location_gated_structured_page_can_be_detail(
         {
             "non_product_editorial_page",
             "non_product_service_flow",
+            "product_unavailable_for_new_customers",
             "promo_or_apply_flow",
             "supporting_terms_or_rates_page",
         }
@@ -5936,6 +5967,7 @@ def _deposit_family_overview_can_be_detail(
             "supporting_terms_or_rates_page",
             "non_product_editorial_page",
             "non_product_service_flow",
+            "product_unavailable_for_new_customers",
             "promo_or_apply_flow",
             "insufficient_evidence",
         )
@@ -5968,6 +6000,7 @@ def _high_confidence_detail_overrides_low_page_score(
             "non_product_or_investor_page",
             "non_product_editorial_page",
             "non_product_service_flow",
+            "product_unavailable_for_new_customers",
             "non_consumer_business_page",
             "promo_or_apply_flow",
             "not_product_detail",
@@ -6026,6 +6059,7 @@ def _candidate_has_confirmed_product_identity(
             "non_product_or_investor_page",
             "non_product_editorial_page",
             "non_product_service_flow",
+            "product_unavailable_for_new_customers",
         )
     ):
         return False
@@ -6229,6 +6263,7 @@ def _seed_detail_has_hard_negative(page_evidence: PageEvidenceAssessment) -> boo
             "non_product_or_investor_page",
             "non_product_editorial_page",
             "non_product_service_flow",
+            "product_unavailable_for_new_customers",
         )
     )
 
@@ -6432,6 +6467,8 @@ def _score_page_evidence(
         product_type=product_type,
         fingerprint=" ".join([raw_url, title_text, primary_heading]).lower(),
     )
+    if unavailable_for_new_customers(html_text, product_type=_canonical_product_type_code(product_type), product_name=primary_heading or title_text.split("|", 1)[0]):
+        scope_exclusion_reason = "product_unavailable_for_new_customers"
     multi_product_family_overview = _looks_like_multi_product_family_overview(
         product_type=product_type,
         title_text=title_text,
@@ -7768,6 +7805,12 @@ def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> st
 def _looks_like_mortgage_advice_or_servicing_flow(*, product_type: str, fingerprint: str) -> bool:
     if _canonical_product_type_code(product_type) != "mortgage":
         return False
+    path = urlparse(fingerprint.split(" ", 1)[0]).path.lower().rstrip("/")
+    tail = path.rsplit("/", 1)[-1].removesuffix(".snc").removesuffix(".html")
+    if tail in {"port-your-mortgage", "mortgage-renewal", "mortgage-refinancing", "mortgage-broker-support"}:
+        return True
+    if re.search(r"\b(?:broker support|mortgage servicing|port your mortgage)\b", fingerprint, re.I):
+        return True
     mortgage_flow_path = any(
         token in fingerprint
         for token in (

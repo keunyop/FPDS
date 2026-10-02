@@ -83,6 +83,26 @@ not zero-filled. Structured rates must pair each exact term with its own rate;
 days must be explicitly stated and deposit amounts must carry deposit meaning.
 The executable contract is `worker/pipeline/fpds_field_contract.py`.
 
+## Generic captured source/evidence boundaries ? 2026-10-02
+
+Current explicit product-scoped new-customer closure and service pages are screened
+before grounding. Preparation v2 supports actual validated PDF responses on HTML
+hints; document identifiers on disclosure/PDF paths remain distinct. Captured
+companions enter the existing grounding call only inside bank/country/language and
+exact-parent/named-product boundaries, with original consulted URL, document,
+snapshot and current-run normalization origins preserved. Parser v5 copies exact
+rate rows/column headers/full scoped notes into atomic evidence; multiple tables
+require explicit footnote links and oversized/ambiguous relationships stay omitted.
+Existing chunk/excerpt budgets, provider-call limits and optional-only retry ban remain.
+
+`Interest rate is annualized` is explicit annual basis. Complete maturity-only
+cashability is explicit prohibited early access, subject to full retained exceptions
+and contradictory-permission checks. Neither phrase authorizes guessed units or
+lost conditions. Grounded identities cannot change during formatting. Independently
+explicit deposit calculation/payment sentences are checked with their applicable
+heading while original compound overdraft context is retained; numerical rate
+ambiguity still uses the full context. See [verified implementation](../00-governance/generic-collection-evidence-improvements-2026-10-02.md).
+
 ## Processing and enforcement
 
 1. Discovery/capture/parser retain existing bounded official-source controls.

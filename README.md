@@ -1,5 +1,7 @@
 # FPDS Workspace
 
+Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. [Implementation and verification](docs/00-governance/generic-collection-evidence-improvements-2026-10-02.md).
+
 Latest optional-interest correction (2026-10-02): CA/US checking requests verified deposit rates and existing qualifiers as optional facts; retrieval uses current profile fields even with older registry lists. The shared gate distinguishes separate deposit-insurance limits from standalone annual rates and extraction rejects companion-account/overdraft interest. Worker 643 / API 539 pass. No live collection, data writes or deployment; deploy the collection runtime/API for future Admin collections. [Diagnosis and verification](docs/00-governance/optional-checking-rates-2026-10-02.md).
 
 Latest local account-validation fix: [Alterna investigation and correction](docs/00-governance/alterna-collection-diagnosis-2026-10-01.md). No-balance requirements no longer invalidate no-fee facts; ordinary day-to-day unlimited transactions are recognized with safeguards. Saved evidence still lacks publication essentials, so no products were published. Runtime deployment remains separate.

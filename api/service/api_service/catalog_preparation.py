@@ -9,7 +9,7 @@ from typing import Any
 
 from api_service.collection_preflight import source_block_reason
 
-PREPARATION_VERSION = "catalog-preparation-v1"
+PREPARATION_VERSION = "catalog-preparation-v2"
 
 
 def preparation_signature(row: dict[str, Any]) -> str:
@@ -113,13 +113,14 @@ def probe_sources(rows: list[dict[str, Any]], *, policy: Any,
                   cache: dict[str, dict[str, Any]] | None = None) -> tuple[list[str], list[dict[str, Any]]]:
     # Reuse the worker's safe-fetch policy; an official link never expands the allowlist.
     from worker.discovery.fpds_discovery.fetch import fetch_response
+    from worker.product_source_policy import unavailable_for_new_customers
     cache = cache if cache is not None else {}
     policy = replace(policy, timeout_seconds=min(policy.timeout_seconds, 20),
                      browser_fallback_timeout_seconds=min(policy.browser_fallback_timeout_seconds, 45))
     available, excluded = [], []
     for row in rows:
         url = str(row.get("source_url") or row.get("normalized_url") or "")
-        key = json.dumps([url, row.get("source_type"), sorted(policy.allowed_domains)])
+        key = json.dumps([url, row.get("source_type"), row.get("product_type"), row.get("discovery_role"), sorted(policy.allowed_domains)])
         result = cache.get(key)
         if result is None:
             try:
@@ -128,9 +129,19 @@ def probe_sources(rows: list[dict[str, Any]], *, policy: Any,
                 if row.get("source_type") == "pdf":
                     if not response.body.startswith(b"%PDF-"):
                         raise ValueError("PDF source returned non-PDF content after bounded fetch recovery")
+                elif content_type.startswith("application/pdf"):
+                    if not response.body.startswith(b"%PDF-"):
+                        raise ValueError("PDF response returned non-PDF bytes")
+                    # Snapshot/parser already dispatch by actual response type.
+                    # Registry HTML is a hint, not permission to reinterpret bytes.
                 elif not content_type.startswith(("text/html", "application/xhtml+xml")):
                     raise ValueError("Text fetch expected HTML content but received " + content_type)
                 result = {"reason_code": None}
+                if (row.get("discovery_role") == "detail" and content_type.startswith(("text/html", "application/xhtml+xml"))
+                        and unavailable_for_new_customers(response.body.decode("utf-8", errors="replace"),
+                            product_type=str(row.get("product_type") or ""))):
+                    result = {"reason_code": "product_unavailable_for_new_customers", "retryable": False,
+                              "detail": "Official product evidence explicitly ends new-customer availability."}
             except Exception as exc:
                 reason = source_block_reason({"source_type": row.get("source_type"), "latest_stage_status": "failed", "latest_error_summary": str(exc)})
                 result = {"reason_code": reason or "source_temporarily_unavailable", "retryable": reason is None,

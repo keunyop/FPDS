@@ -12,7 +12,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v4"
+PARSER_VERSION = "fpds-parse-chunk-v5"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -70,6 +70,7 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         for index, text in enumerate(structured_sections, start=1)
     )
 
+    sections.extend(_rate_table_evidence_sections(soup))
     full_text, segments = _finalize_segments(sections)
     if not full_text.strip():
         raise ValueError("HTML parser produced no usable text.")
@@ -89,6 +90,62 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         parser_metadata=parser_metadata,
         segments=segments,
     )
+
+
+def _rate_table_evidence_sections(soup: BeautifulSoup) -> list[_RawSegment]:
+    """Preserve structural row/header/notes relationships as captured evidence.
+
+    Never synthesize rate labels or annual units. Only one pricing table may
+    use document-wide Legal notes; multiple tables need explicit footnote links.
+    Full original sections remain available alongside these scoped sections.
+    """
+    container = soup.find("main") or soup.body or soup
+    tables = [t for t in container.find_all("table") if re.search(r"\d(?:\.\d+)?\s*%", t.get_text(" ", strip=True))]
+    output = []
+    for index, table in enumerate(tables):
+        head = table.find("thead")
+        column_headers = head.find_all("th") if head is not None else [t for t in table.find_all("th") if t.get("scope") == "col"]
+        if not column_headers:
+            first_row = table.find("tr")
+            if first_row is not None and not first_row.find("td"):
+                column_headers = first_row.find_all("th")
+        headers = [t.get_text(" ", strip=True) for t in column_headers]
+        caption = table.find("caption")
+        if caption:
+            headers.insert(0, caption.get_text(" ", strip=True))
+        if not headers or not re.search(r"\b(?:rates?|APY|APR|interest|yield)\b", " ".join(headers), re.I):
+            continue
+        notes = []
+        for link in table.find_all("a", href=True):
+            href = str(link["href"])
+            if href.startswith("#") and (target := soup.find(id=href[1:])) is not None:
+                if target.find_parent("table") is None:
+                    notes.append(target.get_text(" ", strip=True))
+        if len(tables) == 1:
+            for label in container.find_all(["h2", "h3", "h4", "button", "summary"]):
+                if label.get_text(" ", strip=True).lower() not in {"legal", "rate notes", "rate disclosures", "terms and conditions"}:
+                    continue
+                target_id = label.get("aria-controls")
+                target = soup.find(id=target_id) if target_id else label.find_next_sibling()
+                if target is not None and target.find("table") is None:
+                    notes.append(target.get_text(" ", strip=True))
+        notes = list(dict.fromkeys(n for n in notes if n))
+        rows = []
+        for row in table.find_all("tr"):
+            cells = row.find_all(["td", "th"], recursive=False)
+            if row.find("td") is not None:
+                rows.append("\n".join(c.get_text(" ", strip=True) for c in cells))
+        # A maturity schedule retains all its rows and qualifications together.
+        # Account tables instead preserve each product's own row.
+        term_schedule = rows and all(re.search(r"^\d+\s+(?:days?|months?|years?)\b", r, re.I) for r in rows)
+        groups = ["\n".join(rows)] if term_schedule else rows
+        for row_index, row in enumerate(groups):
+            text = "\n".join([*headers, row, *notes])
+            if len(text) > 6400:
+                continue  # Do not truncate conditions or create partial proof.
+            output.append(_RawSegment("rate_table_schedule" if term_schedule else "rate_table_row",
+                f"rate-table-{index}-row-{row_index}", None, text))
+    return output
 
 
 def _html_parse_containers(soup: BeautifulSoup) -> list[BeautifulSoup]:

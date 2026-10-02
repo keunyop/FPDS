@@ -19,6 +19,12 @@ def source_block_reason(row: dict[str, Any], *, revalidate: bool = False) -> str
         return None
     if str(row.get("latest_stage_status") or "").lower() == "failed":
         error = str(row.get("latest_error_summary") or "").lower()
+        # The format-aware probe/capture now supports real PDF responses on
+        # HTML registry hints. Recheck this precise old format mismatch once
+        # through normal bounded preflight, without relaxing other failures.
+        if (row.get("source_type") == "html" and re.search(
+                r"text fetch expected html content but received application/pdf(?:\s|;|$)", error)):
+            return None
         if any(marker in error for marker in (
             "html access challenge remained after bounded browser fallback",
             "pdf source returned non-pdf content after bounded fetch recovery",

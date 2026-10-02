@@ -40,8 +40,8 @@ def grounded_with_reuse(*, object_store, storage_config, run_id, context, candid
             chunks = {c.evidence_chunk_id: c for c in candidates}
             for field in fields:
                 chunk = chunks.get(field.evidence_chunk_id)
-                if (chunk is None or field.source_document_id != context.source_document_id
-                    or field.source_snapshot_id != context.snapshot_id
+                if (chunk is None or field.source_document_id != chunk.source_document_id
+                    or field.source_snapshot_id != chunk.source_snapshot_id
                     or field.evidence_text_excerpt != chunk.evidence_excerpt):
                     raise ValueError("Cached field provenance mismatch")
             usage = {**cached["usage"], "prompt_tokens": 0, "completion_tokens": 0,

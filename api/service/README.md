@@ -1,5 +1,7 @@
 # FPDS API Service
 
+Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. [Implementation and verification](../../docs/00-governance/generic-collection-evidence-improvements-2026-10-02.md).
+
 Latest optional-interest correction (2026-10-02): CA/US checking requests verified deposit rates and existing qualifiers as optional facts; retrieval uses current profile fields even with older registry lists. The shared gate distinguishes separate deposit-insurance limits from standalone annual rates and extraction rejects companion-account/overdraft interest. Worker 643 / API 539 pass. No live collection, data writes or deployment; deploy the collection runtime/API for future Admin collections. [Diagnosis and verification](../../docs/00-governance/optional-checking-rates-2026-10-02.md).
 
 Alterna account validation fix (2026-10-01): shared accuracy gate distinguishes an explicitly absent minimum-balance requirement from a fee condition and recognizes unconditional ordinary day-to-day transactions. Existing required facts and automatic exclusion remain. Saved inputs still cannot publish both accounts; no data mutation or deployment. Deploy the API/collection runtime to apply the shared fix.

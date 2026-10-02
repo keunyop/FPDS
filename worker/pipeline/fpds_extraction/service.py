@@ -16,6 +16,7 @@ from worker.pipeline.fpds_ai_runtime import (
     llm_provider_configured,
 )
 from worker.country_defaults import default_currency_for_country
+from worker.product_source_policy import unavailable_for_new_customers
 from worker.pipeline.fpds_market_profile import country_product_profile
 from worker.pipeline.fpds_comparison_instructions import COMPARISON_INSTRUCTIONS
 from worker.pipeline.fpds_field_contract import canonical_value_type, field_contract, field_contract_payload
@@ -429,6 +430,53 @@ _PRODUCT_PROFILE_CONFLICT_KEYWORDS = {
 }
 
 
+def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionInput]:
+    """Use only captured batch companions, with bank/market/language ownership.
+
+    Detail heuristics remain detail-only. Companion evidence enters the existing
+    single official grounding call and keeps its real document/snapshot origin.
+    """
+    output = []
+    for item in inputs:
+        context = item.context
+        own_url = _canonical_official_source_url(context.source_metadata.get("normalized_source_url") or context.source_metadata.get("source_url"))
+        own = [replace(c, retrieval_metadata={**c.retrieval_metadata, "source_url": own_url}) for c in item.candidates
+               if c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+               and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code and c.country_code == context.country_code]
+        selected = list(own)
+        if context.source_metadata.get("discovery_role") == "detail":
+            identity = _authoritative_discovery_product_title(context) or next(iter(_source_metadata_title_candidates(context)), "")
+            tokens = set(re.findall(r"[a-z0-9]+", identity.lower())) - {"the", "bank", "account", "accounts", "of", "and"}
+            tokens = {t.removesuffix("s") if len(t) > 4 else t for t in tokens}
+            for companion in inputs:
+                ctx = companion.context
+                if (ctx.bank_code != context.bank_code or ctx.country_code != context.country_code
+                        or ctx.source_language != context.source_language
+                        or ctx.source_metadata.get("discovery_role") not in {"supporting_html", "supporting_pdf", "linked_pdf"}):
+                    continue
+                url = _canonical_official_source_url(ctx.source_metadata.get("normalized_source_url") or ctx.source_metadata.get("source_url"))
+                if not url or not _url_matches_official_domains(url, allowed_domains=_official_domain_allowlist(context)):
+                    continue
+                metadata = ctx.source_metadata.get("discovery_metadata") or {}
+                parent = _canonical_official_source_url(metadata.get("parent_detail_url")) if isinstance(metadata, dict) else ""
+                named = [c for c in companion.candidates if tokens and len(tokens) >= 2
+                         and tokens <= {t.removesuffix("s") if len(t) > 4 else t for t in re.findall(r"[a-z0-9]+", c.evidence_excerpt.lower())}]
+                if parent != own_url and not named:
+                    continue
+                # Include sibling legal chunks only inside the same selected
+                # captured companion; the model must still prove applicability.
+                for c in companion.candidates:
+                    if (c.source_document_id != ctx.source_document_id or c.source_snapshot_id != ctx.snapshot_id
+                            or c.parsed_document_id != ctx.parsed_document_id or c.bank_code != ctx.bank_code
+                            or c.country_code != ctx.country_code or c.source_language != ctx.source_language):
+                        continue
+                    if c not in named and not (parent == own_url or re.search(r"legal|terms|conditions|notes", c.anchor_value or "", re.I)):
+                        continue
+                    selected.append(replace(c, retrieval_metadata={**c.retrieval_metadata, "source_url": url}))
+        output.append(replace(item, grounding_candidates=list({c.evidence_chunk_id:c for c in selected}.values())))
+    return output
+
+
 class ExtractionService:
     def __init__(
         self,
@@ -459,7 +507,7 @@ class ExtractionService:
         source_results: list[ExtractionSourceResult] = []
         partial_completion_flag = False
 
-        for item in inputs:
+        for item in _bind_grounding_evidence(inputs):
             result = self._extract_single_document(
                 run_id=run_id,
                 extraction_input=item,
@@ -522,6 +570,11 @@ class ExtractionService:
                 requested_fields=field_names,
             )
             runtime_notes = list(retrieval_result.runtime_notes)
+            unavailable = unavailable_for_new_customers("\n".join(c.evidence_excerpt for c in extraction_input.candidates),
+                product_type=_infer_product_type(context), product_name=_authoritative_discovery_product_title(context))
+            if unavailable:
+                extracted_fields = []
+                runtime_notes.append("product_unavailable_for_new_customers: official evidence ends new-customer availability; grounding skipped.")
             extracted_fields, exact_origin_grounded_count = _apply_exact_origin_grounding(
                 context=context,
                 extracted_fields=extracted_fields,
@@ -556,11 +609,11 @@ class ExtractionService:
             provider_request_id = None
 
             ai_usage: dict[str, Any] | None = None
-            if _uses_official_ai_grounding(context) and llm_provider_configured():
+            if not unavailable and _uses_official_ai_grounding(context) and llm_provider_configured():
                 ai_fields, ai_notes, ai_usage = grounded_with_reuse(
                     object_store=self.object_store, storage_config=self.storage_config, run_id=run_id,
                     extract=_extract_official_fields_with_ai, context=context,
-                    candidates=extraction_input.candidates,
+                    candidates=extraction_input.grounding_candidates or extraction_input.candidates,
                     requested_fields=field_names,
                     collected_fields=extracted_fields,
                 )
@@ -4059,14 +4112,35 @@ def _is_generic_banking_info_text(text: str) -> bool:
     return marker_hits >= 2 and not has_product_signal
 
 
-def _deposit_interest_context_conflicts(context: ExtractionDocumentContext, excerpt: str) -> bool:
+def _deposit_interest_context_conflicts(
+    context: ExtractionDocumentContext, excerpt: str, *, evidence_quote: str | None = None,
+    field_name: str | None = None,
+) -> bool:
     if _canonical_product_type_family(_infer_product_type(context)) not in {"chequing", "savings", "gic"}:
         return False
-    # Borrowing interest and a companion account's payout are different facts.
-    # Never use their numeric coincidence to populate deposit earnings.
-    return bool(re.search(r"\boverdraft\b", excerpt, re.I)) or _description_conflicts_with_product_context(
-        context=context, description=excerpt,
-    )
+    def conflicts(part: str) -> bool:
+        return bool(re.search(r"\boverdraft\b", part, re.I)) or _description_conflicts_with_product_context(
+            context=context, description=part,
+        )
+    # Scope only descriptive interest facts to their complete quoted sentence.
+    # Numeric rates keep full-context ambiguity checks and all evidence remains
+    # attached unchanged. An ambiguous repeated quote fails closed.
+    if evidence_quote and field_name in {"interest_calculation_method", "interest_payment_frequency",
+                                          "compounding_frequency", "payout_option"}:
+        quote = _normalize_text(evidence_quote).casefold()
+        sentences = re.split(r"(?<=[.!?])\s+|\n", excerpt)
+        applicable = []
+        for i, part in enumerate(sentences):
+            if quote not in _normalize_text(part).casefold():
+                continue
+            previous = sentences[i - 1].strip() if i else ""
+            # A borrowing/companion heading governs the following sentence.
+            if previous and not re.search(r"[.!?]$", previous) and conflicts(previous):
+                part = previous + " " + part
+            applicable.append(part)
+        if applicable:
+            return any(conflicts(part) for part in applicable)
+    return conflicts(excerpt)
 
 
 def _description_conflicts_with_product_context(*, context: ExtractionDocumentContext, description: str) -> bool:
@@ -4313,6 +4387,8 @@ def _extract_official_fields_with_ai(
         candidates=candidates,
         collected_fields=collected_fields,
     )
+    # Responses may cite only the chunks actually supplied in this call.
+    candidate_map = {candidate.evidence_chunk_id: candidate for candidate in prioritized_chunks}
     try:
         response_payload, usage = invoke_openai_json_schema(
             model_id=configured_model_id(),
@@ -4395,7 +4471,9 @@ def _extract_official_fields_with_ai(
                     {
                         "evidence_chunk_id": candidate.evidence_chunk_id,
                         "anchor_value": candidate.anchor_value,
-                        "excerpt": candidate.evidence_excerpt[:1800],
+                        "source_url": candidate.retrieval_metadata.get("source_url") or context.source_metadata.get("normalized_source_url") or context.source_metadata.get("source_url"),
+                        "source_document_id": candidate.source_document_id,
+                        "excerpt": candidate.evidence_excerpt,
                     }
                     for candidate in prioritized_chunks
                 ],
@@ -4446,6 +4524,11 @@ def _extract_official_fields_with_ai(
         exclusions[field_name] = "consulted_source_missing"
         if not cited_sources:
             continue
+        origin_url = _canonical_official_source_url(candidate.retrieval_metadata.get("source_url"))
+        from worker.pipeline.fpds_collection_accuracy import canonical_url
+        if origin_url and not any(canonical_url(source["url"]) == canonical_url(origin_url) for source in cited_sources):
+            exclusions[field_name] = "evidence_source_mismatch"
+            continue
         exclusions[field_name] = "invalid_json_value"
         try:
             verified_value = json.loads(str(item.get("verified_value_json") or ""))
@@ -4464,7 +4547,7 @@ def _extract_official_fields_with_ai(
         if candidate_value is None:
             continue
         exclusions[field_name] = "other_product_interest_context"
-        if field_name in _DEPOSIT_INTEREST_CONTEXT_FIELDS and _deposit_interest_context_conflicts(context, candidate.evidence_excerpt):
+        if field_name in _DEPOSIT_INTEREST_CONTEXT_FIELDS and _deposit_interest_context_conflicts(context, candidate.evidence_excerpt, evidence_quote=evidence_quote, field_name=field_name):
             continue
         exclusions[field_name] = "field_meaning_unproven"
         if not _ai_verified_value_is_supported_by_quote(
@@ -4481,8 +4564,8 @@ def _extract_official_fields_with_ai(
                 value_type=canonical_value_type(field_name, str(item.get("value_type") or "string")),
                 confidence=round(min(0.99, max(0.5, float(item.get("confidence") or 0.75))), 4),
                 extraction_method="openai_official_grounding",
-                source_document_id=context.source_document_id,
-                source_snapshot_id=context.snapshot_id,
+                source_document_id=candidate.source_document_id,
+                source_snapshot_id=candidate.source_snapshot_id,
                 evidence_chunk_id=candidate.evidence_chunk_id,
                 evidence_text_excerpt=candidate.evidence_excerpt,
                 anchor_type=candidate.anchor_type,
@@ -4539,7 +4622,22 @@ def _select_official_grounding_chunks(
         seen.add(candidate.evidence_chunk_id)
         if len(selected) >= 24:
             break
-    return selected[:24]
+    detail_docs = {field.source_document_id for field in collected_fields}
+    companions = [c for c in candidates if c.source_document_id not in detail_docs]
+    if detail_docs and companions:
+        companion_ids = {c.evidence_chunk_id for c in companions[:8]}
+        selected = [c for c in selected if c.evidence_chunk_id not in companion_ids][:16] + companions[:8]
+    # Preserve the previous 24 x 1800 character payload ceiling. Atomic rows
+    # can be larger, but no note is truncated to fit the remaining budget.
+    bounded = []
+    remaining = 43_200
+    for candidate in selected[:24]:
+        size = len(candidate.evidence_excerpt)
+        if size > 6400 or size > remaining:
+            continue
+        bounded.append(candidate)
+        remaining -= size
+    return bounded
 
 
 def _filter_official_web_sources(

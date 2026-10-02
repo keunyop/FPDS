@@ -276,9 +276,12 @@ def _build_evidence_chunks(
     chunk_records: list[EvidenceChunkRecord] = []
 
     for segment in artifact.segments:
+        # Structurally bound financial rows/notes must stay atomic; splitting
+        # them would detach annual basis or omit material conditions.
+        effective_max = max(max_chars, len(segment.text)) if segment.anchor_type in {"rate_table_row", "rate_table_schedule"} else max_chars
         for rel_start, rel_end, excerpt in _split_text_with_overlap(
             segment.text,
-            max_chars=max_chars,
+            max_chars=effective_max,
             overlap_chars=overlap_chars,
         ):
             chunk_index = len(chunk_records)
