@@ -1,5 +1,9 @@
 # FPDS Workspace
 
+Latest authorized staged data operation: [10 additional products published and unsupported targets excluded](docs/00-governance/staged-unpublished-recovery-2026-10-01.md). Public API CA 29 / US 5, total 34; all 404 initially unpublished assessed, 394 removed from this one-off publication work list with records/history preserved. Worker 624 / API 539 and repository doctor pass, zero model calls or manual reviews. Shared collection changes remain local; runtime deployment is separate. Earlier dated results below are historical.
+
+Latest data operation: [all 406 unpublished products assessed; two additional products published](docs/00-governance/fast-whole-catalogue-publication-2026-10-01.md). Public API CA 20 / US 4, total 24; 404 remain unpublished. Twelve bounded current official preflights, zero collection-model calls, no runtime code or deployment. Earlier dated results below are historical.
+
 Latest continuation: [six remaining Scotiabank cards published together](docs/00-governance/remaining-card-recovery-2026-10-01.md). Public API CA 20 / US 2, total 22; 406 remain unpublished. Twelve assessed, six normal automatic passes, zero model calls. Bound numeric evidence and current no-fee semantics corrected locally; Worker 611 / API 539 pass. Future collection-runtime deployment remains separate.
 
 Latest bulk recovery: [two Scotiabank cards published together](docs/00-governance/card-bulk-recovery-2026-10-01.md). Public API CA 14 / US 2, total 16; 412 remain unpublished. Fourteen cards checked, two normal automatic passes, zero collection-model calls. Worker 608 / API 539 tests pass. Shared code is local; future collection-runtime deployment remains separate.

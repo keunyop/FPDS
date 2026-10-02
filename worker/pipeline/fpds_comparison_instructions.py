@@ -2,14 +2,19 @@
 
 FEE_CHANGE_NOTICE_INSTRUCTIONS = (
     "Future subject-to-change notices do not themselves qualify a current fee; "
-    "first-year and introductory zero-fee waivers remain conditional. "
+    "first-year, fixed-duration, age/graduation-limited and average-balance-qualified zero-fee waivers remain conditional. "
+    "Retain their complete conditions; a conditional zero does not replace the regular base fee. "
 )
 
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
     "A separate card-offer exclusion for switching from an existing card does not qualify an "
     "explicit current preferred annual rate declared under its own Rates and Fees heading. "
+    "An explicit Offer revocation for unmet Offer eligibility, before a separate Rates and Fees heading, "
+    "does not qualify that section's complete current labelled annual rates; retain full evidence and all other conditions. "
     "For a complete current preferred annual card-rate declaration, bind purchase and cash "
     "advance percentages to their own explicit labels; do not treat them as competing purchase rates. "
+    "Explicit balance-transfer/credit-card-cheque labels belong to cash advances. A later numbered "
+    "transaction-fee note does not qualify the preceding annual rate; retain the note without inventing fees. "
     "Reject extra percentages, repeated declarations or qualifications; never swap the labels. "
     "Retain the full context. Rates from a lower bound or from a later period remain qualified; "
     "never discard rate conditions, introductory periods, penalty rates or ranges. "
@@ -30,12 +35,17 @@ COMPARISON_INSTRUCTIONS = (
     "default is allowed only when the source has no explicit currency: CA uses CAD and US "
     "uses USD. Preserve explicit currencies and reject unresolved conflicts; never invent "
     "an official currency quote for a country default. Unknown countries have no default. "
+    "National, industry or market averages and competitor rates are comparison benchmarks, never the named product rate. "
+    "Keep complete context; a benchmark percentage or borrowing-example APR cannot replace a current product rate. "
     "Only current market profile prerequisites block publication. Required fields are a minimum, not a collection ceiling. "
     "Collect requested optional facts when the same supplied evidence or already consulted official pages prove "
     "their exact value and complete conditions. Do not search or retry solely for optional information. Omit missing optional "
     "balances, deposit amounts, waivers and loan limits instead of guessing or requesting human review. "
     "Checking requires its transaction cost structure: proven unlimited ordinary transactions, "
     "or a finite included allowance plus the excess per-transaction fee, or explicit per-use pricing. "
+    "A single explicit N Debits / Month row may bind its immediately following dollar price labelled each thereafter "
+    "as the excess transaction charge; disclaimer markers are not counts. Reject duplicate, nonmonthly, conditional "
+    "or specific-channel debit rows. "
     "Read ordinary allowance and excess cost from their exact account-fee rows; label footnote "
     "numbers are not transaction counts. Preserve row line breaks and the full retained context. Unlimited public transit "
     "or another specific channel never proves unlimited ordinary transactions. Store excess-only "

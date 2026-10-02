@@ -47,6 +47,13 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
         r"|\bonly\s+for\b|\bfor\s+(?:eligible|selected|new)\s+(?:customers|cardholders)\b"
         r"|\bfirst\s+(?:year|month|\d+\s+(?:years?|months?))\b", context, re.I):
         return True
+    if field_name in {"monthly_fee", "public_display_fee", "annual_fee", "transaction_fee", "additional_transaction_fee"} and re.search(
+        r"\buntil\b|\baverage\s+(?:monthly|daily)\s+(?:closing\s+)?balance\b"
+        r"|\b(?:for|first)\s+(?:(?:the|your)\s+)?(?:(?:first|next|initial)\s+)?"
+        r"(?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(?:months?|years?)\b",
+        context, re.I,
+    ):
+        return True
     return field_name in {"monthly_fee", "public_display_fee", "annual_fee", "transaction_fee"} and bool(
         re.search(r"minimum balance|at least", context, re.I))
 
@@ -62,6 +69,22 @@ _ORDINARY_UNLIMITED = r"\bunlimited\s+(?:(?:ordinary|free|no fee|debit|everyday|
 def _checking_table_value(field_name: str, value: object, quote: str) -> bool | None:
     if field_name not in {"included_transactions", "additional_transaction_fee"}:
         return None
+    debit_rows = list(re.finditer(
+        r"(?mi)^[ \t]*(\d+)[ \t]+Debits(?:[ \t]+legal disclaimer[ \t]+\d+)?[ \t]*/[ \t]*Month[ \t]*\r?$",
+        quote,
+    ))
+    if debit_rows:
+        if len(debit_rows) != 1 or re.search(
+            r"\b(?:if|when|provided|qualify|qualifying|waived|waiver|maintain|ATM|ABM|wire|foreign|international)\b|public transit",
+            quote, re.I,
+        ) or re.search(_ORDINARY_UNLIMITED, quote, re.I):
+            return False
+        if field_name == "included_transactions":
+            return int(debit_rows[0][1]) == value
+        tail = quote[debit_rows[0].end():]
+        cost = re.match(r"\s*(?:legal disclaimer\s*)?\$(\d+(?:\.\d+)?)\s+each thereafter(?:\.|(?=\s|$))", tail, re.I)
+        return bool(cost and Decimal(cost[1]) == Decimal(str(value))
+                    and len(re.findall(r"\beach thereafter\b", quote, re.I)) == 1)
     label = _COUNT_ROW_LABEL if field_name == "included_transactions" else _EXCESS_ROW_LABEL
     labels = list(re.finditer(rf"(?mi)^[ \t]*(?:{label})[ \t]*\r?$", quote))
     if not labels:
@@ -123,7 +146,7 @@ def _labelled_current_card_rate(field_name: str, value: Decimal, quote: str) -> 
     pattern = (
         r"\bThe current preferred annual interest rates for (?:the|this) Account are:\s*"
         r"(\d+(?:\.\d+)?)% on purchases and (\d+(?:\.\d+)?)% on cash advances"
-        r"(\s*\(including balance transfers and cash-like transactions\))?\."
+        r"(\s*\(including balance transfers(?:, Scotia[\u00ae\u2122]? Credit Card Cheques)? and cash-like transactions\))?\."
     )
     matches = list(re.finditer(pattern, quote, re.I))
     if len(matches) != 1:
@@ -136,6 +159,37 @@ def _labelled_current_card_rate(field_name: str, value: Decimal, quote: str) -> 
     if field_name == "balance_transfer_rate" and not match[3]:
         return False
     return value == Decimal(match[1 if field_name == "purchase_interest_rate" else 2])
+
+
+def _rate_context_has_condition(field_name: str, value: Decimal, quote: str) -> bool:
+    conditions = list(re.finditer(
+        r"\b(?:up to|between|as low as|bonus|introductory|promotional|example|illustration|if|when|qualify|qualifying|depending)\b",
+        quote, re.I,
+    ))
+    if not conditions:
+        return False
+    heading = re.search(r"(?mi)^[ \t]*Rates and Fees:", quote)
+    # This exact offer-revocation clause precedes a separately declared current
+    # rate. Keep the complete evidence; no other condition can be disregarded.
+    if not heading or not _labelled_current_card_rate(field_name, value, quote):
+        return True
+    allowed = set()
+    for revocation in re.finditer(
+        r"\bWe reserve the right to revoke this Offer at any time (if) we determine "
+        r"you do not meet the Offer eligibility requirements, including after you "
+        r"have accepted the Offer or been approved for the Account\.",
+        quote[:heading.start()], re.I,
+    ):
+        allowed.add(revocation.start(1))
+    # A later numbered transaction-fee note is a different charge, not a
+    # condition on the preceding labelled annual interest declaration.
+    cash_clause = re.search(r"\d+(?:\.\d+)?% on cash advances(?:\s*\([^)]*\))?\.", quote, re.I)
+    for fee_note in re.finditer(
+        r"(?m)^[ \t]*\d+[ \t]*\r?\nTransaction fees may apply (when)\b", quote,
+    ):
+        if cash_clause and fee_note.start() > cash_clause.end():
+            allowed.add(fee_note.start(1))
+    return any(condition.start() not in allowed for condition in conditions)
 
 
 def _transaction_count_supported(value: int, quote: str) -> bool:
@@ -262,11 +316,15 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if not number.is_finite() or number < 0:
         return False
     if contract.unit == "percentage_points":
+        # Comparison benchmarks are not the named product's own payable rate.
+        # Retained full context is screened by the same rule below grounding.
+        if re.search(r"\b(?:national|industry|market)\s+average\b|\bcompetitor(?:s|'s)?\b", q, re.I):
+            return False
         if rate_component_only(value=value, context=q):
             return False
         rates = re.findall(r"(?<![\d.])(\d+(?:\.\d+)?)\s*%", q)
         # A scalar cannot represent a tier, range, conditional offer or example.
-        if re.search(r"\b(?:up to|between|as low as|bonus|introductory|promotional|example|illustration|if|when|qualify|qualifying|depending)\b", q, re.I) or _rate_from_is_condition(field_name, quote):
+        if _rate_context_has_condition(field_name, number, quote) or _rate_from_is_condition(field_name, quote):
             return False
         if len({Decimal(v) for v in rates}) != 1:
             return number < 100 and _labelled_current_card_rate(field_name, number, quote)

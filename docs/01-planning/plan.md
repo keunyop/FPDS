@@ -1,5 +1,9 @@
 # FPDS Project Execution Plan
 
+Latest authorized staged data operation: [10 additional products published and unsupported targets excluded](../00-governance/staged-unpublished-recovery-2026-10-01.md). Public API CA 29 / US 5, total 34; all 404 initially unpublished assessed, 394 removed from this one-off publication work list with records/history preserved. Worker 624 / API 539 and repository doctor pass, zero model calls or manual reviews. Shared collection changes remain local; runtime deployment is separate. Earlier dated results below are historical.
+
+Latest Product Owner direction: prioritize quick batch publication across all unpublished products, superseding the final-six-card slice. All 406 diagnosed; twelve current official detail preflights; two normal automatic publications. Public API CA 20 / US 4, total 24. No runtime changes or deployment. See [operation](../00-governance/fast-whole-catalogue-publication-2026-10-01.md).
+
 Latest approved continuation: twelve remaining cards assessed, six automatically published in one run using corrected bound numeric evidence and exact current zero-fee meaning. Personal-student family applicability and separate Mastercard currency documents verified. Public API CA 20 / US 2; Worker 611 / API 539 pass, zero model calls. See [report](../00-governance/remaining-card-recovery-2026-10-01.md). No UI/schema or deployment.
 
 Latest approved continuation: assess 14 retained Scotiabank cards together, correct demonstrated distinct current annual-rate label handling and publish normal automatic passes in one bounded run. Two published; twelve retained exclusions. Public API CA 14 / US 2. Worker 608 / API 539 pass, zero model calls. See [report](../00-governance/card-bulk-recovery-2026-10-01.md); runtime deployment remains separate.

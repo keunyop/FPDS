@@ -1,5 +1,7 @@
 # FPDS API Service
 
+Staged recovery (2026-10-01): ten additional products published through normal current gates; Public API CA 29 / US 5. All 404 initial unpublished have dispositions; 394 unsupported targets excluded from this one-off list with history preserved. Exact separate card-offer/rate-note meaning and monthly debit rows are supported; fixed-duration/age/balance zero fees and comparison benchmark rates remain rejected. Matching shared instructions and Worker 624 / API 539 tests pass. Future collection-runtime deployment is separate; no UI/schema or deployment change.
+
 Remaining-card recovery (2026-10-01): shared normalization preserves unchanged field-bound numeric evidence; current no-fee future change notices are distinguished from temporary/conditional waivers. Six cards published through normal gates; Public API CA 20 / US 2. Worker 611 / API 539 pass. No route/UI/schema or deployment; collection-runtime deployment remains required for future collection.
 
 Card bulk recovery (2026-10-01): shared exact labelled current annual-card-rate handling and matching normalization/extraction instructions are updated locally. Two cards published through normal gates; Public API CA 14 / US 2. Worker 608 / API 539 pass. No route/UI/schema change or deployment.
