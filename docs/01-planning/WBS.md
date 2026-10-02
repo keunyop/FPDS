@@ -1,5 +1,7 @@
 # FPDS Detailed WBS
 
+Latest approved continuation: six of twelve remaining Scotiabank cards published through one normal automatic run, preserving original field-bound evidence and current no-fee conditions. Public API CA 20 / US 2; Worker 611 / API 539 pass, zero provider calls. See [report](../00-governance/remaining-card-recovery-2026-10-01.md); runtime deployment remains separate.
+
 Latest approved continuation: 14-card bounded Scotiabank batch completed with two normal automatic publications, shared labelled-current-rate regressions and zero provider calls. Public API CA 14 / US 2. Worker 608 / API 539 pass. See [report](../00-governance/card-bulk-recovery-2026-10-01.md).
 
 Latest approved continuation: a bounded distinction between separate card-offer switch exclusions and explicit current annual rates fixes the prepared Platinum false exclusion. Shared extraction/card normalization instructions match; all other financial guards remain. One card restored with current official evidence and no provider calls: Public API CA 12 / US 2. Worker 605 / API 539 tests pass. No UI/schema/required-field change or deployment. See [operation](../00-governance/platinum-card-recovery-2026-10-01.md).

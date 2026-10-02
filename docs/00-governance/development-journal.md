@@ -1,6 +1,15 @@
 # FPDS Development Journal
 
 
+## 2026-10-01 - Six remaining Scotiabank cards published
+
+- Continued the authorized twelve-card batch. Traced Gold Amex's false exclusion to replacing bound numeric evidence with unrelated chunks containing the same percentage. Preserve actual full field evidence for unchanged numeric extractions; missing/changed evidence still follows existing lookup and normal gates. Shared zero-fee validation now distinguishes future change notices and rejects temporary/conditional waivers; matching extraction/requested fee normalization instructions.
+- Reused saved current-day diagnosis inputs and preflighted only three additional essential Mastercard documents. Explicit personal Visa/Amex scope covers directly linked student variants; Mastercard has its own current linked base agreement/payment amendment. Complete current identity/currency/fee/annual-rate evidence remains mandatory. No new registration, UI, manual review or permanent recovery feature.
+- Six normal dry-run passes published together: Gold Amex, Scene+ Visa regular/student, Amex regular/student and Momentum Mastercard. Initial capture failed before canonical changes at a duplicate existing Mastercard scope URL; source SQL rolled back, exact existing document ID/metadata were reused and the same reserved run resumed once. One completed run, six approved versions and one completed CA aggregate; provider calls/tokens and new reviews zero.
+- Independent current evidence/DB replay preserves other 422 canonical rows, fifteen saved target candidates, prior versions, registry and existing Mastercard scope metadata/flag. Public API CA 20 / US 2, total 22. Canonical 35 active / 393 inactive; thirteen active hidden, hence 406 unpublished. Six remaining purchase-rate-context exclusions retained.
+- Worker 611 / API 539, ten focused tests and repository doctor pass. All six actual website details show correct annual fees/rates, including proven $0. All 19 actual API/BFF/list/card/detail checks pass after ordinary cache revalidation: CA 20 / US 2, preserving all sixteen previous Public products. Final change-after-one-year/new-customer zero-fee boundaries, full suites, independent receipt/DB replay and diff/goal checks pass. [Report](remaining-card-recovery-2026-10-01.md); private `tmp/card-next-*` retain before-images, exact capture/resume lineage and exclusions. Future collection-runtime/API deployment remains separate.
+
+
 ## 2026-10-01 - Scotiabank cards assessed and published as one batch
 
 - Authorized bulk continuation assessed 14 saved cards and captured only 14 current detail pages plus shared essential scope/PDF. Reproduced distinct purchase/cash-rate and normalization-label failures before adding bounded full-context acceptance and matching shared extraction/card normalization instructions. No UI/schema, prerequisite relaxation, new registration or permanent recovery feature.

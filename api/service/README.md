@@ -1,5 +1,7 @@
 # FPDS API Service
 
+Remaining-card recovery (2026-10-01): shared normalization preserves unchanged field-bound numeric evidence; current no-fee future change notices are distinguished from temporary/conditional waivers. Six cards published through normal gates; Public API CA 20 / US 2. Worker 611 / API 539 pass. No route/UI/schema or deployment; collection-runtime deployment remains required for future collection.
+
 Card bulk recovery (2026-10-01): shared exact labelled current annual-card-rate handling and matching normalization/extraction instructions are updated locally. Two cards published through normal gates; Public API CA 14 / US 2. Worker 608 / API 539 pass. No route/UI/schema change or deployment.
 
 Shared card-rate context correction (2026-10-01): the current Platinum annual-rate false exclusion is fixed with a bounded separate-offer distinction and matching collection/card-normalization instructions. Existing publication prerequisites and receipt/profile versions remain. One card was published through the local corrected worker and compatible serving API. Worker 605 / API 539 tests pass. Future Admin collection requires collection-runtime/API deployment; no route/UI/schema changed.

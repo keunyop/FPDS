@@ -270,3 +270,12 @@ Extraction and requested card-rate dynamic normalization share the same short in
 A complete explicit current preferred annual Account-rate declaration may prove distinct purchase and cash-advance percentages when each has its own label. Every percentage in the retained context must belong to that single declaration; additional/repeated rates, scalar ranges, conditions and missing annual basis remain excluded. Balance-transfer applicability needs its explicit inclusion. Preserve the full source context and official field proof through all normal gates. Shared extraction and requested card normalization instructions match.
 
 The [14-card one-off batch](../00-governance/card-bulk-recovery-2026-10-01.md) produced two normal automatic passes and retained twelve exclusions, with no provider calls or weaker prerequisites. A direct evidence pass alone does not bypass subsequent normalization/validation. Code remains local; future runtime deployment is separate.
+
+
+## Bound numeric context and current zero fees — 2026-10-01
+
+Unchanged extracted numeric fields with a real chunk and full excerpt retain that bound context through normalization. Identical numbers in other chunks cannot replace their label/provenance/conditions. Missing bound evidence or changed/AI-introduced values still follow the existing lookup and final official accuracy gates; an unchanged value alone is not acceptance.
+
+Future subject-to-change notices alone do not qualify an explicitly current fee. Actual payment, balance, eligibility or waiver conditions remain binding. First-year/month and introductory/promotional zero-fee contexts cannot prove an unconditional zero; absent information is never zero. Matching instructions reach extraction and requested fee normalization only. Required/optional contracts, receipt/profile versions, privacy and automatic exclusion remain.
+
+The [remaining-card operation](../00-governance/remaining-card-recovery-2026-10-01.md) verified explicit personal Visa/Amex agreement family applicability for directly linked student variants and separate current Mastercard CAD settlement documents. Six of twelve cards passed normal current validation; six are retained exclusions. Future collection-runtime deployment remains separate from applied data.

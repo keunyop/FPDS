@@ -15,7 +15,7 @@ from worker.pipeline.fpds_ai_runtime import (
     invoke_openai_json_schema,
     llm_provider_configured,
 )
-from worker.pipeline.fpds_comparison_instructions import CARD_RATE_CONTEXT_INSTRUCTIONS
+from worker.pipeline.fpds_comparison_instructions import CARD_RATE_CONTEXT_INSTRUCTIONS, FEE_CHANGE_NOTICE_INSTRUCTIONS
 from worker.pipeline.fpds_approval_policy import populated_dynamic_decision_fields
 from worker.pipeline.fpds_market_profile import country_product_profile
 from worker.country_defaults import default_currency_for_country
@@ -618,6 +618,14 @@ def _normalize_candidate(
     for field_name in dynamic_field_names:
         contract = field_contract(field_name)
         if contract is None or contract.value_type not in {"decimal", "integer"}:
+            continue
+        bound_field = extracted_by_field.get(field_name)
+        if (bound_field is not None and bound_field.evidence_chunk_id
+                and bound_field.evidence_text_excerpt
+                and _as_decimal(bound_field.candidate_value) is not None
+                and _as_decimal(bound_field.candidate_value) == _as_decimal(candidate_payload.get(field_name))):
+            # Keep the actual field-bound full evidence. Numeric coincidence in
+            # another chunk cannot replace its source or financial conditions.
             continue
         evidence_context_by_field[field_name] = _find_dynamic_numeric_evidence_context(
             field_name=field_name,
@@ -5046,6 +5054,7 @@ def _normalize_dynamic_fields_with_ai(
                 "or derive flags from absence. Human review is unavailable; omit uncertain values. "
                 "Keep source-language prose verbatim and use subtype_code `other` for uncertain classification. "
                 + (CARD_RATE_CONTEXT_INSTRUCTIONS if {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate"}.intersection(item.source_metadata.get("expected_fields", [])) else "")
+                + (FEE_CHANGE_NOTICE_INSTRUCTIONS if {"annual_fee", "monthly_fee", "public_display_fee", "transaction_fee", "additional_transaction_fee"}.intersection(item.source_metadata.get("expected_fields", [])) else "")
             ),
             payload={
                 "product_type": item.source_metadata.get("product_type"),

@@ -1,5 +1,7 @@
 # FPDS Workspace
 
+Latest continuation: [six remaining Scotiabank cards published together](docs/00-governance/remaining-card-recovery-2026-10-01.md). Public API CA 20 / US 2, total 22; 406 remain unpublished. Twelve assessed, six normal automatic passes, zero model calls. Bound numeric evidence and current no-fee semantics corrected locally; Worker 611 / API 539 pass. Future collection-runtime deployment remains separate.
+
 Latest bulk recovery: [two Scotiabank cards published together](docs/00-governance/card-bulk-recovery-2026-10-01.md). Public API CA 14 / US 2, total 16; 412 remain unpublished. Fourteen cards checked, two normal automatic passes, zero collection-model calls. Worker 608 / API 539 tests pass. Shared code is local; future collection-runtime deployment remains separate.
 
 Latest recovery: [Platinum card published after bounded current-rate context correction](docs/00-governance/platinum-card-recovery-2026-10-01.md). Public API CA 12 / US 2, total 14; 414 records remain unpublished. Worker 605 / API 539 tests pass. Fifteen retained cards were diagnosed without new fetches or model calls; only one current verified pass was restored. Shared code is local; future Admin collection requires runtime deployment. Earlier counts below are historical.

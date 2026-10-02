@@ -1,5 +1,7 @@
 # FPDS Docs Map
 
+Latest continuation: [six of twelve remaining Scotiabank cards published](00-governance/remaining-card-recovery-2026-10-01.md). Public API CA 20 / US 2, total 22. Zero model calls, six retained exclusions. Shared code is local; deployment remains separate.
+
 Latest bulk recovery: [14 Scotiabank cards assessed; two automatically published](00-governance/card-bulk-recovery-2026-10-01.md). Public API CA 14 / US 2; total 16. Twelve exclusions retained; no provider calls or deployment.
 
 Latest: [current card-rate context correction and Platinum restoration](00-governance/platinum-card-recovery-2026-10-01.md); Public API CA 12 / US 2, with 414 unpublished records. Worker 605 / API 539 tests pass; collection-runtime deployment remains separate. Earlier counts below are historical.

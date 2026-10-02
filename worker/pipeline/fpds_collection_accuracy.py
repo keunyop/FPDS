@@ -42,7 +42,10 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
     # A standalone suitability heading is not a condition on a preceding fee.
     # Keep its following text, including any actual balance/waiver condition.
     context = re.sub(r"(?mi)^Great if[ \t]*\r?\n(?=You (?:want|prefer)\b)", "Suitability\n", quote)
-    if re.search(r"\b(?:if|when|waived|waiver|provided|qualify|qualifying|maintain)\b|subject to", context, re.I):
+    if re.search(r"\b(?:if|when|waived|waiver|provided|qualify|qualifying|maintain|introductory|promotional)\b"
+        r"|subject to(?!\s+change(?:\s+without\s+(?:prior\s+)?notice)?(?:[.!](?:\s|$)|$))"
+        r"|\bonly\s+for\b|\bfor\s+(?:eligible|selected|new)\s+(?:customers|cardholders)\b"
+        r"|\bfirst\s+(?:year|month|\d+\s+(?:years?|months?))\b", context, re.I):
         return True
     return field_name in {"monthly_fee", "public_display_fee", "annual_fee", "transaction_fee"} and bool(
         re.search(r"minimum balance|at least", context, re.I))
