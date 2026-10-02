@@ -1989,7 +1989,7 @@ X"""
                 override_field_names=None,
                 default_fields=_DEFAULT_EXTRACTABLE_FIELDS,
             ),
-            ["product_name", "annual_fee", "purchase_interest_rate"],
+            ["product_name", "purchase_interest_rate_summary", "annual_fee", "purchase_interest_rate"],
         )
 
     def test_high_confidence_detail_h1_beats_audience_seo_title(self) -> None:

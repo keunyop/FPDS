@@ -100,6 +100,11 @@ _AI_SAFE_RATE_FIELDS = {
     "highest_rate",
 }
 _AI_SAFE_MONTHLY_FEE_FIELDS = {"monthly_fee", "public_display_fee"}
+_DEPOSIT_INTEREST_CONTEXT_FIELDS = _AI_SAFE_RATE_FIELDS | {
+    "interest_rate_summary", "interest_calculation_method", "interest_payment_frequency",
+    "compounding_frequency", "payout_option", "tiered_rate_flag", "tier_definition_text",
+    "promotional_period_text", "introductory_rate_flag",
+}
 _COMMON_DEFAULT_FIELDS = {
     "product_name",
     "description_short",
@@ -799,6 +804,11 @@ def _resolve_field_names(
         for field_name in context.source_metadata.get("expected_fields", [])
         if str(field_name).strip()
     ]
+    # Retrieval and heuristics must see the same current catalog as official
+    # grounding and normalization, even when registry field lists are older.
+    profile = country_product_profile(country_code=context.country_code, product_type=product_type)
+    if profile is not None:
+        expected_fields = list(dict.fromkeys([*expected_fields, *profile.collection_fields]))
     if product_type not in _CANONICAL_PRODUCT_TYPES and expected_fields:
         # Operator-defined product contracts are authoritative. Falling back
         # to every deposit extraction field inflated a credit-card request
@@ -2763,6 +2773,8 @@ def _extract_candidate_value(
         return None, "string", "heuristic_noise_filter", {"suppressed_reason": "generic_banking_info_navigation"}
     if _is_noise_for_product_context(context=context, text=text):
         return None, "string", "heuristic_noise_filter", {"suppressed_reason": "cross_product_navigation_noise"}
+    if field_name in _DEPOSIT_INTEREST_CONTEXT_FIELDS and _deposit_interest_context_conflicts(context, text):
+        return None, "string", "heuristic_noise_filter", {"suppressed_reason": "other_product_interest_context"}
     if field_name == "eligibility_text" and _is_audience_specific_sibling_eligibility(
         context=context,
         text=text,
@@ -4047,6 +4059,16 @@ def _is_generic_banking_info_text(text: str) -> bool:
     return marker_hits >= 2 and not has_product_signal
 
 
+def _deposit_interest_context_conflicts(context: ExtractionDocumentContext, excerpt: str) -> bool:
+    if _canonical_product_type_family(_infer_product_type(context)) not in {"chequing", "savings", "gic"}:
+        return False
+    # Borrowing interest and a companion account's payout are different facts.
+    # Never use their numeric coincidence to populate deposit earnings.
+    return bool(re.search(r"\boverdraft\b", excerpt, re.I)) or _description_conflicts_with_product_context(
+        context=context, description=excerpt,
+    )
+
+
 def _description_conflicts_with_product_context(*, context: ExtractionDocumentContext, description: str) -> bool:
     if not description:
         return False
@@ -4440,6 +4462,9 @@ def _extract_official_fields_with_ai(
         )
         exclusions[field_name] = "value_coercion_failed"
         if candidate_value is None:
+            continue
+        exclusions[field_name] = "other_product_interest_context"
+        if field_name in _DEPOSIT_INTEREST_CONTEXT_FIELDS and _deposit_interest_context_conflicts(context, candidate.evidence_excerpt):
             continue
         exclusions[field_name] = "field_meaning_unproven"
         if not _ai_verified_value_is_supported_by_quote(

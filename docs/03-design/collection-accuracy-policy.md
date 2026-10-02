@@ -297,3 +297,28 @@ One explicit `N Debits / Month` row proves its ordinary monthly included allowan
 Zero fees limited by fixed duration, age/graduation or average daily/monthly balance are conditional outcomes, not regular fees. Preserve a separately proven positive base fee and verified waiver conditions; never invent an unconditional zero. National/industry/market averages and competitor benchmark percentages are not the named product's own payable scalar rate. Full retained context and tightly selected quotations receive the same checks; borrowing examples remain insufficient current product-rate evidence. Shared instructions and adversarial/success regressions accompany all changes.
 
 The [staged recovery](../00-governance/staged-unpublished-recovery-2026-10-01.md) published ten current automatic passes and removed 394 unsupported targets from the one-off work list, preserving canonical/history and registry. Receipt/profile versions, conditional essentials and public privacy remain unchanged. No permanent queue or recovery feature; future shared runtime deployment is separate.
+
+
+## Verified optional checking interest - 2026-10-02 correction
+
+CA/US checking includes optional standard/display deposit rates and the shared
+typed deposit rate/calculation/payment/tier/promotion qualifiers. Current-profile
+fields reach retrieval as well as official grounding and normalization, even
+when older source lists omit them. Explicit field overrides remain bounded.
+No optional-only search, model call, retry or review is added; publication still
+requires monthly fee and transaction cost structure, not a rate.
+
+A complete standalone annual deposit-rate declaration may distinguish a separate
+explicit CDIC/FDIC insured-up-to line from a rate ceiling. Keep full original
+context and every actual rate/eligibility/balance condition; combined, ambiguous,
+conditional or competing-rate declarations remain excluded. Shared extraction
+instructions match the shared accuracy gate. Deposit-interest fields reject
+borrowing/overdraft and conflicting companion-account contexts in both heuristic
+and official-model output. Exact quote, actually consulted official origin,
+currency, annual basis, native types and automatic acceptance remain binding.
+
+Saved Alterna detail evidence reproduces both the missing field request and
+unrelated insurance-condition false rejection. Cross-market and adversarial
+regressions verify the generic correction without bank exceptions. Worker/API
+runtime deployment remains separate; no live rate was rewritten. See the
+[diagnosis and verification](../00-governance/optional-checking-rates-2026-10-02.md).

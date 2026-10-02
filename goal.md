@@ -1102,3 +1102,12 @@ whose saved extraction already discarded required official fields. Worker 632,
 API 539, focused 31, repository doctor and final diff checks pass. No model calls,
 canonical writes, publication or deployment. This slice acceptance is satisfied;
 keep the shared goal for earlier unresolved ownership.
+
+
+## Authorized slice: generic verified optional evidence preservation - 2026-10-02
+Objective: reproduce and fix optional facts omitted from already captured official evidence, including Alterna chequing rates, through shared collection paths.
+Scope: read-only latest saved evidence diagnosis; generic field selection, captured supporting-evidence binding and normalization fixes proven by regressions; matching prompts and documentation. Preserve prior goal ownership.
+Exclusions: publication prerequisite changes, optional-only searches/retries, bank-specific exceptions, deployment, paid collection, canonical/live writes, UI or new markets/types.
+Acceptance: reproduce the actual omission; preserve exact product identity, currency, annual basis, conditions and current-run origins; collect supported registered/profile optional facts with no extra provider call; omit ambiguous/unsupported facts without penalizing publication; demonstrate cross-bank success and adversarial isolation; run affected Worker/API checks and update journal.
+Verification: saved extraction/chunk replay; positive, boundary and failure regressions through normal extraction/normalization/accuracy; full affected suites and git diff --check; final goal review.
+Status: complete for this authorized code-only slice. Both saved defects reproduced before their fixes; shared CA/US optional rates and all-profile retrieval preserve proven fields, with full-context and cross-product safeguards and matching prompts. Saved latest input selects 0.05 through corrected retrieval; controlled normalization/accuracy tests retain its complete evidence. Worker 643 / API 539, focused 180, new 11, repository doctor, report-link/fixture checks and git diff --check pass. Final goal/diff acceptance review passes. No live provider calls, canonical writes, publication or deployment; future collection-runtime/API deployment remains separate. Preserve the shared goal file for earlier unresolved ownership.

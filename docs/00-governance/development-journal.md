@@ -1,5 +1,15 @@
 # FPDS Development Journal
 
+## 2026-10-02 - Verified optional checking interest preserved generically
+
+- Product Owner requested resolving verified optional omissions across banks while retaining optional checking rates. Latest Alterna saved detail already contains 0.05% Annual Interest Rate; shared profile omitted rate targets, older registry/default lists narrowed retrieval, and full CDIC insured-up-to context falsely rejected the rate.
+- Reproduced 18 profile/retrieval/preservation failures and then three full-context/insurance failures before fixes. CA/US checking now requests deposit rates and typed qualifiers opportunistically; every supported profile reaches retrieval despite old lists. Explicit overrides stay bounded.
+- Shared gate distinguishes only a separate complete CDIC/FDIC insurance limit plus standalone annual deposit-rate declaration. Full evidence and real conditions remain; matching shared instructions. Deposit-interest extraction/model output reject companion-account and overdraft contexts. No bank exception, essential/receipt/profile-version change, UI or permanent recovery feature.
+- Verification: new 11 tests, focused checking/extraction 180, Worker 643 and API 539 pass. Cross-market success, actual full Alterna context, missing optional/no penalty, currency/basis/native types, promotion/balance/range/overdraft/companion, exact quote and consulted URL boundaries covered. Independent saved-input retrieval/heuristic replay selects 0.05 from the original chunk; it is diagnostic, not a newly grounded publishable fact. Controlled provider fixtures, zero live provider calls.
+- Key files: fpds_market_profile.py, extraction/service.py, fpds_collection_accuracy.py, shared instructions, test_checking_optional_rates.py and source-backed fixture; [diagnosis/report](optional-checking-rates-2026-10-02.md). Private tmp/optional-* preserve read-only latest DB/artifact evidence and test/replay logs.
+- No canonical writes, publication, paid recollection or deployment. Next: deploy collection runtime/API, then normal Admin collection must establish fresh grounded rates. Existing shared goal ownership preserved. Final repository doctor, report-link/fixture JSON checks and git diff --check passed; final goal/diff review satisfies this code-only slice.
+
+
 ## 2026-10-01 - Alterna account validation errors corrected locally
 
 - Product Owner authorized saved-evidence reproduction and correction. Before fix: three failing assertions and one missing-fee error. Saved captures prove explicit no minimum balance required was misread as a fee condition and ordinary day-to-day transactions were absent from the meaning pattern.

@@ -174,6 +174,27 @@ def _rate_context_has_condition(field_name: str, value: Decimal, quote: str) -> 
     ))
     if not conditions:
         return False
+    if field_name in {"standard_rate", "public_display_rate"}:
+        # A separate deposit-insurance ceiling is not a payable-rate ceiling.
+        # Require a complete, standalone annual deposit-rate declaration and
+        # recognize only the exact insurance clause; keep all other conditions.
+        declarations = re.finditer(
+            r"(?mi)^[ \t]*(?:(?P<first>\d{1,2}(?:\.\d{1,4})?)\s*%\*?\s+"
+            r"Annual (?:Interest Rate|Percentage Yield)|Annual (?:Interest Rate|Percentage Yield)"
+            r"(?: \(APY\))?:[ \t]*(?P<last>\d{1,2}(?:\.\d{1,4})?)\s*%)[.]?[ \t]*$", quote,
+        )
+        if any(Decimal(m.group("first") or m.group("last")) == value for m in declarations):
+            insurance_limits = {
+                m.start("ceiling") for m in re.finditer(
+                    r"(?mi)^[ \t]*(?:Safe and secure [\u2013-] )?(?:eligible )?deposits are insured "
+                    r"(?P<ceiling>up to) (?:the maximum amount|\$\d[\d,]*(?:\.\d{2})?) "
+                    r"(?:through|by) (?:the )?(?:Canada Deposit Insurance Corporation \(CDIC\)|"
+                    r"Federal Deposit Insurance Corporation \(FDIC\)|FDIC)[.]?[ \t]*$", quote,
+                )
+            }
+            conditions = [m for m in conditions if m.start() not in insurance_limits]
+            if not conditions:
+                return False
     heading = re.search(r"(?mi)^[ \t]*Rates and Fees:", quote)
     # This exact offer-revocation clause precedes a separately declared current
     # rate. Keep the complete evidence; no other condition can be disregarded.

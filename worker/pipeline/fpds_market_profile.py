@@ -227,7 +227,8 @@ _DEPOSIT_COMPARISON_FIELDS = (
     "promotional_period_text", "introductory_rate_flag",
 )
 _TYPE_SUPPLEMENTAL_FIELDS = {
-    "chequing": ("minimum_deposit", "fee_waiver_condition"),
+    "chequing": ("standard_rate", "public_display_rate", *_DEPOSIT_COMPARISON_FIELDS,
+                 "minimum_deposit", "fee_waiver_condition"),
     "savings": (*_DEPOSIT_COMPARISON_FIELDS, "minimum_deposit", "fee_waiver_condition"),
     "gic": (*_DEPOSIT_COMPARISON_FIELDS, "redeemable_flag", "non_redeemable_flag",
             "early_withdrawal_penalty"),

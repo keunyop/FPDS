@@ -1,5 +1,13 @@
 # Financial Product Field Contract
 
+Checking interest correction (2026-10-02): standard/display deposit rates and
+existing deposit qualifiers belong to the CA/US optional collection profile.
+They use the same percentage-point/native-type, annual-basis, exact official
+quote and complete-context contract as required rates. A separately explicit
+CDIC/FDIC insurance ceiling does not qualify a standalone annual rate; actual
+conditions remain binding. Missing checking rates never imply zero or block
+publication. See [policy](collection-accuracy-policy.md).
+
 Current recovery clarification — 2026-09-30: a transaction-fee waiver balance is
 not a general `minimum_balance` or monthly-fee waiver threshold. Omit it from
 that scalar field; a separately evidenced base transaction charge retains its
