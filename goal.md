@@ -1072,3 +1072,33 @@ and human reviews. No runtime feature or deployment. Preserve prior goal ownersh
 - Preserve previous unresolved goal ownership. Earlier quick-batch time restriction is superseded by this staged-work authorization; no unbounded paid retries.
 
 Staged recovery progress: all 404 initial unpublished classified; ten published through current automatic gates and 394 removed from this one-off target list with explicit reasons, no retry/manual-review queue, all records/history preserved. Public API CA 29/US 5, total 34; independent current receipts/history and ten site details verified. Worker 624/API 539 and repository doctor pass. Registered optional facts follow normal contracts; dry-only unregistered optional rates were correctly omitted, with no registration/optional-only write. All acceptance criteria are satisfied: final API/BFF counts CA 29/US 5 and exact memberships, 24 checks and real CA account/both-country card lists pass after ordinary cache revalidation; final diff and goal review pass. This one-off slice is complete. Earlier unresolved goal ownership remains, so preserve the shared goal file.
+
+## Independent slice: latest Alterna collection diagnosis
+Objective: explain the latest Alterna collection and absence from Public.
+Scope: read-only latest runs, candidates, evidence and live Public membership. Preserve prior goal ownership.
+Exclusions: retries/model calls, data mutation, deployment, gate or UI changes.
+Acceptance: identify run outcomes and exact blockers; distinguish exclusion from publication/cache failure; document evidence and next step.
+Verification: read-only DB transaction, public API readback, scoped source inspection, journal and diff checks.
+
+Completion: latest four Alterna runs completed, eleven source operations succeeded,
+four candidates automatically excluded, zero accepted/reviews. Live Public has
+zero Alterna products and all seven retained canonical records are inactive.
+Exact field blockers and account grounding/context inconsistencies are recorded
+in docs/00-governance/alterna-collection-diagnosis-2026-10-01.md. Read-only slice
+acceptance is satisfied; preserve this goal for earlier unresolved ownership.
+
+## Authorized slice: Alterna account validation fix
+Objective: reproduce and correct proven checking/savings evidence failures.
+Scope: saved current collection artifacts, shared meaning/quote validation, matching prompts and regression tests. Preserve earlier goal ownership.
+Exclusions: live data writes, paid recollection, publication, deployment, GIC/loan work, relaxed financial prerequisites.
+Acceptance: reproduce exact saved failures before extending patterns; correct only proven generic defects with positive/adversarial tests; replay saved evidence and document remaining blockers; run Worker/API checks and diff review.
+Verification: private read-only evidence retrieval, deterministic offline replay, shared-contract regressions and affected runtime suites.
+
+Completion: saved failures reproduced before changes; shared fee-condition and
+ordinary day-to-day transaction meaning corrected with eight adversarial/positive
+regressions and matching extraction/normalization instructions. Actual offline
+replay retains savings fee zero but missing grounded rate, and excludes checking
+whose saved extraction already discarded required official fields. Worker 632,
+API 539, focused 31, repository doctor and final diff checks pass. No model calls,
+canonical writes, publication or deployment. This slice acceptance is satisfied;
+keep the shared goal for earlier unresolved ownership.

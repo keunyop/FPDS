@@ -1,5 +1,21 @@
 # FPDS Development Journal
 
+## 2026-10-01 - Alterna account validation errors corrected locally
+
+- Product Owner authorized saved-evidence reproduction and correction. Before fix: three failing assertions and one missing-fee error. Saved captures prove explicit no minimum balance required was misread as a fee condition and ordinary day-to-day transactions were absent from the meaning pattern.
+- Shared gate now accepts that exact absent-balance wording and unconditional ordinary day-to-day unlimited transactions; real balance/eligibility/duration conditions, negation, finite-count conflicts and channel restrictions remain. One shared account-cost instruction reaches extraction and dynamic normalization. No prerequisite/receipt/annual-basis/exact-quote changes.
+- Actual saved extraction replay through normal normalization/accuracy, with provider calls disabled, retains savings monthly fee zero but still excludes its ungrounded rate. Checking saved extraction already lost fee/unlimited official verification and retains only an unrelated heuristic overdraft fee; it remains excluded. No fabricated mapping, DB mutation, paid collection, deployment or Public publication.
+- Verification: focused 31 tests, Worker 632 and API 539 passed. Eight new regression tests cover real source context, extraction meaning, automatic gate success/failure and adversarial boundaries. Final repository doctor and git diff --check passed; final goal/diff review confirms scoped acceptance. No UI tests because no UI changed.
+- Key files: fpds_collection_accuracy.py, fpds_comparison_instructions.py, normalization/service.py, test_alterna_account_evidence.py, policy/boundary READMEs and [diagnosis/fix record](alterna-collection-diagnosis-2026-10-01.md). Private tmp/alterna-account-* retain read-only inputs/replay. Prior goal ownership and unrelated bytecode edit preserved.
+- Next: separate deployment of collection runtime/API, then bounded normal official grounding for missing essentials. This code-only fix does not establish that both products can be published from saved inputs.
+
+## 2026-10-01 - Latest Alterna collection diagnosed
+
+- Read-only latest collection: four completed runs, eleven successful source operations, no source failures; four candidates automatically excluded, zero accepted or review tasks. Live CA Public API has 29 products, zero Alterna; seven retained Alterna canonical records are inactive. No cache-only or Public rendering failure explains the absence.
+- Exact blockers: chequing fee/unlimited transactions; savings rate/fee; GIC rate/term/redemption/consequence; personal-loan rate summary. Saved account diagnostics describe no-fee facts while field-meaning/full-context or exact-quote checks reject essentials; potential processing defects require replay/regressions before a fix. Model rationale does not prove acceptance.
+- Key file: [diagnosis](alterna-collection-diagnosis-2026-10-01.md); private tmp/alterna-latest-* retain DB/Public/evidence readbacks. No paid recollection, model calls, data mutation, runtime/UI changes or deployment. Prior goal ownership and unrelated bytecode change preserved.
+- Verification: repeatable-read/read-only DB, latest stage metadata and retained field evidence, live Public API; no application tests for documentation-only investigation. Next: reproduce account mapping/meaning failures in a separately authorized implementation slice; do not rerun paid collection or relax publication gates.
+
 ## 2026-10-01 - Staged unpublished-product recovery completed
 
 - Product Owner authorized removal of unsupported official-evidence targets and staged publication. All 404 initial unpublished now have dispositions: ten published, 394 excluded (267 essential proof, 110 identity, 12 binding, four availability, one multi-plan boundary). No canonical deletion, manual review or permanent recovery feature.

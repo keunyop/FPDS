@@ -20,6 +20,12 @@ CARD_RATE_CONTEXT_INSTRUCTIONS = (
     "never discard rate conditions, introductory periods, penalty rates or ranges. "
 )
 
+ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
+    "An explicit no minimum balance required statement does not qualify a separately explicit no monthly fee; "
+    "retain actual balance thresholds, eligibility and duration conditions. Unlimited day-to-day transactions "
+    "denotes ordinary account transactions only when unconditional; specific-channel unlimited benefits remain insufficient. "
+)
+
 COMPARISON_INSTRUCTIONS = (
     "Accuracy takes priority over coverage. Human review is unavailable: return unverified "
     "or omit any uncertain fact, even when it is a required field. Never guess, interpolate, "
@@ -30,6 +36,7 @@ COMPARISON_INSTRUCTIONS = (
     "Keep unchanged extracted values bound to their original complete field evidence; the same "
     "number elsewhere cannot replace that proof. "
     + FEE_CHANGE_NOTICE_INSTRUCTIONS
+    + ACCOUNT_COST_CONTEXT_INSTRUCTIONS
     + "Bind each value to its own label, complete quote and exact source URL. Never pair a "
     "term with an adjacent row's rate. Preserve explicit currency and rate basis; a country "
     "default is allowed only when the source has no explicit currency: CA uses CAD and US "

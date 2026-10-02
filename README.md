@@ -1,5 +1,7 @@
 # FPDS Workspace
 
+Latest local account-validation fix: [Alterna investigation and correction](docs/00-governance/alterna-collection-diagnosis-2026-10-01.md). No-balance requirements no longer invalidate no-fee facts; ordinary day-to-day unlimited transactions are recognized with safeguards. Saved evidence still lacks publication essentials, so no products were published. Runtime deployment remains separate.
+
 Latest authorized staged data operation: [10 additional products published and unsupported targets excluded](docs/00-governance/staged-unpublished-recovery-2026-10-01.md). Public API CA 29 / US 5, total 34; all 404 initially unpublished assessed, 394 removed from this one-off publication work list with records/history preserved. Worker 624 / API 539 and repository doctor pass, zero model calls or manual reviews. Shared collection changes remain local; runtime deployment is separate. Earlier dated results below are historical.
 
 Latest data operation: [all 406 unpublished products assessed; two additional products published](docs/00-governance/fast-whole-catalogue-publication-2026-10-01.md). Public API CA 20 / US 4, total 24; 404 remain unpublished. Twelve bounded current official preflights, zero collection-model calls, no runtime code or deployment. Earlier dated results below are historical.

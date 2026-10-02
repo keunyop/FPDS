@@ -68,6 +68,11 @@ markets, product types, recommendations, public evidence or BX-PF writes.
 Unambiguous written counts from zero through ten may map to native integers
 when directly attached to a transaction count; retain the exact source quote.
 Ranges, alternatives, fractions and qualifying conditions remain ineligible.
+An explicit `no minimum balance required` statement is not a fee-waiver threshold.
+Keep every actual balance, eligibility and duration condition. Unconditional
+`unlimited day-to-day transactions` can establish ordinary checking access;
+channel-limited, conditional, negated or finite-count-conflicting statements
+remain insufficient. Original quotes and full evidence are preserved.
 A standalone suitability heading such as `Great if` followed by `You want` is
 not itself a fee-waiver condition. Keep its following text and reject actual
 balance, waiver or eligibility conditions; never remove a financial qualifier.

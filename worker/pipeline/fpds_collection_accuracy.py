@@ -54,8 +54,14 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
         context, re.I,
     ):
         return True
+    # An explicitly absent balance requirement is not a fee-waiver threshold.
+    # Remove only this exact negation for condition classification; retain the
+    # complete quote and every surrounding qualifier for all other checks.
+    if re.search(r"\b(?:not|does not mean|doesn't mean)\s+no minimum balance required\b", context, re.I):
+        return True
+    balance_context = re.sub(r"\bno minimum balance required\b", "no balance requirement", context, flags=re.I)
     return field_name in {"monthly_fee", "public_display_fee", "annual_fee", "transaction_fee"} and bool(
-        re.search(r"minimum balance|at least", context, re.I))
+        re.search(r"minimum balance|at least", balance_context, re.I))
 
 
 # Flattened official fee tables retain one label/value per line. Footnote markers
@@ -63,7 +69,7 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
 _COUNT_ROW_LABEL = r"Transactions? included per month(?:[ \t]+\d+(?:[ \t]*,[ \t]*\d+)*)?"
 _EXCESS_ROW_LABEL = r"(?:Additional|Extra|Excess|Overage) transaction (?:fee|charge)s?(?:[ \t]+\d+)?"
 
-_ORDINARY_UNLIMITED = r"\bunlimited\s+(?:(?:ordinary|free|no fee|debit|everyday|banking|monthly)\s+){0,3}transactions?\b"
+_ORDINARY_UNLIMITED = r"\bunlimited\s+(?:(?:ordinary|free|no fee|debit|everyday|day-to-day|banking|monthly)\s+){0,3}transactions?\b"
 
 
 def _checking_table_value(field_name: str, value: object, quote: str) -> bool | None:
@@ -253,7 +259,7 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return False
         if field_name == "unlimited_transactions_flag" and re.search(
             r"\b(?:public transit|ATM|ABM|wire|e[- ]?transfer)(?: transactions?)?\s*[:–-]?\s*unlimited\b"
-            r"|\bunlimited\s+(?:(?:ordinary|debit|monthly)\s+)?transactions?\s+"
+            r"|" + _ORDINARY_UNLIMITED + r"\s+(?:\d+\s+)?"
             r"(?:only\s+)?(?:for|on|at)\s+(?:public transit|ATMs?|ABMs?|wire|e[- ]?transfer)\b", q, re.I,
         ):
             return False
