@@ -478,10 +478,14 @@ class _LinkExtractor(HTMLParser):
         self._structured_script_chars = 0
         self._structured_script_count = 0
         self._direct_link_count = 0
+        self._in_main = False
+        self._current_aria_label = ""
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr_map = dict(attrs)
         self._extract_structured_attribute_links(attrs)
+        if tag == "main":
+            self._in_main = True
         if tag == "script":
             script_type = str(attr_map.get("type") or "").strip().lower()
             if (
@@ -499,6 +503,7 @@ class _LinkExtractor(HTMLParser):
         if not href or href.startswith("#") or href.startswith(IGNORED_SCHEMES):
             return
         self._current_href = href
+        self._current_aria_label = str(attr_map.get("aria-label") or "")
         self._text_parts = []
 
     def handle_data(self, data: str) -> None:
@@ -515,6 +520,8 @@ class _LinkExtractor(HTMLParser):
             self._text_parts.append(stripped)
 
     def handle_endtag(self, tag: str) -> None:
+        if tag == "main":
+            self._in_main = False
         if tag == "script":
             if self._structured_script_parts is not None:
                 raw_payload = "".join(self._structured_script_parts).strip()
@@ -531,7 +538,14 @@ class _LinkExtractor(HTMLParser):
         if tag != "a" or self._current_href is None:
             return
 
-        self._append_link(self._current_href, " ".join(self._text_parts).strip())
+        anchor = " ".join(self._text_parts).strip()
+        label = " ".join(part for part in (anchor, self._current_aria_label) if part)
+        # Main-content disclosures displace navigation inside the existing
+        # 256-link / 64-priority-link caps; no additional fetch is initiated.
+        disclosure = self._in_main and bool(re.search(
+            r"agreement|disclosure|pricing|fee[-_ ]?schedule|bank[-_ ]plans|\.pdf(?:$|[?#])",
+            self._current_href + " " + label, re.I))
+        self._append_link(self._current_href, label, prefer_over_ordinary=disclosure)
         self._current_href = None
         self._text_parts = []
 

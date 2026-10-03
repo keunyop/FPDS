@@ -1,5 +1,28 @@
 # Product collection accuracy and automatic acceptance
 
+## Direct Chequing evidence correction - 2026-10-03
+
+Main-content pricing/disclosure anchors (including accessible labels) displace
+ordinary navigation inside the existing 256 total / 64 priority link caps.
+Companion selection retains its two-per-detail / 48-per-scope limits and existing
+host/country/safe-fetch boundaries. Current named-column monthly allowance rows
+and included-transfer cells may be proved before the existing model pass only
+with owned document/snapshot/parse/bank/country/language and exact full-context
+financial validation. Conflicting allowances yield no deterministic fact.
+Already proven fields and exact whole cells enter the same grounding prompt;
+complete relevant pricing passages precede boilerplate in existing companion slots.
+
+Complete ancillary additional-account/FX benefit clauses do not denominate the
+main account. Original evidence remains intact; explicit USD identity/price,
+lead-account conditions and unresolved foreign fragments still block defaulting.
+Complete amount-first fee cards distinguish separately labelled rewards from
+fees; attached conditions, duplicate cards and zero guesses fail. Transaction
+definition prose does not itself qualify an explicit own-account unlimited fact;
+actual eligibility, special-channel and finite-count conflicts remain binding.
+Finite plans still need proved excess costs. No optional-only calls, human review,
+new financial fields or publication/deployment are added. See the
+[direct comparison and saved-input limits](../00-governance/bmo-chequing-direct-comparison-2026-10-03.md).
+
 ## Captured grounding and structural evidence correction - 2026-10-03
 
 The shared extraction grounding pass now uses only current owned official captures

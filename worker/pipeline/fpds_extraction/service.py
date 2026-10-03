@@ -477,6 +477,112 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
     return output
 
 
+def _append_structural_account_facts(
+    *, context: ExtractionDocumentContext, candidates: list[EvidenceChunkCandidate],
+    fields: list[ExtractedFieldCandidate], requested_fields: list[str],
+) -> list[ExtractedFieldCandidate]:
+    """Prove exact named-column facts before the single model pass.
+
+    This is not a heuristic override: current snapshot ownership, explicit
+    column identity, source allowlist and the shared complete-context/value
+    contract are all required. Conflicting cells yield no deterministic fact.
+    """
+    from worker.pipeline.fpds_collection_accuracy import quote_supports_value
+    if _infer_product_type(context) != "chequing":
+        return fields
+    origin = _verified_official_detail_origin(context)
+    if origin is None:
+        return fields
+    product_name = _authoritative_discovery_product_title(context)
+    if not product_name:
+        return fields
+    cells = _select_official_grounding_chunks(candidates=candidates, collected_fields=[], product_name=product_name)
+    proposed = {}
+    for c in cells:
+        if (c.anchor_type != "financial_table_cell" or c.source_document_id != context.source_document_id
+                or c.source_snapshot_id != context.snapshot_id or c.parsed_document_id != context.parsed_document_id
+                or c.bank_code != context.bank_code or c.country_code != context.country_code
+                or c.source_language != context.source_language):
+            continue
+        quote = c.evidence_excerpt
+        values = {}
+        # Only the labelled row supplies the value; other column headers and
+        # benefit/rate rows cannot manufacture account costs or allowances.
+        row = re.search(r"(?mi)^Transactions? per month[^\n]*\n(Unlimited|\d+)\s*$", quote)
+        if row:
+            if row[1].casefold() == "unlimited":
+                values["unlimited_transactions_flag"] = True
+            else:
+                values["included_transactions"] = int(row[1])
+        row = re.search(r"(?mi)^Monthly (?:plan )?fee[^\n]*\n\$(\d+(?:\.\d+)?)", quote)
+        if row:
+            values.update(monthly_fee=float(row[1]), public_display_fee=float(row[1]))
+            if re.search(r"\b(?:or|waiv\w*)\b.*\b(?:balance|maintain)\b", _normalize_text(quote), re.I) and len(_normalize_text(quote)) <= 500:
+                values["fee_waiver_condition"] = _normalize_text(quote)
+        if re.search(r"(?mi)^(?:Interac\s+)?e[- ]?Transfer[^\n]*transactions?[^\n]*\nIncluded(?:\n|$)", quote):
+            values["interac_e_transfer_included"] = True
+        for name, value in values.items():
+            if name not in requested_fields or not quote_supports_value(name, value, quote):
+                continue
+            value_type = canonical_value_type(name)
+            field = ExtractedFieldCandidate(field_name=name,
+                candidate_value=str(value) if value_type == "decimal" else value,
+                value_type=value_type, confidence=0.99, extraction_method="captured_named_column",
+                source_document_id=c.source_document_id, source_snapshot_id=c.source_snapshot_id,
+                evidence_chunk_id=c.evidence_chunk_id, evidence_text_excerpt=quote,
+                anchor_type=c.anchor_type, anchor_value=c.anchor_value, page_no=c.page_no, chunk_index=c.chunk_index,
+                field_metadata={"official_grounding_contract_version":"collection-official-grounding-v2",
+                    "official_verification_status":"match", "official_grounding_method":"deterministic_named_account_column",
+                    "official_web_sources":[{"url":origin[0],"title":origin[1]}],
+                    "evidence_quote":quote, "rationale":"Exact owned named-column cell passed the shared financial contract."})
+            proposed.setdefault(name, []).append(field)
+    if "included_transactions" in proposed and "unlimited_transactions_flag" in proposed:
+        proposed.pop("included_transactions")
+        proposed.pop("unlimited_transactions_flag")
+    output = []
+    for name, found in proposed.items():
+        if len({str(f.candidate_value) for f in found}) == 1:
+            output.append(found[0])
+    replaced = {f.field_name for f in output}
+    # A positive unlimited fact cannot retain a neighbouring finite heuristic.
+    if "unlimited_transactions_flag" in replaced:
+        replaced.add("included_transactions")
+    if "included_transactions" in replaced:
+        replaced.add("unlimited_transactions_flag")
+    return [f for f in fields if f.field_name not in replaced] + output
+
+
+def _ground_explicit_account_declarations(
+    *, context: ExtractionDocumentContext, fields: list[ExtractedFieldCandidate],
+) -> list[ExtractedFieldCandidate]:
+    """Ground only already-extracted complete account-wide declarations.
+
+    Use full owned source context. Ambiguous, conditional and channel-only
+    declarations remain unverified, with no retry or generated quote.
+    """
+    from worker.pipeline.fpds_collection_accuracy import quote_supports_value
+    origin = _verified_official_detail_origin(context)
+    if origin is None or _infer_product_type(context) != "chequing":
+        return fields
+    result = []
+    for f in fields:
+        quote = str(f.evidence_text_excerpt or "")
+        if f.field_metadata.get("official_grounding_contract_version"):
+            result.append(f)
+            continue
+        supported = (f.field_name == "unlimited_transactions_flag" and f.candidate_value is True
+            and bool(re.search(r"\bWith the\s+" + re.escape(_authoritative_discovery_product_title(context) or "\x00") + r", you get unlimited transactions\b", _normalize_text(quote), re.I)))
+        if (supported and f.source_document_id == context.source_document_id
+                and f.source_snapshot_id == context.snapshot_id and f.evidence_chunk_id
+                and quote_supports_value(f.field_name, f.candidate_value, quote)):
+            f = replace(f, field_metadata={**f.field_metadata,
+                "official_grounding_contract_version":"collection-official-grounding-v2",
+                "official_verification_status":"match", "official_grounding_method":"deterministic_account_declaration",
+                "official_web_sources":[{"url":origin[0],"title":origin[1]}], "evidence_quote":quote})
+        result.append(f)
+    return result
+
+
 class ExtractionService:
     def __init__(
         self,
@@ -579,6 +685,15 @@ class ExtractionService:
                 context=context,
                 extracted_fields=extracted_fields,
             )
+            if not unavailable:
+                extracted_fields = _append_structural_account_facts(context=context,
+                    candidates=extraction_input.candidates, fields=extracted_fields, requested_fields=field_names)
+                extracted_fields = _ground_explicit_account_declarations(context=context, fields=extracted_fields)
+                captured_proof_count = sum(field.field_metadata.get("official_grounding_method") in {
+                    "deterministic_named_account_column", "deterministic_account_declaration"}
+                    for field in extracted_fields)
+                if captured_proof_count:
+                    runtime_notes.append(f"Verified {captured_proof_count} exact owned account row/declaration field(s) before the existing model pass.")
             grounded_variant_count = max(
                 (
                     len(field.field_metadata.get("grounded_product_variants", []))
@@ -4444,7 +4559,13 @@ def _extract_official_fields_with_ai(
                 "per month may map to integer 1; copy the original words exactly in evidence_quote. "
                 "For that count verified_value_json is the string 1 containing JSON integer 1, not a JSON-encoded string. "
                 "Keep the exact evidence_chunk_id supplied with the quoted text. Never invent a chunk id. "
-                "For financial_table_cell evidence, the first line is its exact column identity; never use a neighboring product column. Keep row labels and all header/value conditions. An annual fee does not establish annual interest-rate units. A rate needs explicit annual, APR or APY evidence. "
+                "For financial_table_cell evidence, the first line is its exact column identity; never use a neighboring product column. Keep row labels and all header/value conditions. "
+                "Copy the entire supplied named-column cell for a row fact rather than reconstructing a quote from headers and values; reconstructed quotes are not captured evidence. "
+                "Transactions per month followed by a single Unlimited or integer is an ordinary monthly allowance. Header fee-waiver conditions concern the fee, not the separate transaction row. "
+                "A complete account-wide unlimited statement is distinct from a sentence defining when money leaving the account counts as a transaction. Keep actual balance, eligibility, channel or cost qualifiers binding. "
+                "Use verified_captured_fields as already-proven values with their exact source quotes, still checking all supplied conflicts. Concentrate on unresolved comparison facts; do not repeat searches. "
+                "Additional CAD/USD savings accounts and preferred foreign exchange benefits do not denominate the main chequing account. Explicit main-account or lead-account currency conditions remain binding. "
+                "An annual fee does not establish annual interest-rate units. A rate needs explicit annual, APR or APY evidence. "
                 "Return a match or mismatch only when the value is supported by both a supplied official source URL and "
                 "an exact quote copied from the selected evidence chunk. Copy its source_url exactly into sources. A summary or a different URL is not evidence. Otherwise return unverified. Preserve canonical units: "
                 "rates are numeric percentage points per annum, money is numeric in product currency, durations and counts are "
@@ -4497,6 +4618,14 @@ def _extract_official_fields_with_ai(
                     }
                     for field in collected_fields
                     if field.field_name in ai_requested_fields
+                ],
+                "verified_captured_fields": [
+                    {"field_name": f.field_name, "value": f.candidate_value,
+                     "evidence_chunk_id": f.evidence_chunk_id,
+                     "evidence_quote": f.field_metadata.get("evidence_quote")}
+                    for f in collected_fields
+                    if f.field_metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+                    and f.evidence_chunk_id in candidate_map
                 ],
                 "candidate_chunks": [
                     {
@@ -4676,6 +4805,10 @@ def _select_official_grounding_chunks(
             break
     detail_docs = {field.source_document_id for field in collected_fields}
     companions = [c for c in candidates if c.source_document_id not in detail_docs]
+    companions.sort(key=lambda c: (
+        bool(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.lower()))),
+        bool(re.search(r"(?:excess|additional) (?:debit )?transactions?|monthly (?:plan )?fee|fee schedules?|rates? and fees", c.evidence_excerpt, re.I)),
+    ), reverse=True)
     if detail_docs and companions:
         companion_ids = {c.evidence_chunk_id for c in companions[:8]}
         selected = [c for c in selected if c.evidence_chunk_id not in companion_ids][:16] + companions[:8]

@@ -1,5 +1,19 @@
 # Admin pre-handover review and fixes
 
+## Independent slice: direct BMO Chequing comparison and shared improvements - 2026-10-03
+
+Objective: independently collect current official BMO Chequing required and proven optional facts without FPDS Admin API; compare with today's saved collection, reproduce losses and improve shared logic/process/prompts.
+Scope: bounded official detail/linked essential evidence reads; read-only retained DB/artifacts; local generic collection corrections, source-backed positive/adversarial regressions and documentation. Preserve other goal ownership/user changes.
+Exclusions: Admin API, canonical/registry/publication writes, deployment, new Runs, weakened essentials, invented facts, manual review, bank-specific exceptions and unbounded retries.
+Acceptance:
+- [x] Direct evidenced facts/unknowns for six saved Chequing candidates; exact currency/fee/ordinary transactions/conditional excess costs and same-source optional facts.
+- [x] Compare stored fields/receipts/stage inputs and reproduce causes without inferring provider/deployment behavior.
+- [x] Correct generic losses and matching prompts/process with cross-bank boundary/security regressions.
+- [x] Relevant Worker/API checks, final diff, documentation/limitations and git diff --check.
+Verification: official direct reads, private evidence comparison, production-code replay and exact-origin/type/financial regressions. Runtime changes are separate from publication yield.
+Status: completed locally; Worker 685 / API 575, repo doctor, saved-input/HTML replay and diff checks pass. Runtime deployment/live data outcomes remain separate. Retain shared goal for other owners.
+
+
 ## Independent slice: generic collection root-cause correction - 2026-10-03
 
 Latest Product Owner request: explain zero BMO approvals and improve shared

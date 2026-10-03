@@ -4207,6 +4207,26 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertGreaterEqual(detail_rows[0]["discovery_metadata"]["page_evidence_score"], 4)
         self.assertIn("AI parallel scorer evaluated 1 candidate link(s).", result.discovery_notes)
 
+    def test_main_fee_pdf_survives_large_navigation_without_external_fetch(self) -> None:
+        detail = "https://www.bmo.com/en-ca/main/personal/bank-accounts/chequing-accounts/usd-chequing"
+        pdf = "https://www.bmo.com/pdf/Agreements_Bank_Plans_and_Fees_for_Everyday_Banking.pdf"
+        nav = "<nav>" + "".join(f'<a href="/menu/{i}">Menu {i}</a>' for i in range(300)) + "</nav>"
+        html = nav + '<main>' + (
+            f'<a href="{pdf}" aria-label="Access the Agreements, Bank Plans and Fees for Everyday Banking">More details</a>'
+            '<a href="https://evil.test/pricing.pdf">Bank Plans and Fees</a>'
+            '<a href="/en-us/pricing.pdf">Bank Plans and Fees</a>'
+            '<a href="/privacy.pdf">Privacy notice</a>') + '</main>'
+        with patch("api_service.source_catalog.fetch_text") as fetch:
+            companions, _ = _discover_detail_companion_links(
+                detail_rows=[{"normalized_url":detail,"raw_url":detail}],country_code="CA",product_type="chequing",
+                fetch_policy=SimpleNamespace(),hostname="www.bmo.com",allowed_domains=("bmo.com",),
+                page_html_by_url={detail:html})
+        fetch.assert_not_called()
+        self.assertIn(pdf,[c.link.normalized_url for c in companions])
+        self.assertLessEqual(len(companions),2)
+        self.assertTrue(all(c.parent_detail_url==detail for c in companions))
+        self.assertFalse(any("evil.test" in c.link.normalized_url or "/en-us/" in c.link.normalized_url or "privacy" in c.link.normalized_url for c in companions))
+
     def test_selected_card_details_preserve_query_identified_pricing_companions(self) -> None:
         first_detail = "https://www.bankofamerica.com/credit-cards/products/travel-card"
         second_detail = "https://www.bankofamerica.com/credit-cards/products/cash-card"

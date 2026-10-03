@@ -1,5 +1,14 @@
 # Financial Product Field Contract
 
+Chequing clarification (2026-10-03): a complete own named-column monthly
+transaction row supplies a native integer allowance or explicit unlimited true.
+Keep exact headers/conditions; conflicting, conditional or special-channel rows
+remain unproven. Finite plans still require a separately proved excess charge.
+Fee-waiver thresholds and rewards balances are not general minimum balances.
+Ancillary CAD/USD savings and FX benefits do not set main-account denomination;
+explicit price/lead-account conflicts and unresolved cues still block defaults.
+No unit/type/schema change. See [policy](collection-accuracy-policy.md).
+
 Checking interest correction (2026-10-02): standard/display deposit rates and
 existing deposit qualifiers belong to the CA/US optional collection profile.
 They use the same percentage-point/native-type, annual-basis, exact official

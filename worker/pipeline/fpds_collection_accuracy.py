@@ -73,6 +73,30 @@ _EXCESS_ROW_LABEL = r"(?:Additional|Extra|Excess|Overage) transaction (?:fee|cha
 _ORDINARY_UNLIMITED = r"\bunlimited\s+(?:(?:ordinary|free|no fee|debit|everyday|day-to-day|banking|monthly)\s+){0,3}transactions?\b"
 
 
+def _monthly_transaction_row(field_name: str, value: object, quote: str) -> bool | None:
+    if field_name not in {"included_transactions", "unlimited_transactions_flag"}:
+        return None
+    rows = list(re.finditer(
+        r"(?mi)^[ \t]*Transactions? per month(?:[ \t]*\*?\d+(?:[ \t]*,[ \t]*\*?\d+)*)?[ \t]*\r?$", quote))
+    if not rows:
+        return None
+    if len(rows) != 1:
+        return False
+    # Named-column atomic cells have exactly one value. Keep the full header;
+    # multiple values, channel limits and conditional rows stay unproven.
+    tail = quote[rows[0].end():].strip()
+    if not re.fullmatch(r"Unlimited|\d+", tail, re.I):
+        return False
+    prefix = quote[:rows[0].start()]
+    if re.search(r"\b(?:if|when|provided|qualify|qualifying|only|ATM|ABM|wire|e[- ]?transfer)\b|public transit", prefix, re.I):
+        return False
+    if re.search(r"\b(?:not|no)\s+unlimited\b|\b\d+\s+(?:(?:free|included|debit|monthly)\s+)*transactions?\b", prefix, re.I):
+        return False
+    if field_name == "unlimited_transactions_flag":
+        return value is True and tail.casefold() == "unlimited"
+    return tail.isdigit() and int(tail) == value
+
+
 def _checking_table_value(field_name: str, value: object, quote: str) -> bool | None:
     if field_name not in {"included_transactions", "additional_transaction_fee"}:
         return None
@@ -267,17 +291,33 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name in {"interest_rate_summary", "purchase_interest_rate_summary", "fee_waiver_condition", "early_withdrawal_penalty"}:
             return text(value).casefold() == q.casefold()
         return bool(text(value)) and text(value).casefold() in q.casefold()
+    monthly_row = _monthly_transaction_row(field_name, value, quote)
+    if monthly_row is not None:
+        return monthly_row
+    if field_name == "interac_e_transfer_included" and contract.value_type == "boolean":
+        # Explicit inclusion proves true; absence never proves false. Retain
+        # send limits and excess fees separately from the included service.
+        rows = list(re.finditer(r"(?mi)^[ \t]*(?:Interac[ \t]+)?e[- ]?Transfer[^\n]*transactions?(?: per month)?(?:[^\w\n]|\*\d+)*[ \t]*$", quote))
+        if len(rows) == 1 and re.match(r"\s*Included(?:\s*\r?\n|\s*$)", quote[rows[0].end():], re.I):
+            return value is True and not re.search(r"\b(?:not included|if|when|provided|only for)\b", quote[rows[0].start():], re.I)
     table_value = _checking_table_value(field_name, value, quote)
     if table_value is not None:
         return table_value
-    if field_name in {"transaction_fee", "additional_transaction_fee", "unlimited_transactions_flag", "included_transactions"} and re.search(r"\b(?:ATM|ABM|wire|international|foreign|e[- ]?transfer)\s+(?:(?:additional|extra|excess|overage|debit|cash)\s+)*transactions?\b|\bunlimited\s+(?:ATM|ABM|wire|e[- ]?transfer)\b", q, re.I):
+    ordinary_and_transfer = field_name == "unlimited_transactions_flag" and bool(re.search(
+        _ORDINARY_UNLIMITED + r"\s+and\s+(?:Interac\s+)?e[- ]?transfer(?:\s+[^\w\s])?\s+transactions?", q, re.I))
+    if not ordinary_and_transfer and field_name in {"transaction_fee", "additional_transaction_fee", "unlimited_transactions_flag", "included_transactions"} and re.search(r"\b(?:ATM|ABM|wire|international|foreign|e[- ]?transfer)\s+(?:(?:additional|extra|excess|overage|debit|cash)\s+)*transactions?\b|\bunlimited\s+(?:ATM|ABM|wire|e[- ]?transfer)\b", q, re.I):
         # A charge/allowance for one special channel cannot prove general account pricing.
         return False
     if field_name == "transaction_fee" and re.search(r"\b(?:additional|extra|excess|overage)\s+transactions?", q, re.I):
         # Excess-only pricing must retain its distinct field; it is not per-use pricing.
         return False
     if contract.value_type == "boolean":
-        if field_name == "unlimited_transactions_flag" and re.search(r"\b(?:if|when|provided|qualify|qualifying)\b", q, re.I):
+        condition_context = re.sub(
+            r"\bWhen you move money out of your account\b[^.!?]{0,250}\bthat counts as a transaction[.]",
+            lambda match: match[0] if re.search(
+                r"\b(?:if|provided|qualify|qualifying|only|maintain|minimum|balance|fee|cost|subject)\b",
+                match[0], re.I) else "Transaction definition.", q, flags=re.I)
+        if field_name == "unlimited_transactions_flag" and re.search(r"\b(?:if|when|provided|qualify|qualifying)\b", condition_context, re.I):
             return False
         if field_name == "unlimited_transactions_flag" and re.search(
             r"\b(?:public transit|ATM|ABM|wire|e[- ]?transfer)(?: transactions?)?\s*[:–-]?\s*unlimited\b"
@@ -395,6 +435,13 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         return _transaction_count_supported(int(number), q)
     if field_name == "term_length_days":
         return bool(re.search(rf"(?<![\d.]){int(number)}\s*days?\b", q, re.I))
+    if field_name in {"monthly_fee", "public_display_fee"} and number > 0:
+        # A complete amount-first Fees card may be followed by a separately
+        # labelled reward bundle. Its bonus amount is not the monthly fee.
+        cards = list(re.finditer(r"(?mi)^Fees[ \t]*\n\$(\d+(?:\.\d+)?)[ \t]*\nmonthly fee[ \t]*(?:\nBundle offer:|\Z)", quote))
+        card_heads = list(re.finditer(r"(?mi)^Fees[ \t]*\n\$(\d+(?:\.\d+)?)[ \t]*\nmonthly fee\b", quote))
+        if card_heads:
+            return len(card_heads) == len(cards) == 1 and Decimal(cards[0][1]) == number
     if contract.unit == "currency_amount":
         # A waiver balance or example must not stand in for a fee.
         amounts = re.findall(r"(?:[$€£]|\b(?:CAD|USD|EUR|GBP)\s*)(\d[\d,]*(?:\.\d+)?)", q, re.I)
@@ -473,13 +520,40 @@ def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) ->
 
 
 
+def product_currency_context(record: Mapping, excerpt: str) -> str:
+    """Classify denomination without transferring companion-account benefits.
+
+    Only these complete ancillary clauses are excluded from currency screening.
+    All original evidence remains available to financial/condition validation.
+    Price, lead-account denomination and unresolved foreign cues still block.
+    """
+    identity = str(record.get("product_name") or "")
+    if record.get("product_type") != "chequing" and not re.search(r"\bche(?:ck|qu)ing\b", identity, re.I):
+        return excerpt
+    context = excerpt
+    if re.search(r"(?mi)^Additional accounts[ \t]*$", context):
+        context = re.sub(
+            r"(?mi)^(?:Up to two )?Canadian dollar (?:and|or) (?:U\.?S\.?|US) dollar "
+            r"(?:chequing and savings account|Savings Account)s? at no (?:additional )?cost(?:[^\w$\n]|\*\d+)*$",
+            "Companion accounts benefit", context)
+    context = re.sub(
+        r"(?mi)^(?:Get a )?Canadian (?:and|or) U\.?S\.? dollar Savings Account "
+        r"(?:to use )?at no additional cost[.]?$", "Companion savings account benefit", context)
+    context = re.sub(
+        r"(?mi)^(?:Preferred )?exchange rate for U\.?S\.? dollars?(?:[ \t]*\*?\d+)?[ \t]*$",
+        "Foreign exchange benefit", context)
+    context = re.sub(r"\bPreferred exchange rate for U\.?S\.? dollars?(?:\s*\*\d+)?",
+        "Foreign exchange benefit", context, flags=re.I)
+    return context
+
+
 def country_currency_fallback(record: Mapping, evidence: list[dict]) -> str | None:
     """Resolve undisclosed currency without discarding conflicting source context."""
     currency = default_currency_for_country(record.get("country_code"))
     if not currency:
         return None
     context = " ".join([str(record.get("product_name") or ""),
-                        *(str(e.get("evidence_excerpt") or "") for e in evidence)])
+                        *(product_currency_context(record, str(e.get("evidence_excerpt") or "")) for e in evidence)])
     if any(re.search(pattern, context, re.I) for pattern in CURRENCY_PATTERNS.values()):
         return None
     declared = str(record.get("currency") or "")
@@ -538,7 +612,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         elif not exact_quote(quote, e.get("evidence_excerpt")):
             reason = "exact_evidence_missing"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
-            any(code != record.get("currency") and re.search(pattern, str(e.get("evidence_excerpt") or ""), re.I)
+            any(code != record.get("currency") and re.search(pattern, product_currency_context(record, str(e.get("evidence_excerpt") or "")), re.I)
                 for code, pattern in CURRENCY_PATTERNS.items())
             or ("€" in str(quote) and record.get("currency") != "EUR")
             or ("£" in str(quote) and record.get("currency") != "GBP")
