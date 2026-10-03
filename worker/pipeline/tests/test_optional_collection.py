@@ -35,6 +35,10 @@ def extract(ctx, facts, *, overrides=None):
             "verified_value_json": json.dumps(value), "evidence_chunk_id": name,
             "evidence_quote": quote, "confidence": .99, "sources": [{"url": URL}],
             **(overrides or {}).get(name, {})})
+    if not chunks:
+        chunks.append(EvidenceChunkCandidate("capture", "parsed", 0, "section", "product", None, "en",
+            "Example official product identity. Terms unavailable.", {"source_url": URL},
+            "source", "snapshot", "EXAMPLE", ctx.country_code, "html"))
     with patch(INVOKE, return_value=({"fields": entries}, {"web_search_sources": [{"url": URL}]})) as call:
         result = _extract_official_fields_with_ai(context=ctx, candidates=chunks,
             requested_fields=list(ctx.source_metadata["expected_fields"]), collected_fields=[])

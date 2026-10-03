@@ -7465,7 +7465,7 @@ X"""
         finally:
             rmtree(temp_path, ignore_errors=True)
 
-    def test_standard_product_type_uses_official_web_grounding_when_configured(self) -> None:
+    def test_standard_product_type_uses_captured_official_grounding_when_configured(self) -> None:
         temp_path = _prepare_workspace_temp_dir("extraction-standard-official-grounding")
         try:
             context = ExtractionDocumentContext(
@@ -7564,9 +7564,9 @@ X"""
             # same official evidence pass without becoming a prerequisite.
             self.assertEqual(fields_by_name["eligibility_text"].extraction_method, "openai_official_grounding")
             call = invoke_model.call_args.kwargs
-            self.assertTrue(call["require_web_search"])
+            self.assertFalse(call["require_web_search"])
             self.assertEqual(call["reasoning_effort"], "high")
-            self.assertEqual(call["web_search_allowed_domains"], ["td.com"])
+            self.assertIsNone(call["web_search_allowed_domains"])
             self.assertIn("eligibility_text", call["payload"]["supplemental_fields"])
             self.assertNotIn("eligibility_text", call["payload"]["required_comparison_fields"])
             invoke_model.assert_called_once()

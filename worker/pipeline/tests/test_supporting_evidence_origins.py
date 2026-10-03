@@ -71,9 +71,15 @@ class SupportingEvidenceOriginTests(unittest.TestCase):
         item,origin=fixture()
         repo=PsqlNormalizationRepository(NormalizationDatabaseConfig('postgres://unused','public'))
         repo._resolved_schema='public'
-        with patch.object(repo,'_execute',return_value=json.dumps([origin])) as query:
+        origins = [origin, *[
+            {'evidence_chunk_id': link.evidence_chunk_id, 'source_document_id': link.source_document_id,
+             'snapshot_id': link.source_snapshot_id, 'evidence_excerpt': link.evidence_text_excerpt,
+             'source_url': DETAIL, 'bank_code': 'BANK', 'country_code': 'CA', 'run_id': 'run-current'}
+            for link in item.evidence_links if link.evidence_chunk_id != 'currency']]
+        with patch.object(repo,'_execute',return_value=json.dumps(origins)) as query:
             resolved=repo.resolve_evidence_origins(run_id='run-current',inputs=[replace(item,evidence_origins={'invented':{'source_url':DETAIL}})])[0]
-        self.assertEqual(resolved.evidence_origins,{'currency':origin})
+        self.assertEqual(resolved.evidence_origins, {row['evidence_chunk_id']: row for row in origins})
+        self.assertTrue(resolved.evidence_origins_resolved)
         self.assertTrue(self.normalize(resolved).normalized_candidate_record['candidate_payload']['_collection_accuracy']['accepted'])
         sql=query.call_args.args[0]
         self.assertIn("rsi.selected_snapshot_id = ss.snapshot_id",sql)

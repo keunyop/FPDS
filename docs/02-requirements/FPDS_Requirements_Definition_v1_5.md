@@ -1,5 +1,15 @@
 # FPDS Requirements Definition (PRD / Requirements Spec)
 
+## Collection evidence correction - 2026-10-03
+
+The Product Owner requests generic correction of zero BMO approvals. Implemented:
+captured-only grounding, HTML DOM preservation, explicit financial-table product
+columns, full current-run origin validation and non-product identity screening.
+This corrects evidence handling under D-090; financial publication prerequisites,
+optional collection, supported scope and human account/security controls remain.
+Deployment, paid recollection and canonical/public writes were not performed.
+See [root-cause analysis and regression evidence](../00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+
 
 ## Approved Public required/optional presentation - 2026-10-01
 

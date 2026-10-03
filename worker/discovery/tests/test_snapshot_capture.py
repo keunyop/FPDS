@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import unittest
+from unittest.mock import patch
 
 from worker.discovery.fpds_discovery.drift import DriftIssue, PreflightDriftResult, SourcePreflightCheck
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, FetchedResponse
@@ -20,6 +22,19 @@ class SnapshotCaptureTests(unittest.TestCase):
     def setUp(self) -> None:
         self.registry = load_registry(DEFAULT_REGISTRY_PATH)
         self.fetch_policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)
+
+    def test_default_capture_keeps_query_identified_pdf_format(self) -> None:
+        source = replace(CaptureSource.from_registry_source(self.registry.by_source_id("TD-SAV-007")),
+            resolved_url="https://www.td.com/document?documentId=123")
+        service = SnapshotCaptureService(fetch_policy=self.fetch_policy,
+            storage_config=SnapshotStorageConfig(driver="filesystem", env_prefix="dev", snapshot_object_prefix="snapshots",
+                retention_class="hot", filesystem_root="ignored-for-tests"), object_store=_RecordingObjectStore())
+        with patch("worker.discovery.fpds_snapshot.capture.fetch_response", return_value=_fetched_response(
+            body=b"%PDF-1.4 official disclosure", content_type="application/pdf", final_url=source.resolved_url)) as fetch:
+            result = service.capture_sources(run_id="run-pdf", sources=[source])
+        self.assertEqual(result.source_results[0].snapshot_action, "stored")
+        self.assertEqual(fetch.call_args.kwargs["browser_fallback_format"], "pdf")
+        fetch.assert_called_once()
 
     def test_capture_stores_html_and_pdf_snapshots_with_expected_metadata(self) -> None:
         html_source = CaptureSource.from_registry_source(self.registry.by_source_id("TD-SAV-002"))

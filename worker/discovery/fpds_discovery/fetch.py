@@ -294,18 +294,10 @@ def _resolve_browser_fallback_format(
 ) -> Literal["pdf", "html"]:
     if requested_format is not None:
         return requested_format
-    hostname = str(urlparse(url).hostname or "").lower()
-    if (
-        hostname
-        and policy.browser_dom_snapshot_domains
-        and host_matches_allowed_domains(hostname, policy.browser_dom_snapshot_domains)
-    ):
-        # Vancity's rendered DOM contains exact Sitecore product-card fields.
-        # A browser PDF visually captures the page but corrupts or disconnects
-        # those values during text extraction, so configured hosts retain DOM
-        # as the auditable snapshot payload.
-        return "html"
-    return "pdf"
+    # Preserve HTML structure, headings, accessible conditions and table columns.
+    # Print-to-PDF can clip responsive columns and repeat modal overlays on every
+    # page. Native document routes still retain PDF; explicit callers take priority.
+    return "pdf" if urlparse(url).path.lower().endswith(".pdf") else "html"
 
 
 def validate_fetch_url(url: str, policy: DiscoveryFetchPolicy) -> str:

@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 from worker.pipeline.fpds_extraction.models import ExtractionDocumentContext
+from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
 from worker.pipeline.fpds_extraction.service import _extract_official_fields_with_ai, _extract_term_length_days
 from worker.pipeline.fpds_approval_policy import collection_fields_for_product_type, comparison_quality, dynamic_repair_fields
 from worker.pipeline.fpds_extraction.service import _extract_interest_calculation_method, _extract_interest_rate_summary, _ai_verified_value_is_supported_by_quote
@@ -27,7 +28,8 @@ class PublicAlignmentTests(unittest.TestCase):
             "allowed_domains": ["bank.example"], "source_url": "https://bank.example/cd",
         })
         with patch("worker.pipeline.fpds_extraction.service.invoke_openai_json_schema", return_value=({"fields": []}, {})) as call:
-            _extract_official_fields_with_ai(context=context, candidates=[], requested_fields=fields, collected_fields=[])
+            _extract_official_fields_with_ai(context=context, candidates=[EvidenceChunkCandidate("capture", "parsed", 0, "section", "Product", None, "en",
+                "Official product terms.", {}, "document", "snapshot", "BANK", "US", "html")], requested_fields=fields, collected_fields=[])
         call.assert_called_once()
         payload = call.call_args.kwargs["payload"]
         self.assertIn("early_withdrawal_penalty", payload["required_comparison_fields"])
@@ -45,7 +47,8 @@ class PublicAlignmentTests(unittest.TestCase):
             "allowed_domains": ["bank.example"], "source_url": "https://bank.example/checking",
         })
         with patch("worker.pipeline.fpds_extraction.service.invoke_openai_json_schema", return_value=({"fields": []}, {})) as call:
-            _extract_official_fields_with_ai(context=context, candidates=[], requested_fields=["monthly_fee"], collected_fields=[])
+            _extract_official_fields_with_ai(context=context, candidates=[EvidenceChunkCandidate("capture", "parsed", 0, "section", "Product", None, "en",
+                "Official product terms.", {}, "document", "snapshot", "BANK", "US", "html")], requested_fields=["monthly_fee"], collected_fields=[])
         payload = call.call_args.kwargs["payload"]
         self.assertIn("additional_transaction_fee", payload["requested_fields"])
         self.assertIn("unlimited_transactions_flag", payload["requested_fields"])

@@ -1,5 +1,14 @@
 # FPDS RAID Log
 
+## Current collection evidence risk - 2026-10-03
+
+Zero BMO approvals included demonstrated capture/source/provenance loss and
+non-product selection; shared corrections pass saved and independent-bank tests.
+Deployment and fresh model behavior remain unverified, and missing current-input
+rate/term/security facts still require automatic exclusion. Do not interpret the
+27 rejected candidates as 27 verified products or as bank disclosure absence.
+See [evidence, mitigation and limits](bmo-generic-collection-root-cause-2026-10-03.md).
+
 Version: 2.0
 Date: 2026-04-22
 Status: Active current baseline

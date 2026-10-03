@@ -76,6 +76,7 @@ class NormalizationInput:
 
     # Populated only from current-run captured evidence by the repository.
     evidence_origins: dict[str, dict[str, object]] = field(default_factory=dict)
+    evidence_origins_resolved: bool = False
 
 
 @dataclass(frozen=True)

@@ -111,31 +111,42 @@ _RATE_CONTEXT_FIELDS = {
 
 
 def _accuracy_evidence(*, item: NormalizationInput, run_id: str) -> list[dict[str, object]]:
-    """Bind supporting URLs to captured current-run evidence, never model URLs."""
+    """Keep canonical current-run chunks separate from per-field scoped excerpts.
+
+    A scoped link must be a contiguous piece of the retained capture. Validation
+    always sees the full original context, including conditions omitted by a link.
+    Multiple links cannot overwrite one chunk's source with a shorter excerpt.
+    """
     from worker.pipeline.fpds_collection_accuracy import text
 
-    evidence = []
+    evidence = {}
     for link in item.evidence_links:
         origin = item.evidence_origins.get(link.evidence_chunk_id)
         source_url = None
+        excerpt = link.evidence_text_excerpt
         if origin is not None:
+            scoped = text(link.evidence_text_excerpt)
             if (origin.get("run_id") == run_id
                     and origin.get("bank_code") == item.bank_code
                     and origin.get("country_code") == item.country_code
                     and origin.get("source_document_id") == link.source_document_id
                     and origin.get("snapshot_id") == link.source_snapshot_id
                     and origin.get("evidence_chunk_id") == link.evidence_chunk_id
-                    and text(origin.get("evidence_excerpt")) == text(link.evidence_text_excerpt)):
+                    and scoped and scoped in text(origin.get("evidence_excerpt"))):
                 source_url = origin.get("source_url")
-        elif (link.source_document_id == item.source_document_id
+                excerpt = origin["evidence_excerpt"]
+        elif (not item.evidence_origins_resolved
+                and link.source_document_id == item.source_document_id
                 and link.source_snapshot_id == item.snapshot_id):
             source_url = (item.normalized_source_url
                           or item.source_metadata.get("normalized_source_url")
                           or item.source_metadata.get("source_url"))
-        evidence.append({"evidence_chunk_id": link.evidence_chunk_id,
-                         "evidence_excerpt": link.evidence_text_excerpt,
-                         "source_url": source_url})
-    return evidence
+        row = {"evidence_chunk_id": link.evidence_chunk_id,
+               "evidence_excerpt": excerpt, "source_url": source_url}
+        previous = evidence.get(link.evidence_chunk_id)
+        if previous is None or (source_url and not previous["source_url"]):
+            evidence[link.evidence_chunk_id] = row
+    return list(evidence.values())
 
 
 class NormalizationService:

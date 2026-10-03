@@ -571,6 +571,15 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         verified.append("public_display_fee")
     identity_verified = "product_name" in verified and payload.get("product_name") == record.get("product_name")
     reasons = []
+    from worker.product_source_policy import non_product_identity_reason
+    identity_metadata = source_metadata.get("discovery_metadata") or {}
+    identity_reason = non_product_identity_reason(
+        product_type=str(record.get("product_type") or ""),
+        primary_heading=str(identity_metadata.get("primary_heading") or "") if isinstance(identity_metadata, Mapping) else "",
+        page_title=str(record.get("product_name") or ""),
+    )
+    if identity_reason:
+        reasons.append(identity_reason)
     if not identity_verified:
         reasons.append("product_identity_unverified")
     if source_metadata.get("discovery_role") != "detail":

@@ -39,7 +39,7 @@ from api_service.source_registry_utils import (
     load_seed_source_registry_rows,
     normalize_source_url,
 )
-from worker.product_source_policy import unavailable_for_new_customers
+from worker.product_source_policy import unavailable_for_new_customers, non_product_identity_reason
 from worker.discovery.fpds_discovery.discovery import (
     ExtractedLink,
     extract_links,
@@ -4965,7 +4965,9 @@ def _invoke_openai_parallel_scorer(*, model_id: str, api_key: str, payload: dict
             "Return whether each candidate is likely an official public detail page, a supporting page, or irrelevant for the given product type. "
             "Use a relevance_score from 0 to 10. A detail page must describe one named financial product; category lists, rates or fee tables, calculators, "
             "educational articles, guides, resource centres, and banking-service pages such as transfers or debit-card instructions are supporting pages, "
-            "not product detail pages."
+            "not product detail pages. Insurance, creditor protection, prepaid cards, card-access/security instructions and search tools "
+            "are not the requested credit, deposit or lending product. Judge the primary identity; insurance benefits on a named "
+            "credit card do not make that card an insurance page. Supporting pages provide evidence only; never promote them because they contain rates or fees."
         ),
         "input": [
             {
@@ -6514,6 +6516,12 @@ def _score_page_evidence(
         product_type=product_type,
         fingerprint=" ".join([raw_url, title_text, primary_heading]).lower(),
     )
+    prominent_identity_reason = non_product_identity_reason(
+        product_type=_canonical_product_type_code(product_type),
+        primary_heading=parser.primary_heading, page_title=title_text,
+    )
+    if prominent_identity_reason:
+        scope_exclusion_reason = prominent_identity_reason
     if unavailable_for_new_customers(html_text, product_type=_canonical_product_type_code(product_type), product_name=primary_heading or title_text.split("|", 1)[0]):
         scope_exclusion_reason = "product_unavailable_for_new_customers"
     multi_product_family_overview = _looks_like_multi_product_family_overview(

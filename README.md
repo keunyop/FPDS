@@ -1,5 +1,7 @@
 # FPDS Workspace
 
+Generic collection correction (2026-10-03): owned captured-only grounding, default HTML DOM fallback, parser v6 explicit product/financial columns, full current-run chunk origins and prominent non-product screening. Worker 674 / API 574 pass. Deployment and live collection remain separate. [Diagnosis and verification](docs/00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+
 Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. [Implementation and verification](docs/00-governance/generic-collection-evidence-improvements-2026-10-02.md).
 
 Latest optional-interest correction (2026-10-02): CA/US checking requests verified deposit rates and existing qualifiers as optional facts; retrieval uses current profile fields even with older registry lists. The shared gate distinguishes separate deposit-insurance limits from standalone annual rates and extraction rejects companion-account/overdraft interest. Worker 643 / API 539 pass. No live collection, data writes or deployment; deploy the collection runtime/API for future Admin collections. [Diagnosis and verification](docs/00-governance/optional-checking-rates-2026-10-02.md).

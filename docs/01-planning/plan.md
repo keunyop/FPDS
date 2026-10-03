@@ -1,6 +1,8 @@
 # FPDS Project Execution Plan
 
-Latest authorized code slice (2026-10-02): generic source-selection and captured-evidence improvements implemented with Worker 659 / API 550 verification; existing financial prerequisites and scope remain. Deployment/live collection remain separate. [Outcome](../00-governance/generic-collection-evidence-improvements-2026-10-02.md).
+Latest authorized code slice (2026-10-03), within existing collection work: generic BMO root-cause correction implemented; Worker 674 / API 574 tests pass. Financial essentials and scope remain; deployment/live collection remain separate. [Diagnosis and verification](../00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+
+Prior authorized code slice (2026-10-02): generic source-selection and captured-evidence improvements implemented with Worker 659 / API 550 verification; existing financial prerequisites and scope remain. Deployment/live collection remain separate. [Outcome](../00-governance/generic-collection-evidence-improvements-2026-10-02.md).
 
 Latest authorized staged data operation: [10 additional products published and unsupported targets excluded](../00-governance/staged-unpublished-recovery-2026-10-01.md). Public API CA 29 / US 5, total 34; all 404 initially unpublished assessed, 394 removed from this one-off publication work list with records/history preserved. Worker 624 / API 539 and repository doctor pass, zero model calls or manual reviews. Shared collection changes remain local; runtime deployment is separate. Earlier dated results below are historical.
 

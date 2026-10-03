@@ -152,7 +152,7 @@ class SnapshotCaptureService:
         fetch_policy: DiscoveryFetchPolicy,
         storage_config: SnapshotStorageConfig,
         object_store: SnapshotObjectStore,
-        fetcher: Callable[[str, DiscoveryFetchPolicy], FetchedResponse] = fetch_response,
+        fetcher: Callable[[str, DiscoveryFetchPolicy], FetchedResponse] | None = None,
         max_attempts: int = 3,
         max_concurrency: int = 4,
     ):
@@ -240,7 +240,11 @@ class SnapshotCaptureService:
         while attempt_count < self.max_attempts:
             attempt_count += 1
             try:
-                fetched = self.fetcher(source.resolved_url, self.fetch_policy)
+                if self.fetcher is None:
+                    fetched = fetch_response(source.resolved_url, self.fetch_policy,
+                        browser_fallback_format="pdf" if source.source_type == "pdf" else None)
+                else:
+                    fetched = self.fetcher(source.resolved_url, self.fetch_policy)
                 _validate_fetched_payload(source=source, fetched=fetched)
                 fetch_warning_count = len(preflight_issues) + int(
                     fetched.headers.get("x-fpds-browser-fallback-attempted") == "true"

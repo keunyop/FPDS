@@ -5,8 +5,16 @@ proof of product retirement. Unknown or transient outcomes remain collectable.
 """
 from __future__ import annotations
 
+from pathlib import Path
 import re
+import sys
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:  # pragma: no cover - API-only environment entrypoint
+    sys.path.insert(0, str(REPO_ROOT))
+
+from worker.product_source_policy import non_product_identity_reason
 
 BOUNDARY_REASONS = frozenset({
     "multi_product_family_overview", "hub_page_not_detail",
@@ -40,6 +48,15 @@ def source_block_reason(row: dict[str, Any], *, revalidate: bool = False) -> str
             return "terminal_source_failure"
     if row.get("discovery_role") != "detail":
         return None
+    metadata = row.get("discovery_metadata") or {}
+    if isinstance(metadata, dict):
+        reason = non_product_identity_reason(
+            product_type=str(row.get("product_type") or ""),
+            primary_heading=str(metadata.get("primary_heading") or ""),
+            page_title=str(metadata.get("page_title") or ""),
+        )
+        if reason:
+            return reason
     # The newest candidate and decision are selected in SQL. A newer pass or
     # approval must supersede an older hold; system deduplication is not a veto.
     state = row.get("latest_review_state")

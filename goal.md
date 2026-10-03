@@ -1,5 +1,92 @@
 # Admin pre-handover review and fixes
 
+## Independent slice: generic collection root-cause correction - 2026-10-03
+
+Latest Product Owner request: explain zero BMO approvals and improve shared
+collection logic/prompts, addressing demonstrated architectural defects across
+banks. Preserve other goal ownership and existing journal edits.
+Scope: read-only retained BMO stage/capture/evidence diagnosis; shared discovery,
+snapshot/parser/retrieval, extraction/normalization/provenance and prompts where
+reproduced failures occur; multi-bank regression evidence and matching docs.
+Exclusions: weakened financial/identity/currency gates, invented facts, bank-specific
+exceptions, human review, new markets/types/UI, deployment, paid live recollection
+and canonical/public/registry mutations.
+Acceptance:
+- [x] Trace all 27 exclusions to captured inputs/provider/stage outputs and distinguish
+      missing bank disclosure, capture/discovery defects and evidence/provenance loss.
+- [x] Reproduce demonstrated failures with saved real inputs and independent bank
+      fixtures; establish positive and adversarial regression evidence before extension.
+- [x] Fix shared logic/contracts/prompts together within existing bounded call/fetch
+      budgets, preserve exact financial meaning and fail-closed validation.
+- [x] Run relevant Worker/API regressions and final boundary/harness checks, inspect
+      diff, document diagnosis/limitations/runtime deployment and git diff --check.
+Status: completed locally; other goal slices retained. Deployment and data operations
+remain outside this slice.
+Verification: provider-disabled saved-input replay, deterministic evidence/provenance
+checks, representative cross-bank fixtures, no paid calls/data writes; existing
+financial/security/budget failure regressions remain passing.
+
+## Independent slice: remaining BMO failure retry after active queue - 2026-10-02
+
+Product Owner again requests the remaining stopped Runs run sequentially.
+Objective: keep the live Personal Loan/Savings queue intact, then retry the
+confirmed pre-ingestion Mortgage DB-disconnection failure once using the normal
+catalog enqueue/preflight and automatic financial gates. Existing completed Runs
+are excluded; no permanent scheduler, deployment or financial-gate changes.
+Acceptance:
+- [x] Verify global Run inventory, original worker, exact failure and no persisted
+      Mortgage source/model output that requires a downstream-only continuation.
+- [x] Prepare and launch one bounded hidden follow-on worker, waiting for active
+      collection to end before enqueueing only Mortgage with original retry provenance.
+- [x] Verify live handoff/status, document the operation and run git diff --check.
+Verification: independent DB readback and process/log checks, mocked wait/eligibility
+control checks, compilation and live waiting-state readback. Later retry completion
+is not a prerequisite for handoff and must not be claimed in the final status.
+
+Status: follow-on handoff verified at 22:12:14 Vancouver. Personal Loan and
+Savings continue in the original worker; a separate private waiting process
+will enqueue only the failed Mortgage once afterward. Enqueue has not occurred
+and final collection results remain outstanding. Preserve other goal ownership.
+
+Final results verified 23:42:04 Vancouver: original remaining scopes and the
+Mortgage replacement completed; zero active Runs. Seven completed scope outcomes
+produce 27 excluded candidates, zero approvals/reviews and zero BMO public
+products. Mortgage replacement finished 23:40:37; prior failure/retry history
+remains preserved. Sequential operation has finished; no further rerun is queued.
+
+## Independent slice: resume stopped BMO batch - 2026-10-02
+
+Latest Product Owner request authorizes retry from the stopped point.
+Objective: resume collection_8A4zrym7vicR7aaM once, preserving its seven Run IDs,
+completed source captures/parsing and exact stored financial evidence.
+Scope: Chequing extraction persistence and downstream normal gates; original six
+queued BMO scopes through the existing bounded sequential runner. Preserve all
+other goals and unrelated changes. This is a one-off operational recovery.
+Exclusions: other banks/batches, new UI/scheduler/permanent recovery feature,
+deployment, waived evidence/financial gates, human review and unbounded retries.
+Acceptance:
+- [x] Confirm DB/DNS/storage readiness, original ownership and no duplicate worker.
+- [x] Prove and preserve current saved Chequing inputs/results; skip completed
+      capture/parse and avoid repeating completed provider requests where reusable.
+- [x] Resume original Chequing and six queued scopes exactly once, renewing only
+      this batch's state and recording recovery provenance.
+- [x] Verify actual persisted continuation and autonomous worker handoff; distinguish
+      completed results from scopes still processing in the final status.
+- [x] Record operation/evidence/verification, inspect changes and git diff --check.
+Verification: read-only before/after DB snapshots, source/snapshot/chunk and private
+artifact/cache identity checks, provider-disabled reuse rehearsal, normal pipeline
+services, process/log/Run readback. No application code change is required.
+
+Status: one-off resumption and autonomous handoff complete. At 16:33:10 Vancouver,
+nine Chequing extraction executions are persisted and normalization is active;
+six original scopes remain queued in the detached sequential worker. This does
+not assert finished collection results. Preserve this file for other goal owners.
+
+Follow-up 16:58:20 Vancouver: global nonterminal inventory contains only the
+six remaining BMO Runs. Chequing finished at 16:34:15; the existing live worker
+automatically entered Credit Card discovery and retains GIC, LOC, Mortgage,
+Personal Loan and Savings in its sequential loop. No duplicate launch needed.
+
 ## Independent slice: 2026-10-02 collection Run visibility and Public clarity
 
 Ownership: preserve earlier unresolved goals and unrelated in-progress changes.

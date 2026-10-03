@@ -1,5 +1,22 @@
 # Product collection accuracy and automatic acceptance
 
+## Captured grounding and structural evidence correction - 2026-10-03
+
+The shared extraction grounding pass now uses only current owned official captures
+and bounded captured companions, with exact supplied source/chunk/quote citations;
+it does not repeat discovery web search. Search remains in bounded discovery and
+essential coverage repair. HTML fallback preserves rendered DOM; native/explicit
+PDF documents remain PDF. Parser v6 retains explicit financial-table column/row
+header relationships and complete conditions/linked local notes without guessing
+missing/ambiguous relationships. Only matching named columns enter atomic proof.
+Normalization resolves scoped field links against one full authoritative current-run
+chunk, preserving omitted conditions and preventing duplicate-origin overwrite.
+Missing resolved origins fail closed. Prominent insurance/service/search-tool and
+prepaid identities cannot become supported financial products; supporting evidence
+and named products with insurance benefits remain available. Existing units,
+conditional essentials, optional rules and automatic receipt gates are unchanged.
+See [diagnosis, verification and limits](../00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+
 ## Requested Run visibility - 2026-10-02
 
 The latest Product Owner instruction supersedes the prior D-089 boundary that

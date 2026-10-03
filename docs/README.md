@@ -1,5 +1,7 @@
 # FPDS Docs Map
 
+Generic collection correction (2026-10-03): owned captured-only grounding, default HTML DOM fallback, parser v6 explicit product/financial columns, full current-run chunk origins and prominent non-product screening. Worker 674 / API 574 pass. Deployment and live collection remain separate. [Diagnosis and verification](00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+
 Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. [Implementation and verification](00-governance/generic-collection-evidence-improvements-2026-10-02.md).
 
 Latest shared collection correction: [verified optional checking rates](00-governance/optional-checking-rates-2026-10-02.md). Saved Alterna input failures reproduced and fixed generically for CA/US; Worker 643 / API 539 pass. Deployment and live data changes remain separate.

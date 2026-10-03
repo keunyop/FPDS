@@ -1,4 +1,4 @@
-"""Conservative product-scoped availability checks on captured official text."""
+"""Conservative product identity and availability checks on official evidence."""
 from datetime import UTC, date, datetime
 import re
 from html.parser import HTMLParser
@@ -114,3 +114,24 @@ def unavailable_for_new_customers(content: str, *, product_type: str, product_na
             continue
         return True
     return False
+
+
+def non_product_identity_reason(*, product_type: str, primary_heading: str = "", page_title: str = "") -> str | None:
+    """Classify only the prominent identity, never benefits or navigation text.
+
+    Insurance and account tools remain usable as bounded supporting evidence;
+    they cannot themselves identify one of the supported financial products.
+    An unknown title is left for the normal evidence and boundary gates.
+    """
+    if product_type not in _TYPE_PATTERNS:
+        return None
+    identity = re.sub(r"\s+", " ", primary_heading or page_title.split("|", 1)[0]).strip()
+    if not identity:
+        return None
+    if re.search(r"\b(?:search tool|rate calculator|loan calculator|mortgage calculator|payment calculator)\b", identity, re.I):
+        return "non_product_service_flow"
+    if re.search(r"\b(?:mortgage|loan|credit card|line of credit|mastercard|visa)\b.{0,35}\b(?:insurance|access details|security protection|security features)\b", identity, re.I):
+        return "non_product_service_flow"
+    if product_type == "credit-card" and re.search(r"\bprepaid\b", identity, re.I):
+        return "non_product_service_flow"
+    return None

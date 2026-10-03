@@ -19,6 +19,7 @@ from worker.discovery.fpds_discovery.fetch import (
     FetchedResponse,
     NonRetryableFetchError,
     _should_try_browser_rendered_rate_fallback,
+    _resolve_browser_fallback_format,
     fetch_response,
     fetch_text,
     validate_fetch_url,
@@ -436,6 +437,24 @@ class FetchPolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_fetch_url("https://www.example.com/unapproved", policy)
 
+    def test_browser_fallback_preserves_html_structure_on_every_bank(self):
+        html = '<html><main><h1>Everyday Savings</h1><table><tr><th>Annual rate</th><td>2.50%</td></tr></table></main></html>'
+        for host in ('bmo.com', 'td.com', 'examplebank.com'):
+            policy = DiscoveryFetchPolicy(allowed_domains=(host,), block_private_networks=False,
+                browser_executable='browser', browser_fallback_domains=(host,))
+            with self.subTest(host=host), patch(
+                'worker.discovery.fpds_discovery.fetch.urllib.request.build_opener') as opener, patch(
+                'worker.discovery.fpds_discovery.fetch.subprocess.run',
+                return_value=_CompletedProcess(returncode=0, stdout=html, stderr='')) as browser:
+                opener.return_value.open.side_effect = socket.timeout('timed out')
+                response = fetch_response('https://'+host+'/savings', policy)
+            self.assertEqual(response.content_type, 'text/html')
+            self.assertEqual(response.body.decode('utf8'), html)
+            self.assertIn('--dump-dom', browser.call_args.args[0])
+            self.assertFalse(any(str(arg).startswith('--print-to-pdf=') for arg in browser.call_args.args[0]))
+        self.assertEqual(_resolve_browser_fallback_format('https://examplebank.com/terms.pdf', policy, requested_format=None), 'pdf')
+        self.assertEqual(_resolve_browser_fallback_format('https://examplebank.com/document?id=1', policy, requested_format='pdf'), 'pdf')
+
     def test_fetch_response_uses_browser_pdf_fallback_for_eligible_timeout(self) -> None:
         policy = DiscoveryFetchPolicy(
             allowed_domains=("bmo.com",),
@@ -463,7 +482,7 @@ class FetchPolicyTests(unittest.TestCase):
             patch("worker.discovery.fpds_discovery.fetch.tempfile.TemporaryDirectory", return_value=_TemporaryDirectoryStub(temp_dir)),
             patch("worker.discovery.fpds_discovery.fetch.subprocess.run", side_effect=fake_browser_run),
         ):
-            response = fetch_response("https://www.bmo.com/main/personal/test/", policy)
+            response = fetch_response("https://www.bmo.com/main/personal/test/", policy, browser_fallback_format="pdf")
 
         self.assertEqual(response.content_type, "application/pdf")
         self.assertEqual(response.status_code, 200)

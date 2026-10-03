@@ -12,7 +12,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v5"
+PARSER_VERSION = "fpds-parse-chunk-v6"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -71,6 +71,7 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     )
 
     sections.extend(_rate_table_evidence_sections(soup))
+    sections.extend(_linked_financial_table_cells(soup))
     full_text, segments = _finalize_segments(sections)
     if not full_text.strip():
         raise ValueError("HTML parser produced no usable text.")
@@ -145,6 +146,66 @@ def _rate_table_evidence_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                 continue  # Do not truncate conditions or create partial proof.
             output.append(_RawSegment("rate_table_schedule" if term_schedule else "rate_table_row",
                 f"rate-table-{index}-row-{row_index}", None, text))
+    return output
+
+
+
+def _linked_financial_table_cells(soup: BeautifulSoup) -> list[_RawSegment]:
+    """Retain explicit HTML headers-to-cell financial/product relationships.
+
+    Do not guess a column from position or copy another product's values.
+    All referenced headers must be unique and belong to this table. Preserve
+    complete header/value conditions and explicitly linked local footnotes.
+    """
+    container = soup.find("main") or soup.body or soup
+    output = []
+    id_counts = {}
+    for node in soup.find_all(id=True):
+        id_counts[node["id"]] = id_counts.get(node["id"], 0) + 1
+    financial_label = re.compile(
+        r"\b(?:rates?|interest|APY|APR|monthly|annual.{0,12}fee|transactions?|"
+        r"withdrawals?|redeemable|cashable|penalt\w*|security|collateral|term|minimum.{0,20}deposit)\b", re.I)
+    for table_index, table in enumerate(container.find_all("table")):
+        headers_by_id = {}
+        for header in table.find_all("th", id=True):
+            if header.find_parent("table") is not table:
+                continue
+            headers_by_id.setdefault(header["id"], []).append(header)
+        for cell_index, cell in enumerate(table.find_all("td", headers=True)):
+            if cell.find_parent("table") is not table:
+                continue
+            ids = cell.get("headers") or []
+            if isinstance(ids, str):
+                ids = ids.split()
+            if not ids or any(len(headers_by_id.get(key, [])) != 1 or id_counts.get(key) != 1 for key in ids):
+                continue
+            headers = [headers_by_id[key][0] for key in ids]
+            row_headers = [h for h in headers if h.get("scope") == "row"]
+            column_headers = [h for h in headers if h.get("scope") == "col"]
+            if len(column_headers) != 1 or not any(financial_label.search(h.get_text(" ", strip=True)) for h in row_headers):
+                continue
+            # The source's exact column identity, row labels, then its own value.
+            nodes = [*column_headers, *[h for h in headers if h not in column_headers], cell]
+            parts = [n.get_text("\n" if n in column_headers else " ", strip=True) for n in nodes]
+            if not parts[-1]:
+                continue
+            ambiguous_notes = False
+            for node in nodes:
+                for link in node.find_all("a", href=True):
+                    href = str(link["href"])
+                    if not href.startswith("#"):
+                        continue  # External disclosures use bounded captured companions.
+                    targets = soup.find_all(id=href[1:])
+                    if len(targets) != 1:
+                        ambiguous_notes = True
+                        break
+                    parts.append(targets[0].get_text(" ", strip=True))
+            text = "\n".join(dict.fromkeys(part for part in parts if part))
+            if ambiguous_notes or len(text) > 6400:
+                continue  # Never truncate a financial qualifier to make a chunk fit.
+            label = " / ".join(h.get_text(" ", strip=True) for h in row_headers)
+            output.append(_RawSegment("financial_table_cell",
+                f"financial-table-{table_index}-cell-{cell_index}: {label}", None, text))
     return output
 
 

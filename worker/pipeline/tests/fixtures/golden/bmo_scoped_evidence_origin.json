@@ -1,0 +1,456 @@
+{
+  "provenance": "BMO CA Personal Loan captured 2026-10-02, run_20261002_210002_bmo_personal-loan_collect_rg9MS_v4; private persisted raw chunk and extraction links; no reconstructed financial facts",
+  "raw_chunk": {
+    "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+    "parsed_document_id": "parsed-e4afb1c614fa154a",
+    "chunk_index": 1,
+    "anchor_type": "page",
+    "anchor_value": "page-1",
+    "page_no": 1,
+    "source_language": "en",
+    "chunk_char_start": 779,
+    "chunk_char_end": 1676,
+    "evidence_excerpt": "much you want to borrow? Let’s get started.\nPersonal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+    "retrieval_metadata": {
+      "chunk_length": 897,
+      "parser_version": "fpds-parse-chunk-v5",
+      "segment_char_end": 1721,
+      "segment_char_start": 0
+    },
+    "created_at": "2026-10-03 05:41:44.466987+00:00"
+  },
+  "source": {
+    "source_document_id": "src-bmo-html-656a54254df5d798",
+    "bank_code": "BMO",
+    "country_code": "CA",
+    "normalized_source_url": "https://www.bmo.com/en-ca/main/personal/loans-line-of-credit/loans/personal-loan",
+    "source_type": "html",
+    "source_language": "en",
+    "registry_managed_flag": true,
+    "source_metadata": {
+      "purpose": "Explicitly names BMO Personal Loans and is located under the personal-loan product path, making it the direct detail-page match.",
+      "priority": "P1",
+      "source_id": "AUTO-BMO-PER-482cae5efc",
+      "product_type": "personal-loan",
+      "discovery_role": "detail",
+      "product_family": "lending",
+      "expected_fields": [
+        "product_name",
+        "interest_rate_summary",
+        "interest_rate",
+        "term_length_text",
+        "loan_amount_text",
+        "secured_flag"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "seed_source_flag": false,
+      "product_type_name": "Personal Loan",
+      "discovery_keywords": [
+        "personal loans",
+        "loan rates",
+        "fixed rate loan",
+        "vehicle loan",
+        "car loan",
+        "rrsp loan",
+        "monthly payments",
+        "installment loan",
+        "borrow money"
+      ],
+      "discovery_metadata": {
+        "page_title": "Personal Loans - BMO Canada Back Button Search Icon Filter Icon",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 7,
+        "primary_heading": "Personal Loan",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Explicitly names BMO Personal Loans and is located under the personal-loan product path, making it the direct detail-page match.",
+        "market_profile_key": "CA:personal-loan",
+        "page_evidence_score": 10,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 9,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "structured_component_evidence",
+          "title_semantic_match",
+          "url_product_identity_signal"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "structured_component_evidence",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "url_product_identity_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "ed470b6d529cbbe5d36ba3494d86efd9928861a926b19c5eb98b3479f440ac48"
+      },
+      "normalized_source_url": "https://www.bmo.com/en-ca/main/personal/loans-line-of-credit/loans/personal-loan/?icid=tl-FEAT2953BRND4-AJBMOH123",
+      "product_type_description": "Personal installment loans collected for rate or APR summary, amount, and term.",
+      "official_domain_allowlist": [
+        "bmo.com"
+      ]
+    },
+    "discovered_at": "2026-08-22 07:54:57.988089+00:00",
+    "created_at": "2026-08-22 07:55:02.482144+00:00",
+    "updated_at": "2026-10-03 05:41:27.660460+00:00"
+  },
+  "extraction": {
+    "source_id": "AUTO-BMO-PER-482cae5efc",
+    "source_document_id": "src-bmo-html-656a54254df5d798",
+    "snapshot_id": "snap-51642b38f89b79ec",
+    "parsed_document_id": "parsed-e4afb1c614fa154a",
+    "extraction_action": "stored",
+    "model_execution_id": "modelexec-cddd6719c49f0e3c",
+    "extracted_storage_key": "dev/extracted/CA/BMO/src-bmo-html-656a54254df5d798/parsed-e4afb1c614fa154a/run_20261002_210002_bmo_personal-loan_collect_rg9MS_v4/extracted.json",
+    "metadata_storage_key": "dev/extracted/CA/BMO/src-bmo-html-656a54254df5d798/parsed-e4afb1c614fa154a/run_20261002_210002_bmo_personal-loan_collect_rg9MS_v4/metadata.json",
+    "runtime_notes": [
+      "Accepted 2 exact labeled field(s) from the verified official detail-page snapshot.",
+      "Official grounding omitted fields: {\"currency\": \"model_unverified\", \"interest_rate\": \"model_unverified\", \"interest_rate_summary\": \"model_unverified\", \"term_length_text\": \"exact_quote_missing\"}",
+      "The official page identifies the product as “Personal Loan.” Its captured one-to-five-year repayment term is supported. The captured 5.00% is an input in the payment calculator, not a verified published product rate. Currency is unverified because the supplied evidence chunks contain no exact currency quote. Optional loan-amount and secured-status facts are omitted because the evidence does not establish a product minimum or one fixed secured status.",
+      "Official-domain AI grounding verified or corrected 1 evidence-linked field candidate(s)."
+    ],
+    "error_summary": null,
+    "extracted_fields": [
+      {
+        "field_name": "product_family",
+        "candidate_value": "lending",
+        "value_type": "string",
+        "confidence": 0.99,
+        "extraction_method": "derived_context",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": null,
+        "evidence_text_excerpt": null,
+        "anchor_type": null,
+        "anchor_value": null,
+        "page_no": null,
+        "chunk_index": null,
+        "field_metadata": {
+          "derived_field": true
+        }
+      },
+      {
+        "field_name": "product_type",
+        "candidate_value": "personal-loan",
+        "value_type": "string",
+        "confidence": 0.99,
+        "extraction_method": "derived_context",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": null,
+        "evidence_text_excerpt": null,
+        "anchor_type": null,
+        "anchor_value": null,
+        "page_no": null,
+        "chunk_index": null,
+        "field_metadata": {
+          "derived_field": true
+        }
+      },
+      {
+        "field_name": "bank_code",
+        "candidate_value": "BMO",
+        "value_type": "string",
+        "confidence": 0.99,
+        "extraction_method": "derived_context",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": null,
+        "evidence_text_excerpt": null,
+        "anchor_type": null,
+        "anchor_value": null,
+        "page_no": null,
+        "chunk_index": null,
+        "field_metadata": {
+          "derived_field": true
+        }
+      },
+      {
+        "field_name": "country_code",
+        "candidate_value": "CA",
+        "value_type": "string",
+        "confidence": 0.99,
+        "extraction_method": "derived_context",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": null,
+        "evidence_text_excerpt": null,
+        "anchor_type": null,
+        "anchor_value": null,
+        "page_no": null,
+        "chunk_index": null,
+        "field_metadata": {
+          "derived_field": true
+        }
+      },
+      {
+        "field_name": "source_language",
+        "candidate_value": "en",
+        "value_type": "string",
+        "confidence": 0.99,
+        "extraction_method": "derived_context",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": null,
+        "evidence_text_excerpt": null,
+        "anchor_type": null,
+        "anchor_value": null,
+        "page_no": null,
+        "chunk_index": null,
+        "field_metadata": {
+          "derived_field": true
+        }
+      },
+      {
+        "field_name": "currency",
+        "candidate_value": "CAD",
+        "value_type": "string",
+        "confidence": 0.99,
+        "extraction_method": "derived_context",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": null,
+        "evidence_text_excerpt": null,
+        "anchor_type": null,
+        "anchor_value": null,
+        "page_no": null,
+        "chunk_index": null,
+        "field_metadata": {
+          "derived_field": true
+        }
+      },
+      {
+        "field_name": "product_name",
+        "candidate_value": "Personal Loan",
+        "value_type": "string",
+        "confidence": 0.99,
+        "extraction_method": "openai_official_grounding",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+        "evidence_text_excerpt": "much you want to borrow? Let’s get started.\nPersonal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+        "anchor_type": "page",
+        "anchor_value": "page-1",
+        "page_no": 1,
+        "chunk_index": 1,
+        "field_metadata": {
+          "official_grounding_contract_version": "collection-official-grounding-v2",
+          "official_verification_status": "match",
+          "official_web_sources": [
+            {
+              "url": "https://www.bmo.com/en-ca/main/personal/loans-line-of-credit/loans/personal-loan/",
+              "title": "https://www.bmo.com/en-ca/main/personal/loans-line-of-credit/loans/personal-loan/"
+            }
+          ],
+          "evidence_quote": "Personal Loan",
+          "rationale": "The captured page heading gives the exact product name as “Personal Loan.”",
+          "dynamic_product_type": true
+        }
+      },
+      {
+        "field_name": "interest_rate_summary",
+        "candidate_value": "Interest rate* 5.00% Enter an interest rate.",
+        "value_type": "string",
+        "confidence": 0.99,
+        "extraction_method": "heuristic_rate_summary",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+        "evidence_text_excerpt": "Personal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+        "anchor_type": "page",
+        "anchor_value": "page-1",
+        "page_no": 1,
+        "chunk_index": 1,
+        "field_metadata": {
+          "retrieval_mode": "metadata-only",
+          "matched_keywords": [
+            "interest",
+            "interest rate",
+            "of",
+            "rate",
+            "to"
+          ],
+          "official_grounding_contract_version": "collection-official-grounding-v2",
+          "official_verification_status": "match",
+          "official_web_sources": [
+            {
+              "url": "https://www.bmo.com/en-ca/main/personal/loans-line-of-credit/loans/personal-loan",
+              "title": "Personal Loans - BMO Canada Back Button Search Icon Filter Icon"
+            }
+          ],
+          "evidence_quote": "Personal LoanPersonalLoans & Lines of CreditLoans Personal Loan 1 2 2,3 4 * Loan amount* $2,000 Enter the total amount you want to borrow. Interest rate* 5.00% Enter an interest rate. Our most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback. BOOK AN APPOINTMENT SIGN IN ACCEPT ANDCONTINUE Manage your preferences We, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and pre",
+          "rationale": "The comparison value and its qualifying context were captured from the verified identity-matched official detail-page snapshot.",
+          "official_grounding_method": "deterministic_lending_comparison_origin",
+          "dynamic_product_type": true
+        }
+      },
+      {
+        "field_name": "interest_rate",
+        "candidate_value": "5.00",
+        "value_type": "decimal",
+        "confidence": 0.98,
+        "extraction_method": "heuristic_labeled_rate",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+        "evidence_text_excerpt": "Personal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+        "anchor_type": "page",
+        "anchor_value": "page-1",
+        "page_no": 1,
+        "chunk_index": 1,
+        "field_metadata": {
+          "retrieval_mode": "metadata-only",
+          "matched_keywords": [
+            "interest",
+            "interest rate",
+            "rate"
+          ]
+        }
+      },
+      {
+        "field_name": "loan_amount_text",
+        "candidate_value": "Personal LoanPersonalLoans & Lines of CreditLoans Personal Loan 1 2 2,3 4 * Loan amount* $2,000 Enter the total amount you want to borrow. Interest rate* 5.00% Enter an interest rate. Our most popular loan can help cover almost any borrowing need. You can borrow a lump sum and ha",
+        "value_type": "string",
+        "confidence": 0.9,
+        "extraction_method": "heuristic_text",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+        "evidence_text_excerpt": "Personal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+        "anchor_type": "page",
+        "anchor_value": "page-1",
+        "page_no": 1,
+        "chunk_index": 1,
+        "field_metadata": {
+          "retrieval_mode": "metadata-only",
+          "matched_keywords": [
+            "amount",
+            "loan"
+          ],
+          "official_grounding_contract_version": "collection-official-grounding-v2",
+          "official_verification_status": "match",
+          "official_web_sources": [
+            {
+              "url": "https://www.bmo.com/en-ca/main/personal/loans-line-of-credit/loans/personal-loan",
+              "title": "Personal Loans - BMO Canada Back Button Search Icon Filter Icon"
+            }
+          ],
+          "evidence_quote": "Personal LoanPersonalLoans & Lines of CreditLoans Personal Loan 1 2 2,3 4 * Loan amount* $2,000 Enter the total amount you want to borrow. Interest rate* 5.00% Enter an interest rate. Our most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback. BOOK AN APPOINTMENT SIGN IN ACCEPT ANDCONTINUE Manage your preferences We, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and pre",
+          "rationale": "The comparison value and its qualifying context were captured from the verified identity-matched official detail-page snapshot.",
+          "official_grounding_method": "deterministic_lending_comparison_origin",
+          "dynamic_product_type": true
+        }
+      }
+    ],
+    "evidence_links": [
+      {
+        "field_name": "product_name",
+        "candidate_value": "Personal Loan",
+        "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+        "evidence_text_excerpt": "much you want to borrow? Let’s get started.\nPersonal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "citation_confidence": 0.99,
+        "model_execution_id": "modelexec-cddd6719c49f0e3c",
+        "anchor_type": "page",
+        "anchor_value": "page-1",
+        "page_no": 1,
+        "chunk_index": 1
+      },
+      {
+        "field_name": "interest_rate_summary",
+        "candidate_value": "Interest rate* 5.00% Enter an interest rate.",
+        "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+        "evidence_text_excerpt": "Personal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "citation_confidence": 0.99,
+        "model_execution_id": "modelexec-cddd6719c49f0e3c",
+        "anchor_type": "page",
+        "anchor_value": "page-1",
+        "page_no": 1,
+        "chunk_index": 1
+      },
+      {
+        "field_name": "interest_rate",
+        "candidate_value": "5.00",
+        "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+        "evidence_text_excerpt": "Personal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "citation_confidence": 0.98,
+        "model_execution_id": "modelexec-cddd6719c49f0e3c",
+        "anchor_type": "page",
+        "anchor_value": "page-1",
+        "page_no": 1,
+        "chunk_index": 1
+      },
+      {
+        "field_name": "loan_amount_text",
+        "candidate_value": "Personal LoanPersonalLoans & Lines of CreditLoans Personal Loan 1 2 2,3 4 * Loan amount* $2,000 Enter the total amount you want to borrow. Interest rate* 5.00% Enter an interest rate. Our most popular loan can help cover almost any borrowing need. You can borrow a lump sum and ha",
+        "evidence_chunk_id": "chunk-56754cf69bf2aa50",
+        "evidence_text_excerpt": "Personal LoanPersonalLoans & Lines of CreditLoans\nPersonal Loan\n1\n2\n2,3\n4\n*\nLoan amount*\n$2,000\nEnter the total amount you want to borrow.\nInterest rate*\n5.00%\nEnter an interest rate.\nOur most popular loan can help cover almost any borrowing need. You can borrow a lump sum and have a set plan to pay itback.\nBOOK AN APPOINTMENT\nSIGN IN\nACCEPT ANDCONTINUE\nManage your preferences\nWe, and third parties we select, use cookies, tracking tools, webforms and other similartechnologies to collect certain information about you, your device and use of our digital properties.This protects you from fraud, improves your online experience, monitors analytics andperformance of our digital properties, and presents you with relevant marketing messages. Thethird parties we select may also use your information in accordance with their privacy policies.Learn more",
+        "source_document_id": "src-bmo-html-656a54254df5d798",
+        "source_snapshot_id": "snap-51642b38f89b79ec",
+        "citation_confidence": 0.9,
+        "model_execution_id": "modelexec-cddd6719c49f0e3c",
+        "anchor_type": "page",
+        "anchor_value": "page-1",
+        "page_no": 1,
+        "chunk_index": 1
+      }
+    ],
+    "run_source_item_record": {
+      "run_source_item_id": "rsi-e358c8c002759bab",
+      "run_id": "run_20261002_210002_bmo_personal-loan_collect_rg9MS_v4",
+      "source_document_id": "src-bmo-html-656a54254df5d798",
+      "selected_snapshot_id": "snap-51642b38f89b79ec",
+      "stage_status": "completed",
+      "warning_count": 1,
+      "error_count": 0,
+      "error_summary": null,
+      "stage_metadata": {
+        "extraction_action": "stored",
+        "parsed_document_id": "parsed-e4afb1c614fa154a",
+        "model_execution_id": "modelexec-cddd6719c49f0e3c",
+        "extracted_storage_key": "dev/extracted/CA/BMO/src-bmo-html-656a54254df5d798/parsed-e4afb1c614fa154a/run_20261002_210002_bmo_personal-loan_collect_rg9MS_v4/extracted.json",
+        "metadata_storage_key": "dev/extracted/CA/BMO/src-bmo-html-656a54254df5d798/parsed-e4afb1c614fa154a/run_20261002_210002_bmo_personal-loan_collect_rg9MS_v4/metadata.json",
+        "extracted_field_count": 10,
+        "evidence_link_count": 4,
+        "runtime_notes": [
+          "Accepted 2 exact labeled field(s) from the verified official detail-page snapshot.",
+          "Official grounding omitted fields: {\"currency\": \"model_unverified\", \"interest_rate\": \"model_unverified\", \"interest_rate_summary\": \"model_unverified\", \"term_length_text\": \"exact_quote_missing\"}",
+          "The official page identifies the product as “Personal Loan.” Its captured one-to-five-year repayment term is supported. The captured 5.00% is an input in the payment calculator, not a verified published product rate. Currency is unverified because the supplied evidence chunks contain no exact currency quote. Optional loan-amount and secured-status facts are omitted because the evidence does not establish a product minimum or one fixed secured status.",
+          "Official-domain AI grounding verified or corrected 1 evidence-linked field candidate(s)."
+        ],
+        "correlation_id": "corr_lrQ5W-7WZebkxJ-O",
+        "request_id": "req_2f11a5641af4494db21cdf02b61ea6f7"
+      }
+    }
+  }
+}

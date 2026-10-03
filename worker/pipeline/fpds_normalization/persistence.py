@@ -219,7 +219,7 @@ FROM (
         chunk_ids = sorted({link.evidence_chunk_id for item in inputs
                             for link in item.evidence_links})
         if not chunk_ids:
-            return [replace(item, evidence_origins={}) for item in inputs]
+            return [replace(item, evidence_origins={}, evidence_origins_resolved=True) for item in inputs]
         schema = self.active_schema
         sql = f"""
 SET search_path TO {schema};
@@ -245,7 +245,7 @@ FROM (
         output = self._execute(sql, variables={"run_id": run_id,
                                "chunk_ids_json": json.dumps(chunk_ids, ensure_ascii=True)})
         origins = {row["evidence_chunk_id"]: row for row in json.loads(output or "[]")}
-        return [replace(item, evidence_origins={
+        return [replace(item, evidence_origins_resolved=True, evidence_origins={
             link.evidence_chunk_id: origins[link.evidence_chunk_id]
             for link in item.evidence_links if link.evidence_chunk_id in origins
         }) for item in inputs]

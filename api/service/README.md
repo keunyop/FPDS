@@ -1,5 +1,7 @@
 # FPDS API Service
 
+Generic collection correction (2026-10-03): owned captured-only grounding, default HTML DOM fallback, parser v6 explicit product/financial columns, full current-run chunk origins and prominent non-product screening. Worker 674 / API 574 pass. Deployment and live collection remain separate. [Diagnosis and verification](../../docs/00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+
 ## Collection Run visibility - 2026-10-02
 
 Catalog collection persists all accepted requested scopes as queued ingestion
@@ -611,7 +613,7 @@ cd api/service
   metadata. Credential-bearing URLs and common secret assignments are redacted
   from both runner output and persisted diagnostics, so Runs can expose the
   actionable DB or worker error without relying on a transient console log.
-- Fetching uses format-aware browser fallback for domains listed in `FPDS_SOURCE_BROWSER_FALLBACK_DOMAINS`. Blocked or timed-out HTML-only homepage/detail discovery receives browser-rendered DOM; snapshot capture normally receives a browser-rendered PDF, while `FPDS_SOURCE_BROWSER_DOM_SNAPSHOT_DOMAINS` retains HTML for sites such as Vancity whose exact product conditions are encoded in structured CMS payloads. Dynamic rate shells and unresolved customer-visible rate placeholders use the same bounded path. Current defaults include BMO, CIBC, RBC, Simplii, Tangerine, and Vancity plus the configured US banks. Every attempt remains on the exact validated official URL and per-bank allowlist; HTML-only callers still reject PDF payloads, and a usable direct snapshot remains the fail-soft result if optional rendering fails.
+- Fetching uses bounded format-aware browser recovery on the exact validated official URL. HTML routes retain rendered DOM by default to preserve headings, financial columns and conditions; native/explicit PDF and query-identified PDF sources remain PDF. `FPDS_SOURCE_BROWSER_DOM_SNAPSHOT_DOMAINS` remains a compatible configuration key, but DOM is no longer limited to selected banks. Safe-fetch/allowlist, timeout, retry and usable-direct-response fallback controls remain. HTML-only callers still reject actual PDF payloads.
 - Homepage, coverage-quote, and existing-detail companion discovery load browser settings from the selected environment while replacing the general fetch allowlist with the exact current bank domains. This preserves the Admin collection boundary instead of widening a single-bank collection to all configured source domains.
 - Product-supporting source discovery excludes annual/climate disclosure reports. These corporate reports are not exact-product pricing or terms evidence and cannot create recurring partial runs when an old report URL is retired.
 - Vancity's seven active Product Type catalog rows are pinned by migration `0041` to their audited official family hubs. The committed Vancity registries seed exact product-detail routes plus the separate account, GIC, mortgage, and consumer-lending rate pages; strongly verified Vancity GIC seed details ignore only the false family signal created by their cross-sell footer, while genuine multi-option pages such as LOC stay boundary-marked until evidence-grounded variant expansion. Case-only generated aliases are retired after the canonical route is revalidated.
@@ -641,22 +643,7 @@ cd api/service
 - The bank list payload now includes its attached coverage items so `/admin/banks` can drive multi-bank bulk collect without reopening each bank detail modal first.
 - Homepage-first source generation can still use committed fallback discovery hints from the repo baselines when link extraction comes up empty, but those hints no longer write rows back into the live DB automatically.
 - Source collection plans now carry generated-source discovery metadata into the worker registry payload so the runtime `source_document.source_metadata` stays aligned with the source registry explanation fields.
-- Source collection plans also carry the canonicalized official-domain
-  allowlist and each normalized source URL into extraction. When OpenAI is
-  configured, every candidate-producing detail source—not only a dynamic
-  Product Type—runs a required official-domain web grounding pass over the
-  complete active field contract. A returned value is retained only when its
-  cited URL was actually consulted and its exact quote is present in the fresh
-  evidence chunk; otherwise the existing evidence-first value or reviewable
-  omission remains. A co-located labeled currency fee from an identity-matched,
-  high-confidence official detail snapshot may use the narrower deterministic
-  exact-origin contract. Qualified lending rate summaries and their
-  amount/limit/term/rate-type companions may use the same path only when their
-  value and qualifying context are co-located; scalar rates and general prose
-  remain provider-grounded or omitted.
-  The bounded model result and consulted sources are persisted with the
-  extraction execution; standalone token/cost usage is discarded, and AI
-  failure does not bypass validation or review.
+- Source collection plans carry the official-domain allowlist and normalized URLs into extraction. Each candidate-producing detail receives one captured-only grounding pass over its complete active field contract. The server supplies owned current captures and bounded companions; returned fields need exact supplied source/chunk/quote, native types and unchanged automatic accuracy gates. No duplicate provider web search is required. Supporting documents remain evidence-only; optional missing facts do not trigger extra calls. Provider failure cannot authorize heuristic publication. Exact-origin deterministic evidence keeps its existing narrow co-located financial safeguards.
 - The background source-collection runner now launches worker stages through the repo-root `uv` project environment instead of the API service virtualenv, so worker-only dependencies such as `beautifulsoup4` and `pypdf` resolve correctly during collection.
 - Discovery, registry refresh, and snapshot capture now merge the active registry's `allowed_domains` into the env allowlist, which keeps bank-scoped safe fetch behavior aligned with the selected source registry during Big 5 collection.
 - Snapshot capture now runs source fetches concurrently inside the same run, and the shared fetch timeout baseline moved to `90` seconds to better tolerate slower Big 5 pages without stretching bank-wide collection wall-clock time linearly per source.
