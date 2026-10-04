@@ -673,6 +673,9 @@ def _strip_embedded_html(value: str) -> str:
 def extract_links(html_text: str, *, base_url: str) -> list[ExtractedLink]:
     parser = _LinkExtractor(base_url=base_url)
     parser.feed(html_text)
+    from .modal_links import literal_modal_links
+    for href, label in literal_modal_links(html_text):
+        parser._append_link(href, label, prefer_over_ordinary=True)
     by_identity: dict[tuple[str, str], ExtractedLink] = {}
     for link in parser.links:
         by_identity.setdefault((link.normalized_url, link.anchor_text), link)

@@ -5514,6 +5514,12 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
     if not shared_lending_pricing and _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
         return 0
 
+    # A selected deposit detail can delegate its exact withdrawal terms to
+    # the linked family catalogue. Keep it as evidence-only within existing
+    # caps; parser/grounding must bind each named product to its own legal panel.
+    if _canonical_product_type_code(product_type) == "gic" and re.fullmatch(
+            r"(?:see|view|explore) (?:more|all|our) (?:GICs|CDs|certificates of deposit)", anchor, re.I):
+        return 18
     anchor_hits = sum(marker in anchor for marker in _DETAIL_COMPANION_ANCHOR_MARKERS)
     url_hits = sum(marker in path_and_query for marker in _DETAIL_COMPANION_URL_MARKERS)
     if not anchor_hits and not url_hits and not shared_lending_pricing:

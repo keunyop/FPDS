@@ -1,5 +1,36 @@
 # Product collection accuracy and automatic acceptance
 
+## Exact account classification and product withdrawal declarations - 2026-10-03
+
+An independently explicit base monthly fee is not qualified by the separate
+service-classification phrases `this is our low-cost account and it can qualify
+as a no-cost account` or `this account can also qualify as a no-cost account`.
+This bounded distinction keeps the full quote and rejects every actual fee
+balance, eligibility, duration and waiver prerequisite. Other zero claims remain
+subject to the same exact attribute and conditional-meaning checks.
+
+A complete official withdrawal sentence preserves waiting periods, qualifications
+and adjacent redemption minimums. Explicit no-penalty redemption after a stated
+waiting period proves only that access boundary; it never permits earlier access.
+An explicit declaration that no interest will be paid on redemption within a
+stated period is a consequence even without numeric penalty wording. Payment
+timing, vague terms pointers and conflicting statements remain insufficient.
+Matching shared extraction/normalization instructions preserve the native prose.
+
+Parser v8 keeps each named product's own attached flip-card legal panel and
+unique detail link atomic. Bound GIC catalogue companions require exact detail
+path, selected parent, native identity and existing source/snapshot/bank/country/
+language proof. Relevant panels retain priority within unchanged grounding and
+companion caps. Other products' terms never establish the target's facts.
+Static confirmation-dialog destinations are discovery leads only: literal HTTPS,
+existing unique button/dialog, no script execution, existing official-domain and
+safe-fetch gates. No issuer allowlist is inferred from a link or relaxed.
+
+The source-backed CCS replay proves three ordinary automatic passes; two use
+original captured inputs and Better-than-Cash needs additional current official
+catalogue terms. No live collection, publication or deployment is implied. See
+[correction, adversarial evidence and rollout limits](../00-governance/coast-collection-evidence-corrections-2026-10-03.md).
+
 ## Product-owned captured facts and direct/Admin parity - 2026-10-03
 
 The Product Owner authorizes replacing existing collection implementation rules

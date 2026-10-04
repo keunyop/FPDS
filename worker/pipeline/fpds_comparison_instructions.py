@@ -24,6 +24,17 @@ ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
     "An explicit no minimum balance required statement does not qualify a separately explicit no monthly fee; "
     "retain actual balance thresholds, eligibility and duration conditions. Unlimited day-to-day transactions "
     "denotes ordinary account transactions only when unconditional; specific-channel unlimited benefits remain insufficient. "
+    "A separate low-cost/no-cost service classification does not qualify an explicitly stated base monthly fee; "
+    "retain optional paper-statement charges and all actual fee-waiver prerequisites separately. "
+)
+
+WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
+    "Explicit redeemability after a waiting period and no penalty on payable interest establishes the permitted "
+    "withdrawal conditions; never infer permission before that period. No interest paid on early redemption is "
+    "a material consequence even without a numeric penalty. Copy complete withdrawal restrictions, lost-interest "
+    "conditions and partial-redemption minimums exactly. Interest payment timing alone is insufficient. "
+    "Bind family-page terms only to their own named product/detail link and attached legal panel; do not transfer "
+    "neighboring offers, new-money promotions or another product's conditions. "
 )
 
 COMPARISON_INSTRUCTIONS = (
@@ -41,6 +52,7 @@ COMPARISON_INSTRUCTIONS = (
     "number elsewhere cannot replace that proof. "
     + FEE_CHANGE_NOTICE_INSTRUCTIONS
     + ACCOUNT_COST_CONTEXT_INSTRUCTIONS
+    + WITHDRAWAL_CONTEXT_INSTRUCTIONS
     + "Bind each value to its own label, complete quote and exact source URL. Never pair a "
     "term with an adjacent row's rate. Preserve explicit currency and rate basis; a country "
     "default is allowed only when the source has no explicit currency: CA uses CAD and US "

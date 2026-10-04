@@ -1,5 +1,33 @@
 # Admin pre-handover review and fixes
 
+## Authorized slice: Coast Capital collection evidence corrections - 2026-10-03
+
+Objective: reproduce and repair confirmed CCS Admin collection failures, repeat
+ordinary-service verification until demonstrated defects are resolved, and
+preserve independently owned goal slices.
+Scope: read-only latest CCS captures/stage artifacts; shared product-scoped
+fee/redemption grounding, essential companions and named card discovery;
+matching prompts, source-backed positive/adversarial regressions and docs.
+Exclusions: live/canonical/registry/publication writes, paid recollection,
+deployment/process restarts, manual review, relaxed essentials, new countries/
+types, permanent recovery tooling and unrelated cleanup.
+Acceptance:
+- [x] Reproduce actual fee/redemption and discovery/companion failures.
+- [x] Correct generic causes, preserve exact financial meaning/product ownership
+      and conflicting/conditional/cross-product rejection.
+- [x] Repeat same-input extraction/normalization/validation and bounded source
+      planning checks; confirm fixes and explain evidence limits.
+- [x] Pass relevant Worker/API suites, final diff and git diff --check; update
+      journal/contracts and identify deployment limits.
+Verification: read-only DB/artifacts, provider-disabled production-service replay,
+official source fixtures, cross-bank positive/boundary/failure regressions and
+affected runtime suites. Code-only scope; no live data result implied.
+Status: complete for this code-only slice. Three ordinary automatic passes verified;
+missing-term and issuer-domain exclusions preserved. Worker 711 / API 580 and
+repository checks pass. API/source-catalog and Worker deployment and live data
+results remain separate. Existing goal.md is retained for independently owned
+unresolved slices.
+
 ## Independent slice: CIBC official supplementation and shared collection redesign - 2026-10-03
 
 Objective: supplement the latest CIBC results with current official evidence,

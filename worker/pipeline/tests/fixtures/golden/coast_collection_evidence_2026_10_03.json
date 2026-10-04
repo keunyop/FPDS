@@ -1,0 +1,1537 @@
+{
+  "source": "Exact public excerpts and recorded field proof from the 2026-10-03 CCS run; technical identities replaced with fixture IDs.",
+  "products": [
+    {
+      "url": "https://www.coastcapitalsavings.com/everyday-banking/chequing/free-chequing",
+      "metadata": {
+        "product_type": "chequing",
+        "product_family": "deposit",
+        "discovery_role": "detail",
+        "official_domain_allowlist": [
+          "coastcapitalsavings.com"
+        ],
+        "expected_fields": [
+          "product_name",
+          "monthly_fee",
+          "public_display_fee",
+          "unlimited_transactions_flag",
+          "included_transactions",
+          "transaction_fee",
+          "additional_transaction_fee",
+          "minimum_balance",
+          "fee_waiver_condition",
+          "standard_rate",
+          "public_display_rate",
+          "interest_rate_summary",
+          "interest_calculation_method",
+          "interest_payment_frequency",
+          "compounding_frequency",
+          "payout_option",
+          "tiered_rate_flag",
+          "tier_definition_text",
+          "promotional_rate",
+          "promotional_period_text",
+          "introductory_rate_flag",
+          "minimum_deposit"
+        ],
+        "fallback_policy": "generic_ai_review",
+        "normalized_source_url": "https://www.coastcapitalsavings.com/everyday-banking/chequing/free-chequing",
+        "discovery_metadata": {
+          "product_identity_match": true,
+          "primary_heading": "Free Chequing, Free Debit, and More Account®",
+          "page_title": "Free Chequing | Coast Capital Savings"
+        }
+      },
+      "chunks": [
+        {
+          "evidence_chunk_id": "chunk-0",
+          "chunk_index": 0,
+          "anchor_type": "section",
+          "anchor_value": "document",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Document\nBanking\nChequing Accounts\nFree Chequing",
+          "retrieval_metadata": {
+            "chunk_length": 48,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 48,
+            "segment_char_start": 0
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-1",
+          "chunk_index": 1,
+          "anchor_type": "section",
+          "anchor_value": "free-chequing-free-debit-and-more-account",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Free Chequing, Free Debit, and More Account®\nMeet your essential banking needs, without a monthly fee or minimum balance required.\nThis account can also qualify as a no cost account. 2\na Free Chequing, Free Debit, and More\nTop of main content\nFor a limited time, new members can get a $150 bonus †\nAccount Details Compare FAQs\na Free Chequing, Free Debit, and More\nLIMITED TIME",
+          "retrieval_metadata": {
+            "chunk_length": 377,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 427,
+            "segment_char_start": 50
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-2",
+          "chunk_index": 2,
+          "anchor_type": "section",
+          "anchor_value": "how-to-get-150-welcome-bonus",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "How to get $150 Welcome Bonus †\nFor new members only.\nBecome a new personal member by opening a Free Chequing account online in as little as 5 minutes\nWithin 60 days of account opening, set up an eligible recurring payroll or direct deposit Your direct deposit must be the same direct deposit coming from the same payee for 3 consecutive months. This may be your payroll, pension or certain government payments. †\ndirect deposit\nYour direct deposit must be the same direct deposit coming from the same payee for 3 consecutive months. This may be your payroll, pension or certain government payments.\nMaintain your payroll or direct deposit for 90 consecutive days (at least one deposit per month) Open a Free Chequing, Free Debit, and More account\na Free Chequing, Free Debit, and More",
+          "retrieval_metadata": {
+            "chunk_length": 785,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 1214,
+            "segment_char_start": 429
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-3",
+          "chunk_index": 3,
+          "anchor_type": "section",
+          "anchor_value": "are-you-a-coast-capital-member",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Are you a Coast Capital member?\n×\nA member is someone with any account, investment, loan or mortgage with Coast Capital.\nYes Not yet",
+          "retrieval_metadata": {
+            "chunk_length": 132,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 1348,
+            "segment_char_start": 1216
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-4",
+          "chunk_index": 4,
+          "anchor_type": "section",
+          "anchor_value": "free-chequing-free-debit-and-more-account-details",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Free Chequing, Free Debit, and More Account Details\nMonthly Fee\n$0\n(this is our low-cost account and it can qualify as a no-cost account\n2\n)\nMinimum Balance\nNot required\nDay-to-day Transactions 1\nUnlimited\nInterac e-Transfers\n$1.50 each (sending)\nFree (receiving)\nCanadian Cheque Book\nFree for ages 59+\nMonthly eStatement\nFree\n(Printed statements are $3/month per membership\n2\n)\nCoast Capital and The Exchange® Network ATM Transactions\nFree\nInterac® Network ATM Transactions (Canada) 3\n$2.50 each\nInternational ATM Transactions 4\n$5 International ATM fee plus 2% administration fee on transaction amount\nCoast Online® and Mobile® Banking\nFree\nClick here for service fees",
+          "retrieval_metadata": {
+            "chunk_length": 670,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2020,
+            "segment_char_start": 1350
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-5",
+          "chunk_index": 5,
+          "anchor_type": "section",
+          "anchor_value": "is-free-chequing-the-right-account-for-you",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Is Free Chequing the right account for you?",
+          "retrieval_metadata": {
+            "chunk_length": 43,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2065,
+            "segment_char_start": 2022
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-6",
+          "chunk_index": 6,
+          "anchor_type": "section",
+          "anchor_value": "may-be-right-for-you-if",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "May be right for you if:\nYou just want a basic account with no frills\nYou don't want to maintain a minimum balance\nYou value no monthly fee over other benefits",
+          "retrieval_metadata": {
+            "chunk_length": 159,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2226,
+            "segment_char_start": 2067
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-7",
+          "chunk_index": 7,
+          "anchor_type": "section",
+          "anchor_value": "may-not-be-right-for-you-if",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "May not be right for you if:\nYou’re looking for free Interac® e-Transfers\nYou want more premium banking benefits\nYou want identity theft protection",
+          "retrieval_metadata": {
+            "chunk_length": 147,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2375,
+            "segment_char_start": 2228
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-8",
+          "chunk_index": 8,
+          "anchor_type": "section",
+          "anchor_value": "compare-accounts",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Compare Accounts\nExplore our chequing accounts to understand which account is best suited to your needs.\nAccount Features\nFree Chequing Account\nUnlimited Chequing Account\nElevate Chequing Account\nMonthly Fee\n$0\n$8.50 or less\n$16.95 or less\nReduced monthly fee if you :\n- Maintain a minimum $4,000 daily balance at all times during the calendar month\nor\n- Are 59+ years of age\nor\n- Are 25 years of age or younger\nReduced monthly fee if you :\nor\nN/A\nPay $0\nPay $8.50\nOr get $5 off monthly fee\nWhen you set-up and deposit payroll or another eligible direct deposit into the account.\n5\nOr get $5 off monthly fee\nN/A\nPay $3.50\nPay $11.95\nInterac e-Transfers\nSending\n$1.50/transfer\nFree\nReceiving\nFree\nUnlimited day-to-day transactions 1\nFree access to ID Assist® - Online identity theft protection\n(For one account holder)\nFree access to ID Assist® - Online identity theft protection\nN/A\n+Password",
+          "retrieval_metadata": {
+            "chunk_length": 892,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 4078,
+            "segment_char_start": 2377
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-9",
+          "chunk_index": 9,
+          "anchor_type": "section",
+          "anchor_value": "compare-accounts",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "ty theft protection\n(For one account holder)\nFree access to ID Assist® - Online identity theft protection\nN/A\n+Password manager\nFree access to Coursera\n6\n– Online learning platform\n(For one account holder)\nFree access to Coursera 6 – Online learning platform\nN/A\nFree paper or eStatements\neStatement only 2\nOne free Canadian cheque book\n(Annually)\nOne free Canadian cheque book\n(Annually)\nFree for ages 59+\n25 singles\n50 singles\nUp to $50 one-time first year credit card rebate\nOn eligible credit cards issued by Collabria\n7\nUp to $50 one-time first year credit card rebate\nOn eligible credit cards issued by Collabria 7\nN/A\n2 free Interac network Canadian ATM withdrawals per month 8\nN/A\n3 free International ATM withdrawals per year 9\nN/A\nViewing Free Chequing Account\nFree Chequing Account\nView More about Unlimited Chequing Account\nMore about Unlimited Chequing Account\nView Elevate Chequing",
+          "retrieval_metadata": {
+            "chunk_length": 895,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 4078,
+            "segment_char_start": 2377
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-10",
+          "chunk_index": 10,
+          "anchor_type": "section",
+          "anchor_value": "compare-accounts",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Chequing Account\nView More about Unlimited Chequing Account\nMore about Unlimited Chequing Account\nView Elevate Chequing Account\nElevate Chequing Account",
+          "retrieval_metadata": {
+            "chunk_length": 152,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 4078,
+            "segment_char_start": 2377
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-11",
+          "chunk_index": 11,
+          "anchor_type": "section",
+          "anchor_value": "frequently-asked-questions",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Frequently asked questions\nWhat counts as unlimited day-to-day transactions?\nTransactions include cheques drawn on the account, Coast Capital® and THE EXCHANGE® Network ATM withdrawals, Interac Direct Payment, pre-authorized payments, bill payments, transfers (between Coast Capital accounts), and withdrawals (in-branch/self serve). Deposits and electronic transfers (between Coast Capital accounts) performed via Coast Capital® ATM, Coast-by-Phone®, and Coast Capital digital banking are free & unlimited.\nDo Seniors receive free personalized cheque orders?\nSeniors(59+ years of age) receive free personalized cheque orders and free cheque images (returned with statements). Canadian office cheques and bank drafts are also free for Seniors.",
+          "retrieval_metadata": {
+            "chunk_length": 743,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 4823,
+            "segment_char_start": 4080
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-12",
+          "chunk_index": 12,
+          "anchor_type": "section",
+          "anchor_value": "connect-with-us",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Connect with us\nBook appointment\n1.888.517.7000\nFind a branch\nCoast Capital Savings Federal Credit Union is a member of the Canada Deposit Insurance Corporation (CDIC). More CDIC information\nOnly deposits payable in Canada are eligible to be insured under the Canada Deposit Insurance Corporation Act.",
+          "retrieval_metadata": {
+            "chunk_length": 301,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 5126,
+            "segment_char_start": 4825
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-13",
+          "chunk_index": 13,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "You are now being redirected to a third party site.\n×\nThe website you will be entering is not owned or operated by Coast Capital Savings Federal Credit Union or its subsidiaries. You are entering a website of an independent third party which solely owns and controls the content, products, services, and information contained on its websites. Coast Capital Savings Federal Credit Union makes no representations or warranties about the third party’s products or services and is not responsible or liable for damages relating to the third party, its products or services, its website, its privacy policies or practices, or the content of the third party website. Your use of the third party website is subject to the third party’s terms, conditions, and policies and you accept any risks and liabilities of using the third party website including, but not limited to, risks associated with data breach",
+          "retrieval_metadata": {
+            "chunk_length": 899,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-14",
+          "chunk_index": 14,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "risks and liabilities of using the third party website including, but not limited to, risks associated with data breach and loss of personal and private information.\nCancel OK\nWant to compare our accounts with accounts at other financial institutions? Use the Financial Consumer Agency of Canada Account Comparison Tool\nTerms & Conditions\n† Offer is subject to change. Read new member cash offer terms and conditions .\n1. Transactions include cheques drawn on the account, Coast Capital® and THE EXCHANGE® Network ATM withdrawals, Interac Direct Payment, pre-authorized payments, bill payments, transfers (between Coast Capital accounts), and withdrawals (in-branch/self serve). Deposits and electronic transfers (between Coast Capital accounts) performed via Coast Capital ® ATM, Coast-by-Phone®, and Coast Capital digital banking are free & unlimited.\n2. Low-Cost Account : Our Free Chequing, Free",
+          "retrieval_metadata": {
+            "chunk_length": 899,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-15",
+          "chunk_index": 15,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Coast-by-Phone®, and Coast Capital digital banking are free & unlimited.\n2. Low-Cost Account : Our Free Chequing, Free Debit and More Account meets our public commitment to ensure that members have access to basic banking services at a nominal cost. If paper statements are requested instead of eStatements, this account costs $3/membership per month. If paper cheque image returns are requested, this cost is $0.50/account per month, and you will receive images of all your cheques with your statement. If you don't write any cheques, no fee will be charged.\nLow-Cost Account\nNo-Cost Account : If you identify in one of the Eligible Groups (noted below), you can open our Free Chequing, Free Debit & More Account and access a No-Cost account that meets the minimum requirements as outlined in the FCAC guidelines. Paper printed statements and paper cheque image return will be at no charge. Call",
+          "retrieval_metadata": {
+            "chunk_length": 896,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-16",
+          "chunk_index": 16,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "s as outlined in the FCAC guidelines. Paper printed statements and paper cheque image return will be at no charge. Call our Advice Centre or visit a branch for more information.\nNo-Cost Account\nEligible Groups for No-Cost Account : Students, Youth (Canadians aged 18 and under), Seniors receiving the Guaranteed Income Supplement, Registered Disability Savings Plan (RDSP) beneficiary, Newcomers to Canada (for 1st year in Canada), Indigenous peoples, Canadians receiving social assistance payments from select provincial or territorial programs or Recipients of the Disability Tax.\nEligible Groups for No-Cost Account\n3. Surcharges from other financial institution ATMs may apply.\n4. Additional fees may be charged by third parties as part of the transaction amount. The ‘transaction amount’ we use to calculate the commission is the amount of the POS or ATM request we receive and pay from your",
+          "retrieval_metadata": {
+            "chunk_length": 896,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-17",
+          "chunk_index": 17,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "saction amount’ we use to calculate the commission is the amount of the POS or ATM request we receive and pay from your account to settle your international ATM or POS transaction. The ATM or POS request we receive is in Canadian dollars. Any currency conversion to calculate the Canadian dollar transaction amount is done by a third party in the electronic network your debit request comes through on. We do not set the rates for or complete those currency conversions. Fees or commissions of third parties involved in processing your international ATM or POS transaction may also be included in the transaction amount.\n5. Eligible payroll or direct deposit transaction codes include: Payroll (200-207), Pension (230-233, 310-312, and 315-316), certain Government Payments (308, 313, 318, 326-328 and 600-607) , or deposits from employers approved by Coast Capital (Doordash, Skip the Dishes, Uber,",
+          "retrieval_metadata": {
+            "chunk_length": 899,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-18",
+          "chunk_index": 18,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "313, 318, 326-328 and 600-607) , or deposits from employers approved by Coast Capital (Doordash, Skip the Dishes, Uber, Uber Eats, Lyft, Avon, Youngliving, Fantuan Asian Food Delivery).\n6. Coursera is an online learning platform offering multiple continuing education opportunities from leading universities and institutions. The products offered by Coursera can, but do not guarantee to, help users advance, relaunch, or improve their earning potential in their careers. As a bonus on their Coast Capital Elevate Chequing Account, a primary account holder will receive one (1) free Coursera for Business license for the account holder’s personal use. This license will be associated with the primary account holder’s email address on Coast Capital’s records. The license can only be used with the associated email address to open a Coursera account. The license will be valid for the period the",
+          "retrieval_metadata": {
+            "chunk_length": 895,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-19",
+          "chunk_index": 19,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "only be used with the associated email address to open a Coursera account. The license will be valid for the period the primary account holder maintains a Coast Capital Elevate Chequing Account in good standing. The license has a monetary value of $538 CAD per year or monthly monetary value of $79 CAD as of January 1, 2024. Limit of one (1) license per primary account holder. No substitutions will be allowed. Coast Capital may allow, at its sole discretion, transfers of the license to another individual as decided by the primary account holder. The license may be subject to content, course, and program exclusions or limitations at the sole discretion of Coursera. The use of the license will be exclusively subject to Coursera’s terms, conditions, and policies. Details regarding Coursera’s products, terms, conditions, and policies can be found at https://www.coursera.org/\n7. As a holder",
+          "retrieval_metadata": {
+            "chunk_length": 897,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-20",
+          "chunk_index": 20,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "regarding Coursera’s products, terms, conditions, and policies can be found at https://www.coursera.org/\n7. As a holder of an eligible Coast Capital credit card issued by Collabria – only applies to World Mastercard®, Cash Back World Elite Mastercard ®, and Centra Gold Mastercard® – you may qualify for a onetime fee rebate of up to $50 upon (i) opening or holding an eligible Coast Capital credit card account as the primary cardholder and (ii) opening or holding a Coast Capital Elevate Chequing Account as the primary account holder. For clarity, if you are currently a primary account holder on an Coast Capital Elevate Chequing Account and then open an eligible Coast Capital credit card account, you will be eligible for the onetime fee rebate; if you are currently a primary cardholder on an eligible Coast Capital credit card account and then open a Coast Capital Elevate Chequing Account,",
+          "retrieval_metadata": {
+            "chunk_length": 898,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-21",
+          "chunk_index": 21,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "ary cardholder on an eligible Coast Capital credit card account and then open a Coast Capital Elevate Chequing Account, you will be eligible for the onetime fee rebate. The fee rebate shall be applied directly to eligible Coast Capital credit card account in the year the eligible Coast Capital credit card account, or Coast Capital Elevate Chequing Account, or both are opened. Limit of one fee rebate per Coast Capital Elevate Chequing Account. The eligible credit card account and Coast Capital Elevate Chequing Account must be in good standing at the time the fee rebate is applied. Coast Capital may change, revoke, or end this offer at any time in its sole discretion and without further notice.\n8. Coast Capital waives its fee for up to two (2) Interac® network ATM transactions per month for transactions initiated within Canada. Surcharges from other financial intuition ATMs may apply.\n9.",
+          "retrieval_metadata": {
+            "chunk_length": 898,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-22",
+          "chunk_index": 22,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "ctions per month for transactions initiated within Canada. Surcharges from other financial intuition ATMs may apply.\n9. Coast Capital waives its fee for up to three (3) international ATM transactions per year for transactions initiated outside Canada. Additional 2.00% international ATM administration fee still applies. The international ATM administration fee is a commission calculate based on the amount of the ATM request Coast Capital receives and is paid from your account to settle your international ATM transaction. The ATM request Coast Capital receives is in Canadian dollars. Any currency conversion to calculate the Canadian dollar transaction amount is done by a third party in the electronic network your ATM request comes through on. Coast Capital does not set the rates for or complete those currency conversions. Fees or commissions of third parties involved in processing your",
+          "retrieval_metadata": {
+            "chunk_length": 896,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-23",
+          "chunk_index": 23,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "the rates for or complete those currency conversions. Fees or commissions of third parties involved in processing your international ATM transaction may also be included in the transaction amount per month for transactions initiated within Canada.",
+          "retrieval_metadata": {
+            "chunk_length": 247,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 13160,
+            "segment_char_start": 5128
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-24",
+          "chunk_index": 24,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "You are now being redirected to a third party site.\n×\nThe website you will be entering is not owned or operated by Coast Capital Savings Federal Credit Union or its subsidiaries. You are entering a website of an independent third party which solely owns and controls the content, products, services, and information contained on its websites. Coast Capital Savings Federal Credit Union makes no representations or warranties about the third party’s products or services and is not responsible or liable for damages relating to the third party, its products or services, its website, its privacy policies or practices, or the content of the third party website. Your use of the third party website is subject to the third party’s terms, conditions, and policies and you accept any risks and liabilities of using the third party website including, but not limited to, risks associated with data breach",
+          "retrieval_metadata": {
+            "chunk_length": 899,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 14117,
+            "segment_char_start": 13162
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-25",
+          "chunk_index": 25,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "risks and liabilities of using the third party website including, but not limited to, risks associated with data breach and loss of personal and private information.\nCancel OK",
+          "retrieval_metadata": {
+            "chunk_length": 175,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 14117,
+            "segment_char_start": 13162
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-26",
+          "chunk_index": 26,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "free-chequing-free-debit-and-more-account-details",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Monthly Fee\n$0\n(this is our low-cost account and it can qualify as a no-cost account\n2\n)",
+          "retrieval_metadata": {
+            "chunk_length": 88,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 14207,
+            "segment_char_start": 14119
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-27",
+          "chunk_index": 27,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "free-chequing-free-debit-and-more-account-details",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Minimum Balance\nNot required\nDay-to-day Transactions 1\nUnlimited",
+          "retrieval_metadata": {
+            "chunk_length": 64,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 14273,
+            "segment_char_start": 14209
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-28",
+          "chunk_index": 28,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "free-chequing-free-debit-and-more-account-details",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Interac e-Transfers\n$1.50 each (sending)\nFree (receiving)\nCanadian Cheque Book\nFree for ages 59+\nMonthly eStatement\nFree\n(Printed statements are $3/month per membership\n2\n)\nCoast Capital and The Exchange® Network ATM Transactions\nFree\nInterac® Network ATM Transactions (Canada) 3\n$2.50 each\nInternational ATM Transactions 4\n$5 International ATM fee plus 2% administration fee on transaction amount\nCoast Online® and Mobile® Banking\nFree\nClick here for service fees",
+          "retrieval_metadata": {
+            "chunk_length": 464,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 14739,
+            "segment_char_start": 14275
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-29",
+          "chunk_index": 29,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "compare-accounts",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Monthly Fee\n$0\n$8.50 or less\n$16.95 or less\nReduced monthly fee if you :\n- Maintain a minimum $4,000 daily balance at all times during the calendar month\nor\n- Are 59+ years of age\nor\n- Are 25 years of age or younger\nReduced monthly fee if you :\nor\nN/A\nPay $0\nPay $8.50\nOr get $5 off monthly fee\nWhen you set-up and deposit payroll or another eligible direct deposit into the account.\n5\nOr get $5 off monthly fee\nN/A\nPay $3.50\nPay $11.95",
+          "retrieval_metadata": {
+            "chunk_length": 436,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 15177,
+            "segment_char_start": 14741
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-30",
+          "chunk_index": 30,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "compare-accounts",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Interac e-Transfers\nSending\n$1.50/transfer\nFree\nReceiving\nFree\nUnlimited day-to-day transactions 1\nFree access to ID Assist® - Online identity theft protection\n(For one account holder)\nFree access to ID Assist® - Online identity theft protection\nN/A\n+Password manager\nFree access to Coursera\n6\n– Online learning platform\n(For one account holder)\nFree access to Coursera 6 – Online learning platform\nN/A\nFree paper or eStatements\neStatement only 2\nOne free Canadian cheque book\n(Annually)\nOne free Canadian cheque book\n(Annually)\nFree for ages 59+\n25 singles\n50 singles\nUp to $50 one-time first year credit card rebate\nOn eligible credit cards issued by Collabria\n7\nUp to $50 one-time first year credit card rebate\nOn eligible credit cards issued by Collabria 7\nN/A\n2 free Interac network Canadian ATM withdrawals per month 8\nN/A\n3 free International ATM withdrawals per year 9\nN/A\nViewing Free Chequing Account\nFree Chequing Account\nView More about Unlimited Chequing Account\nMore about Unlimited Chequing Account\nView Elevate Chequing Account\nElevate Chequing Account",
+          "retrieval_metadata": {
+            "chunk_length": 1068,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 16247,
+            "segment_char_start": 15179
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-31",
+          "chunk_index": 31,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "frequently-asked-questions",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Transactions include cheques drawn on the account, Coast Capital® and THE EXCHANGE® Network ATM withdrawals, Interac Direct Payment, pre-authorized payments, bill payments, transfers (between Coast Capital accounts), and withdrawals (in-branch/self serve). Deposits and electronic transfers (between Coast Capital accounts) performed via Coast Capital® ATM, Coast-by-Phone®, and Coast Capital digital banking are free & unlimited.\nDo Seniors receive free personalized cheque orders?\nSeniors(59+ years of age) receive free personalized cheque orders and free cheque images (returned with statements). Canadian office cheques and bank drafts are also free for Seniors.",
+          "retrieval_metadata": {
+            "chunk_length": 666,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 16915,
+            "segment_char_start": 16249
+          }
+        }
+      ],
+      "saved_fields": [
+        {
+          "field_name": "monthly_fee",
+          "candidate_value": "0.00",
+          "value_type": "decimal",
+          "confidence": 0.9,
+          "extraction_method": "heuristic_money",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-4",
+          "evidence_text_excerpt": "Free Chequing, Free Debit, and More Account Details\nMonthly Fee\n$0\n(this is our low-cost account and it can qualify as a no-cost account\n2\n)\nMinimum Balance\nNot required\nDay-to-day Transactions 1\nUnlimited\nInterac e-Transfers\n$1.50 each (sending)\nFree (receiving)\nCanadian Cheque Book\nFree for ages 59+\nMonthly eStatement\nFree\n(Printed statements are $3/month per membership\n2\n)\nCoast Capital and The Exchange® Network ATM Transactions\nFree\nInterac® Network ATM Transactions (Canada) 3\n$2.50 each\nInternational ATM Transactions 4\n$5 International ATM fee plus 2% administration fee on transaction amount\nCoast Online® and Mobile® Banking\nFree\nClick here for service fees",
+          "anchor_type": "section",
+          "anchor_value": "free-chequing-free-debit-and-more-account-details",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "account",
+              "fee",
+              "monthly",
+              "monthly fee",
+              "service",
+              "service fee"
+            ]
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "Free Chequing, Free Debit, and More Account®",
+          "value_type": "string",
+          "confidence": 1.0,
+          "extraction_method": "captured_financial_record",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-1",
+          "evidence_text_excerpt": "Free Chequing, Free Debit, and More Account®\nMeet your essential banking needs, without a monthly fee or minimum balance required.\nThis account can also qualify as a no cost account. 2\na Free Chequing, Free Debit, and More\nTop of main content\nFor a limited time, new members can get a $150 bonus †\nAccount Details Compare FAQs\na Free Chequing, Free Debit, and More\nLIMITED TIME",
+          "anchor_type": "section",
+          "anchor_value": "free-chequing-free-debit-and-more-account",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "deterministic_captured_financial_record",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/everyday-banking/chequing/free-chequing",
+                "title": "Free Chequing, Free Debit, and More Account®"
+              }
+            ],
+            "evidence_quote": "Free Chequing, Free Debit, and More Account®\nMeet your essential banking needs, without a monthly fee or minimum balance required.\nThis account can also qualify as a no cost account. 2\na Free Chequing, Free Debit, and More\nTop of main content\nFor a limited time, new members can get a $150 bonus †\nAccount Details Compare FAQs\na Free Chequing, Free Debit, and More\nLIMITED TIME"
+          }
+        },
+        {
+          "field_name": "unlimited_transactions_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 1.0,
+          "extraction_method": "captured_financial_record",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-30",
+          "evidence_text_excerpt": "Interac e-Transfers\nSending\n$1.50/transfer\nFree\nReceiving\nFree\nUnlimited day-to-day transactions 1\nFree access to ID Assist® - Online identity theft protection\n(For one account holder)\nFree access to ID Assist® - Online identity theft protection\nN/A\n+Password manager\nFree access to Coursera\n6\n– Online learning platform\n(For one account holder)\nFree access to Coursera 6 – Online learning platform\nN/A\nFree paper or eStatements\neStatement only 2\nOne free Canadian cheque book\n(Annually)\nOne free Canadian cheque book\n(Annually)\nFree for ages 59+\n25 singles\n50 singles\nUp to $50 one-time first year credit card rebate\nOn eligible credit cards issued by Collabria\n7\nUp to $50 one-time first year credit card rebate\nOn eligible credit cards issued by Collabria 7\nN/A\n2 free Interac network Canadian ATM withdrawals per month 8\nN/A\n3 free International ATM withdrawals per year 9\nN/A\nViewing Free Chequing Account\nFree Chequing Account\nView More about Unlimited Chequing Account\nMore about Unlimited Chequing Account\nView Elevate Chequing Account\nElevate Chequing Account",
+          "anchor_type": "financial_declaration",
+          "anchor_value": "compare-accounts",
+          "page_no": null,
+          "chunk_index": 30,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "deterministic_captured_financial_record",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/everyday-banking/chequing/free-chequing",
+                "title": "Free Chequing, Free Debit, and More Account®"
+              }
+            ],
+            "evidence_quote": "Interac e-Transfers\nSending\n$1.50/transfer\nFree\nReceiving\nFree\nUnlimited day-to-day transactions 1\nFree access to ID Assist® - Online identity theft protection\n(For one account holder)\nFree access to ID Assist® - Online identity theft protection\nN/A\n+Password manager\nFree access to Coursera\n6\n– Online learning platform\n(For one account holder)\nFree access to Coursera 6 – Online learning platform\nN/A\nFree paper or eStatements\neStatement only 2\nOne free Canadian cheque book\n(Annually)\nOne free Canadian cheque book\n(Annually)\nFree for ages 59+\n25 singles\n50 singles\nUp to $50 one-time first year credit card rebate\nOn eligible credit cards issued by Collabria\n7\nUp to $50 one-time first year credit card rebate\nOn eligible credit cards issued by Collabria 7\nN/A\n2 free Interac network Canadian ATM withdrawals per month 8\nN/A\n3 free International ATM withdrawals per year 9\nN/A\nViewing Free Chequing Account\nFree Chequing Account\nView More about Unlimited Chequing Account\nMore about Unlimited Chequing Account\nView Elevate Chequing Account\nElevate Chequing Account"
+          }
+        }
+      ],
+      "requested_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "public_display_fee",
+        "fee_waiver_condition",
+        "minimum_balance",
+        "minimum_deposit",
+        "eligibility_text",
+        "application_method",
+        "tax_benefits",
+        "deposit_insurance",
+        "included_transactions",
+        "unlimited_transactions_flag",
+        "interac_e_transfer_included",
+        "overdraft_available",
+        "cheque_book_info",
+        "student_plan_flag",
+        "newcomer_plan_flag",
+        "notes",
+        "transaction_fee",
+        "additional_transaction_fee",
+        "standard_rate",
+        "public_display_rate",
+        "interest_rate_summary",
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "compounding_frequency",
+        "payout_option",
+        "tiered_rate_flag",
+        "tier_definition_text",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag"
+      ],
+      "schema_context": {
+        "product_family": "deposit",
+        "product_type": "chequing",
+        "source_language": "en",
+        "expected_fields": [
+          "product_name",
+          "monthly_fee",
+          "public_display_fee",
+          "unlimited_transactions_flag",
+          "included_transactions",
+          "transaction_fee",
+          "additional_transaction_fee",
+          "minimum_balance",
+          "fee_waiver_condition",
+          "standard_rate",
+          "public_display_rate",
+          "interest_rate_summary",
+          "interest_calculation_method",
+          "interest_payment_frequency",
+          "compounding_frequency",
+          "payout_option",
+          "tiered_rate_flag",
+          "tier_definition_text",
+          "promotional_rate",
+          "promotional_period_text",
+          "introductory_rate_flag",
+          "minimum_deposit"
+        ],
+        "product_type_name": "Chequing",
+        "product_type_description": "Chequing accounts collected for monthly fee, minimum balance, and included or unlimited transactions.",
+        "product_type_dynamic": null
+      }
+    },
+    {
+      "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-redeemable-gic",
+      "metadata": {
+        "product_type": "gic",
+        "product_family": "deposit",
+        "discovery_role": "detail",
+        "official_domain_allowlist": [
+          "coastcapitalsavings.com"
+        ],
+        "expected_fields": [
+          "product_name",
+          "standard_rate",
+          "base_12_month_rate",
+          "public_display_rate",
+          "highest_rate",
+          "interest_rate_summary",
+          "term_rate_table",
+          "term_length_text",
+          "term_length_days",
+          "redeemable_flag",
+          "non_redeemable_flag",
+          "early_withdrawal_penalty",
+          "minimum_deposit",
+          "interest_calculation_method",
+          "interest_payment_frequency",
+          "compounding_frequency",
+          "payout_option",
+          "tiered_rate_flag",
+          "tier_definition_text",
+          "promotional_rate",
+          "promotional_period_text",
+          "introductory_rate_flag"
+        ],
+        "fallback_policy": "generic_ai_review",
+        "normalized_source_url": "https://www.coastcapitalsavings.com/investments/gics/1-year-redeemable-gic",
+        "discovery_metadata": {
+          "product_identity_match": true,
+          "primary_heading": "1-Year Redeemable GIC",
+          "page_title": "Investments - 1 Year Redeemable GIC | Coast Capital Savings"
+        }
+      },
+      "chunks": [
+        {
+          "evidence_chunk_id": "chunk-0",
+          "chunk_index": 0,
+          "anchor_type": "section",
+          "anchor_value": "document",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Document\nInvestments\nGICs\n1 Year Redeemable GIC",
+          "retrieval_metadata": {
+            "chunk_length": 47,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 47,
+            "segment_char_start": 0
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-1",
+          "chunk_index": 1,
+          "anchor_type": "section",
+          "anchor_value": "1-year-redeemable-gic",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "1-Year Redeemable GIC\nEnjoy the flexibility of being able to redeem this GIC after 30 days without penalty.\nTop of main content\nOpen a 1-Year Redeemable GIC today\nGet started",
+          "retrieval_metadata": {
+            "chunk_length": 174,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 223,
+            "segment_char_start": 49
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-2",
+          "chunk_index": 2,
+          "anchor_type": "section",
+          "anchor_value": "gic-details",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "GIC Details\nAvailable terms and rates\n1 Year\nAccess to funds\nThis is the flexibility to cash out, or deem, the GIC during the term.\nThis is the flexibility to cash out, or deem, the GIC during the term.\nRedeemable Have the flexibility to cash out the GIC during the term. Redeemable after 30 days without penalty on payable interest.\nRedeemable\nHave the flexibility to cash out the GIC during the term.\nRedeemable after 30 days without penalty on payable interest.\nMinimum investment\n$500\nInterest\nPaid annually Get an interest payment on each anniversary of opening the GIC.\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nAvailability\nAvailable in non-registered and registered accounts inclusing RRSP, RIF, RESP or TFSA",
+          "retrieval_metadata": {
+            "chunk_length": 752,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 977,
+            "segment_char_start": 225
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-3",
+          "chunk_index": 3,
+          "anchor_type": "section",
+          "anchor_value": "interest-rates-and-terms",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.15%\n1 Year\n1-Year Redeemable GIC\n1-Year Better-Than-Cash GIC\nShort-term GIC",
+          "retrieval_metadata": {
+            "chunk_length": 252,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 1231,
+            "segment_char_start": 979
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-4",
+          "chunk_index": 4,
+          "anchor_type": "section",
+          "anchor_value": "compare-similar-gics",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Compare similar GICs",
+          "retrieval_metadata": {
+            "chunk_length": 20,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 1253,
+            "segment_char_start": 1233
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-5",
+          "chunk_index": 5,
+          "anchor_type": "section",
+          "anchor_value": "explore-our-other-gics-and-find-one-that-works-for-your-needs",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Explore our other GICs and find one that works for your needs.\n1-Year Redeemable GIC\n1-Year Better-Than-Cash GIC\nShort-term GIC\nAvailable terms\n1 Year\n1 to 9 months\nAccess to funds\nThis is the flexibility to cash out (redeem) the GIC during the term.\nMinimal length for interest payable to be redeemable without penalty\n30 days\n6 months\nAt term\nMinimum investment\n$500\nInterest earning options\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nPaid at maturity\nGet a lump sum interest payment at the end of the term.\nAvailability\nAvailable as a Non-registered account\nAvailable as a Registered Account such as an RRSP, RIF, RESP or TFSA\nViewing\nView\nSee more GICs\nStart growing your money today\nInvest in a 1-Year Redeemable GIC online in as little as five minutes, or visit us in branch.\nInvest now\nBook appointment\nor call us at 1.888.517.7745\n1.888.517.7745",
+          "retrieval_metadata": {
+            "chunk_length": 888,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2143,
+            "segment_char_start": 1255
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-6",
+          "chunk_index": 6,
+          "anchor_type": "section",
+          "anchor_value": "connect-with-us",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Connect with us\nBook an appointment\n1.888.517.7000\nFind a branch\nCoast Capital Savings Federal Credit Union is a member of the Canada Deposit Insurance Corporation (CDIC). More CDIC information\nOnly deposits payable in Canada are eligible to be insured under the Canada Deposit Insurance Corporation Act.",
+          "retrieval_metadata": {
+            "chunk_length": 304,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2449,
+            "segment_char_start": 2145
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-7",
+          "chunk_index": 7,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "You are now being redirected to a third party site.\n×\nThe website you will be entering is not owned or operated by Coast Capital Savings Federal Credit Union or its subsidiaries. You are entering a website of an independent third party which solely owns and controls the content, products, services, and information contained on its websites. Coast Capital Savings Federal Credit Union makes no representations or warranties about the third party’s products or services and is not responsible or liable for damages relating to the third party, its products or services, its website, its privacy policies or practices, or the content of the third party website. Your use of the third party website is subject to the third party’s terms, conditions, and policies and you accept any risks and liabilities of using the third party website including, but not limited to, risks associated with data breach",
+          "retrieval_metadata": {
+            "chunk_length": 899,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 3406,
+            "segment_char_start": 2451
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-8",
+          "chunk_index": 8,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "risks and liabilities of using the third party website including, but not limited to, risks associated with data breach and loss of personal and private information.\nCancel OK",
+          "retrieval_metadata": {
+            "chunk_length": 175,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 3406,
+            "segment_char_start": 2451
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-9",
+          "chunk_index": 9,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "gic-details",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Minimum investment\n$500\nInterest\nPaid annually Get an interest payment on each anniversary of opening the GIC.\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nAvailability\nAvailable in non-registered and registered accounts inclusing RRSP, RIF, RESP or TFSA",
+          "retrieval_metadata": {
+            "chunk_length": 287,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 3695,
+            "segment_char_start": 3408
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-10",
+          "chunk_index": 10,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "explore-our-other-gics-and-find-one-that-works-for-your-needs",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Minimum investment\n$500\nInterest earning options\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nPaid at maturity\nGet a lump sum interest payment at the end of the term.\nAvailability\nAvailable as a Non-registered account\nAvailable as a Registered Account such as an RRSP, RIF, RESP or TFSA\nViewing\nView\nSee more GICs\nStart growing your money today\nInvest in a 1-Year Redeemable GIC online in as little as five minutes, or visit us in branch.\nInvest now\nBook appointment\nor call us at 1.888.517.7745\n1.888.517.7745",
+          "retrieval_metadata": {
+            "chunk_length": 543,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 4240,
+            "segment_char_start": 3697
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-11",
+          "chunk_index": 11,
+          "anchor_type": "rate_table_row",
+          "anchor_value": "rate-table-0-row-0",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Rate\nTerm Length\n2.15%\n1 Year",
+          "retrieval_metadata": {
+            "chunk_length": 29,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 4271,
+            "segment_char_start": 4242
+          }
+        }
+      ],
+      "saved_fields": [
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "2.15",
+          "value_type": "decimal",
+          "confidence": 0.91,
+          "extraction_method": "openai_official_grounding",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-3",
+          "evidence_text_excerpt": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.15%\n1 Year\n1-Year Redeemable GIC\n1-Year Better-Than-Cash GIC\nShort-term GIC",
+          "anchor_type": "section",
+          "anchor_value": "interest-rates-and-terms",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "captured_official_evidence",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-redeemable-gic",
+                "title": "gic-details"
+              }
+            ],
+            "evidence_quote": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.15%\n1 Year\n1-Year Redeemable GIC\n1-Year Better-Than-Cash GIC\nShort-term GIC",
+            "rationale": "The product page’s rate-and-terms declaration displays 2.15% for the 1 Year term and explicitly states that rates are calculated per annum.",
+            "dynamic_product_type": false
+          }
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "1 Year",
+          "value_type": "string",
+          "confidence": 0.98,
+          "extraction_method": "openai_official_grounding",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-3",
+          "evidence_text_excerpt": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.15%\n1 Year\n1-Year Redeemable GIC\n1-Year Better-Than-Cash GIC\nShort-term GIC",
+          "anchor_type": "section",
+          "anchor_value": "interest-rates-and-terms",
+          "page_no": null,
+          "chunk_index": 3,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "captured_official_evidence",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-redeemable-gic",
+                "title": "gic-details"
+              }
+            ],
+            "evidence_quote": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.15%\n1 Year\n1-Year Redeemable GIC\n1-Year Better-Than-Cash GIC\nShort-term GIC",
+            "rationale": "The official rate table explicitly labels the term as “1 Year.”",
+            "dynamic_product_type": false
+          }
+        },
+        {
+          "field_name": "redeemable_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.98,
+          "extraction_method": "openai_official_grounding",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-2",
+          "evidence_text_excerpt": "GIC Details\nAvailable terms and rates\n1 Year\nAccess to funds\nThis is the flexibility to cash out, or deem, the GIC during the term.\nThis is the flexibility to cash out, or deem, the GIC during the term.\nRedeemable Have the flexibility to cash out the GIC during the term. Redeemable after 30 days without penalty on payable interest.\nRedeemable\nHave the flexibility to cash out the GIC during the term.\nRedeemable after 30 days without penalty on payable interest.\nMinimum investment\n$500\nInterest\nPaid annually Get an interest payment on each anniversary of opening the GIC.\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nAvailability\nAvailable in non-registered and registered accounts inclusing RRSP, RIF, RESP or TFSA",
+          "anchor_type": "section",
+          "anchor_value": "gic-details",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "captured_official_evidence",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-redeemable-gic",
+                "title": "gic-details"
+              }
+            ],
+            "evidence_quote": "GIC Details\nAvailable terms and rates\n1 Year\nAccess to funds\nThis is the flexibility to cash out, or deem, the GIC during the term.\nThis is the flexibility to cash out, or deem, the GIC during the term.\nRedeemable Have the flexibility to cash out the GIC during the term. Redeemable after 30 days without penalty on payable interest.\nRedeemable\nHave the flexibility to cash out the GIC during the term.\nRedeemable after 30 days without penalty on payable interest.\nMinimum investment\n$500\nInterest\nPaid annually Get an interest payment on each anniversary of opening the GIC.\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nAvailability\nAvailable in non-registered and registered accounts inclusing RRSP, RIF, RESP or TFSA",
+            "rationale": "The official GIC details explicitly describe the product as redeemable during the term, after 30 days without penalty on payable interest.",
+            "dynamic_product_type": false
+          }
+        },
+        {
+          "field_name": "non_redeemable_flag",
+          "candidate_value": false,
+          "value_type": "boolean",
+          "confidence": 0.97,
+          "extraction_method": "openai_official_grounding",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-2",
+          "evidence_text_excerpt": "GIC Details\nAvailable terms and rates\n1 Year\nAccess to funds\nThis is the flexibility to cash out, or deem, the GIC during the term.\nThis is the flexibility to cash out, or deem, the GIC during the term.\nRedeemable Have the flexibility to cash out the GIC during the term. Redeemable after 30 days without penalty on payable interest.\nRedeemable\nHave the flexibility to cash out the GIC during the term.\nRedeemable after 30 days without penalty on payable interest.\nMinimum investment\n$500\nInterest\nPaid annually Get an interest payment on each anniversary of opening the GIC.\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nAvailability\nAvailable in non-registered and registered accounts inclusing RRSP, RIF, RESP or TFSA",
+          "anchor_type": "section",
+          "anchor_value": "gic-details",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "captured_official_evidence",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-redeemable-gic",
+                "title": "gic-details"
+              }
+            ],
+            "evidence_quote": "GIC Details\nAvailable terms and rates\n1 Year\nAccess to funds\nThis is the flexibility to cash out, or deem, the GIC during the term.\nThis is the flexibility to cash out, or deem, the GIC during the term.\nRedeemable Have the flexibility to cash out the GIC during the term. Redeemable after 30 days without penalty on payable interest.\nRedeemable\nHave the flexibility to cash out the GIC during the term.\nRedeemable after 30 days without penalty on payable interest.\nMinimum investment\n$500\nInterest\nPaid annually Get an interest payment on each anniversary of opening the GIC.\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nAvailability\nAvailable in non-registered and registered accounts inclusing RRSP, RIF, RESP or TFSA",
+            "rationale": "The explicit redeemable-during-the-term statement supports that this is not a non-redeemable GIC.",
+            "dynamic_product_type": false
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "1-Year Redeemable GIC",
+          "value_type": "string",
+          "confidence": 1.0,
+          "extraction_method": "captured_financial_record",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-1",
+          "evidence_text_excerpt": "1-Year Redeemable GIC\nEnjoy the flexibility of being able to redeem this GIC after 30 days without penalty.\nTop of main content\nOpen a 1-Year Redeemable GIC today\nGet started",
+          "anchor_type": "section",
+          "anchor_value": "1-year-redeemable-gic",
+          "page_no": null,
+          "chunk_index": 1,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "deterministic_captured_financial_record",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-redeemable-gic",
+                "title": "1-Year Redeemable GIC"
+              }
+            ],
+            "evidence_quote": "1-Year Redeemable GIC\nEnjoy the flexibility of being able to redeem this GIC after 30 days without penalty.\nTop of main content\nOpen a 1-Year Redeemable GIC today\nGet started"
+          }
+        }
+      ],
+      "requested_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "public_display_fee",
+        "fee_waiver_condition",
+        "minimum_balance",
+        "minimum_deposit",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "term_rate_table",
+        "interest_rate_summary",
+        "term_length_text",
+        "term_length_days",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "early_withdrawal_penalty",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "notes",
+        "highest_rate",
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "tiered_rate_flag",
+        "tier_definition_text"
+      ],
+      "schema_context": {
+        "product_family": "deposit",
+        "product_type": "gic",
+        "source_language": "en",
+        "expected_fields": [
+          "product_name",
+          "standard_rate",
+          "base_12_month_rate",
+          "public_display_rate",
+          "highest_rate",
+          "interest_rate_summary",
+          "term_rate_table",
+          "term_length_text",
+          "term_length_days",
+          "redeemable_flag",
+          "non_redeemable_flag",
+          "early_withdrawal_penalty",
+          "minimum_deposit",
+          "interest_calculation_method",
+          "interest_payment_frequency",
+          "compounding_frequency",
+          "payout_option",
+          "tiered_rate_flag",
+          "tier_definition_text",
+          "promotional_rate",
+          "promotional_period_text",
+          "introductory_rate_flag"
+        ],
+        "product_type_name": "GIC",
+        "product_type_description": "Guaranteed investment certificates collected for rate, term, minimum deposit, and redeemability.",
+        "product_type_dynamic": null
+      }
+    },
+    {
+      "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-better-than-cash-gic",
+      "metadata": {
+        "product_type": "gic",
+        "product_family": "deposit",
+        "discovery_role": "detail",
+        "official_domain_allowlist": [
+          "coastcapitalsavings.com"
+        ],
+        "expected_fields": [
+          "product_name",
+          "standard_rate",
+          "base_12_month_rate",
+          "public_display_rate",
+          "highest_rate",
+          "interest_rate_summary",
+          "term_rate_table",
+          "term_length_text",
+          "term_length_days",
+          "redeemable_flag",
+          "non_redeemable_flag",
+          "early_withdrawal_penalty",
+          "minimum_deposit",
+          "interest_calculation_method",
+          "interest_payment_frequency",
+          "compounding_frequency",
+          "payout_option",
+          "tiered_rate_flag",
+          "tier_definition_text",
+          "promotional_rate",
+          "promotional_period_text",
+          "introductory_rate_flag"
+        ],
+        "fallback_policy": "generic_ai_review",
+        "normalized_source_url": "https://www.coastcapitalsavings.com/investments/gics/1-year-better-than-cash-gic",
+        "discovery_metadata": {
+          "product_identity_match": true,
+          "primary_heading": "1-Year Better-than-Cash GIC",
+          "page_title": "Investments - 1-year Better than Cash GIC | Coast Capital Savings"
+        }
+      },
+      "chunks": [
+        {
+          "evidence_chunk_id": "chunk-0",
+          "chunk_index": 0,
+          "anchor_type": "section",
+          "anchor_value": "1-year-better-than-cash-gic",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "1-Year Better-than-Cash GIC\nEnjoy the flexibility of being able to redeem this GIC anytime. Redeem after at least 6 months to keep accrued interest.\nTop of main content\nOpen a 1-Year Better-than-Cash® GIC today\nGet started",
+          "retrieval_metadata": {
+            "chunk_length": 222,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 222,
+            "segment_char_start": 0
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-1",
+          "chunk_index": 1,
+          "anchor_type": "section",
+          "anchor_value": "gic-details",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "GIC Details\nAvailable terms and rates\n1 Year\nAccess to funds\nThis is the flexibility to cash out, or redeem, the GIC during the term.\nThis is the flexibility to cash out, or redeem, the GIC during the term.\nRedeemable Have the flexibility to cash out at anytime, interest is paid after 6 months of the funds held.\nRedeemable\nHave the flexibility to cash out at anytime, interest is paid after 6 months of the funds held.\nMinimum investment\n$500\nInterest\nPaid annually Get an interest payment on each anniversary of opening the GIC.\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nAvailability\nAvailable in non-registered and registered accounts inclusing RRSP, RIF, RESP or TFSA",
+          "retrieval_metadata": {
+            "chunk_length": 708,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 932,
+            "segment_char_start": 224
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-2",
+          "chunk_index": 2,
+          "anchor_type": "section",
+          "anchor_value": "interest-rates-and-terms",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.30%\n1 Year\n1-Year Better-Than-Cash GIC\nShort-term GIC\n1-Year Redeemable GIC",
+          "retrieval_metadata": {
+            "chunk_length": 252,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 1186,
+            "segment_char_start": 934
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-3",
+          "chunk_index": 3,
+          "anchor_type": "section",
+          "anchor_value": "compare-similar-gics",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Compare similar GICs",
+          "retrieval_metadata": {
+            "chunk_length": 20,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 1208,
+            "segment_char_start": 1188
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-4",
+          "chunk_index": 4,
+          "anchor_type": "section",
+          "anchor_value": "explore-our-other-gics-and-find-one-that-works-for-your-needs",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Explore our other GICs and find one that works for your needs.\n1-Year Better-Than-Cash GIC\nShort-term GIC\n1-Year Redeemable GIC\nAvailable terms\n1 Year\n1 to 9 months\n1 Year\nAccess to funds\nThis is the flexibility to cash out (redeem) the GIC during the term.\nRedeemable at any time\nMinimal length for interest payable to be redeemable without penalty\n6 months\nAt term\n30 days\nMinimum investment\n$500\nInterest earning options\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nPaid at maturity\nGet a lump sum interest payment at the end of the term.\nAvailability\nAvailable as a Non-registered account\nAvailable as a Registered Account such as an RRSP, RIF, RESP or TFSA\nViewing\nView\nSee more GICs\nStart growing your money today\nInvest in a 1-Year Better than Cash® GIC in as little as five minutes, or visit us in branch.\nInvest now\nBook appointment\nor call us at",
+          "retrieval_metadata": {
+            "chunk_length": 888,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2128,
+            "segment_char_start": 1210
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-5",
+          "chunk_index": 5,
+          "anchor_type": "section",
+          "anchor_value": "explore-our-other-gics-and-find-one-that-works-for-your-needs",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "ar Better than Cash® GIC in as little as five minutes, or visit us in branch.\nInvest now\nBook appointment\nor call us at 1.888.517.7745\n1.888.517.7745",
+          "retrieval_metadata": {
+            "chunk_length": 149,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2128,
+            "segment_char_start": 1210
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-6",
+          "chunk_index": 6,
+          "anchor_type": "section",
+          "anchor_value": "connect-with-us",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Connect with us\nBook an appointment\n1.888.517.7000\nFind a branch\nCoast Capital Savings Federal Credit Union is a member of the Canada Deposit Insurance Corporation (CDIC). More CDIC information\nOnly deposits payable in Canada are eligible to be insured under the Canada Deposit Insurance Corporation Act.",
+          "retrieval_metadata": {
+            "chunk_length": 304,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 2434,
+            "segment_char_start": 2130
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-7",
+          "chunk_index": 7,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "You are now being redirected to a third party site.\n×\nThe website you will be entering is not owned or operated by Coast Capital Savings Federal Credit Union or its subsidiaries. You are entering a website of an independent third party which solely owns and controls the content, products, services, and information contained on its websites. Coast Capital Savings Federal Credit Union makes no representations or warranties about the third party’s products or services and is not responsible or liable for damages relating to the third party, its products or services, its website, its privacy policies or practices, or the content of the third party website. Your use of the third party website is subject to the third party’s terms, conditions, and policies and you accept any risks and liabilities of using the third party website including, but not limited to, risks associated with data breach",
+          "retrieval_metadata": {
+            "chunk_length": 899,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 3391,
+            "segment_char_start": 2436
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-8",
+          "chunk_index": 8,
+          "anchor_type": "section",
+          "anchor_value": "you-are-now-being-redirected-to-a-third-party-site",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "risks and liabilities of using the third party website including, but not limited to, risks associated with data breach and loss of personal and private information.\nCancel OK",
+          "retrieval_metadata": {
+            "chunk_length": 175,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 3391,
+            "segment_char_start": 2436
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-9",
+          "chunk_index": 9,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "gic-details",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Minimum investment\n$500\nInterest\nPaid annually Get an interest payment on each anniversary of opening the GIC.\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nAvailability\nAvailable in non-registered and registered accounts inclusing RRSP, RIF, RESP or TFSA",
+          "retrieval_metadata": {
+            "chunk_length": 287,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 3680,
+            "segment_char_start": 3393
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-10",
+          "chunk_index": 10,
+          "anchor_type": "financial_declaration",
+          "anchor_value": "explore-our-other-gics-and-find-one-that-works-for-your-needs",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Minimum investment\n$500\nInterest earning options\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nPaid at maturity\nGet a lump sum interest payment at the end of the term.\nAvailability\nAvailable as a Non-registered account\nAvailable as a Registered Account such as an RRSP, RIF, RESP or TFSA\nViewing\nView\nSee more GICs\nStart growing your money today\nInvest in a 1-Year Better than Cash® GIC in as little as five minutes, or visit us in branch.\nInvest now\nBook appointment\nor call us at 1.888.517.7745\n1.888.517.7745",
+          "retrieval_metadata": {
+            "chunk_length": 543,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 4225,
+            "segment_char_start": 3682
+          }
+        },
+        {
+          "evidence_chunk_id": "chunk-11",
+          "chunk_index": 11,
+          "anchor_type": "rate_table_row",
+          "anchor_value": "rate-table-0-row-0",
+          "page_no": null,
+          "source_language": "en",
+          "evidence_excerpt": "Rate\nTerm Length\n2.30%\n1 Year",
+          "retrieval_metadata": {
+            "chunk_length": 29,
+            "parser_version": "fpds-parse-chunk-v7",
+            "segment_char_end": 4256,
+            "segment_char_start": 4227
+          }
+        }
+      ],
+      "saved_fields": [
+        {
+          "field_name": "redeemable_flag",
+          "candidate_value": true,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-2",
+          "evidence_text_excerpt": "1-Year Better-Than-Cash GIC\nShort-term GIC\n1-Year Redeemable GIC",
+          "anchor_type": "section",
+          "anchor_value": "interest-rates-and-terms",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "redeemable"
+            ]
+          }
+        },
+        {
+          "field_name": "non_redeemable_flag",
+          "candidate_value": false,
+          "value_type": "boolean",
+          "confidence": 0.55,
+          "extraction_method": "heuristic_flag",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-4",
+          "evidence_text_excerpt": "1-Year Better-Than-Cash GIC\nShort-term GIC\n1-Year Redeemable GIC\nAvailable terms\n1 Year\n1 to 9 months\n1 Year\nAccess to funds\nThis is the flexibility to cash out (redeem) the GIC during the term.\nRedeemable at any time\nMinimal length for interest payable to be redeemable without penalty\n6 months\nAt term\n30 days\nMinimum investment\n$500\nInterest earning options\nPaid annually\nGet an interest payment on each anniversary of opening the GIC.\nPaid at maturity\nGet a lump sum interest payment at the end of the term.\nAvailability\nAvailable as a Non-registered account\nAvailable as a Registered Account such as an RRSP, RIF, RESP or TFSA\nViewing\nView\nSee more GICs\nStart growing your money today\nInvest in a 1-Year Better than Cash® GIC in as little as five minutes, or visit us in branch.\nInvest now\nBook appointment\nor call us at",
+          "anchor_type": "section",
+          "anchor_value": "explore-our-other-gics-and-find-one-that-works-for-your-needs",
+          "page_no": null,
+          "chunk_index": 4,
+          "field_metadata": {
+            "retrieval_mode": "metadata-only",
+            "matched_keywords": [
+              "non",
+              "redeemable"
+            ]
+          }
+        },
+        {
+          "field_name": "standard_rate",
+          "candidate_value": "2.30",
+          "value_type": "decimal",
+          "confidence": 0.95,
+          "extraction_method": "openai_official_grounding",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-2",
+          "evidence_text_excerpt": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.30%\n1 Year\n1-Year Better-Than-Cash GIC\nShort-term GIC\n1-Year Redeemable GIC",
+          "anchor_type": "section",
+          "anchor_value": "interest-rates-and-terms",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "captured_official_evidence",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-better-than-cash-gic",
+                "title": "gic-details"
+              }
+            ],
+            "evidence_quote": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.30%\n1 Year\n1-Year Better-Than-Cash GIC\nShort-term GIC\n1-Year Redeemable GIC",
+            "rationale": "The official rate section displays 2.30% for the one-year product and explicitly states that rates are calculated per annum.",
+            "dynamic_product_type": false
+          }
+        },
+        {
+          "field_name": "term_length_text",
+          "candidate_value": "1 Year",
+          "value_type": "string",
+          "confidence": 0.95,
+          "extraction_method": "openai_official_grounding",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-2",
+          "evidence_text_excerpt": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.30%\n1 Year\n1-Year Better-Than-Cash GIC\nShort-term GIC\n1-Year Redeemable GIC",
+          "anchor_type": "section",
+          "anchor_value": "interest-rates-and-terms",
+          "page_no": null,
+          "chunk_index": 2,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "captured_official_evidence",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-better-than-cash-gic",
+                "title": "gic-details"
+              }
+            ],
+            "evidence_quote": "Interest Rates and Terms\nRate is subject to change at any time, without notice. Interest rates are calculated per annum, accrued daily, and paid at maturity.\nRate\nTerm Length\n2.30%\n1 Year\n1-Year Better-Than-Cash GIC\nShort-term GIC\n1-Year Redeemable GIC",
+            "rationale": "The rate table explicitly labels the term as 1 Year.",
+            "dynamic_product_type": false
+          }
+        },
+        {
+          "field_name": "product_name",
+          "candidate_value": "1-Year Better-than-Cash GIC",
+          "value_type": "string",
+          "confidence": 1.0,
+          "extraction_method": "captured_financial_record",
+          "source_document_id": "doc",
+          "source_snapshot_id": "snap",
+          "evidence_chunk_id": "chunk-0",
+          "evidence_text_excerpt": "1-Year Better-than-Cash GIC\nEnjoy the flexibility of being able to redeem this GIC anytime. Redeem after at least 6 months to keep accrued interest.\nTop of main content\nOpen a 1-Year Better-than-Cash® GIC today\nGet started",
+          "anchor_type": "section",
+          "anchor_value": "1-year-better-than-cash-gic",
+          "page_no": null,
+          "chunk_index": 0,
+          "field_metadata": {
+            "official_grounding_contract_version": "collection-official-grounding-v2",
+            "official_verification_status": "match",
+            "official_grounding_method": "deterministic_captured_financial_record",
+            "official_web_sources": [
+              {
+                "url": "https://www.coastcapitalsavings.com/investments/gics/1-year-better-than-cash-gic",
+                "title": "1-Year Better-than-Cash GIC"
+              }
+            ],
+            "evidence_quote": "1-Year Better-than-Cash GIC\nEnjoy the flexibility of being able to redeem this GIC anytime. Redeem after at least 6 months to keep accrued interest.\nTop of main content\nOpen a 1-Year Better-than-Cash® GIC today\nGet started"
+          }
+        }
+      ],
+      "requested_fields": [
+        "product_name",
+        "description_short",
+        "monthly_fee",
+        "public_display_fee",
+        "fee_waiver_condition",
+        "minimum_balance",
+        "minimum_deposit",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag",
+        "eligibility_text",
+        "application_method",
+        "post_maturity_interest_rate",
+        "tax_benefits",
+        "deposit_insurance",
+        "term_rate_table",
+        "interest_rate_summary",
+        "term_length_text",
+        "term_length_days",
+        "redeemable_flag",
+        "non_redeemable_flag",
+        "early_withdrawal_penalty",
+        "compounding_frequency",
+        "payout_option",
+        "registered_plan_supported",
+        "notes",
+        "highest_rate",
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "tiered_rate_flag",
+        "tier_definition_text"
+      ],
+      "schema_context": {
+        "product_family": "deposit",
+        "product_type": "gic",
+        "source_language": "en",
+        "expected_fields": [
+          "product_name",
+          "standard_rate",
+          "base_12_month_rate",
+          "public_display_rate",
+          "highest_rate",
+          "interest_rate_summary",
+          "term_rate_table",
+          "term_length_text",
+          "term_length_days",
+          "redeemable_flag",
+          "non_redeemable_flag",
+          "early_withdrawal_penalty",
+          "minimum_deposit",
+          "interest_calculation_method",
+          "interest_payment_frequency",
+          "compounding_frequency",
+          "payout_option",
+          "tiered_rate_flag",
+          "tier_definition_text",
+          "promotional_rate",
+          "promotional_period_text",
+          "introductory_rate_flag"
+        ],
+        "product_type_name": "GIC",
+        "product_type_description": "Guaranteed investment certificates collected for rate, term, minimum deposit, and redeemability.",
+        "product_type_dynamic": null
+      }
+    }
+  ]
+}

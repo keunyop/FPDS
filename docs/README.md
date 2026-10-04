@@ -87,6 +87,7 @@ sequence and the linked report for exact evidence and limitations. Recent exampl
 
 | Record | What it proves |
 |---|---|
+| [Coast Capital evidence corrections, 2026-10-03](00-governance/coast-collection-evidence-corrections-2026-10-03.md) | Three local automatic passes and shared discovery/terms fixes; no deployment or data publication |
 | [CIBC collection redesign, 2026-10-03](00-governance/cibc-collection-redesign-2026-10-03.md) | Shared evidence parity and fourteen applied automatic publications; rollout separate |
 | [BMO direct publication, 2026-10-03](00-governance/bmo-direct-publication-2026-10-03.md) | Applied data result and exclusions; no runtime deployment |
 | [BMO direct comparison, 2026-10-03](00-governance/bmo-chequing-direct-comparison-2026-10-03.md) | Official comparison and saved-input correction |

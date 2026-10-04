@@ -43,6 +43,14 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
     # A standalone suitability heading is not a condition on a preceding fee.
     # Keep its following text, including any actual balance/waiver condition.
     context = re.sub(r"(?mi)^Great if[ \t]*\r?\n(?=You (?:want|prefer)\b)", "Suitability\n", quote)
+    if field_name in {"monthly_fee", "public_display_fee"}:
+        # This service classification concerns paper statements/eligible groups,
+        # not a waiver prerequisite for the independently stated base fee.
+        # Retain the original quote and every actual fee condition.
+        context = re.sub(
+            r"\bthis is our low[- ]cost account and it can qualify as a no[- ]cost account\b"
+            r"|\bthis account can also qualify as a no[- ]cost account\b",
+            "Separate account service classification", context, flags=re.I)
     if re.search(r"\b(?:if|when|waived|waiver|provided|qualify|qualifying|maintain|introductory|promotional)\b"
         r"|subject to(?!\s+change(?:\s+without\s+(?:prior\s+)?notice)?(?:[.!](?:\s|$)|$))"
         r"|\bonly\s+for\b|\bfor\s+(?:eligible|selected|new)\s+(?:customers|cardholders)\b"

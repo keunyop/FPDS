@@ -322,6 +322,14 @@ def withdrawal_consequences_usable(value: object) -> bool:
         return False
     if re.search(r"(?:no|without) (?:early[- ]withdrawal |redemption )?penalt|penalty[- ]free", value, re.I):
         return True
+    # A complete loss-of-interest declaration is a consequence even without
+    # the literal word penalty. Payment timing alone never establishes loss.
+    if re.search(
+        r"\bNo interest (?:will be|is) paid if you (?:redeem|withdraw) "
+        r"(?:this |the |your )?(?:GIC|CD|certificate|deposit|investment) "
+        r"(?:within (?:the )?(?:first )?(?:\d+|one|two|three|six|twelve) (?:days?|months?|years?)|before maturity)"
+        r"(?:[.](?:\s|$)|$)", value, re.I):
+        return True
     interest_loss = re.search(
         r"(?:\d+|one|two|three|six|twelve)\s*(?:days?|months?|years?)[\s'\u2019-]*(?:of )?(?:earned |accrued )?interest"
         r"|(?:lose|forfeit|loss of)\s+(?:all |any |the |accrued |earned )*interest", value, re.I,

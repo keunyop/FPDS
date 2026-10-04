@@ -541,8 +541,28 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if excess: values['additional_transaction_fee']=float(excess[1])
             if quote_supports_value('unlimited_transactions_flag',True,quote): values['unlimited_transactions_flag']=True
             if _infer_product_type(context)=='gic' and quote_supports_value('non_redeemable_flag',True,quote): values['non_redeemable_flag']=True
+        field_quotes = {}
+        if _infer_product_type(context) == "gic" and (own or (
+                companion and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url)):
+            # An owned product detail block or a named companion declaration
+            # must establish access before we retain its consequences. Related
+            # product comparison sections never establish target-product facts.
+            access_record = (own and (c.anchor_value == "gic-details")) or (
+                companion and c.anchor_type == "product_terms_declaration"
+                and c.anchor_value == urlsplit(url).path
+                and identity_tokens <= tokens(quote))
+            if access_record:
+                for name in ("redeemable_flag", "non_redeemable_flag"):
+                    for value in (True, False):
+                        if quote_supports_value(name, value, quote):
+                            values[name] = value
+                penalty = _extract_early_withdrawal_penalty(quote)
+                if penalty:
+                    values["early_withdrawal_penalty"] = penalty
+                    field_quotes["early_withdrawal_penalty"] = penalty
         for name,value in values.items():
-            if name not in requested_fields or not quote_supports_value(name,value,quote):
+            field_quote = field_quotes.get(name, quote)
+            if name not in requested_fields or not quote_supports_value(name,value,field_quote):
                 continue
             source_url=url if own else _canonical_official_source_url(c.retrieval_metadata.get('source_url'))
             if not source_url or not _url_matches_official_domains(source_url,allowed_domains=_official_domain_allowlist(context)):
@@ -555,7 +575,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 anchor_value=c.anchor_value,page_no=c.page_no,chunk_index=c.chunk_index,
                 field_metadata={'official_grounding_contract_version':'collection-official-grounding-v2',
                     'official_verification_status':'match','official_grounding_method':'deterministic_captured_financial_record',
-                    'official_web_sources':[{'url':source_url,'title':identity}], 'evidence_quote':quote})
+                    'official_web_sources':[{'url':source_url,'title':identity}], 'evidence_quote':field_quote})
             proposals.setdefault(name,[]).append(fact)
     conflicts = {name for name, rows in proposals.items()
                  if len({str(f.candidate_value) for f in rows}) != 1}
@@ -4881,7 +4901,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"financial_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"financial_declaration", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)
@@ -4904,6 +4924,8 @@ def _select_official_grounding_chunks(
     detail_docs = {field.source_document_id for field in collected_fields}
     companions = [c for c in candidates if c.source_document_id not in detail_docs]
     companions.sort(key=lambda c: (
+        c.anchor_type == "product_terms_declaration" and bool(identity_tokens)
+        and identity_tokens <= set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.lower())),
         bool(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.lower()))),
         bool(re.search(r"(?:excess|additional) (?:debit )?transactions?|monthly (?:plan )?fee|fee schedules?|rates? and fees", c.evidence_excerpt, re.I)),
     ), reverse=True)
@@ -7338,29 +7360,27 @@ def _extract_withdrawal_limit_text(*, context: ExtractionDocumentContext, text: 
 
 
 def _extract_early_withdrawal_penalty(text: str) -> str | None:
-    normalized = _normalize_text(text)
-    if not normalized:
-        return None
-    for raw_sentence in re.split(r"(?<=[.!?])\s+|\n+", normalized):
-        sentence = _normalize_text(raw_sentence)
-        lowered = sentence.lower()
-        if not any(
-            marker in lowered
-            for marker in (
-                "early withdrawal penalty",
-                "penalty for early withdrawal",
-                "penalty may be imposed for early withdrawal",
-                "withdraw before maturity",
-                "withdrawal before maturity",
-            )
-        ):
-            continue
-        if re.search(
-            r"(?:\$\s*\d|\d+(?:\.\d+)?\s*%|\b\d+\s+(?:days?|months?)\s+(?:of\s+)?interest\b)",
-            sentence,
-            flags=re.IGNORECASE,
-        ):
-            return sentence[:500]
+    from worker.pipeline.fpds_approval_policy import withdrawal_consequences_usable
+
+    # Preserve exact source prose, including the waiting period. Do not demand
+    # a numeric penalty when the bank explicitly states no penalty/lost interest.
+    statements = []
+    for sentence in re.split(r"(?<=[.!?])\s+|\n+", text):
+        sentence = sentence.strip()
+        if (len(sentence) <= 500 and re.search(r"\b(?:redeem|redemption|redeemable|withdraw|withdrawal)\b", sentence, re.I)
+                and withdrawal_consequences_usable(sentence)):
+            statements.append(sentence)
+    # Multiple distinct statements need their complete original context; never
+    # choose one side of a contradictory declaration.
+    if len(set(statements)) == 1:
+        statement = statements[0]
+        # Adjacent explicit redemption restrictions are part of the result,
+        # including partial-redemption minimums. Keep the exact substring.
+        position = text.find(statement) + len(statement)
+        restrictions = re.match(r"\s+(?:Minimum redemption amount|Partial or full redemptions? allowed)[^.]*[.]", text[position:], re.I)
+        if restrictions:
+            statement += restrictions[0]
+        return statement if len(statement) <= 500 else None
     return None
 
 

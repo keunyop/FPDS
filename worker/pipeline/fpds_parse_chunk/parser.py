@@ -12,7 +12,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v7"
+PARSER_VERSION = "fpds-parse-chunk-v8"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -70,6 +70,7 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         for index, text in enumerate(structured_sections, start=1)
     )
 
+    sections.extend(_product_terms_sections(soup))
     sections.extend(_financial_declaration_sections(sections))
     sections.extend(_rate_table_evidence_sections(soup))
     sections.extend(_linked_financial_table_cells(soup))
@@ -92,6 +93,30 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         parser_metadata=parser_metadata,
         segments=segments,
     )
+
+
+
+def _product_terms_sections(soup: BeautifulSoup) -> list[_RawSegment]:
+    """Preserve a named product and its own attached flip-card legal panel.
+
+    Shared category pages are evidence, never composite products. Require one
+    explicit product title/detail link and a complete terms panel in the same
+    component; never join neighboring panels by text position.
+    """
+    output = []
+    for block in soup.select(".flipper")[:64]:
+        titles = block.select(".prod-title")
+        backs = block.select(".back")
+        if len(titles) != 1 or len(backs) != 1 or not titles[0].get_text(" ", strip=True):
+            continue
+        links = [a for a in block.select(".view-details a[href]") if a.get("href")]
+        targets = {str(a["href"]) for a in links}
+        if len(targets) != 1 or not re.search(r"\bterms and conditions\b", backs[0].get_text(" ", strip=True), re.I):
+            continue
+        value = _normalize_text(block.get_text("\n", strip=True))
+        if 0 < len(value) <= 12000:
+            output.append(_RawSegment("product_terms_declaration", targets.pop(), None, value))
+    return output
 
 
 # Complete labelled records are evidence units, not large mixed marketing sections.
