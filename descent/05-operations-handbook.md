@@ -15,7 +15,7 @@
    선택 정보 부족은 누락 상태로 유지한다. More tools의 Review는 과거 결정과
    evidence 조회용이며 수동 승인·수정·보류·AI 재검증을 제공하지 않는다.
 4. Runs에서는 Search로 현재 상태를 조회하고 completed뿐 아니라 partial 표시를
-   확인한다. 자동 새로고침은 없다. 상세에서 stage/source/자동 제외/오류를 확인한다.
+   확인한다. Auto refresh 또는 Search로 갱신하고, 상세에서 stage/source/자동 제외/오류를 확인한다.
    원인과 영향을 이해한 뒤 승인된
    범위만 retry한다. 반복 실패를 정상화하려고 과거 실행을 지우지 않는다.
 5. Banks에서 은행별 coverage와 활성 Product Type을 확인한 뒤 필요한 항목만

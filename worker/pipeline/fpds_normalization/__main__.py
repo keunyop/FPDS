@@ -148,6 +148,7 @@ def main() -> int:
                 source_id=source_id,
                 lookup=lookup,
                 artifact=merged_artifact,
+                registry_source=registry_sources_by_id.get(source_id),
             )
         )
 
@@ -192,7 +193,15 @@ def _build_normalization_input(
     source_id: str,
     lookup: NormalizationArtifactLookup,
     artifact: dict[str, object],
+    registry_source: RegistrySource | None = None,
 ) -> NormalizationInput:
+    # The per-run registry pins collection settings. Another concurrent run or
+    # an older retained source_document must not replace this run's targets.
+    source_metadata = dict(lookup.source_metadata)
+    if registry_source is not None:
+        registry_metadata = registry_source.to_source_document_record().get("source_metadata") or {}
+        source_metadata["expected_fields"] = list(registry_source.expected_fields)
+        source_metadata["collection_field_policy"] = dict(registry_metadata.get("collection_field_policy") or {})
     return NormalizationInput(
         source_id=source_id,
         source_document_id=lookup.source_document_id,
@@ -206,7 +215,7 @@ def _build_normalization_input(
         country_code=lookup.country_code,
         source_type=lookup.source_type,
         source_language=lookup.source_language,
-        source_metadata=dict(lookup.source_metadata),
+        source_metadata=source_metadata,
         schema_context=dict(artifact.get("schema_context", {})),
         extracted_fields=[NormalizationExtractedField(**item) for item in artifact.get("extracted_fields", [])],
         evidence_links=[NormalizationEvidenceLink(**item) for item in artifact.get("evidence_links", [])],

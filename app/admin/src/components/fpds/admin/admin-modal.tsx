@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +13,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import type { AdminLocale } from "@/lib/admin-i18n";
 
 type AdminModalProps = {
   open: boolean;
+  locale?: AdminLocale;
   onOpenChange: (open: boolean) => void;
   title: string;
   width?: "default" | "medium" | "narrow";
@@ -32,8 +34,15 @@ type AdminModalProps = {
   footer?: ReactNode;
 };
 
+const MODAL_COPY = {
+  en: { close: "Close dialog", context: "Operation context", brand: "FPDS Admin" },
+  ko: { close: "대화상자 닫기", context: "작업 정보", brand: "FPDS 관리자" },
+  ja: { close: "ダイアログを閉じる", context: "操作情報", brand: "FPDS 管理" },
+} as const;
+
 function AdminModal({
   open,
+  locale = "en",
   onOpenChange,
   title,
   width = "default",
@@ -46,10 +55,13 @@ function AdminModal({
   children,
   footer,
 }: AdminModalProps) {
+  const copy = MODAL_COPY[locale];
+  const descriptionId = useId();
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent
         showCloseButton={false}
+        aria-describedby={description ? descriptionId : undefined}
         className={cn(
           "group grid max-h-[calc(100dvh-1.5rem)] w-[calc(100vw-1.5rem)] gap-0 overflow-hidden rounded-lg border border-border bg-card p-0 shadow-xl duration-200 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:w-[calc(100vw-2.5rem)] lg:max-h-[calc(100dvh-3rem)]",
           showPanel
@@ -64,13 +76,13 @@ function AdminModal({
         <div className="absolute right-4 top-4 z-20">
           <DialogClose asChild>
             <Button
-              aria-label="Close dialog"
+              aria-label={copy.close}
               variant="ghost"
               size="icon-sm"
-              className="border border-border bg-card text-foreground transition-colors duration-200 hover:bg-muted"
+              className="size-10 border border-border bg-card text-foreground transition-colors duration-200 hover:bg-muted"
             >
               <X aria-hidden="true" />
-              <span className="sr-only">Close dialog</span>
+              <span className="sr-only">{copy.close}</span>
             </Button>
           </DialogClose>
         </div>
@@ -78,7 +90,7 @@ function AdminModal({
         <div className={cn(showPanel ? "lg:grid lg:grid-cols-[18rem_minmax(0,1fr)]" : "")}>
           {showPanel ? (
             <aside
-              aria-label="Operation context"
+              aria-label={copy.context}
               className="hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:min-h-[34rem] lg:flex-col lg:px-6 lg:py-6"
             >
               {panelBadge ? (
@@ -91,7 +103,7 @@ function AdminModal({
 
               <div className={cn("space-y-3", panelBadge ? "mt-12" : "")}>
                 <p className="text-sm font-medium text-sidebar-foreground/65">
-                  FPDS Admin workspace
+                  {copy.brand}
                 </p>
                 {panelTitle ? (
                   <h3 className="text-2xl font-semibold leading-tight tracking-tight text-sidebar-foreground">
@@ -136,7 +148,7 @@ function AdminModal({
                 {title}
               </DialogTitle>
               {description ? (
-                <DialogDescription className="max-w-2xl text-sm leading-6 text-muted-foreground lg:text-left">
+                <DialogDescription id={descriptionId} className="max-w-2xl text-sm leading-6 text-muted-foreground lg:text-left">
                   {description}
                 </DialogDescription>
               ) : null}

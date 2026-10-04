@@ -2,7 +2,7 @@
 
 상태: 저장소 migration 전수 목록 + shared dev 실측 schema
 
-기준일: 2026-08-31
+기준일: 2026-08-31 실측 / 2026-10-04 저장소 target 갱신
 
 Database: Supabase-hosted PostgreSQL, schema public
 
@@ -26,7 +26,7 @@ Database: Supabase-hosted PostgreSQL, schema public
 
 | 항목 | 2026-08-30 확인 결과 |
 |---|---|
-| 저장소 migration 파일 | 46개, 0001부터 0046까지 연속 |
+| 저장소 migration 파일 | 2026-10-04 기준 47개, 0001부터 0047까지 연속 |
 | shared dev 최신 history | 0045_public_product_engagement.sql |
 | shared dev history row | 41개 |
 | public base table | 32개 |
@@ -51,7 +51,9 @@ Database: Supabase-hosted PostgreSQL, schema public
    - 0015: 목표 policy-auto-approve-min-confidence-v2, value 0.82는 현재
      active 상태로 확인됐다.
 
-shared dev의 현재 version을 0045라고 부를 수 있고 저장소 target은 0046이다.
+2026-08-30 실측 shared dev version은 0045이며, 2026-10-04 저장소 target은 0047이다.
+0047은 국가별 필수·선택 수집 항목 JSONB 설정을 추가하며 이 개발 작업에서 실제 DB에는 적용하지 않았다.
+과거 실측을 현재 DB 상태로 단정하지 않는다.
 인수 완료 판정은 0013 drift를
 해결하고 fresh replay와 live schema가 일치할 때만 한다.
 
@@ -115,7 +117,7 @@ shared dev의 현재 version을 0045라고 부를 수 있고 저장소 target은
 | 0033 | 0033_essential_field_low_touch_publication.sql | type별 essential field와 complete grounding publication | 기록됨 |
 | 0034 | 0034_country_product_market_profiles.sql | US market profile, source metadata, wrong-role cleanup | 기록됨 |
 
-### 0035-0046
+### 0035-0047
 
 | No. | 파일 | 목적 | shared dev |
 |---|---|---|---|
@@ -131,6 +133,7 @@ shared dev의 현재 version을 0045라고 부를 수 있고 저장소 target은
 | 0044 | 0044_remove_admin_collection_scheduler.sql | recurring collection/recovery policy row 제거, 수동 collection 경계 | 기록됨 |
 | 0045 | 0045_public_product_engagement.sql | 400일 bounded Public 일별 상품 클릭/공식은행 이동/finder 선택 aggregate | 기록됨; 적용 직후 0행, retention trigger/index 확인 |
 | 0046 | 0046_public_feedback_submission.sql | 400일 bounded 익명 상품 오류/사이트 피드백과 Public snapshot 상품 context | shared dev 미적용; 저장소 target |
+| 0047 | 0047_product_type_collection_fields.sql | 국가별 Product Type 필수·선택 수집 항목, 보호된 공통 필수 조건 유지 | 저장소 target; 이 개발 작업에서 실제 DB 미적용 |
 
 ### 적용 확인 query
 
@@ -145,7 +148,7 @@ ORDER BY applied_at, migration_name;
 COMMIT;
 ~~~
 
-fresh DB에는 db/README.md의 순서대로 0001부터 0046까지 적용한다. 단,
+fresh DB에는 db/README.md의 순서대로 0001부터 0047까지 적용한다. 단,
 0013 drift를 확인한 뒤 migration을 재실행할지 별도 corrective migration을
 만들지는 DBA/Product Owner 승인으로 결정한다.
 
@@ -176,6 +179,7 @@ fresh DB에는 db/README.md의 순서대로 0001부터 0046까지 적용한다. 
 | auth_login_attempt | PK login_attempt_id; FK user_id → user_account | login_attempt_id text; login_id?; email text; user_id?; ip_address?; attempt_outcome text; failure_reason_code?; attempted_at timestamptz |
 
 product_type_registry.built_in_flag는 0013이 제거해야 하는 drift 열이다.
+0047 적용 후 목표에는 collection_field_policy jsonb NOT NULL DEFAULT {}도 포함한다. 위 표는 과거 실측이며 새 설정을 적용했다고 주장하지 않는다.
 runtime API response는 이 열을 사용하지 않지만 fresh replay와 shared dev
 schema 불일치가 남으므로 인수 전 정리한다.
 
@@ -514,7 +518,7 @@ erDiagram
       승인했다.
 - [ ] 0009, 0014, 0015처럼 history를 남기지 않는 migration의 증적 방식을
       정하고 future migration은 일관되게 기록한다.
-- [ ] 깨끗한 빈 PostgreSQL에 0001→0046을 순서대로 적용하고 schema diff가
+- [ ] 깨끗한 빈 PostgreSQL에 0001→0047을 순서대로 적용하고 schema diff가
       승인된 target과 일치한다.
 - [ ] 의뢰자 소유 dev/prod Supabase/PostgreSQL project, role, pool, credential,
       backup/PITR와 비용 계정이 분리됐다.

@@ -464,8 +464,14 @@ def _normalize_candidate(
         str(item.schema_context.get("product_type", "")) or None,
         str(item.source_metadata.get("product_type", "")) or None,
     )
+    from worker.pipeline.fpds_collection_fields import metadata_collection_fields
+    resolved_fields = metadata_collection_fields(item.source_metadata,
+        product_type=product_type, country_code=item.country_code)
     profile = country_product_profile(country_code=item.country_code, product_type=product_type)
-    if profile is not None:
+    if resolved_fields["configured"]:
+        item = replace(item, source_metadata={**item.source_metadata,
+            "expected_fields": [*resolved_fields["required_fields"], *resolved_fields["optional_fields"]]})
+    elif profile is not None:
         # Preserve the current required and optional catalog for older registrations.
         expected = list(dict.fromkeys([
             *item.source_metadata.get("expected_fields", []),

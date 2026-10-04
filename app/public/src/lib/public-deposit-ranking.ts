@@ -1,7 +1,10 @@
 import type { PublicProduct } from './public-api.ts';
 import { depositCopy, depositGroupKey, depositOptions, depositPeriod } from './public-deposit.ts';
+import { hasRankingEssentials } from './public-ranking-essentials.ts';
+import { getPublicMessages } from './public-locale.ts';
 
 const HOME_CURRENCIES: Record<string, string> = { CA: 'CAD', US: 'USD' };
+const TYPES = ['chequing', 'savings', 'gic'];
 const CONDITIONS = {
   en: { all: 'All', noMonthlyFee: 'No monthly fee' },
   ko: { all: '전체', noMonthlyFee: '월 수수료 없음' },
@@ -12,13 +15,14 @@ type DepositRankingGroup = {
   key: string;
   label: string;
   currency: string;
-  basis: string;
+  basis: string | null;
   term: string | null;
+  metric: 'monthly_fee' | 'interest_rate';
   items: PublicProduct[];
-  rates: Record<string, number>;
+  values: Record<string, number>;
 };
 
-/** Home-only presets. Never widen a comparison to fill five places. */
+/** Home-only comparisons. Never widen a comparison to fill five places. */
 export function depositRankingGroups(products: PublicProduct[], country: string, locale: string): DepositRankingGroup[] {
   const currency = HOME_CURRENCIES[country];
   if (!currency) return [];
@@ -27,9 +31,19 @@ export function depositRankingGroups(products: PublicProduct[], country: string,
   const groups = new Map<string, DepositRankingGroup>();
   for (const product of products) {
     if (product.country_code !== country || product.currency !== currency
-      || !['savings', 'gic'].includes(product.product_type)) continue;
+      || !TYPES.includes(product.product_type) || !hasRankingEssentials(product)) continue;
+    if (product.product_type === 'chequing') {
+      const key = `${country}|chequing|${currency}|monthly_fee`;
+      const group = groups.get(key) ?? {
+        key, label: `${product.product_type_label} · ${getPublicMessages(locale).grid.metricMonthlyFee}`, currency, basis: null, term: null,
+        metric: 'monthly_fee' as const, items: [], values: {}
+      };
+      if (!group.items.some(item => item.product_id === product.product_id)) group.items.push(product);
+      group.values[product.product_id] = product.public_display_fee!;
+      groups.set(key, group);
+      continue;
+    }
     const terms = product.deposit_terms;
-    if (product.product_type === 'gic' && !['redeemable', 'non_redeemable'].includes(terms?.withdrawal ?? '')) continue;
     for (const option of depositOptions(product)) {
       const conditions: Array<{ key: string; label: string }> = [{ key: '0-all', label: copy.all }];
       if (product.product_type === 'savings') {
@@ -43,23 +57,25 @@ export function depositRankingGroups(products: PublicProduct[], country: string,
           ? `${product.product_type_label} · ${depositPeriod(option, locale)} · ${labels[terms!.withdrawal]}`
           : `${product.product_type_label} · ${condition.label}`;
         const group = groups.get(key) ?? {
-          key, label, currency, term: product.product_type === 'gic' ? depositPeriod(option, locale) : null, basis: terms!.basis === 'apy' ? labels.apy : labels.annual, items: [], rates: {}
+          key, label, currency, term: product.product_type === 'gic' ? depositPeriod(option, locale) : null,
+          basis: terms!.basis === 'apy' ? labels.apy : labels.annual, metric: 'interest_rate' as const, items: [], values: {}
         };
         if (!group.items.some(item => item.product_id === product.product_id)) group.items.push(product);
-        group.rates[product.product_id] = option.rate;
+        group.values[product.product_id] = option.rate;
         groups.set(key, group);
       }
     }
   }
-  const ordered = [...groups.values()].sort((a, b) => {
-    const savingsFirst = (group: DepositRankingGroup) => group.items[0].product_type === 'savings' ? 0 : 1;
-    return savingsFirst(a) - savingsFirst(b) || a.key.localeCompare(b.key, 'en', { numeric: true });
-  });
+  const ordered = [...groups.values()].sort((a, b) =>
+    TYPES.indexOf(a.items[0].product_type) - TYPES.indexOf(b.items[0].product_type)
+      || a.key.localeCompare(b.key, 'en', { numeric: true })
+  );
   return ordered.map(group => ({
     ...group,
     label: ordered.some(other => other !== group && other.label === group.label && other.basis !== group.basis)
       ? `${group.label} · ${group.basis}` : group.label,
-    items: [...group.items].sort((a, b) => group.rates[b.product_id] - group.rates[a.product_id]
+    items: [...group.items].sort((a, b) =>
+      (group.values[a.product_id] - group.values[b.product_id]) * (group.metric === 'monthly_fee' ? 1 : -1)
       || a.product_id.localeCompare(b.product_id)).slice(0, 5)
   }));
 }

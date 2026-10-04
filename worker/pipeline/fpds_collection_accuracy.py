@@ -526,6 +526,10 @@ def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) ->
     quality = comparison_quality(product_type=record.get("product_type"), country_code=record.get("country_code"), expected_fields=list(p), candidate_payload=p)
     if not quality.complete:
         return False
+    required = receipt.get("additional_required_fields", [])
+    if not isinstance(required, list) or any(not isinstance(f, str) or not field_contract(f)
+            or p.get(f) in (None, "", [], {}) or not value_matches_contract(f, p.get(f)) for f in required):
+        return False
     digest = payload_digest(record, p)
     return bool(digest and receipt.get("accepted") is True and receipt.get("digest") == digest
                 and all(value_matches_contract(k, v) for k, v in p.items() if k != RECEIPT_KEY))
@@ -695,7 +699,16 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     quality = comparison_quality(product_type=record.get("product_type"), country_code=record.get("country_code"), expected_fields=source_metadata.get("expected_fields", []), candidate_payload=payload)
     if not quality.applicable or not quality.contract_defined or not quality.complete:
         reasons.append("essential_fields_missing")
-    receipt = {"version": ACCURACY_VERSION, "accepted": not reasons, "verified_fields": sorted(set(verified)), "omitted_fields": omitted, "reasons": reasons, "missing_fields": list(quality.missing_fields)}
+    from worker.pipeline.fpds_collection_fields import metadata_collection_fields, missing_additional_required_fields, additional_required_fields
+    resolved_fields = metadata_collection_fields(source_metadata,
+        product_type=str(record.get("product_type") or ""), country_code=record.get("country_code"))
+    additional_missing = missing_additional_required_fields(resolved_fields, payload)
+    if additional_missing:
+        reasons.append("required_collection_fields_missing")
+    receipt = {"version": ACCURACY_VERSION, "accepted": not reasons, "verified_fields": sorted(set(verified)), "omitted_fields": omitted, "reasons": reasons, "missing_fields": list(dict.fromkeys([*quality.missing_fields, *additional_missing]))}
+    if resolved_fields["configured"]:
+        receipt["additional_required_fields"] = additional_required_fields(resolved_fields)
+        receipt["collection_field_country"] = resolved_fields["country_code"]
     receipt["currency_basis"] = "country_default" if fallback else "official_evidence" if currency_verified else "unverified"
     receipt["digest"] = payload_digest(record, payload)
     payload[RECEIPT_KEY] = receipt

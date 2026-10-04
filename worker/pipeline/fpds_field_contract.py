@@ -120,6 +120,13 @@ def field_contract(field_name: str) -> FieldContract | None:
     return None
 
 
+def registered_field_names() -> tuple[str, ...]:
+    """The approved shared catalog, including conditional checking cost fields."""
+    return tuple(sorted(_STRING_FIELDS | _DECIMAL_FIELDS | _INTEGER_FIELDS |
+                        _BOOLEAN_FIELDS | _JSON_FIELDS |
+                        {'transaction_fee', 'additional_transaction_fee'}))
+
+
 def canonical_value_type(field_name: str, declared_type: str = "string") -> str:
     contract = field_contract(field_name)
     if contract is not None:

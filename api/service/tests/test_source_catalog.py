@@ -3455,6 +3455,7 @@ class SourceCatalogTests(unittest.TestCase):
                         "generated_source_count": 1,
                     },
                 ],
+                None,  # No completed Public snapshot.
             ]
         )
 
@@ -3463,6 +3464,7 @@ class SourceCatalogTests(unittest.TestCase):
             filters=normalize_bank_filters(country_code="CA", search=None, status=None),
         )
 
+        self.assertEqual(result["items"][0]["published_product_count"], 0)
         self.assertEqual(result["items"][0]["catalog_product_types"], ["gic", "savings"])
         self.assertEqual(
             [item["catalog_item_id"] for item in result["items"][0]["catalog_items"]],

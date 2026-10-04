@@ -959,6 +959,12 @@ def _serialize_recent_run_row(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def _collection_source_record(row: dict[str, Any], *, product_type_definition: dict[str, Any]) -> dict[str, Any]:
+    from worker.pipeline.fpds_collection_fields import resolve_collection_fields
+    policy = dict(product_type_definition.get("collection_field_policy") or {})
+    resolved = resolve_collection_fields(product_type=str(row["product_type"]),
+        country_code=str(row["country_code"]),
+        expected_fields=[*product_type_definition.get("expected_fields", []), *row.get("expected_fields", [])],
+        collection_field_policy=policy)
     return {
         "source_id": str(row["source_id"]),
         "bank_code": str(row["bank_code"]),
@@ -972,7 +978,9 @@ def _collection_source_record(row: dict[str, Any], *, product_type_definition: d
         "priority": str(row.get("priority") or "P1"),
         "source_language": str(row.get("source_language") or "en"),
         "purpose": str(row.get("purpose") or ""),
-        "expected_fields": list(row.get("expected_fields") or []),
+        "expected_fields": [*resolved["required_fields"], *resolved["optional_fields"]],
+        "collection_field_policy": {str(row["country_code"]).upper(): policy[str(row["country_code"]).upper()]}
+            if resolved["configured"] else {},
         "seed_source_flag": bool(row.get("seed_source_flag")),
         "product_type_name": str(product_type_definition.get("display_name") or row["product_type"]),
         "product_type_description": str(product_type_definition.get("description") or ""),

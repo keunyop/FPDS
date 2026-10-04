@@ -376,7 +376,9 @@ def load_public_projection_rows(
     for row in rows:
         item = dict(row)
         payload = item.pop("approved_collection_payload", None)
-        if item.get("product_type") in {"chequing", "gic", "line-of-credit"}:
+        configured_receipt = (payload.get("_collection_accuracy", {}) if isinstance(payload, dict) else {})
+        if (item.get("product_type") in {"chequing", "gic", "line-of-credit"}
+                or (isinstance(configured_receipt, dict) and configured_receipt.get("additional_required_fields"))):
             # Check the exact snapshot-pinned version; an old snapshot/receipt
             # must not bypass the current cost/access/security prerequisites.
             if not isinstance(payload, dict) or not acceptance_receipt_valid(item, payload):

@@ -1,5 +1,6 @@
 import type { PublicProduct } from './public-api.ts';
 import { getComparablePublicRate } from './public-rate.ts';
+import { hasRankingEssentials } from './public-ranking-essentials.ts';
 
 const HOME_CURRENCIES: Record<string, string> = { CA: 'CAD', US: 'USD' };
 const TYPES = ['mortgage', 'personal-loan', 'line-of-credit'];
@@ -21,7 +22,7 @@ export function loanRankingGroups(products: PublicProduct[], country: string, lo
   const copy = loanRankingCopy(locale);
   const groups = new Map<string, LoanRankingGroup>();
   for (const product of products) {
-    if (product.country_code !== country || product.currency !== currency || !TYPES.includes(product.product_type)) continue;
+    if (product.country_code !== country || product.currency !== currency || !TYPES.includes(product.product_type) || !hasRankingEssentials(product)) continue;
     const rate = getComparablePublicRate(product);
     if (rate === null) continue;
     const conditions: Array<{ key: string; label: string }> = [{ key: '0-all', label: copy.all }];

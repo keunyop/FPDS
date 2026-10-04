@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { CollectionPreparationStatus } from "./collection-preparation-status";
 import { collectionPreflightMessage } from "@/lib/admin-collection-feedback";
 import { Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { AdminModal } from "@/components/fpds/admin/admin-modal";
 import { BankAiOnboardingDialogContent } from "@/components/fpds/admin/bank-ai-onboarding-dialog-content";
@@ -72,8 +70,10 @@ const BANK_COPY = {
     bank: "Bank",
     code: "Code",
     homepage: "Homepage",
-    catalogs: "Catalogs",
+    catalogs: "Coverage",
     generatedSources: "Generated sources",
+    publishedProducts: "Published products",
+    selectBank: (name: string) => `Select ${name}`,
     noBanks: "No banks matched the current filter set.",
     selectBankFirst: "Select at least one bank with added coverage before starting collection.",
     loadFailed: "Bank detail could not be loaded.",
@@ -82,6 +82,7 @@ const BANK_COPY = {
     collectApiFailed: "Collection could not be started. Check the admin API and try again.",
     none: "none",
     bankDetail: "Bank detail",
+    loadingBank: "Loading bank details…",
     aiAdded: (count: number) => `${count} ${count === 1 ? "bank was" : "banks were"} added with verified coverage.`,
   },
   ko: {
@@ -110,8 +111,10 @@ const BANK_COPY = {
     bank: "은행",
     code: "코드",
     homepage: "홈페이지",
-    catalogs: "Catalogs",
+    catalogs: "수집 범위",
     generatedSources: "생성된 소스",
+    publishedProducts: "공개된 상품",
+    selectBank: (name: string) => `${name} 선택`,
     noBanks: "현재 필터에 맞는 은행이 없습니다.",
     selectBankFirst: "수집을 시작하기 전에 coverage가 추가된 은행을 하나 이상 선택하세요.",
     loadFailed: "은행 상세를 불러올 수 없습니다.",
@@ -120,6 +123,7 @@ const BANK_COPY = {
     collectApiFailed: "Collection을 시작할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
     none: "없음",
     bankDetail: "은행 상세",
+    loadingBank: "은행 상세 불러오는 중…",
     aiAdded: (count: number) => `검증된 coverage와 함께 은행 ${count}개를 추가했습니다.`,
   },
   ja: {
@@ -148,8 +152,10 @@ const BANK_COPY = {
     bank: "銀行",
     code: "コード",
     homepage: "ホームページ",
-    catalogs: "Catalogs",
+    catalogs: "収集範囲",
     generatedSources: "生成済みソース",
+    publishedProducts: "公開商品",
+    selectBank: (name: string) => `${name}を選択`,
     noBanks: "現在のフィルターに該当する銀行はありません。",
     selectBankFirst: "Collection を開始する前に、coverage が追加された銀行を1件以上選択してください。",
     loadFailed: "銀行詳細を読み込めません。",
@@ -158,6 +164,7 @@ const BANK_COPY = {
     collectApiFailed: "Collection を開始できません。Admin APIを確認してから再試行してください。",
     none: "なし",
     bankDetail: "銀行詳細",
+    loadingBank: "銀行詳細を読み込み中…",
     aiAdded: (count: number) => `確認済みの coverage とともに${count}件の銀行を追加しました。`,
   },
 } as const;
@@ -176,11 +183,15 @@ export function BankRegistrySurface({
   userRole,
 }: BankRegistrySurfaceProps) {
   const copy = BANK_COPY[locale];
+  const canManage = userRole === "admin";
   const router = useRouter();
   const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen);
   const [aiDialogOpen, setAiDialogOpen] = useState(aiAddModalOpen);
   const [bankDialogOpen, setBankDialogOpen] = useState(Boolean(activeBankCode && activeBankDetail));
   const [bankDialogDetail, setBankDialogDetail] = useState<BankDetailResponse | null>(activeBankDetail);
+  const [bankDetailPending, setBankDetailPending] = useState(false);
+  const [bankDetailError, setBankDetailError] = useState<string | null>(null);
+  const bankDetailRequest = useRef(0);
   const baseSearchParams = useMemo(() => buildRegistrySearchParams(filters), [filters]);
   const productTypeLabelMap = useMemo(() => buildAdminProductTypeLabelMap(productTypes), [productTypes]);
   const [selectedBankCodes, setSelectedBankCodes] = useState<string[]>([]);
@@ -258,17 +269,22 @@ export function BankRegistrySurface({
     setBankDialogOpen(true);
     setBankDialogDetail(bank ? buildPreviewBankDetail(bank) : null);
     syncUrlWithParams(params);
-    void hydrateBankDetail(bankCode);
+    setBankDetailPending(true);
+    setBankDetailError(null);
+    void hydrateBankDetail(bankCode, ++bankDetailRequest.current);
   }
 
   function closeModal() {
+    bankDetailRequest.current += 1;
+    setBankDetailPending(false);
+    setBankDetailError(null);
     setAddDialogOpen(false);
     setAiDialogOpen(false);
     setBankDialogOpen(false);
     syncUrlWithParams(new URLSearchParams(baseSearchParams), { replace: true });
   }
 
-  async function hydrateBankDetail(bankCode: string) {
+  async function hydrateBankDetail(bankCode: string, requestNumber: number) {
     try {
       const response = await fetch(`/admin/banks/${encodeURIComponent(bankCode)}/detail`, {
         cache: "no-store",
@@ -277,13 +293,16 @@ export function BankRegistrySurface({
         data?: BankDetailResponse;
         error?: { message?: string };
       };
+      if (requestNumber !== bankDetailRequest.current) return;
       if (!response.ok || !payload.data) {
-        setError(payload.error?.message ?? copy.loadFailed);
+        setBankDetailError(payload.error?.message ?? copy.loadFailed);
         return;
       }
       setBankDialogDetail(payload.data);
     } catch {
-      setError(copy.loadApiFailed);
+      if (requestNumber === bankDetailRequest.current) setBankDetailError(copy.loadApiFailed);
+    } finally {
+      if (requestNumber === bankDetailRequest.current) setBankDetailPending(false);
     }
   }
 
@@ -340,6 +359,7 @@ export function BankRegistrySurface({
   }
 
   async function handleBulkCollect() {
+    if (!canManage) return;
     setBulkPending(true);
     document.body.dataset.adminMutationPending = "true";
     setMessage(null);
@@ -394,8 +414,6 @@ export function BankRegistrySurface({
 
   return (
     <section aria-busy={bulkPending} className="grid min-w-0 gap-5">
-      <AdminTableAutoRefresh locale={locale} />
-
       <AdminPageHeader
         description={copy.description}
         path={copy.path}
@@ -403,10 +421,11 @@ export function BankRegistrySurface({
       />
 
       <article className="border border-border bg-card p-4">
-        <form action={buildAdminHref("/admin/banks", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_minmax(0,220px)_auto]">
-          <label className="grid gap-2 text-sm">
+        <form action={buildAdminHref("/admin/banks", new URLSearchParams(), locale)} className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,220px)_auto]">
+          <input name="locale" type="hidden" value={locale} />
+          <label className="grid min-w-0 gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.search}</span>
-            <input className="h-10 rounded-md border border-input bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
+            <input className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm" defaultValue={filters.q} name="q" placeholder={copy.searchPlaceholder} type="search" />
           </label>
           <FilterSelect allLabel={copy.all} defaultValue={filters.status} label={copy.status} name="status" options={banks.facets.statuses} />
           <div className="flex items-end gap-2">
@@ -434,37 +453,41 @@ export function BankRegistrySurface({
                 {copy.addBanksWithAi}
               </button>
             ) : null}
-            <button className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" onClick={openAddModal} type="button">
-              {copy.addBank}
-            </button>
-            {selectedCoverageCount > 0 ? (
-              <div
-                aria-label={copy.collectionMode}
-                className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border border-border bg-background px-3 text-xs font-medium"
-                role="group"
-              >
-                <span className={bulkDetailedCollection ? "text-muted-foreground" : "text-foreground"}>
-                  {copy.normalCollect}
-                </span>
-                <Switch
-                  aria-label={copy.collectionMode}
-                  checked={bulkDetailedCollection}
-                  disabled={bulkPending}
-                  onCheckedChange={setBulkDetailedCollection}
-                />
-                <span className={bulkDetailedCollection ? "text-foreground" : "text-muted-foreground"}>
-                  {copy.detailedCollect}
-                </span>
-              </div>
+            {canManage ? (
+              <>
+                <button className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" onClick={openAddModal} type="button">
+                  {copy.addBank}
+                </button>
+                {selectedCoverageCount > 0 ? (
+                  <div
+                    aria-label={copy.collectionMode}
+                   className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border border-border bg-background px-3 text-xs font-medium"
+                    role="group"
+                  >
+                    <span className={bulkDetailedCollection ? "text-muted-foreground" : "text-foreground"}>
+                      {copy.normalCollect}
+                    </span>
+                    <Switch
+                      aria-label={copy.collectionMode}
+                      checked={bulkDetailedCollection}
+                      disabled={bulkPending}
+                      onCheckedChange={setBulkDetailedCollection}
+                    />
+                    <span className={bulkDetailedCollection ? "text-foreground" : "text-muted-foreground"}>
+                      {copy.detailedCollect}
+                    </span>
+                  </div>
+                ) : null}
+                <button
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={bulkPending || selectedCoverageCount === 0}
+                  onClick={() => void handleBulkCollect()}
+                  type="button"
+                >
+                  {bulkPending ? copy.collecting : copy.collectSelected(selectedCoverageCount)}
+                </button>
+              </>
             ) : null}
-            <button
-               className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={bulkPending || selectedCoverageCount === 0}
-              onClick={() => void handleBulkCollect()}
-              type="button"
-            >
-              {bulkPending ? copy.collecting : copy.collectSelected(selectedCoverageCount)}
-            </button>
           </div>
         </div>
         {message ? (
@@ -478,42 +501,51 @@ export function BankRegistrySurface({
           </p>
         ) : null}
         <div aria-label={copy.bankList} className="overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
-          <table className="min-w-[720px] table-fixed border-separate border-spacing-0">
+          <table className="w-full min-w-[800px] border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs text-muted-foreground">
-                <th className="border-b border-border px-3 py-3 font-medium">
-                  <input
-                    aria-label={copy.selectAllBanks}
-                    checked={allVisibleSelected}
-                    className="h-4 w-4 rounded border-border"
-                    onChange={toggleAllVisibleBanks}
-                    type="checkbox"
-                  />
-                </th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.bank}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.catalogs}</th>
-                <th className="border-b border-border px-3 py-3 font-medium">{copy.generatedSources}</th>
+                {canManage ? (
+                  <th className="border-b border-border px-3 py-3 font-medium" scope="col">
+                    <label className="inline-flex size-10 cursor-pointer items-center justify-center">
+                      <input
+                        aria-label={copy.selectAllBanks}
+                        checked={allVisibleSelected}
+                        className="h-4 w-4 rounded border-border"
+                        onChange={toggleAllVisibleBanks}
+                        type="checkbox"
+                      />
+                    </label>
+                  </th>
+                ) : null}
+                <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.bank}</th>
+                <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.catalogs}</th>
+                <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.generatedSources}</th>
+                <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.publishedProducts}</th>
               </tr>
             </thead>
             <tbody>
               {banks.items.length === 0 ? (
                 <tr>
-                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={4}>
+                  <td className="px-3 py-8 text-sm text-muted-foreground" colSpan={canManage ? 5 : 4}>
                     {copy.noBanks}
                   </td>
                 </tr>
               ) : (
                 banks.items.map((item) => (
                   <tr className="align-top text-sm" key={item.bank_code}>
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <input
-                        aria-label={`Select ${item.bank_name}`}
-                        checked={selectedBankCodes.includes(item.bank_code)}
-                        className="h-4 w-4 rounded border-border"
-                        onChange={() => toggleBankSelection(item.bank_code)}
-                        type="checkbox"
-                      />
-                    </td>
+                    {canManage ? (
+                      <td className="border-b border-border/70 px-3 py-4">
+                        <label className="inline-flex size-10 cursor-pointer items-center justify-center">
+                          <input
+                            aria-label={copy.selectBank(item.bank_name)}
+                            checked={selectedBankCodes.includes(item.bank_code)}
+                            className="h-4 w-4 rounded border-border"
+                            onChange={() => toggleBankSelection(item.bank_code)}
+                            type="checkbox"
+                          />
+                        </label>
+                      </td>
+                    ) : null}
                     <td className="border-b border-border/70 px-3 py-4">
                       <div className="flex min-w-0 items-start gap-3">
                         <BankLogoMark
@@ -523,7 +555,7 @@ export function BankRegistrySurface({
                           logoUrl={item.logo_url}
                         />
                         <div className="grid min-w-0 gap-1">
-                          <button className="min-w-0 bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
+                          <button className="min-h-10 min-w-0 bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
                             {item.bank_name}
                           </button>
                           <span className="text-xs text-muted-foreground">
@@ -538,14 +570,11 @@ export function BankRegistrySurface({
                       ) : (
                         <span className="text-muted-foreground">{copy.none}</span>
                       )}
-                      {item.catalog_items.filter((coverage) => coverage.collection_preparation?.status).map((coverage) => (
-                        <div className="mt-2" key={coverage.catalog_item_id}>
-                          <span className="text-xs font-medium">{formatProductTypeList([coverage.product_type], productTypeLabelMap)}</span>
-                          <CollectionPreparationStatus locale={locale} state={coverage.collection_preparation} />
-                        </div>
-                      ))}
                     </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">{item.generated_source_count}</td>
+                    <td className="border-b border-border/70 px-3 py-4 text-right font-mono tabular-nums text-foreground">{item.generated_source_count}</td>
+                    <td className="border-b border-border/70 px-3 py-4 text-right font-mono tabular-nums text-foreground">
+                      {typeof item.published_product_count === "number" ? item.published_product_count : "—"}
+                    </td>
                   </tr>
                 ))
               )}
@@ -555,6 +584,7 @@ export function BankRegistrySurface({
       </article>
 
       <AdminModal
+        locale={locale}
         description={copy.description}
         onOpenChange={handleAiDialogChange}
         open={aiDialogOpen && userRole === "admin"}
@@ -573,8 +603,9 @@ export function BankRegistrySurface({
       </AdminModal>
 
       <AdminModal
+        locale={locale}
         onOpenChange={handleAddDialogChange}
-        open={addDialogOpen}
+        open={addDialogOpen && canManage}
         showPanel={false}
         title={copy.addBank}
         width="medium"
@@ -583,17 +614,21 @@ export function BankRegistrySurface({
       </AdminModal>
 
       <AdminModal
+        locale={locale}
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
         showPanel={false}
         title={bankDialogDetail ? bankDialogDetail.bank.bank_name : copy.bankDetail}
         width="medium"
       >
+        {bankDetailPending ? <p className="mb-4 text-sm text-muted-foreground" role="status">{copy.loadingBank}</p> : null}
+        {bankDetailError ? <p className="mb-4 border-l-4 border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">{bankDetailError}</p> : null}
         {bankDialogDetail ? (
           <BankDetailDialogContent
+            canManage={canManage && !bankDetailPending}
             csrfToken={csrfToken}
             detail={bankDialogDetail}
-            key={bankDialogDetail.bank.bank_code}
+            key={`${bankDialogDetail.bank.bank_code}:${bankDetailPending ? "preview" : "detail"}`}
             locale={locale}
             productTypes={productTypes}
           />
@@ -724,9 +759,9 @@ function FilterSelect({
   options: string[];
 }) {
   return (
-    <label className="grid gap-2 text-sm">
+    <label className="grid min-w-0 gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
+      <select className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm text-foreground" defaultValue={defaultValue} name={name}>
         <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option} value={option}>

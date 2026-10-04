@@ -28,7 +28,11 @@ current workspace is collecting products.
 
 Daily Admin work is **Overview → Runs → Banks**. Review is read-only history
 under **More tools**, alongside Sources, Product Types, Changes, Countries and
-Public Health. Runs reload through Search; they have no automatic refresh.
+Public Health. Runs supports safe 15-second Auto refresh and Search;
+Advanced filters start collapsed. Banks uses Search and shows current eligible
+published-product counts beside generated sources. Product Type details manage
+country-owned required/optional collection targets while protecting mandatory
+financial requirements.
 
 Collection accepts only current, product-scoped, officially evidenced facts
 through automatic validation, or excludes incomplete candidates. It creates no

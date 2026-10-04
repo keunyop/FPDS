@@ -1059,11 +1059,11 @@ async def product_type_list(
     status: str | None = None,
     q: str | None = None,
 ) -> JSONResponse:
-    _resolve_session(request)
+    _, session_info = _resolve_session(request)
     filters = normalize_product_type_filters(search=q, status=status)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
-        payload = load_product_type_list(connection, filters=filters)
+        payload = load_product_type_list(connection, filters=filters, country_code=_session_country(session_info))
     return _success(payload, request)
 
 
@@ -1093,10 +1093,10 @@ async def create_product_type(
 
 @app.get("/api/admin/product-types/{product_type_code}")
 async def product_type_detail(request: Request, product_type_code: str) -> JSONResponse:
-    _resolve_session(request)
+    _, session_info = _resolve_session(request)
     settings: Settings = request.app.state.settings
     with open_connection(settings) as connection:
-        payload = load_product_type_definition(connection, product_type_code=product_type_code.lower())
+        payload = load_product_type_definition(connection, product_type_code=product_type_code.lower(), country_code=_session_country(session_info))
     if not payload:
         return _error(status_code=404, code="product_type_not_found", message="Product type was not found.", request=request)
     return _success({"product_type": payload}, request)

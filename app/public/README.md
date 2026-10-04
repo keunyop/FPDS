@@ -1,5 +1,18 @@
 # FPDS Public
 
+## Home Top 5 by required comparison facts - 2026-10-04
+
+Deposit Top 5 now includes Chequing/Checking ordered by the verified base monthly
+fee, lowest first, with required transaction costs beside each record. Optional
+deposit interest, balances and waiver details do not change the fee order; a
+conditional waiver never replaces the base fee. Amounts use the selected market's
+currency. Savings/GIC retain comparable-rate order and explicit annual/APY,
+exact-term and withdrawal boundaries. Loans retain comparable full-rate order.
+Older malformed projections missing required costs, access/consequences, lending
+terms/type or credit-line security cannot enter Home rankings. Missing optional
+facts never affect eligibility or position. This changes only Public Home; no
+collection, projection mutation, deployment or personalized ranking is added.
+
 ## Home and product detail clarity - 2026-10-02
 
 Home renders each successfully loaded complete Top 5 product scope even if its
@@ -102,11 +115,12 @@ input persistence. See [the complete contract](../../docs/03-design/public-compa
   and the deposit basis/term conditions below. Deposit, Credit Card, and Loan
   remain equal direct next actions. The main content places Deposit Top 5
   on the left and Loan Top 5 on the right at desktop, stacking both lists below
-  that breakpoint. Deposit offers Savings conditions (all, no monthly fee)
+  that breakpoint. Deposit offers Chequing/Checking monthly fees, Savings conditions (all, no monthly fee)
   and GIC exact term/redemption choices within the selected country's home
   currency (CA CAD / US USD) and matching rate basis. Loan offers exact Product
   Type; security is shown for credit lines without optional security presets,
-  within the same home-currency policy. It orders comparable full rates ascending.
+  within the same home-currency policy. Chequing orders monthly fees ascending;
+  Savings/GIC order comparable rates descending; Loan orders comparable full rates ascending.
   Both lists read all snapshot pages before ranking; later-page failure or a
   changing snapshot shows unavailable rather than a partial result. Neither list is a personalized
   recommendation. The two groups use distinct Deposit/Loan family rails,

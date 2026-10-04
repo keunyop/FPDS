@@ -1,5 +1,19 @@
 # FPDS Admin
 
+## Product Type collection targets - 2026-10-04
+
+Product Type detail groups protected identity/currency and alternative/conditional
+financial requirements, then manages typed additional fields as required,
+optional or outside the target list. Only admins can edit; read-only operators
+can inspect. Settings apply to the session country and the next collection plan;
+CA and US overrides remain separate. Verified optional facts encountered in the
+same official evidence remain preserved; unknown values are omitted.
+
+Apply migration `0047_product_type_collection_fields.sql` before deploying the
+API/Worker and Admin together. Local verification does not apply live settings,
+start collection, publish data or deploy the runtime.
+
+
 
 Current optional collection rule (2026-10-01): required facts determine publication;
 profile and explicitly registered typed optional facts are also extracted when
@@ -31,7 +45,8 @@ Daily work is Overview, Runs and Banks:
 
 1. **Overview** — inspect collection failures, public-data health and signup requests.
 2. **Runs** — inspect queued/discovering/collecting and terminal outcomes, automatic
-   exclusions and source errors. Use Search to reload; this route has no automatic refresh.
+   exclusions and source errors. Use Search or safe 15-second Auto refresh;
+   Advanced filters start collapsed.
 3. **Banks** — manage banks and coverage, then launch normal/detailed collection.
    First-time eligible scopes require precision discovery; skipped scopes keep
    terminal Runs and an exclusion reason.
@@ -169,8 +184,11 @@ create duplicates. Discovery/access failures finish the registered Run without
 creating candidates or weakening collection gates. Existing older plans remain
 compatible with deferred preparation.
 
-Runs has no Refresh button or automatic refresh; submit the existing Search
-form to load current results. The bank list retains its existing refresh behavior. Bank/type identity, Run IDs and exclusion reasons
+Runs offers safe 15-second Auto refresh and Search. Polling pauses for hidden
+pages, dialogs, focused inputs, unsaved filters and pending mutations. Advanced
+filters start collapsed and indicate applied filters. Banks uses Search, shows
+eligible published-product counts beside generated sources and omits per-type
+preparation/View run clutter. Bank/type identity, Run IDs and exclusion reasons
 remain visible; filters support the added preparation states. Database lifecycle
 values remain `started/completed/failed/retried`, refined by private collection
 phase metadata. The existing `started`/`completed` filters include their child

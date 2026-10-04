@@ -82,6 +82,7 @@ type ShellCopy = {
   dailyWork: string;
   moreTools: string;
   account: string;
+  toggleNavigation: string;
   items: Partial<Record<NavItem["key"], string>>;
 };
 
@@ -106,6 +107,7 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
     dailyWork: "Daily work",
     moreTools: "More tools",
     account: "Account",
+    toggleNavigation: "Toggle navigation",
     items: {
       overview: "Overview",
       reviews: "Review history",
@@ -122,6 +124,7 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
     dailyWork: "주요 업무",
     moreTools: "기타 도구",
     account: "계정",
+    toggleNavigation: "메뉴 열기 또는 닫기",
     items: {
       overview: "개요",
       reviews: "과거 검토 기록",
@@ -138,6 +141,7 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
     dailyWork: "日常業務",
     moreTools: "その他のツール",
     account: "アカウント",
+    toggleNavigation: "メニューを開閉",
     items: {
       overview: "概要",
       reviews: "過去の審査記録",
@@ -254,7 +258,7 @@ function MobileBottomNav({
       aria-label={copy.dailyWork}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-sidebar-border bg-sidebar md:hidden"
     >
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-3">
         {primaryItems.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
@@ -304,7 +308,7 @@ function AppSidebar({
     <Sidebar className="top-14 h-[calc(100svh-3.5rem)]! border-r bg-sidebar" collapsible="icon">
       <SidebarHeader className="px-2 py-2">
         <div className="flex items-center justify-end">
-          <SidebarTrigger className="hidden md:inline-flex" />
+          <SidebarTrigger aria-label={copy.toggleNavigation} className="hidden size-10 md:inline-flex" />
         </div>
       </SidebarHeader>
 
@@ -404,7 +408,7 @@ function AdminShell({
       <div className="flex min-h-screen w-full flex-col">
         <header className="sticky top-0 z-40 border-b border-sidebar-border bg-sidebar text-sidebar-foreground">
           <div className="flex h-14 items-center gap-3 px-4 md:px-6">
-            <SidebarTrigger className="md:hidden" />
+            <SidebarTrigger aria-label={copy.toggleNavigation} className="size-10 md:hidden" />
             <p className="shrink-0 text-base font-semibold tracking-[-0.02em] text-sidebar-foreground">{copy.brand}</p>
 
             <PrimaryNav locale={locale} pathname={pathname} />

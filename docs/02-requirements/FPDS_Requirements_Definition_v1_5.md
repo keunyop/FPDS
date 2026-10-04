@@ -1113,6 +1113,13 @@ FPDS should support an operator-managed product type registry, not only a fixed 
 
 Implemented capability baseline:
 - admin can create and edit product types with at least `name` and `description`
+- Product Owner update (2026-10-04): Product Type details manage typed required
+  and optional collection targets for the session country. Protected identity,
+  currency and grouped/conditional financial essentials cannot be downgraded.
+  Future runs pin the definition through extraction and automatic validation;
+  unproven added required facts exclude automatically. Missing optional facts
+  do not penalize publication/ranking or trigger extra calls. Permissions,
+  CSRF and historical facts/receipts remain intact.
 - admin can search product types when attaching coverage to a bank
 - AI-assisted discovery can use the stored product type name and description to infer relevant bank-site URLs during homepage-first source generation
 - downstream parser, extraction, normalization, validation, and public/admin vocabulary rules must define safe fallback behavior when a newly added product type does not yet have full dedicated domain logic

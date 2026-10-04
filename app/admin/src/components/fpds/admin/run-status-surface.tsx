@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
 
 import { collectionPreparationMessage } from "@/lib/admin-collection-feedback";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
@@ -50,8 +53,9 @@ const RUN_STATUS_COPY = {
     applyFilters: "Search",
     reset: "Reset",
     advancedFilters: "Advanced filters",
+    activeFilters: "Active",
     results: "Results",
-    tableTitle: "Run table",
+    tableTitle: "Run history",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
       `Page ${page} of ${Math.max(totalPages, 1)} with ${totalItems} matching run${totalItems === 1 ? "" : "s"}.`,
     noMatches: "No matching runs",
@@ -121,8 +125,9 @@ const RUN_STATUS_COPY = {
     applyFilters: "검색",
     reset: "초기화",
     advancedFilters: "고급 필터",
+    activeFilters: "적용 중",
     results: "결과",
-    tableTitle: "실행 테이블",
+    tableTitle: "실행 이력",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
       `${Math.max(totalPages, 1)}페이지 중 ${page}페이지, 일치 실행 ${totalItems}건.`,
     noMatches: "일치하는 실행 없음",
@@ -191,8 +196,9 @@ const RUN_STATUS_COPY = {
     applyFilters: "検索",
     reset: "リセット",
     advancedFilters: "詳細フィルター",
+    activeFilters: "適用中",
     results: "結果",
-    tableTitle: "実行テーブル",
+    tableTitle: "実行履歴",
     pageSummary: (page: number, totalPages: number, totalItems: number) =>
       `${Math.max(totalPages, 1)}ページ中${page}ページ、該当実行${totalItems}件。`,
     noMatches: "該当する実行なし",
@@ -246,17 +252,22 @@ type RunStatusSurfaceProps = {
 
 export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProps) {
   const copy = RUN_STATUS_COPY[locale];
+  const [filtersDirty, setFiltersDirty] = useState(false);
+  useEffect(() => setFiltersDirty(false), [filters]);
   const runTypeOptions = Array.from(new Set([...COMMON_RUN_TYPES, ...Object.keys(runs.summary.run_type_counts)])).sort();
   const advancedFiltersActive =
     Boolean(filters.startedFrom || filters.startedTo) ||
     filters.sortBy !== "started_at" ||
     filters.sortOrder !== "desc" ||
-    filters.states.length !== 2 ||
+    filters.states.length !== 3 ||
+    !filters.states.includes("completed") ||
     !filters.states.includes("started") ||
     !filters.states.includes("failed");
 
   return (
     <section className="grid min-w-0 gap-5">
+      <AdminTableAutoRefresh locale={locale} />
+
       <AdminPageHeader
         description={copy.headerDescription}
         path={copy.path}
@@ -264,7 +275,13 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
       />
 
       <article className="min-w-0 border border-border bg-card p-4">
-        <form action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)} className="grid gap-4">
+        <form
+          action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)}
+          className="grid gap-4"
+          data-admin-dirty={filtersDirty ? "true" : undefined}
+          onChange={() => setFiltersDirty(true)}
+          onSubmit={() => setFiltersDirty(false)}
+        >
           <input name="locale" type="hidden" value={locale} />
           <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(16rem,1.45fr)_minmax(10rem,1fr)_minmax(10rem,1fr)_auto]">
             <label className="grid min-w-0 gap-2 text-sm">
@@ -316,8 +333,13 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
             </div>
           </div>
 
-          <details className="border-t border-border pt-3" open={advancedFiltersActive}>
-            <summary className="cursor-pointer text-sm font-semibold text-foreground">{copy.advancedFilters}</summary>
+          <details className="border-t border-border pt-3">
+            <summary className="min-h-10 cursor-pointer py-2 text-sm font-semibold text-foreground">
+              {copy.advancedFilters}
+              {advancedFiltersActive ? (
+                <span className="ml-2 rounded-full bg-info-soft px-2 py-1 text-xs font-medium text-info">{copy.activeFilters}</span>
+              ) : null}
+            </summary>
             <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-4">
               <label className="grid min-w-0 gap-2 text-sm">
                 <span className="font-medium text-foreground">{copy.sortBy}</span>
@@ -394,8 +416,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
       <article className="min-w-0 overflow-hidden border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-medium text-muted-foreground">{copy.results}</p>
-            <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">{copy.tableTitle}</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">{copy.tableTitle}</h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
               {copy.pageSummary(runs.page, runs.total_pages, runs.total_items)}
             </p>
@@ -438,14 +459,14 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         ) : (
           <>
             <div aria-label={copy.tableTitle} className="max-w-full overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
-              <table className="min-w-[820px] table-fixed border-separate border-spacing-0">
+              <table className="w-full min-w-[820px] border-separate border-spacing-0">
                 <thead>
                   <tr className="text-left text-xs text-muted-foreground">
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.status}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.run}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.sourceSummary}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.candidateSummary}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium">{copy.action}</th>
+                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.status}</th>
+                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.run}</th>
+                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.sourceSummary}</th>
+                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.candidateSummary}</th>
+                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.action}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -501,7 +522,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                         </div>
                       </td>
                       <td className="border-b border-border/70 px-3 py-4">
-                        <Button asChild size="sm" variant="outline">
+                        <Button asChild variant="outline">
                           <Link href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>{copy.openDetail}</Link>
                         </Button>
                       </td>
@@ -517,20 +538,20 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
               </p>
               <div className="flex items-center gap-2">
                 {runs.page > 1 ? (
-                  <Button asChild size="sm" variant="outline">
+                  <Button asChild variant="outline">
                     <Link href={buildRunHref(filters, { page: Math.max(1, runs.page - 1) }, locale)}>{copy.previous}</Link>
                   </Button>
                 ) : (
-                  <span className="inline-flex h-9 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground opacity-60">
+                  <span className="inline-flex h-10 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground opacity-60">
                     {copy.previous}
                   </span>
                 )}
                 {runs.has_next_page ? (
-                  <Button asChild size="sm" variant="outline">
+                  <Button asChild variant="outline">
                     <Link href={buildRunHref(filters, { page: runs.page + 1 }, locale)}>{copy.next}</Link>
                   </Button>
                 ) : (
-                  <span className="inline-flex h-9 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground opacity-60">
+                  <span className="inline-flex h-10 items-center rounded-md border border-border bg-muted px-3 text-sm text-muted-foreground opacity-60">
                     {copy.next}
                   </span>
                 )}
@@ -589,12 +610,15 @@ function toTitleCase(value: string) {
 
 function runStateBadgeClasses(state: string) {
   switch (state) {
+    case "queued":
+    case "discovering":
     case "started":
       return "bg-info-soft text-info";
     case "completed":
       return "bg-success-soft text-success";
     case "failed":
       return "bg-destructive/10 text-destructive";
+    case "skipped":
     case "retried":
       return "bg-warning-soft text-warning";
     default:

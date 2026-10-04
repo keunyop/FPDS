@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 AUTH_PASSWORD_MIN_LENGTH = 4
 
@@ -119,7 +119,14 @@ class SourceCatalogCollectionRequest(BaseModel):
     precision_rediscovery: bool = False
 
 
+class CollectionFieldsWriteRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    required_fields: list[str] = Field(max_length=100)
+    optional_fields: list[str] = Field(max_length=100)
+
+
 class ProductTypeWriteRequest(BaseModel):
+    collection_fields: CollectionFieldsWriteRequest | None = None
     product_type_code: str | None = Field(default=None, max_length=50)
     product_family: str | None = Field(default=None, max_length=50)
     display_name: str | None = Field(default=None, max_length=120)

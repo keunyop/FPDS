@@ -7,7 +7,7 @@ const product = (overrides: Partial<PublicProduct> = {}) => ({country_code:'CA',
 
 test('Top 5 distinguishes absent target types from unverified rate basis in every locale', () => {
   for (const [locale, absent, basis] of [['en','No published','basis'], ['ko','공개된','기준'], ['ja','公開済み','基準']]) {
-    assert.ok(rankingEmptyMessage([product({product_type:'chequing'}),product({product_type:'credit-card'})], 'deposit','CA',locale).includes(absent));
+    assert.ok(rankingEmptyMessage([product({product_type:'credit-card'})], 'deposit','CA',locale).includes(absent));
     assert.ok(rankingEmptyMessage([product()], 'deposit','CA',locale).includes(basis));
   }
 });
@@ -21,4 +21,10 @@ test('known basis with unresolved terms never reports an absent catalogue or inv
   const p = product({product_type:'gic', deposit_terms:{version:1, basis:'annual', reason:'term_unknown', calculation_reason:'term_unknown',withdrawal:'unknown',options:[]}});
   assert.match(rankingEmptyMessage([p], 'deposit','CA','en'), /terms and withdrawal/);
   assert.equal(p.deposit_terms?.options.length, 0);
+});
+
+test('published Chequing with unverified costs is distinct from no deposits or unknown rate basis', () => {
+  const message=rankingEmptyMessage([product({product_type:'chequing'})], 'deposit','CA','en');
+  assert.match(message,/fees and transaction costs/);
+  assert.ok(!message.includes('No published') && !message.includes('APY basis'));
 });

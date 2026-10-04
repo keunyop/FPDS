@@ -1,5 +1,22 @@
 # Worker Boundary
 
+## Product Type collection targets - 2026-10-04
+
+The Admin-owned country-specific field policy is pinned in each run registry.
+Configured required/optional targets drive retrieval and the existing grounded
+extraction request; normalization uses that registry snapshot even if mutable
+source-document metadata changes. Protected grouped/conditional financial
+requirements still apply. Added required facts must pass the same native-type,
+exact-quote/current-origin accuracy gate or the candidate is automatically
+excluded. Missing optional facts trigger neither rejection nor extra calls;
+verified same-evidence optional facts remain preserved.
+
+The API must apply migration `0047_product_type_collection_fields.sql` before
+API/Worker/Admin rollout. Existing unconfigured definitions retain current
+profiles, and historical accepted receipts stay compatible. Settings affect
+future collection, without rewriting old financial facts or starting collection.
+
+
 Coast Capital evidence correction (2026-10-03): shared fee classification and complete withdrawal consequences, parser v8 named legal panels, bounded GIC companions and static confirmation-dialog links are verified locally. Original input for two products plus current official companion terms for Better-than-Cash yield three ordinary automatic passes; missing terms and unverified issuer domains remain excluded. Worker 711 / API 580 pass. No live data writes or deployment; deploy API/source catalog and Worker together for future collection. [Evidence and limits](../docs/00-governance/coast-collection-evidence-corrections-2026-10-03.md).
 
 CIBC direct/Admin evidence parity (2026-10-03): common essential companions retain all selected parents; explicit unresolved official rate templates receive one bounded render; parser v7 preserves complete fee records and purchase columns/notes. Ordinary extraction proves native facts before its model pass and preserves them afterwards; normalization cannot rewrite grounded values. Same current captured input yields 14 additional automatic passes with unchanged financial/security gates. Worker 698 / API 578 pass. Data publication and serving-runtime deployment are verified separately. [Diagnosis, applied result and rollout](../docs/00-governance/cibc-collection-redesign-2026-10-03.md).

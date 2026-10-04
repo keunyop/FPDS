@@ -64,6 +64,7 @@ export default async function ProductTypePage({ searchParams }: ProductTypePageP
         activeProductType={activeProductType}
         activeProductTypeCode={activeProductTypeCode || null}
         addModalOpen={addModalOpen}
+        canManage={session.user.role === "admin"}
         csrfToken={session.csrf_token}
         filters={filters}
         locale={locale}

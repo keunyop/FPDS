@@ -980,6 +980,7 @@ def _build_registry_payload(group: dict[str, Any]) -> dict[str, Any]:
                 "product_type_description": item.get("product_type_description"),
                 "discovery_keywords": item.get("discovery_keywords", []),
                 "fallback_policy": item.get("fallback_policy"),
+                "collection_field_policy": item.get("collection_field_policy", {}),
                 "discovery_metadata": item.get("discovery_metadata", {}),
                 "normalized_source_url": item["source_url"],
                 "official_domain_allowlist": allowed_domains,

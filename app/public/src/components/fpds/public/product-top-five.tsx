@@ -1,4 +1,4 @@
-import { buildPublicProductMetrics } from "@/lib/public-product-presentation";
+import { buildPublicProductMetrics, formatPublicCurrency, formatPublicRate } from "@/lib/public-product-presentation";
 import { publicFactCopy } from "@/lib/public-fact-copy";
 import { getComparablePublicRate } from "@/lib/public-rate";
 import { ArrowRight, ExternalLink, Landmark, PiggyBank } from "lucide-react";
@@ -7,13 +7,14 @@ import type { ReactNode } from "react";
 import { BankLogo } from "@/components/fpds/public/bank-logo";
 import { ProductVerification } from "@/components/fpds/public/product-verification";
 import { TrackedOfficialBankLink, TrackedProductLink } from "@/components/fpds/public/product-engagement-link";
-import { getIntlLocale, getPublicMessages } from "@/lib/public-locale";
+import { getPublicMessages } from "@/lib/public-locale";
 import type { PublicProductsResponse } from "@/lib/public-api";
 import { buildPublicHref, type DashboardPageFilters } from "@/lib/public-query";
 
 export function ProductTopFive({
   controls,
-  rates,
+  values,
+  metric = "interest_rate",
   termLabel,
   accent,
   emptyText,
@@ -28,7 +29,8 @@ export function ProductTopFive({
   unavailableText
 }: {
   controls?: ReactNode;
-  rates?: Record<string, number>;
+  values?: Record<string, number>;
+  metric?: "monthly_fee" | "interest_rate";
   termLabel?: string | null;
   accent: "deposit" | "loan";
   emptyText: string;
@@ -67,53 +69,59 @@ export function ProductTopFive({
         </div>
       </div>
       {controls}
-      <p className="px-4 py-3 text-xs leading-5 text-muted-foreground md:px-5">{publicFactCopy(filters.locale).ranking}</p>
+      <p className="px-4 py-3 text-xs leading-5 text-muted-foreground md:px-5">{metric === "monthly_fee" ? publicFactCopy(filters.locale).feeRanking : publicFactCopy(filters.locale).ranking}</p>
       {unavailable ? (
         <div className="p-4 md:p-5">
           <EmptyPanel text={unavailableText} />
         </div>
       ) : products.length ? (
         <ol className={`grid divide-y ${rowClass}`}>
-          {products.map((product, index) => (
-            <li className="grid min-w-0 grid-cols-[1.25rem_auto_minmax(0,1fr)] items-center gap-x-3 px-4 py-4 sm:grid-cols-[1.25rem_auto_minmax(0,1fr)_auto_auto] md:px-5" key={product.product_id}>
-              <span className="text-sm font-semibold text-muted-foreground tabular-nums">{index + 1}</span>
-              <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
-              <div className="min-w-0">
-                <TrackedProductLink
-                  className="flex min-h-11 min-w-0 items-center text-sm font-semibold text-foreground hover:text-primary [overflow-wrap:anywhere]"
-                  countryCode={filters.countryCode}
-                  href={buildProductDetailHref(filters, product.product_id)}
-                  productId={product.product_id}
-                >
-                  {product.product_name}
-                </TrackedProductLink>
-                <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
-                <ProductVerification product={product} locale={filters.locale} />
-              </div>
-              <div className="col-start-3 mt-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
-                <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${copy.grid.metricDisplayRate} ${formatMetricValue(rates?.[product.product_id] ?? getComparablePublicRate(product), "percent", filters.locale)}`}>
-                  {formatMetricValue(rates?.[product.product_id] ?? getComparablePublicRate(product), "percent", filters.locale)}
-                </span>
-                {product.product_url ? (
-                  <TrackedOfficialBankLink
-                    className="inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium text-primary hover:text-primary/80"
+          {products.map((product, index) => {
+            const value = values?.[product.product_id] ?? (metric === "monthly_fee" ? product.public_display_fee : getComparablePublicRate(product));
+            const formattedValue = metric === "monthly_fee" ? formatPublicCurrency(value, product.currency, filters.locale) : formatPublicRate(value, filters.locale);
+            const metricLabel = metric === "monthly_fee" ? copy.grid.metricMonthlyFee : copy.grid.metricDisplayRate;
+            return (
+              <li className="grid min-w-0 grid-cols-[1.25rem_auto_minmax(0,1fr)] items-center gap-x-3 px-4 py-4 sm:grid-cols-[1.25rem_auto_minmax(0,1fr)_auto_auto] md:px-5" key={product.product_id}>
+                <span className="text-sm font-semibold text-muted-foreground tabular-nums">{index + 1}</span>
+                <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
+                <div className="min-w-0">
+                  <TrackedProductLink
+                    className="flex min-h-11 min-w-0 items-center text-sm font-semibold text-foreground hover:text-primary [overflow-wrap:anywhere]"
                     countryCode={filters.countryCode}
-                    href={product.product_url}
+                    href={buildProductDetailHref(filters, product.product_id)}
                     productId={product.product_id}
                   >
-                    {copy.common.bankPage}
-                    <ExternalLink className="size-3.5" aria-hidden="true" />
-                  </TrackedOfficialBankLink>
-                ) : null}
-              </div>
-              <dl className="col-span-full mt-3 grid min-w-0 gap-3 border-t border-border/70 pt-3 sm:grid-cols-2">
-                {buildPublicProductMetrics(product, filters.locale).slice(1).map((metric, index) => <div className="min-w-0" key={metric.label}>
-                  <dt className="text-xs text-muted-foreground">{metric.label}</dt>
-                  <dd className="mt-1 break-words text-sm leading-6">{product.product_type === "gic" && index === 0 && termLabel ? termLabel : metric.value}</dd>
-                </div>)}
-              </dl>
-            </li>
-          ))}
+                    {product.product_name}
+                  </TrackedProductLink>
+                  <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
+                  <ProductVerification product={product} locale={filters.locale} />
+                </div>
+                <div className="col-start-3 mt-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
+                  <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${metricLabel} ${formattedValue}`}>
+                    {metric === "monthly_fee" ? <span className="block text-xs font-normal text-muted-foreground">{metricLabel}</span> : null}
+                    {formattedValue}
+                  </span>
+                  {product.product_url ? (
+                    <TrackedOfficialBankLink
+                      className="inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium text-primary hover:text-primary/80"
+                      countryCode={filters.countryCode}
+                      href={product.product_url}
+                      productId={product.product_id}
+                    >
+                      {copy.common.bankPage}
+                      <ExternalLink className="size-3.5" aria-hidden="true" />
+                    </TrackedOfficialBankLink>
+                  ) : null}
+                </div>
+                <dl className="col-span-full mt-3 grid min-w-0 gap-3 border-t border-border/70 pt-3 sm:grid-cols-2">
+                  {buildPublicProductMetrics(product, filters.locale).slice(1).map((metric, index) => <div className="min-w-0" key={metric.label}>
+                    <dt className="text-xs text-muted-foreground">{metric.label}</dt>
+                    <dd className="mt-1 break-words text-sm leading-6">{product.product_type === "gic" && index === 0 && termLabel ? termLabel : metric.value}</dd>
+                  </div>)}
+                </dl>
+              </li>
+            );
+          })}
         </ol>
       ) : (
         <div className="p-4 md:p-5">
@@ -132,33 +140,6 @@ export function ProductTopFive({
 
 function EmptyPanel({ text }: { text: string }) {
   return <p className="rounded-lg border border-dashed border-border bg-card px-3 py-6 text-center text-sm text-muted-foreground">{text}</p>;
-}
-
-function formatMetricValue(value: number | string | null, unit: string, locale: string) {
-  const copy = getPublicMessages(locale);
-  if (value === null || (typeof value === "number" && !Number.isFinite(value))) {
-    return copy.common.notDisclosed;
-  }
-  if (typeof value === "string") {
-    return value;
-  }
-  if (unit === "percent") {
-    return `${value.toFixed(2).replace(/\.?0+$/, "")}%`;
-  }
-  if (unit === "currency") {
-    return new Intl.NumberFormat(getIntlLocale(locale), {
-      style: "currency",
-      currency: "CAD",
-      maximumFractionDigits: Number.isInteger(value) ? 0 : 2
-    }).format(value);
-  }
-  return formatCount(value, locale);
-}
-
-function formatCount(value: number, locale: string) {
-  return new Intl.NumberFormat(getIntlLocale(locale), {
-    maximumFractionDigits: Number.isInteger(value) ? 0 : 2
-  }).format(value);
 }
 
 function buildProductDetailHref(filters: DashboardPageFilters, productId: string) {

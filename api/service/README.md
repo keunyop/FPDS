@@ -1,5 +1,27 @@
 # FPDS API Service
 
+## Product Type collection targets and Banks counts - 2026-10-04
+
+Product Type GET list/detail resolves `collection_fields` for the authenticated
+session country: required/optional targets, locked grouped financial requirements
+and the shared typed field catalog. Admin-only CSRF-protected POST/PATCH accepts
+`collection_fields: {required_fields: [...], optional_fields: [...]}`. Unknown,
+duplicate, overlapping or weakened mandatory targets receive 422. A field-only
+save preserves discovery keywords without an extra provider call.
+
+Migration `0047_product_type_collection_fields.sql` adds country-keyed
+`collection_field_policy`; apply it before this API/Worker release. Changes merge
+only the current country, and normal collection snapshots the policy in its
+registry. Extraction, normalization and automatic accuracy receipts retain that
+same run policy. Missing proven additional required facts exclude automatically;
+optional absence never blocks or starts extra searches/retries.
+
+Bank list/detail `published_product_count` counts distinct eligible products in
+the latest completed Public snapshot using the same Public accuracy gate. No
+snapshot yields zero; counts are not raw active canonical totals. No live data
+operation or deployment was performed for this local implementation.
+
+
 Coast Capital evidence correction (2026-10-03): shared fee classification and complete withdrawal consequences, parser v8 named legal panels, bounded GIC companions and static confirmation-dialog links are verified locally. Original input for two products plus current official companion terms for Better-than-Cash yield three ordinary automatic passes; missing terms and unverified issuer domains remain excluded. Worker 711 / API 580 pass. No live data writes or deployment; deploy API/source catalog and Worker together for future collection. [Evidence and limits](../../docs/00-governance/coast-collection-evidence-corrections-2026-10-03.md).
 
 CIBC direct/Admin evidence parity (2026-10-03): common essential companions retain all selected parents; explicit unresolved official rate templates receive one bounded render; parser v7 preserves complete fee records and purchase columns/notes. Ordinary extraction proves native facts before its model pass and preserves them afterwards; normalization cannot rewrite grounded values. Same current captured input yields 14 additional automatic passes with unchanged financial/security gates. Worker 698 / API 578 pass. Data publication and serving-runtime deployment are verified separately. [Diagnosis, applied result and rollout](../../docs/00-governance/cibc-collection-redesign-2026-10-03.md).
@@ -221,6 +243,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quar
 psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0045_public_product_engagement.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0046_public_feedback_submission.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0047_product_type_collection_fields.sql
 ```
 
 Create the first operator account:

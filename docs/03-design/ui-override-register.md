@@ -143,3 +143,16 @@ FPDS-owned editorial routes and shell composition reuse Button, BankLogo,
 feedback, existing Radix menus and semantic tokens. Navigation adds Blog;
 article layout uses native headings, a contents list, responsive table and
 source links. No vendor primitive, external block, font or token family added.
+
+
+## 2026-10-04 - Product Type collection management and Admin dialogs
+
+Product Type details compose the existing Field/Input/Button primitives with
+protected grouped financial requirements and searchable typed required/optional
+controls. Concise profile and disclosure sections replace repeated onboarding
+prose and decorative subcards. Registry writes follow the authenticated role;
+forms retain associated labels, dirty/busy state and locale-preserving search.
+The existing offer-modal4-derived AdminModal localizes close/context labels and
+uses a 40px close target. The existing application-shell5-derived shell uses
+three evenly spaced mobile daily-work entries and localized 40px sidebar
+triggers. No vendor primitive, style family or token was added.

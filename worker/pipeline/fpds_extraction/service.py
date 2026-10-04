@@ -1079,6 +1079,12 @@ def _resolve_field_names(
     override_field_names: list[str] | None,
     default_fields: tuple[str, ...],
 ) -> list[str]:
+    from worker.pipeline.fpds_collection_fields import metadata_collection_fields
+    resolved = metadata_collection_fields(context.source_metadata,
+        product_type=_infer_product_type(context), country_code=context.country_code)
+    if resolved["configured"]:
+        # CLI/seed overrides cannot narrow a registered active contract.
+        return list(dict.fromkeys([*resolved["required_fields"], *resolved["optional_fields"]]))
     if override_field_names:
         return sorted(dict.fromkeys(item.strip() for item in override_field_names if item.strip()))
 
@@ -4551,7 +4557,11 @@ def _extract_official_fields_with_ai(
     profile = country_product_profile(country_code=context.country_code, product_type=_infer_product_type(context))
     # Current profiles include both prerequisites and optional facts. Historical
     # source lists must not silently narrow that collection contract.
-    profile_fields = profile.collection_fields if profile else ()
+    from worker.pipeline.fpds_collection_fields import metadata_collection_fields, additional_required_fields
+    resolved_fields = metadata_collection_fields(context.source_metadata,
+        product_type=_infer_product_type(context), country_code=context.country_code)
+    profile_fields = (tuple([*resolved_fields["required_fields"], *resolved_fields["optional_fields"]])
+                      if resolved_fields["configured"] else profile.collection_fields if profile else ())
     ai_requested_fields = list(dict.fromkeys([
         "product_name", "currency", *profile_fields, *ai_requested_fields,
     ]))
@@ -4561,9 +4571,10 @@ def _extract_official_fields_with_ai(
     ai_requested_fields = [name for name in ai_requested_fields if field_contract(name) is not None]
     requirement_fields = {name for requirement in (profile.requirements if profile else ())
                           for name in requirement.alternatives}
+    requirement_fields.update(additional_required_fields(resolved_fields))
     supplemental_fields = [
         name for name in ai_requested_fields
-        if profile and name not in requirement_fields | {"product_name", "currency"}
+        if (profile or resolved_fields["configured"]) and name not in requirement_fields | {"product_name", "currency"}
     ]
     schema = {
         "type": "object",
@@ -4724,7 +4735,8 @@ def _extract_official_fields_with_ai(
                 "comparison_requirements": [
                     {"key": r.key, "alternatives": list(r.alternatives), "required_when": r.required_when}
                     for r in (profile.requirements if profile else ())
-                ],
+                ] + [{"key": f, "alternatives": [f], "required_when": "always"}
+                     for f in additional_required_fields(resolved_fields)],
                 "supplemental_fields": supplemental_fields,
                 "collected_fields": [
                     {

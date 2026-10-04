@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { Globe, ImageIcon, Landmark, Languages, ShieldCheck, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 
 import { BankCoverageSection } from "@/components/fpds/admin/bank-coverage-section";
 import { BankLogoMark } from "@/components/fpds/admin/bank-logo-mark";
@@ -20,6 +20,7 @@ import { buildAdminHref, type AdminLocale } from "@/lib/admin-i18n";
 
 type BankDetailDialogContentProps = {
   detail: BankDetailResponse;
+  canManage: boolean;
   locale: AdminLocale;
   csrfToken: string | null | undefined;
   productTypes: ProductTypeItem[];
@@ -44,6 +45,8 @@ const BANK_DETAIL_COPY = {
     bankProfile: "Bank profile",
     profileTitle: "Operator-supplied bank information",
     bankName: "Bank name",
+    logoUrl: "Logo URL",
+    logoPreview: "Logo preview",
     homepageUrl: "Homepage URL",
     language: "Language",
     status: "Status",
@@ -70,6 +73,8 @@ const BANK_DETAIL_COPY = {
     bankProfile: "은행 프로필",
     profileTitle: "운영자가 입력한 은행 정보",
     bankName: "은행명",
+    logoUrl: "로고 URL",
+    logoPreview: "로고 미리보기",
     homepageUrl: "홈페이지 URL",
     language: "언어",
     status: "상태",
@@ -96,6 +101,8 @@ const BANK_DETAIL_COPY = {
     bankProfile: "銀行プロファイル",
     profileTitle: "運用者が入力した銀行情報",
     bankName: "銀行名",
+    logoUrl: "ロゴURL",
+    logoPreview: "ロゴプレビュー",
     homepageUrl: "ホームページURL",
     language: "言語",
     status: "状態",
@@ -119,6 +126,7 @@ const BANK_DETAIL_COPY = {
 
 export function BankDetailDialogContent({
   detail,
+  canManage,
   locale,
   csrfToken,
   productTypes,
@@ -141,6 +149,7 @@ export function BankDetailDialogContent({
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManage) return;
     setPendingSave(true);
     setMessage(null);
     setError(null);
@@ -169,6 +178,7 @@ export function BankDetailDialogContent({
   }
 
   async function handleDelete() {
+    if (!canManage) return;
     setPendingDelete(true);
     setMessage(null);
     setError(null);
@@ -213,23 +223,17 @@ export function BankDetailDialogContent({
         </p>
       ) : null}
       {error ? (
-        <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p aria-live="assertive" className="border-l-4 border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
         <section className="border border-border bg-card p-5">
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">
-              {copy.bankProfile}
-            </p>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              {copy.profileTitle}
-            </h2>
-          </div>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">{copy.bankProfile}</h2>
 
-          <form className="mt-5 space-y-4" onSubmit={handleSave}>
+          <form className="mt-5" onSubmit={handleSave}>
+            <fieldset className="min-w-0 space-y-4" disabled={!canManage || pendingSave || pendingDelete}>
             <FieldGroup className="lg:grid lg:grid-cols-2 lg:gap-4">
               <InputField
                 icon={<Landmark className="size-4" />}
@@ -249,7 +253,7 @@ export function BankDetailDialogContent({
               />
               <InputField
                 icon={<ImageIcon className="size-4" />}
-                label="Logo URL"
+                label={copy.logoUrl}
                 onChange={(value) =>
                   setForm((current) => ({ ...current, logo_url: value }))
                 }
@@ -258,6 +262,7 @@ export function BankDetailDialogContent({
             </FieldGroup>
 
             <BankLogoPreview
+              label={copy.logoPreview}
               bankCode={detail.bank.bank_code}
               bankName={form.bank_name || detail.bank.bank_name}
               logoUrl={form.logo_url}
@@ -285,19 +290,21 @@ export function BankDetailDialogContent({
               />
             </div>
 
-            <div className="flex justify-between gap-3">
+            {canManage ? <div className="flex flex-wrap justify-between gap-3">
               <Button disabled={pendingDelete} onClick={() => setDeleteDialogOpen(true)} type="button" variant="destructive">
-                <Trash2 className="size-4" />
+                <Trash2 aria-hidden="true" className="size-4" />
                 {pendingDelete ? copy.deleting : copy.deleteBank}
               </Button>
               <Button disabled={pendingSave} type="submit">
                 {pendingSave ? copy.saving : copy.saveBank}
               </Button>
-            </div>
+            </div> : null}
+            </fieldset>
           </form>
         </section>
 
         <BankCoverageSection
+          canManage={canManage}
           bankCode={detail.bank.bank_code}
           catalogItems={detail.catalog_items}
           csrfToken={csrfToken}
@@ -312,7 +319,7 @@ export function BankDetailDialogContent({
         description={copy.deleteDescription(detail.bank.bank_name)}
         onConfirm={handleDelete}
         onOpenChange={setDeleteDialogOpen}
-        open={deleteDialogOpen}
+        open={canManage && deleteDialogOpen}
         pending={pendingDelete}
         pendingLabel={copy.deleting}
         title={copy.deleteTitle(detail.bank.bank_name)}
@@ -323,7 +330,7 @@ export function BankDetailDialogContent({
 
 function ReadonlySummary({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border/80 bg-muted/35 px-4 py-3">
+    <div className="rounded-md border border-border/80 bg-muted/35 px-4 py-3">
       <p className="text-xs font-medium text-muted-foreground">
         {label}
       </p>
@@ -333,10 +340,12 @@ function ReadonlySummary({ label, value }: { label: string; value: string }) {
 }
 
 function BankLogoPreview({
+  label,
   bankCode,
   bankName,
   logoUrl,
 }: {
+  label: string;
   bankCode: string;
   bankName: string;
   logoUrl: string;
@@ -351,7 +360,7 @@ function BankLogoPreview({
         logoUrl={normalizedLogoUrl}
       />
       <div className="min-w-0">
-        <p className="text-xs font-medium text-muted-foreground">Logo preview</p>
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <p className="mt-1 truncate text-sm font-medium text-foreground">{bankName}</p>
       </div>
     </div>
@@ -369,12 +378,14 @@ function InputField({
   onChange: (value: string) => void;
   icon: ReactNode;
 }) {
+  const inputId = useId();
   return (
     <Field>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
       <InputGroup>
         <InputGroupAddon align="inline-start">{icon}</InputGroupAddon>
         <InputGroupInput
+          id={inputId}
           onChange={(event) => onChange(event.target.value)}
           value={value}
         />
@@ -401,7 +412,7 @@ function SelectField({
   return (
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <div className="flex h-10 items-center rounded-xl border border-input bg-background px-3">
+      <div className="flex h-10 items-center rounded-md border border-input bg-background px-3">
         <div className="mr-2 text-muted-foreground">{icon}</div>
         <select
           className="w-full bg-transparent text-sm text-foreground outline-none"

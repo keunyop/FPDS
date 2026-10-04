@@ -780,6 +780,7 @@ export type CollectionPreparation = {
 };
 
 export type BankItem = {
+  published_product_count?: number;
   bank_code: string;
   country_code: string;
   bank_name: string;
@@ -963,7 +964,18 @@ export type SourceCatalogCollectionLaunchResponse = SourceCollectionLaunchRespon
   queued_catalog_item_count?: number;
 };
 
+export type ProductTypeCollectionFields = {
+  country_code: string;
+  configured: boolean;
+  required_fields: string[];
+  optional_fields: string[];
+  locked_required_fields: string[];
+  requirements: Array<{ key: string; alternatives: string[]; required_when: string }>;
+  field_catalog: Array<{ field_key: string; value_type: string; unit: string | null }>;
+};
+
 export type ProductTypeItem = {
+  collection_fields?: ProductTypeCollectionFields;
   product_type_code: string;
   product_family: string;
   display_name: string;

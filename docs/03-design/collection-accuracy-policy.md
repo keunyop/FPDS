@@ -1,5 +1,25 @@
 # Product collection accuracy and automatic acceptance
 
+## Product Type-managed collection targets - 2026-10-04
+
+The Product Owner requests required/optional collection management in Product
+Type details. Country-keyed registry overrides supplement the protected shared
+identity/currency and grouped/conditional financial essentials; they cannot
+remove checking transaction costs, GIC/CD access/consequences or LOC security.
+The registered typed catalog is authoritative. Configured target lists total at most 60 fields, matching the existing bounded grounding pass. Added required fields must be
+proved by the same financial/type/current-origin/exact-quote gates; otherwise
+exclude automatically, with no manual queue or confidence override.
+
+An explicit optional list controls collection targets. Missing optional facts do
+not block, penalize ranking or cause optional-only searches/retries. Proved
+profile/registered optional facts encountered in the same evidence remain
+preserved. Empty optional lists are intentional, not replaced with defaults.
+Each future collection plan pins its working-country override through retrieval,
+extraction prompt, normalization and acceptance receipt. Settings do not rewrite
+historical facts/receipts or trigger collection. Unconfigured definitions retain
+the current profiles. Migration `0047` precedes API/Worker/Admin rollout.
+
+
 ## Exact account classification and product withdrawal declarations - 2026-10-03
 
 An independently explicit base monthly fee is not qualified by the separate

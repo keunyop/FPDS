@@ -22,6 +22,7 @@ type ProductTypeRegistrySurfaceProps = {
   productTypes: ProductTypeListResponse;
   filters: ProductTypePageFilters;
   csrfToken: string | null | undefined;
+  canManage: boolean;
   locale: AdminLocale;
   addModalOpen: boolean;
   activeProductTypeCode: string | null;
@@ -63,13 +64,13 @@ const PRODUCT_TYPE_COPY = {
     searchPlaceholder: "이름, 코드, 설명",
     status: "상태",
     all: "전체",
-    apply: "Search",
+    apply: "검색",
     reset: "초기화",
     listEyebrow: "상품 유형 목록",
     productType: "상품 유형",
     code: "코드",
-    fallbackPolicy: "Fallback policy",
-    discoveryKeywords: "Discovery keywords",
+    fallbackPolicy: "수집 방식",
+    discoveryKeywords: "검색 키워드",
     noMatches: "현재 필터에 맞는 상품 유형이 없습니다.",
     detailTitleFallback: "상품 유형 상세",
   },
@@ -85,13 +86,13 @@ const PRODUCT_TYPE_COPY = {
     searchPlaceholder: "名前、コード、説明",
     status: "状態",
     all: "すべて",
-    apply: "Search",
+    apply: "検索",
     reset: "リセット",
     listEyebrow: "商品タイプ一覧",
     productType: "商品タイプ",
     code: "コード",
-    fallbackPolicy: "Fallback policy",
-    discoveryKeywords: "Discovery keywords",
+    fallbackPolicy: "収集方式",
+    discoveryKeywords: "検索キーワード",
     noMatches: "現在のフィルターに該当する商品タイプはありません。",
     detailTitleFallback: "商品タイプ詳細",
   },
@@ -101,13 +102,14 @@ export function ProductTypeRegistrySurface({
   productTypes,
   filters,
   csrfToken,
+  canManage,
   locale,
   addModalOpen,
   activeProductTypeCode,
   activeProductType,
 }: ProductTypeRegistrySurfaceProps) {
   const copy = PRODUCT_TYPE_COPY[locale];
-  const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen);
+  const [addDialogOpen, setAddDialogOpen] = useState(addModalOpen && canManage);
   const [selectedProductTypeCode, setSelectedProductTypeCode] = useState(activeProductTypeCode);
   const [selectedProductTypeOverride, setSelectedProductTypeOverride] = useState<ProductTypeItem | null>(activeProductType);
   const baseSearchParams = useMemo(() => buildRegistrySearchParams(filters), [filters]);
@@ -116,8 +118,8 @@ export function ProductTypeRegistrySurface({
       return null;
     }
     return (
-      productTypes.items.find((item) => item.product_type_code === selectedProductTypeCode) ??
-      (selectedProductTypeOverride?.product_type_code === selectedProductTypeCode ? selectedProductTypeOverride : null)
+      (selectedProductTypeOverride?.product_type_code === selectedProductTypeCode ? selectedProductTypeOverride : null) ??
+      productTypes.items.find((item) => item.product_type_code === selectedProductTypeCode) ?? null
     );
   }, [productTypes.items, selectedProductTypeCode, selectedProductTypeOverride]);
   const detailModalOpen = Boolean(selectedProductTypeCode && selectedProductType);
@@ -125,29 +127,29 @@ export function ProductTypeRegistrySurface({
     {
       label: copy.productTypes,
       value: String(productTypes.summary.total_items),
-      note: "Current filter.",
+      note: "",
       tone: "info" as const,
       icon: Shapes,
     },
     {
       label: copy.active,
       value: String(productTypes.summary.status_counts.active ?? 0),
-      note: "Enabled definitions.",
+      note: "",
       tone: "success" as const,
       icon: CircleCheck,
     },
     {
       label: copy.inactive,
       value: String(productTypes.summary.status_counts.inactive ?? 0),
-      note: "Paused definitions.",
+      note: "",
       tone: "neutral" as const,
       icon: CircleOff,
     },
   ];
 
   useEffect(() => {
-    setAddDialogOpen(addModalOpen);
-  }, [addModalOpen]);
+    setAddDialogOpen(addModalOpen && canManage);
+  }, [addModalOpen, canManage]);
 
   useEffect(() => {
     setSelectedProductTypeCode(activeProductTypeCode);
@@ -215,11 +217,10 @@ export function ProductTypeRegistrySurface({
   }
 
   return (
-    <section className="grid gap-5">
+    <section className="grid min-w-0 max-w-full gap-5">
       <AdminTableAutoRefresh locale={locale} />
 
       <AdminPageHeader
-        description={copy.description}
         path={copy.path}
         title={copy.title}
       />
@@ -230,12 +231,13 @@ export function ProductTypeRegistrySurface({
         items={statItems}
       />
 
-      <article className="border border-border bg-card p-4">
-        <form action={buildAdminHref("/admin/product-types", new URLSearchParams(), locale)} className="grid gap-4 lg:grid-cols-[1.4fr_minmax(0,220px)_auto]">
+      <article className="min-w-0 max-w-full border border-border bg-card p-4">
+        <form action={buildAdminHref("/admin/product-types", new URLSearchParams(), locale)} className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,220px)_auto]">
+          <input name="locale" type="hidden" value={locale} />
           <label className="grid gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.search}</span>
             <input
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm"
               defaultValue={filters.q}
               name="q"
               placeholder={copy.searchPlaceholder}
@@ -257,12 +259,12 @@ export function ProductTypeRegistrySurface({
         </form>
       </article>
 
-      <article className="border border-border bg-card">
+      <article className="min-w-0 max-w-full border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-foreground">{copy.listEyebrow}</h2>
           </div>
-          <div className="flex flex-wrap gap-2">
+          {canManage ? <div className="flex flex-wrap gap-2">
             <button
               className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               onClick={openAddModal}
@@ -270,11 +272,11 @@ export function ProductTypeRegistrySurface({
             >
               {copy.addProductType}
             </button>
-          </div>
+          </div> : null}
         </div>
 
-        <div aria-label={copy.listEyebrow} className="overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
-          <table className="min-w-[980px] table-fixed border-separate border-spacing-0">
+        <div aria-label={copy.listEyebrow} className="max-w-full overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
+          <table className="w-full min-w-[720px] border-separate border-spacing-0">
             <thead>
               <tr className="text-left text-xs text-muted-foreground">
                 <th className="border-b border-border px-3 py-3 font-medium">{copy.productType}</th>
@@ -319,6 +321,7 @@ export function ProductTypeRegistrySurface({
       </article>
 
       <AdminModal
+        locale={locale}
         onOpenChange={handleAddDialogChange}
         open={addDialogOpen}
         showPanel={false}
@@ -329,6 +332,7 @@ export function ProductTypeRegistrySurface({
       </AdminModal>
 
       <AdminModal
+        locale={locale}
         onOpenChange={handleDetailDialogChange}
         open={detailModalOpen}
         showPanel={false}
@@ -338,6 +342,7 @@ export function ProductTypeRegistrySurface({
         {selectedProductType ? (
           <ProductTypeDetailDialogContent
             csrfToken={csrfToken}
+            canManage={canManage}
             key={selectedProductType.product_type_code}
             locale={locale}
             onDeleted={closeModal}
@@ -377,7 +382,7 @@ function FilterSelect({
   return (
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <select className="h-10 rounded-md border border-input bg-background px-3 text-sm" defaultValue={defaultValue} name={name}>
+      <select className="h-10 min-w-0 rounded-md border border-input bg-background px-3 text-sm" defaultValue={defaultValue} name={name}>
         <option value="">{allLabel}</option>
         {options.map((option) => (
           <option key={option} value={option}>

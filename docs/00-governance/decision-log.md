@@ -1,5 +1,18 @@
 # FPDS Decision Log
 
+## Product Owner-directed Admin usability and collection settings - 2026-10-04
+
+The latest request restores safe Runs Auto refresh with initially collapsed
+advanced filters, removes Banks polling/per-type Run-created links and adds
+eligible Public counts. Product Types manages country-owned typed required and
+optional targets above the protected financial floor; future runs pin settings
+without manual product review or optional completeness penalties. SwitchaBank
+Home adds required-fact Chequing fee/transaction comparison while preserving
+currency, annual-rate and exact-term/access boundaries. This supersedes earlier
+Search-only Runs copy and supplements D-090; runtime rollout and live data
+operations remain separate. See [policy](../03-design/collection-accuracy-policy.md).
+
+
 ## Product-owned collection proof supersedes old implementation rules - 2026-10-03
 
 The Product Owner explicitly requests independent reassessment/rework of Admin

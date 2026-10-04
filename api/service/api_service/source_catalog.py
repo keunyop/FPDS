@@ -609,6 +609,21 @@ def normalize_source_catalog_filters(
     )
 
 
+def _published_product_counts(connection: Connection, *, country_code: str) -> dict[str, int]:
+    # Share Public's snapshot-pinned current accuracy gate; raw active canonical
+    # rows and historical projections are not published membership.
+    from api_service.public_common import load_latest_public_snapshot, load_public_projection_rows
+    snapshot = load_latest_public_snapshot(connection, country_code=country_code)
+    if not snapshot:
+        return {}
+    rows = load_public_projection_rows(connection, country_code=country_code,
+                                       snapshot_id=str(snapshot["snapshot_id"]))
+    ids_by_bank: dict[str, set[str]] = {}
+    for row in rows:
+        ids_by_bank.setdefault(str(row["bank_code"]), set()).add(str(row["product_id"]))
+    return {bank: len(ids) for bank, ids in ids_by_bank.items()}
+
+
 def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str, Any]:
     where_clauses = ["b.country_code = %(country_code)s"]
     params: dict[str, Any] = {"country_code": filters.country_code}
@@ -732,8 +747,10 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             }
         )
 
+    published_counts = _published_product_counts(connection, country_code=filters.country_code) if bank_codes else {}
     items = [
-        _serialize_bank_row({**row, "catalog_items": catalog_items_by_bank.get(str(row["bank_code"]), [])})
+        _serialize_bank_row({**row, "published_product_count": published_counts.get(str(row["bank_code"]), 0),
+                             "catalog_items": catalog_items_by_bank.get(str(row["bank_code"]), [])})
         for row in rows
     ]
     status_counts = Counter(item["status"] for item in items)
@@ -821,12 +838,14 @@ def load_bank_detail(connection: Connection, *, bank_code: str) -> dict[str, Any
         for item in generated_counts_by_type_rows
     }
     catalog_product_types = sorted(str(item["product_type"]) for item in catalog_rows)
+    published_counts = _published_product_counts(connection, country_code=str(row["country_code"]))
 
     return {
         "bank": _serialize_bank_row(
             {
                 **row,
                 "catalog_item_count": len(catalog_rows),
+                "published_product_count": published_counts.get(str(row["bank_code"]), 0),
                 "generated_source_count": int((generated_source_count_row or {}).get("generated_source_count") or 0),
                 "catalog_product_types": catalog_product_types,
             }
@@ -8181,6 +8200,12 @@ def _product_type_expected_fields(
     *,
     country_code: str | None = None,
 ) -> list[str]:
+    from worker.pipeline.fpds_collection_fields import resolve_collection_fields
+    resolved = resolve_collection_fields(product_type=str(product_type_definition.get("product_type_code") or ""),
+        country_code=country_code, expected_fields=product_type_definition.get("expected_fields", []),
+        collection_field_policy=product_type_definition.get("collection_field_policy"))
+    if resolved["configured"]:
+        return [*resolved["required_fields"], *resolved["optional_fields"]]
     fields = [str(item).strip() for item in product_type_definition.get("expected_fields", []) if str(item).strip()]
     product_type_code = str(product_type_definition.get("product_type_code") or "").strip()
     product_family = str(product_type_definition.get("product_family") or "deposit").strip().lower()
@@ -8237,6 +8262,7 @@ def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
         "catalog_product_types": catalog_product_types,
         "catalog_items": catalog_items,
         "generated_source_count": int(row.get("generated_source_count") or 0),
+        "published_product_count": int(row.get("published_product_count") or 0),
     }
 
 

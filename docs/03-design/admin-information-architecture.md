@@ -1,5 +1,20 @@
 # FPDS Admin Information Architecture
 
+## Approved usability update - 2026-10-04
+
+Banks shows eligible published-product counts beside Generated sources, uses
+Search and omits per-type Collection run created/View run clutter. Runs restores
+safe 15-second Auto refresh; Advanced filters start closed with an
+applied-filter indicator. Unsaved filters, focused inputs, dialogs, hidden pages
+and pending mutations pause polling.
+
+Product Type details manage session-country required/optional collection targets
+using grouped protected financial essentials and the shared typed catalog.
+Read-only operators inspect these settings; only admins mutate. Search preserves
+locale, forms have associated labels, pending actions prevent overlapping writes
+and modal close controls meet the compact target baseline in EN/KO/JA.
+
+
 ## Current collection IA override — 2026-09-30
 
 D-090: daily navigation is Overview, Runs, Banks. Review routes are read-only

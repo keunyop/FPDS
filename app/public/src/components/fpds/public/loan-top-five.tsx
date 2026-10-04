@@ -14,7 +14,7 @@ export function LoanTopFive({ products, filters, unavailable }: { products: Publ
   const [selected, setSelected] = useState('');
   const group = groups.find(entry => entry.key === selected) ?? groups[0];
   return <ProductTopFive accent="loan" filters={filters} headingId="loan-top-title" title={copy.loanTopTitle}
-    subtitle={copy.loanTopSubtitle} products={group?.items ?? []} rates={group?.rates}
+    subtitle={copy.loanTopSubtitle} products={group?.items ?? []} values={group?.rates}
     href={buildPublicHref('/loans', { ...filters, page: 1 })} linkLabel={copy.moreLoans}
     unavailable={unavailable} unavailableText={copy.loanTopUnavailable} emptyText={rankingEmptyMessage(products, "loan", filters.countryCode, filters.locale)}
     controls={group ? <label className="grid min-w-0 gap-1.5 border-b border-border px-4 py-3 text-xs font-medium md:px-5">

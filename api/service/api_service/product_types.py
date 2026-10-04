@@ -18,6 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
     sys.path.insert(0, str(REPO_ROOT))
 
+from worker.pipeline.fpds_collection_fields import resolve_collection_fields, validate_collection_fields
 from worker.pipeline.fpds_ai_runtime import configured_model_id
 from worker.pipeline.fpds_approval_policy import collection_fields_for_product_type
 
@@ -140,7 +141,7 @@ def normalize_product_type_filters(*, search: str | None, status: str | None) ->
     )
 
 
-def load_product_type_list(connection: Connection, *, filters: ProductTypeFilters) -> dict[str, Any]:
+def load_product_type_list(connection: Connection, *, filters: ProductTypeFilters, country_code: str = "CA") -> dict[str, Any]:
     where_clauses: list[str] = []
     params: dict[str, Any] = {}
     if filters.status:
@@ -170,6 +171,7 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
             managed_flag,
             discovery_keywords,
             expected_fields,
+            to_jsonb(product_type_registry) -> 'collection_field_policy' AS collection_field_policy,
             fallback_policy,
             created_at,
             updated_at
@@ -179,7 +181,7 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
         """,
         params,
     ).fetchall()
-    items = [_serialize_product_type_row(row) for row in rows]
+    items = [_serialize_product_type_row(row, country_code=country_code) for row in rows]
     status_counts = Counter(item["status"] for item in items)
     return {
         "items": items,
@@ -197,7 +199,7 @@ def load_product_type_list(connection: Connection, *, filters: ProductTypeFilter
     }
 
 
-def load_product_type_definition(connection: Connection, *, product_type_code: str) -> dict[str, Any] | None:
+def load_product_type_definition(connection: Connection, *, product_type_code: str, country_code: str = "CA") -> dict[str, Any] | None:
     normalized_code = canonicalize_product_type_code(product_type_code)
     row = connection.execute(
         """
@@ -210,6 +212,7 @@ def load_product_type_definition(connection: Connection, *, product_type_code: s
             managed_flag,
             discovery_keywords,
             expected_fields,
+            to_jsonb(product_type_registry) -> 'collection_field_policy' AS collection_field_policy,
             fallback_policy,
             created_at,
             updated_at
@@ -223,7 +226,7 @@ def load_product_type_definition(connection: Connection, *, product_type_code: s
         """,
         {"product_type_code": normalized_code},
     ).fetchone()
-    return _serialize_product_type_row(row) if row else None
+    return _serialize_product_type_row(row, country_code=country_code) if row else None
 
 
 def load_product_type_definitions_map(
@@ -255,6 +258,7 @@ def load_product_type_definitions_map(
             managed_flag,
             discovery_keywords,
             expected_fields,
+            to_jsonb(product_type_registry) -> 'collection_field_policy' AS collection_field_policy,
             fallback_policy,
             created_at,
             updated_at
@@ -335,6 +339,14 @@ def create_product_type_definition(
     expected_fields = _normalize_string_list(
         payload.get("expected_fields") or _default_expected_fields_for_product_type(product_type_code=product_type_code, product_family=product_family)
     )
+    collection_field_policy = {}
+    if "collection_fields" in payload:
+        resolved = resolve_collection_fields(product_type=product_type_code, country_code=country_code,
+                                             expected_fields=expected_fields)
+        try:
+            collection_field_policy[country_code.upper()] = validate_collection_fields(payload["collection_fields"], resolved=resolved)
+        except ValueError as exc:
+            raise SourceRegistryError(status_code=422, code="invalid_collection_fields", message=str(exc)) from exc
     fallback_policy = "generic_ai_review"
     connection.execute(
         """
@@ -347,6 +359,7 @@ def create_product_type_definition(
             managed_flag,
             discovery_keywords,
             expected_fields,
+            collection_field_policy,
             fallback_policy,
             created_at,
             updated_at
@@ -360,6 +373,7 @@ def create_product_type_definition(
             true,
             %(discovery_keywords)s::jsonb,
             %(expected_fields)s::jsonb,
+            %(collection_field_policy)s::jsonb,
             %(fallback_policy)s,
             %(created_at)s,
             %(updated_at)s
@@ -373,6 +387,7 @@ def create_product_type_definition(
             "status": status,
             "discovery_keywords": json.dumps(discovery_keywords, ensure_ascii=True),
             "expected_fields": json.dumps(expected_fields, ensure_ascii=True),
+            "collection_field_policy": json.dumps(collection_field_policy, ensure_ascii=True),
             "fallback_policy": fallback_policy,
             "created_at": now,
             "updated_at": now,
@@ -394,7 +409,7 @@ def create_product_type_definition(
         diff_summary=f"Created product type `{product_type_code}`.",
         metadata={"product_type_code": product_type_code, "product_family": product_family, "display_name": display_name},
     )
-    created = load_product_type_definition(connection, product_type_code=product_type_code)
+    created = load_product_type_definition(connection, product_type_code=product_type_code, country_code=country_code)
     if created is None:
         raise SourceRegistryError(status_code=500, code="product_type_missing_after_create", message="Created product type could not be reloaded.")
     return created
@@ -440,7 +455,8 @@ def update_product_type_definition(
     if status not in {"active", "inactive"}:
         raise SourceRegistryError(status_code=422, code="invalid_product_type_status", message="status must be active or inactive.")
 
-    definition_supplied = "display_name" in payload or "description" in payload
+    definition_supplied = any(key in payload and payload[key] != existing[key]
+                              for key in ("display_name", "description"))
     explicit_keywords = "discovery_keywords" in payload
     discovery_keywords = _merge_keywords(
         display_name=display_name,
@@ -454,6 +470,14 @@ def update_product_type_definition(
         or existing["expected_fields"]
         or _default_expected_fields_for_product_type(product_type_code=updated_code, product_family=product_family)
     )
+    policy_update = {}
+    if "collection_fields" in payload:
+        resolved = resolve_collection_fields(product_type=updated_code, country_code=country_code,
+            expected_fields=expected_fields, collection_field_policy=existing.get("collection_field_policy"))
+        try:
+            policy_update[country_code.upper()] = validate_collection_fields(payload["collection_fields"], resolved=resolved)
+        except ValueError as exc:
+            raise SourceRegistryError(status_code=422, code="invalid_collection_fields", message=str(exc)) from exc
     now = utc_now()
     connection.execute(
         """
@@ -466,12 +490,14 @@ def update_product_type_definition(
             status = %(status)s,
             discovery_keywords = %(discovery_keywords)s::jsonb,
             expected_fields = %(expected_fields)s::jsonb,
+            collection_field_policy = COALESCE(collection_field_policy, '{}'::jsonb) || %(collection_field_policy)s::jsonb,
             updated_at = %(updated_at)s
         WHERE product_type_code = %(existing_product_type_code)s
         """,
         {
             "existing_product_type_code": existing_code,
             "updated_product_type_code": updated_code,
+            "collection_field_policy": json.dumps(policy_update, ensure_ascii=True),
             "product_family": product_family,
             "display_name": display_name,
             "description": description,
@@ -490,7 +516,7 @@ def update_product_type_definition(
         product_family=product_family,
         status=status,
     )
-    updated = load_product_type_definition(connection, product_type_code=updated_code)
+    updated = load_product_type_definition(connection, product_type_code=updated_code, country_code=country_code)
     if updated is None:
         raise SourceRegistryError(status_code=500, code="product_type_missing_after_update", message="Updated product type could not be reloaded.")
     _record_product_type_audit_event(
@@ -814,12 +840,14 @@ def _build_product_type_diff_summary(existing: dict[str, Any], updated: dict[str
         changes.append("Discovery keywords")
     if list(existing.get("expected_fields") or []) != list(updated.get("expected_fields") or []):
         changes.append("Expected fields")
+    if existing.get("collection_field_policy") != updated.get("collection_field_policy"):
+        changes.append("Collection fields")
     if not changes:
         return f"Updated product type `{existing['product_type_code']}` with no material field changes."
     return f"Updated product type `{existing['product_type_code']}`: {', '.join(changes)}."
 
 
-def _serialize_product_type_row(row: dict[str, Any]) -> dict[str, Any]:
+def _serialize_product_type_row(row: dict[str, Any], *, country_code: str = "CA") -> dict[str, Any]:
     return {
         "product_type_code": str(row["product_type_code"]),
         "product_family": str(row.get("product_family") or "deposit"),
@@ -829,6 +857,10 @@ def _serialize_product_type_row(row: dict[str, Any]) -> dict[str, Any]:
         "managed_flag": bool(row.get("managed_flag", True)),
         "discovery_keywords": _normalize_string_list(row.get("discovery_keywords") or []),
         "expected_fields": _normalize_string_list(row.get("expected_fields") or []),
+        "collection_field_policy": dict(row.get("collection_field_policy") or {}),
+        "collection_fields": resolve_collection_fields(product_type=str(row["product_type_code"]),
+            country_code=country_code, expected_fields=row.get("expected_fields") or (),
+            collection_field_policy=row.get("collection_field_policy")),
         "fallback_policy": str(row.get("fallback_policy") or "generic_ai_review"),
         "created_at": _serialize_datetime(row.get("created_at")),
         "updated_at": _serialize_datetime(row.get("updated_at")),

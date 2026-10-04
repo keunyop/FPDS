@@ -3,10 +3,10 @@
 import type { ReactNode } from "react";
 import { FileText, Search, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from "@/components/ui/input-group";
 import type { ProductTypeItem } from "@/lib/admin-api";
 import type { AdminLocale } from "@/lib/admin-i18n";
@@ -45,7 +45,7 @@ const CREATE_COPY = {
     apiFailed: "Product type could not be created. Check the admin API and try again.",
   },
   ko: {
-    code: "Code",
+    code: "코드",
     displayName: "표시 이름",
     description: "설명",
     status: "상태",
@@ -57,7 +57,7 @@ const CREATE_COPY = {
     apiFailed: "상품 유형을 생성할 수 없습니다. Admin API를 확인한 뒤 다시 시도하세요.",
   },
   ja: {
-    code: "Code",
+    code: "コード",
     displayName: "表示名",
     description: "説明",
     status: "状態",
@@ -83,6 +83,7 @@ export function ProductTypeCreateDialogContent({
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) return;
     setPending(true);
     setError(null);
 
@@ -115,38 +116,41 @@ export function ProductTypeCreateDialogContent({
   }
 
   return (
-    <div className="space-y-5">
-      {error ? <p className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p> : null}
+    <div aria-busy={pending} className="space-y-5" data-admin-dirty={JSON.stringify(form) !== JSON.stringify(DEFAULT_FORM)} data-admin-mutation-pending={pending}>
+      {error ? <p className="border-l-4 border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">{error}</p> : null}
 
       <form className="space-y-4" onSubmit={handleCreate}>
         <InputField
+          disabled={pending}
           icon={<Search className="size-4" />}
           label={copy.code}
           onChange={(value) => setForm((current) => ({ ...current, product_type_code: value }))}
           value={form.product_type_code}
         />
         <InputField
+          disabled={pending}
           icon={<Search className="size-4" />}
           label={copy.displayName}
           onChange={(value) => setForm((current) => ({ ...current, display_name: value }))}
           value={form.display_name}
         />
         <TextareaField
+          disabled={pending}
           icon={<FileText className="size-4" />}
           label={copy.description}
           onChange={(value) => setForm((current) => ({ ...current, description: value }))}
           value={form.description}
         />
         <SelectField
+          disabled={pending}
           copy={copy}
           icon={<Sparkles className="size-4" />}
           label={copy.status}
           onChange={(value) => setForm((current) => ({ ...current, status: value }))}
           value={form.status}
         />
-        {error ? <FieldError>{error}</FieldError> : null}
         <div className="flex justify-end">
-          <Button disabled={pending} type="submit">
+          <Button className="min-h-10" disabled={pending} type="submit">
             {pending ? copy.creating : copy.create}
           </Button>
         </div>
@@ -160,18 +164,21 @@ function InputField({
   value,
   onChange,
   icon,
+  disabled,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   icon: ReactNode;
+  disabled: boolean;
 }) {
+  const id = useId();
   return (
     <Field>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <InputGroup>
         <InputGroupAddon align="inline-start">{icon}</InputGroupAddon>
-        <InputGroupInput onChange={(event) => onChange(event.target.value)} value={value} />
+        <InputGroupInput disabled={disabled} id={id} required onChange={(event) => onChange(event.target.value)} value={value} />
       </InputGroup>
     </Field>
   );
@@ -182,18 +189,21 @@ function TextareaField({
   value,
   onChange,
   icon,
+  disabled,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   icon: ReactNode;
+  disabled: boolean;
 }) {
+  const id = useId();
   return (
     <Field>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <InputGroup className="min-h-24 items-start">
         <InputGroupAddon align="block-start">{icon}</InputGroupAddon>
-        <InputGroupTextarea onChange={(event) => onChange(event.target.value)} rows={4} value={value} />
+        <InputGroupTextarea disabled={disabled} id={id} onChange={(event) => onChange(event.target.value)} rows={4} value={value} />
       </InputGroup>
     </Field>
   );
@@ -205,19 +215,21 @@ function SelectField({
   value,
   onChange,
   icon,
+  disabled,
 }: {
   copy: typeof CREATE_COPY[AdminLocale];
   label: string;
   value: string;
   onChange: (value: string) => void;
   icon: ReactNode;
+  disabled: boolean;
 }) {
   return (
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
-      <div className="flex h-10 items-center rounded-xl border border-input bg-background px-3">
+      <div className="flex h-10 items-center rounded-md border border-input bg-background px-3 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30">
         <div className="mr-2 text-muted-foreground">{icon}</div>
-        <select className="w-full bg-transparent text-sm text-foreground outline-none" onChange={(event) => onChange(event.target.value)} value={value}>
+        <select disabled={disabled} className="w-full bg-transparent text-sm text-foreground outline-none" onChange={(event) => onChange(event.target.value)} value={value}>
           <option value="active">{copy.active}</option>
           <option value="inactive">{copy.inactive}</option>
         </select>

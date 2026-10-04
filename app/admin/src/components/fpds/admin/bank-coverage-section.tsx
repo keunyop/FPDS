@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { CollectionPreparationStatus } from "./collection-preparation-status";
 import { collectionPreflightMessage } from "@/lib/admin-collection-feedback";
 import { FileText, Layers3, Play } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useId, useMemo, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -29,6 +28,7 @@ import {
 
 type BankCoverageSectionProps = {
   bankCode: string;
+  canManage: boolean;
   catalogItems: BankDetailResponse["catalog_items"];
   csrfToken: string | null | undefined;
   locale: AdminLocale;
@@ -49,11 +49,11 @@ const STATUS_OPTIONS = [
 const COVERAGE_COPY = {
   en: {
     sectionLabel: "Coverage",
-    title: "Product coverage from this bank homepage",
+    title: "Product coverage",
     description:
       "Operators only choose which product families FPDS should cover. Source URLs are generated during collect from the bank homepage, not entered manually here.",
     noCoverage: "No coverage has been added for this bank yet.",
-    generatedSources: (count: number) => `${count} generated source(s) currently available for this coverage.`,
+    generatedSources: (count: number) => `Generated sources · ${count}`,
     firstPrecisionRequired: "First collection · precision source discovery required",
     precisionRediscovery: "Precision source rediscovery",
     precisionRediscoveryHelp: "Search again for new or changed product and evidence pages before collection.",
@@ -66,6 +66,7 @@ const COVERAGE_COPY = {
       "Add only missing product families. FPDS will discover the actual product pages from this bank's homepage later.",
     allCovered: "All supported product families are already covered for this bank.",
     searchProductTypes: "Search product types",
+    noMatchingTypes: "No matching product types",
     searchPlaceholder: "Search by name or description",
     productType: "Product type",
     status: "Status",
@@ -92,11 +93,11 @@ const COVERAGE_COPY = {
   },
   ko: {
     sectionLabel: "Coverage",
-    title: "은행 홈페이지 기준 상품 coverage",
+    title: "상품 수집 범위",
     description:
       "운영자는 FPDS가 다룰 상품군만 선택합니다. Source URL은 여기서 직접 입력하지 않고, collect 중 은행 홈페이지에서 생성됩니다.",
     noCoverage: "아직 이 은행에 추가된 coverage가 없습니다.",
-    generatedSources: (count: number) => `현재 이 coverage에 생성된 source ${count}개가 있습니다.`,
+    generatedSources: (count: number) => `생성된 소스 · ${count}`,
     firstPrecisionRequired: "최초 수집 · 정밀 source 탐색 필수",
     precisionRediscovery: "정밀 source 재탐색",
     precisionRediscoveryHelp: "수집 전에 새 상품 또는 변경된 상품·근거 페이지를 다시 찾습니다.",
@@ -109,6 +110,7 @@ const COVERAGE_COPY = {
       "아직 없는 상품군만 추가하세요. 실제 상품 페이지는 나중에 이 은행 홈페이지에서 FPDS가 찾습니다.",
     allCovered: "지원되는 모든 상품군이 이미 이 은행에 추가되어 있습니다.",
     searchProductTypes: "상품 유형 검색",
+    noMatchingTypes: "일치하는 상품 유형 없음",
     searchPlaceholder: "이름 또는 설명으로 검색",
     productType: "상품 유형",
     status: "상태",
@@ -133,11 +135,11 @@ const COVERAGE_COPY = {
   },
   ja: {
     sectionLabel: "Coverage",
-    title: "銀行ホームページからの商品 coverage",
+    title: "商品の収集範囲",
     description:
       "オペレーターは FPDS が扱う商品ファミリーだけを選択します。Source URL はここで手入力せず、collect 中に銀行ホームページから生成されます。",
     noCoverage: "この銀行にはまだ coverage が追加されていません。",
-    generatedSources: (count: number) => `この coverage で現在 ${count} 件の source が生成されています。`,
+    generatedSources: (count: number) => `生成済みソース · ${count}`,
     firstPrecisionRequired: "初回収集 · 精密 source 探索が必須",
     precisionRediscovery: "精密 source 再探索",
     precisionRediscoveryHelp: "収集前に新規・変更済みの商品ページと根拠ページを再探索します。",
@@ -150,6 +152,7 @@ const COVERAGE_COPY = {
       "不足している商品ファミリーだけを追加してください。実際の商品ページは後で FPDS がこの銀行ホームページから検出します。",
     allCovered: "対応しているすべての商品ファミリーは、この銀行ですでに coverage 済みです。",
     searchProductTypes: "商品タイプを検索",
+    noMatchingTypes: "該当する商品タイプなし",
     searchPlaceholder: "名前または説明で検索",
     productType: "商品タイプ",
     status: "状態",
@@ -176,12 +179,14 @@ const COVERAGE_COPY = {
 
 export function BankCoverageSection({
   bankCode,
+  canManage,
   catalogItems,
   csrfToken,
   locale,
   productTypes,
 }: BankCoverageSectionProps) {
   const copy = COVERAGE_COPY[locale];
+  const reasonInputId = useId();
   const router = useRouter();
   const [productTypeSearch, setProductTypeSearch] = useState("");
   const existingTypes = useMemo(
@@ -217,9 +222,17 @@ export function BankCoverageSection({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setCreateForm((current) =>
+      filteredProductTypes.some((option) => option.value === current.product_type)
+        ? current
+        : { ...current, product_type: filteredProductTypes[0]?.value ?? "" },
+    );
+  }, [filteredProductTypes]);
+
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!createForm.product_type) {
+    if (!canManage || !createForm.product_type) {
       return;
     }
     setCreatePending(true);
@@ -268,6 +281,7 @@ export function BankCoverageSection({
   }
 
   async function handleCollect(item: BankDetailResponse["catalog_items"][number]) {
+    if (!canManage) return;
     setCollectingId(item.catalog_item_id);
     setMessage(null);
     setError(null);
@@ -303,15 +317,8 @@ export function BankCoverageSection({
   }
 
   return (
-    <section className="border border-border bg-card p-5">
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">
-          {copy.sectionLabel}
-        </p>
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">
-          {copy.title}
-        </h2>
-      </div>
+    <section aria-busy={createPending || collectingId !== null} className="min-w-0 border border-border bg-card p-5">
+      <h2 className="text-xl font-semibold tracking-tight text-foreground">{copy.title}</h2>
 
       {message ? (
         <p aria-live="polite" className="mt-4 border-l-4 border-success bg-success-soft px-4 py-3 text-sm text-success" role="status">
@@ -319,20 +326,20 @@ export function BankCoverageSection({
         </p>
       ) : null}
       {error ? (
-        <p className="mt-4 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <p aria-live="assertive" className="mt-4 border-l-4 border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}
 
       <div className="mt-5 grid gap-3">
         {catalogItems.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-4 text-sm leading-6 text-muted-foreground">
+          <div className="rounded-md border border-dashed border-border bg-muted/20 px-4 py-4 text-sm leading-6 text-muted-foreground">
             {copy.noCoverage}
           </div>
         ) : (
           catalogItems.map((item) => (
             <article
-              className="rounded-2xl border border-border/80 bg-background px-4 py-4"
+              className="rounded-md border border-border/80 bg-background px-4 py-4"
               key={item.catalog_item_id}
             >
               <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
@@ -348,8 +355,8 @@ export function BankCoverageSection({
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     {copy.generatedSources(item.generated_source_count)}
                   </p>
-                  {item.status === "active" ? (
-                    <label className="mt-3 flex max-w-full items-start gap-2 text-sm text-foreground">
+                  {canManage && item.status === "active" ? (
+                    <label className="mt-3 flex min-h-10 max-w-full items-start gap-2 py-2 text-sm text-foreground">
                       <input
                         checked={precisionRediscoveryIds.includes(item.catalog_item_id)}
                         className="mt-0.5 size-4 shrink-0 accent-primary"
@@ -375,7 +382,6 @@ export function BankCoverageSection({
                       {copy.firstPrecisionRequired}
                     </p>
                   ) : null}
-                  <CollectionPreparationStatus locale={locale} state={item.collection_preparation} />
                   {item.change_reason ? (
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
                       {copy.latestNote}: {item.change_reason}
@@ -385,7 +391,7 @@ export function BankCoverageSection({
 
                 <div className="flex flex-wrap gap-2">
                   <Link
-                    className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
+                    className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
                     href={buildAdminHref(
                       "/admin/sources",
                       new URLSearchParams(
@@ -396,14 +402,14 @@ export function BankCoverageSection({
                   >
                     {copy.viewSources}
                   </Link>
-                  <Button
+                  {canManage ? <Button
                     disabled={collectingId === item.catalog_item_id || item.status !== "active"}
                     onClick={() => void handleCollect(item)}
                     type="button"
                   >
-                    <Play className="size-4" />
+                    <Play aria-hidden="true" className="size-4" />
                     {collectingId === item.catalog_item_id ? copy.collecting : copy.collect}
-                  </Button>
+                  </Button> : null}
                 </div>
               </div>
             </article>
@@ -411,7 +417,7 @@ export function BankCoverageSection({
         )}
       </div>
 
-      <div className="mt-5 rounded-2xl border border-border/80 bg-muted/20 p-4">
+      {canManage ? <div className="mt-5 rounded-md border border-border/80 bg-muted/20 p-4">
         <div className="space-y-1">
           <p className="text-sm font-medium text-foreground">{copy.addCoverage}</p>
           <p className="text-sm leading-6 text-muted-foreground">
@@ -429,7 +435,7 @@ export function BankCoverageSection({
               <label className="grid gap-2 text-sm">
                 <span className="font-medium text-foreground">{copy.searchProductTypes}</span>
                 <input
-                  className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground"
+                  className="h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground"
                   onChange={(event) => setProductTypeSearch(event.target.value)}
                   placeholder={copy.searchPlaceholder}
                   type="search"
@@ -443,7 +449,7 @@ export function BankCoverageSection({
                 onChange={(value) =>
                   setCreateForm((current) => ({ ...current, product_type: value }))
                 }
-                options={filteredProductTypes.length > 0 ? filteredProductTypes : availableProductTypes}
+                options={filteredProductTypes.length > 0 ? filteredProductTypes : [{label: copy.noMatchingTypes, value: ""}]}
                 value={createForm.product_type}
               />
               <SelectField
@@ -457,12 +463,13 @@ export function BankCoverageSection({
             </div>
 
             <Field data-invalid={Boolean(error)}>
-              <FieldLabel>{copy.changeReason}</FieldLabel>
+              <FieldLabel htmlFor={reasonInputId}>{copy.changeReason}</FieldLabel>
               <InputGroup className="min-h-20 items-start">
                 <InputGroupAddon align="block-start">
                   <FileText className="size-4" />
                 </InputGroupAddon>
                 <InputGroupTextarea
+                  id={reasonInputId}
                   aria-invalid={Boolean(error)}
                   onChange={(event) =>
                     setCreateForm((current) => ({
@@ -483,13 +490,13 @@ export function BankCoverageSection({
                 disabled={createPending || !createForm.product_type}
                 type="submit"
               >
-                <Layers3 className="size-4" />
+                <Layers3 aria-hidden="true" className="size-4" />
                 {createPending ? copy.adding : copy.addCoverage}
               </Button>
             </div>
           </form>
         )}
-      </div>
+      </div> : null}
     </section>
   );
 }
@@ -509,7 +516,7 @@ function SelectField({
     <label className="grid gap-2 text-sm">
       <span className="font-medium text-foreground">{label}</span>
       <select
-        className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground"
+        className="h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground"
         onChange={(event) => onChange(event.target.value)}
         value={value}
       >
@@ -544,6 +551,7 @@ function buildSingleCoverageCollectMessage(
   labelMap?: Record<string, string>,
 ) {
   const copy = COVERAGE_COPY[locale];
+  const reasonInputId = useId();
   const label = formatProductType(productType, labelMap);
 
   const skippedMessage = collectionPreflightMessage(locale, payload);

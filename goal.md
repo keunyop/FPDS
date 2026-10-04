@@ -1,5 +1,39 @@
 # Admin pre-handover review and fixes
 
+## Authorized slice: Admin usability and Product Type collection fields - 2026-10-04
+
+Objective: implement requested Banks/Runs usability changes, manage required and
+optional collection information in Product Type details, improve confirmed Admin
+UI/UX defects, and align SwitchaBank Home Top 5 with required decision facts.
+Ownership: preserve all earlier goal slices and their remaining external gates.
+Scope: Admin Banks/Runs/Product Types and confirmed shared usability fixes;
+API field configuration and eligible published counts; collection targeting,
+typed required/optional validation and prompts; Public Home Top 5; regression
+coverage and current workflow documentation.
+Exclusions: live collection/model calls, canonical/registry/Public data mutations,
+deployment/process restarts, manual review, weakened financial essentials,
+new countries/types, personalized recommendations and unrelated refactors.
+Acceptance:
+- [x] Banks shows eligible published counts beside Generated sources, removes
+      per-type collection-created/View run clutter and auto refresh.
+- [x] Runs supports safe auto refresh and starts Advanced filters collapsed.
+- [x] Product Type details manage typed required/optional targets with permissions,
+      protected mandatory essentials and consistent collection/validation behavior.
+- [x] Home Top 5 uses required facts without optional absence penalties, preserving
+      currency, annual rate, exact term and access comparability.
+- [x] Confirmed Admin UX improvements are concise and accessible, verified at
+      desktop/tablet/390px across EN/KO/JA and affected loading/error/data states.
+- [x] Relevant Admin/Public/API/Worker regression and repository checks, final
+      diff and git diff --check pass; journal/workflow docs updated.
+Verification: provider-disabled local regression tests and controlled responsive
+UI fixtures; affected typechecks/builds with isolated output; no live data operation.
+Status: complete for this local implementation slice. API 587 / Worker 722 /
+Admin 40 / Public 99 tests, both typechecks/isolated production builds, Public lint,
+EN/KO/JA 390/768/1440px responsive/state fixtures and repository source checks pass.
+Migration 0047 is prepared but not applied; API/Worker/Admin/Public release and
+future live collection results remain separate. Earlier goal ownership is retained.
+
+
 ## Authorized slice: Coast Capital collection evidence corrections - 2026-10-03
 
 Objective: reproduce and repair confirmed CCS Admin collection failures, repeat

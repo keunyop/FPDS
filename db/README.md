@@ -1,5 +1,15 @@
 # FPDS Database Baseline
 
+## Product Type collection targets - 2026-10-04
+
+Migration `0047_product_type_collection_fields.sql` adds the object-valued
+`product_type_registry.collection_field_policy`, keyed by working country.
+Each override stores typed `required_fields` and `optional_fields`; executable
+financial essentials remain protected in the shared contract. Updates merge one
+country key rather than overwriting other markets. Apply after `0046` and before
+the matching API/Worker/Admin release. No live migration is claimed here.
+
+
 ## Approved accuracy cutover — 2026-09-30
 
 The fixed-scope `scripts/maintenance/collection_accuracy_cutover.py` applied
@@ -177,6 +187,7 @@ psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quar
 psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0045_public_product_engagement.sql
 psql $env:FPDS_DATABASE_URL -f db/migrations/0046_public_feedback_submission.sql
+psql $env:FPDS_DATABASE_URL -f db/migrations/0047_product_type_collection_fields.sql
 ```
 
 Notes:

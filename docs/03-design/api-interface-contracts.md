@@ -1,5 +1,24 @@
 # FPDS API and Interface Contracts
 
+## Product Type fields and Banks publication counts - 2026-10-04
+
+Authenticated Product Type GET returns `collection_fields` resolved for the
+session country: `country_code`, `configured`, `required_fields`,
+`optional_fields`, `locked_required_fields`, grouped `requirements` and typed
+`field_catalog`. Existing `expected_fields` remains backward compatible. Configured target lists total at most 60 fields, matching the existing bounded grounding pass.
+Admin/CSRF POST/PATCH accepts nested `collection_fields` with both field lists;
+invalid/untyped, duplicate, overlapping or removed protected targets return
+`422 invalid_collection_fields`. Extra policy keys/type coercions fail request
+validation. Locked alternatives are satisfied as groups under their explicit
+`required_when` condition, not as independently compulsory values.
+
+Country overrides merge atomically in `collection_field_policy` (migration
+`0047`), and normal collection pins them per run. New receipt prerequisites
+preserve typed proof without exposing private policy/evidence on Public. Bank
+list/detail adds `published_product_count`, the distinct latest completed
+snapshot membership after Public eligibility checks; absent snapshots count zero.
+
+
 ## Registered collection and Run states - 2026-10-02
 
 Catalog collection returns persisted `run_ids`, `workflow_state=queued` and
