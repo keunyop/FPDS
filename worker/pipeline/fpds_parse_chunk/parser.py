@@ -12,7 +12,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v6"
+PARSER_VERSION = "fpds-parse-chunk-v7"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -70,6 +70,7 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         for index, text in enumerate(structured_sections, start=1)
     )
 
+    sections.extend(_financial_declaration_sections(sections))
     sections.extend(_rate_table_evidence_sections(soup))
     sections.extend(_linked_financial_table_cells(soup))
     full_text, segments = _finalize_segments(sections)
@@ -91,6 +92,108 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         parser_metadata=parser_metadata,
         segments=segments,
     )
+
+
+# Complete labelled records are evidence units, not large mixed marketing sections.
+_FINANCIAL_LABEL = re.compile(r"(?mi)^(?:Annual fee|Monthly (?:account |plan )?fee|Additional cardholders[^\n]*|Purchase interest rate[^\n]*|Cash interest rate[^\n]*|Transactions[^\n]*|Interac e-Transfer[^\n]*|Non-[^\n]+ ATM[^\n]*|Minimum[^\n]*|Apply now|Open an account)\s*$")
+
+def _financial_declaration_sections(sections: list[_RawSegment]) -> list[_RawSegment]:
+    output = []
+    seen = set()
+    for section in sections:
+        if section.anchor_type != "section":
+            continue
+        starts = list(_FINANCIAL_LABEL.finditer(section.text))
+        for i, match in enumerate(starts):
+            end = starts[i + 1].start() if i + 1 < len(starts) else len(section.text)
+            value = section.text[match.start():end].strip()
+            prefix = section.text[:match.start()].strip()
+            # The section heading and immediately preceding qualifier can
+            # govern this price. Earlier welcome-benefit paragraphs cannot.
+            lines = prefix.splitlines()
+            context = "\n".join(dict.fromkeys([lines[0],lines[-1]])) if lines else ""
+            if re.search(r"\b(?:introductory|first (?:year|month)|eligible|until|if you|provided|maintain)\b", context, re.I):
+                value = context + "\n" + value
+            if match[0].strip().lower().startswith(("apply", "open")):
+                continue
+            if len(value) <= 1800 and value not in seen:
+                seen.add(value)
+                output.append(_RawSegment("financial_declaration", section.anchor_value, section.page_no, value))
+        # Keep the entire ordinary allowance/excess sentence together. Separate
+        # later channel-specific benefits are separate financial declarations.
+        for match in re.finditer(r"(?m)^[^\n]*\b\d+ transactions[^\n.]*\b(?:month|monthly)[^\n]*(?:\n|$)", section.text):
+            value = match[0].strip()
+            if len(value) <= 1800 and value not in seen:
+                seen.add(value)
+                output.append(_RawSegment("financial_declaration", section.anchor_value, section.page_no, value))
+    return output
+
+
+def _pdf_purchase_rate_cells(layout: str, *, page_no: int) -> list[_RawSegment]:
+    """Read explicit PDF purchase columns; never transpose cash/default rates.
+
+    Only a layout with unique Card Product and Purchases columns and an explicit
+    annual-interest heading is supported. Retain the full product/exclusion cell
+    and its own referenced note. All text pieces are copied from the PDF grid.
+    """
+    lines = layout.splitlines()
+    heads = [(i, m) for i, line in enumerate(lines)
+             if "Card Product" in line and (m := re.search(r"(?<!\S)Purchases\d*(?!\S)", line))]
+    if len(heads) != 1:
+        return []
+    hi, purchase = heads[0]
+    product = re.search(r"Card Product", lines[hi])
+    if product is None or product.end() >= purchase.start():
+        return []
+    annual_lines = [line[:product.start()].strip() for line in lines[max(0,hi-3):hi+1]]
+    annual = "\n".join(x for x in annual_lines if x)
+    if not re.search(r"Annual\s+Interest\s+Rates", annual, re.I):
+        return []
+    left = (product.end() + purchase.start()) // 2
+    # The next header is explicitly a different charge column.
+    cash = next((m for line in lines[max(0,hi-3):hi+3]
+                 if (m := re.search(r"Cash Advances",line)) and m.start() > purchase.end()), None)
+    if cash is None:
+        return []
+    right = (purchase.end() + cash.start()) // 2
+    start = next((i for i in range(hi+1,len(lines))
+                  if re.search(r"\d+(?:\.\d+)?%",lines[i][left:right])),None)
+    if start is None:
+        return []
+    # Include leading product lines before the first percentage in this row.
+    while start > hi+1 and lines[start-1].strip():
+        start -= 1
+    # A referenced qualification is part of the purchase evidence. Fail closed
+    # when this page does not contain a uniquely identifiable complete note.
+    note_number = re.search(r"\d+$", purchase[0])
+    notes = []
+    if note_number:
+        note_starts = [i for i, line in enumerate(lines)
+                       if re.match(r"\s*" + re.escape(note_number[0]) + r"\s+\D", line)]
+        if len(note_starts) != 1:
+            return []
+        note_lines = []
+        for line in lines[note_starts[0]:]:
+            if not line.strip():
+                break
+            note_lines.append(line.strip())
+        notes = ["\n".join(note_lines)]
+    body = []
+    for line in lines[start:]:
+        if re.match(r"\s*\d+\s+\D", line):
+            break
+        body.append(line)
+    groups = re.split(r"\n\s*\n", "\n".join(body))
+    output = []
+    for index, group in enumerate(groups):
+        rows=group.splitlines()
+        identity="\n".join(line[:left].strip() for line in rows if line[:left].strip())
+        rates=[line[left:right].strip() for line in rows if line[left:right].strip()]
+        if not identity or len(rates)!=1 or not re.fullmatch(r"\d+(?:\.\d+)?%",rates[0]):
+            continue
+        value="\n".join([annual,product[0],identity,purchase[0],rates[0], *notes])
+        output.append(_RawSegment("card_purchase_rate_cell",f"pdf-purchase-{page_no}-{index}",page_no,value))
+    return output
 
 
 def _rate_table_evidence_sections(soup: BeautifulSoup) -> list[_RawSegment]:
@@ -253,7 +356,7 @@ def _extract_html_sections(container: BeautifulSoup) -> list[_RawSegment]:
         # already represented by a semantic or nested leaf element.
         if tag.name in supplemental_tags and tag.find(all_tags, recursive=True) is not None:
             continue
-        text = _normalize_text(tag.get_text(" ", strip=True))
+        text = _normalize_multiline_text(tag.get_text("\n", strip=True)) if tag.find("br") else _normalize_text(tag.get_text(" ", strip=True))
         if not text:
             continue
         if tag.name in {"h1", "h2", "h3", "h4", "h5", "h6"}:
@@ -288,6 +391,9 @@ def _parse_pdf(body: bytes) -> ParsedArtifact:
                 text=text,
             )
         )
+
+    for page_index, page in enumerate(reader.pages, start=1):
+        raw_segments.extend(_pdf_purchase_rate_cells(page.extract_text(extraction_mode="layout") or "", page_no=page_index))
 
     full_text, segments = _finalize_segments(raw_segments)
     if not full_text.strip():

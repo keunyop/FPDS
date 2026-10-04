@@ -442,6 +442,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         card_heads = list(re.finditer(r"(?mi)^Fees[ \t]*\n\$(\d+(?:\.\d+)?)[ \t]*\nmonthly fee\b", quote))
         if card_heads:
             return len(card_heads) == len(cards) == 1 and Decimal(cards[0][1]) == number
+    if field_name == "additional_transaction_fee":
+        ordinary = re.findall(r"\$(\d+(?:\.\d+)?) for each additional transaction(?: over \d+)?", q, re.I)
+        if ordinary:
+            return len(ordinary) == 1 and Decimal(ordinary[0]) == number and not _money_has_condition(quote,field_name)
     if contract.unit == "currency_amount":
         # A waiver balance or example must not stand in for a fee.
         amounts = re.findall(r"(?:[$€£]|\b(?:CAD|USD|EUR|GBP)\s*)(\d[\d,]*(?:\.\d+)?)", q, re.I)

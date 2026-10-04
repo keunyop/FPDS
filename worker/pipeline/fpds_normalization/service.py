@@ -560,6 +560,17 @@ def _normalize_candidate(
         dynamic_candidate_payload = dict(dynamic_payload.get("candidate_payload", {}))
         dynamic_field_names = set(dynamic_candidate_payload)
         for field_name, value in dynamic_candidate_payload.items():
+            extracted_field = extracted_by_field.get(field_name)
+            captured_value = field_mapping_metadata.get(field_name, {}).get("normalized_value")
+            if (_is_exact_grounded_product_identity(extracted_field)
+                    and captured_value is not None and value_matches_contract(field_name, captured_value)):
+                # Normalization cannot rewrite a fact already proved against
+                # exact current official evidence. The final shared gate still
+                # checks its full context, provenance and financial meaning.
+                if value != captured_value:
+                    runtime_notes.append(f"Preserved captured `{field_name}` instead of a model rewrite.")
+                dynamic_field_names.discard(field_name)
+                continue
             candidate_payload[field_name] = value
             normalized_values_for_links[field_name] = value
             extracted_field = extracted_by_field.get(field_name)

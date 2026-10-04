@@ -1,5 +1,17 @@
 # FPDS RAID Log
 
+## Direct/Admin parity and rollout risk - 2026-10-03
+
+CIBC saved input demonstrates missing essential companion/column/identity proof
+and normalization value loss; shared corrections pass source-backed regressions
+and ordinary-service replay (14 additional passes). Fresh paid discovery/model
+yield and deployed Admin runtime changes remain unverified. Deploy API/catalog
+and Worker together; distinguish that step from the separately audited CIBC data
+operation. Other product types still need exact rate/term/access/security binding;
+rendered rates alone do not justify approval or bank-nondisclosure claims. No
+optional-only calls, manual product review or unbounded retry is authorized.
+See [mitigation and practical limits](cibc-collection-redesign-2026-10-03.md).
+
 ## Current collection evidence risk - 2026-10-03
 
 Zero BMO approvals included demonstrated capture/source/provenance loss and

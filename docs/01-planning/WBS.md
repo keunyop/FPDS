@@ -1,5 +1,7 @@
 # FPDS Detailed WBS
 
+Latest Product Owner slice (2026-10-03): CIBC official supplementation/publication and redesign of ordinary evidence-to-approval handling within existing collection work (3.1-3.7). Shared essential companion/capture/parser/extraction/normalization changes pass Worker 698 / API 578; same-input replay yields 14 additional automatic passes. Current data operation and serving-runtime rollout are separate, with no financial prerequisite, security, country/type or recurring recovery feature expansion. [Diagnosis and dated applied outcome](../00-governance/cibc-collection-redesign-2026-10-03.md).
+
 Latest authorized code slice (2026-10-03), within existing collection work: generic BMO root-cause correction implemented; Worker 674 / API 574 tests pass. Financial essentials and scope remain; deployment/live collection remain separate. [Diagnosis and verification](../00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
 
 Prior authorized code slice (2026-10-02): generic source-selection and captured-evidence improvements implemented with Worker 659 / API 550 verification; existing financial prerequisites and scope remain. Deployment/live collection remain separate. [Outcome](../00-governance/generic-collection-evidence-improvements-2026-10-02.md).

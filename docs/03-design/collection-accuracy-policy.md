@@ -1,5 +1,37 @@
 # Product collection accuracy and automatic acceptance
 
+## Product-owned captured facts and direct/Admin parity - 2026-10-03
+
+The Product Owner authorizes replacing existing collection implementation rules
+with a shared official-evidence path. Financial essentials and security remain.
+Parser v7 retains complete labelled pricing declarations and explicit PDF
+purchase-column cells. It preserves attached conditions and family exceptions;
+cash/default columns cannot become purchase rates. Exact detail identity comes
+from its owned captured heading, not a navigation-title heuristic. Source/bank/
+country/language/snapshot/parse ownership and exact official quotations still
+precede acceptance; discovery and AI confidence do not prove facts.
+
+Ordinary ExtractionService supplies the same deterministic fact proof used in
+the bounded CIBC supplementation. It proves records before the existing model pass and preserves them afterwards;
+normalization preserves already grounded native facts from model rewrites. All
+facts still pass the common accuracy/comparison/promotion/Public gates. Missing
+or conflicting records fail closed. Explicit amount-before-excess transaction
+prices retain their distinct typed field; neither channel charges nor ordinary
+allowances without excess costs satisfy finite-account essentials.
+
+An unresolved financial placeholder on a safe-fetch validated official domain
+receives one bounded browser render even without a bank-specific fallback list.
+Other best-effort rendering retains its configured domain boundary. Failure or
+remaining placeholders cannot produce guessed numeric facts. Essential price/
+fee disclosures survive navigation caps and precede general agreement/privacy
+links in the existing two-per-detail cap. Insurance/benefit/checklist documents
+are excluded by document filename/label, preserving legitimate agreements in
+shared insurance folders; common selected
+companions retain all actual parent-detail relationships within existing caps.
+Optional facts still use the same evidence only; no optional-only calls, manual
+product review or permanent recovery queue is added. Runtime rollout and the
+CIBC data result are separate. See [CIBC diagnosis and publication](../00-governance/cibc-collection-redesign-2026-10-03.md) and the source-backed regression tests.
+
 ## Direct Chequing evidence correction - 2026-10-03
 
 Main-content pricing/disclosure anchors (including accessible labels) displace

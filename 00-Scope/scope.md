@@ -6,8 +6,8 @@
 
 ## 인계 범위
 
-- **Admin 화면**: 국가별 은행·수집 범위 관리, 수집 실행과 실패 진단, Review Queue의 근거 확인 및 승인·수정승인·거절·보류, 변경 이력 확인
-- **Admin 데이터 처리**: 공식 출처 발견, 스냅샷, 파싱·추출·정규화·검증, 후보 검토와 canonical 반영
+- **Admin 화면**: 국가별 은행·수집 범위 관리, 수집 실행과 실패 진단, 자동 승인·제외 결과와 과거 검토 기록의 근거 확인, 변경 이력 확인
+- **Admin 데이터 처리**: 공식 출처 발견, 스냅샷, 파싱·추출·정규화·검증, 자동 후보 검증·제외와 canonical 반영
 - **Admin 운영 기반**: EN/KO/JA, 인증·권한·세션·CSRF·SSRF 방어, Admin API, DB migration, worker 운영
 - 대상 국가와 상품은 등록되고 승인된 활성 프로필 범위만 포함합니다.
 
@@ -15,7 +15,7 @@
 ## 인계 산출물과 완료 기준
 
 - Admin 소스, 관련 API·worker·migration, 운영 문서, 환경변수 예시, 검증 명령은 저장소에서 관리합니다.
-- Admin은 인증·국가 경계를 지키며 수집→검토→변경 이력 흐름이 동작해야 합니다.
+- Admin은 인증·국가 경계를 지키며 수집→자동 검증·승인/제외→변경 이력 흐름이 동작해야 합니다.
 - 원본 evidence, 운영 메모, 비밀값은 Admin의 인증·권한 경계 안에서만 취급해야 합니다.
 
 
@@ -123,7 +123,7 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
       않음을 확인했다.
 - [ ] collection과 retry가 인증된 운영자의 수동 action으로만 시작됨을
       확인했다.
-- [ ] OpenAI 장애·quota·rate limit 시 누락/Review/fail-safe 경계를
+- [ ] OpenAI 장애·quota·rate limit 시 누락/자동 제외/fail-safe 경계를
       확인하고 자동으로 금융 사실을 만들지 않음을 검증했다.
 
 ### E. 검증·UAT·Cutover·종료
@@ -132,7 +132,7 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
       foundation check와 git diff --check가 통과했다.
 - [ ] EN/KO/JA, desktop/tablet/정확한 390px의 affected Admin 화면을
       확인했다.
-- [ ] 의뢰자 운영자가 전달자 도움 없이 Overview → Review → Runs → Banks와
+- [ ] 의뢰자 운영자가 전달자 도움 없이 Overview → Runs → Banks와
       실패 run 진단/retry를 완료했다.
 - [ ] UAT의 Critical/High defect가 0건이고 운영·시스템·보안 책임자가
       승인했다.
@@ -145,3 +145,40 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
 
 위 체크박스 중 하나라도 미완료이면 FPDS Admin 인수 완료로 서명하지
 않습니다.
+
+## 소스·문서 전달 목록 — 2026-10-03 정리
+
+현재 인계 방식은 Git clone입니다. 아래 경계는 Admin 인계 범위를 설명하며,
+같은 저장소의 Public 코드를 삭제하거나 서비스 구성을 변경하지 않습니다.
+
+| 구분 | 경로 | 전달·보존 기준 |
+|---|---|---|
+| Admin 실행 소스 | `app/admin/`, `api/service/`, `worker/`, `shared/` | 소스·설정 계약·잠금 파일·회귀 테스트·공식 소스 fixture 유지 |
+| DB·스토리지 | `db/`, `storage/` | migration 원본과 접근 계약 유지. 과거 migration도 삭제하지 않음 |
+| 검증·운영 도구 | `scripts/harness/`, `scripts/maintenance/` | 정식 도구 유지. 상태 변경 도구는 관련 기록과 승인 범위를 먼저 확인 |
+| 현재 인수 문서 | `descent/`, `00-Scope/` | 사용자 매뉴얼·운영 핸드북·범위·계정 템플릿·DB 목록·실행 가이드 |
+| 현재 제품 계약 | `docs/00-governance/`, `01-planning/`, `02-requirements/`, `03-design/` | 요구사항·설계·결정·위험·개발일지와 날짜별 작업 결과 유지 |
+| 과거 참고자료 | `docs/archive/` | 게이트·프로토타입·정리 전 README·이전 정책 매뉴얼/PDF/화면 이미지 보존 |
+| 별도 Public 영역 | `app/public/`, `app.py`, `vercel.json` | 저장소에는 유지. Admin 운영 호스트 또는 Public 인수 완료로 간주하지 않음 |
+| 실행 중 로컬 자료 | `tmp/`, `.tmp/`, `__pycache__/`, `*.pyc`, `.venv/`, `node_modules/`, `.next/` | 소스 전달에서 제외. 이번 정리에서는 기존 로컬 파일을 삭제하지 않음 |
+| 제한 인수 증거 | `FPDS-Admin-Handover/`, 실제 `.env` 파일 | Git 제외. 계정·backup·UAT·서명 증거는 의뢰자 제한 저장소/secret manager에서 관리 |
+
+Python bytecode 7개와 `tmp/`의 과거 일회성 도구 4개는 Git 추적에서만 제외했습니다.
+로컬 내용과 경로는 그대로 보존했습니다. 일회성 도구는
+`fpds_admin_collection_goal_tool.py`, `fpds_collection_reset_common.py`,
+`fpds_collection_reset_counts.py`, `fpds_collection_reset_execute.py`입니다.
+현재 앱·API·worker·정식 운영 스크립트에 참조가 없으며, 현행 상품수집 경로를
+구성하지 않습니다. 특히 과거 reset·review 도구를 인수자의 정상 운영 절차로 제공하지 않습니다.
+필요한 역사 확인은 원래 Git 이력과 날짜별 기록을 따릅니다.
+
+문서 사용 순서는 [인수인계 가이드](../descent/README.md) →
+[현행 사용자 매뉴얼](../descent/FPDS_Admin_사용자_매뉴얼.md) →
+[운영 핸드북](../descent/05-operations-handbook.md)입니다.
+기술 계약은 [문서 지도](../docs/README.md)에서 찾습니다.
+[과거 매뉴얼](../docs/archive/admin-manual/FPDS_Admin_사용자_매뉴얼.md)은
+이전 수동 상품 검토 정책의 참고자료입니다. 현행 업무 절차로 사용하지 않습니다.
+
+수집 중인 작업공간에서는 코드 이동·삭제, 의존성 재설치, build, 프로세스 재시작,
+로그·증거·임시 폴더 삭제를 피합니다. 전체 인수 검증은 별도 깨끗한 clone에서
+수행하고 결과와 확정 commit/tag를 인수 준비 기록에 연결합니다.
+이번 정리는 배포·데이터 변경·계정 이전·UAT·Production GO를 실행하지 않습니다.

@@ -128,6 +128,9 @@ _DETAIL_COMPANION_ANCHOR_MARKERS = (
     "rate and fee",
     "rate, fee",
     "rates and fees",
+    "annual interest rates and fees",
+    "fees and details",
+    "personal account service fees",
     "schedule of fees",
     "schumer",
     "view disclosure",
@@ -143,6 +146,9 @@ _DETAIL_COMPANION_URL_MARKERS = (
     "getdisclosure",
     "pricing",
     "rate-and-fee",
+    "rates-n-fees",
+    "fees-and-details",
+    "service-fees",
     "rates-and-fees",
     "schedule-of-fees",
 )
@@ -546,6 +552,7 @@ class DetailCompanionLink:
     link: ExtractedLink
     parent_detail_url: str
     score: int
+    parent_detail_urls: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -2397,6 +2404,7 @@ def _generate_existing_detail_companion_rows(
                 ],
                 "candidate_origin": "existing_detail_outbound_link",
                 "parent_detail_url": companion.parent_detail_url,
+                "parent_detail_urls": list(companion.parent_detail_urls or (companion.parent_detail_url,)),
                 "heuristic_score": companion.score,
             },
         )
@@ -4078,6 +4086,7 @@ def _generate_sources_from_homepage(
                         "selection_reason_codes": ["exact_product_detail_link", "pricing_or_terms_companion"],
                         "candidate_origin": "selected_detail_outbound_link",
                         "parent_detail_url": companion.parent_detail_url,
+                        "parent_detail_urls": list(companion.parent_detail_urls or (companion.parent_detail_url,)),
                         "heuristic_score": companion.score,
                     },
                 )
@@ -5398,9 +5407,13 @@ def _discover_detail_companion_links(
 
     by_url: dict[str, DetailCompanionLink] = {}
     for candidate in sorted(candidates, key=lambda item: (-item.score, item.link.normalized_url)):
-        by_url.setdefault(candidate.link.normalized_url, candidate)
-        if len(by_url) >= _DISCOVERY_DETAIL_COMPANION_MAX:
-            break
+        key = candidate.link.normalized_url
+        if key in by_url:
+            previous = by_url[key]
+            by_url[key] = DetailCompanionLink(link=previous.link,parent_detail_url=previous.parent_detail_url,
+                score=previous.score,parent_detail_urls=tuple(dict.fromkeys([*(previous.parent_detail_urls or (previous.parent_detail_url,)), candidate.parent_detail_url])))
+        elif len(by_url) < _DISCOVERY_DETAIL_COMPANION_MAX:
+            by_url[key] = candidate
 
     notes: list[str] = []
     if by_url:
@@ -5434,6 +5447,10 @@ def _is_non_product_supporting_document(
             "/website-terms",
         )
     ):
+        return True
+
+    # Insurance/benefit certificates do not supply core account or borrowing pricing.
+    if re.search(r"insurance|benefit[s]?[-_ ](?:guide|certificate)|redemption[-_ ]terms|checklists?", f"{path.rsplit('/', 1)[-1]} {anchor_text.lower()}"):
         return True
 
     canonical_type = _canonical_product_type_code(product_type)
@@ -5502,6 +5519,10 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
     if not anchor_hits and not url_hits and not shared_lending_pricing:
         return 0
     score = anchor_hits * 5 + url_hits * 3 + (3 if shared_lending_pricing else 0)
+    # Core pricing must survive the two-per-detail cap ahead of general
+    # cardholder/privacy terms, even when their labels match more markers.
+    if re.search(r"annual interest rates and fees|fees and details|schedule of fees|pricing disclosure|rates and fees", anchor):
+        score += 20
     if parsed.query:
         score += 2
     if infer_source_type(normalized_url) == "pdf" or "pdf" in anchor or "pdf" in parsed.path.lower():

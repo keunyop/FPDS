@@ -1,6 +1,12 @@
 # FPDS Admin 인수인계 실행 가이드
 
-상태: 실행용 체크리스트
+상태: 실행용 체크리스트 · 운영 절차 정리: 2026-10-03
+
+현행 상품수집은 자동 승인 또는 자동 제외로 끝납니다. Review는 More tools의
+과거 기록 조회이며 수동 상품 승인·수정·보류·AI 재검증 절차는 없습니다.
+가입 승인과 계정·보안·인수 승인 절차는 유지합니다.
+[현행 사용자 매뉴얼](FPDS_Admin_사용자_매뉴얼.md)과
+[소스·문서 전달 목록](../00-Scope/scope.md)을 먼저 확인합니다.
 
 Kick-off 미팅 자료: [FPDS 인수인계 킥오프 미팅 (한국어・日本語)](00-kickoff-meeting.md)
 
@@ -238,7 +244,7 @@ git diff --check
 - release tag, 실제 URL, 담당자, 범위와 알려진 제한사항
 - 시스템 구성과 dev/prod 환경 구분
 - 설치, 배포, migration, rollback과 release 확인 방법
-- 로그인, 국가·언어, Overview, Review/AI verify, Runs/retry,
+- 로그인, 국가·언어, Overview, Runs/retry, Review history,
   Banks/collection, Sources, Product Types, Countries, Changes와 Health 사용법
 - Admin은 수동 collection/retry로 운영한다는 기준
 - backup/restore, 장애 진단, monitoring, alert와 escalation 절차
@@ -249,7 +255,7 @@ git diff --check
 
 교육 실행:
 
-- [ ] 운영자 교육: Overview → Review → Runs → Banks 순으로 일상 업무를
+- [ ] 운영자 교육: Overview → Runs → Banks 순으로 일상 업무를
       실습한다.
 - [ ] 시스템·보안 교육: 배포, migration, monitoring, restore, rollback,
       계정 회수와 secret rotation을 실습한다.
@@ -268,7 +274,7 @@ git diff --check
 
 통과 조건:
 
-- [ ] 의뢰자 운영자가 핸드북만 보고 Review와 실패 run 진단을 완료했다.
+- [ ] 의뢰자 운영자가 핸드북만 보고 자동 제외 사유와 실패 run 진단을 완료했다.
 - [ ] 의뢰자 시스템 담당자가 핸드북만 보고 배포와 복구 절차를 설명하고
       rehearsal 결과를 재현할 수 있다.
 
@@ -287,8 +293,8 @@ git diff --check
 - [ ] 국가 전환 후 다른 국가 데이터가 섞이지 않는지 확인한다.
 - [ ] EN/KO/JA와 desktop, tablet, 정확한 `390px` 기본 화면을 확인한다.
 - [ ] Banks에서 승인된 소규모 collection을 실행한다.
-- [ ] Review에서 evidence 확인 후 approve, reject, defer와 edit-approve를
-      실행한다.
+- [ ] 수집 결과의 자동 승인·제외 사유와 과거 Review evidence를 확인하고,
+      수동 상품 승인·수정·보류·AI 재검증 기능이 없는지 확인한다.
 - [ ] Runs에서 completed, partial, failed 상태 진단과 승인된 retry를 실행한다.
 - [ ] API, worker, DB 또는 LLM 장애 시 alert와 escalation 절차를 확인한다.
 - [ ] backup restore와 release rollback 결과를 재확인한다.

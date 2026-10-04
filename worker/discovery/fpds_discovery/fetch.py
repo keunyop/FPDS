@@ -440,9 +440,7 @@ def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy
         return False
     parsed = urlparse(response.final_url)
     hostname = (parsed.hostname or "").lower()
-    if not hostname or not policy.browser_fallback_domains:
-        return False
-    if not host_matches_allowed_domains(hostname, policy.browser_fallback_domains):
+    if not hostname or not host_matches_allowed_domains(hostname, policy.allowed_domains):
         return False
     decoded = response.body.decode(_get_charset(response.headers.get("content-type", "")), errors="replace")
     visible_text = re.sub(r"<[^>]+>", " ", decoded)
@@ -473,6 +471,8 @@ def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy
     )
     if unresolved_pricing_placeholder:
         return True
+    if not host_matches_allowed_domains(hostname, policy.browser_fallback_domains):
+        return False
     has_numeric_rate = bool(
         re.search(r"(?<!\d)\d{1,2}(?:[.,]\d{1,4})?\s*%", visible_text)
         or re.search(r"(?<!\d)\d{1,2}(?:[.,]\d{1,4})?\s+per\s+cent\b", visible_text, flags=re.IGNORECASE)

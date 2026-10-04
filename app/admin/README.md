@@ -27,56 +27,29 @@ It distinguishes implemented screens from removed and deferred capabilities.
 
 ## Operator Workflow
 
-The shell puts four daily tasks first:
+Daily work is Overview, Runs and Banks:
 
-1. **Overview** — see only work that needs attention.
-2. **Review** — inspect flagged fields, evidence, AI verification, and record a
-   guarded decision.
-3. **Runs** — find failed or partial collection work and inspect or retry it.
-4. **Banks** — add banks manually or through grounded AI research, manage
-   coverage, and launch collection. Eligible first-time scopes require precision
-   source discovery. Every active coverage offers normal/detailed collection;
-   normal collection checks existing eligibility, while detailed collection
-   explicitly revalidates the source scope. Excluded scopes report a reason and
-   retain skipped Runs when preparation excludes a requested scope.
+1. **Overview** — inspect collection failures, public-data health and signup requests.
+2. **Runs** — inspect queued/discovering/collecting and terminal outcomes, automatic
+   exclusions and source errors. Use Search to reload; this route has no automatic refresh.
+3. **Banks** — manage banks and coverage, then launch normal/detailed collection.
+   First-time eligible scopes require precision discovery; skipped scopes keep
+   terminal Runs and an exclusion reason.
 
-Before entering the workspace, the operator selects an enabled working country
-on the login form. The API persists that ISO alpha-2 code in the server-side
-session, and the shell keeps it visible in the header. The country owns the
-scope of reads and writes, but the operator can switch to another active
-country from the header. A switch is confirmed, updates the server-side
-session, and returns to Overview in the same language so detail/filter state
-does not cross countries.
+The operator selects an active working country at login. The API owns that
+country in the server session; confirmed switching returns to Overview in the
+same language, so country-owned detail/filter context does not cross countries.
+Authenticated locale selection and logout live in the sidebar Account menu.
 
-The sidebar keeps less frequent tools available: Sources, Product Types,
-Countries, Changes, and Public Health. Anonymous Public product-error and
-site-feedback submissions are reviewed only in the password-gated FPDS Public
-`/admin` route, not in this operator application. Countries is visible
-only to administrators and uses a prepared ISO list: activation adds a login
-country, while reversible deactivation preserves history and protects the
-current/last active country. Existing Bank and Source Catalog detail URLs
-remain compatibility redirects; their APIs are still live.
-Authenticated language selection lives in the sidebar Account menu rather than
-the global header. Login and Signup use the same EN/KO/JA dropdown pattern as a
-standalone control, and every locale change preserves the current route and
-non-locale query state.
+More tools contains read-only Review history, Sources, Product Types, Changes,
+Countries and Public Health. Countries and signup approval are admin-only.
+Historical Review list/detail preserve private evidence and decisions but offer
+no approve/reject/defer/edit-approve, AI Verify or bulk actions. New collection
+automatically accepts or excludes candidates without creating review tasks.
 
-Review Detail follows one short decision path: candidate identity and three key
-facts, recommended action, source check, flagged fields, then the guarded
-decision. `Source check` is expanded initially because provenance is required
-for a safe review. Product facts, other collected fields, advanced overrides,
-decision notes, diff, evidence trace, and audit context remain available through
-collapsed disclosure. AI verification opens only for active verification or an
-attention state; its `Official sources` list stays collapsed until requested.
-This presentation does not change correction, CSRF, RBAC, audit, canonical, or
-publication boundaries.
-
-Review Queue search, reset, page-size changes, pagination, and visible auto
-refresh update only the results region through the authenticated same-origin
-Admin proxy. Page size is selectable as `20`, `50`, or `100` with `20` as the
-default. The active search/filter/sort/page state remains in the URL and is
-carried into Review Detail, so Back, Reject, and Defer return to the same queue
-context.
+Existing Bank/Source Catalog page URLs remain compatibility redirects; their
+proxy APIs are still used by Banks. Anonymous Public feedback belongs to the
+separate Public application.
 
 ## Code Map
 
@@ -129,23 +102,21 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
   reasons and precision-rediscovery guidance. All-skipped requests retain terminal
   Runs; already active preparations reuse their existing work without duplicates.
   Mixed selections report both queued and excluded work.
-  Revalidation checks fresh evidence and never overrides a human Review decision.
+  Revalidation checks fresh evidence and cannot bypass automatic financial gates.
 - Keep `data-admin-dirty` and mutation-pending signals so automatic refresh
   pauses during edits, dialogs, and writes.
 
 ## Current Capability Boundaries
 
-- API mutations for registries, collection, Runs retry, and Public Health retry
-  require `admin`. Review decisions and AI verification allow `admin` and
-  `reviewer`; `read_only` has no mutation rights. Countries and signup approval
-  are admin-only.
+- API mutations for registries, collection, Runs retry and Public Health retry
+  require `admin`; `read_only` has no mutation rights. Countries and signup
+  approval are admin-only. Historical product-review mutations are retired.
 - Sources are inspectable and support admin-only soft removal. Their direct
   create/update APIs return `405`; bank coverage owns configuration.
-- Collection is operator-initiated. Validation, qualified candidate promotion,
-  bounded Review AI autopilot, and approval-triggered aggregate refresh remain
-  automatic within that workflow. There is no recurring collection scheduler.
-- Review Detail AI Verify stores verification results and stages suggested edits;
-  it does not itself approve or publish the candidate.
+- Collection is operator-initiated. Evidence validation, qualified candidate
+  promotion and aggregate refresh run automatically within that workflow.
+  No human product review, Review AI autopilot or recurring collection scheduler
+  is part of current collection.
 - There is no standalone Product Record, Publish Monitor, Audit, Usage, global
   search, localization-health, or existing-account-management page.
 

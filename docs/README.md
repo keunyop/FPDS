@@ -1,189 +1,111 @@
 # FPDS Docs Map
 
-Direct BMO Chequing comparison (2026-10-03): official evidence supports five CAD plan comparisons; saved FPDS inputs locally improve from zero to two automatic passes with missing essential PDF/old currency-fragment exclusions preserved. Shared main-content disclosure priority, exact named-column proof, companion pricing selection and prompts corrected. Worker 685 / API 575 pass. No Admin API, live Run, data writes or deployment. [Comparison and limits](00-governance/bmo-chequing-direct-comparison-2026-10-03.md).
+Status: Active navigation index · Updated: 2026-10-03
 
-Generic collection correction (2026-10-03): owned captured-only grounding, default HTML DOM fallback, parser v6 explicit product/financial columns, full current-run chunk origins and prominent non-product screening. Worker 674 / API 574 pass. Deployment and live collection remain separate. [Diagnosis and verification](00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+Use this map to find the current contract or operating document. Dated reports
+record historical results; product counts and test totals are not live status.
+Archived documents retain traceability and do not override current policy.
 
-Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. [Implementation and verification](00-governance/generic-collection-evidence-improvements-2026-10-02.md).
+## Start an Admin handover
 
-Latest shared collection correction: [verified optional checking rates](00-governance/optional-checking-rates-2026-10-02.md). Saved Alterna input failures reproduced and fixed generically for CA/US; Worker 643 / API 539 pass. Deployment and live data changes remain separate.
+| Read in order | Purpose |
+|---|---|
+| [Handover guide](../descent/README.md) | Steps, owner responsibilities and acceptance gates |
+| [Scope and source inventory](../00-Scope/scope.md) | Included source, transfer exclusions and document ownership |
+| [Admin user manual](../descent/FPDS_Admin_사용자_매뉴얼.md) | Current operator workflow |
+| [Operations handbook](../descent/05-operations-handbook.md) | Daily checks, incidents and security/restore boundaries |
+| [Minimum playbook](01-planning/fpds-admin-handover-minimum-playbook.md) | Environment rehearsal, training, UAT and cutover |
+| [Services and accounts](../00-Scope/external-services-and-accounts.md) | External dependencies and ownership template |
+| [Database inventory](../00-Scope/database-migrations-schema-erd.md) | Migration catalogue, schema and ERD |
+| [Technical review](../descent/02-release-readiness.md) | Dated verification and remaining owner actions |
 
-Latest authorized staged data operation: [10 additional products published and unsupported targets excluded](00-governance/staged-unpublished-recovery-2026-10-01.md). Public API CA 29 / US 5, total 34; all 404 initially unpublished assessed, 394 removed from this one-off publication work list with records/history preserved. Worker 624 / API 539 and repository doctor pass, zero model calls or manual reviews. Shared collection changes remain local; runtime deployment is separate. Earlier dated results below are historical.
+Review is historical and read-only. Current collection uses automatic acceptance
+or exclusion; account/signup approval remains separate. Read the
+[collection accuracy policy](03-design/collection-accuracy-policy.md) before
+collection work.
 
-Latest data operation: [whole unpublished catalogue assessed; two additional products published](00-governance/fast-whole-catalogue-publication-2026-10-01.md). Public API CA 20 / US 4, total 24; 404 remain unpublished. Data-only, zero model calls; earlier results below are historical.
+## Resume development
 
-Latest continuation: [six of twelve remaining Scotiabank cards published](00-governance/remaining-card-recovery-2026-10-01.md). Public API CA 20 / US 2, total 22. Zero model calls, six retained exclusions. Shared code is local; deployment remains separate.
-
-Latest bulk recovery: [14 Scotiabank cards assessed; two automatically published](00-governance/card-bulk-recovery-2026-10-01.md). Public API CA 14 / US 2; total 16. Twelve exclusions retained; no provider calls or deployment.
-
-Latest: [current card-rate context correction and Platinum restoration](00-governance/platinum-card-recovery-2026-10-01.md); Public API CA 12 / US 2, with 414 unpublished records. Worker 605 / API 539 tests pass; collection-runtime deployment remains separate. Earlier counts below are historical.
-
-Latest: [exact checking fee rows and two TD restorations](00-governance/td-checking-recovery-2026-10-01.md); Public API CA 11 / US 2, with 415 records still unpublished. Shared collection code is corrected locally; deployment remains separate. Earlier counts below are historical.
-
-Latest: [supporting-origin code correction and two Scotiabank restorations](00-governance/supporting-evidence-recovery-2026-10-01.md); Public API CA 9 / US 2, 417 remain unpublished. Collection-runtime deployment remains separate. Earlier operation counts below are historical.
-
-Latest data operation: [four hidden products restored and one legal-document record deleted](00-governance/additional-product-recovery-2026-10-01.md); Public CA 7 / US 2, with 419 records still unpublished. The publication counts immediately below are historical.
-
-Latest publication: [17 products recovered after policy deployment](00-governance/collection-policy-recovery-2026-10-01.md); original manifest has 24 active, 326 inactive and [5 deleted non-products](00-governance/nonproduct-cleanup-2026-10-01.md).
-
-Status: Active navigation index
-Last updated: 2026-09-16
-
-This file is the main entrypoint for `docs/`.
-
-Default rule:
-- Read only the active docs first.
-- Ignore `docs/archive/` unless you are validating a past decision, gate record, or prototype artifact.
-
-## 1. Resume A Codex Session
-
-Before substantive work, read in this order:
-1. `README.md`
-2. `docs/00-governance/development-journal.md`
-3. this docs map
-
-Then route by task instead of loading every active document:
+Read [root README](../README.md), [development journal](00-governance/development-journal.md),
+then this map. Select only the documents needed for the slice:
 
 | Task affects | Read next |
 |---|---|
-| product behavior, scope, or acceptance | requirements definition and `scope-baseline.md` |
-| delivery selection, sequencing, or status | `plan.md` and `WBS.md` |
-| architecture or a settled baseline | `decision-log.md` and relevant design docs |
-| an active risk, issue, assumption, or dependency | `raid-log.md` |
-| a runtime boundary | that boundary's README plus relevant contracts/design docs |
-| UI or visual behavior | design docs index, both frontend baselines, relevant surface/locale docs, and the Admin/Public README |
-| harness, CI, or repository-wide checks | `harness-engineering-baseline.md` |
+| Product behavior, scope or acceptance | [Requirements](02-requirements/FPDS_Requirements_Definition_v1_5.md), [scope baseline](02-requirements/scope-baseline.md) |
+| Delivery selection or sequencing | [Plan](01-planning/plan.md), [WBS](01-planning/WBS.md) |
+| Architecture or a settled baseline | [Decision log](00-governance/decision-log.md) and relevant design docs |
+| Risk, issue or dependency | [RAID log](00-governance/raid-log.md) |
+| Runtime boundary | [Admin](../app/admin/README.md), [API](../api/service/README.md), [Worker](../worker/README.md), [DB](../db/README.md), [Storage](../storage/README.md), or [Public](../app/public/README.md) README |
+| UI or visual behavior | [Design index](03-design/README.md), both frontend baselines and relevant surface/locale docs |
+| Harness, CI or repository checks | [Harness baseline](00-governance/harness-engineering-baseline.md) |
 
-This keeps the startup context current without spending context on unrelated
-requirements, planning, or design material.
+## Current contracts and planning
 
-## 2. Active Documents
+- [Working agreement](00-governance/working-agreement.md): collaboration and authority.
+- [Scope change control](00-governance/scope-change-control.md) and
+  [stage gates](00-governance/stage-gate-checklist.md): approval boundaries.
+- [Roadmap](00-governance/roadmap.md) and
+  [milestone tracker](00-governance/milestone-tracker.md): broader delivery context.
+- [Phase 1 QA checklist](00-governance/phase-1-no-bxpf-test-checklist.md):
+  bounded operational verification.
+- [Canada Big 5 source registry](01-planning/canada-big5-source-registry.md):
+  original source baseline; live registry state is database-owned.
+- [Demo scenario](01-planning/fpds-customer-demo-scenario.md):
+  supporting presentation material; verify older workflow copy against current policy.
 
-### 2.1 Governance
+Start technical design from the [design index](03-design/README.md). Common contracts:
 
-- [Remaining 182-product recovery](00-governance/collection-accuracy-oneoff-remaining-2026-09-30.md): Value Visa restored, Public 7, first-pass manifest coverage complete
-- [Larger recovery batch](00-governance/collection-accuracy-oneoff-broad-2026-09-30.md): 120 products across 40 banks, Tangerine restored, zero new model calls
-- [RBC/BMO recovery assessment](00-governance/collection-accuracy-oneoff-rbc-bmo-2026-09-30.md): 11 exclusions retained, cross-attribute zero validation corrected
-- [CIBC/Scotiabank one-off recovery](00-governance/collection-accuracy-oneoff-scotia-2026-09-30.md): 11 products checked, Basic Plus restored, no new model calls
-- [One-off Vancity recovery](00-governance/collection-accuracy-oneoff-vancity-2026-09-30.md): exact product currency properties, one automatic restoration, zero model calls
-- [One-off TD recovery](00-governance/collection-accuracy-oneoff-td-2026-09-30.md): zero-model evidence reuse, one automatic restoration and unchanged product scope
+- [Collection accuracy](03-design/collection-accuracy-policy.md) and
+  [financial field contract](03-design/financial-product-field-contract.md).
+- [Canonical domain/schema](03-design/domain-model-canonical-schema.md),
+  [ingestion states](03-design/workflow-state-ingestion-design.md),
+  [review/run/publish history](03-design/review-run-publish-audit-state-design.md).
+- [API contracts](03-design/api-interface-contracts.md) and
+  [security/access control](03-design/security-access-control-design.md).
+- [Environment specification](03-design/dev-prod-environment-spec.md),
+  [migration baseline](03-design/db-migration-baseline.md),
+  [private storage](03-design/object-storage-evidence-bucket-baseline.md),
+  [bounded retention](03-design/bounded-data-retention-policy.md).
+- [Source registry policy](03-design/source-registry-refresh-and-approval-policy.md).
+- [FPDS design system](03-design/fpds-design-system.md),
+  [frontend benchmark](03-design/fpds_design_system_stripe_benchmark.md),
+  [Admin IA](03-design/admin-information-architecture.md),
+  [localization](03-design/localization-governance-and-fallback-policy.md).
+- [Admin purpose and features](03-design/fpds-admin-purpose-and-features.md):
+  detailed Korean overview; historical reviewer actions are superseded by the
+  current accuracy policy.
+- [CI baseline](00-governance/foundation-ci-cd-baseline.md) and
+  [source domain allowlist](00-governance/codex-internet-domain-allowlist.md).
 
-- [Economical accuracy recovery](00-governance/collection-accuracy-recovery-2026-09-30.md): manifest diagnosis, bounded collection, reuse and actual Public results
+Source-backed test fixtures remain under `worker/pipeline/tests/fixtures/`;
+they are part of reproducible verification, not disposable build output.
 
-- [Live collection accuracy pilot](00-governance/collection-accuracy-pilot-2026-09-30.md): real-source exclusion fixes, automatic product recovery and operational checks
+## Implementation and operation records
 
-- [Collection accuracy assessment](00-governance/collection-accuracy-audit-2026-09-30.md): new automatic gates, verification and existing-data impact
+Use the [development journal](00-governance/development-journal.md) for the dated
+sequence and the linked report for exact evidence and limitations. Recent examples:
 
-- [CA/US collection alignment](00-governance/public-collection-alignment-2026-09-29.md): bounded comparison fields, six applied corrections, cost and remaining gaps
+| Record | What it proves |
+|---|---|
+| [CIBC collection redesign, 2026-10-03](00-governance/cibc-collection-redesign-2026-10-03.md) | Shared evidence parity and fourteen applied automatic publications; rollout separate |
+| [BMO direct publication, 2026-10-03](00-governance/bmo-direct-publication-2026-10-03.md) | Applied data result and exclusions; no runtime deployment |
+| [BMO direct comparison, 2026-10-03](00-governance/bmo-chequing-direct-comparison-2026-10-03.md) | Official comparison and saved-input correction |
+| [Generic root cause, 2026-10-03](00-governance/bmo-generic-collection-root-cause-2026-10-03.md) | Shared collection correction and verification |
+| [Evidence improvements, 2026-10-02](00-governance/generic-collection-evidence-improvements-2026-10-02.md) | Generic source selection and captured evidence |
+| [Optional checking rates, 2026-10-02](00-governance/optional-checking-rates-2026-10-02.md) | Typed optional evidence and omissions |
+| [Legacy accuracy assessment, 2026-09-30](00-governance/collection-accuracy-audit-2026-09-30.md) | Approved 355-product/470-review cutover history |
 
-- [Official bank link sample](00-governance/public-bank-link-check-2026-09-26.md): initial P1-4 URL checks and operator follow-up
+Other dated reports remain in `00-governance/`; they are not deleted or
+automatically restored to Public. Local implementation, deployment and data
+publication are separate facts.
 
-- [Home Top 5 bounded data completion](00-governance/home-top5-data-completion-2026-09-24.md): official-source corrections, condition counts and pending US reviews
+## Historical and private material
 
-- [Public deposit comparison self-review](00-governance/public-deposit-comparison-review-2026-09-24.md): INDEXED GIC/Oaken official-source review and bounded data limitations
+[Archive index](archive/README.md) routes closed gates, prototype evidence and
+the [pre-cleanup docs map](archive/00-governance/docs-map-before-handover-cleanup-2026-10-03.md).
+Open these only to verify a historical result or reference.
 
-- [Public rate correction and self-review](00-governance/public-rate-correction-2026-09-16.md): API/UI rate semantics, published-data audit and separately authorized one-record correction
-
-- `docs/00-governance/working-agreement.md`: collaboration and document authority rules
-- `docs/00-governance/development-journal.md`: recent implementation memory and resume context
-- `docs/00-governance/decision-log.md`: active decisions and historical decision trail
-- `docs/00-governance/raid-log.md`: active risks, assumptions, issues, and dependencies
-- `docs/00-governance/scope-change-control.md`: scope change rules
-- `docs/00-governance/stage-gate-checklist.md`: gate criteria
-- `docs/00-governance/roadmap.md`: broader delivery roadmap
-- `docs/00-governance/milestone-tracker.md`: milestone board
-- `docs/00-governance/phase-1-no-bxpf-test-checklist.md`: current interim QA checklist
-- `docs/00-governance/harness-engineering-baseline.md`: repo validation and harness behavior
-- `docs/00-governance/foundation-ci-cd-baseline.md`: CI baseline
-- `docs/00-governance/codex-internet-domain-allowlist.md`: allowed external domains for source work
-
-- [Public UI/UX review](00-governance/public-ui-ux-review-2026-09-28.md): confirmed usability fixes and local regression verification
-
-### 2.2 Planning
-
-- `docs/01-planning/plan.md`: execution plan
-- `docs/01-planning/WBS.md`: current work breakdown and task status
-- `docs/01-planning/fpds-admin-handover-minimum-playbook.md`: follow-in-order
-  Admin handover checklist with evidence and stop gates
-- `docs/01-planning/canada-big5-source-registry.md`: active source coverage baseline for Phase 1
-- `docs/01-planning/fpds-customer-demo-scenario.md`: customer demo scenario for Admin collection through Public results, including AI/usage talking points and ChatGPT image prompts
-
-### 2.3 Requirements
-
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`: requirements baseline
-- `docs/02-requirements/scope-baseline.md`: scope, non-goals, release cutline, and build-start rule
-
-### 2.4 Design
-
-- [Same-amount calculator](03-design/public-scenario-calculator-policy.md): two-product scenarios, rounding and privacy contract
-
-Start from [docs/03-design/README.md](03-design/README.md).
-
-Most commonly needed:
-- [SwitchaBank blog](03-design/public-blog-policy.md): bank comparison article, source checks, SEO and content maintenance
-- [Authored comparison guides](03-design/public-comparison-guides-policy.md): newcomer entry, sources/corrections and localized guide discovery
-- [Deposit comparison conditions](03-design/public-deposit-comparison-policy.md): matching type/currency/basis/maturity and calculator eligibility
-- [Public verification freshness](03-design/public-verification-freshness-policy.md): separate snapshot/product dates, read-only overdue report, manual review cadence
-- [FPDS Admin purpose and complete feature guide (Korean)](03-design/fpds-admin-purpose-and-features.md): source-verified workflow, screens, roles, automation, and current versus deferred scope
-- `docs/03-design/domain-model-canonical-schema.md`
-- `docs/03-design/financial-product-field-contract.md`
-- `docs/03-design/workflow-state-ingestion-design.md`
-- `docs/03-design/review-run-publish-audit-state-design.md`
-- `docs/03-design/api-interface-contracts.md`
-- `docs/03-design/security-access-control-design.md`
-- `docs/03-design/source-registry-refresh-and-approval-policy.md`
-- `docs/03-design/dev-prod-environment-spec.md`
-- `docs/03-design/db-migration-baseline.md`
-- `docs/03-design/object-storage-evidence-bucket-baseline.md`
-- `docs/03-design/fpds-design-system.md`
-- `docs/03-design/fpds_design_system_stripe_benchmark.md`
-- `docs/03-design/admin-information-architecture.md`
-
-### 2.5 Golden Test Fixtures
-
-- `worker/pipeline/tests/fixtures/golden/`: source-backed reference datasets for admin collection and review testing
-
-### 2.6 Client Handoff
-
-- `README.md`: runtime map, startup context, and full verification commands
-- `docs/01-planning/fpds-admin-handover-minimum-playbook.md`: primary Admin
-  execution entrypoint for the Product Owner and handover manager
-- [Admin scope and checklist](../00-Scope/scope.md): signed Admin boundary, deliverable map, and final
-  handover checklist
-- [external services and accounts](../00-Scope/external-services-and-accounts.md): current external-service
-  inventory plus safe account/ownership template
-- [database migrations, schema, and ERD](../00-Scope/database-migrations-schema-erd.md): complete migration catalogue,
-  shared-dev schema status, data dictionary, and ERD
-- `app/admin/README.md`: operator workflow, route/code map, and Admin safety boundaries
-- `app/public/README.md`: Public route, data, localization, and evidence boundaries
-- `api/service/README.md`: live API runtime and endpoint map
-
-## 3. Status Labels
-
-Use this interpretation when deciding what to read:
-- `active`: default reading path for implementation work
-- `supporting`: read when the current slice touches that topic
-- `historical`: past gate, prototype, or evidence record; skip by default
-- `archive`: retained for traceability only; skip by default
-
-## 4. Archive Boundary
-
-Archived material now lives under [docs/archive/README.md](archive/README.md).
-
-By default, Codex should not read:
-- past gate review notes
-- prototype planning documents
-- prototype evidence packs and raw stage outputs
-- pre-WBS-3 owner readiness guidance
-
-Open archive docs only when you need to verify how a past decision or prototype result was recorded.
-
-## 5. Cleanup Notes
-
-The docs set was simplified on `2026-04-22` and reconciled for handoff on
-`2026-07-28`:
-- historical gate and prototype docs moved to `docs/archive/`
-- the design benchmark doc was rewritten as a short current baseline
-- the development journal was reduced to recent resume context
-- stale route-shell placeholders and partial API scaffold manifests were removed;
-  current app manifests point directly to live implementation files
+Active contracts and source-backed regression fixtures stay in their current
+paths. Private client evidence belongs in the restricted handover store described
+by [scope](../00-Scope/scope.md); credentials, raw operational evidence and local
+collection files do not belong in the source transfer.

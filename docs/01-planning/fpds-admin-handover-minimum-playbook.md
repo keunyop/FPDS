@@ -1,6 +1,11 @@
 # FPDS Admin 인수인계 최소 실행 플레이북
 
-상태: 실행용 체크리스트
+상태: 실행용 체크리스트 · 운영 절차 정리: 2026-10-03
+
+현행 수집은 자동 승인·제외 흐름이며 Review는 과거 기록 조회입니다.
+아래 교육·UAT는 현행 흐름을 확인합니다. 가입·계정·보안·인수 승인은 별도입니다.
+현재 [사용자 매뉴얼](../../descent/FPDS_Admin_사용자_매뉴얼.md)과
+[전달 목록](../../00-Scope/scope.md)을 기준으로 진행합니다.
 
 대상: FPDS Admin만 해당하며 FPDS Public은 제외
 
@@ -44,7 +49,7 @@ FPDS-Admin-Handover/
 
 - `app/public/`, Public 배포, Public 매뉴얼과 Public UAT는 범위에서 제외한다.
 - 모든 production 계정과 비용 주체는 의뢰자 소유여야 한다.
-- collection, Review 승인, AI 호출은 이관 rehearsal 동안 의뢰자 `dev`에서만 한다.
+- collection, retry, AI 호출은 이관 rehearsal 동안 의뢰자 `dev`에서만 한다.
 - 백업을 만들기만 해서는 안 된다. 실제 restore까지 성공해야 한다.
 - 의뢰자 운영자가 전달자 도움 없이 Admin을 사용해야 최종 인수한다.
 
@@ -176,7 +181,7 @@ git diff --check
 - [ ] `00-read-me-first.md`: 버전, URL, 담당자, 범위, known limitation
 - [ ] `deployment-operations-recovery.md`: 설치, 배포, migration, 수동 collection,
       장애 처리, backup/restore, rollback
-- [ ] `admin-user-manual.md`: 로그인·국가·언어, Overview, Review/AI verify,
+- [ ] `admin-user-manual.md`: 로그인·국가·언어, Overview, Review history,
       Runs/retry, Banks/collection, Sources, Product Types, Countries, Changes,
       Health 사용법
 - [ ] `security-access.md`: 역할, signup 승인, 접근회수, session/CSRF/CORS,
@@ -197,7 +202,7 @@ git diff --check
 
 최소 교육 세션:
 
-- [ ] 운영자 2시간: Overview → Review → Runs → Banks
+- [ ] 운영자 2시간: Overview → Runs → Banks
 - [ ] 관리자/Data 2시간: 계정·국가·은행·상품 유형·수집·evidence 경계
 - [ ] SRE/보안 3시간: 배포·migration·수동 collection·alert·restore·rollback·접근회수
 
@@ -213,7 +218,7 @@ git diff --check
 - `04-Manuals-And-Training/training-recording-link.md`
 - `04-Manuals-And-Training/operator-practice-result.md`
 
-통과 조건: 의뢰자 운영자가 매뉴얼만 보고 Review와 실패 run 진단을
+통과 조건: 의뢰자 운영자가 매뉴얼만 보고 자동 제외 사유와 실패 run 진단을
 완료했다.
 
 멈춤 조건: 전달자가 대신 클릭해야 완료된다면 교육을 다시 한다.
@@ -227,7 +232,7 @@ git diff --check
 - [ ] 국가 선택·전환 후 다른 국가 데이터가 섞이지 않는지 확인
 - [ ] EN/KO/JA와 desktop/정확한 `390px` 기본 화면 확인
 - [ ] Banks에서 승인된 소규모 collection 실행
-- [ ] Review에서 evidence 확인 후 approve/reject/defer/edit-approve 실행
+- [ ] 자동 승인·제외 사유와 과거 Review evidence 조회, 수동 상품 검토 action 제거 확인
 - [ ] Runs에서 completed/partial/failed 진단과 승인된 retry 실행
 - [ ] API/Worker/DB/LLM 장애 시 alert와 복구 절차 실행
 - [ ] SSRF/private network, CORS, cookie/security header 차단 확인

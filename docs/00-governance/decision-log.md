@@ -1,5 +1,18 @@
 # FPDS Decision Log
 
+## Product-owned collection proof supersedes old implementation rules - 2026-10-03
+
+The Product Owner explicitly requests independent reassessment/rework of Admin
+collection and CIBC official supplementation/publication. Ordinary Admin and
+direct collection share captured product-bound proof before their model pass,
+preserve verified native values through extraction/normalization, and use the
+same automatic gates. Essential companion selection retains actual parents;
+complete fee declarations and purchase-column notes preserve financial meaning.
+Confidence cannot prove a financial fact; conflicts and incomplete essentials
+still exclude automatically. Financial/security/supported-scope requirements and
+legacy cutover history remain. Data publication is distinct from runtime rollout.
+See [diagnosis, regressions and dated data outcome](cibc-collection-redesign-2026-10-03.md).
+
 ## Collection evidence correction - 2026-10-03
 
 The Product Owner requests generic correction of zero BMO approvals. Implemented:

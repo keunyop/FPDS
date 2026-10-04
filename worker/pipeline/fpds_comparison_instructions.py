@@ -27,6 +27,10 @@ ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
 )
 
 COMPARISON_INSTRUCTIONS = (
+    "Use complete product-owned financial declarations and explicit purchase columns as evidence units. "
+    "Separate welcome offers, additional-card fees, cash-advance and default-rate columns from regular pricing; "
+    "retain all conditions attached to the selected record and exceptions in family-wide rate declarations. "
+    "Unresolved templates are missing evidence, never numbers. Exact captured facts do not depend on AI scores. "
     "Accuracy takes priority over coverage. Human review is unavailable: return unverified "
     "or omit any uncertain fact, even when it is a required field. Never guess, interpolate, "
     "repair a source, treat absence as false/zero, or use confidence as evidence. Source "

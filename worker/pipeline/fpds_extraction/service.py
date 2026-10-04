@@ -461,6 +461,9 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                 parent = _canonical_official_source_url(metadata.get("parent_detail_url")) if isinstance(metadata, dict) else ""
                 named = [c for c in companion.candidates if tokens and len(tokens) >= 2
                          and tokens <= {t.removesuffix("s") if len(t) > 4 else t for t in re.findall(r"[a-z0-9]+", c.evidence_excerpt.lower())}]
+                parents = metadata.get("parent_detail_urls") or [] if isinstance(metadata, dict) else []
+                if own_url in {_canonical_official_source_url(u) for u in parents}:
+                    parent = own_url
                 if parent != own_url and not named:
                     continue
                 # Include sibling legal chunks only inside the same selected
@@ -472,9 +475,96 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                         continue
                     if c not in named and not (parent == own_url or re.search(r"legal|terms|conditions|notes", c.anchor_value or "", re.I)):
                         continue
-                    selected.append(replace(c, retrieval_metadata={**c.retrieval_metadata, "source_url": url, "captured_companion": True}))
+                    selected.append(replace(c, retrieval_metadata={**c.retrieval_metadata, "source_url": url, "captured_companion": True, "parent_detail_url": parent}))
         output.append(replace(item, grounding_candidates=list({c.evidence_chunk_id:c for c in selected}.values())))
     return output
+
+
+def _append_captured_decision_facts(*, context, candidates, fields, requested_fields):
+    """The same exact captured financial records serve direct and Admin paths.
+
+    Prove owned detail declarations and bound official purchase-column cells.
+    Discovery confidence is not fact evidence. No model-created source/chunk or
+    changed number can enter here; all output retains a complete native record.
+    """
+    from worker.pipeline.fpds_collection_accuracy import quote_supports_value
+    metadata=context.source_metadata
+    discovery=metadata.get("discovery_metadata") or {}
+    identity=_authoritative_discovery_product_title(context)
+    url=_canonical_official_source_url(metadata.get("normalized_source_url") or metadata.get("source_url"))
+    if (metadata.get("discovery_role") != "detail" or not identity
+            or discovery.get("product_identity_match") is not True
+            or not _url_matches_official_domains(url,allowed_domains=_official_domain_allowlist(context))
+            or non_product_identity_reason(product_type=_infer_product_type(context),primary_heading=identity,page_title=identity)):
+        return fields
+    def tokens(value):
+        return set(re.findall(r"[a-z0-9]+",value.lower())) - {"card","cards","for","tm","r"}
+    identity_tokens=tokens(identity)
+    proposals={}
+    for c in candidates:
+        own=(c.source_document_id==context.source_document_id and c.source_snapshot_id==context.snapshot_id
+             and c.parsed_document_id==context.parsed_document_id)
+        companion=c.retrieval_metadata.get("captured_companion") is True
+        if (not (own or companion) or c.bank_code!=context.bank_code or c.country_code!=context.country_code
+                or c.source_language!=context.source_language):
+            continue
+        quote=c.evidence_excerpt
+        values={}
+        heading = _normalize_text(str(discovery.get("primary_heading") or ""))
+        first_line = next((line.strip() for line in quote.splitlines() if line.strip()), "")
+        if own and first_line == heading:
+            values["product_name"] = heading
+        if c.anchor_type=="card_purchase_rate_cell" and _infer_product_type(context)=="credit-card":
+            parts=re.split(r"\nPurchases\d*\n",quote)
+            rate_line = parts[1].splitlines()[0].strip() if len(parts) == 2 else ""
+            if not re.fullmatch(r"\d+(?:\.\d+)?%", rate_line):
+                continue
+            group=parts[0].split("Card Product\n",1)[-1]
+            family=re.match(r"All (.+?) Personal Credit Cards\s*\(except (.+)\)$",group.replace("\n"," "),re.I)
+            if family:
+                issuer=tokens(family[1])
+                exclusions=re.split(r",|\band\b",family[2],flags=re.I)
+                applies=bool(issuer and issuer<=identity_tokens) and not any(tokens(x) and tokens(x)<=identity_tokens for x in exclusions)
+            else:
+                applies=any(tokens(row) and tokens(row)==identity_tokens for row in group.splitlines())
+            if not applies:
+                continue
+            values['purchase_interest_rate']=float(rate_line.removesuffix('%'))
+        elif (own or (companion and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url)) and c.anchor_type=="financial_declaration":
+            monthly=re.match(r"Monthly (?:account |plan )?fee\s+\$(\d+(?:\.\d+)?)",quote,re.I)
+            annual=re.match(r"Annual fee\s+\$(\d+(?:\.\d+)?)",quote,re.I)
+            if monthly: values['monthly_fee']=float(monthly[1])
+            if annual: values['annual_fee']=float(annual[1])
+            allowance=re.search(r"(?<![\d.])(\d+) transactions[^.]*\b(?:month|monthly)\b",quote,re.I)
+            excess=re.search(r"\$(\d+(?:\.\d+)?) for each additional transaction",quote,re.I)
+            if allowance: values['included_transactions']=int(allowance[1])
+            if excess: values['additional_transaction_fee']=float(excess[1])
+            if quote_supports_value('unlimited_transactions_flag',True,quote): values['unlimited_transactions_flag']=True
+            if _infer_product_type(context)=='gic' and quote_supports_value('non_redeemable_flag',True,quote): values['non_redeemable_flag']=True
+        for name,value in values.items():
+            if name not in requested_fields or not quote_supports_value(name,value,quote):
+                continue
+            source_url=url if own else _canonical_official_source_url(c.retrieval_metadata.get('source_url'))
+            if not source_url or not _url_matches_official_domains(source_url,allowed_domains=_official_domain_allowlist(context)):
+                continue
+            typ=canonical_value_type(name)
+            fact=ExtractedFieldCandidate(field_name=name,candidate_value=str(value) if typ=='decimal' else value,
+                value_type=typ,confidence=1.0,extraction_method='captured_financial_record',
+                source_document_id=c.source_document_id,source_snapshot_id=c.source_snapshot_id,
+                evidence_chunk_id=c.evidence_chunk_id,evidence_text_excerpt=quote,anchor_type=c.anchor_type,
+                anchor_value=c.anchor_value,page_no=c.page_no,chunk_index=c.chunk_index,
+                field_metadata={'official_grounding_contract_version':'collection-official-grounding-v2',
+                    'official_verification_status':'match','official_grounding_method':'deterministic_captured_financial_record',
+                    'official_web_sources':[{'url':source_url,'title':identity}], 'evidence_quote':quote})
+            proposals.setdefault(name,[]).append(fact)
+    conflicts = {name for name, rows in proposals.items()
+                 if len({str(f.candidate_value) for f in rows}) != 1}
+    if 'included_transactions' in proposals and 'unlimited_transactions_flag' in proposals:
+        conflicts.update({'included_transactions', 'unlimited_transactions_flag'})
+    proven = [rows[0] for name, rows in proposals.items() if name not in conflicts]
+    names = {f.field_name for f in proven} | conflicts
+    # A model or heuristic value cannot hide contradictory captured records.
+    return [f for f in fields if f.field_name not in names] + proven
 
 
 def _append_structural_account_facts(
@@ -689,11 +779,14 @@ class ExtractionService:
                 extracted_fields = _append_structural_account_facts(context=context,
                     candidates=extraction_input.candidates, fields=extracted_fields, requested_fields=field_names)
                 extracted_fields = _ground_explicit_account_declarations(context=context, fields=extracted_fields)
+                extracted_fields = _append_captured_decision_facts(context=context,
+                    candidates=extraction_input.grounding_candidates or extraction_input.candidates,
+                    fields=extracted_fields, requested_fields=field_names)
                 captured_proof_count = sum(field.field_metadata.get("official_grounding_method") in {
-                    "deterministic_named_account_column", "deterministic_account_declaration"}
+                    "deterministic_named_account_column", "deterministic_account_declaration", "deterministic_captured_financial_record"}
                     for field in extracted_fields)
                 if captured_proof_count:
-                    runtime_notes.append(f"Verified {captured_proof_count} exact owned account row/declaration field(s) before the existing model pass.")
+                    runtime_notes.append(f"Verified {captured_proof_count} exact product-owned captured financial field(s) before the existing model pass.")
             grounded_variant_count = max(
                 (
                     len(field.field_metadata.get("grounded_product_variants", []))
@@ -754,6 +847,10 @@ class ExtractionService:
                 runtime_notes.append(
                     "Dynamic product extraction kept heuristic mode because the OpenAI provider or API key was not configured."
                 )
+            if not unavailable:
+                extracted_fields = _append_captured_decision_facts(context=context,
+                    candidates=extraction_input.grounding_candidates or extraction_input.candidates,
+                    fields=extracted_fields, requested_fields=field_names)
             evidence_links = [
                 EvidenceLinkDraft(
                     field_name=field.field_name,
@@ -4784,6 +4881,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
+    cells = [c for c in candidates if c.anchor_type in {"financial_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)

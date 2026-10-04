@@ -15,3 +15,5 @@ docs/seo/input/*.zip
 /tmp/
 **/tmp/
 .vercel
+/.tmp/
+/FPDS-Admin-Handover/

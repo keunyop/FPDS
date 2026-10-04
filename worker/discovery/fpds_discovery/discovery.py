@@ -543,7 +543,7 @@ class _LinkExtractor(HTMLParser):
         # Main-content disclosures displace navigation inside the existing
         # 256-link / 64-priority-link caps; no additional fetch is initiated.
         disclosure = self._in_main and bool(re.search(
-            r"agreement|disclosure|pricing|fee[-_ ]?schedule|bank[-_ ]plans|\.pdf(?:$|[?#])",
+            r"agreement|disclosure|pricing|fee[-_ ]?schedule|bank[-_ ]plans|annual interest rates and fees|fees[-_ ]and[-_ ]details|\.pdf(?=$|[?#\s])",
             self._current_href + " " + label, re.I))
         self._append_link(self._current_href, label, prefer_over_ordinary=disclosure)
         self._current_href = None
