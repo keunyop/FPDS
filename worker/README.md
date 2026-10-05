@@ -1,5 +1,8 @@
 # Worker Boundary
 
+Native disclosure correction (2026-10-04): parser v9 retains unique linked financial notes and actual titles. Shared proof preserves annual/currency/price meaning and rejects shortened conditions. Named companion columns retain actual product links; generic plan discovery runs in the API/catalog boundary. Worker 738 / API 588 tests pass. [Diagnosis, bounded publication and rollout](../docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+
+
 ## Product Type collection targets - 2026-10-04
 
 The Admin-owned country-specific field policy is pinned in each run registry.

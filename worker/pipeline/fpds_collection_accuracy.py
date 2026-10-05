@@ -51,6 +51,17 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
             r"\bthis is our low[- ]cost account and it can qualify as a no[- ]cost account\b"
             r"|\bthis account can also qualify as a no[- ]cost account\b",
             "Separate account service classification", context, flags=re.I)
+    if field_name == "annual_fee" and re.search(r"(?mi)^Annual fee\s*\n(?:None|\$\d+(?:\.\d+)?)(?:\s*\n|$)", quote):
+        # A complete separate payment/grace-period disclosure describes
+        # interest, not the labelled annual price. Keep its exact quotation;
+        # any fee/waiver/eligibility language still fails closed.
+        payment = re.search(r"(?s)(You have \d+[ \u00a0]+days from the date the monthly statement is issued to pay the full balance on your account without interest, except on cash advances\..*)$", context)
+        if payment and not re.search(r"\b(?:fees?|waiv\w*|eligible|qualif\w*|introductory|promotional|first year|first month|only for)\b", payment[1], re.I):
+            context = context[:payment.start()]
+    if field_name in {"monthly_fee", "public_display_fee"}:
+        context = re.sub(
+            r"Transaction fees apply if you exceed the number of transactions included in your monthly plan or if you don't have a plan\. For more information, see the Service fees page\.",
+            "Separate excess-transaction pricing.", context, flags=re.I)
     if re.search(r"\b(?:if|when|waived|waiver|provided|qualify|qualifying|maintain|introductory|promotional)\b"
         r"|subject to(?!\s+change(?:\s+without\s+(?:prior\s+)?notice)?(?:[.!](?:\s|$)|$))"
         r"|\bonly\s+for\b|\bfor\s+(?:eligible|selected|new)\s+(?:customers|cardholders)\b"
@@ -66,9 +77,9 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
     # An explicitly absent balance requirement is not a fee-waiver threshold.
     # Remove only this exact negation for condition classification; retain the
     # complete quote and every surrounding qualifier for all other checks.
-    if re.search(r"\b(?:not|does not mean|doesn't mean)\s+no minimum balance required\b", context, re.I):
+    if re.search(r"\b(?:not|does not mean|doesn't mean)\s+no minimum balances?(?: required)?\b", context, re.I):
         return True
-    balance_context = re.sub(r"\bno minimum balance required\b", "no balance requirement", context, flags=re.I)
+    balance_context = re.sub(r"\bno minimum balances?(?: required)?\b", "no balance requirement", context, flags=re.I)
     return field_name in {"monthly_fee", "public_display_fee", "annual_fee", "transaction_fee"} and bool(
         re.search(r"minimum balance|at least", balance_context, re.I))
 
@@ -198,6 +209,29 @@ def _labelled_current_card_rate(field_name: str, value: Decimal, quote: str) -> 
     if field_name == "balance_transfer_rate" and not match[3]:
         return False
     return value == Decimal(match[1 if field_name == "purchase_interest_rate" else 2])
+
+
+
+def _explicit_labelled_card_rate(field_name: str, value: Decimal, quote: str) -> bool:
+    """A default-rate note does not turn an explicit ordinary labelled rate into it.
+
+    Accept only one own label/value, annual basis and a complete separately stated
+    missed-minimum-payment consequence. Other conditions/ranges remain rejected.
+    """
+    labels = {"purchase_interest_rate": r"(?:Interest rate on purchases|Purchase interest rate)",
+              "cash_advance_rate": r"(?:Interest rate on cash advances|Cash advance interest rate)"}
+    label = labels.get(field_name)
+    if not label or not _ANNUAL_RATE_BASIS.search(quote):
+        return False
+    rows = list(re.finditer(r"(?mi)^" + label + r"[ \t]*\n[ \t]*(\d+(?:\.\d+)?)%[ \t]*(?:\d{1,2}|[*??])?[ \t]*$", quote))
+    if len(rows) != 1 or Decimal(rows[0][1]) != value:
+        return False
+    rest = quote[:rows[0].start()] + quote[rows[0].end():]
+    consequence = re.compile(r"If you don't make the minimum payment by the due date, the annual interest rates on purchases and cash advances will increase to \d+(?:\.\d+)?% until we receive your payment\.", re.I)
+    rest, count = consequence.subn("", rest)
+    if not _ANNUAL_RATE_BASIS.search(rest) or count > 1 or re.search(r"\d+(?:\.\d+)?\s*%|\b(?:if|when|only|eligible|qualify|qualifying|introductory|promotional|example|from|up to|between|as low as)\b", rest, re.I):
+        return False
+    return 0 <= value < 100
 
 
 def _rate_context_has_condition(field_name: str, value: Decimal, quote: str) -> bool:
@@ -402,6 +436,9 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if not number.is_finite() or number < 0:
         return False
     if contract.unit == "percentage_points":
+        if field_name in {"purchase_interest_rate", "cash_advance_rate"} and re.search(
+            r"(?mi)^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Cash advance interest rate)\s*\n\d", quote):
+            return _explicit_labelled_card_rate(field_name, number, quote)
         # Comparison benchmarks are not the named product's own payable rate.
         # Retained full context is screened by the same rule below grounding.
         if re.search(r"\b(?:national|industry|market)\s+average\b|\bcompetitor(?:s|'s)?\b", q, re.I):
@@ -426,8 +463,8 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return False
         return number < 100 and number in {Decimal(v) for v in rates} and bool(re.search(r"\b(?:rate|interest|apr|apy|yield)\b", q, re.I))
     labels = {
-        "monthly_fee": r"monthly.{0,25}(?:fee|charge)|(?:fee|charge).{0,20}(?:monthly|per month)",
-        "public_display_fee": r"monthly.{0,25}(?:fee|charge)|(?:fee|charge).{0,20}(?:monthly|per month)",
+        "monthly_fee": r"monthly.{0,25}?(?:fee|charge)|(?:fee|charge).{0,20}?(?:monthly|per month)",
+        "public_display_fee": r"monthly.{0,25}?(?:fee|charge)|(?:fee|charge).{0,20}?(?:monthly|per month)",
         "annual_fee": r"annual.{0,20}fee|fee.{0,20}(?:annual|per year)",
         "minimum_deposit": r"(?:minimum|initial|opening).{0,30}deposit|deposit.{0,30}(?:minimum|to open)|open.{0,25}(?:at least|minimum)",
         "minimum_balance": r"minimum.{0,25}balance|balance.{0,25}(?:at least|minimum)",
@@ -472,6 +509,8 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             "minimum_deposit": r"(?:minimum(?: opening)?|initial|opening) deposit",
         }
         zero_label = zero_labels.get(field_name)
+        if number == 0 and field_name == "annual_fee" and re.search(r"(?mi)^Annual fee\s*\nNone(?:[ \t]+\d+)?[ \t]*$", quote) and not _money_has_condition(quote, field_name):
+            return True
         if number == 0 and zero_label and re.search(rf"\b(?:no|zero)\s+(?:{zero_label})\b", q, re.I):
             return True
         if number not in _numbers(q) or number not in matching:

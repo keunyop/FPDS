@@ -6547,6 +6547,23 @@ def _score_page_evidence(
     if product_type == "chequing":
         def named_checking(value: str) -> bool:
             return bool(re.fullmatch(r"(?:[a-z0-9'-]+\s+){0,5}(?:checking|chequing)", value.split("|", 1)[0].strip().lower()))
+        # Transaction plans are independent priced checking variants. Do not
+        # require "account" in a brand's plan name or infer identity from a
+        # keyword alone: corroborated title/H1 plus ordinary pricing is needed.
+        def plan_key(value: str) -> str:
+            return re.sub(r"[^a-z0-9]+", " ", value.replace("\u00ad", "").casefold()).strip()
+        heading_plan = plan_key(primary_heading)
+        title_plan = plan_key(re.split(r"\s+[|\u2013\u2014-]\s+", title_text, maxsplit=1)[0])
+        plan_text = _collapse_whitespace(" ".join([heading_text, *parser.body_chunks[:1024]]))
+        named_plan = (
+            re.fullmatch(r"(?:[a-z0-9]+\s+){1,5}plan", heading_plan) is not None
+            and heading_plan == title_plan
+            and re.search(r"\bmonthly (?:account |plan )?fee\b", plan_text, re.I)
+            and re.search(r"\btransactions?\s+per\s+month\b|\bunlimited\s+transactions?\b", plan_text, re.I)
+            and re.search(r"\b(?:debit|bill payments?|chequing|checking)\b", plan_text, re.I)
+        )
+        title_match += int(bool(named_plan))
+        primary_heading_match += int(bool(named_plan))
         title_match += int(named_checking(title_text))
         primary_heading_match += int(named_checking(primary_heading))
     normalized_url_path = re.sub(r"[-_/]+", " ", unquote(urlparse(raw_url).path).lower())
@@ -6749,6 +6766,15 @@ def _looks_like_multi_product_family_overview(
         f"{title_text} {primary_heading}", re.IGNORECASE,
     ):
         return True
+
+    if normalized_type == "chequing" and not re.fullmatch(
+            r"(?:[\w'-]+\s+){1,5}plan", primary_heading.replace("\u00ad", "").strip(), re.I):
+        plan_names = {re.sub(r"\s+", " ", h.replace("\u00ad", "").casefold()).strip()
+            for h in secondary_headings
+            if re.fullmatch(r"(?:[\w'-]+\s+){1,5}plan", h.replace("\u00ad", "").strip(), re.I)
+            and not re.match(r"^(?:choose|compare|open|find|select)\b", h, re.I)}
+        if len(plan_names) >= 2 and re.search(r"\b(?:choose|compare) your plans?\b", " ".join(secondary_headings), re.I):
+            return True
 
     heading_identity = _collapse_whitespace(primary_heading).lower().strip(" .:-|")
     title_identity = _collapse_whitespace(title_text.split("|", 1)[0]).lower().strip(" .:-|")

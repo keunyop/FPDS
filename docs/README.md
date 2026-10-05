@@ -1,6 +1,6 @@
 # FPDS Docs Map
 
-Status: Active navigation index · Updated: 2026-10-03
+Status: Active navigation index · Updated: 2026-10-04
 
 Use this map to find the current contract or operating document. Dated reports
 record historical results; product counts and test totals are not live status.
@@ -23,6 +23,8 @@ Review is historical and read-only. Current collection uses automatic acceptance
 or exclusion; account/signup approval remains separate. Read the
 [collection accuracy policy](03-design/collection-accuracy-policy.md) before
 collection work.
+
+Latest collection result: [DESJARDINS / EQBANK shared corrections and direct publication](00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
 
 ## Resume development
 

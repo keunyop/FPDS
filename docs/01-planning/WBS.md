@@ -1,5 +1,8 @@
 # FPDS Detailed WBS
 
+Latest authorized existing-collection slice (2026-10-04): DESJARDINS/EQBANK generic discovery and evidence corrections plus bounded direct publication of 11 distinct products (DESJARDINS 10 / EQBANK 1). Worker 738 / API 588 pass; no new type/country, weakened prerequisite, manual review, recurring recovery feature or runtime deployment. [Diagnosis and operation](../00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+
+
 Latest Product Owner slice (2026-10-04): Banks/Runs usability, country-owned
 Product Type required/optional target management and required-fact Home Top 5
 within existing Admin registry/collection/Public delivery. Additive migration

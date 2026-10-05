@@ -126,6 +126,31 @@ def _product_type_definition(product_type_code: str) -> dict[str, object]:
 
 
 class SourceCatalogTests(unittest.TestCase):
+    def test_named_transaction_plans_need_corroborated_identity_and_pricing(self) -> None:
+        from pathlib import Path
+        from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy
+        from api_service.source_catalog import _score_page_evidence, _looks_like_multi_product_family_overview
+        fixtures=json.loads(Path(__file__).parent.joinpath("fixtures/desjardins_plan_identity.json").read_text(encoding="utf8"))
+        for item in [*fixtures, {**fixtures[0], "html": fixtures[0]["html"].replace("<main>", "<main>"+"<p>General site information.</p>"*100)}]:
+            with self.subTest(url=item["url"]), patch("api_service.source_catalog.fetch_text",return_value=item["html"]):
+                result=_score_page_evidence(raw_url=item["url"],fetch_policy=DiscoveryFetchPolicy(allowed_domains=("desjardins.com",)),
+                    product_type="chequing",product_type_definition=_product_type_definition("chequing"))
+                self.assertTrue(result.product_identity_match)
+                self.assertTrue(result.heading_match)
+                self.assertGreaterEqual(result.page_evidence_score,6)
+        other='<title>Value Plan | Another Bank</title><main><h1>Value Plan</h1><p>Monthly fee $8. Transactions per month Unlimited. Debit card.</p></main>'
+        with patch("api_service.source_catalog.fetch_text",return_value=other):
+            self.assertTrue(_score_page_evidence(raw_url="https://anotherbank.com/value-plan",fetch_policy=DiscoveryFetchPolicy(allowed_domains=("anotherbank.com",)),
+                product_type="chequing",product_type_definition=_product_type_definition("chequing")).product_identity_match)
+        for bad in [other.replace("Value Plan</h1>","Premium Plan</h1>"),other.replace("Monthly fee","Annual price"),other.replace("Transactions per month","Insurance coverage")]:
+            with patch("api_service.source_catalog.fetch_text",return_value=bad):
+                self.assertFalse(_score_page_evidence(raw_url="https://anotherbank.com/value-plan",fetch_policy=DiscoveryFetchPolicy(allowed_domains=("anotherbank.com",)),
+                    product_type="chequing",product_type_definition=_product_type_definition("chequing")).product_identity_match)
+        self.assertTrue(_looks_like_multi_product_family_overview(product_type="chequing",title_text="Everyday Account",primary_heading="Everyday Account",
+            secondary_headings=["Choose your plan","Value plan","Premium plan"]))
+        self.assertFalse(_looks_like_multi_product_family_overview(product_type="chequing",title_text="Premium Plan",primary_heading="Premium Plan",
+            secondary_headings=["Value plan","Premium plan"]))
+
     def test_homepage_generation_loads_browser_policy_without_widening_bank_domains(self) -> None:
         bounded_policy = SimpleNamespace(
             allowed_domains=("vancity.com",),

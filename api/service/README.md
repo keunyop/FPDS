@@ -1,5 +1,8 @@
 # FPDS API Service
 
+Collection correction (2026-10-04): named checking plans require corroborated identity and ordinary pricing; multi-plan pages remain evidence-only. Worker v9 keeps exact linked disclosures/titles/currencies through existing automatic gates. Worker 738 / API 588 regressions pass. Direct publication and future API/Worker rollout are separate. [Operation and limits](../../docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+
+
 ## Product Type collection targets and Banks counts - 2026-10-04
 
 Product Type GET list/detail resolves `collection_fields` for the authenticated

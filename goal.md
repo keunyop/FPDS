@@ -1,5 +1,14 @@
 # Admin pre-handover review and fixes
 
+## Authorized slice: generic collection corrections and DESJARDINS/EQBANK publication - 2026-10-04
+Objective: reproduce current two-bank evidence losses, correct shared collection paths across banks/types, directly collect and publish current automatic passes.
+Scope: preserved latest batch diagnosis; bounded official essential captures; generic discovery/parser/extraction/normalization/financial-proof corrections with matching prompts and source-backed positive/adversarial regressions; normal automatic promotion/Public refresh, private before-images and independent readback.
+Exclusions: relaxed essentials, manual review, permanent recovery features, new countries/types, account/security changes, unrelated mutations, paid broad recollection, deployment or process restart.
+Acceptance: reproduce actual defects before fixes; reusable rules preserve exact identity/currency/rate/term/conditions/origins; ordinary services process identical captures; publish validated current products only; preserve original history/evidence and unrelated data; verify Public membership/details/privacy; document exclusions and separate runtime rollout.
+Verification: focused source-backed/cross-bank tests, full affected Worker/API suites, provider-disabled actual-service rehearsal, current evidence/DB/Public API/site readback, repository contract checks and git diff --check.
+Status: complete for this code/data slice. Worker 738 / API 588, actual-service persisted-origin replay, 39 exact current citations, 11 anonymous API/site routes, 27 committed-document language/width checks and source/foundation/diff checks pass. Eleven distinct products are published (DESJARDINS 10 / EQBANK 1); two existing plan versions additionally retain complete optional waivers. Public CA 64 / US 5; original history/evidence and unrelated data preserved. API/Worker runtime rollout remains separate. Preserve every older goal slice and its ownership.
+
+
 ## Authorized slice: Admin usability and Product Type collection fields - 2026-10-04
 
 Objective: implement requested Banks/Runs usability changes, manage required and

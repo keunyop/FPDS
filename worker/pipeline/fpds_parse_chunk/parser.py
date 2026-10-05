@@ -12,7 +12,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v8"
+PARSER_VERSION = "fpds-parse-chunk-v9"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -70,7 +70,11 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         for index, text in enumerate(structured_sections, start=1)
     )
 
+    if soup.title and soup.title.get_text(" ", strip=True):
+        sections.append(_RawSegment("document_title", "document-title", None, soup.title.get_text(" ", strip=True)))
     sections.extend(_product_terms_sections(soup))
+    sections.extend(_labelled_disclosure_sections(soup))
+    sections.extend(_linked_rate_records(soup))
     sections.extend(_financial_declaration_sections(sections))
     sections.extend(_rate_table_evidence_sections(soup))
     sections.extend(_linked_financial_table_cells(soup))
@@ -116,6 +120,129 @@ def _product_terms_sections(soup: BeautifulSoup) -> list[_RawSegment]:
         value = _normalize_text(block.get_text("\n", strip=True))
         if 0 < len(value) <= 12000:
             output.append(_RawSegment("product_terms_declaration", targets.pop(), None, value))
+    return output
+
+
+
+def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
+    """Bind a labelled DOM price to its explicit local references, never a neighbour.
+
+    Works with ordinary anchors, ARIA references and custom footnote references.
+    Only a unique plain annual-basis declaration mentioning the same rate labels
+    may supplement a scalar; default/offer conditions remain in the record.
+    """
+    root = soup.find("main") or soup.body or soup
+    headings = root.find_all("h1")
+    if len(headings) != 1:
+        return []
+    identity = headings[0].get_text(" ", strip=True)
+    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Annual fee|Monthly fee)$", re.I)
+    basis = []
+    for node in root.find_all(True):
+        value = node.get_text(" ", strip=True)
+        if (len(value) <= 600 and re.match(r"Annual fees and fixed annual interest rates\b", value, re.I)
+                and "purchases" in value.lower() and "cash advances" in value.lower()
+                and not re.search(r"%|\b(?:introductory|promotional|eligible|only|if)\b", value, re.I)):
+            basis.append(value)
+    basis = list(dict.fromkeys(basis))
+    result, seen = [], set()
+    for leaf in root.find_all(string=lambda t: t and labels.fullmatch(t.strip())):
+        block = leaf.parent
+        for _ in range(7):
+            value = block.get_text("\n", strip=True)
+            if len(value) > 900 or block is root:
+                break
+            if sum(bool(labels.fullmatch(line.strip())) for line in value.splitlines()) > 1:
+                break
+            if re.search(r"\d+(?:\.\d+)?%|\$\d|\bNone\b", value, re.I):
+                # A linked sibling product cannot inherit the page's main identity.
+                named = block.find_all(["h1", "h2", "h3"])
+                if named and any(h.get_text(" ", strip=True) != identity for h in named):
+                    break
+                preceding = block.find_previous(["h1", "h2", "h3"])
+                scope = preceding.get_text(" ", strip=True) if preceding is not None else ""
+                if preceding is not None and preceding.name != "h1" and re.search(
+                        r"^(?:[\w-]+\s+){1,8}(?:account|card|Visa|Mastercard|mortgage|loan|GIC|plan)$", scope.replace("\u00ad", ""), re.I):
+                    if scope.replace("\u00ad", "").casefold() != identity.replace("\u00ad", "").casefold():
+                        result.append(_RawSegment("unresolved_financial_reference", identity, None, "\n".join([identity, value, scope])))
+                        break
+                refs = []
+                bad = False
+                for ref in block.find_all(True):
+                    target = None
+                    if str(ref.get("href", "")).startswith("#"):
+                        target = str(ref["href"])[1:]
+                    elif "footnote" in ref.name and ref.get("target"):
+                        target = str(ref["target"])
+                    elif ref.get("aria-describedby"):
+                        ids = str(ref["aria-describedby"]).split()
+                        if len(ids) != 1:
+                            bad = True
+                            break
+                        target = ids[0]
+                    if not target:
+                        continue
+                    targets = soup.find_all(id=target)
+                    if len(targets) != 1:
+                        bad = True
+                        break
+                    note = targets[0].get_text(" ", strip=True)
+                    refs.append(note)
+                if bad:
+                    result.append(_RawSegment("unresolved_financial_reference", identity, None, "\n".join([identity, value])))
+                    break
+                parts = [identity, value]
+                if re.search(r"\b(?:first year|first month|eligible|until|if you|provided|maintain|introductory|promotional)\b", scope, re.I):
+                    parts.append(scope)
+                if "interest" in leaf.lower() and len(basis) == 1:
+                    parts.append(basis[0])
+                parts.extend(dict.fromkeys(refs))
+                record = _normalize_text("\n".join(parts))
+                if len(record) <= 6400 and record not in seen:
+                    seen.add(record)
+                    result.append(_RawSegment("labelled_financial_record", identity, None, record))
+                break
+            block = block.parent
+            if block is None:
+                break
+    return result
+
+
+def _linked_rate_records(soup: BeautifulSoup) -> list[_RawSegment]:
+    """Keep a compact native detail rate with its exact local disclosure."""
+    root = soup.find("main")
+    if root is None or len(root.find_all("h1")) != 1:
+        return []
+    output = []
+    for paragraph in root.find_all("p"):
+        value = paragraph.get_text(" ", strip=True)
+        if not re.fullmatch(r"(?:Earn\s+)?\d+(?:\.\d+)?%\s*[*??\d]*\s*(?:annual\s+)?interest(?:\s+rate)?[.]?", value, re.I):
+            continue
+        # A product-bearing sibling heading is a separate offer, not this
+        # page's rate. Navigation/footer and comparison tables are excluded.
+        if paragraph.find_parent(["nav", "footer", "table", "aside"]):
+            continue
+        heading = paragraph.find_previous(["h1", "h2", "h3"])
+        if heading is None:
+            continue
+        if heading.name != "h1" and re.search(
+                r"\b(?:account|card|mortgage|loan|GIC)\b", heading.get_text(), re.I):
+            continue
+        links = [a for a in paragraph.find_all("a", href=True) if str(a["href"]).startswith("#")]
+        if not links:
+            continue
+        notes = []
+        for link in links:
+            targets = soup.find_all(id=str(link["href"])[1:])
+            if len(targets) != 1:
+                notes = []
+                break
+            notes.append(targets[0].get_text(" ", strip=True))
+        if not notes:
+            continue
+        record = "\n".join([value, *dict.fromkeys(notes)])
+        if len(record) <= 6400:
+            output.append(_RawSegment("linked_rate_record", "linked-rate", None, record))
     return output
 
 
@@ -291,7 +418,7 @@ def _linked_financial_table_cells(soup: BeautifulSoup) -> list[_RawSegment]:
     for node in soup.find_all(id=True):
         id_counts[node["id"]] = id_counts.get(node["id"], 0) + 1
     financial_label = re.compile(
-        r"\b(?:rates?|interest|APY|APR|monthly|annual.{0,12}fee|transactions?|"
+        r"\b(?:currency|rates?|interest|APY|APR|monthly|annual.{0,12}fee|transactions?|"
         r"withdrawals?|redeemable|cashable|penalt\w*|security|collateral|term|minimum.{0,20}deposit)\b", re.I)
     for table_index, table in enumerate(container.find_all("table")):
         headers_by_id = {}
@@ -315,6 +442,10 @@ def _linked_financial_table_cells(soup: BeautifulSoup) -> list[_RawSegment]:
             # The source's exact column identity, row labels, then its own value.
             nodes = [*column_headers, *[h for h in headers if h not in column_headers], cell]
             parts = [n.get_text("\n" if n in column_headers else " ", strip=True) for n in nodes]
+            detail_urls = [str(a["href"]) for a in column_headers[0].find_all("a", href=True)
+                           if str(a["href"]).startswith(("https://", "http://"))]
+            if detail_urls:
+                parts[0] += "\n" + "\n".join(dict.fromkeys(detail_urls))
             if not parts[-1]:
                 continue
             ambiguous_notes = False

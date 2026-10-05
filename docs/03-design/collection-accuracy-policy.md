@@ -1,5 +1,31 @@
 # Product collection accuracy and automatic acceptance
 
+## Native labelled disclosures and named transaction plans - 2026-10-04
+
+Parser v9 preserves current owned titles, complete labelled prices and uniquely
+linked anchor/ARIA/custom notes. Missing/ambiguous references and distinct
+product scopes block weaker flattened fee copies. Regular labelled card rates
+need independent annual basis; separate missed-payment consequences and
+payment/grace-period examples stay in evidence. Actual fee/waiver/eligibility
+conditions still block. Explicit annual-fee None means zero only with complete
+unconditional context.
+
+Named header cells retain real detail links and explicit currency. A native
+title needs current owned capture and body/URL corroboration; scores are
+insufficient. Plural absent minimum balances are not prerequisites. Monetary
+labels stop at their first own label. Separate excess-pricing notices do not
+qualify monthly prices or prove missing scalar excess cost. Linked rate
+paragraphs retain their own annual note; specific-channel unlimited is
+insufficient. Complete verified monthly-price waiver wording and its attached
+balance/whole-month maintenance requirement survive as the typed optional
+fee_waiver_condition; a waiver never changes the regular base fee to zero.
+
+Singular checking plans need corroborated title/H1, monthly price, ordinary
+transactions and checking services. Multiple plans under choose/compare form
+a family boundary. Proof is reapplied after the existing model pass; exact
+origins, types, automatic exclusion/privacy and financial essentials remain.
+No permanent review/recovery queue. [Diagnosis and operation](../00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+
 ## Product Type-managed collection targets - 2026-10-04
 
 The Product Owner requests required/optional collection management in Product
