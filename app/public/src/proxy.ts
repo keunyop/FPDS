@@ -45,7 +45,10 @@ export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname === "/blog" || request.nextUrl.pathname.startsWith("/blog/")) {
     const path = request.nextUrl.pathname;
     // Next's metadata image is an asset route, not an article slug.
-    if (path === "/blog/opengraph-image") return NextResponse.next();
+    if (path === "/blog/opengraph-image" ||
+      (path.endsWith("/opengraph-image") && isBlogSlug(path.slice("/blog/".length, -"/opengraph-image".length)))) {
+      return NextResponse.next();
+    }
     if (path !== "/blog" && !isBlogSlug(path.slice("/blog/".length))) {
       return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
     }

@@ -149,7 +149,8 @@
       "implementation_path": "src/app/blog/[slug]/page.tsx",
       "resource_key": "public_blog.article",
       "allowed_slugs": [
-        "eq-bank-vs-tangerine-vs-td-savings"
+        "eq-bank-vs-tangerine-vs-td-savings",
+        "tangerine-vs-simplii-vs-cibc-chequing-fees"
       ]
     }
   ]

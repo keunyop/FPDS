@@ -1,22 +1,24 @@
 # SwitchaBank Blog
 
 Status: Implemented locally; Production deployment remains separately scoped.
-Authority: Product Owner's 2026-09-30 blog request, FR-PUB-028, D-088, WBS 5.74.
+Authority: Product Owner's 2026-09-30 blog request and 2026-10-05 additional
+article request, FR-PUB-028, D-088, WBS 5.74.
 
 ## Reader experience
 
-`/blog` and the allowlisted `/blog/eq-bank-vs-tangerine-vs-td-savings`
-deliver one original comparison article in EN/KO/JA. A ruled feature section,
+`/blog` lists two allowlisted original comparison articles in EN/KO/JA:
+`/blog/eq-bank-vs-tangerine-vs-td-savings` and
+`/blog/tangerine-vs-simplii-vs-cibc-chequing-fees`. A ruled feature section,
 existing official bank logos, an article contents list, mobile-stacked comparison
 table, hypothetical interest example, checklist and related guides lead to the
-existing Canadian savings catalog. Desktop/mobile navigation and the footer
-expose Blog. No account ownership is required.
+existing Canadian savings or chequing catalog, according to the article.
+Desktop/mobile navigation and the footer expose Blog. No account ownership is required.
 
 The blog is implemented in the existing Next.js Public package.
 Browser verification found that the former root loading boundary hid streamed
 article HTML without JavaScript. Its unchanged skeleton now belongs to the
 existing data routes and Home's explicit Suspense wrapper; blog pages render
-complete readable HTML without that boundary. For one article,
+complete readable HTML without that boundary. For these authored articles,
 versioned typed content avoids a separate CMS account, database, publishing API,
 dependency or runtime Markdown execution. Existing Button, feedback, logo and
 semantic tokens are reused; no vendor primitive is edited.
@@ -24,8 +26,8 @@ semantic tokens are reused; no vendor primitive is edited.
 Coverage is explicitly Canadian. Blog links from another market enter the
 Canadian editorial surface with its scope visible. Switching country while
 reading, or requesting a non-CA country query, redirects to that country's
-Savings catalog with locale preserved. Article content does not depend on the
-product API. Comparison links target the catalog, which already handles empty
+matching product-type catalog with locale preserved (the index uses Savings).
+Article content does not depend on the product API. Comparison links target the catalog, which already handles empty
 and unavailable data; they do not imply all three named accounts are published.
 
 ## Editorial contract and initial verification
@@ -63,12 +65,49 @@ accrual, tax, fee or changing-balance assumption is hidden. It is neither a
 current bank offer nor an APY claim. No bank ranking, suitability promise,
 deposit-protection/tax claim or financial-data mutation is introduced.
 
+## Second article — 2026-10-05
+
+The chequing comparison targets the intent behind Canadian no-monthly-fee
+accounts and balance-based rebates. It covers Tangerine No-fee daily Chequing,
+Simplii No Fee Chequing and CIBC Smart Tier 1, with eight official citations
+checked October 5. Product names remain in English; all three editorial
+versions preserve identical financial conditions.
+
+- Tangerine: CAD 0 base monthly fee, no minimum balance for that fee, unlimited
+  named daily transactions and free Interac e-Transfer. The separate current
+  fee schedule proves CAD 1.50 for other-bank Canadian ATM withdrawals.
+- Simplii: CAD 0 monthly fee, unlimited named debit purchases/bill payments/
+  withdrawals and free CIBC ATM use. No unproved minimum-balance claim or
+  changing promotional amount is copied.
+- CIBC: positive CAD 16.95 Tier 1 base fee remains visible. The rebate requires
+  CAD 4,000 end-of-day balance each day of that month in one Smart Account,
+  for up to three Smart Accounts. Separate tier/customer benefits qualify the
+  comparison; this is not an unconditional zero-fee account.
+- FCAC Chequing, ATM fees and transferring-service pages support transaction/
+  channel checks, distinct operator charges and the payment-migration sequence.
+  Historical ATM price ranges are not reused.
+
+The example uses one account: twelve assumed fee months = CAD 203.40;
+three missed-rebate months = CAD 50.85; separately, constant CAD 4,000 at a
+fictional annual simple 3% = CAD 120 foregone interest, assuming zero interest
+in the account holding that balance. Do not sum all scenarios. The visible
+notes exclude compounding/tax/fees/balance changes and label the fictional
+rate. Actual eligibility and realistic availability of the money matter.
+
+Mid-article and closing buttons open the existing Canadian chequing catalog
+ordered by monthly fee. Comparison selection/device saving/verification and
+official-bank checks are explained using existing capabilities; no promise
+that every discussed account is published is made. Both articles link to each
+other; the older article's content and source dates remain September 30.
+
 ## Search and measurement
 
 Clean index/article URLs receive localized canonicals, reciprocal EN/KO/JA and
-x-default alternates, descriptions, social metadata and six sitemap entries.
+x-default alternates, descriptions, social metadata and nine sitemap entries.
 BlogPosting and BreadcrumbList describe the visible article; CollectionPage/
-ItemList describe the index. The code-native PNG preview is served locally.
+ItemList describe the index. The index has a generic PNG preview; each article has a distinct locally served
+`/blog/[slug]/opengraph-image` preview. Only allowlisted article image paths
+bypass the article check; unknown image paths still return 404.
 Unknown slugs return HTTP 404 before streaming. Extra, repeated and invalid
 query parameters are noindex/follow and canonicalize to a clean locale URL.
 The blog does not create arbitrary SEO filter pages or alter product KO/JA
@@ -91,7 +130,8 @@ traffic increases are not guaranteed or measured by local verification.
    `app/public/src/lib/public-blog.ts`.
 2. Add complete localized authored content and exact official sources in
    `public-blog-content.ts`. Keep the article-to-content mapping explicit.
-   Extend the source registry per article when adding the next article.
+   Keep source registries scoped per article via `blogSources`; update the
+   content map and `blogPresentation` for its topic, catalog and related reading.
 3. Recheck any fee, condition or offer with the exact official product source.
    Preserve ambiguity; do not infer numbers from templates or calculator copy.
    Update all affected languages together. Advance only the dates actually
@@ -101,12 +141,12 @@ traffic increases are not guaranteed or measured by local verification.
 5. Run Public tests, lint, typecheck/build and the relevant browser audit.
    Record material changes in the journal before the normal release workflow.
 
-Review this article's bank-specific conditions monthly and before reuse in a
+Review each article's bank-specific conditions monthly and before reuse in a
 campaign; recheck sooner when a reported correction or known bank change
 arrives. This is an editorial maintenance instruction, not an automated job.
 Use site feedback to report the title and passage; correct confirmed errors
-against official sources. Product records still use their existing approval
-and freshness workflow.
+against official sources. Product records still use automatic acceptance
+and the existing freshness workflow.
 
 ## Verification
 
@@ -117,7 +157,7 @@ uv run --with playwright python app/public/scripts/blog-audit.py
 ```
 
 The audit covers 390/768/1440px EN/KO/JA index/detail, exact financial example,
-source links, metadata/JSON-LD, six sitemap entries, PNG preview, real 404,
+source links, metadata/JSON-LD, nine sitemap entries, PNG preview, real 404,
 query noindex, country redirect, source-independent rendering, menu focus,
 JavaScript-free article HTML and the catalog handoff. Browser writes and
 third-party calls are stubbed. Screenshots are local under ignored

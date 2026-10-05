@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { BLOG_POSTS, blogHref, isBlogSlug, isBlogIndexableQuery, blogCountryDestination } from './public-blog.ts';
-import { BLOG_SOURCES, blogContent } from './public-blog-content.ts';
+import { blogSources, blogContent } from './public-blog-content.ts';
 import { getAnalyticsPage } from './google-analytics.ts';
 
 test('only published blog slugs and clean language variants are discoverable', () => {
@@ -20,20 +20,22 @@ test('only published blog slugs and clean language variants are discoverable', (
 });
 
 test('Canadian article country changes go to the requested market and preserve locale', () => {
-  for (const path of ['/blog', '/blog/' + BLOG_POSTS[0].slug]) {
+  for (const path of ['/blog', ...BLOG_POSTS.map(post => '/blog/' + post.slug)]) {
     assert.equal(blogCountryDestination(path, 'ko', 'CA'), null);
     const url = new URL(blogCountryDestination(path, 'ja', 'US')!, 'https://www.switchabank.com');
     assert.equal(url.pathname, '/products');
     assert.equal(url.searchParams.get('country_code'), 'US');
-    assert.equal(url.searchParams.get('product_type'), 'savings');
+    assert.equal(url.searchParams.get('product_type'), BLOG_POSTS.find(post => path.endsWith(post.slug))?.productType ?? 'savings');
     assert.equal(url.searchParams.get('locale'), 'ja');
   }
   assert.equal(blogCountryDestination('/products', 'en', 'US'), null);
 });
 
 test('article citations resolve, anchors are unique, all locales retain financial examples', () => {
-  const sources = new Set<string>(BLOG_SOURCES.map(source => source.id));
   for (const post of BLOG_POSTS) {
+    const sources = new Set<string>(blogSources(post.slug).map(source => source.id));
+    assert.equal(sources.size, blogSources(post.slug).length);
+    for (const source of blogSources(post.slug)) assert.equal(new URL(source.href).protocol, 'https:');
     assert.ok(post.publishedAt <= post.modifiedAt);
     assert.match(post.sourcesCheckedAt, /^\d{4}-\d{2}-\d{2}$/);
     for (const locale of ['en', 'ko', 'ja']) {
@@ -44,6 +46,7 @@ test('article citations resolve, anchors are unique, all locales retain financia
         for (const source of section.sources ?? []) assert.ok(sources.has(source));
       }
       for (const row of article.rows) assert.ok(sources.has(row.source));
+      if (post.productType !== 'savings') continue;
       const a = 10000 * 0.05 * 3 / 12 + 10000 * 0.01 * 9 / 12;
       const b = 10000 * 0.03;
       assert.equal(article.example.rows[0][2], `CAD ${a}`);
@@ -54,7 +57,7 @@ test('article citations resolve, anchors are unique, all locales retain financia
       assert.equal(article.rows.find(row => row.code === 'TD')?.fee, 'CAD 0');
     }
   }
-  for (const source of BLOG_SOURCES) assert.equal(new URL(source.href).protocol, 'https:');
+
 });
 
 test('blog page views retain fixed screen types without article identifiers', () => {

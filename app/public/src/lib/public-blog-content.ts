@@ -1,5 +1,9 @@
 import type { PublicLocale } from './public-locale.ts';
 import type { BlogSlug } from './public-blog.ts';
+import { blogCopy } from './public-blog.ts';
+import { CHEQUING_CONTENT, CHEQUING_PRESENTATION, CHEQUING_SOURCES } from './public-blog-chequing.ts';
+import type { CuratedSlug } from './public-curated.ts';
+import type { GuideSlug } from './public-guides.ts';
 
 export const BLOG_SOURCES = [
   { id: 'eq', title: 'EQ Bank — Personal Account', href: 'https://www.eqbank.ca/personal-banking/personal-account' },
@@ -7,9 +11,10 @@ export const BLOG_SOURCES = [
   { id: 'td', title: 'TD — Every Day Savings Account', href: 'https://www.td.com/ca/en/personal-banking/products/bank-accounts/savings-accounts/every-day-savings-account' },
   { id: 'fcac', title: 'FCAC — Savings accounts', href: 'https://www.canada.ca/en/financial-consumer-agency/services/banking/bank-accounts/savings-account.html' }
 ] as const;
-type SourceId = typeof BLOG_SOURCES[number]['id'];
+export type BlogSource = { id: string; title: string; href: string };
+type SourceId = typeof BLOG_SOURCES[number]['id'] | typeof CHEQUING_SOURCES[number]['id'];
 export type BlogSection = { id: string; title: string; paragraphs: string[]; sources?: SourceId[] };
-type BlogContent = {
+export type BlogContent = {
   title: string; description: string; intro: string; takeaway: string;
   rows: { bank: string; code: string; name: string; fee: string; detail: string; source: SourceId }[];
   sections: BlogSection[];
@@ -211,7 +216,34 @@ const content: Record<PublicLocale, BlogContent> = {
     ]
   }
 };
-const articles: Record<BlogSlug, Record<PublicLocale, BlogContent>> = { 'eq-bank-vs-tangerine-vs-td-savings': content };
+const articles: Record<BlogSlug, Record<PublicLocale, BlogContent>> = {
+  'eq-bank-vs-tangerine-vs-td-savings': content,
+  'tangerine-vs-simplii-vs-cibc-chequing-fees': CHEQUING_CONTENT
+};
+export function blogSources(slug: BlogSlug): readonly BlogSource[] {
+  return slug === 'tangerine-vs-simplii-vs-cibc-chequing-fees' ? CHEQUING_SOURCES : BLOG_SOURCES;
+}
+export function blogPresentation(slug: BlogSlug, locale: string) {
+  const copy = blogCopy(locale);
+  const chequing = slug === 'tangerine-vs-simplii-vs-cibc-chequing-fees';
+  const localized = CHEQUING_PRESENTATION[locale === 'ko' || locale === 'ja' ? locale : 'en'];
+  return {
+    ...(chequing ? localized : {
+      scope: copy.scope, comparison: copy.comparison, compare: copy.compare,
+      compareBody: copy.compareBody, action: copy.action,
+      about: 'Canadian savings account comparisons'
+    }),
+    catalog: (chequing ? 'no-monthly-fee-chequing' : 'savings-accounts') as CuratedSlug,
+    guides: (chequing ? ['monthly-fee-waivers', 'switching-bank-accounts'] :
+      ['base-and-promotional-rates', 'monthly-fee-waivers', 'switching-bank-accounts']) as GuideSlug[],
+    relatedArticle: chequing ? {
+      slug: 'eq-bank-vs-tangerine-vs-td-savings' as BlogSlug, label: localized.relatedArticle
+    } : {
+      slug: 'tangerine-vs-simplii-vs-cibc-chequing-fees' as BlogSlug,
+      label: CHEQUING_CONTENT[locale === 'ko' || locale === 'ja' ? locale : 'en'].title
+    }
+  };
+}
 export function blogContent(slug: BlogSlug, locale: string): BlogContent {
   return articles[slug][locale === 'ko' || locale === 'ja' ? locale : 'en'];
 }

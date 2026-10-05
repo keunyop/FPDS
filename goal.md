@@ -1,5 +1,14 @@
 # Admin pre-handover review and fixes
 
+## Read-only slice: HomeEquity direct evidence assessment - 2026-10-05
+Objective: assess additional automatic approval feasibility from official HomeEquity sources without Admin API.
+Scope: bounded official product/rate/access inspection, existing gates and saved-input comparison, findings and journal; preserve prior goal ownership.
+Exclusions: runtime changes, paid models, canonical/registry writes, publication, deployment, weaker essentials and manual review.
+Acceptance: identify evidence-backed candidates and blockers; distinguish feasibility from demonstrated automatic acceptance; retain financial and product boundaries.
+Verification: current official pages, contracts, recent saved candidates and final diff check.
+Status: complete for this feasibility slice. Three rendered capture/hash receipts, current gate probe and read-only saved metadata verified. Concrete CHIP/GIC opportunities and future-effective/new-origination/identity blockers recorded; no demonstrated approval, publication or runtime change. Preserve every earlier goal slice.
+
+
 ## Authorized slice: generic three-bank corrections and direct publication - 2026-10-05
 Objective: reproduce and repair shared collection failures, repeatedly verify actual service behavior, directly publish only current automatically accepted FAIRSTONE/FNBC/HAVENTREE products without Admin API.
 Scope: bounded current essential captures/reuse; generic parser, product-section/identity, companion selection, extraction/provenance and financial-context corrections with matching prompts and cross-bank/adversarial regressions; normal automatic promotion/aggregate refresh; private before-images, preserved original history and unrelated data; independent Public verification.
@@ -1447,3 +1456,11 @@ Exclusions: new collection/model calls, registry/canonical writes, deployment or
 Acceptance: distinguish requested scopes, prepared/skipped scopes, created runs and display behavior using current evidence; document exact reasons and any unresolved limitation.
 Verification: read-only repeatable-read DB inspection, local source/log correlation, journal and final diff check.
 Status: complete. Exact twelve-scope plan, sequential processing, preflight-only skips and persisted Run creation verified. Final read-only 11:57:06 Vancouver snapshot shows three completed Alterna Runs and Savings started, LOC/Mortgage skipped without Runs, all six B2B scopes queued. No lost B2B selection. User-screen filter/refresh state not captured; cannot assert a separate display defect. Journal updated and final diff check passed; no new collection/model calls or runtime/data changes. Preserve earlier unresolved goal ownership.
+
+## Independent slice: second SwitchaBank blog article - 2026-10-05
+Objective: add one professional, sourced Canadian chequing-account comparison article that attracts search readers and leads to existing SwitchaBank comparisons.
+Scope: original EN/KO/JA article, verified official sources, illustrative annual fee/balance example, article-specific discovery/social metadata and localized catalog/related reading links; preserve the first article and earlier goal ownership.
+Exclusions: CMS/dependency installation, personalized recommendations, canonical/collection changes, new countries/types, analytics events, external writes or deployment.
+Acceptance: two articles discoverable in all three languages; named account conditions accurately sourced with explicit check date; transparent hypothetical arithmetic; new article targets checking catalog; unique canonical/hreflang/BlogPosting/social image and sitemap entries; existing article retained; readable without JavaScript and responsive at 390/768/1440px.
+Verification: official-source inspection; Public unit tests, lint, typecheck and isolated build; focused blog browser/HTTP/SEO audit; final diff and goal review; journal/policy update.
+Status: complete for this article slice. Both articles/index pass 60 focused browser/HTTP/SEO checks in EN/KO/JA at 390/768/1440px, including sources, arithmetic, metadata/structured data, nine sitemap URLs, distinct previews, no-JavaScript reading and localized catalog handoffs. Public 102 tests, lint, isolated typecheck/build and foundation baseline pass; representative Korean screens independently inspected. No deployment or canonical/private-data operation. Changed Markdown links/route JSON, twenty-file UTF-8/whitespace checks, unchanged first-article content comparison and final git diff --check pass. Acceptance criteria reviewed and satisfied. Existing shared goal remains for independently owned unresolved work.

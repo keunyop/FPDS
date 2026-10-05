@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { BlogVisual } from '@/components/fpds/public/blog-visual';
 import { PublicStructuredData } from '@/components/fpds/public/public-structured-data';
 import { BLOG_POSTS, blogCopy, blogHref, isBlogIndexableQuery } from '@/lib/public-blog';
-import { blogContent } from '@/lib/public-blog-content';
+import { blogContent, blogPresentation } from '@/lib/public-blog-content';
 import { guideCopy, guideHref } from '@/lib/public-guides';
 import { normalizePublicLocale } from '@/lib/public-locale';
 import { buildPublicPageMetadata, buildPublicSeoUrl } from '@/lib/public-seo';
@@ -30,10 +30,11 @@ export default async function BlogPage({ searchParams }: Props) {
       <h2 id="blog-latest" className="py-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{copy.latest}</h2>
       {BLOG_POSTS.map(post => {
         const article = blogContent(post.slug, locale);
-        return <article key={post.slug} className="grid gap-6 border-b border-border pb-8 md:grid-cols-[1fr_1.15fr] md:gap-10 md:pb-10">
-          <BlogVisual />
+        const presentation = blogPresentation(post.slug, locale);
+        return <article key={post.slug} className="grid gap-6 border-b border-border py-8 md:grid-cols-[1fr_1.15fr] md:gap-10 md:pb-10">
+          <BlogVisual banks={article.rows} issue={post.issue} />
           <div className="flex flex-col items-start justify-center">
-            <p className="text-xs font-medium text-primary">{copy.scope}</p>
+            <p className="text-xs font-medium text-primary">{presentation.scope}</p>
             <h3 className="mt-3 text-balance text-2xl font-semibold leading-snug tracking-tight md:text-3xl">
               <Link href={blogHref(post.slug, locale)} className="underline-offset-4 hover:underline">{article.title}</Link>
             </h3>

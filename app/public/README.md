@@ -68,13 +68,19 @@ source traces remain inside FPDS Admin. Its customer-facing identity is
 
 ## Blog (2026-09-30)
 
-`/blog` and `/blog/eq-bank-vs-tangerine-vs-td-savings` provide a sourced
-Canadian bank-account comparison in EN/KO/JA, with a responsive table, explicit
-hypothetical interest example, original editorial content, checklist and
-existing savings-catalog handoff. Header/mobile/footer links expose the blog.
-Content is versioned in `src/lib/public-blog-content.ts`; no separate CMS or
-dependency is needed. Clean localized URLs get canonical/hreflang, BlogPosting/
-breadcrumb metadata, a local PNG social preview and six sitemap entries.
+`/blog` lists two sourced Canadian bank-account comparisons in EN/KO/JA:
+`/blog/eq-bank-vs-tangerine-vs-td-savings` and
+`/blog/tangerine-vs-simplii-vs-cibc-chequing-fees`. Responsive tables, explicit
+illustrative calculations, checklists and related reading lead to the relevant
+existing savings or chequing catalog. The chequing article has comparison
+buttons in its practical workflow and closing section; both articles link to
+each other. Header/mobile/footer links expose the blog.
+Content is versioned in `src/lib/public-blog-content.ts` and
+`src/lib/public-blog-chequing.ts`, with separate official source registries.
+No separate CMS or dependency is needed. Clean localized URLs get
+canonical/hreflang, BlogPosting/breadcrumb metadata, article-specific local PNG
+previews and nine sitemap entries. The latest article appears first; publication,
+modification and source-check dates remain explicit per article.
 Fixed Blog/Blog article screen types use existing page views without slugs.
 
 See [editorial checks, scope, maintenance and authoring](../../docs/03-design/public-blog-policy.md).

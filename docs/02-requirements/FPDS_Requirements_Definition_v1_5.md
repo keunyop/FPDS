@@ -938,6 +938,13 @@ citations, a real source-check date, honest authorship and correction disclosure
 a responsive comparison table and an explicitly hypothetical interest example.
 Existing catalogs/comparison/calculator provide the next step.
 
+The 2026-10-05 request adds one sourced Canadian chequing-fee comparison in
+the same three languages. Preserve positive base fees and complete rebate
+conditions, label hypothetical arithmetic, use article-specific sources/social
+previews and route readers to the existing chequing catalog. Keep the first
+article's source dates and financial content; link the two articles for related
+reading. This extension authorizes no data collection or deployment.
+
 Clean editorial routes gain canonical/hreflang, sitemap, social and article
 structured data. Unknown slugs return 404; arbitrary query states remain
 noindex. Preserve product source-language policy, curated gates, private

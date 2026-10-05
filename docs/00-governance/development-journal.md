@@ -1,5 +1,57 @@
 # FPDS Development Journal
 
+## 2026-10-05 - Second SwitchaBank comparison article
+
+- Added an original Canadian chequing-fee comparison in EN/KO/JA: Tangerine,
+  Simplii and CIBC Smart Tier 1. Eight current official sources support base
+  fees, full daily-balance rebate conditions, transaction/ATM costs and account
+  migration. The October 5 source date belongs only to the new article.
+- Kept CIBC's positive CAD 16.95 base fee visible. Separate illustrative
+  calculations show twelve paid months (CAD 203.40), three missed-rebate
+  months (CAD 50.85), and CAD 120 hypothetical foregone simple interest.
+  The fictional 3% assumption and non-additive scenarios are explicit.
+- The latest story appears first with its own bank identities. Per-article
+  sources, subject, social PNGs, catalog type and related reading prevent
+  savings-specific content from leaking into the new topic. Mid-article and
+  closing actions open the existing chequing catalog sorted by monthly fee.
+  Both articles link to each other; the original financial content/dates remain.
+- Search discovery uses clean localized canonicals/hreflang, BlogPosting,
+  breadcrumbs, distinct previews and nine blog sitemap entries. Unknown image
+  paths still return 404; country changes preserve the article's product type.
+  Existing analytics categories and editorial disclosure are retained.
+- Key files: Public blog registry/content/presentation, new
+  public-blog-chequing.ts, article/index/preview routes, BlogVisual, proxy,
+  route allowlist, blog tests and browser audit; README, blog policy,
+  FR-PUB-028, plan and WBS 5.74.
+- Verification: Public 102 unit tests, lint, isolated typecheck and production
+  build pass. Focused browser/HTTP/SEO audit passes 60 checks across both
+  articles and the index in EN/KO/JA at exact 390/768/1440px, including sources,
+  arithmetic, canonical/hreflang/JSON-LD, nine sitemap URLs, three distinct PNG
+  previews, 404/noindex/country handling, keyboard menu focus, JavaScript-free
+  reading and both catalog handoffs with failed country lookup. Zero browser
+  exceptions or horizontal overflow. Korean 390px article header and desktop
+  comparison table independently viewed. Builds use an isolated task copy
+  with existing dependencies and a local empty-catalog fixture; live catalog
+  membership and production search outcomes were not tested in this slice.
+  Foundation baseline, changed Markdown links/route JSON, twenty-file UTF-8/
+  whitespace checks, first-article content comparison and git diff --check pass.
+  Final goal/diff review satisfies this slice's acceptance criteria.
+- Boundaries: no dependency/CMS installation, canonical or private data,
+  collection, account changes, analytics event, deployment or external write.
+  Prior Product Owner journal/goal changes and unrelated report are preserved.
+- Next: deploy Public through the normal release workflow when separately
+  authorized. The article is complete locally; production search performance
+  requires measurement after publication. Earlier goal ownership remains.
+
+## 2026-10-05 - HomeEquity direct evidence feasibility assessment
+
+- Assessed official product/rate pages without FPDS Admin API. Preserved the latest two exclusions and zero approvals/reviews; recent field metadata queried in a repeatable-read/read-only transaction.
+- Rendered CHIP posted reset rates and Income Advantage account-specific rates provide concrete essential evidence absent from plain web output. Reset versus new origination, actual rate versus example APR, account-specific terms and named-product identity remain binding.
+- GIC has a term/payment schedule and complete no-redemption sentence with owner-death exception. Unchanged field-proof function rejects that exact access sentence. Web October 5 and direct-rendered October 6 effective rates differ; future values cannot fill current Public. No full automatic pass is claimed.
+- Verification: three safe-fetch/browser/parser captures with independent SHA-256 readback; one bounded CHIP new-rate render timed out; existing financial gate probe and read-only saved metadata. No paid models, dependency install, runtime fixes, Admin API, DB writes, publication or deployment.
+- Key record: [HomeEquity evidence assessment](homeequity-direct-evidence-assessment-2026-10-05.md). Next: resolve current applicability and product bindings, then separately scoped generic corrections/regressions and normal service rehearsal. Preserve prior goal ownership.
+
+
 ## 2026-10-05 - Shared native product evidence corrections
 
 - Product Owner authorized generic fixes, repeated service verification and direct three-bank publication without Admin API; retained all earlier goal ownership.

@@ -1,12 +1,23 @@
 import type { PublicLocale } from './public-locale.ts';
 
 export const BLOG_POSTS = [{
+  slug: 'tangerine-vs-simplii-vs-cibc-chequing-fees',
+  publishedAt: '2026-10-05',
+  modifiedAt: '2026-10-05',
+  sourcesCheckedAt: '2026-10-05',
+  country: 'CA',
+  productType: 'chequing',
+  minutes: 8,
+  issue: '02'
+}, {
   slug: 'eq-bank-vs-tangerine-vs-td-savings',
   publishedAt: '2026-09-30',
   modifiedAt: '2026-09-30',
   sourcesCheckedAt: '2026-09-30',
   country: 'CA',
-  minutes: 7
+  productType: 'savings',
+  minutes: 7,
+  issue: '01'
 }] as const;
 export type BlogSlug = typeof BLOG_POSTS[number]['slug'];
 export type BlogPath = '/blog' | `/blog/${BlogSlug}`;
@@ -22,7 +33,8 @@ export function isBlogIndexableQuery(query: Record<string, string | string[] | u
 // Editorial coverage is explicitly Canadian. Country changes leave the article.
 export function blogCountryDestination(path: string, locale: string, country: string) {
   if (country === 'CA' || (path !== '/blog' && !path.startsWith('/blog/'))) return null;
-  const params = new URLSearchParams({ country_code: country, product_type: 'savings' });
+  const post = BLOG_POSTS.find(item => path === '/blog/' + item.slug);
+  const params = new URLSearchParams({ country_code: country, product_type: post?.productType ?? 'savings' });
   if (locale === 'ko' || locale === 'ja') params.set('locale', locale);
   return `/products?${params}`;
 }

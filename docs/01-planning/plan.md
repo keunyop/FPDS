@@ -704,6 +704,10 @@ semantic UI, existing catalog handoff and bounded search policy. Typed content
 keeps editing reviewable without a new CMS dependency. Verify source claims,
 financial examples, localized layouts and crawler signals before normal release.
 No deployment, canonical mutation or new analytics event is included.
+The 2026-10-05 additional-article request extends this slice with a sourced
+Canadian chequing-fee comparison, per-article citations/social images,
+localized catalog actions and reciprocal related reading. Validate both
+articles and preserve the first article's financial/source-check dates.
 
 ## 2026-09-30 latest collection recurrence
 
