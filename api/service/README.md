@@ -1,5 +1,7 @@
 # FPDS API Service
 
+Native product evidence correction (2026-10-05): parser v10 decodes literal CMS content/links and retains independent named account panels with complete local conditions. Shared discovery/expansion preserves per-field origins; named captured account terms can prove annual units through a separate current-run reference. Only missing savings essentials trigger additional bounded legal companions; optional checking interest does not. Worker 750 / API 594 pass. API/catalog and Worker runtime rollout is separate from the authorized direct data operation. [Diagnosis, exclusions and publication](../../docs/00-governance/three-bank-generic-collection-corrections-2026-10-05.md).
+
 Collection correction (2026-10-04): named checking plans require corroborated identity and ordinary pricing; multi-plan pages remain evidence-only. Worker v9 keeps exact linked disclosures/titles/currencies through existing automatic gates. Worker 738 / API 588 regressions pass. Direct publication and future API/Worker rollout are separate. [Operation and limits](../../docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
 
 

@@ -1,5 +1,7 @@
 # Worker Boundary
 
+Native product evidence correction (2026-10-05): parser v10 decodes literal CMS content/links and retains independent named account panels with complete local conditions. Shared discovery/expansion preserves per-field origins; named captured account terms can prove annual units through a separate current-run reference. Only missing savings essentials trigger additional bounded legal companions; optional checking interest does not. Worker 750 / API 594 pass. API/catalog and Worker runtime rollout is separate from the authorized direct data operation. [Diagnosis, exclusions and publication](../docs/00-governance/three-bank-generic-collection-corrections-2026-10-05.md).
+
 Native disclosure correction (2026-10-04): parser v9 retains unique linked financial notes and actual titles. Shared proof preserves annual/currency/price meaning and rejects shortened conditions. Named companion columns retain actual product links; generic plan discovery runs in the API/catalog boundary. Worker 738 / API 588 tests pass. [Diagnosis, bounded publication and rollout](../docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
 
 

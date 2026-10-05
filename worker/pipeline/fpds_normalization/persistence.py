@@ -216,8 +216,11 @@ FROM (
         self, *, run_id: str, inputs: list[NormalizationInput],
     ) -> list[NormalizationInput]:
         """Resolve only referenced chunks from successful captures in this run."""
-        chunk_ids = sorted({link.evidence_chunk_id for item in inputs
-                            for link in item.evidence_links})
+        from .grounded_product_expansion import expand_grounded_product_inputs
+        item_chunk_ids = [{link.evidence_chunk_id
+                           for variant in [item, *expand_grounded_product_inputs(item)]
+                           for link in variant.evidence_links} for item in inputs]
+        chunk_ids = sorted(set().union(*item_chunk_ids))
         if not chunk_ids:
             return [replace(item, evidence_origins={}, evidence_origins_resolved=True) for item in inputs]
         schema = self.active_schema
@@ -225,7 +228,7 @@ FROM (
 SET search_path TO {schema};
 SELECT COALESCE(json_agg(row_to_json(origins)), '[]'::json)::text
 FROM (
-    SELECT DISTINCT ec.evidence_chunk_id, ec.evidence_excerpt,
+    SELECT DISTINCT ec.evidence_chunk_id, ec.evidence_excerpt, ec.anchor_type, ec.anchor_value,
         ss.snapshot_id, ss.source_document_id, sd.normalized_source_url AS source_url,
         sd.bank_code, sd.country_code, rsi.run_id
     FROM evidence_chunk ec
@@ -246,9 +249,9 @@ FROM (
                                "chunk_ids_json": json.dumps(chunk_ids, ensure_ascii=True)})
         origins = {row["evidence_chunk_id"]: row for row in json.loads(output or "[]")}
         return [replace(item, evidence_origins_resolved=True, evidence_origins={
-            link.evidence_chunk_id: origins[link.evidence_chunk_id]
-            for link in item.evidence_links if link.evidence_chunk_id in origins
-        }) for item in inputs]
+            chunk_id: origins[chunk_id]
+            for chunk_id in referenced if chunk_id in origins
+        }) for item, referenced in zip(inputs, item_chunk_ids)]
 
     def persist_normalization_result(
         self,

@@ -142,7 +142,9 @@ def _accuracy_evidence(*, item: NormalizationInput, run_id: str) -> list[dict[st
                           or item.source_metadata.get("normalized_source_url")
                           or item.source_metadata.get("source_url"))
         row = {"evidence_chunk_id": link.evidence_chunk_id,
-               "evidence_excerpt": excerpt, "source_url": source_url}
+               "evidence_excerpt": excerpt, "source_url": source_url,
+               "anchor_type": origin.get("anchor_type") if origin else None,
+               "anchor_value": origin.get("anchor_value") if origin else None}
         previous = evidence.get(link.evidence_chunk_id)
         if previous is None or (source_url and not previous["source_url"]):
             evidence[link.evidence_chunk_id] = row
@@ -5673,6 +5675,7 @@ def _official_grounding_mapping_metadata(field: NormalizationExtractedField) -> 
     if metadata.get("official_grounding_contract_version") != "collection-official-grounding-v2":
         return {}
     return {
+        **{key: metadata[key] for key in ("annual_basis_evidence_chunk_id", "annual_basis_evidence_quote", "annual_basis_product_name") if key in metadata},
         "official_grounding_contract_version": "collection-official-grounding-v2",
         "official_grounding_method": metadata.get("official_grounding_method"),
         "official_verification_status": metadata.get("official_verification_status"),

@@ -92,6 +92,30 @@ _EXCESS_ROW_LABEL = r"(?:Additional|Extra|Excess|Overage) transaction (?:fee|cha
 _ORDINARY_UNLIMITED = r"\bunlimited\s+(?:(?:ordinary|free|no fee|debit|everyday|day-to-day|banking|monthly)\s+){0,3}transactions?\b"
 
 
+def _named_account_row_value(field_name: str, value: object, quote: str) -> bool | None:
+    """Native named panels keep base price, waiver and ordinary rows separate."""
+    price = re.search(r"(?mi)^Monthly (?:account |plan )?fees?\n\$(\d+(?:\.\d+)?)\n(.*)$", quote, re.S)
+    if field_name in {"monthly_fee", "public_display_fee"} and price and re.match(r"When you maintain\b", price[2], re.I):
+        # A separately labelled waiver never changes a positive base price to
+        # zero. Require its entire local note; all other eligibility stays out.
+        waiver = re.fullmatch(r"When you maintain a \$[\d,]+ balance \d+ Fee waived\n\d+\. Minimum monthly balance must be maintained throughout the calendar month to qualify for fee waiver or rebate\.", price[2], re.I)
+        return bool(Decimal(price[1]) > 0 and Decimal(price[1]) == Decimal(str(value)) and waiver)
+    row = re.search(r"(?mi)^Transactions Included\n(.+)$", quote, re.S)
+    if not row or field_name not in {"included_transactions", "additional_transaction_fee", "unlimited_transactions_flag"}:
+        return None
+    body = row[1]
+    if re.search(r"\b(?:if|when|only|eligible|qualif\w*|maintain|not unlimited)\b", body, re.I):
+        return False
+    finite = re.fullmatch(r"(\d+) included(?:, including (\d+) free (?:Interac|Intrerac)(?:\u00ae|\u00a9)? e-Transfers)?\nAdditional transactions:?\s+\$(\d+(?:\.\d+)?) each", body, re.I)
+    if finite:
+        if finite[2] and int(finite[2]) > int(finite[1]):
+            return False
+        return ((field_name == "included_transactions" and int(finite[1]) == value)
+                or (field_name == "additional_transaction_fee" and Decimal(finite[3]) == Decimal(str(value))))
+    unlimited = re.fullmatch(r"Unlimited(?:, including (?:\d+ free Interac(?:\u00ae|\u00a9)? e-Transfers|unlimited Interac and Cirrus(?:\u00ae|\u00a9)? ATM withdrawals \d+ and Interac e-Transfers sent)(?:\n\d+\. Other financial institutions may charge fees for the use of their ATMs\.)?)?", body, re.I)
+    return field_name == "unlimited_transactions_flag" and value is True and bool(unlimited)
+
+
 def _monthly_transaction_row(field_name: str, value: object, quote: str) -> bool | None:
     if field_name not in {"included_transactions", "unlimited_transactions_flag"}:
         return None
@@ -333,6 +357,9 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name in {"interest_rate_summary", "purchase_interest_rate_summary", "fee_waiver_condition", "early_withdrawal_penalty"}:
             return text(value).casefold() == q.casefold()
         return bool(text(value)) and text(value).casefold() in q.casefold()
+    named_row = _named_account_row_value(field_name, value, quote)
+    if named_row is not None:
+        return named_row
     monthly_row = _monthly_transaction_row(field_name, value, quote)
     if monthly_row is not None:
         return monthly_row
@@ -602,6 +629,21 @@ def product_currency_context(record: Mapping, excerpt: str) -> str:
     return context
 
 
+def _captured_named_annual_basis(record, mapping, chunks, source_metadata):
+    key = mapping.get("annual_basis_evidence_chunk_id")
+    basis = chunks.get(str(key), {})
+    name = str(record.get("product_name") or "")
+    quote = mapping.get("annual_basis_evidence_quote")
+    return bool(record.get("product_type") in {"chequing", "savings"} and key and name and str(mapping.get("annual_basis_product_name") or "").casefold() == name.casefold()
+        and basis.get("anchor_type") == "named_product_rate_basis"
+        and str(basis.get("anchor_value") or "").casefold() == name.casefold()
+        and _official_url(canonical_url(basis.get("source_url")), source_metadata.get("official_domain_allowlist"))
+        and exact_quote(quote, basis.get("evidence_excerpt"))
+        and text(quote).casefold().startswith(name.casefold() + " ")
+        and _ANNUAL_RATE_BASIS.search(str(quote))
+        and not re.search(r"\d+(?:\.\d+)?%|not an annual|not annual|annual fee", str(quote), re.I))
+
+
 def country_currency_fallback(record: Mapping, evidence: list[dict]) -> str | None:
     """Resolve undisclosed currency without discarding conflicting source context."""
     currency = default_currency_for_country(record.get("country_code"))
@@ -673,7 +715,8 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             or ("£" in str(quote) and record.get("currency") != "GBP")
         ):
             reason = "field_currency_mismatch"
-        elif (field_contract(name).unit == "percentage_points" or name == "term_rate_table") and not _ANNUAL_RATE_BASIS.search(str(e.get("evidence_excerpt") or "")):
+        elif (field_contract(name).unit == "percentage_points" or name == "term_rate_table") and not (_ANNUAL_RATE_BASIS.search(str(e.get("evidence_excerpt") or ""))
+                or (name in {"standard_rate", "public_display_rate"} and _captured_named_annual_basis(record, m, chunks, source_metadata))):
             reason = "annual_rate_basis_unproven"
         elif name == "minimum_balance" and re.search(
             r"balance.{0,40}(?:no|waiv\w*|avoid|free).{0,25}transaction|"

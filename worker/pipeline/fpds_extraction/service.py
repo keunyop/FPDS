@@ -512,7 +512,88 @@ def _captured_native_product_title(context, candidates):
                     and c.bank_code == context.bank_code and c.country_code == context.country_code
                     and c.source_language == context.source_language)):
             identity = title
+    if not identity and _infer_product_type(context) == "personal-loan":
+        url_tokens = set(re.findall(r"[a-z]+", urlsplit(url).path.lower()))
+        names = set()
+        for c in candidates:
+            if (c.anchor_type == "named_lending_range_declaration" and c.source_document_id == context.source_document_id
+                    and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
+                    and c.bank_code == context.bank_code and c.country_code == context.country_code
+                    and c.source_language == context.source_language):
+                distinctive = set(re.findall(r"[a-z]+", str(c.anchor_value).lower())) - {"personal", "loan", "loans"}
+                if distinctive and distinctive <= url_tokens:
+                    names.add(str(c.anchor_value))
+        if len(names) == 1:
+            identity = names.pop()
     return identity
+
+
+def _extract_grounded_named_account_variants(*, context, candidates):
+    """Only complete independently owned native accounts become siblings."""
+    from worker.pipeline.fpds_collection_accuracy import quote_supports_value, text
+    if _infer_product_type(context) != "chequing" or context.source_metadata.get("discovery_role") != "detail":
+        return []
+    url = _canonical_official_source_url(context.source_metadata.get("normalized_source_url"))
+    if not _url_matches_official_domains(url, allowed_domains=_official_domain_allowlist(context)):
+        return []
+    owned = [c for c in candidates if c.source_document_id == context.source_document_id
+             and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
+             and c.bank_code == context.bank_code and c.country_code == context.country_code
+             and c.source_language == context.source_language]
+    variants = []
+    for section in owned:
+        if section.anchor_type != "named_product_section":
+            continue
+        name = str(section.anchor_value or "")
+        if not section.evidence_excerpt.startswith(name + "\n"):
+            continue
+        records = {}
+        def add(field_name, value, chunk, quote=None):
+            quote = quote or chunk.evidence_excerpt
+            if not quote_supports_value(field_name, value, quote):
+                return
+            row = {"candidate_value": value, "evidence_chunk_id": chunk.evidence_chunk_id,
+                   "evidence_text_excerpt": chunk.evidence_excerpt, "anchor_type": chunk.anchor_type,
+                   "anchor_value": chunk.anchor_value, "page_no": chunk.page_no, "chunk_index": chunk.chunk_index,
+                   "field_metadata": {"official_grounding_contract_version": "collection-official-grounding-v2",
+                       "official_verification_status": "match", "official_grounding_method": "deterministic_named_product_section",
+                       "official_web_sources": [{"url": url}], "evidence_quote": quote}}
+            records.setdefault(field_name, []).append(row)
+        identity_chunk = next((c for c in owned if c.anchor_type == "named_product_identity"
+                               and c.anchor_value == name and c.evidence_excerpt == name), None)
+        if identity_chunk is None:
+            continue
+        add("product_name", name, identity_chunk, name)
+        from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
+        for currency, pattern in CURRENCY_PATTERNS.items():
+            if re.search(pattern, name, re.I):
+                add("currency", currency, identity_chunk, name)
+        for c in owned:
+            if c.anchor_type != "named_product_financial_record" or c.anchor_value != name:
+                continue
+            q = c.evidence_excerpt
+            price = re.search(r"(?mi)^Monthly (?:account |plan )?fees?\n\$(\d+(?:\.\d+)?)", q)
+            if price:
+                add("monthly_fee", float(price[1]), c)
+                if "Fee waived" in q and "calendar month" in q:
+                    add("fee_waiver_condition", text(q), c)
+            finite = re.search(r"(?mi)^Transactions Included\n(\d+) included", q)
+            if finite:
+                add("included_transactions", int(finite[1]), c)
+            excess = re.search(r"(?mi)^Additional transactions:?\s+\$(\d+(?:\.\d+)?) each", q)
+            if excess:
+                add("additional_transaction_fee", float(excess[1]), c)
+            if re.search(r"(?mi)^Transactions Included\nUnlimited", q):
+                add("unlimited_transactions_flag", True, c)
+        facts = {key: rows[0] for key, rows in records.items()
+                 if len({str(row["candidate_value"]) for row in rows}) == 1}
+        complete = ("monthly_fee" in facts and (("unlimited_transactions_flag" in facts)
+                     or {"included_transactions", "additional_transaction_fee"} <= facts.keys()))
+        if complete and not {"included_transactions", "unlimited_transactions_flag"} <= facts.keys():
+            variants.append({"product_name": name, "field_records": facts,
+                             **{key: row["candidate_value"] for key, row in facts.items()},
+                             **{key: value for key, value in facts["product_name"].items() if key != "candidate_value"}})
+    return variants if len(variants) >= 2 else []
 
 
 def _append_captured_decision_facts(*, context, candidates, fields, requested_fields):
@@ -555,6 +636,13 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
         and c.source_language == context.source_language
         and re.search(r"(?mi)^Monthly fee\s*\n\$\d", c.evidence_excerpt)]
     single_owned_price = len(owned_prices) == 1
+    basis_records = [c for c in candidates if c.anchor_type == "named_product_rate_basis"
+                     and str(c.anchor_value).casefold() == identity.casefold()
+                     and c.retrieval_metadata.get("captured_companion") is True
+                     and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url
+                     and c.bank_code == context.bank_code and c.country_code == context.country_code
+                     and c.source_language == context.source_language]
+    basis_records = list({c.evidence_excerpt: c for c in basis_records}.values())
     proposals={}
     for c in candidates:
         own=(c.source_document_id==context.source_document_id and c.source_snapshot_id==context.snapshot_id
@@ -648,6 +736,35 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 denomination = re.search(r"(?mi)^Currency\s*\n(CAD|USD|EUR|GBP)\s*$", quote)
                 if denomination:
                     values["currency"] = denomination[1]
+        if own and c.anchor_type == "named_lending_range_declaration" and _infer_product_type(context) == "personal-loan":
+            # A complete numeric range and repayment interval remain prose,
+            # never a fabricated scalar or a payment-example APR.
+            owner_tokens = set(re.findall(r"[a-z]+", str(c.anchor_value).lower())) - {"personal", "loan", "loans"}
+            target_tokens = set(re.findall(r"[a-z]+", (identity + " " + url).lower()))
+            if owner_tokens and owner_tokens <= target_tokens and not re.search(r"\b(?:example|illustration)\b", quote, re.I):
+                range_match = re.search(r"\bInterest Rates? on .+? loans? range from \d+(?:\.\d+)?%\s*-\s*\d+(?:\.\d+)?%", quote, re.I)
+                term = re.search(r"minimum loan term of \d+ months? and maximum term of \d+ months?", quote, re.I)
+                if range_match and term and re.search(r"Annual Percentage Rate|\bAPR\b|per annum", quote, re.I):
+                    if native_identity_proven:
+                        values["product_name"] = identity
+                        field_quotes["product_name"] = identity
+                    values["interest_rate_summary"] = _normalize_text(quote)
+                    field_quotes["interest_rate_summary"] = quote
+                    values["term_length_text"] = term[0]
+                    field_quotes["term_length_text"] = term[0]
+        rate_basis = None
+        if _infer_product_type(context) in {"savings", "chequing"} and len(basis_records) == 1:
+            if c is basis_records[0]:
+                values["interest_calculation_method"] = _normalize_text(quote)
+                from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
+                for currency, pattern in CURRENCY_PATTERNS.items():
+                    if re.search(pattern, quote, re.I):
+                        values["currency"] = currency
+            if own and c.anchor_type == "section" and identity.casefold() in quote.casefold() and len(quote) <= 1000:
+                rates = set(re.findall(r"(?<![\d.])(\d+(?:\.\d+)?)%", quote))
+                if len(rates) == 1 and re.search(r"\binterest\b", quote, re.I):
+                    values["standard_rate"] = float(next(iter(rates)))
+                    rate_basis = basis_records[0]
         if own and c.anchor_type == "linked_rate_record":
             rates = re.findall(r"(?<![\d.])(\d+(?:\.\d+)?)%", quote)
             if len(set(rates)) == 1:
@@ -688,13 +805,21 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 anchor_value=c.anchor_value,page_no=c.page_no,chunk_index=c.chunk_index,
                 field_metadata={'official_grounding_contract_version':'collection-official-grounding-v2',
                     'official_verification_status':'match','official_grounding_method':'deterministic_captured_financial_record',
-                    'official_web_sources':[{'url':source_url,'title':identity}], 'evidence_quote':field_quote})
+                    'official_web_sources':[{'url':source_url,'title':identity}], 'evidence_quote':field_quote,
+                    **({'annual_basis_evidence_chunk_id':rate_basis.evidence_chunk_id,
+                        'annual_basis_evidence_quote':rate_basis.evidence_excerpt,
+                        'annual_basis_product_name':identity} if name == 'standard_rate' and rate_basis else {})})
             proposals.setdefault(name,[]).append(fact)
     conflicts = {name for name, rows in proposals.items()
                  if len({str(f.candidate_value) for f in rows}) != 1}
     if 'included_transactions' in proposals and 'unlimited_transactions_flag' in proposals:
         conflicts.update({'included_transactions', 'unlimited_transactions_flag'})
     proven = [rows[0] for name, rows in proposals.items() if name not in conflicts]
+    variants = next((f.field_metadata.get("grounded_product_variants") for f in fields
+                     if f.field_name == "product_name" and f.field_metadata.get("grounded_product_variants")), None)
+    if variants:
+        proven = [replace(f, field_metadata={**f.field_metadata, "grounded_product_variants": variants})
+                  if f.field_name == "product_name" else f for f in proven]
     names = {f.field_name for f in proven} | conflicts | linked_labels
     # A model or heuristic value cannot hide contradictory captured records.
     return [f for f in fields if f.field_name not in names] + proven
@@ -931,7 +1056,7 @@ class ExtractionService:
             )
             if grounded_variant_count:
                 runtime_notes.append(
-                    f"Captured {grounded_variant_count} fully grounded sibling products from independent official card blocks."
+                    f"Captured {grounded_variant_count} fully grounded sibling products from independent official product blocks."
                 )
             if exact_origin_grounded_count:
                 runtime_notes.append(
@@ -1287,7 +1412,8 @@ def _extract_fields(
                 field=product_name_field,
             )
             grounded_product_variants = (
-                _extract_grounded_card_product_variants(
+                _extract_grounded_named_account_variants(context=context, candidates=candidates)
+                or _extract_grounded_card_product_variants(
                     context=context,
                     candidates=candidates,
                 )

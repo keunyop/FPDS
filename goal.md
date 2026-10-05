@@ -1,5 +1,23 @@
 # Admin pre-handover review and fixes
 
+## Authorized slice: generic three-bank corrections and direct publication - 2026-10-05
+Objective: reproduce and repair shared collection failures, repeatedly verify actual service behavior, directly publish only current automatically accepted FAIRSTONE/FNBC/HAVENTREE products without Admin API.
+Scope: bounded current essential captures/reuse; generic parser, product-section/identity, companion selection, extraction/provenance and financial-context corrections with matching prompts and cross-bank/adversarial regressions; normal automatic promotion/aggregate refresh; private before-images, preserved original history and unrelated data; independent Public verification.
+Exclusions: weaker essentials, manual review, bank-specific financial rules, new types/countries, account/security changes, permanent recovery tooling, unrelated refactors, serving deployment/restarts.
+Acceptance: reproduce failures before extension; ordinary services consume identical official captures; exact currency/rate/term/access/conditions/origins remain; repeated gate rehearsal stabilizes with retained unsupported/conflicting exclusions; approved scope published through normal gates; other-bank/US and original evidence preserved; Public membership/values/privacy independently verified.
+Verification: source-backed success/boundary/failure and cross-bank tests, full affected Worker/API suites, persisted-origin provider-disabled rehearsal, before/after DB/Public API/site readbacks, repository contracts and git diff --check.
+Status: complete for this code/data slice. Worker 750 / API 594, repeated current-run persisted-origin rehearsal, 31 exact field citations, six anonymous detail API/site routes, original 433 products / 1,445 versions / all original Runs/candidates/sources/snapshots and CA 64 / US 5 Public values preserved. Six products are published through normal automatic promotion and full-country aggregate: FAIRSTONE 1 / FNBC 4 / HAVENTREE 1; Public CA 70 / US 5, ten exclusions and zero product reviews/provider/Admin calls/pending refreshes. Foundation/changed-source Markdown/diff checks pass; whole repo-doctor has a pre-existing link failure in an old tmp copy, documented in the report. Future API/catalog/auto-promotion and Worker rollout remains separate. Preserve earlier goal ownership.
+
+
+## Read-only slice: FAIRSTONE / FNBC / HAVENTREE direct evidence assessment - 2026-10-05
+Objective: assess additional automatic-approval feasibility from current official sources without FPDS Admin API.
+Scope: bounded official detail/rate/fee/terms inspection, latest saved-input comparison, existing financial gates, evidence report and journal; preserve earlier goal ownership.
+Exclusions: paid/model calls, runtime fixes, canonical/registry writes, approval/publication, deployment, manual review and relaxed essentials.
+Acceptance: identify concrete candidates and essential blockers; distinguish evidence feasibility from actual automatic acceptance; retain exact source, financial and product boundaries.
+Verification: current official pages/documents, existing contracts, read-only preserved inputs, final goal/diff review and git diff --check.
+Status: complete for this read-only feasibility slice. Six priority candidates and further mortgage/GIC opportunities are identified with exact financial conditions and retained conflicts; sixteen direct capture/hash receipts and read-only original batch verified. No automatic acceptance or publication is claimed. Preserve all earlier goal ownership.
+
+
 ## Authorized slice: generic collection corrections and DESJARDINS/EQBANK publication - 2026-10-04
 Objective: reproduce current two-bank evidence losses, correct shared collection paths across banks/types, directly collect and publish current automatic passes.
 Scope: preserved latest batch diagnosis; bounded official essential captures; generic discovery/parser/extraction/normalization/financial-proof corrections with matching prompts and source-backed positive/adversarial regressions; normal automatic promotion/Public refresh, private before-images and independent readback.

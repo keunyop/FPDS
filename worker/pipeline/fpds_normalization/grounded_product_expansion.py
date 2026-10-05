@@ -6,6 +6,11 @@ from typing import Any
 from .models import NormalizationEvidenceLink, NormalizationExtractedField, NormalizationInput
 
 _VARIANT_FIELD_TYPES = {
+    "chequing": {
+        "product_name": "string", "currency": "string", "monthly_fee": "decimal", "included_transactions": "integer",
+        "additional_transaction_fee": "decimal", "unlimited_transactions_flag": "boolean",
+        "fee_waiver_condition": "string",
+    },
     "credit-card": {
         "product_name": "string",
         "annual_fee": "decimal",
@@ -21,6 +26,7 @@ _VARIANT_FIELD_TYPES = {
     },
 }
 _GROUNDING_METHODS = {
+    "chequing": "deterministic_named_product_section",
     "credit-card": "deterministic_sibling_product_block",
     "line-of-credit": "deterministic_sibling_lending_table",
 }
@@ -62,11 +68,30 @@ def expand_grounded_product_inputs(item: NormalizationInput) -> list[Normalizati
 def _valid_variant(value: object, *, product_type: str) -> dict[str, Any] | None:
     if not isinstance(value, dict):
         return None
-    required_fields = (
-        ("product_name", "annual_fee", "purchase_interest_rate")
-        if product_type == "credit-card"
-        else ("product_name", "interest_rate_summary", "credit_limit_text", "minimum_payment_text")
-    )
+    if product_type == "chequing":
+        records = value.get("field_records")
+        if not isinstance(records, dict) or not {"product_name", "monthly_fee"} <= records.keys():
+            return None
+        if not ("unlimited_transactions_flag" in records or {"included_transactions", "additional_transaction_fee"} <= records.keys()):
+            return None
+        if {"included_transactions", "unlimited_transactions_flag"} <= records.keys():
+            return None
+        for name, row in records.items():
+            if not isinstance(row, dict) or not row.get("evidence_chunk_id") or not row.get("evidence_text_excerpt"):
+                return None
+            from worker.pipeline.fpds_collection_accuracy import exact_quote, quote_supports_value
+            meta = row.get("field_metadata", {})
+            if (meta.get("official_grounding_method") != _GROUNDING_METHODS[product_type]
+                    or not exact_quote(meta.get("evidence_quote"), row["evidence_text_excerpt"])
+                    or not quote_supports_value(name, row.get("candidate_value"), row["evidence_text_excerpt"])):
+                return None
+        required_fields = ("product_name", "monthly_fee")
+    else:
+        required_fields = (
+            ("product_name", "annual_fee", "purchase_interest_rate")
+            if product_type == "credit-card"
+            else ("product_name", "interest_rate_summary", "credit_limit_text", "minimum_payment_text")
+        )
     if any(value.get(key) in {None, ""} for key in (*required_fields, "evidence_chunk_id", "evidence_text_excerpt")):
         return None
     if product_type == "line-of-credit" and all(
@@ -98,6 +123,9 @@ def _build_variant_input(
     candidate_key = "grounded-" + product_type + "-" + sha256(product_name.casefold().encode("utf-8")).hexdigest()[:16]
     variant_field_types = _VARIANT_FIELD_TYPES[product_type]
     variant_field_names = set(variant_field_types)
+    if product_type == "chequing":
+        # No family or neighbouring optional facts may leak into a sibling.
+        variant_field_names.update(f.field_name for f in item.extracted_fields if f.field_name not in {"product_type", "product_family", "bank_code", "country_code", "source_language"})
     variant_fields = [
         _variant_field(item=item, variant=variant, field_name=field_name, value_type=value_type)
         for field_name, value_type in variant_field_types.items()
@@ -152,6 +180,8 @@ def _resolved_variant_source_metadata(
                 resolved_reasons.append("grounded_product_variants_resolved")
             resolved_discovery[reason_key] = list(dict.fromkeys(resolved_reasons))
         metadata["discovery_metadata"] = resolved_discovery
+    if item.source_metadata.get("product_type") == "chequing" and isinstance(metadata.get("discovery_metadata"), dict):
+        metadata["discovery_metadata"].update(primary_heading=product_name, page_title=product_name, product_identity_match=True)
     metadata.update(
         {
             "product_name": product_name,
@@ -168,6 +198,9 @@ def _variant_field(
     field_name: str,
     value_type: str,
 ) -> NormalizationExtractedField:
+    if isinstance(variant.get("field_records"), dict):
+        record = variant["field_records"][field_name]
+        variant = {**variant, **record}
     return NormalizationExtractedField(
         field_name=field_name,
         candidate_value=variant[field_name],
@@ -195,8 +228,8 @@ def _variant_evidence_link(
     return NormalizationEvidenceLink(
         field_name=field.field_name,
         candidate_value=str(field.candidate_value),
-        evidence_chunk_id=str(variant["evidence_chunk_id"]),
-        evidence_text_excerpt=str(variant["evidence_text_excerpt"]),
+        evidence_chunk_id=str(field.evidence_chunk_id),
+        evidence_text_excerpt=str(field.evidence_text_excerpt),
         source_document_id=item.source_document_id,
         source_snapshot_id=item.snapshot_id,
         citation_confidence=field.confidence,

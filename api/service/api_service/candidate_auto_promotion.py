@@ -533,7 +533,44 @@ def _has_ambiguous_product_boundary(row: dict[str, Any]) -> bool:
             }
         )
     )
-    return has_boundary_signal and not _has_deterministic_sibling_lending_boundary(row)
+    return has_boundary_signal and not (_has_deterministic_sibling_lending_boundary(row)
+                                       or _has_deterministic_named_account_boundary(row))
+
+
+def _has_deterministic_named_account_boundary(row: dict[str, Any]) -> bool:
+    """Recheck the same complete native account proof at final promotion.
+
+    A containing source's historic family label cannot erase separately proved
+    product boundaries. Receipts, grounding and all other promotion gates remain.
+    """
+    from worker.pipeline.fpds_collection_accuracy import quote_supports_value, text
+    if str(row.get("product_type") or "").strip().lower() != "chequing":
+        return False
+    payload = _coerce_mapping(row.get("candidate_payload"))
+    mappings = _coerce_mapping(row.get("field_mapping_metadata"))
+    name = text(row.get("product_name"))
+    if not name or payload.get("product_name") != row.get("product_name"):
+        return False
+    required = {"product_name", "monthly_fee"}
+    if payload.get("unlimited_transactions_flag") is True:
+        if payload.get("included_transactions") is not None:
+            return False
+        required.add("unlimited_transactions_flag")
+    else:
+        required.update({"included_transactions", "additional_transaction_fee"})
+    for field_name in required:
+        mapping = _coerce_mapping(mappings.get(field_name))
+        quote = mapping.get("official_evidence_quote")
+        value = payload.get(field_name)
+        if (mapping.get("official_grounding_contract_version") != "collection-official-grounding-v2"
+                or mapping.get("official_grounding_method") != "deterministic_named_product_section"
+                or mapping.get("official_verification_status") != "match"
+                or not mapping.get("evidence_chunk_id") or not mapping.get("official_web_sources")
+                or mapping.get("normalized_value") != value
+                or not (text(quote) == name if field_name == "product_name" else text(quote).startswith(name + " "))
+                or not quote_supports_value(field_name, value, str(quote or ""))):
+            return False
+    return True
 
 
 def _has_deterministic_sibling_lending_boundary(row: dict[str, Any]) -> bool:

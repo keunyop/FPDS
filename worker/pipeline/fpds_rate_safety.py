@@ -198,6 +198,7 @@ _RATE_LABEL = (
 )
 _NUMERIC_PERCENTAGE = r"(?<![\d.])(?:\d{1,3}(?:\.\d{1,6})?|\.\d{1,6})\s*%"
 _EXPLICIT_RATE_PERCENTAGE_PATTERNS = (
+    re.compile(rf"\binterest\s+rates?\s+on\s+(?:[a-z]+[\s-]+){{1,8}}loans?\s+range\s+from\s+{_NUMERIC_PERCENTAGE}\s*-\s*{_NUMERIC_PERCENTAGE}", re.IGNORECASE),
     re.compile(rf"\b{_RATE_LABEL}\b[^\d%]{{0,24}}{_NUMERIC_PERCENTAGE}", re.IGNORECASE),
     re.compile(rf"{_NUMERIC_PERCENTAGE}[^\w%]{{0,12}}\b{_RATE_LABEL}\b", re.IGNORECASE),
 )

@@ -1,6 +1,6 @@
 # FPDS Docs Map
 
-Status: Active navigation index · Updated: 2026-10-04
+Status: Active navigation index · Updated: 2026-10-05
 
 Use this map to find the current contract or operating document. Dated reports
 record historical results; product counts and test totals are not live status.
@@ -24,7 +24,7 @@ or exclusion; account/signup approval remains separate. Read the
 [collection accuracy policy](03-design/collection-accuracy-policy.md) before
 collection work.
 
-Latest collection result: [DESJARDINS / EQBANK shared corrections and direct publication](00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+Latest collection result: [FAIRSTONE / FNBC / HAVENTREE shared corrections and direct publication](00-governance/three-bank-generic-collection-corrections-2026-10-05.md). Previous result: [DESJARDINS / EQBANK](00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
 
 ## Resume development
 

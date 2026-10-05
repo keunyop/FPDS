@@ -502,3 +502,16 @@ unrelated insurance-condition false rejection. Cross-market and adversarial
 regressions verify the generic correction without bank exceptions. Worker/API
 runtime deployment remains separate; no live rate was rewritten. See the
 [diagnosis and verification](../00-governance/optional-checking-rates-2026-10-02.md).
+
+
+## Native product sections and independently captured annual basis - 2026-10-05
+
+Parser v10 preserves bounded literal CMS JSON content/links without script execution or truncated financial qualifications. Independently named native product panels retain subordinate financial labels, complete unique local notes, a separate native identity and atomic price/transaction records. Complete chequing siblings use the existing expansion path with their own per-field evidence origins; family descriptions, optional facts and service currencies cannot leak between siblings. Discovery may resolve a family boundary from these complete native panels, while retaining raw AI labels and all other scope/security gates.
+
+A positive labelled base fee before a complete separately stated calendar-month balance waiver is not zero. Ordinary Transactions Included counts remain separate from included transfer sublimits and exact excess costs. General unlimited rows may include limited transfers or external ATM fee notices without claiming those services are free/unlimited. Conditional, ambiguous and channel-only declarations stay excluded. Existing fee and suitability rules remain intact.
+
+A directly linked legal container may be selected within existing companion caps only when a savings product's essential numeric interest lacks annual units. Optional checking interest must not trigger extra searches. A named account Terms and Conditions section can prove annual units through an explicit separate captured-basis reference for its own standard/display deposit rate. Preserve both exact source quotes; do not manufacture a composite quotation. The reference must resolve through actual successful current-run same-bank/country snapshot/parse joins, bind the exact named account and parser anchor, prove annual units in the complete original record, and contain no competing numeric rate. Missing, mismatched, unproven or foreign basis origins stay excluded. Numeric rates still pass unchanged meaning, conditions, uniqueness and currency checks.
+
+An explicit official loan range declaration remains a full qualified prose summary, including its repayment interval and actual APR qualifiers. Its endpoints and payment-example APRs never become scalar comparison rates. The shared prompts and source-backed/cross-bank regressions cover all extensions. See [diagnosis and bounded publication](../00-governance/three-bank-generic-collection-corrections-2026-10-05.md).
+
+Final automatic promotion rechecks the same complete native account identity and general cost records. A historical containing-page family label cannot erase field-level independently proven boundaries; missing, foreign or conditional proof and hard coverage/service exclusions remain blocking. Receipts and current official grounding are still required.

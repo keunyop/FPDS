@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from io import BytesIO
 import re
+import json
 
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
@@ -12,7 +13,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v9"
+PARSER_VERSION = "fpds-parse-chunk-v10"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -72,6 +73,43 @@ def _parse_html(body: bytes) -> ParsedArtifact:
 
     if soup.title and soup.title.get_text(" ", strip=True):
         sections.append(_RawSegment("document_title", "document-title", None, soup.title.get_text(" ", strip=True)))
+    from worker.native_product_sections import extract_named_product_sections
+    for product in extract_named_product_sections(html):
+        sections.append(_RawSegment("named_product_section", product.name, None, product.text))
+        sections.append(_RawSegment("named_product_identity", product.name, None, product.name))
+        sections.extend(_RawSegment("named_product_financial_record", product.name, None, record)
+                        for record in product.financial_records)
+    # Decode literal native CMS HTML without executing JavaScript. Each content
+    # fragment keeps headings/paragraphs and complete financial qualifiers.
+    for node in soup.find_all(attrs={"aem-data": True})[:256]:
+        raw = str(node.get("aem-data") or "")
+        if len(raw) > 250000:
+            continue
+        try:
+            payload = json.loads(raw)
+        except (ValueError, TypeError):
+            continue
+        stack, count = [payload], 0
+        while stack and count < 2000:
+            item = stack.pop()
+            count += 1
+            if isinstance(item, dict):
+                for key, value in item.items():
+                    if isinstance(value, str) and key.lower() in {"content", "body", "description", "text", "heading", "title"} and len(value) <= 64000:
+                        fragment = BeautifulSoup(value, "html.parser")
+                        for unsafe in fragment(["script", "style", "noscript", "svg"]):
+                            unsafe.decompose()
+                        sections.extend(_extract_html_sections(fragment))
+                        for paragraph in fragment.find_all("p"):
+                            declaration = paragraph.get_text(" ", strip=True)
+                            if re.search(r"\bInterest Rates? on .+? loans? range from\b", declaration, re.I) and len(declaration) <= 2000:
+                                owner = re.search(r"Interest Rates? on (.+? loans?) range from", declaration, re.I)
+                                sections.append(_RawSegment("named_lending_range_declaration", owner[1], None, declaration))
+                    elif isinstance(value, (dict, list)):
+                        stack.append(value)
+            elif isinstance(item, list):
+                stack.extend(reversed(item))
+    sections.extend(_named_rate_basis_sections(soup))
     sections.extend(_product_terms_sections(soup))
     sections.extend(_labelled_disclosure_sections(soup))
     sections.extend(_linked_rate_records(soup))
@@ -98,6 +136,37 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         segments=segments,
     )
 
+
+
+def _named_rate_basis_sections(soup):
+    """A named terms section can prove units, never donate a numeric rate."""
+    output, seen = [], set()
+    for section in soup.find_all("section")[:128]:
+        title_node = section.find(["h1", "h2", "h3", "h4", "p"])
+        if title_node is None:
+            continue
+        title = title_node.get_text(" ", strip=True)
+        match = re.fullmatch(r"(.+? account):? Terms and Conditions", title, re.I)
+        if not match:
+            continue
+        name = match[1]
+        paragraphs = section.find_all("p")
+        introduction = next((p.get_text(" ", strip=True) for p in paragraphs
+                             if name.casefold() in p.get_text(" ", strip=True).casefold()
+                             and re.search(r"\b(?:Canadian|U\.?S\.?) dollar\b", p.get_text(" ", strip=True), re.I)), "")
+        for paragraph in paragraphs:
+            value = paragraph.get_text(" ", strip=True)
+            if not re.search(r"\binterest is calculated.+?rates per annum\b", value, re.I):
+                continue
+            block = paragraph
+            while block.parent is not None and block.parent is not section and not block.get("id") and len(block.parent.get_text()) <= 6400:
+                block = block.parent
+            content = block.get_text("\n", strip=True)
+            record = "\n".join([name, introduction, content])
+            if len(record) <= 6400 and record not in seen:
+                seen.add(record)
+                output.append(_RawSegment("named_product_rate_basis", name, None, record))
+    return output
 
 
 def _product_terms_sections(soup: BeautifulSoup) -> list[_RawSegment]:

@@ -5412,6 +5412,16 @@ def _discover_detail_companion_links(
                 normalized_url=link.normalized_url,
                 anchor_text=link.anchor_text,
             )
+            if score <= 0 and _canonical_product_type_code(product_type) == "savings":
+                # A directly linked legal container can hold essential annual
+                # units. Fetch only when this captured detail has a numeric
+                # interest declaration without annual basis; normal grounding
+                # still requires a complete named account terms section.
+                literal_text = " ".join([*extract_structured_text_sections(html_text), html_text])
+                needs_basis = (re.search(r"\d+(?:\.\d+)?%[^<]{0,30}interest|interest[^<]{0,30}\d+(?:\.\d+)?%", literal_text, re.I)
+                               and not re.search(r"per annum|annual (?:interest )?rate|\bAPR\b|\bAPY\b", literal_text, re.I))
+                if needs_basis and link.anchor_text.strip().casefold() == "legal" and re.search(r"/legal/?$", urlparse(link.normalized_url).path, re.I):
+                    score = 18
             if score <= 0:
                 continue
             per_detail.append(
@@ -5791,6 +5801,9 @@ def _candidate_promotes_to_detail(
         return False
     if {"non_product_service_flow", "product_unavailable_for_new_customers"}.intersection(page_evidence.page_evidence_reason_codes):
         return False
+    if ("native_named_product_sections_resolved" in page_evidence.page_evidence_reason_codes
+            and page_evidence.product_identity_match and page_evidence.negative_signal_count == 0):
+        return True  # Complete native facts resolve boundaries independently of AI labels.
     verified_coverage_review_source = (
         (allow_verified_coverage_review_source or allow_verified_lending_review_source)
         and _verified_coverage_page_requires_review(
@@ -6242,6 +6255,9 @@ def _build_detail_discovery_metadata(
     resolved_ai_reasons = _coerce_reason_codes(ai_score.reason_codes) if ai_score is not None else []
     if _single_section_overrides_hub_score(ai_score, page_evidence):
         resolved_ai_reasons = [code for code in resolved_ai_reasons if code != "hub_page_not_detail"]
+    if ("native_named_product_sections_resolved" in page_evidence.page_evidence_reason_codes
+            and page_evidence.product_identity_match and page_evidence.negative_signal_count == 0):
+        resolved_ai_reasons = [code for code in resolved_ai_reasons if code not in {"hub_page_not_detail", "multi_product_family_overview"}]
     combined = _candidate_combined_score(candidate, {candidate.normalized_url: ai_score} if ai_score is not None else {})
     if page_evidence.page_evidence_score >= 7 and combined >= 8:
         confidence = "high"
@@ -6633,7 +6649,11 @@ def _score_page_evidence(
         reason_codes.append(scope_exclusion_reason)
         reason_codes.append("insufficient_evidence")
     if multi_product_family_overview:
-        reason_codes.append("multi_product_family_overview")
+        from worker.native_product_sections import complete_named_account_sections
+        if product_type == "chequing" and not scope_exclusion_reason and not negative_hits and len(complete_named_account_sections(html_text)) >= 2:
+            reason_codes.append("native_named_product_sections_resolved")
+        else:
+            reason_codes.append("multi_product_family_overview")
     if not title_match and not primary_heading_match and not body_match and attribute_hits == 0:
         reason_codes.append("insufficient_evidence")
 

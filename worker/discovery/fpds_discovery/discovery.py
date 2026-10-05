@@ -606,7 +606,7 @@ class _LinkExtractor(HTMLParser):
         for name, raw_value in attrs:
             value = (raw_value or "").strip()
             if (
-                not name.lower().startswith("data-")
+                not (name.lower().startswith("data-") or name.lower() == "aem-data")
                 or not value
                 or len(value) > _STRUCTURED_ATTRIBUTE_MAX_CHARS
                 or value[0] not in "[{"
@@ -697,7 +697,7 @@ class _StructuredTextExtractor(HTMLParser):
         for name, raw_value in attrs:
             value = (raw_value or "").strip()
             if (
-                not name.lower().startswith("data-")
+                not (name.lower().startswith("data-") or name.lower() == "aem-data")
                 or not value
                 or len(value) > _STRUCTURED_ATTRIBUTE_MAX_CHARS
                 or value[0] not in "[{"
@@ -822,7 +822,8 @@ class _StructuredTextExtractor(HTMLParser):
         remaining = _STRUCTURED_TEXT_TOTAL_CHARS - self._total_chars
         if remaining <= 0:
             return
-        text = text[: min(4_000, remaining)]
+        if len(text) > remaining:
+            return  # Never retain a truncated financial declaration.
         self._seen.add(text)
         self.sections.append(text)
         self._total_chars += len(text)
