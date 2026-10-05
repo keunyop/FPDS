@@ -1,5 +1,19 @@
 # FPDS Workspace
 
+## Essential evidence research - 2026-10-05
+
+Ordinary Admin collection now diagnoses missing required proof after initial
+capture/parse, follows observed official product/companion links for at most two
+waves, then runs final extraction, normalization, validation and promotion.
+Additional evidence is capped at two URLs per detail and 48 per Run; planning
+uses at most eight constrained model calls per Run. Optional gaps never trigger
+research. Companions remain evidence-only and all financial/security gates apply.
+`/healthz` and private Run receipts report `collection_process_version` so a
+source change can be distinguished from the serving collection process.
+[Root cause, verification and release limits](docs/00-governance/ordinary-collection-redesign-2026-10-05.md).
+This implementation requires coordinated API/runner and Worker rollout; isolated
+rehearsal is neither deployment nor a canonical/Public publication result.
+
 FPDS (Finance Product Data Service) collects official financial-product evidence
 and serves authenticated Admin operations and anonymous Public projections.
 This repository contains both applications; the current handover covers Admin

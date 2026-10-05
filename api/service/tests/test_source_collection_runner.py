@@ -220,6 +220,8 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         with (
             patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
             patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
+            patch("api_service.source_collection_runner._research_essential_evidence", side_effect=lambda **kw: (kw["parsed_source_ids"], [])),
+            patch("api_service.source_collection_runner._persist_evidence_research_receipt") as process_receipt,
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
             patch("api_service.source_collection_runner._persist_end_to_end_source_summary") as persist_summary,
             patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
@@ -353,6 +355,8 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         with (
             patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
             patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
+            patch("api_service.source_collection_runner._research_essential_evidence", side_effect=lambda **kw: (kw["parsed_source_ids"], [])),
+            patch("api_service.source_collection_runner._persist_evidence_research_receipt") as process_receipt,
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
             patch("api_service.source_collection_runner._persist_end_to_end_source_summary"),
             patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
@@ -410,6 +414,8 @@ class SourceCollectionRunnerTests(unittest.TestCase):
         with (
             patch("api_service.source_collection_runner.args_temp_dir", return_value=temp_dir),
             patch("api_service.source_collection_runner._resolve_env_file", return_value=None),
+            patch("api_service.source_collection_runner._research_essential_evidence", side_effect=lambda **kw: (kw["parsed_source_ids"], [])),
+            patch("api_service.source_collection_runner._persist_evidence_research_receipt") as process_receipt,
             patch(
                 "api_service.source_collection_runner._run_stage",
                 return_value={"source_results": [{"source_id": "BMO-CHQ-002", "snapshot_action": "failed"}]},
@@ -419,6 +425,7 @@ class SourceCollectionRunnerTests(unittest.TestCase):
                 source_collection_runner._run_group(plan=plan, group=group)
 
         run_stage.assert_called_once()
+        process_receipt.assert_called_once_with(run_id="run-001", rounds=[], model_calls=0)
 
     def test_successful_source_ids_ignores_failed_results(self) -> None:
         self.assertEqual(

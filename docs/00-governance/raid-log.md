@@ -1,5 +1,20 @@
 # FPDS RAID Log
 
+## Ordinary acquisition and evaluation risk - 2026-10-05
+
+Previous same-input supplements did not prove autonomous evidence acquisition or
+fresh deployed model yield. The new ordinary path diagnoses essentials and
+follows bounded observed official leads, with success/stop/failure receipts and a
+process version separate from accuracy/profile versions. Link-planner usage is
+capped at eight calls per Run, supplementing the existing single final grounding
+call per detail; this amends the older one-call acquisition assumption in R-005.
+Source-backed and isolated live evidence must still be distinguished from deployed
+Admin publication. Unobserved links, ambiguous/current-inapplicable facts, model
+errors, parser patterns and exhausted budgets can still exclude valid bank
+products. Coordinate API/runner/Worker rollout and measure a bounded normal Run
+before claiming general direct-quality equivalence.
+[Evidence and limits](ordinary-collection-redesign-2026-10-05.md).
+
 ## Direct/Admin parity and rollout risk - 2026-10-03
 
 CIBC saved input demonstrates missing essential companion/column/identity proof

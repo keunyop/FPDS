@@ -1,5 +1,18 @@
 # FPDS Admin 운영 핸드북 초안
 
+## Collection process rollout check - 2026-10-05
+
+For the essential-evidence research release, deploy API/runner and Worker together.
+Check `/healthz.collection_process_version` against
+`2026-10-05-evidence-research-v1`; accuracy/profile versions alone cannot identify
+this acquisition change. A fresh operator-started Run must pin the same process
+version and private `evidence_research` diagnostics. Inspect missing essentials,
+selected evidence, capture/parse failures and budget-stop reasons before retry.
+Never describe a preflight gap as bank nondisclosure. Optional gaps cause no retry.
+No recurring collection/recovery is added. Use a bounded normal Run after release;
+verify its final automatic outcome and ordinary Public projection separately.
+[Diagnosis and verification](../docs/00-governance/ordinary-collection-redesign-2026-10-05.md).
+
 상태: 2026-10-03 현행 상품수집 정책 반영. 의뢰자 환경·담당자·복구 증거 반영 전.
 실제 URL, release tag, 지원 연락망, 환경 소유권은
 [범위·담당자](01-scope-and-owners.md)와 [인수 준비 기록](02-release-readiness.md)에서

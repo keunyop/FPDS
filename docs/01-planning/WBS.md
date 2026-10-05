@@ -1,5 +1,14 @@
 # FPDS Detailed WBS
 
+Latest Product Owner collection slice (2026-10-05), within 3.1-3.7/5.76:
+redesign ordinary acquisition around missing applicable essential evidence,
+constrained official-link planning and normal same-run capture/parse before final
+extraction. Verify shared exact proof, cross-bank automatic outcomes, adversarial
+exclusions, bounded provider/fetch failures and private process-version receipts.
+No new market/type, manual review or recurring recovery feature. Runtime rollout
+and deployed quality evaluation remain separate release steps.
+[Evidence and acceptance](../00-governance/ordinary-collection-redesign-2026-10-05.md).
+
 Latest authorized existing-collection slice (2026-10-04): DESJARDINS/EQBANK generic discovery and evidence corrections plus bounded direct publication of 11 distinct products (DESJARDINS 10 / EQBANK 1). Worker 738 / API 588 pass; no new type/country, weakened prerequisite, manual review, recurring recovery feature or runtime deployment. [Diagnosis and operation](../00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
 
 

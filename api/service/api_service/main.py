@@ -388,7 +388,8 @@ def _require_review_task_country(connection: Any, *, review_task_id: str, countr
 async def healthz() -> dict[str, str]:
     from worker.pipeline.fpds_collection_accuracy import ACCURACY_VERSION
     from worker.pipeline.fpds_market_profile import MARKET_PROFILE_VERSION
-    return {"status": "ok", "collection_accuracy_version": ACCURACY_VERSION,
+    from worker.pipeline.fpds_collection_process import COLLECTION_PROCESS_VERSION
+    return {"collection_process_version": COLLECTION_PROCESS_VERSION, "status": "ok", "collection_accuracy_version": ACCURACY_VERSION,
             "market_profile_version": MARKET_PROFILE_VERSION}
 
 

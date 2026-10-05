@@ -20,6 +20,11 @@ from api_service.collection_ai_autopilot import (
     remediate_collection_review_task,
 )
 from api_service.config import Settings
+from api_service.collection_evidence_research import plan_collection_evidence_research
+from worker.pipeline.fpds_collection_process import (
+    COLLECTION_PROCESS_VERSION, MAX_RESEARCH_ROUNDS, MAX_ADDITIONAL_PER_RUN,
+    MAX_PLANNER_CALLS_PER_RUN,
+)
 from api_service.db import open_connection
 from api_service.security import new_id
 
@@ -104,6 +109,9 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     if plan.get("request_id"):
         base_args.extend(["--request-id", str(plan["request_id"])])
 
+    # Pin this executed process before capture, including early failed Runs.
+    _persist_evidence_research_receipt(run_id=run_id, rounds=[], model_calls=0)
+
     included_source_ids = [str(item) for item in group.get("included_source_ids", [])]
     target_source_ids = [str(item) for item in group.get("target_source_ids", [])]
 
@@ -154,6 +162,12 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     )
     if not parse_successful_target_source_ids:
         raise RuntimeError("Parse/chunk produced no target sources eligible for extraction.")
+
+    parse_successful_source_ids, research_source_ids = _research_essential_evidence(
+        run_id=run_id, registry_path=registry_path, base_args=base_args,
+        parsed_source_ids=parse_successful_source_ids,
+    )
+    included_source_ids.extend(research_source_ids)
 
     extraction_output = _run_stage("worker.pipeline.fpds_extraction", base_args + _source_args(parse_successful_source_ids))
     extraction_successful_source_ids = _successful_stage_source_ids(
@@ -232,6 +246,73 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             flush=True,
         )
     print(f"[source-collection-runner] run {run_id} completed downstream stages", flush=True)
+
+
+def _research_essential_evidence(*, run_id, registry_path, base_args, parsed_source_ids):
+    """Acquire required proof before the single final grounding pass.
+
+    Every new URL is captured and parsed through the ordinary worker stages.
+    The immutable per-run registry gains evidence-only companions; target
+    sources, registry allowlist and canonical product scope never widen.
+    """
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    attempted = {str(s["url"]) for s in registry["sources"]}
+    parent_counts = {}
+    acquired_ids = []
+    successful = list(parsed_source_ids)
+    model_calls = 0
+    rounds = []
+    for round_index in range(MAX_RESEARCH_ROUNDS + 1):
+        remaining = MAX_ADDITIONAL_PER_RUN - len(acquired_ids) if round_index < MAX_RESEARCH_ROUNDS else 0
+        with open_connection(Settings.from_env()) as connection:
+            result = plan_collection_evidence_research(connection,
+                run_id=run_id, registry_path=registry_path, source_ids=successful,
+                attempted_urls=attempted, parent_counts=parent_counts,
+                remaining_sources=remaining, remaining_model_calls=MAX_PLANNER_CALLS_PER_RUN - model_calls)
+        model_calls += result["planner_call_count"]
+        sources = result.pop("sources")
+        receipt = {**result, "round": round_index + 1,
+                   "capture_source_ids": [s["source_id"] for s in sources]}
+        rounds.append(receipt)
+        _persist_evidence_research_receipt(run_id=run_id, rounds=rounds, model_calls=model_calls)
+        if not sources:
+            break
+        registry["sources"].extend(sources)
+        # Preserve atomic plan visibility between subprocess stages.
+        next_path = registry_path.with_suffix(".research.json")
+        next_path.write_text(json.dumps(registry, indent=2, ensure_ascii=True), encoding="utf-8")
+        next_path.replace(registry_path)
+        ids = [s["source_id"] for s in sources]
+        acquired_ids.extend(ids)
+        attempted.update(s["url"] for s in sources)
+        try:
+            captured = _run_stage("worker.discovery.fpds_snapshot",
+                base_args + ["--skip-preflight-drift-check"] + _source_args(ids))
+            captured_ids = _successful_source_ids(captured)
+            if captured_ids:
+                parsed = _run_stage("worker.pipeline.fpds_parse_chunk", base_args + _source_args(captured_ids))
+                new_ids = _successful_stage_source_ids(stage_output=parsed,
+                    action_field="parse_action", success_actions={"stored", "reused"})
+                successful = list(dict.fromkeys([*successful, *new_ids]))
+                receipt["parsed_source_ids"] = new_ids
+            else:
+                receipt["parsed_source_ids"] = []
+        except WorkerStageError as exc:
+            receipt["capture_stage_failure"] = exc.to_run_metadata()
+        _persist_evidence_research_receipt(run_id=run_id, rounds=rounds, model_calls=model_calls)
+    return successful, acquired_ids
+
+
+def _persist_evidence_research_receipt(*, run_id, rounds, model_calls):
+    receipt = {"version": COLLECTION_PROCESS_VERSION,
+               "max_rounds": MAX_RESEARCH_ROUNDS,
+               "max_additional_sources": MAX_ADDITIONAL_PER_RUN,
+               "planner_call_count": model_calls, "rounds": rounds}
+    with open_connection(Settings.from_env()) as connection:
+        connection.execute("""UPDATE ingestion_run
+            SET run_metadata = run_metadata || %(metadata)s::jsonb WHERE run_id = %(run_id)s""",
+            {"run_id": run_id, "metadata": json.dumps({"collection_process_version": COLLECTION_PROCESS_VERSION,
+                                                       "evidence_research": receipt}, ensure_ascii=True)})
 
 
 def _run_stage(module_name: str, args: list[str]) -> dict[str, Any]:

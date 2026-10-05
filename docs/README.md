@@ -24,6 +24,8 @@ or exclusion; account/signup approval remains separate. Read the
 [collection accuracy policy](03-design/collection-accuracy-policy.md) before
 collection work.
 
+Latest ordinary-process verification: [essential-evidence research redesign and runtime limits](00-governance/ordinary-collection-redesign-2026-10-05.md). This local result is distinct from direct data publication.
+
 Latest collection result: [FAIRSTONE / FNBC / HAVENTREE shared corrections and direct publication](00-governance/three-bank-generic-collection-corrections-2026-10-05.md). Previous result: [DESJARDINS / EQBANK](00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
 
 ## Resume development

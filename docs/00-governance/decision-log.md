@@ -1,5 +1,18 @@
 # FPDS Decision Log
 
+## D-090 amendment - ordinary evidence-driven acquisition - 2026-10-05
+
+The Product Owner permits process redesign for direct/Admin collection parity.
+Replace fixed-only capture with a shared required-proof preflight and bounded
+observed-official-link research before final extraction: two waves, two additional
+URLs per detail, 48 per Run and eight link-planner calls per Run. This supersedes
+older acquisition-only call/cap assumptions for the authorized slice. No required
+fact, field/unit, financial condition, security or automatic acceptance gate is
+relaxed. A planner selects server-provided IDs; only ordinary captured evidence
+and final gates prove facts. Optional gaps cause no research. Private receipts
+and health expose process version; rollout/live yield remain separately verified.
+[Source-backed diagnosis and result](ordinary-collection-redesign-2026-10-05.md).
+
 ## Product Owner-directed Admin usability and collection settings - 2026-10-04
 
 The latest request restores safe Runs Auto refresh with initially collapsed

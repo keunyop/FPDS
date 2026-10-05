@@ -1,5 +1,13 @@
   # FPDS Scope Baseline and Build Start Approval
 
+## Approved ordinary collection redesign - 2026-10-05
+
+The Product Owner permits replacing the collection process to close the direct/
+Admin quality gap. Bounded essential-evidence research within an operator-started
+Run is authorized; it is not recurring recovery or a new menu. Publication,
+financial types/conditions, privacy, account/security, countries and product types
+retain the existing boundaries. Deployment/canonical operations remain separate
+stateful steps. [Implementation and practical limits](../00-governance/ordinary-collection-redesign-2026-10-05.md).
 
 ## Approved Public required/optional presentation - 2026-10-01
 

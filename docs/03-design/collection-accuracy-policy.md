@@ -1,5 +1,49 @@
 # Product collection accuracy and automatic acceptance
 
+## Essential evidence research before final extraction - 2026-10-05
+
+The Product Owner authorizes redesign of ordinary collection to address the
+recurring direct/Admin quality gap. This amends fixed acquisition budgets and
+process sequencing; it does not weaken any publication essential or financial,
+identity, origin, account/security or privacy requirement.
+
+After initial selected capture/parse, reuse the same captured fact proof and
+financial sanitizer to diagnose missing applicable required fields, including
+country-owned additional requirements. These are conservative current-input
+acquisition diagnostics, not bank nondisclosure, AI truth or approval receipts.
+Complete products and optional-only gaps cause no research calls.
+
+Follow only observed links on the actual owned detail or a bound successful
+current-run companion. Preserve exact bank/country/language, official domains,
+URLs, query identities, snapshot/parse ownership, raw SHA-256 and all shared
+source/action/market vetoes. Two waves, two additional URLs per detail and 48 per
+Run are hard acquisition limits. Planner calls total at most eight per Run;
+models select supplied link IDs and cannot emit accepted financial facts or add
+URLs/domains. Full relevant source records fit an eight-record/16,000-character
+planning budget, without truncating atomic financial context. No optional-only
+search, failure retry loop, human queue or recurring recovery feature.
+
+New companions enter normal snapshot/parse persistence and the immutable Run
+registry as evidence-only, preserving all selected product parents. Final
+captured grounding still runs once per detail, followed by normal origin-resolved
+normalization, validation, automatic promotion and private Public projection.
+All qualified rate/term/access/security/currency conditions remain binding.
+Separately captured named annual-unit terms are explicit evidence links for the
+rate field in the extracted artifact. Ordinary origin lookup and normalization
+retain their complete anchor, URL, document and snapshot; optional/currency
+links cannot be the only route to that required proof.
+Private Run receipts distinguish preflight gaps, choices, budget exhaustion,
+provider/capture failures and final acceptance. Health and Runs report the
+acquisition process version separately from accuracy/market-profile versions.
+
+An exact native H1 may survive an action SEO title only with its owned main
+section, its own labelled financial record and at least two distinctive name
+terms on its product URL. Action routes, family boundaries and foreign/missing
+snapshot/parse/language records remain insufficient. The source-backed current
+CIBC regression precedes this extension; extraction instructions and final proof
+are aligned. Localized legal-container leads remain retrieval only and never
+establish annual units themselves. [Evidence, outcome and deployment limits](../00-governance/ordinary-collection-redesign-2026-10-05.md).
+
 ## Native labelled disclosures and named transaction plans - 2026-10-04
 
 Parser v9 preserves current owned titles, complete labelled prices and uniquely

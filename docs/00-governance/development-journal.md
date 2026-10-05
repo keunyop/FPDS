@@ -1,5 +1,52 @@
 # FPDS Development Journal
 
+## 2026-10-05 - Ordinary essential-evidence collection redesign
+
+- Diagnosed the recurring direct/Admin gap as fixed acquisition before required
+  proof assessment, evidence/identity losses across stages, and verification
+  stopping at supplemented saved-input/local data results. Prior corrections
+  remain valid; they did not establish autonomous fresh Admin acquisition or
+  serving model yield. No controlled model comparison was claimed.
+- Added shared captured-proof preflight and bounded observed official-link
+  research before final extraction: two waves, two extra URLs per detail, 48 per
+  Run and eight planner calls per Run. Optional-only gaps cause no calls.
+  Server-supplied link IDs cannot create URLs or facts; normal safe capture/parse,
+  immutable Run scope, final origin-resolved financial gates and automatic
+  accept/exclude remain. Failed or attempted URLs are not selected again.
+- Current CIBC native H1/owned section/labelled price/product URL proof fixes an
+  action SEO title without accepting application/family/foreign captures.
+  Localized legal leads stay retrieval only. Independent named annual terms now
+  have explicit rate-field links in the extracted artifact, preserving full
+  anchor/URL/document/snapshot through ordinary CLI loading and origin lookup.
+- Key files: collection_evidence_research.py, source_collection_runner.py,
+  shared collection_process constants, extraction service, health contract;
+  new source-backed acquisition/ordinary-path and runner failure regressions.
+  Accuracy policy, requirements/scope, plan/WBS, decision/RAID, boundary READMEs,
+  operations handbook and docs map now describe the same workflow and limits.
+- Verification: Worker 756 and API 617 tests pass; final focused service/routing
+  6 and API runner/health 40 pass. Foundation baseline, changed Markdown links,
+  fixture JSON and git diff --check pass. Whole repo-doctor reproduces its existing
+  broken link in the unrelated ignored tmp/public-top5-20261004/app/README.md.
+- Bounded current official rehearsal used six retained snapshots, four planner
+  invocations and four final grounding attempts with existing gpt-6-luna. Final
+  replay reused all inputs with zero new captures/provider calls. CIBC Adapta,
+  CCS Free Chequing and Haventree Everyday Growth all auto-validate through
+  stored JSON, actual CLI loader, fixture-backed origin repository and unchanged
+  routing; twelve core receipt readbacks and independent annual terms match
+  their current captures. Initial/intermediate failures remain preserved.
+- The Product Owner started localhost:4000 during this slice. Running local
+  health confirms 2026-10-05-evidence-research-v1; documented production health
+  lacks that new process version. Read-only normal Admin preparation confirms
+  three active single-target groups and no skips. Their real registered metadata,
+  types and field policies also yield three unchanged-input automatic passes
+  without new provider/capture calls. No actual Run, registry/canonical
+  write, publication, production deployment or agent restart was performed.
+- Known limitation/next step: approve and execute only the concrete three-target
+  authenticated Admin verification scope, then independently check final Run and
+  Public outcomes. Local replay and healthy API do not prove fresh deployed yield.
+  [Diagnosis, implementation, current evidence and limits](ordinary-collection-redesign-2026-10-05.md).
+
+
 ## 2026-10-05 - Second SwitchaBank comparison article
 
 - Added an original Canadian chequing-fee comparison in EN/KO/JA: Tangerine,

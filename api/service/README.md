@@ -1,5 +1,30 @@
 # FPDS API Service
 
+## Ordinary essential evidence research - 2026-10-05
+
+After initial successful capture/parse, the ordinary source collection runner
+diagnoses required gaps with shared captured proof and the financial sanitizer.
+It follows only observed official, current-product/companion links through normal
+snapshot/parse stages before one final grounding pass. Hard limits: two research
+waves, two additional URLs per detail, 48 additional URLs and eight constrained
+planner calls per Run. Optional gaps never trigger research; failed/attempted URLs
+are not reselected. Captured companions never become normalization targets.
+Plans choose supplied link IDs, never financial values or new domains. Provider
+failure may retain deterministic observed-link acquisition, with no paid retry.
+
+Research loads exact successful current-run selected snapshot/parse joins, checks
+bank/country/language, uses the immutable Run registry and verifies raw SHA-256.
+Private `run_metadata.evidence_research` retains gaps, origins, choices, stop and
+failure reasons plus bounded planner usage. No source-registry row, canonical
+mutation, manual review queue or schema migration is added by research itself.
+Final ordinary automatic promotion/Public refresh remain unchanged.
+Separately captured named annual-unit terms are explicit evidence links for the
+rate field in the extracted artifact. Ordinary origin lookup and normalization
+retain their complete anchor, URL, document and snapshot; optional/currency
+links cannot be the only route to that required proof.
+`GET /healthz` adds non-secret `collection_process_version`; new Runs pin it.
+[Diagnosis, verification and coordinated rollout](../../docs/00-governance/ordinary-collection-redesign-2026-10-05.md).
+
 Native product evidence correction (2026-10-05): parser v10 decodes literal CMS content/links and retains independent named account panels with complete local conditions. Shared discovery/expansion preserves per-field origins; named captured account terms can prove annual units through a separate current-run reference. Only missing savings essentials trigger additional bounded legal companions; optional checking interest does not. Worker 750 / API 594 pass. API/catalog and Worker runtime rollout is separate from the authorized direct data operation. [Diagnosis, exclusions and publication](../../docs/00-governance/three-bank-generic-collection-corrections-2026-10-05.md).
 
 Collection correction (2026-10-04): named checking plans require corroborated identity and ordinary pricing; multi-plan pages remain evidence-only. Worker v9 keeps exact linked disclosures/titles/currencies through existing automatic gates. Worker 738 / API 588 regressions pass. Direct publication and future API/Worker rollout are separate. [Operation and limits](../../docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).

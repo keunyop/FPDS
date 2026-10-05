@@ -1,5 +1,19 @@
 # FPDS Requirements Definition (PRD / Requirements Spec)
 
+## Ordinary collection quality redesign - 2026-10-05
+
+The Product Owner requests ordinary Admin collection quality comparable to direct
+collection and permits process replacement. Collection must diagnose current
+required-evidence gaps before final extraction, acquire bounded observed official
+leads in the same Run, and retain current financial/privacy/security gates. Two
+research waves, two additional URLs per detail, 48 per Run and at most eight
+link-planning calls per Run replace the earlier acquisition-only ceiling for
+this authorized slice. Optional absence causes no research. Plans never prove
+financial values; incomplete/conflicting candidates remain automatically excluded.
+Source-backed acquisition-to-routing regressions and an isolated live model
+rehearsal distinguish local quality evidence from deployed Admin yield.
+See [process and verification](../00-governance/ordinary-collection-redesign-2026-10-05.md).
+
 ## Collection evidence correction - 2026-10-03
 
 The Product Owner requests generic correction of zero BMO approvals. Implemented:

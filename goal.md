@@ -1,5 +1,42 @@
 # Admin pre-handover review and fixes
 
+## Authorized slice: ordinary collection quality redesign - 2026-10-05
+
+Objective: diagnose the recurring direct/Admin quality gap and make ordinary
+Admin collection follow a bounded evidence-driven process rather than depend
+on one-off direct supplements and bank-by-bank pattern repairs.
+Ownership: preserve every earlier goal slice and its remaining external gates.
+Scope: source-backed history and runtime diagnosis; shared collection planning,
+capture, extraction, normalization and automatic validation; exact evidence and
+financial safeguards; cross-bank production-path parity and failure regressions;
+current contracts, operator documentation and journal.
+Exclusions: weaker essentials, invented facts, human product review, new markets
+or types, public raw evidence, account/security changes, historical restoration,
+permanent recovery menus/schedulers and unrelated refactoring. Deployment and
+canonical/public data writes remain separate stateful actions; first prepare and
+verify the concrete implementation.
+Acceptance:
+- [x] Explain demonstrated systemic causes; distinguish code, deployed runtime,
+      model behavior, captured inputs and publication results.
+- [x] Implement bounded essential-evidence-driven ordinary collection with owned
+      inputs, unchanged gates, optional omission and durable diagnostic outcomes.
+- [x] Prove the ordinary production path on source-backed cross-bank examples;
+      preserve adversarial, conditional and unsupported exclusions.
+- [x] Pass relevant Worker/API behavior and repository checks; update current
+      workflow/decision/risk docs, journal and inspect final diff.
+Verification: saved official fixtures and provider-disabled/stubbed production
+services; success, boundary and failure cases; explicit live-verification limits.
+Status: local implementation/verification complete and running local API process
+version confirmed. Worker 756 / API 617, actual stored-artifact/origin/routing
+regressions and three current-official isolated passes verified; foundation,
+changed docs/JSON and final diff checked. Three eligible single-target Admin
+verification groups prepared read-only; their real registered metadata/field
+policies also pass the unchanged-input replay. No Run/canonical/public write
+performed.
+A bounded authenticated Admin/Public acceptance requires explicit stateful scope;
+other serving deployment is separate. Preserve all earlier unfinished ownership.
+Previous direct publication is not proof of fresh Admin-path quality.
+
 ## Read-only slice: HomeEquity direct evidence assessment - 2026-10-05
 Objective: assess additional automatic approval feasibility from official HomeEquity sources without Admin API.
 Scope: bounded official product/rate/access inspection, existing gates and saved-input comparison, findings and journal; preserve prior goal ownership.

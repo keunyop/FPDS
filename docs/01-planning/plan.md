@@ -1,5 +1,14 @@
 # FPDS Project Execution Plan
 
+Latest authorized collection slice (2026-10-05), within existing 3.1-3.7/WBS
+5.76: ordinary essential-evidence research, shared captured-proof preflight,
+source-backed cross-bank full-path regressions and bounded isolated live model
+rehearsal. Two research waves and constrained link planning replace fixed-only
+acquisition while retaining all financial/security/automatic exclusion controls.
+Coordinated API/runner/Worker rollout and deployed Admin yield remain separate
+from local implementation or direct Public data results.
+[Diagnosis and verification](../00-governance/ordinary-collection-redesign-2026-10-05.md).
+
 Latest Product Owner slice (2026-10-03): CIBC official supplementation/publication and redesign of ordinary evidence-to-approval handling within existing collection work (3.1-3.7). Shared essential companion/capture/parser/extraction/normalization changes pass Worker 698 / API 578; same-input replay yields 14 additional automatic passes. Current data operation and serving-runtime rollout are separate, with no financial prerequisite, security, country/type or recurring recovery feature expansion. [Diagnosis and dated applied outcome](../00-governance/cibc-collection-redesign-2026-10-03.md).
 
 Latest authorized code slice (2026-10-03), within existing collection work: generic BMO root-cause correction implemented; Worker 674 / API 574 tests pass. Financial essentials and scope remain; deployment/live collection remain separate. [Diagnosis and verification](../00-governance/bmo-generic-collection-root-cause-2026-10-03.md).

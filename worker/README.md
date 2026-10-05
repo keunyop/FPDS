@@ -1,5 +1,25 @@
 # Worker Boundary
 
+## Ordinary essential evidence research - 2026-10-05
+
+The Admin runner now calls the same `collect_captured_fields` proof used by
+ordinary extraction before final grounding. It uses the unchanged financial
+sanitizer to diagnose current-input essential gaps, then captures/parses bounded
+observed official leads in the same Run. Two waves, two additional URLs per
+detail, 48 per Run and eight link-planner calls per Run are hard limits. The
+existing final field-grounding call, cache, native financial types, optional
+preservation, normalization and automatic exclusion remain. A diagnostic is
+neither bank nondisclosure nor a publication receipt. No recovery scheduler.
+Exact owned H1/main section/labelled price plus a distinctive product URL can
+establish native identity when an action SEO title differs; action routes,
+family pages and foreign/missing origins cannot. Complete relevant context
+enters link planning; financial proof stays in the existing gates.
+Separately captured named annual-unit terms are explicit evidence links for the
+rate field in the extracted artifact. Ordinary origin lookup and normalization
+retain their complete anchor, URL, document and snapshot; optional/currency
+links cannot be the only route to that required proof.
+[Verification and rollout](../docs/00-governance/ordinary-collection-redesign-2026-10-05.md).
+
 Native product evidence correction (2026-10-05): parser v10 decodes literal CMS content/links and retains independent named account panels with complete local conditions. Shared discovery/expansion preserves per-field origins; named captured account terms can prove annual units through a separate current-run reference. Only missing savings essentials trigger additional bounded legal companions; optional checking interest does not. Worker 750 / API 594 pass. API/catalog and Worker runtime rollout is separate from the authorized direct data operation. [Diagnosis, exclusions and publication](../docs/00-governance/three-bank-generic-collection-corrections-2026-10-05.md).
 
 Native disclosure correction (2026-10-04): parser v9 retains unique linked financial notes and actual titles. Shared proof preserves annual/currency/price meaning and rejects shortened conditions. Named companion columns retain actual product links; generic plan discovery runs in the API/catalog boundary. Worker 738 / API 588 tests pass. [Diagnosis, bounded publication and rollout](../docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
