@@ -52,6 +52,17 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
     "neighboring offers, new-money promotions or another product's conditions. "
 )
 
+NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "An explicit percentage header binds native numeric cells to their own term rows; "
+    "copy the original header, cells, named section, complete conditions and uniquely linked notes. "
+    "Never append a percent sign to a source quote, mix open/closed/promotional/example scopes, "
+    "or turn a qualified schedule into an unconditional scalar. Keep typed grounded row objects "
+    "unchanged, without guessed calendar day counts or invented optional members. "
+    "A numbered disclosure needs an exact literal reference and one matching list/target. "
+    "Conflicting prime spreads exclude that row; other independently complete rows retain their "
+    "own exact term. Explicit Cashable: No means prohibited early access, with exceptions retained. "
+)
+
 COMPARISON_INSTRUCTIONS = (
     "Use complete product-owned financial declarations and explicit purchase columns as evidence units. "
     "Separate welcome offers, additional-card fees, cash-advance and default-rate columns from regular pricing; "
@@ -75,6 +86,7 @@ COMPARISON_INSTRUCTIONS = (
     + FEE_CHANGE_NOTICE_INSTRUCTIONS
     + ACCOUNT_COST_CONTEXT_INSTRUCTIONS
     + WITHDRAWAL_CONTEXT_INSTRUCTIONS
+    + NATIVE_RATE_CONTEXT_INSTRUCTIONS
     + "Bind each value to its own label, complete quote and exact source URL. Never pair a "
     "term with an adjacent row's rate. Preserve explicit currency and rate basis; a country "
     "default is allowed only when the source has no explicit currency: CA uses CAD and US "

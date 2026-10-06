@@ -1,5 +1,41 @@
 # Admin pre-handover review and fixes
 
+## Authorized slice: generic Laurentian corrections and direct publication - 2026-10-05
+
+Objective: correct demonstrated shared acquisition/financial-proof failures, repeat verification until evidence-backed defects are resolved, and directly publish current automatically accepted Laurentian products without Admin API.
+Ownership: preserve all prior slices and unrelated user changes.
+Scope: retained current official inputs and bounded essential supplements; generic URL/content validity, native financial table/term/access proof and origin preservation; matching gates/prompts, cross-bank/type positive/adversarial regressions; ordinary extraction/normalization/validation/promotion and Public refresh; private before-images and independent Public readback.
+Exclusions: weaker financial essentials, manual product review, invented/annualized/tier-flattened facts, bank-specific approval rules, new types/countries, account/security changes, permanent recovery features, unrelated mutations, broad paid recollection and deployment/restarts without necessity.
+Acceptance:
+- [x] Reproduce confirmed failures before extending accepted representations and trace malformed source construction.
+- [x] Generic corrections preserve units, table scope/conditions, exact current evidence/identity/currency/origins and financial exclusion boundaries across banks/types.
+- [x] Repeated ordinary-service replay resolves supported Laurentian failures with retained source/semantic exclusions.
+- [x] Direct bounded publication through normal automatic gates; preserve original history and unrelated Public values; verify product facts, privacy and CA/US outcomes.
+- [x] Relevant Worker/API regressions and suites, contract/docs checks, final goal/diff review and git diff --check pass; journal updated.
+Verification: source-backed failure/success/boundary tests, identical-input saved artifact/origin rehearsal, normal persisted validation/promotion, before/after DB and anonymous Public API/site readback.
+Status: complete for this authorized slice. Confirmed source/representation and
+independent API environment defects corrected generically; final Worker 771 /
+actual API 618 pass. Two final unchanged-input stored-artifact rehearsals retain
+3 automatic passes / 5 exclusions. Real DB origins, normal promotion and Public
+refresh verified: three existing Laurentian products published, CA 73 / US 5,
+17 field origins and anonymous API/site financial/privacy readback checked.
+Local API process v2 confirmed after final-code restart. Original Runs,
+candidates and financial version history preserved; ordinary supersession of
+three previous versions is expected. Foundation, changed references/JSON,
+API lock and git diff checks pass. Whole repo-doctor reports only the existing
+ignored tmp/public-top5-20261004/app/README.md broken link, outside this slice.
+Journal/report updated. No fresh paid Admin
+model yield or production runtime rollout claimed. Preserve earlier ownership.
+
+## Read-only slice: Laurentian direct evidence assessment - 2026-10-05
+Objective: inspect current official evidence for the latest Laurentian collection targets without FPDS Admin API, and assess additional automatic-acceptance feasibility under unchanged gates.
+Scope: latest saved target/input readback; bounded official product/rate/fee/terms inspection and current capture reuse; evidence-backed opportunities, remaining blockers, report and journal.
+Exclusions: runtime fixes, paid models, Admin API, new collection Runs, registry/canonical mutations, approval/publication, deployment, manual review and relaxed essentials.
+Acceptance: inspect the eight latest targets; identify current product-scoped essential evidence or concrete absence/ambiguity; distinguish direct feasibility from demonstrated production-path automatic acceptance; preserve prior goal ownership.
+Verification: official sources, saved-input metadata, raw current capture/hash receipts where needed, existing financial gate probes and final diff check.
+Status: complete for this read-only feasibility slice. All eight targets inspected; eleven current snapshot hashes, two bounded official captures, PDF references, nine existing gate probes and eight saved-candidate comparison replays checked. Three strong opportunities and remaining financial/source blockers documented; no new automatic acceptance or publication claimed. No Admin API/provider/new Run/runtime/canonical writes. Preserve every earlier goal slice.
+
+
 ## Authorized slice: ordinary collection quality redesign - 2026-10-05
 
 Objective: diagnose the recurring direct/Admin quality gap and make ordinary

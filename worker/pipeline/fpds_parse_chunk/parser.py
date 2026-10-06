@@ -13,7 +13,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v10"
+PARSER_VERSION = "fpds-parse-chunk-v11"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -35,6 +35,9 @@ def parse_snapshot_bytes(*, body: bytes, content_type: str) -> ParsedArtifact:
 
 
 def _parse_html(body: bytes) -> ParsedArtifact:
+    from worker.source_content_validity import html_unavailable_reason
+    if reason := html_unavailable_reason(body):
+        raise ValueError(f"HTML source unavailable ({reason})")
     html = body.decode("utf-8", errors="replace")
     structured_sections = extract_structured_text_sections(html)
     soup = BeautifulSoup(html, "html.parser")
@@ -114,6 +117,9 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     sections.extend(_labelled_disclosure_sections(soup))
     sections.extend(_linked_rate_records(soup))
     sections.extend(_financial_declaration_sections(sections))
+    from worker.native_rate_tables import native_financial_sections
+    sections.extend(_RawSegment(kind, owner, None, record)
+                    for kind, owner, record in native_financial_sections(soup))
     sections.extend(_rate_table_evidence_sections(soup))
     sections.extend(_linked_financial_table_cells(soup))
     full_text, segments = _finalize_segments(sections)

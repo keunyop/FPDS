@@ -34,7 +34,7 @@ _NUMBER = r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\w.])"
 _COUNT_WORDS = dict(zip(("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"), range(11)))
 _ANNUAL_RATE_BASIS = re.compile(
     r"\bannual(?:ized)?\s+(?:(?:interest|percentage)\s+)?(?:rates?|yield)\b"
-    r"|\binterest rates? (?:is|are) annualized\b"
+    r"|\bannual\s+%\s+rates?\b|\binterest rates? (?:is|are) annualized\b"
     r"|\b(?:apr|apy|per annum|per year)\b|\bp\.?a\.?(?!\w)", re.I,
 )
 
@@ -403,6 +403,12 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name == "secured_flag":
             return security_meaning(q) is value
         if field_name in {"redeemable_flag", "non_redeemable_flag"}:
+            # An explicit labelled No is not absence. Preserve the entire
+            # product record and reject a competing permission/exception.
+            labelled_no = re.search(r"\b(?:cashable|redeemable)\s*:\s*no\b|\b(?:GICs?|certificates?) (?:are|is) not cashable\b", q, re.I)
+            if labelled_no:
+                conflict = re.search(r"\b(?:cashable|redeemable)\s*:\s*yes\b|\b(?:can|may) be (?:cashed|redeemed)\b|\b(?:except|unless|however)\b|(?:cashable|redeemable)\s+(?:after|before|upon|at)\b|(?:cashable|redeemable)\s*:\s*no\s+(?:until|for|during|only|before)\b|not cashable\s+(?:until|for|during|only|before)\b|early withdrawals? (?:are|is) (?:allowed|permitted)", q, re.I)
+                return not conflict and value is (field_name == "non_redeemable_flag")
             maturity_only = re.search(
                 r"(?:^|[.!?]\s+)(?:Cashable|Redeemable) (?:upon|at) maturity only(?:[.](?:$|\s)|$)"
                 r"|(?:^|[.!?]\s+)Can only be (?:redeemed|cashed) at maturity(?:[.](?:$|\s)|$)", q, re.I)
@@ -434,6 +440,17 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if contract.value_type == "json":
         if field_name != "term_rate_table" or not isinstance(value, list) or not value:
             return False
+        from worker.native_rate_tables import rate_schedules
+        native = rate_schedules(quote, annual_only=True)
+        if native:
+            if len(native) != 1:
+                return False
+            supported = {row["term_label"].casefold(): row["rate"] for row in native[0]}
+            return all(isinstance(row, dict) and row.get("term_label", "").casefold() in supported
+                and Decimal(str(row.get("rate"))) == Decimal(str(supported[row["term_label"].casefold()]))
+                and (row.get("term_length_days") is None or re.fullmatch(rf"{row['term_length_days']} days?", row["term_label"], re.I))
+                and row.get("minimum_deposit") is None
+                and (not row.get("notes") or exact_quote(row["notes"], q)) for row in value)
         for row in value:
             label = text(row.get("term_label"))
             # Require a rate in the same row following this exact term. Never
@@ -493,7 +510,7 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         "monthly_fee": r"monthly.{0,25}?(?:fee|charge)|(?:fee|charge).{0,20}?(?:monthly|per month)",
         "public_display_fee": r"monthly.{0,25}?(?:fee|charge)|(?:fee|charge).{0,20}?(?:monthly|per month)",
         "annual_fee": r"annual.{0,20}fee|fee.{0,20}(?:annual|per year)",
-        "minimum_deposit": r"(?:minimum|initial|opening).{0,30}deposit|deposit.{0,30}(?:minimum|to open)|open.{0,25}(?:at least|minimum)",
+        "minimum_deposit": r"(?:minimum|initial|opening).{0,30}deposit|deposit.{0,30}(?:minimum|to open)|open.{0,25}(?:at least|minimum)|minimum investment amount",
         "minimum_balance": r"minimum.{0,25}balance|balance.{0,25}(?:at least|minimum)",
         "transaction_fee": r"transaction.{0,20}(?:fee|charge)|per transaction",
         "additional_transaction_fee": r"(?:additional|extra|excess|overage).{0,30}transactions?.{0,20}(?:fee|charge)?|(?:fee|charge).{0,25}(?:additional|extra|excess) transactions?",
@@ -726,6 +743,13 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             # A balance that waives transaction charges is not an opening or
             # general minimum balance, nor a monthly-account-fee threshold.
             reason = "transaction_waiver_balance_not_minimum"
+        elif (name in {"interest_rate_summary", "term_rate_table"} and e.get("anchor_type") == "native_rate_table"
+                and (not exact_quote(e.get("evidence_excerpt"), quote)
+                     or (name == "term_rate_table" and any(
+                         not exact_quote(e.get("evidence_excerpt"), row.get("notes")) for row in value)))):
+            # Typed rates must retain the same complete public conditions as
+            # summaries; an exact cell value cannot waive its source qualifiers.
+            reason = "native_rate_conditions_incomplete"
         elif not quote_supports_value(name, value, str(quote)):
             reason = "field_meaning_unproven"
         elif field_contract(name).value_type in {"decimal", "integer", "boolean"} and not quote_supports_value(name, value, str(e.get("evidence_excerpt") or "")):

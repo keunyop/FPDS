@@ -773,6 +773,44 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                     field_quotes["interest_rate_summary"] = quote
                     values["term_length_text"] = term[0]
                     field_quotes["term_length_text"] = term[0]
+        if c.anchor_type == "native_rate_table" and (own or (
+                companion and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url)):
+            from worker.native_rate_tables import rate_schedules
+            product_type = _infer_product_type(context)
+            if product_type == "gic" and own:
+                schedules = rate_schedules(quote, annual_only=True)
+                if len(schedules) == 1:
+                    # The full record preserves eligibility, payment and
+                    # promotional conditions alongside every term/rate pair.
+                    values["term_rate_table"] = [{**r, "notes": _normalize_text(quote)} for r in schedules[0]]
+            if product_type == "mortgage" and tokens(c.anchor_value) == tokens(identity):
+                schedules = rate_schedules(quote)
+                from worker.native_rate_tables import native_variable_rows
+                if schedules or native_variable_rows(quote):
+                    values["interest_rate_summary"] = quote
+                    field_quotes["interest_rate_summary"] = quote
+        if own and c.anchor_type == "native_product_terms" and str(c.anchor_value).casefold() == identity.casefold():
+            product_type = _infer_product_type(context)
+            if product_type in {"gic", "mortgage"}:
+                for name in ("redeemable_flag", "non_redeemable_flag") if product_type == "gic" else ():
+                    for value in (True, False):
+                        if quote_supports_value(name, value, quote):values[name] = value
+                term = re.search(r"Available terms range from [^\n.]+[.]?|Choose from [^\n.]+[.]?|Closed[^\n]*\n[^\n]*\b(?:months?|years?)\b[^\n]*", quote, re.I)
+                if term:values["term_length_text"] = _normalize_text(term[0])
+                if product_type == "mortgage":
+                    values["rate_type"] = "variable" if re.search(r"\bvariable[- ]rate\b", identity, re.I) else "fixed" if re.search(r"\bfixed[- ]rate\b", identity, re.I) else None
+                if product_type == "gic":
+                    values["eligibility_text"] = _normalize_text(quote)
+                    amount = re.search(r"Minimum investment amount:\s*\$(\d+(?:\.\d+)?)", quote, re.I)
+                    if amount:values["minimum_deposit"] = float(amount[1])
+                    method = re.search(r"Simple interest is paid on terms[^\n]+?Compound interest[^\n]+?paid at maturity[.]", quote, re.I)
+                    if method:values["interest_calculation_method"] = method[0]
+                    insurance = re.search(r"This product is eligible for deposit insurance[^\n]+?subject to applicable conditions[.]", quote, re.I)
+                    if insurance:values["deposit_insurance"] = insurance[0]
+        if own and c.anchor_type == "section" and _infer_product_type(context) in {"gic", "mortgage"}:
+            term = re.search(r"Available terms range from [^\n.]+[.]?|Choose from [^\n.]+[.]?", quote, re.I)
+            if term and re.search(r"\b(?:days?|months?|years?)\b", term[0], re.I):
+                values["term_length_text"] = _normalize_text(term[0])
         rate_basis = None
         if _infer_product_type(context) in {"savings", "chequing"} and len(basis_records) == 1:
             if c is basis_records[0]:
@@ -836,6 +874,19 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
     if 'included_transactions' in proposals and 'unlimited_transactions_flag' in proposals:
         conflicts.update({'included_transactions', 'unlimited_transactions_flag'})
     proven = [rows[0] for name, rows in proposals.items() if name not in conflicts]
+    # A selected term-specific mortgage row is compared only at its disclosed
+    # term; a family-level alternative must not widen that offer's boundary.
+    rate_record = next((f for f in proven if f.field_name == "interest_rate_summary"
+                        and f.anchor_type == "native_rate_table"), None)
+    if rate_record is not None:
+        from worker.native_rate_tables import native_variable_rows
+        selected_terms = native_variable_rows(rate_record.evidence_text_excerpt)
+        if len(selected_terms) == 1:
+            term = selected_terms[0][0]
+            proven = [f for f in proven if f.field_name != "term_length_text"] + [replace(rate_record,
+                field_name="term_length_text", candidate_value=term,
+                field_metadata={**rate_record.field_metadata,"evidence_quote":term})]
+            conflicts.discard("term_length_text")
     variants = next((f.field_metadata.get("grounded_product_variants") for f in fields
                      if f.field_name == "product_name" and f.field_metadata.get("grounded_product_variants")), None)
     if variants:
@@ -5218,7 +5269,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)

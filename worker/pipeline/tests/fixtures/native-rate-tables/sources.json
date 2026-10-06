@@ -1,0 +1,30 @@
+[
+  {
+    "fixture": "fixed-gic.html",
+    "url": "https://www.laurentianbank.ca/en/personal/investments/gics/fixed-rate",
+    "current_capture_sha256": "624d5aee86b6f7a9f8dbd626969d143bb434393cb5b927b6ad16c6596f7db799",
+    "captured_date": "2026-10-05",
+    "transformation": "Main DOM only, decorative nodes/attributes omitted; financial text, table order, duplicates and footnote targets preserved."
+  },
+  {
+    "fixture": "mortgage-rates.html",
+    "url": "https://www.laurentianbank.ca/en/personal/rates/mortgages",
+    "current_capture_sha256": "87dbefd5f435ad1dce0c736be7dd1a8946838ce67513f83b477b1b3ba01ff7e7",
+    "captured_date": "2026-10-05",
+    "transformation": "Main DOM only, decorative nodes/attributes omitted; financial text, table order, duplicates and footnote targets preserved."
+  },
+  {
+    "fixture": "fixed-mortgage.html",
+    "url": "https://www.laurentianbank.ca/en/personal/mortgages/fixed-rate",
+    "current_capture_sha256": "4cba8a35f9e81ebbae699e9e67fc511c5a3811497a4a093ee39c4074304be674",
+    "captured_date": "2026-10-05",
+    "transformation": "Main DOM only; financial text/order/notes preserved, decorative nodes and attributes omitted."
+  },
+  {
+    "fixture": "variable-mortgage.html",
+    "url": "https://www.laurentianbank.ca/en/personal/mortgages/variable-rate",
+    "current_capture_sha256": "d18b7a3d12dde010d657193bdad3464c16197f464d55903c41d69992ec6e1ffb",
+    "captured_date": "2026-10-05",
+    "transformation": "Main DOM only; financial text/order/notes preserved, decorative nodes and attributes omitted."
+  }
+]

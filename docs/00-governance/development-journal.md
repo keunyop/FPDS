@@ -1,5 +1,70 @@
 # FPDS Development Journal
 
+## 2026-10-05 - Generic Laurentian corrections and three verified publications
+
+- Reproduced eight ordinary exclusions from the original current inputs; traced
+  slashless CMS sibling routes to duplicate paths and HTTP-200 soft errors.
+  Shared discovery requires observed root conventions; catalog, capture and
+  retained parsing reject unavailable source documents consistently.
+- Parser v11/shared native financial proof retain literal percent headers,
+  exact term rows, responsive-copy equality and complete unique linked legal
+  notes. Extraction, stored JSON loading and normalization preserve typed rows,
+  GIC access and verified optional facts without guessed days or rate scalars.
+  Mortgage conditions/terms remain scoped; contradictory rows are excluded.
+  Gates/prompts/cache agree; row-note deletion/shortening regression is blocked.
+- Repeated ordinary-service replay yielded three automatic passes/five exclusions
+  without providers or Admin API. Actual DB-selected snapshot/parse origins also
+  passed before normal promotion. Four new scoped Runs completed, no review;
+  existing captures/history preserved and no recovery feature added.
+- Fixed GIC and fixed/variable mortgages were published as three new versions of
+  existing canonical products. The variable offer is restricted to its qualified
+  3-year row; its contradictory 5-year row stays excluded. Indexed GIC, three
+  LOCs and HISA retain essential financial/source exclusions.
+- Independent DB/Public verification checked 17 field origins, ten raw GIC rows,
+  CAD/access/eligibility/optional conditions, three live API/site details and
+  absence of private evidence. CA Public 70 to 73; US 5 unchanged. Original
+  four Runs/eight candidates, source history and historical financial payloads
+  preserved; three prior versions normally superseded, unrelated values intact.
+- Actual API virtualenv exposed missing shared HTML-parser dependency. Corrected
+  `api/service/pyproject.toml`/lockfile and installed it; independent API 618 and
+  Worker 771 tests pass. Local API restarted with no active Runs and health
+  reports `2026-10-05-native-rate-proof-v2`. Fresh paid Admin model yield and
+  production runtime deployment remain separate; no universal success claim.
+- Foundation, changed-file reference/JSON/diff and API lock checks pass. Whole
+  repo-doctor retains one pre-existing broken link in ignored
+  `tmp/public-top5-20261004/app/README.md`; unrelated artifacts are untouched.
+  [Implementation, exclusions and public links](laurentian-generic-collection-corrections-2026-10-05.md).
+
+## 2026-10-05 - Laurentian direct evidence feasibility without Admin API
+
+- Inspected the latest eight Laurentian targets using read-only saved metadata,
+  eleven hash-verified same-day snapshots, two bounded official captures and
+  official fee/mortgage PDF references. Admin API/provider calls, new Runs,
+  runtime/policy changes, canonical writes and publications: zero.
+- Fixed GIC and fixed/variable mortgages have strong additional evidence
+  opportunities; no new automatic approval was demonstrated. Preserve GIC
+  offer eligibility and term/access/payment semantics, separate mortgage
+  posted/promotion/high-ratio APR scopes and the variable 5-year spread conflict.
+- Confirmed malformed duplicate-path lending capture is a soft 404 despite
+  successful processing; exact URL-construction cause remains untraced.
+  Valid captured GIC/mortgage facts also failed field grounding/native table
+  representation. The failure is not uniformly bank nondisclosure.
+- HISA retains conditional tier/statement facts and a CAD 100,000 source-boundary
+  conflict; current CA scalar comparison contract cannot flatten it. LOC
+  reference/minimum rates and unproven security, plus cumulative indexed GIC
+  series returns/future issuance, remain excluded rather than inferred.
+- Verification: eleven snapshot SHA-256 checks, content/body inspection of two
+  official fetches (one PDF-route soft 404), two official PDF inspections, nine
+  diagnostic financial/security probes and eight unchanged saved-candidate
+  comparison failures reproduced. These are not full-path acceptance tests.
+  No application suite rerun for the documentation-only slice. Local document
+  link/width checks and git diff --check pass.
+- Next step remains separate: reproduce and correct native financial-table
+  proof and invalid lead handling generically, then demonstrate normal-path
+  automatic acceptance on identical current inputs; no permission requested
+  or assumed for this next implementation/data operation.
+  [Product evidence, blockers and verification limits](laurentian-direct-evidence-assessment-2026-10-05.md).
+
 ## 2026-10-05 - Ordinary essential-evidence collection redesign
 
 - Diagnosed the recurring direct/Admin gap as fixed acquisition before required

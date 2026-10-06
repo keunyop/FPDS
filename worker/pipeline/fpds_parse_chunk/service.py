@@ -278,7 +278,7 @@ def _build_evidence_chunks(
     for segment in artifact.segments:
         # Structurally bound financial rows/notes must stay atomic; splitting
         # them would detach annual basis or omit material conditions.
-        effective_max = max(max_chars, len(segment.text)) if segment.anchor_type in {"named_product_rate_basis", "named_lending_range_declaration", "named_product_section", "named_product_financial_record", "rate_table_row", "rate_table_schedule", "financial_table_cell", "financial_declaration", "labelled_financial_record", "linked_rate_record", "unresolved_financial_reference", "product_terms_declaration", "card_purchase_rate_cell"} else max_chars
+        effective_max = max(max_chars, len(segment.text)) if segment.anchor_type in {"native_rate_table", "native_product_terms", "named_product_rate_basis", "named_lending_range_declaration", "named_product_section", "named_product_financial_record", "rate_table_row", "rate_table_schedule", "financial_table_cell", "financial_declaration", "labelled_financial_record", "linked_rate_record", "unresolved_financial_reference", "product_terms_declaration", "card_purchase_rate_cell"} else max_chars
         for rel_start, rel_end, excerpt in _split_text_with_overlap(
             segment.text,
             max_chars=effective_max,

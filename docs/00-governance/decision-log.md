@@ -1,5 +1,16 @@
 # FPDS Decision Log
 
+## D-090 clarification - native financial proof - 2026-10-05
+
+The Product Owner authorizes generic fixes and direct Laurentian publication.
+Evidence acquisition must resolve literal CMS root conventions conservatively
+and reject source error documents despite HTTP 200. Native tables retain their
+own explicit units, term boundaries and complete unique footnotes through shared
+proof and normalization. Conflicting qualified rows remain excluded; GIC access,
+LOC security and conditional costs remain essentials. No review or coverage
+exception is added. Direct data publication and runtime rollout are verified
+separately. [Implementation](laurentian-generic-collection-corrections-2026-10-05.md).
+
 ## D-090 amendment - ordinary evidence-driven acquisition - 2026-10-05
 
 The Product Owner permits process redesign for direct/Admin collection parity.

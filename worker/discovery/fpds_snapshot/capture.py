@@ -430,6 +430,11 @@ def _build_checksum(body: bytes) -> str:
 
 
 def _validate_fetched_payload(*, source: CaptureSource, fetched: FetchedResponse) -> None:
+    if fetched.content_type.lower().startswith("text/html"):
+        from worker.source_content_validity import html_unavailable_reason
+        reason = html_unavailable_reason(fetched.body)
+        if reason:
+            raise NonRetryableFetchError(f"HTML source unavailable ({reason}): {source.resolved_url}")
     if source.source_type.lower() != "pdf":
         return
     if fetched.content_type.lower().startswith("application/pdf") or fetched.body.startswith(b"%PDF"):

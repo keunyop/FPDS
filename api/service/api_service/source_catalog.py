@@ -6510,6 +6510,9 @@ def _score_page_evidence(
 ) -> PageEvidenceAssessment:
     try:
         html_text = fetch_text(raw_url, fetch_policy)
+        from worker.source_content_validity import html_unavailable_reason
+        if reason := html_unavailable_reason(html_text.encode("utf-8")):
+            raise ValueError(f"HTML source unavailable ({reason})")
     except Exception as exc:
         return PageEvidenceAssessment(
             page_evidence_score=0,

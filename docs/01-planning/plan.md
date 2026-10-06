@@ -1,5 +1,12 @@
 # FPDS Project Execution Plan
 
+Authorized collection follow-through (2026-10-05), within the current ordinary
+collection slice: generic CMS/source-validity/native-table proof corrections and
+bounded direct Laurentian publication. Acceptance includes repeated actual
+service replay, preserved financial exclusions, original-history protection and
+anonymous Public readback. No new product/country/recovery feature.
+[Evidence and result](../00-governance/laurentian-generic-collection-corrections-2026-10-05.md).
+
 Latest authorized collection slice (2026-10-05), within existing 3.1-3.7/WBS
 5.76: ordinary essential-evidence research, shared captured-proof preflight,
 source-backed cross-bank full-path regressions and bounded isolated live model

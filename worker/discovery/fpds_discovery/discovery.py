@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from html.parser import HTMLParser
 import json
 import re
@@ -478,6 +478,7 @@ class _LinkExtractor(HTMLParser):
         self._structured_script_chars = 0
         self._structured_script_count = 0
         self._direct_link_count = 0
+        self._structured_hrefs: set[str] = set()
         self._in_main = False
         self._current_aria_label = ""
 
@@ -642,6 +643,7 @@ class _LinkExtractor(HTMLParser):
                             # Prefer the public route and never score the CMS
                             # alias as a second source.
                             continue
+                        self._structured_hrefs.add(item.strip())
                         self._append_link(item.strip(), label)
                     elif isinstance(item, (dict, list)):
                         stack.append((item, str(key), label))
@@ -676,8 +678,20 @@ def extract_links(html_text: str, *, base_url: str) -> list[ExtractedLink]:
     from .modal_links import literal_modal_links
     for href, label in literal_modal_links(html_text):
         parser._append_link(href, label, prefer_over_ordinary=True)
+    # A literal CMS URL may omit the root slash. Correct only a path prefix
+    # whose convention is demonstrated by an exact ordinary DOM counterpart;
+    # genuine relative DOM paths and unproven CMS conventions remain unchanged.
+    roots = {link.href for link in parser.links if link.href.startswith("/") and not link.href.startswith("//")}
+    prefixes = {tuple(href.split("/")[:2]) for href in parser._structured_hrefs
+                if "/" + href in roots and len(href.split("/")) >= 3}
     by_identity: dict[tuple[str, str], ExtractedLink] = {}
     for link in parser.links:
+        href = link.href
+        if (href in parser._structured_hrefs and not urlparse(href).scheme
+                and not href.startswith(("/", "?", "#", "."))
+                and tuple(href.split("/")[:2]) in prefixes):
+            resolved = urljoin(base_url, "/" + href)
+            link = replace(link, resolved_url=resolved, normalized_url=normalize_source_url(resolved))
         by_identity.setdefault((link.normalized_url, link.anchor_text), link)
     return list(by_identity.values())
 

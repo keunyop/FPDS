@@ -1,5 +1,18 @@
 # Product collection accuracy and automatic acceptance
 
+## Native financial record correction - 2026-10-05
+
+Literal CMS sibling paths require an observed root DOM convention; unavailable
+HTTP-200 documents are excluded at discovery, capture and retained parse.
+Parser v11 preserves explicit percent headers, native term rows and complete
+uniquely linked legal notes. Exact annual term tables retain typed values through
+normalization without invented days or shortened conditions. Qualified mortgage
+rows keep their own terms; conflicting rows cannot supply comparison facts.
+GIC cashability requires complete access proof. These are generic evidence
+representations, with unchanged essentials and no manual product review.
+Process version: `2026-10-05-native-rate-proof-v2`.
+[Diagnosis, regressions and publication](../00-governance/laurentian-generic-collection-corrections-2026-10-05.md).
+
 ## Essential evidence research before final extraction - 2026-10-05
 
 The Product Owner authorizes redesign of ordinary collection to address the

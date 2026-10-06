@@ -1,5 +1,12 @@
 # Financial Product Field Contract
 
+Native table clarification (2026-10-05): literal annual-percent headers bind
+native term/rate cells; complete conditions and exact typed rows must survive
+normalization. Do not infer month/year day counts, flatten qualified mortgage
+rows or use cumulative series returns as annual rates. Complete own cashability
+proof remains required. No unit/type/schema or essential-policy change.
+See [policy](collection-accuracy-policy.md).
+
 Chequing clarification (2026-10-03): a complete own named-column monthly
 transaction row supplies a native integer allowance or explicit unlimited true.
 Keep exact headers/conditions; conflicting, conditional or special-channel rows

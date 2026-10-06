@@ -242,7 +242,8 @@ def contains_explicit_rate_percentage(value: object) -> bool:
             percentage = re.search(_NUMERIC_PERCENTAGE, match.group())
             if percentage and not rate_component_only(value=percentage.group(), context=text):
                 return True
-    return False
+    from worker.native_rate_tables import has_native_rate_grid
+    return has_native_rate_grid(text)
 
 
 def canonical_deposit_rate_suppression_reason(

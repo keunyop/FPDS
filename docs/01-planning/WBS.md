@@ -1,5 +1,12 @@
 # FPDS Detailed WBS
 
+Authorized collection follow-through (2026-10-05), within the current ordinary
+collection slice: generic CMS/source-validity/native-table proof corrections and
+bounded direct Laurentian publication. Acceptance includes repeated actual
+service replay, preserved financial exclusions, original-history protection and
+anonymous Public readback. No new product/country/recovery feature.
+[Evidence and result](../00-governance/laurentian-generic-collection-corrections-2026-10-05.md).
+
 Latest Product Owner collection slice (2026-10-05), within 3.1-3.7/5.76:
 redesign ordinary acquisition around missing applicable essential evidence,
 constrained official-link planning and normal same-run capture/parse before final

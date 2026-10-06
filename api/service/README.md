@@ -1,5 +1,18 @@
 # FPDS API Service
 
+## Native financial record correction - 2026-10-05
+
+Literal CMS sibling paths require an observed root DOM convention; unavailable
+HTTP-200 documents are excluded at discovery, capture and retained parse.
+Parser v11 preserves explicit percent headers, native term rows and complete
+uniquely linked legal notes. Exact annual term tables retain typed values through
+normalization without invented days or shortened conditions. Qualified mortgage
+rows keep their own terms; conflicting rows cannot supply comparison facts.
+GIC cashability requires complete access proof. These are generic evidence
+representations, with unchanged essentials and no manual product review.
+Process version: `2026-10-05-native-rate-proof-v2`.
+[Diagnosis, regressions and publication](../../docs/00-governance/laurentian-generic-collection-corrections-2026-10-05.md).
+
 ## Ordinary essential evidence research - 2026-10-05
 
 After initial successful capture/parse, the ordinary source collection runner
@@ -291,10 +304,11 @@ $env:FPDS_ENV_FILE=".env.dev"
 uv run --directory api/service uvicorn api_service.main:app --reload --host localhost --port 4000
 ```
 
-The shared product-availability policy uses Python's standard-library HTML
-parser so this independent API environment does not need Worker-only
-BeautifulSoup dependencies. The 2026-10-02 startup repair was verified with the
-actual API virtualenv and a successful Uvicorn `/healthz` response.
+The independent API project declares `beautifulsoup4` because source scoring
+uses shared native product-section and source-validity HTML proof. Run
+`uv sync --directory api/service` before restarting this API after the native
+evidence correction; the root Worker environment remains a separate boundary.
+The product-availability policy itself still uses the standard-library parser.
 
 ## Vercel API Deployment
 

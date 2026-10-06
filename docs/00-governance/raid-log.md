@@ -1,5 +1,17 @@
 # FPDS RAID Log
 
+## Native proof and environment parity follow-through - 2026-10-05
+
+Laurentian retained-input normal services now accept three products and exclude
+five under unchanged essentials; direct Public readback is verified separately.
+Literal URL conventions, HTTP-200 error pages, detached units/notes and typed
+normalization losses have generic regressions. API dependency omission was
+reproduced in its actual virtualenv and corrected in project/lockfile; local
+port 4000 runs process v2 after bounded restart with no active Runs. Preserve
+coordinated production rollout and fresh ordinary paid-run yield as separate
+unverified outcomes; three direct publications do not prove every bank/type.
+[Evidence and result](laurentian-generic-collection-corrections-2026-10-05.md).
+
 ## Ordinary acquisition and evaluation risk - 2026-10-05
 
 Previous same-input supplements did not prove autonomous evidence acquisition or
