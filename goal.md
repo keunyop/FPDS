@@ -1,5 +1,21 @@
 # Admin pre-handover review and fixes
 
+## Authorized slice: generic Manulife corrections and direct publication - 2026-10-06
+
+Objective: inspect latest Manulife collection without Admin API, correct demonstrated generic defects and directly publish current products passing unchanged automatic gates.
+Ownership: preserve all earlier slices and unrelated changes.
+Scope: read-only baseline/private before-images; bounded current official captures/reuse; generic acquisition/parser/extraction/normalization/origin corrections, matching prompts and cross-bank/type regressions; repeated normal-service verification; normal automatic promotion and independent Public readback; journal/report/contracts.
+Exclusions: weaker essentials, invented facts, manual review, bank-specific acceptance rules, new types/countries, account/security changes, permanent recovery features, broad paid recollection, unrelated mutations and production runtime deployment.
+Acceptance:
+- [x] Diagnose latest outcomes and direct/Admin evidence differences.
+- [x] Reproduce and fix generic defects with success/boundary/failure regressions and matching gates/prompts.
+- [x] Repeat identical-input normal services, preserving exact financial meaning/current origins and exclusions.
+- [x] Publish eligible Manulife products through normal automatic gates; verify Public facts/privacy and preserved history/unrelated data.
+- [x] Pass relevant runtime/repository checks, inspect final diff/goal and update journal/report with limitations.
+Verification: capture hashes; provider-disabled ordinary stored-artifact/origin services; behavior suites; DB before/after; anonymous Public API/site readback; git diff --check.
+Status: complete. Five unique products verified on live API/site, 23 current field links checked, Worker 783/API 621 tests and focused docs/environment/diff checks pass. Full foundation entrypoint has an unrelated pre-existing ignored-tmp link failure. Final verification remains local after automatic review rejected its optional extra external archival. No production API/Worker deployment claimed; all prior slice ownership and history preserved.
+
+
 ## Authorized slice: generic Laurentian corrections and direct publication - 2026-10-05
 
 Objective: correct demonstrated shared acquisition/financial-proof failures, repeat verification until evidence-backed defects are resolved, and directly publish current automatically accepted Laurentian products without Admin API.

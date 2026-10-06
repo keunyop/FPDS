@@ -106,6 +106,8 @@ def _link_relevance(*, product_type, url, label, missing):
         score = 1
     if score <= 0:
         return 0
+    if any('rate' in name for name in missing) and re.search(r'(?:^|[-_/])(?:news|blog|articles?)(?:$|[-_/])', urlparse(url).path, re.I):
+        return 0
     fingerprint = f'{urlparse(url).path} {label}'
     hints = [pattern for key, pattern in _FIELD_HINTS.items() if any(key in name for name in missing)]
     return score + 20 * sum(bool(re.search(pattern, fingerprint, re.I)) for pattern in hints)
@@ -231,6 +233,15 @@ class EvidenceResearchPlanner:
                     # Failure cannot create facts or paid retries. Observed,
                     # validated leads can still use deterministic acquisition.
                     diagnostic['planner_failure'] = 'failed_or_invalid_plan'
+            # A literal observed current-rate/pricing lead cannot be displaced
+            # by a generic agreement while required rate proof is missing.
+            # This chooses capture only; normal exact product gates prove facts.
+            direct_rates = [c for c in options if any('rate' in name for name in missing)
+                and re.fullmatch(r'(?:view |see |our )?(?:current|interest) rates', c['label'].strip(), re.I)]
+            if direct_rates:
+                lead = direct_rates[0]
+                selected = [lead, *[c for c in selected if c['url'] != lead['url']]][:budget]
+                diagnostic['required_rate_lead_reserved'] = lead['url']
             for candidate in selected:
                 url = candidate['url']
                 if url in sources:

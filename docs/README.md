@@ -1,6 +1,6 @@
 # FPDS Docs Map
 
-Status: Active navigation index · Updated: 2026-10-05
+Status: Active navigation index · Updated: 2026-10-06
 
 Use this map to find the current contract or operating document. Dated reports
 record historical results; product counts and test totals are not live status.
@@ -28,7 +28,7 @@ Latest read-only collection assessment: [Laurentian direct evidence opportunitie
 
 Latest ordinary-process verification: [essential-evidence research redesign and runtime limits](00-governance/ordinary-collection-redesign-2026-10-05.md). This local result is distinct from direct data publication.
 
-Latest collection result: [Laurentian generic native-proof corrections and three verified publications](00-governance/laurentian-generic-collection-corrections-2026-10-05.md). Previous result: [FAIRSTONE / FNBC / HAVENTREE shared corrections and direct publication](00-governance/three-bank-generic-collection-corrections-2026-10-05.md). Previous result: [DESJARDINS / EQBANK](00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+Latest collection result: [Manulife generic information-record corrections and five verified publications](00-governance/manulife-generic-collection-corrections-2026-10-06.md). Previous result: [Laurentian generic native-proof corrections and three verified publications](00-governance/laurentian-generic-collection-corrections-2026-10-05.md). Previous result: [FAIRSTONE / FNBC / HAVENTREE shared corrections and direct publication](00-governance/three-bank-generic-collection-corrections-2026-10-05.md). Previous result: [DESJARDINS / EQBANK](00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
 
 ## Resume development
 

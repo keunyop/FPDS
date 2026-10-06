@@ -7,6 +7,9 @@ FEE_CHANGE_NOTICE_INSTRUCTIONS = (
 )
 
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    "A native Card Information Box binds its ordinary Annual Interest Rates purchase/cash labels separately from "
+    "its complete missed-minimum-payment increased-rate rule. Preserve that whole rule, its start and reset duration; "
+    "never use the increased rate as the ordinary rate or truncate a condition. Its Annual Fees row is independent. "
     "A separate card-offer exclusion for switching from an existing card does not qualify an "
     "explicit current preferred annual rate declared under its own Rates and Fees heading. "
     "An explicit Offer revocation for unmet Offer eligibility, before a separate Rates and Fees heading, "
@@ -53,6 +56,11 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 )
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "A named mortgage Rate grid can contain internal fixed/variable term headers with explicit APR (%). "
+    "Bind only their open/closed loan rows and complete linked APR/compounding/prime notes; exclude base-reference "
+    "and positive-deposit-balance rows. Preserve exact term cells separately from the full rate conditions. "
+    "A credit-limit Interest grid needs its own explicitly linked annual-unit note; retain all limit/spread tiers "
+    "rather than selecting a headline scalar. Resolve numeric note anchors only to their own prose, never adjacent notes. "
     "An explicit percentage header binds native numeric cells to their own term rows; "
     "copy the original header, cells, named section, complete conditions and uniquely linked notes. "
     "Never append a percent sign to a source quote, mix open/closed/promotional/example scopes, "

@@ -1,5 +1,17 @@
 # FPDS Workspace
 
+## Native information records and Manulife publication - 2026-10-06
+
+Parser v12 preserves named card information boxes, embedded mortgage APR term
+subgroups and owned credit-limit annual notes. Semantic navigation does not
+become product currency evidence. Current-rate leads stay within existing
+research/link caps; unnamed companion fees do not overwrite owned prices.
+Same-capture registered optional facts and explicit typed security survive
+normalization and unchanged origin/financial essentials. Complete native
+conditions are checked at the final gate. Process version:
+`2026-10-06-native-information-proof-v2`.
+[Diagnosis, verified publication and deployment limits](docs/00-governance/manulife-generic-collection-corrections-2026-10-06.md).
+
 ## Native financial record correction - 2026-10-05
 
 Literal CMS sibling paths require an observed root DOM convention; unavailable

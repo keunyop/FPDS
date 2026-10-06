@@ -310,7 +310,7 @@ def security_meaning(value: object) -> bool | None:
         return None
     unsecured = bool(re.search(r"\bunsecured\b|no collateral (?:is )?required|\bnot secured\b", value, re.I))
     positive_context = re.sub(r"\bnot secured\b|\bno collateral (?:is )?required\b", "", value, flags=re.I)
-    secured = bool(re.search(r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b", positive_context, re.I))
+    secured = bool(re.search(r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b|\bby securing your line of credit with assets\b", positive_context, re.I))
     return None if secured == unsecured else secured
 
 

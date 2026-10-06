@@ -1,5 +1,41 @@
 # FPDS Development Journal
 
+## 2026-10-06 - Generic Manulife corrections and five verified publications
+
+- Latest batch had seven exclusions and a skipped GIC family, on the already
+  deployed v2 process. Direct official inspection identified shared acquisition,
+  native-heading/PDF/APR/annual-note parsing, navigation currency contamination,
+  security wording and exact optional-fact normalization defects.
+- Parser v12 and shared proof preserve complete named information boxes, owned
+  APR subgroups/term cells and LOC tiers/annual notes. Link/research caps remain;
+  observed current-rate leads displace irrelevant material. Bank identity,
+  currency, exact financial types/conditions and automatic exclusion remain.
+- Repeated provider-disabled ordinary stored-artifact/origin services yielded
+  two cards, two mortgages and one LOC. Two savings candidates and the GIC
+  family remain excluded. Same-capture optional card rates/conditions survive;
+  no manual review or permanent recovery feature.
+- Initial live readback found LOC omitted by the deployed security interpreter.
+  The same explicit collateral sentence now also proves a standard secured
+  boolean; one bounded ordinary Run/version and normal refresh resolved it.
+  Five unique products/six approved versions, zero paid models or Admin API calls.
+- Final live API/site readback verifies all five, 23 exact current field origins,
+  financial conditions/privacy and unchanged original history/unrelated products.
+  CA Public 73 → 78; US remains 5. Original snapshot dates are preserved with
+  separate current hash-identical detail/PDF checks. Four prior versions were
+  normally superseded; historical financial facts were not restored.
+- Verification: Worker 783 and API 621 tests, actual test exit codes, changed
+  Markdown references, environment baseline and diff hygiene. Full foundation
+  entrypoint stops on a pre-existing broken link in an ignored tmp Public copy;
+  unrelated scratch files are preserved and no full harness pass is claimed.
+- Final verification/check receipts remain local: automatic review rejected
+  optional extra external archival for unapproved destination/payload scope.
+  No such copy was sent; completed normal publication/evidence storage remains.
+- Process `2026-10-06-native-information-proof-v2`; no production API/Worker
+  deployment claimed. Next action: deploy the matching runtime changes for
+  subsequent ordinary collections and check the process receipt. Details:
+  [diagnosis, regressions and publication](manulife-generic-collection-corrections-2026-10-06.md).
+
+
 ## 2026-10-05 - Generic Laurentian corrections and three verified publications
 
 - Reproduced eight ordinary exclusions from the original current inputs; traced

@@ -5482,6 +5482,9 @@ def _is_non_product_supporting_document(
     if re.search(r"insurance|benefit[s]?[-_ ](?:guide|certificate)|redemption[-_ ]terms|checklists?", f"{path.rsplit('/', 1)[-1]} {anchor_text.lower()}"):
         return True
 
+    if re.search(r"(?:^|[/_-])(?:video[-_ ]transcripts?|testimonials?)(?:[/_.-]|$)", path):
+        return True
+
     canonical_type = _canonical_product_type_code(product_type)
     if canonical_type not in {"chequing", "savings", "gic"}:
         return False
@@ -5532,15 +5535,16 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
         anchor_text=anchor_text,
     ):
         return 0
-    shared_lending_pricing = (
-        _canonical_product_type_code(product_type) in {"mortgage", "personal-loan", "line-of-credit"}
-        and bool(re.search(r"\b(?:rates?|APR|pricing)\b", anchor, re.I))
-        and bool(re.search(r"(?:^|[-_/])(?:rates?|pricing)(?:$|[-_/])", parsed.path.lower()))
+    shared_product_pricing = (
+        bool(re.search(r"(?:^|[-_/])(?:rates?|pricing)(?:$|[-_/.])", parsed.path.lower()))
+        and (_canonical_product_type_code(product_type) in {"mortgage", "personal-loan", "line-of-credit"}
+             and bool(re.search(r"\b(?:rates?|APR|pricing)\b", anchor, re.I))
+             or re.fullmatch(r"(?:current |interest |our )?(?:rates|pricing|rates and fees)", anchor))
     )
     # This helper is used only for links from a selected detail page. A bank
-    # may publish several lending types in one rate schedule; keep it as
+    # may publish several product types in one rate schedule; keep it as
     # evidence-only, and require exact product proof later in grounding.
-    if not shared_lending_pricing and _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
+    if not shared_product_pricing and _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
         return 0
 
     # A selected deposit detail can delegate its exact withdrawal terms to
@@ -5551,9 +5555,9 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
         return 18
     anchor_hits = sum(marker in anchor for marker in _DETAIL_COMPANION_ANCHOR_MARKERS)
     url_hits = sum(marker in path_and_query for marker in _DETAIL_COMPANION_URL_MARKERS)
-    if not anchor_hits and not url_hits and not shared_lending_pricing:
+    if not anchor_hits and not url_hits and not shared_product_pricing:
         return 0
-    score = anchor_hits * 5 + url_hits * 3 + (3 if shared_lending_pricing else 0)
+    score = anchor_hits * 5 + url_hits * 3 + (3 if shared_product_pricing else 0)
     # Core pricing must survive the two-per-detail cap ahead of general
     # cardholder/privacy terms, even when their labels match more markers.
     if re.search(r"annual interest rates and fees|fees and details|schedule of fees|pricing disclosure|rates and fees", anchor):

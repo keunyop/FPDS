@@ -13,7 +13,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v11"
+PARSER_VERSION = "fpds-parse-chunk-v12"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -43,6 +43,11 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript", "svg"]):
         tag.decompose()
+    # Site navigation can be nested inside <main>. It is neither product
+    # identity nor denomination evidence, even when it lists foreign accounts.
+    for navigation in soup.select('nav, [role="navigation"]'):
+        if navigation.parent is not None:
+            navigation.decompose()
     for image in soup.find_all("img"):
         alt_text = _normalize_text(str(image.get("alt") or ""))
         if image.find_parent("table") is not None and alt_text.casefold() in {"check", "x"}:
@@ -117,6 +122,10 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     sections.extend(_labelled_disclosure_sections(soup))
     sections.extend(_linked_rate_records(soup))
     sections.extend(_financial_declaration_sections(sections))
+    for heading in soup.find_all("h1"):
+        sections.append(_RawSegment("document_heading", "h1", None, heading.get_text(" ", strip=True)))
+    from worker.native_information_records import html_information_records
+    sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in html_information_records(soup))
     from worker.native_rate_tables import native_financial_sections
     sections.extend(_RawSegment(kind, owner, None, record)
                     for kind, owner, record in native_financial_sections(soup))
@@ -614,6 +623,9 @@ def _parse_pdf(body: bytes) -> ParsedArtifact:
         if not text:
             empty_pages.append(page_index)
             continue
+        from worker.native_information_records import pdf_information_records
+        raw_segments.extend(_RawSegment(kind, owner, page_index, record)
+                            for kind, owner, record in pdf_information_records(text, page_no=page_index))
         raw_segments.append(
             _RawSegment(
                 anchor_type="page",

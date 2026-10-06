@@ -58,6 +58,28 @@ class EvidenceResearchTests(unittest.TestCase):
             inputs=inputs or [item], captures=pages or [page], attempted_urls=attempted or {s.normalized_url},
             parent_counts=counts if counts is not None else {}, **kwargs)
 
+    def test_required_rate_reserves_observed_current_rates_ahead_of_agreement(self):
+        s = source(url='https://examplebank.com/ca/credit-line', product='line-of-credit', name='Example Credit Line')
+        html = '<a href="/current-rates.html">Current rates</a><a href="/line-of-credit-agreement.pdf">Line of credit agreement</a>'
+        def model(**kw):
+            options = json.loads(kw['messages'][-1]['content'])['observed_links']
+            choice = next(c['link_id'] for c in options if 'agreement' in c['url'])
+            return {'stop': False, 'link_ids': [choice]}, {}
+        result = self.plan(s, html=html, model=model)
+        self.assertEqual(result['sources'][0]['url'], 'https://examplebank.com/current-rates.html')
+        self.assertLessEqual(len(result['sources']), MAX_ADDITIONAL_PER_DETAIL)
+        self.assertEqual(result['diagnostics'][0]['required_rate_lead_reserved'], result['sources'][0]['url'])
+
+    def test_other_product_specific_pricing_cannot_displace_shared_current_rates(self):
+        s = source(url='https://examplebank.com/ca/savings', product='savings', name='Example Savings')
+        result = self.plan(s, html='<a href="/credit-cards/rates">Credit card rates</a><a href="/current-rates.html">Current rates</a>')
+        self.assertEqual([r['url'] for r in result['sources']], ['https://examplebank.com/current-rates.html'])
+
+    def test_video_transcript_and_rate_news_are_not_essential_pricing_leads(self):
+        s = source(url='https://examplebank.com/ca/mortgage', product='mortgage', name='Example Mortgage')
+        result = self.plan(s, html='<a href="/documents/video-transcripts/mortgage-rates.pdf">Mortgage rates</a><a href="/news/mortgage-rates">Mortgage rates</a>')
+        self.assertEqual(result['sources'], [])
+
     def test_missing_ordinary_costs_select_observed_evidence_only_companion(self):
         result = self.plan()
         self.assertEqual(len(result['sources']), 1)

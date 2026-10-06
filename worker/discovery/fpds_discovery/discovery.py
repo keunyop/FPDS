@@ -543,7 +543,9 @@ class _LinkExtractor(HTMLParser):
         label = " ".join(part for part in (anchor, self._current_aria_label) if part)
         # Main-content disclosures displace navigation inside the existing
         # 256-link / 64-priority-link caps; no additional fetch is initiated.
-        disclosure = self._in_main and bool(re.search(
+        named_rate_lead = bool(re.search(r"(?:^|[-_/])(?:current|interest)[-_]rates?(?:[./?#]|$)", self._current_href, re.I)
+            and re.fullmatch(r"(?:current|interest|mortgage interest) rates?", anchor.strip(), re.I))
+        disclosure = named_rate_lead or self._in_main and bool(re.search(
             r"agreement|disclosure|pricing|fee[-_ ]?schedule|bank[-_ ]plans|annual interest rates and fees|fees[-_ ]and[-_ ]details|\.pdf(?=$|[?#\s])",
             self._current_href + " " + label, re.I))
         self._append_link(self._current_href, label, prefer_over_ordinary=disclosure)

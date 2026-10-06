@@ -2648,7 +2648,7 @@ class SourceCatalogTests(unittest.TestCase):
 
         rates_row = next(item for item in result.rows if item["normalized_url"] == rates_url)
         self.assertEqual(rates_row["discovery_role"], "supporting_html")
-        self.assertEqual(rates_row["discovery_metadata"]["selection_path"], "deterministic_supporting_fallback")
+        self.assertEqual(rates_row["discovery_metadata"]["selection_path"], "selected_detail_companion")
 
     def test_product_type_rate_page_recognizes_vancity_family_routes_without_cross_product_leakage(self) -> None:
         cases = (

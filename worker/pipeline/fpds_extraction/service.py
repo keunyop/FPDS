@@ -447,7 +447,7 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code and c.country_code == context.country_code]
         selected = list(own)
         if context.source_metadata.get("discovery_role") == "detail":
-            identity = _authoritative_discovery_product_title(context) or _captured_native_product_title(context, own) or next(iter(_source_metadata_title_candidates(context)), "")
+            identity = _captured_native_product_title(context, own) or _authoritative_discovery_product_title(context) or next(iter(_source_metadata_title_candidates(context)), "")
             tokens = set(re.findall(r"[a-z0-9]+", identity.lower())) - {"the", "bank", "account", "accounts", "of", "and"}
             tokens = {t.removesuffix("s") if len(t) > 4 else t for t in tokens}
             for companion in inputs:
@@ -490,6 +490,41 @@ def _captured_native_product_title(context, candidates):
     discovery = context.source_metadata.get("discovery_metadata") or {}
     url = _canonical_official_source_url(context.source_metadata.get("normalized_source_url") or context.source_metadata.get("source_url"))
     identity = None
+    # Literal H1 ownership and independently corroborating SEO/URL tokens,
+    # not confidence or mutable metadata alone, establish the native name.
+    from worker.native_information_records import name_key, names_match
+    native_heads = [c for c in candidates if c.anchor_type == "document_heading"
+        and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+        and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
+        and c.country_code == context.country_code and c.source_language == context.source_language]
+    if len(native_heads) == 1:
+        literal = _normalize_text(native_heads[0].evidence_excerpt)
+        native_tokens = set(name_key(literal).split()) - {"the", "bank", "card", "cards", "account", "accounts", "r", "tm"}
+        title_tokens = set(name_key(str(discovery.get("page_title") or "")).split())
+        url_tokens = set(name_key(urlsplit(url).path).split())
+        route_identity = native_tokens - set(name_key(context.bank_code).split())
+        family = discovery.get("multi_product_family_overview") is True or "multi_product_family_overview" in discovery.get("page_evidence_reason_codes", [])
+        card_price = (_infer_product_type(context) != "credit-card" or any(
+            names_match(c.anchor_value, literal) and (
+                (c.anchor_type in {"labelled_financial_record", "named_product_financial_record"}
+                 and c.source_document_id == context.source_document_id
+                 and c.source_snapshot_id == context.snapshot_id
+                 and c.parsed_document_id == context.parsed_document_id)
+                or (c.anchor_type in {"card_information_rate", "card_information_fee"}
+                    and c.retrieval_metadata.get("captured_companion") is True
+                    and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url))
+            and c.bank_code == context.bank_code and c.country_code == context.country_code
+            and c.source_language == context.source_language for c in candidates))
+        if (card_price and not family and route_identity and route_identity <= url_tokens and len(native_tokens) >= 2 and len(literal.split()) <= 10
+                and native_tokens <= (title_tokens | url_tokens)
+                and not re.search(r"^(?:get|benefit|plan|choose|compare|discover|find|open)\b", literal, re.I)
+                and not re.search(r"/(?:apply|application|login|calculator|insurance)(?:/|[.-]|$)",urlsplit(url).path,re.I)
+                and not non_product_identity_reason(product_type=_infer_product_type(context),primary_heading=literal,page_title=literal)
+                and any(c.anchor_type == "section" and _normalize_text(c.evidence_excerpt.splitlines()[0]) == literal
+                    for c in candidates if c.evidence_excerpt and c.source_document_id == context.source_document_id
+                    and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
+                    and c.bank_code == context.bank_code and c.country_code == context.country_code)):
+            return literal
     # A marketing/action SEO title can disagree with an exact native H1.
     # Require the owned main section AND its own labelled price record AND a
     # distinctive product URL; metadata/confidence alone never proves identity.
@@ -518,15 +553,20 @@ def _captured_native_product_title(context, candidates):
         title = _clean_title_candidate(raw_title)
         if re.sub(r"[^a-z0-9]", "", raw_title.casefold()) == re.sub(r"[^a-z0-9]", "", (title or "").casefold()):
             title = raw_title
-        title_tokens = set(re.findall(r"[a-z0-9]+", (title or "").lower()))
-        url_tokens = set(re.findall(r"[a-z0-9]+", urlsplit(url).path.lower()))
+        # Singular/plural category words in a captured SEO name and its own
+        # route do not create different product identities (lines/line, loans/loan).
+        def route_tokens(value):
+            return {t[:-1] if len(t) > 3 and t.endswith("s") else t
+                    for t in re.findall(r"[a-z0-9]+", value.lower())}
+        title_tokens = route_tokens(title or "")
+        url_tokens = route_tokens(urlsplit(url).path)
         native_titles = [c for c in candidates if c.anchor_type == "document_title"
             and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
             and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
             and c.country_code == context.country_code and c.source_language == context.source_language
             and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(c.evidence_excerpt).casefold())
                 == re.sub(r"[^a-z0-9]", "", (title or "").casefold())]
-        if title and title_tokens and native_titles and any(k in title.casefold() for k in _PRODUCT_TITLE_KEYWORDS) and not _looks_like_marketing_or_family_title(title) and (
+        if not family and not action_path and title and title_tokens and native_titles and any(k in title.casefold() for k in _PRODUCT_TITLE_KEYWORDS) and not _looks_like_marketing_or_family_title(title) and (
                 title_tokens <= url_tokens or any(re.sub(r"[^a-z0-9]", "", title.casefold()) in re.sub(r"[^a-z0-9]", "", c.evidence_excerpt.casefold())
                     for c in candidates if c.anchor_type == "section" and c.source_document_id == context.source_document_id
                     and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
@@ -631,7 +671,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
     url=_canonical_official_source_url(metadata.get("normalized_source_url") or metadata.get("source_url"))
     native_title = _captured_native_product_title(context, candidates)
     native_identity_proven = bool(native_title and not identity)
-    identity = identity or native_title
+    identity = native_title or identity
     if (metadata.get("discovery_role") != "detail" or not identity
             or (discovery.get("product_identity_match") is not True and not native_identity_proven)
             or not _url_matches_official_domains(url,allowed_domains=_official_domain_allowlist(context))
@@ -676,13 +716,52 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
         values={}
         field_quotes = {}
         heading = _normalize_text(str(discovery.get("primary_heading") or ""))
-        first_line = next((line.strip() for line in quote.splitlines() if line.strip()), "")
-        if own and (first_line == heading or (c.anchor_type == "document_title" and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(quote).casefold()) == re.sub(r"[^a-z0-9]", "", identity.casefold()))):
+        first_line = next((_normalize_text(line) for line in quote.splitlines() if line.strip()), "")
+        if own and ((c.anchor_type == "document_heading" and first_line == identity) or first_line == heading or (c.anchor_type == "document_title" and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(quote).casefold()) == re.sub(r"[^a-z0-9]", "", identity.casefold()))):
             values["product_name"] = identity
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
             for currency, pattern in CURRENCY_PATTERNS.items():
                 if re.search(pattern, identity, re.I):
                     values["currency"] = currency
+        if c.anchor_type in {"card_information_rate", "card_information_fee"} and _infer_product_type(context) == "credit-card":
+            from worker.native_information_records import names_match, information_card_rates
+            if names_match(c.anchor_value, identity):
+                pair = information_card_rates(quote) if c.anchor_type == "card_information_rate" else None
+                if pair:
+                    values.update(purchase_interest_rate=float(pair[0]), cash_advance_rate=float(pair[1]),
+                                  purchase_interest_rate_summary=_normalize_text(quote))
+                if c.anchor_type == "card_information_fee":
+                    fee = re.search(r"(?mi)^Annual Fees\s+\$(\d+(?:\.\d+)?)",quote)
+                    if fee: values["annual_fee"] = float(fee[1])
+        if c.anchor_type == "named_mortgage_rate_schedule" and _infer_product_type(context) == "mortgage":
+            from worker.native_information_records import names_match, mortgage_terms
+            if names_match(c.anchor_value, identity) and mortgage_terms(quote):
+                values["interest_rate_summary"] = _normalize_text(quote)
+                field_quotes["interest_rate_summary"] = quote
+        if c.anchor_type == "named_mortgage_term_schedule" and _infer_product_type(context) == "mortgage":
+            from worker.native_information_records import names_match
+            if names_match(c.anchor_value, identity):
+                values["term_length_text"] = _normalize_text(quote)
+        if own and c.anchor_type == "credit_limit_rate_schedule" and _infer_product_type(context) == "line-of-credit":
+            values["interest_rate_summary"] = _normalize_text(quote)
+            field_quotes["interest_rate_summary"] = quote
+        if own and c.anchor_type == "section" and _infer_product_type(context) == "mortgage" and len(quote) <= 6400:
+            mode = re.search(r"\bvariable or fixed interest rate\b|\bfixed or variable interest rate\b",quote,re.I)
+            if mode:
+                values["rate_type"] = mode[0]
+                field_quotes["rate_type"] = mode[0]
+        if own and c.anchor_type == "section" and _infer_product_type(context) == "line-of-credit" and len(quote) <= 1500:
+            # Retain the complete affirmative collateral sentence; hypothetical
+            # comparisons with unsecured loans do not prove required security.
+            security = re.search(r"[^.\n]*\bby securing your line of credit with assets\b[^.\n]+[.]",quote,re.I)
+            if security:
+                values["collateral_text"] = _normalize_text(security[0])
+                from worker.pipeline.fpds_approval_policy import security_meaning
+                meaning = security_meaning(security[0])
+                if meaning is not None:
+                    values["secured_flag"] = meaning
+                    field_quotes["secured_flag"] = security[0]
+                field_quotes["collateral_text"] = security[0]
         if c.anchor_type=="card_purchase_rate_cell" and _infer_product_type(context)=="credit-card":
             parts=re.split(r"\nPurchases\d*\n",quote)
             rate_line = parts[1].splitlines()[0].strip() if len(parts) == 2 else ""
@@ -699,7 +778,9 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if not applies:
                 continue
             values['purchase_interest_rate']=float(rate_line.removesuffix('%'))
-        elif (own or (companion and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url)) and c.anchor_type=="financial_declaration":
+        elif (own or (companion
+                and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url
+                and identity_tokens <= tokens(quote))) and c.anchor_type=="financial_declaration":
             monthly=re.match(r"Monthly (?:account |plan )?fee\s+\$(\d+(?:\.\d+)?)",quote,re.I)
             annual=re.match(r"Annual fee\s+\$(\d+(?:\.\d+)?)",quote,re.I)
             if monthly: values['monthly_fee']=float(monthly[1])
@@ -720,6 +801,13 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                     values[name] = float(m[1])
             if re.search(r"(?mi)^Annual fee\s*\nNone(?:\n|$)", quote):
                 values["annual_fee"] = 0.0
+        if own and c.anchor_type == "section" and _infer_product_type(context) == "credit-card":
+            availability = re.search(
+                r"Already a [^\n?]+ customer\?[^.\n]+[.]\s*New to [^?\n]+\?[^.\n]+soon[.]\s*Stay tuned!",
+                quote, re.I)
+            if availability:
+                values["eligibility_text"] = _normalize_text(availability[0])
+                field_quotes["eligibility_text"] = availability[0]
         if own and c.anchor_type == "section" and len(quote) <= 700:
             # Only explicit assertions in owned compact sections. Suitability
             # wishes, other-product suggestions and channel-only benefits fail.
@@ -851,7 +939,11 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                     field_quotes["early_withdrawal_penalty"] = penalty
         for name,value in values.items():
             field_quote = field_quotes.get(name, quote)
-            if name not in {*requested_fields, "currency"} or not quote_supports_value(name,value,field_quote):
+            # These registered optional facts are obtained from the SAME
+            # complete record. They add no research, model call or target budget.
+            optional_same_record = (_infer_product_type(context) == "credit-card"
+                and name in {"cash_advance_rate", "purchase_interest_rate_summary", "eligibility_text"})
+            if (name not in {*requested_fields, "currency"} and not optional_same_record) or not quote_supports_value(name,value,field_quote):
                 continue
             source_url=url if own else _canonical_official_source_url(c.retrieval_metadata.get('source_url'))
             if not source_url or not _url_matches_official_domains(source_url,allowed_domains=_official_domain_allowlist(context)):
@@ -869,6 +961,12 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                         'annual_basis_evidence_quote':rate_basis.evidence_excerpt,
                         'annual_basis_product_name':identity} if name == 'standard_rate' and rate_basis else {})})
             proposals.setdefault(name,[]).append(fact)
+    # Word order does not make two explicit fixed/variable declarations
+    # contradictory. Keep an actual source phrase rather than a synthesized label.
+    if "rate_type" in proposals and all(re.fullmatch(
+            r"(?:variable or fixed|fixed or variable) interest rate", str(f.candidate_value), re.I)
+            for f in proposals["rate_type"]):
+        proposals["rate_type"] = proposals["rate_type"][:1]
     conflicts = {name for name, rows in proposals.items()
                  if len({str(f.candidate_value) for f in rows}) != 1}
     if 'included_transactions' in proposals and 'unlimited_transactions_flag' in proposals:
@@ -5269,7 +5367,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"document_heading", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)

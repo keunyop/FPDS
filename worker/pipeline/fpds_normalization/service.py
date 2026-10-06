@@ -2378,8 +2378,8 @@ def _apply_credit_card_labeled_fallback(
 
     field_labels = {
         "purchase_interest_rate": r"(?:interest\s*:\s*purchases?|current\s+interest\s+rate\s*\(\s*purchases?\s*\)|purchases?\s+(?:interest\s+)?rate|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
-        "balance_transfer_rate": r"(?:interest\s*:\s*balance\s+transfers?|interest\s+rate\s*\(\s*balance\s+transfers?|balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
-        "cash_advance_rate": r"(?:interest\s*:\s*cash\s+advances?|cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?)",
+        "balance_transfer_rate": r"(?:interest\s*:\s*balance\s+transfers?|interest\s+rate\s*\(\s*balance\s+transfers?|balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?|cash\s+advances?\s+and\s+balance\s+transfers?)",
+        "cash_advance_rate": r"(?:interest\s*:\s*cash\s+advances?|cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?|cash\s+advances?\s+and\s+balance\s+transfers?)",
     }
     supplemented: list[str] = []
     for field_name, label_pattern in field_labels.items():
@@ -2924,6 +2924,18 @@ def _enforce_dynamic_field_contract(
     if not allowed_fields:
         return
     allowed_fields.update(_DYNAMIC_OPERATIONAL_FIELDS)
+    # Targets bound research; they are not a ceiling on facts already proved
+    # from the same capture. Preserve only registered typed exact facts here.
+    # The final sanitizer still requires current origins, full context and units.
+    from worker.pipeline.fpds_collection_accuracy import quote_supports_value
+    for name, value in candidate_payload.items():
+        mapping = field_mapping_metadata.get(name) or {}
+        if (field_contract(name) is not None
+                and mapping.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+                and mapping.get("official_verification_status") in {"match", "mismatch"}
+                and mapping.get("normalized_value") == value
+                and quote_supports_value(name, value, str(mapping.get("official_evidence_quote") or ""))):
+            allowed_fields.add(name)
     suppressed_fields = [
         field_name
         for field_name in candidate_payload
@@ -3937,8 +3949,8 @@ def _looks_like_credit_card_field_mismatch(
             return False
         labels = {
             "purchase_interest_rate": r"(?:interest\s*:\s*purchases?|purchases?\s+(?:interest\s+)?rate|interest\s+rate\s*\(\s*purchases?\s*\)|purchase\s+apr|apr\s+for\s+purchases?|annual\s+percentage\s+rate(?:\s*\(apr\))?(?:\s+for\s+purchases?)?)",
-            "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?)",
-            "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?)",
+            "balance_transfer_rate": r"(?:balance\s+transfers?\s+(?:interest\s+)?rate|balance\s+transfer\s+apr|apr\s+for\s+balance\s+transfers?|balance\s+transfers?\s+and\s+cash\s+advances?|cash\s+advances?\s+and\s+balance\s+transfers?)",
+            "cash_advance_rate": r"(?:cash\s+(?:advance\s+)?interest\s+rate|cash\s+advances?\s+(?:interest\s+)?rate|cash\s+advance\s+apr|apr\s+for\s+cash\s+advances?|balance\s+transfers?\s+and\s+cash\s+advances?|cash\s+advances?\s+and\s+balance\s+transfers?)",
         }
         value_pattern = re.escape(f"{numeric_value:g}")
         match = re.search(
@@ -4415,6 +4427,7 @@ def _looks_like_unsupported_security_value(*, field_name: str, context: str) -> 
         for marker in (
             "secured",
             "unsecured",
+            "securing your line of credit with assets",
             "security requirement",
             "collateral",
             "guarantor",

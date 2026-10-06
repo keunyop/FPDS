@@ -242,6 +242,9 @@ def contains_explicit_rate_percentage(value: object) -> bool:
             percentage = re.search(_NUMERIC_PERCENTAGE, match.group())
             if percentage and not rate_component_only(value=percentage.group(), context=text):
                 return True
+    from worker.native_information_records import mortgage_terms
+    if mortgage_terms(text) and re.search(r"\bAPR\s*\(\s*%\s*\)",text,re.I):
+        return True
     from worker.native_rate_tables import has_native_rate_grid
     return has_native_rate_grid(text)
 

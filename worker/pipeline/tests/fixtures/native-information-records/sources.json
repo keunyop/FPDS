@@ -1,0 +1,30 @@
+[
+  {
+    "file": "mortgage-rates.html",
+    "url": "https://www.manulifebank.ca/current-rates.html",
+    "captured_at": "2026-10-06T12:59:41.546469+00:00",
+    "raw_sha256": "04e5697a17d2f1251890569800cfa4fe1a5518124945cd6d561a2f5a5035f81e",
+    "fixture_note": "Exact source body without navigation/scripts; PDF first-page text."
+  },
+  {
+    "file": "credit-card.html",
+    "url": "https://www.manulifebank.ca/personal-banking/credit-cards/visa-infinite.html",
+    "captured_at": "2026-10-06 04:02:23.337108+00:00",
+    "raw_sha256": "19fe2a87b06af501f239a3404c66220f8e7386d93a6597b04f4f5debad22b8f3",
+    "fixture_note": "Exact source body without navigation/scripts; PDF first-page text."
+  },
+  {
+    "file": "line-of-credit.html",
+    "url": "https://www.manulifebank.ca/personal-banking/loans/line-of-credit.html",
+    "captured_at": "2026-10-06 04:09:27.644824+00:00",
+    "raw_sha256": "841ade7d4a7ccb679455b5c4b2d83cd44adaa4c6e08726cc3b8d92484e834798",
+    "fixture_note": "Exact source body without navigation/scripts; PDF first-page text."
+  },
+  {
+    "file": "card-information-box.txt",
+    "url": "https://www.manulifebank.ca/documents/personal-banking/credit-cards/manulife-visa-infinite-card-rates-fees.pdf",
+    "captured_at": "2026-10-06T13:00:47.066661+00:00",
+    "raw_sha256": "d4f0cb975bd5b71327c42672846b13754ee816a223603795b2d2a7201923e8d9",
+    "fixture_note": "Exact source body without navigation/scripts; PDF first-page text."
+  }
+]

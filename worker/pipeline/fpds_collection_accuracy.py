@@ -483,6 +483,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name in {"purchase_interest_rate", "cash_advance_rate"} and re.search(
             r"(?mi)^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Cash advance interest rate)\s*\n\d", quote):
             return _explicit_labelled_card_rate(field_name, number, quote)
+        from worker.native_information_records import information_card_rates
+        information_rates = information_card_rates(quote)
+        if information_rates is not None and field_name in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate"}:
+            return number == information_rates[0 if field_name == "purchase_interest_rate" else 1]
         # Comparison benchmarks are not the named product's own payable rate.
         # Retained full context is screened by the same rule below grounding.
         if re.search(r"\b(?:national|industry|market)\s+average\b|\bcompetitor(?:s|'s)?\b", q, re.I):
@@ -743,7 +747,11 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             # A balance that waives transaction charges is not an opening or
             # general minimum balance, nor a monthly-account-fee threshold.
             reason = "transaction_waiver_balance_not_minimum"
-        elif (name in {"interest_rate_summary", "term_rate_table"} and e.get("anchor_type") == "native_rate_table"
+        elif (e.get("anchor_type") == "card_information_rate"
+                and name in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
+                and not exact_quote(e.get("evidence_excerpt"), quote)):
+            reason = "native_rate_conditions_incomplete"
+        elif (name in {"interest_rate_summary", "term_rate_table"} and e.get("anchor_type") in {"native_rate_table", "named_mortgage_rate_schedule", "credit_limit_rate_schedule"}
                 and (not exact_quote(e.get("evidence_excerpt"), quote)
                      or (name == "term_rate_table" and any(
                          not exact_quote(e.get("evidence_excerpt"), row.get("notes")) for row in value)))):
