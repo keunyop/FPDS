@@ -30,6 +30,20 @@ class GroundingReuseTests(unittest.TestCase):
             run_id="run-one", context=self.context, candidates=[self.chunk], requested_fields=["product_name"],
             collected_fields=[], extract=self.extract)
 
+    def test_independent_evaluation_bypasses_both_read_and_write(self):
+        grounded_with_reuse(**self.args)
+        cached_before = dict(self.store.data)
+        fields1, _, usage1 = grounded_with_reuse(**self.args, reuse_cache=False)
+        fields2, _, usage2 = grounded_with_reuse(**self.args, reuse_cache=False)
+        self.assertEqual(self.extract.call_count, 3)
+        self.assertEqual(self.store.data, cached_before)
+        self.assertEqual(fields1, fields2)
+        self.assertFalse(usage1["reused"])
+        self.assertEqual(usage1["cache_policy"], "independent_evaluation")
+        self.assertEqual(usage1["evaluation_input_digest"], usage2["evaluation_input_digest"])
+        grounded_with_reuse(**self.args)
+        self.assertEqual(self.extract.call_count, 3)
+
     def test_reused_parse_does_not_overwrite_previous_run_artifacts(self):
         config = self.args["storage_config"]
         kwargs = dict(country_code="CA", bank_code="BANK", source_document_id="sd", parsed_document_id="pd")

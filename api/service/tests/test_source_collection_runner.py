@@ -223,6 +223,7 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner._research_essential_evidence", side_effect=lambda **kw: (kw["parsed_source_ids"], [])),
             patch("api_service.source_collection_runner._persist_evidence_research_receipt") as process_receipt,
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
+            patch("api_service.source_collection_runner._persist_collection_outcome"),
             patch("api_service.source_collection_runner._persist_end_to_end_source_summary") as persist_summary,
             patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
             patch(
@@ -358,6 +359,7 @@ class SourceCollectionRunnerTests(unittest.TestCase):
             patch("api_service.source_collection_runner._research_essential_evidence", side_effect=lambda **kw: (kw["parsed_source_ids"], [])),
             patch("api_service.source_collection_runner._persist_evidence_research_receipt") as process_receipt,
             patch("api_service.source_collection_runner._run_stage", side_effect=fake_run_stage),
+            patch("api_service.source_collection_runner._persist_collection_outcome"),
             patch("api_service.source_collection_runner._persist_end_to_end_source_summary"),
             patch("api_service.source_collection_runner._supersede_stale_logical_reviews_for_run", return_value=0),
             patch(

@@ -500,7 +500,10 @@ def _captured_native_product_title(context, candidates):
     if len(native_heads) == 1:
         literal = _normalize_text(native_heads[0].evidence_excerpt)
         native_tokens = set(name_key(literal).split()) - {"the", "bank", "card", "cards", "account", "accounts", "r", "tm"}
-        title_tokens = set(name_key(str(discovery.get("page_title") or "")).split())
+        captured_titles = [c.evidence_excerpt for c in candidates if c.anchor_type == "document_title"
+            and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+            and c.parsed_document_id == context.parsed_document_id]
+        title_tokens = set(name_key(" ".join(captured_titles)).split())
         url_tokens = set(name_key(urlsplit(url).path).split())
         route_identity = native_tokens - set(name_key(context.bank_code).split())
         family = discovery.get("multi_product_family_overview") is True or "multi_product_family_overview" in discovery.get("page_evidence_reason_codes", [])
@@ -510,12 +513,12 @@ def _captured_native_product_title(context, candidates):
                  and c.source_document_id == context.source_document_id
                  and c.source_snapshot_id == context.snapshot_id
                  and c.parsed_document_id == context.parsed_document_id)
-                or (c.anchor_type in {"card_information_rate", "card_information_fee"}
+                or (c.anchor_type in {"card_information_rate", "card_information_fee", "named_card_regular_rates", "named_card_fee_row"}
                     and c.retrieval_metadata.get("captured_companion") is True
                     and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url))
             and c.bank_code == context.bank_code and c.country_code == context.country_code
             and c.source_language == context.source_language for c in candidates))
-        if (card_price and not family and route_identity and route_identity <= url_tokens and len(native_tokens) >= 2 and len(literal.split()) <= 10
+        if (card_price and not family and route_identity and bool((route_identity - {"credit", "mastercard", "visa", "savings", "interest", "gic"}) & url_tokens) and len(native_tokens) >= 2 and len(literal.split()) <= 10
                 and native_tokens <= (title_tokens | url_tokens)
                 and not re.search(r"^(?:get|benefit|plan|choose|compare|discover|find|open)\b", literal, re.I)
                 and not re.search(r"/(?:apply|application|login|calculator|insurance)(?:/|[.-]|$)",urlsplit(url).path,re.I)
@@ -723,10 +726,16 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             for currency, pattern in CURRENCY_PATTERNS.items():
                 if re.search(pattern, identity, re.I):
                     values["currency"] = currency
-        if c.anchor_type in {"card_information_rate", "card_information_fee"} and _infer_product_type(context) == "credit-card":
+        if c.anchor_type in {"card_information_rate", "card_information_fee", "named_card_regular_rates", "named_card_fee_row"} and _infer_product_type(context) == "credit-card":
             from worker.native_information_records import names_match, information_card_rates
             if names_match(c.anchor_value, identity):
-                pair = information_card_rates(quote) if c.anchor_type == "card_information_rate" else None
+                from worker.native_information_records import shared_card_rates, shared_card_fee
+                pair = information_card_rates(quote) if c.anchor_type == "card_information_rate" else (
+                    shared_card_rates(quote) if c.anchor_type == "named_card_regular_rates" else None)
+                if c.anchor_type == "named_card_fee_row":
+                    fee_value = shared_card_fee(quote)
+                    if fee_value is not None:
+                        values["annual_fee"] = float(fee_value)
                 if pair:
                     values.update(purchase_interest_rate=float(pair[0]), cash_advance_rate=float(pair[1]),
                                   purchase_interest_rate_summary=_normalize_text(quote))
@@ -799,6 +808,12 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 m = re.search(pattern, quote)
                 if m:
                     values[name] = float(m[1])
+            # An owned amount-first Fees card preserves the literal label;
+            # the shared money gate still rejects waiver/duration zeroes.
+            for name, label in (("annual_fee", "Annual fee"), ("monthly_fee", "Monthly fee")):
+                amount_first = re.search(r"(?mi)^\$(\d+(?:\.\d+)?)\s*\n" + label + r"\s*$", quote)
+                if amount_first:
+                    values[name] = float(amount_first[1])
             if re.search(r"(?mi)^Annual fee\s*\nNone(?:\n|$)", quote):
                 values["annual_fee"] = 0.0
         if own and c.anchor_type == "section" and _infer_product_type(context) == "credit-card":
@@ -900,6 +915,27 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if term and re.search(r"\b(?:days?|months?|years?)\b", term[0], re.I):
                 values["term_length_text"] = _normalize_text(term[0])
         rate_basis = None
+        if own and c.anchor_type == "owned_base_fee" and c.anchor_value == identity:
+            if quote_supports_value("monthly_fee", 0, quote):
+                values["monthly_fee"] = 0.0
+        if own and c.anchor_type == "contract_rate_row" and c.anchor_value == identity and len(basis_records) == 1:
+            term = re.search(r"(?m)^Term\n(\d+ months?)$", quote)
+            rate = re.search(r"(?m)^Rate\n(\d+(?:\.\d+)?)%$", quote)
+            if term and rate:
+                values["term_length_text"] = term[1]
+                values["standard_rate"] = float(rate[1])
+                rate_basis = basis_records[0]
+        if companion and c.anchor_type == "named_product_interest_terms" and c.anchor_value == identity:
+            values["interest_calculation_method"] = _normalize_text(quote)
+        if own and c.anchor_type == "owned_withdrawal_terms" and _infer_product_type(context) == "gic" and c.anchor_value == identity:
+            for name in ("redeemable_flag", "non_redeemable_flag"):
+                for value in (True, False):
+                    if quote_supports_value(name, value, quote):
+                        values[name] = value
+            penalty = _extract_early_withdrawal_penalty(quote)
+            if penalty:
+                values["early_withdrawal_penalty"] = penalty
+                field_quotes["early_withdrawal_penalty"] = penalty
         if _infer_product_type(context) in {"savings", "chequing"} and len(basis_records) == 1:
             if c is basis_records[0]:
                 values["interest_calculation_method"] = _normalize_text(quote)
@@ -916,6 +952,13 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             rates = re.findall(r"(?<![\d.])(\d+(?:\.\d+)?)%", quote)
             if len(set(rates)) == 1:
                 values["standard_rate"] = float(rates[0])
+                # Calculation/payment facts are proven by this same referenced
+                # note; no optional-only query or later retry is needed.
+                if re.search(r"Interest is calculated", quote, re.I):
+                    values["interest_calculation_method"] = _normalize_text(quote)
+                payment = re.search(r"It will be paid monthly[.]", quote, re.I)
+                if payment:
+                    values["interest_payment_frequency"] = payment[0]
         if own and c.anchor_type != "labelled_financial_record":
             for label in linked_labels:
                 values.pop(label, None)
@@ -5367,7 +5410,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"document_heading", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)
@@ -7833,7 +7876,7 @@ def _extract_early_withdrawal_penalty(text: str) -> str | None:
     statements = []
     for sentence in re.split(r"(?<=[.!?])\s+|\n+", text):
         sentence = sentence.strip()
-        if (len(sentence) <= 500 and re.search(r"\b(?:redeem|redemption|redeemable|withdraw|withdrawal)\b", sentence, re.I)
+        if (len(sentence) <= 500 and re.search(r"\b(?:redeem|redemption|redeemable|withdraw|withdrawal|cashed)\b", sentence, re.I)
                 and withdrawal_consequences_usable(sentence)):
             statements.append(sentence)
     # Multiple distinct statements need their complete original context; never

@@ -13,7 +13,7 @@ from worker.discovery.fpds_discovery.discovery import extract_structured_text_se
 from .models import ParsedArtifact, ParsedSegment
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v12"
+PARSER_VERSION = "fpds-parse-chunk-v13"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 
@@ -41,6 +41,8 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     html = body.decode("utf-8", errors="replace")
     structured_sections = extract_structured_text_sections(html)
     soup = BeautifulSoup(html, "html.parser")
+    from worker.native_component_values import resolve_component_values
+    resolved_component_values = resolve_component_values(soup, html)
     for tag in soup(["script", "style", "noscript", "svg"]):
         tag.decompose()
     # Site navigation can be nested inside <main>. It is neither product
@@ -121,6 +123,9 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     sections.extend(_product_terms_sections(soup))
     sections.extend(_labelled_disclosure_sections(soup))
     sections.extend(_linked_rate_records(soup))
+    sections.extend(_owned_contract_rows(soup))
+    sections.extend(_owned_base_fee_records(soup))
+    sections.extend(_owned_withdrawal_records(soup))
     sections.extend(_financial_declaration_sections(sections))
     for heading in soup.find_all("h1"):
         sections.append(_RawSegment("document_heading", "h1", None, heading.get_text(" ", strip=True)))
@@ -140,6 +145,7 @@ def _parse_html(body: bytes) -> ParsedArtifact:
         "content_type": "text/html",
         "section_count": len(segments),
         "structured_component_section_count": len(structured_sections),
+        "resolved_component_value_count": resolved_component_values,
         "partial_parse_flag": False,
     }
     return ParsedArtifact(
@@ -294,13 +300,13 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
 
 def _linked_rate_records(soup: BeautifulSoup) -> list[_RawSegment]:
     """Keep a compact native detail rate with its exact local disclosure."""
-    root = soup.find("main")
-    if root is None or len(root.find_all("h1")) != 1:
+    root = soup.find("main") or soup.body or soup
+    if len(root.find_all("h1")) != 1:
         return []
     output = []
     for paragraph in root.find_all("p"):
         value = paragraph.get_text(" ", strip=True)
-        if not re.fullmatch(r"(?:Earn\s+)?\d+(?:\.\d+)?%\s*[*??\d]*\s*(?:annual\s+)?interest(?:\s+rate)?[.]?", value, re.I):
+        if not re.fullmatch(r"(?:Earn\s+)?\d+(?:\.\d+)?%\s*[*??\d]*\s*(?:annual\s+)?interest(?:\s+rate)?[.]?(?:\s*\d+)?", value, re.I):
             continue
         # A product-bearing sibling heading is a separate offer, not this
         # page's rate. Navigation/footer and comparison tables are excluded.
@@ -321,7 +327,20 @@ def _linked_rate_records(soup: BeautifulSoup) -> list[_RawSegment]:
             if len(targets) != 1:
                 notes = []
                 break
-            notes.append(targets[0].get_text(" ", strip=True))
+            target = targets[0]
+            lists = target.find_all("ol")
+            label = link.get_text(" ", strip=True)
+            if lists:
+                if len(lists) != 1 or not label.isdigit():
+                    notes = []
+                    break
+                items = lists[0].find_all("li", recursive=False)
+                index = int(label) - int(lists[0].get("start", 1))
+                if not 0 <= index < len(items):
+                    notes = []
+                    break
+                target = items[index]
+            notes.append(target.get_text(" ", strip=True))
         if not notes:
             continue
         record = "\n".join([value, *dict.fromkeys(notes)])
@@ -708,3 +727,91 @@ def _slugify(value: str) -> str:
     lowered = value.lower()
     lowered = re.sub(r"[^a-z0-9]+", "-", lowered)
     return lowered.strip("-") or "section"
+
+
+def _owned_contract_rows(soup):
+    root = soup.find("main") or soup.body or soup
+    h1s = root.find_all("h1")
+    if len(h1s) != 1:
+        return []
+    owner = h1s[0].get_text(" ", strip=True)
+    output = []
+    for table in root.find_all("table")[:64]:
+        scope = table.find_parent(attrs={"data-fpds-literal-owner": owner})
+        if scope is None:
+            scope = table.find_parent("section")
+            heading = scope.find(["h1", "h2", "h3"]) if scope is not None else None
+            if heading is None or heading.get_text(" ", strip=True) != owner:
+                continue
+        rows = table.find_all("tr")
+        headers = [x.get_text(" ", strip=True) for x in rows[0].find_all(["th", "td"], recursive=False)] if rows else []
+        if headers != ["Term", "Minimum investment", "Rate", "Interest type", "Get this GIC"]:
+            continue
+        for row in rows[1:]:
+            cells = row.find_all(["td", "th"], recursive=False)
+            if len(cells) != len(headers):
+                continue
+            term, amount, rate, interest = [c.get_text(" ", strip=True) for c in cells[:4]]
+            if not re.fullmatch(r"\d+ months?", term) or not re.fullmatch(r"\d+(?:\.\d+)?%", rate):
+                continue
+            quote = "\n".join([owner, "Term", term, "Minimum investment", amount, "Rate", rate, "Interest type", interest])
+            output.append(_RawSegment("contract_rate_row", owner, None, quote))
+    return output
+
+
+def _owned_base_fee_records(soup):
+    root = soup.find("main") or soup.body or soup
+    h1s = root.find_all("h1")
+    if len(h1s) != 1:
+        return []
+    owner = h1s[0].get_text(" ", strip=True)
+    output = []
+    for node in root.find_all(["p", "li"]):
+        if node.find_parent(["aside", "nav", "footer", "table"]):
+            continue
+        heading = node.find_previous(["h1", "h2", "h3"])
+        if heading is not None and heading.name != "h1":
+            label = heading.get_text(" ", strip=True)
+            if re.search(r"\b(?:other|related|recommended|account|card|mortgage|loan|GIC)\b", label, re.I) and label != owner:
+                continue
+        quote = node.get_text("\n", strip=True)
+        if not re.search(r"\bNo fixed\s+monthly fees\b", quote, re.I):
+            continue
+        notes = []
+        for link in node.select('a[href^="#"]'):
+            targets = soup.find_all(id=link["href"][1:])
+            if len(targets) != 1:
+                break
+            lists = targets[0].find_all("ol")
+            label = link.get_text(" ", strip=True)
+            if len(lists) != 1 or not label.isdigit():
+                break
+            items = lists[0].find_all("li", recursive=False)
+            index = int(label) - int(lists[0].get("start", 1))
+            if not 0 <= index < len(items):
+                break
+            notes.append(items[index].get_text(" ", strip=True))
+        else:
+            value = "\n".join([owner, quote, *notes])
+            if len(value) <= 1800:
+                output.append(_RawSegment("owned_base_fee", owner, None, value))
+    return output
+
+
+def _owned_withdrawal_records(soup):
+    root = soup.find("main") or soup.body or soup
+    h1s = root.find_all("h1")
+    if len(h1s) != 1:
+        return []
+    owner = h1s[0].get_text(" ", strip=True)
+    output = []
+    for node in root.find_all(["p", "li"]):
+        quote = re.sub(r"\s+", " ", node.get_text(" ", strip=True))
+        if not re.search(r"All or part of the GIC can be cashed in", quote, re.I):
+            continue
+        heading = node.find_previous(["h1", "h2", "h3"])
+        if heading is not None and heading.name != "h1" and re.search(r"\b(?:GIC|certificate|account|card)\b", heading.get_text(), re.I):
+            continue
+        if len(quote) <= 1800:
+            output.append(_RawSegment("owned_withdrawal_terms", owner, None, quote))
+    return output

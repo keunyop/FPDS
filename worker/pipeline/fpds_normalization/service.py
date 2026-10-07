@@ -4025,7 +4025,7 @@ def _has_exact_official_card_purchase_rate(
     official_grounding_metadata: dict[str, object],
 ) -> bool:
     if (
-        field_name != "purchase_interest_rate"
+        field_name not in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate"}
         or official_grounding_metadata.get("official_grounding_contract_version")
         != "collection-official-grounding-v2"
         or official_grounding_metadata.get("official_verification_status") != "match"
@@ -4053,6 +4053,10 @@ def _has_exact_official_card_purchase_rate(
             and quote_supports_value(field_name, value, quote)
             and quote_supports_value(field_name, value, context)):
         return True
+    if field_name != "purchase_interest_rate":
+        # Other card columns require the shared exact label/column proof;
+        # the older purchase-only prose fallback cannot donate their value.
+        return False
     evidence_values = [quote]
     if official_grounding_metadata.get("official_grounding_method") in {
         "deterministic_card_comparison_origin",

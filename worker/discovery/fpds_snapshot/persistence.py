@@ -378,7 +378,16 @@ ON CONFLICT (run_id, source_document_id) DO UPDATE SET
     error_count = EXCLUDED.error_count,
     error_summary = EXCLUDED.error_summary,
     stage_metadata = EXCLUDED.stage_metadata,
-    updated_at = now();
+    updated_at = now()
+WHERE NOT COALESCE((
+    EXCLUDED.selected_snapshot_id IS NULL
+    AND EXCLUDED.stage_metadata->'evidence_acquisition_action'->>'kind' = 'render_html'
+    AND EXCLUDED.stage_metadata->'evidence_acquisition_action'->>'run_id' = run_source_item.run_id
+    AND EXCLUDED.stage_metadata->'evidence_acquisition_action'->>'source_document_id' = run_source_item.source_document_id
+    AND EXCLUDED.stage_metadata->'evidence_acquisition_action'->>'observed_snapshot_id' = run_source_item.selected_snapshot_id
+    AND EXCLUDED.stage_metadata->'evidence_acquisition_action'->>'observed_parsed_document_id' = run_source_item.stage_metadata->>'parsed_document_id'
+    AND run_source_item.error_count = 0
+), false);
 
 UPDATE ingestion_run
 SET

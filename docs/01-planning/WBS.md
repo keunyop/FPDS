@@ -1,5 +1,16 @@
 # FPDS Detailed WBS
 
+Latest requested collection plan (2026-10-06), within existing 3.1-3.7/5.76:
+ordinary Admin collection-to-Public parity, grounded in the National 17-candidate
+exclusion. Plan P1-P6 covers reproducible field-loss diagnosis, shared rendered/
+structured acquisition, financial-role proof, ordinary service integration,
+controlled model evaluation and fresh authenticated Admin/Public acceptance.
+Implementation is authorized: P1-P4 common code/local acceptance and P5/P6
+preparation are recorded in the [implementation report](../00-governance/admin-collection-parity-implementation-2026-10-06.md).
+Required/optional and security boundaries remain. Paid P5 evaluation, deployment
+and fresh P6 Admin-to-Public acceptance are separate and have not been executed.
+[Root causes and delivery gates](admin-collection-publication-parity-plan-2026-10-06.md).
+
 Authorized collection follow-through (2026-10-05), within the current ordinary
 collection slice: generic CMS/source-validity/native-table proof corrections and
 bounded direct Laurentian publication. Acceptance includes repeated actual

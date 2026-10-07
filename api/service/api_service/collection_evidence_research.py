@@ -5,7 +5,7 @@ ordinary snapshot/parse/extraction/normalization/promotion gates in the same run
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from hashlib import sha256
 from pathlib import Path
 import re
@@ -29,7 +29,7 @@ from worker.pipeline.fpds_parse_chunk.storage import ParseChunkStorageConfig, bu
 
 from worker.pipeline.fpds_collection_process import (
     COLLECTION_PROCESS_VERSION, MAX_RESEARCH_ROUNDS, MAX_ADDITIONAL_PER_DETAIL,
-    MAX_ADDITIONAL_PER_RUN, MAX_PLANNER_CALLS_PER_RUN, MAX_LINKS_PER_DETAIL,
+    MAX_ADDITIONAL_PER_RUN, MAX_PLANNER_CALLS_PER_RUN, MAX_LINKS_PER_DETAIL, MAX_RENDERS_PER_RUN,
 )
 
 # Retrieval hints only; these words never prove a financial fact.
@@ -53,6 +53,8 @@ class CapturedPage:
     source_url: str
     html: str
     checksum: str
+    response_metadata: dict = field(default_factory=dict)
+    parser_version: str | None = None
 
 
 def assess_captured_essentials(item: ExtractionInput, *, run_id: str) -> dict:
@@ -113,6 +115,32 @@ def _link_relevance(*, product_type, url, label, missing):
     return score + 20 * sum(bool(re.search(pattern, fingerprint, re.I)) for pattern in hints)
 
 
+
+def _has_required_dynamic_lead(html, missing):
+    """A dynamic financial value can fill an essential gap; login links cannot."""
+    from bs4 import BeautifulSoup
+    hints = [pattern for key, pattern in _FIELD_HINTS.items() if any(key in name for name in missing)]
+    if not hints:
+        return False
+    soup = BeautifulSoup(html, 'html.parser')
+    for tag in soup(['script', 'style', 'nav', 'header', 'footer']):
+        tag.decompose()
+    for node in list(soup.find_all(string=re.compile(r'\$\{|\{\{')))[:256]:
+        tokens = re.findall(r'\$\{([^}]{1,256})\}|\{\{([^}]{1,256})\}\}', str(node))
+        if not any(not re.search(r'\|\s*(?:link|image)\s*:|^(?:url|image|nomProduit|productName)', a or b, re.I) for a, b in tokens):
+            continue
+        scope = node.parent
+        for _ in range(4):
+            if scope is None:
+                break
+            context = scope.get_text(' ', strip=True)
+            if len(context) > 1200:
+                break
+            if any(re.search(hint, context, re.I) for hint in hints):
+                return True
+            scope = scope.parent
+    return any('rate' in name for name in missing) and bool(soup.select('[data-rate-code], [data-pricing-code]'))
+
 def _research_context(item):
     """Complete relevant records, rather than a prefix dominated by navigation."""
     discovery = item.context.source_metadata.get('discovery_metadata') or {}
@@ -138,10 +166,10 @@ class EvidenceResearchPlanner:
         self.invoke_model = invoke_model
 
     def plan(self, *, run_id, registry, inputs, captures, attempted_urls, parent_counts,
-             remaining_sources=MAX_ADDITIONAL_PER_RUN, remaining_model_calls=MAX_PLANNER_CALLS_PER_RUN):
+             remaining_sources=MAX_ADDITIONAL_PER_RUN, remaining_model_calls=MAX_PLANNER_CALLS_PER_RUN, attempted_actions=(), remaining_renders=MAX_RENDERS_PER_RUN):
         bound = _bind_grounding_evidence(inputs)
         pages = {page.source_document_id: page for page in captures}
-        sources, diagnostics, calls = {}, [], 0
+        sources, diagnostics, calls, actions = {}, [], 0, []
         for item in bound:
             ctx = item.context
             if ctx.source_metadata.get('discovery_role') != 'detail':
@@ -167,8 +195,34 @@ class EvidenceResearchPlanner:
                 continue
             budget = min(MAX_ADDITIONAL_PER_DETAIL - parent_counts.get(parent, 0),
                          remaining_sources - len(sources))
+            owned_page = pages.get(ctx.source_document_id)
+            if owned_page and owned_page.snapshot_id == ctx.snapshot_id and owned_page.parsed_document_id == ctx.parsed_document_id and owned_page.source_url == parent:
+                from worker.pipeline.fpds_parse_chunk.parser import PARSER_VERSION
+                version_gap = owned_page.parser_version and owned_page.parser_version != PARSER_VERSION
+                already_rendered = ('browser' in str(owned_page.response_metadata.get('fetch_method', '')).lower()
+                    or owned_page.response_metadata.get('browser_fallback_attempted') is True)
+                dynamic_gap = _has_required_dynamic_lead(owned_page.html, missing)
+                kind = 'reparse_snapshot' if version_gap else ('render_html' if dynamic_gap and not already_rendered else None)
+                action_id = (f'reparse:{ctx.source_document_id}:{ctx.snapshot_id}:{PARSER_VERSION}' if version_gap
+                             else f'render:{ctx.source_document_id}')
+                rendered_docs = {p.source_document_id for p in captures if 'browser' in str(p.response_metadata.get('fetch_method', '')).lower()
+                    or p.response_metadata.get('browser_fallback_attempted') is True}
+                rendered_docs.update(a.removeprefix('render:') for a in attempted_actions if a.startswith('render:'))
+                render_budget = min(remaining_renders, MAX_RENDERS_PER_RUN - len(rendered_docs))
+                if kind and action_id not in attempted_actions and (
+                        kind == 'reparse_snapshot' and remaining_sources > 0
+                        or kind == 'render_html' and sum(a['kind'] == 'render_html' for a in actions) < render_budget):
+                    actions.append({'action_id': action_id, 'kind': kind, 'run_id': run_id,
+                        'source_id': ctx.source_id, 'source_document_id': ctx.source_document_id,
+                        'url': parent, 'observed_snapshot_id': ctx.snapshot_id,
+                        'observed_parsed_document_id': ctx.parsed_document_id, 'capture_checksum': owned_page.checksum,
+                        'parser_version': PARSER_VERSION, 'missing_required_fields': missing})
+                    diagnostic['selected_actions'] = [action_id]
+                    if kind == 'reparse_snapshot':
+                        diagnostic['stop_reason'] = 'reparse_current_capture'
+                        continue
             if budget <= 0:
-                diagnostic['stop_reason'] = 'research_budget_exhausted'
+                diagnostic['stop_reason'] = 'acquisition_actions_selected' if diagnostic.get('selected_actions') else 'research_budget_exhausted'
                 continue
             candidates = {}
             owned_docs = {c.source_document_id for c in item.grounding_candidates}
@@ -197,7 +251,7 @@ class EvidenceResearchPlanner:
                         candidates[url] = candidate
             options = sorted(candidates.values(), key=lambda c: (-c['score'], c['url']))[:MAX_LINKS_PER_DETAIL]
             if not options:
-                diagnostic['stop_reason'] = 'no_unvisited_official_lead'
+                diagnostic['stop_reason'] = 'acquisition_actions_selected' if diagnostic.get('selected_actions') else 'no_unvisited_official_lead'
                 continue
             selected = options[:budget]
             # The planner chooses only supplied IDs. It cannot add a URL, prove
@@ -263,7 +317,7 @@ class EvidenceResearchPlanner:
                 diagnostic['selected_urls'].append(url)
                 parent_counts[parent] = parent_counts.get(parent, 0) + 1
             diagnostic['stop_reason'] = 'capture_selected' if selected else 'planner_no_relevant_lead'
-        return {'version': COLLECTION_PROCESS_VERSION, 'sources': list(sources.values()),
+        return {'version': COLLECTION_PROCESS_VERSION, 'sources': list(sources.values()), 'actions': actions,
                 'diagnostics': diagnostics, 'planner_call_count': calls}
 
 
@@ -277,7 +331,8 @@ def load_research_inputs(connection, *, run_id, registry, source_ids, object_sto
     rows = connection.execute('''
         SELECT sd.source_document_id, sd.bank_code, sd.country_code, sd.source_type,
                sd.source_language, sd.source_metadata, ss.snapshot_id, ss.checksum,
-               ss.object_storage_key, ss.content_type, pd.parsed_document_id
+               ss.object_storage_key, ss.content_type, ss.response_metadata, rsi.stage_metadata,
+               pd.parsed_document_id, pd.parser_version
         FROM run_source_item rsi
         JOIN source_snapshot ss ON ss.snapshot_id = rsi.selected_snapshot_id
             AND ss.source_document_id = rsi.source_document_id
@@ -313,20 +368,24 @@ def load_research_inputs(connection, *, run_id, registry, source_ids, object_sto
             if sha256(raw).hexdigest() != row['checksum']:
                 raise ValueError('Capture checksum mismatch')
             captures.append(CapturedPage(ctx.source_document_id, ctx.snapshot_id, ctx.parsed_document_id,
-                                        source.normalized_url, raw.decode('utf-8', errors='replace'), row['checksum']))
+                                        source.normalized_url, raw.decode('utf-8', errors='replace'), row['checksum'],
+                                        (row.get('stage_metadata') or {}).get('current_response_metadata') or row.get('response_metadata') or {},
+                                        row.get('parser_version')))
         except Exception:
             errors.append({'source_id': source.source_id, 'reason': 'capture_read_or_checksum_failure'})
     return inputs, captures, errors
 
 
 def plan_collection_evidence_research(connection, *, run_id, registry_path: Path, source_ids,
-                                      attempted_urls, parent_counts, remaining_sources, remaining_model_calls):
+                                      attempted_urls, parent_counts, remaining_sources, remaining_model_calls,
+                                      attempted_actions=(), remaining_renders=MAX_RENDERS_PER_RUN):
     registry = load_registry(registry_path)
     inputs, captures, errors = load_research_inputs(connection, run_id=run_id, registry=registry,
         source_ids=source_ids, object_store=build_object_store(ParseChunkStorageConfig.from_env()))
     planner = EvidenceResearchPlanner(invoke_model=invoke_openai_json_schema if llm_provider_configured() else None)
     result = planner.plan(run_id=run_id, registry=registry, inputs=inputs, captures=captures,
         attempted_urls=attempted_urls, parent_counts=parent_counts,
-        remaining_sources=remaining_sources, remaining_model_calls=remaining_model_calls)
+        remaining_sources=remaining_sources, remaining_model_calls=remaining_model_calls,
+        attempted_actions=attempted_actions, remaining_renders=remaining_renders)
     result['capture_errors'] = errors
     return result

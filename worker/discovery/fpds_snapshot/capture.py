@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from hashlib import sha256
 from typing import Callable
 
 from worker.discovery.fpds_discovery.drift import PreflightDriftResult
 from worker.discovery.fpds_discovery.fetch import (
     DiscoveryFetchPolicy,
+    BrowserRenderBudget,
     FetchedResponse,
     NonRetryableFetchError,
     fetch_response,
+    fetch_rendered_response,
 )
 from worker.discovery.fpds_discovery.registry import RegistrySource
 
@@ -73,7 +75,7 @@ class CaptureSource:
             "source_type": self.source_type,
             "source_language": self.source_language,
             "registry_managed_flag": self.registry_managed_flag,
-            "source_metadata": self.source_metadata,
+            "source_metadata": {k: v for k, v in self.source_metadata.items() if k != "_evidence_acquisition_action"},
             "discovered_at": discovered_at,
         }
 
@@ -122,6 +124,7 @@ class SnapshotCaptureResult:
     source_results: list[SnapshotSourceResult]
     partial_completion_flag: bool
     preflight_result: PreflightDriftResult | None = None
+    browser_render_attempt_count: int = 0
 
     def to_dict(self) -> dict[str, object]:
         stored_count = sum(1 for item in self.source_results if item.snapshot_action == "stored")
@@ -137,6 +140,7 @@ class SnapshotCaptureResult:
                 "stored_count": stored_count,
                 "reused_count": reused_count,
                 "failed_count": failed_count,
+                "browser_render_attempt_count": self.browser_render_attempt_count,
             },
             "source_results": [item.__dict__ for item in self.source_results],
         }
@@ -156,7 +160,8 @@ class SnapshotCaptureService:
         max_attempts: int = 3,
         max_concurrency: int = 4,
     ):
-        self.fetch_policy = fetch_policy
+        self.fetch_policy = (fetch_policy if fetch_policy.browser_render_budget is not None
+                             else replace(fetch_policy, browser_render_budget=BrowserRenderBudget()))
         self.storage_config = storage_config
         self.object_store = object_store
         self.fetcher = fetcher
@@ -219,6 +224,7 @@ class SnapshotCaptureService:
             source_results=source_results,
             partial_completion_flag=partial_completion_flag,
             preflight_result=preflight_result,
+            browser_render_attempt_count=self.fetch_policy.browser_render_budget.used,
         )
 
     def _capture_single_source(
@@ -237,10 +243,19 @@ class SnapshotCaptureService:
         preflight_status = preflight_result.status_for_source_document(source.source_document_id) if preflight_result is not None else None
         preflight_issue_codes = [issue.issue_code for issue in preflight_issues]
 
-        while attempt_count < self.max_attempts:
+        action = source.source_metadata.get("_evidence_acquisition_action")
+        forced = isinstance(action, dict) and action.get("kind") == "render_html"
+        while attempt_count < (1 if action else self.max_attempts):
             attempt_count += 1
             try:
-                if self.fetcher is None:
+                if action:
+                    observed = next((s for s in known_snapshots.values() if s.source_document_id == source.source_document_id
+                        and s.snapshot_id == action.get("observed_snapshot_id") and s.checksum == action.get("capture_checksum")), None)
+                    if not forced or action.get("run_id") != run_id or action.get("source_document_id") != source.source_document_id or action.get("url") != source.normalized_source_url or observed is None:
+                        raise NonRetryableFetchError("Unbound evidence acquisition action")
+                if forced and self.fetcher is None:
+                    fetched = fetch_rendered_response(source.resolved_url, self.fetch_policy)
+                elif self.fetcher is None:
                     fetched = fetch_response(source.resolved_url, self.fetch_policy,
                         browser_fallback_format="pdf" if source.source_type == "pdf" else None)
                 else:
@@ -360,6 +375,7 @@ class SnapshotCaptureService:
                 error_summary=last_error,
                 stage_metadata={
                     "snapshot_action": "failed",
+                    "evidence_acquisition_action": action,
                     "request_id": request_id,
                     "attempt_count": attempt_count,
                     "correlation_id": correlation_id,

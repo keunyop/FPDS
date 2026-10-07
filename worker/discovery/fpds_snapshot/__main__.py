@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from worker.discovery.env import load_env_file, resolve_default_env_file
 from worker.discovery.fpds_discovery.drift import RegistryPreflightDriftService
-from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy
+from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, BrowserRenderBudget
 from worker.discovery.fpds_discovery.registry import load_registry
 from worker.run_scope import require_single_country_code
 
@@ -17,6 +18,7 @@ from .storage import SnapshotStorageConfig, build_object_store
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="FPDS snapshot capture")
+    parser.add_argument("--max-browser-renders", type=int, default=48, choices=range(49), help="Remaining per-Run browser allowance, including automatic fallback.")
     parser.add_argument("--run-id", required=True, help="Run identifier.")
     parser.add_argument("--correlation-id", default=None, help="Optional correlation identifier.")
     parser.add_argument("--request-id", default=None, help="Optional request identifier.")
@@ -103,7 +105,7 @@ def main() -> int:
     fetch_policy = DiscoveryFetchPolicy.from_env(extra_allowed_domains=registry.allowed_domains)
     preflight_result = None
     if not args.skip_preflight_drift_check:
-        preflight_service = RegistryPreflightDriftService(fetch_policy=fetch_policy)
+        preflight_service = RegistryPreflightDriftService(fetch_policy=replace(fetch_policy, browser_render_budget=BrowserRenderBudget(0)))
         preflight_result = preflight_service.check_sources(
             run_id=args.run_id,
             correlation_id=args.correlation_id,
@@ -111,7 +113,7 @@ def main() -> int:
             sources=sources,
         )
     service = SnapshotCaptureService(
-        fetch_policy=fetch_policy,
+        fetch_policy=replace(fetch_policy, browser_render_budget=BrowserRenderBudget(args.max_browser_renders)),
         storage_config=storage_config,
         object_store=build_object_store(storage_config),
     )

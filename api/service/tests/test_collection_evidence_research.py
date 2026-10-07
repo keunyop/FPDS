@@ -311,7 +311,7 @@ class ResearchRunnerTests(unittest.TestCase):
              patch.object(runner, '_resolve_env_file', return_value=None), patch.object(runner, 'open_connection'), \
              patch.object(runner.Settings, 'from_env'), patch.object(runner, 'plan_collection_evidence_research', side_effect=plans), \
              patch.object(runner, '_persist_evidence_research_receipt'), patch.object(runner, '_run_stage', side_effect=stage), \
-             patch.object(runner, '_persist_end_to_end_source_summary') as summary, \
+             patch.object(runner, '_persist_collection_outcome'), patch.object(runner, '_persist_end_to_end_source_summary') as summary, \
              patch.object(runner, '_supersede_stale_logical_reviews_for_run', return_value=0), \
              patch.object(runner, '_supersede_reviews_covered_by_approved_candidates_for_run', return_value=0), \
              patch.object(runner, '_promote_auto_validated_candidates_for_run', return_value={'promoted_count': 0}):
@@ -367,5 +367,117 @@ class ResearchRunnerTests(unittest.TestCase):
             self.assertIn('capture_stage_failure', persist.call_args.kwargs['rounds'][0])
 
 
-if __name__ == '__main__':
+
+class EvidenceAcquisitionActionTests(unittest.TestCase):
+    plan = EvidenceResearchTests.plan
+    def test_missing_required_dynamic_values_select_same_owned_capture(self):
+        result = self.plan(html='<p>Monthly fee ${product.monthlyFee}</p>')
+        self.assertEqual(result['sources'], [])
+        action = result['actions'][0]
+        self.assertEqual(action['kind'], 'render_html')
+        self.assertEqual(action['source_id'], 'detail')
+        self.assertEqual(action['url'], source().url)
+        self.assertEqual(action['observed_snapshot_id'], 'snap-detail')
+        self.assertNotIn('monthly_fee', action)
+
+    def test_same_page_action_does_not_repeat_or_exceed_budget(self):
+        result = self.plan(html='<p>Monthly fee ${product.monthlyFee}</p>')
+        self.assertEqual(self.plan(html='<p>Monthly fee ${product.monthlyFee}</p>',
+            attempted_actions={result['actions'][0]['action_id']})['actions'], [])
+        self.assertEqual(self.plan(html='<p>Monthly fee ${product.monthlyFee}</p>', remaining_renders=0)['actions'], [])
+
+    def test_already_rendered_and_wrong_snapshot_cannot_render_again(self):
+        s = source(); item, page = evidence(s, html='<p>Fee ${product.fee}</p>')
+        self.assertEqual(self.plan(inputs=[item], pages=[replace(page,
+            response_metadata={'fetch_method': 'browser_headless'})])['actions'], [])
+        self.assertEqual(self.plan(inputs=[item], pages=[replace(page, snapshot_id='foreign')])['actions'], [])
+
+    def test_static_nondisclosure_does_not_trigger_render(self):
+        for html in ('<p>Contact us for a price.</p>', '<p>Fee schedule ${p1.url|link:"Apply"}</p>',
+                     '<script>var rate = "${rate}";</script><p>Apply online</p>'):
+            self.assertEqual(self.plan(html=html)['actions'], [])
+
+    def test_parse_version_change_reprocesses_owned_snapshot_once(self):
+        s = source(); item, page = evidence(s, html='<p>Fee ${product.fee}</p>')
+        page = replace(page, parser_version='fpds-parse-chunk-v12')
+        result = self.plan(inputs=[item], pages=[page])
+        self.assertEqual(result['actions'][0]['kind'], 'reparse_snapshot')
+        self.assertEqual(result['actions'][0]['observed_snapshot_id'], item.context.snapshot_id)
+
+
+class AcquisitionActionRunnerTests(unittest.TestCase):
+    def exercise(self, kind, *, failure=False):
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'registry.json'
+            path.write_text(json.dumps({'sources': [{'source_id': 'detail', 'url': source().url}]}), encoding='utf8')
+            action = {'action_id': kind + ':detail', 'kind': kind, 'run_id': 'run', 'source_id': 'detail',
+                'source_document_id': source().source_document_id, 'url': source().url,
+                'observed_snapshot_id': 'snap-detail', 'observed_parsed_document_id': 'parsed-detail'}
+            plans = [{'sources': [], 'actions': [action], 'planner_call_count': 0},
+                     {'sources': [], 'actions': [], 'planner_call_count': 0}]
+            stages = []
+            def stage(module, args):
+                stages.append(module)
+                if module.endswith('fpds_snapshot'):
+                    self.assertEqual(json.loads(path.read_text())['sources'][0]['_evidence_acquisition_action'], action)
+                    self.assertIn('--max-browser-renders', args)
+                    if failure:
+                        raise runner.WorkerStageError(stage_name='snapshot', failure_kind='timeout', timeout_seconds=90)
+                    return {'stats': {'browser_render_attempt_count': 1}, 'source_results': [{'source_id': 'detail', 'snapshot_action': 'stored'}]}
+                return {'source_results': [{'source_id': 'detail', 'parse_action': 'stored'}]}
+            with patch.object(runner, 'open_connection'), patch.object(runner.Settings, 'from_env'), \
+                 patch.object(runner, 'plan_collection_evidence_research', side_effect=plans) as planner, \
+                 patch.object(runner, '_persist_evidence_research_receipt') as persist, patch.object(runner, '_run_stage', side_effect=stage):
+                good, added = runner._research_essential_evidence(run_id='run', registry_path=path, base_args=[], parsed_source_ids=['detail'])
+            self.assertEqual(good, ['detail'])
+            self.assertEqual(added, [])
+            self.assertEqual(len(json.loads(path.read_text())['sources']), 1)
+            self.assertNotIn('_evidence_acquisition_action', json.loads(path.read_text())['sources'][0])
+            self.assertIn(action['action_id'], planner.call_args.kwargs['attempted_actions'])
+            return stages, persist.call_args.kwargs['rounds'], planner.call_args.kwargs
+
+    def test_render_keeps_target_identity_and_normal_worker_stages(self):
+        stages, rounds, _ = self.exercise('render_html')
+        self.assertEqual(stages, ['worker.discovery.fpds_snapshot', 'worker.pipeline.fpds_parse_chunk'])
+        self.assertEqual(rounds[0]['action_capture_results'][0]['snapshot_action'], 'stored')
+
+    def test_reparse_uses_same_selected_snapshot_without_network_capture(self):
+        stages, _, _ = self.exercise('reparse_snapshot')
+        self.assertEqual(stages, ['worker.pipeline.fpds_parse_chunk'])
+
+    def test_stage_failure_is_visible_and_cannot_authorize_another_render(self):
+        stages, rounds, next_plan = self.exercise('render_html', failure=True)
+        self.assertEqual(len(stages), 1)
+        self.assertIn('capture_stage_failure', rounds[0])
+        self.assertEqual(next_plan['remaining_renders'], 0)
+
+
+class CollectionOutcomeTests(unittest.TestCase):
+    def test_exact_source_field_loss_and_publication_boundaries_are_private_names_only(self):
+        result = runner._build_collection_outcome(
+            extraction_output={'source_results': [{'source_id': 'detail', 'extracted_fields': [
+                {'field_name': 'standard_rate', 'candidate_value': 9.99, 'evidence_text_excerpt': 'PRIVATE QUOTE'},
+                {'field_name': 'monthly_fee', 'candidate_value': 0}]}]},
+            normalization_output={'source_results': [{'source_id': 'detail', 'candidate_id': 'c1',
+                'normalized_candidate_record': {'candidate_payload': {'monthly_fee': 0, '_collection_accuracy': {
+                    'verified_fields': ['monthly_fee'], 'omitted_fields': {'standard_rate': 'annual_basis_missing'}, 'missing_fields': ['standard_rate']}}}}]},
+            validation_output={'source_results': [{'validation_action': 'excluded'}]},
+            promotion_result={'promoted_count': 0, 'skipped_items': []})
+        self.assertEqual(result['field_flow'][0]['lost_during_normalization'], ['standard_rate'])
+        self.assertEqual(result['excluded_source_count'], 1)
+        self.assertEqual(result['canonical_promoted_candidate_count'], 0)
+        self.assertEqual(result['public_visibility'], 'not_verified')
+        self.assertEqual(result['projection_refresh_status'], 'not_requested_no_promotion')
+        self.assertNotIn('PRIVATE QUOTE', json.dumps(result))
+        self.assertNotIn('9.99', json.dumps(result))
+
+    def test_approval_does_not_claim_completed_public_projection(self):
+        result = runner._build_collection_outcome(extraction_output={}, normalization_output={},
+            validation_output={'source_results': [{'validation_action': 'auto_validated'}]}, promotion_result={'promoted_count': 1})
+        self.assertEqual(result['auto_validated_source_count'], 1)
+        self.assertEqual(result['canonical_promoted_candidate_count'], 1)
+        self.assertEqual(result['projection_refresh_status'], 'pending_launch')
+        self.assertEqual(result['public_visibility'], 'not_verified')
+
+if __name__ == "__main__":
     unittest.main()

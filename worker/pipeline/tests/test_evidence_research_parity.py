@@ -84,8 +84,11 @@ def run_services(inputs, *, provider=False):
             item = repo.resolve_evidence_origins(run_id='run', inputs=[item])[0]
         links = item.evidence_links
         ncfg = NormalizationStorageConfig('filesystem', 'test', 'normalized', 'hot', filesystem_root=tmp)
-        normalization = NormalizationService(storage_config=ncfg, object_store=build_object_store(ncfg)).normalize_inputs(
-            run_id='run', inputs=[item]).source_results[0]
+        normalization_result = NormalizationService(storage_config=ncfg, object_store=build_object_store(ncfg)).normalize_inputs(
+            run_id='run', inputs=[item])
+        normalization = normalization_result.source_results[0]
+        from worker.pipeline.fpds_normalization.models import normalization_field_flow
+        assert normalization_result.to_dict()['source_results'][0]['field_flow'] == normalization_field_flow(normalization.normalized_candidate_record)
         if normalization.normalization_action != 'stored':
             raise AssertionError(normalization.error_summary)
         record = normalization.normalized_candidate_record

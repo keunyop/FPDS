@@ -145,8 +145,20 @@ class NormalizationResult:
                     "runtime_notes": item.runtime_notes,
                     "error_summary": item.error_summary,
                     "field_evidence_link_count": len(item.field_evidence_link_records),
+                    "field_flow": normalization_field_flow(item.normalized_candidate_record),
                     "run_source_item_record": item.run_source_item_record,
                 }
                 for item in self.source_results
             ],
         }
+
+
+def normalization_field_flow(record):
+    """Names/reasons only: CLI receipts never include raw financial quotations."""
+    from worker.pipeline.fpds_field_contract import field_contract
+    payload = (record or {}).get("candidate_payload") or {}
+    accuracy = payload.get("_collection_accuracy") or {}
+    return {"normalized_fields": sorted(name for name in payload if field_contract(name)),
+        "verified_fields": accuracy.get("verified_fields", []),
+        "omitted_fields": accuracy.get("omitted_fields", {}),
+        "missing_fields": accuracy.get("missing_fields", [])}

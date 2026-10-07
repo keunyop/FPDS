@@ -349,6 +349,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if field_name == "currency":
         return value in CURRENCY_PATTERNS and bool(re.search(CURRENCY_PATTERNS[value], q, re.I)) and not any(
             code != value and re.search(pattern, q, re.I) for code, pattern in CURRENCY_PATTERNS.items())
+    if field_name == "term_length_text" and re.search(r"investment horizon|cash (?:in|out) after|redeem(?:able)? after|waiting period", q, re.I):
+        own_term = re.search(r"\b(?:term|maturity)\s*[:\n]?\s*" + re.escape(text(value)) + r"(?!\w)", q, re.I)
+        if not own_term:
+            return False
     if contract.value_type == "string":
         if field_name in {"security_requirement", "collateral_text"}:
             return text(value).casefold() == q.casefold() and security_meaning(value) is not None
@@ -403,6 +407,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name == "secured_flag":
             return security_meaning(q) is value
         if field_name in {"redeemable_flag", "non_redeemable_flag"}:
+            anniversary = re.search(r"All or part of the GIC can be cashed in without penalty on the anniversary of the issue date[.]", q, re.I)
+            if anniversary:
+                conflict = re.search(r"non[- ]redeemable|cannot be|not cashable|only at maturity|except|unless", q, re.I)
+                return not conflict and value is (field_name == "redeemable_flag")
             # An explicit labelled No is not absence. Preserve the entire
             # product record and reject a competing permission/exception.
             labelled_no = re.search(r"\b(?:cashable|redeemable)\s*:\s*no\b|\b(?:GICs?|certificates?) (?:are|is) not cashable\b", q, re.I)
@@ -483,8 +491,8 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name in {"purchase_interest_rate", "cash_advance_rate"} and re.search(
             r"(?mi)^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Cash advance interest rate)\s*\n\d", quote):
             return _explicit_labelled_card_rate(field_name, number, quote)
-        from worker.native_information_records import information_card_rates
-        information_rates = information_card_rates(quote)
+        from worker.native_information_records import information_card_rates, shared_card_rates
+        information_rates = information_card_rates(quote) or shared_card_rates(quote)
         if information_rates is not None and field_name in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate"}:
             return number == information_rates[0 if field_name == "purchase_interest_rate" else 1]
         # Comparison benchmarks are not the named product's own payable rate.
@@ -540,6 +548,11 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if ordinary:
             return len(ordinary) == 1 and Decimal(ordinary[0]) == number and not _money_has_condition(quote,field_name)
     if contract.unit == "currency_amount":
+        if field_name == "annual_fee":
+            from worker.native_information_records import shared_card_fee
+            fee = shared_card_fee(quote)
+            if fee is not None:
+                return fee == number
         # A waiver balance or example must not stand in for a fee.
         amounts = re.findall(r"(?:[$€£]|\b(?:CAD|USD|EUR|GBP)\s*)(\d[\d,]*(?:\.\d+)?)", q, re.I)
         amounts += re.findall(r"(\d[\d,]*(?:\.\d+)?)\s*(?:dollars?|CAD|USD|EUR|GBP)\b", q, re.I)
@@ -548,8 +561,8 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return False
         # Zero must negate this attribute, not an unrelated fee/balance nearby.
         zero_labels = {
-            "monthly_fee": r"monthly(?: account)? (?:fees?|charges?)",
-            "public_display_fee": r"monthly(?: account)? (?:fees?|charges?)",
+            "monthly_fee": r"(?:fixed )?monthly(?: account)? (?:fees?|charges?)",
+            "public_display_fee": r"(?:fixed )?monthly(?: account)? (?:fees?|charges?)",
             "annual_fee": r"annual (?:fees?|charges?)",
             "transaction_fee": r"transaction (?:fees?|charges?)",
             "additional_transaction_fee": r"(?:additional|extra|excess) transaction (?:fees?|charges?)",
@@ -655,7 +668,7 @@ def _captured_named_annual_basis(record, mapping, chunks, source_metadata):
     basis = chunks.get(str(key), {})
     name = str(record.get("product_name") or "")
     quote = mapping.get("annual_basis_evidence_quote")
-    return bool(record.get("product_type") in {"chequing", "savings"} and key and name and str(mapping.get("annual_basis_product_name") or "").casefold() == name.casefold()
+    return bool(record.get("product_type") in {"chequing", "savings", "gic"} and key and name and str(mapping.get("annual_basis_product_name") or "").casefold() == name.casefold()
         and basis.get("anchor_type") == "named_product_rate_basis"
         and str(basis.get("anchor_value") or "").casefold() == name.casefold()
         and _official_url(canonical_url(basis.get("source_url")), source_metadata.get("official_domain_allowlist"))

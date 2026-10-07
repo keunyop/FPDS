@@ -584,3 +584,26 @@ A directly linked legal container may be selected within existing companion caps
 An explicit official loan range declaration remains a full qualified prose summary, including its repayment interval and actual APR qualifiers. Its endpoints and payment-example APRs never become scalar comparison rates. The shared prompts and source-backed/cross-bank regressions cover all extensions. See [diagnosis and bounded publication](../00-governance/three-bank-generic-collection-corrections-2026-10-05.md).
 
 Final automatic promotion rechecks the same complete native account identity and general cost records. A historical containing-page family label cannot erase field-level independently proven boundaries; missing, foreign or conditional proof and hard coverage/service exclusions remain blocking. Receipts and current official grounding are still required.
+
+
+## Ordinary Admin acquisition and stored-record parity - 2026-10-06
+
+Process `2026-10-06-admin-evidence-parity-v3` and parser v13 preserve local
+literal component ownership, native named regular card columns, exact referred
+savings rates/base fees and named GIC annual basis. Contract term is distinct
+from investment horizon/redemption timing. Source formatter directives cannot
+invent annual units. Ambiguous qualified fee rows remain unusable for regular
+fees. Whole default/reset, payment-reduction and anniversary-redemption conditions
+survive ordinary 900-character chunk limits through bounded financial records.
+Same-evidence registered optional facts survive every normalizer filter and model
+rewrite; uncertain optional values remain omitted.
+
+Essential gaps alone may select an observed same-page render or current-snapshot
+reparse; login/image templates are not financial leads. Existing research budgets
+remain. Automatic and forced browser attempts count toward one per URL and 48 per
+Run, including failed attempts. Failed recapture preserves only an exact existing
+successful current-Run source/snapshot/parse selection, never historical fallback.
+Private receipts distinguish field loss, validation, promotion and projection
+launch; processing completion cannot establish Public visibility. Existing
+accuracy/profile versions, financial essentials and security controls remain.
+See [implementation and release acceptance](../00-governance/admin-collection-parity-implementation-2026-10-06.md).

@@ -1,5 +1,18 @@
 # Worker Boundary
 
+## Ordinary Admin evidence parity - 2026-10-06
+
+Process `2026-10-06-admin-evidence-parity-v3` and parser v13 preserve owned
+literal values, exact fee/term roles and complete financial records through
+actual chunk/artifact storage and automatic gates. Essential gaps may trigger
+one same-page render or a current-snapshot/version reparse. Existing URL/model
+budgets remain; all browser attempts share a 48-per-Run allowance. Preflight
+uses direct HTTPS checks; capture owns browser rendering. Failed renders keep
+only an exact already-successful current-Run selection. No manual product review.
+Private Run receipts distinguish field omission/loss, automatic validation,
+canonical promotion and projection launch; Public visibility requires readback.
+[Implementation, regressions and separate release acceptance](../docs/00-governance/admin-collection-parity-implementation-2026-10-06.md).
+
 ## Native information records and Manulife publication - 2026-10-06
 
 Parser v12 preserves named card information boxes, embedded mortgage APR term

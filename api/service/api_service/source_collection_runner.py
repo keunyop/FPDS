@@ -23,7 +23,7 @@ from api_service.config import Settings
 from api_service.collection_evidence_research import plan_collection_evidence_research
 from worker.pipeline.fpds_collection_process import (
     COLLECTION_PROCESS_VERSION, MAX_RESEARCH_ROUNDS, MAX_ADDITIONAL_PER_RUN,
-    MAX_PLANNER_CALLS_PER_RUN,
+    MAX_PLANNER_CALLS_PER_RUN, MAX_RENDERS_PER_RUN, MAX_RENDERS_PER_DETAIL, MAX_REPARSES_PER_SNAPSHOT_VERSION,
 )
 from api_service.db import open_connection
 from api_service.security import new_id
@@ -166,6 +166,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     parse_successful_source_ids, research_source_ids = _research_essential_evidence(
         run_id=run_id, registry_path=registry_path, base_args=base_args,
         parsed_source_ids=parse_successful_source_ids,
+        initial_render_count=int(snapshot_output.get("stats", {}).get("browser_render_attempt_count", 0)),
     )
     included_source_ids.extend(research_source_ids)
 
@@ -234,8 +235,19 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
             ),
             flush=True,
         )
+    outcome = _build_collection_outcome(extraction_output=extraction_output,
+        normalization_output=normalization_output, validation_output=validation_output,
+        promotion_result=promotion_result)
+    _persist_collection_outcome(run_id=run_id, outcome=outcome)
     if promotion_result["promoted_count"] or ai_autopilot_result["approved_count"]:
-        launch_result = launch_aggregate_refresh_runner()
+        try:
+            launch_result = launch_aggregate_refresh_runner()
+        except Exception:
+            outcome["projection_refresh_status"] = "launch_failed"
+            _persist_collection_outcome(run_id=run_id, outcome=outcome)
+            raise
+        outcome["projection_refresh_status"] = "worker_started" if launch_result["launched"] else "worker_not_started"
+        _persist_collection_outcome(run_id=run_id, outcome=outcome)
         print(
             (
                 f"[source-collection-runner] run {run_id} auto-promoted "
@@ -248,7 +260,7 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     print(f"[source-collection-runner] run {run_id} completed downstream stages", flush=True)
 
 
-def _research_essential_evidence(*, run_id, registry_path, base_args, parsed_source_ids):
+def _research_essential_evidence(*, run_id, registry_path, base_args, parsed_source_ids, initial_render_count=0):
     """Acquire required proof before the single final grounding pass.
 
     Every new URL is captured and parsed through the ordinary worker stages.
@@ -259,6 +271,8 @@ def _research_essential_evidence(*, run_id, registry_path, base_args, parsed_sou
     attempted = {str(s["url"]) for s in registry["sources"]}
     parent_counts = {}
     acquired_ids = []
+    attempted_actions = set()
+    render_count = initial_render_count
     successful = list(parsed_source_ids)
     model_calls = 0
     rounds = []
@@ -268,27 +282,43 @@ def _research_essential_evidence(*, run_id, registry_path, base_args, parsed_sou
             result = plan_collection_evidence_research(connection,
                 run_id=run_id, registry_path=registry_path, source_ids=successful,
                 attempted_urls=attempted, parent_counts=parent_counts,
-                remaining_sources=remaining, remaining_model_calls=MAX_PLANNER_CALLS_PER_RUN - model_calls)
+                remaining_sources=remaining, remaining_model_calls=MAX_PLANNER_CALLS_PER_RUN - model_calls,
+                attempted_actions=attempted_actions,
+                remaining_renders=max(0, MAX_RENDERS_PER_RUN - render_count) if round_index < MAX_RESEARCH_ROUNDS else 0)
         model_calls += result["planner_call_count"]
         sources = result.pop("sources")
+        actions = result.pop("actions", [])
         receipt = {**result, "round": round_index + 1,
-                   "capture_source_ids": [s["source_id"] for s in sources]}
+                   "capture_source_ids": [s["source_id"] for s in sources], "actions": actions}
         rounds.append(receipt)
         _persist_evidence_research_receipt(run_id=run_id, rounds=rounds, model_calls=model_calls)
-        if not sources:
+        if not sources and not actions:
             break
         registry["sources"].extend(sources)
+        render_actions = [a for a in actions if a["kind"] == "render_html"]
+        reparse_ids = [a["source_id"] for a in actions if a["kind"] == "reparse_snapshot"]
+        attempted_actions.update(a["action_id"] for a in actions)
+        for source in registry["sources"]:
+            action = next((a for a in render_actions if a["source_id"] == source["source_id"]), None)
+            if action:
+                source["_evidence_acquisition_action"] = action
         # Preserve atomic plan visibility between subprocess stages.
         next_path = registry_path.with_suffix(".research.json")
         next_path.write_text(json.dumps(registry, indent=2, ensure_ascii=True), encoding="utf-8")
         next_path.replace(registry_path)
         ids = [s["source_id"] for s in sources]
         acquired_ids.extend(ids)
+        capture_ids = list(dict.fromkeys([*ids, *[a["source_id"] for a in render_actions]]))
         attempted.update(s["url"] for s in sources)
         try:
-            captured = _run_stage("worker.discovery.fpds_snapshot",
-                base_args + ["--skip-preflight-drift-check"] + _source_args(ids))
-            captured_ids = _successful_source_ids(captured)
+            captured = (_run_stage("worker.discovery.fpds_snapshot",
+                base_args + ["--skip-preflight-drift-check", "--max-browser-renders", str(max(0, MAX_RENDERS_PER_RUN - render_count))] + _source_args(capture_ids)) if capture_ids else {"source_results": []})
+            stage_render_count = int(captured.get("stats", {}).get("browser_render_attempt_count", len(render_actions)))
+            render_count += stage_render_count
+            receipt["browser_render_attempt_count"] = stage_render_count
+            receipt["action_capture_results"] = [{k: row.get(k) for k in ("source_id", "snapshot_action", "snapshot_id", "attempt_count", "error_summary")}
+                for row in captured.get("source_results", []) if row.get("source_id") in {a["source_id"] for a in render_actions}]
+            captured_ids = list(dict.fromkeys([*_successful_source_ids(captured), *reparse_ids]))
             if captured_ids:
                 parsed = _run_stage("worker.pipeline.fpds_parse_chunk", base_args + _source_args(captured_ids))
                 new_ids = _successful_stage_source_ids(stage_output=parsed,
@@ -299,6 +329,12 @@ def _research_essential_evidence(*, run_id, registry_path, base_args, parsed_sou
                 receipt["parsed_source_ids"] = []
         except WorkerStageError as exc:
             receipt["capture_stage_failure"] = exc.to_run_metadata()
+            render_count = MAX_RENDERS_PER_RUN  # Unknown failed-stage usage cannot authorize another render.
+        finally:
+            for source in registry["sources"]:
+                source.pop("_evidence_acquisition_action", None)
+            next_path.write_text(json.dumps(registry, indent=2, ensure_ascii=True), encoding="utf-8")
+            next_path.replace(registry_path)
         _persist_evidence_research_receipt(run_id=run_id, rounds=rounds, model_calls=model_calls)
     return successful, acquired_ids
 
@@ -307,6 +343,8 @@ def _persist_evidence_research_receipt(*, run_id, rounds, model_calls):
     receipt = {"version": COLLECTION_PROCESS_VERSION,
                "max_rounds": MAX_RESEARCH_ROUNDS,
                "max_additional_sources": MAX_ADDITIONAL_PER_RUN,
+               "max_renders_per_detail": MAX_RENDERS_PER_DETAIL, "max_renders_per_run": MAX_RENDERS_PER_RUN,
+               "max_reparses_per_snapshot_version": MAX_REPARSES_PER_SNAPSHOT_VERSION,
                "planner_call_count": model_calls, "rounds": rounds}
     with open_connection(Settings.from_env()) as connection:
         connection.execute("""UPDATE ingestion_run
@@ -1131,6 +1169,50 @@ def args_temp_dir(plan_path: Path | None) -> Path:
     if plan_path is not None:
         return plan_path.parent
     return Path.cwd() / "tmp" / "source-collections"
+
+
+
+
+
+def _build_collection_outcome(*, extraction_output, normalization_output, validation_output, promotion_result):
+    """Private bounded field-name diagnostics; stage completion is not Public proof."""
+    from worker.pipeline.fpds_field_contract import field_contract
+    from worker.pipeline.fpds_normalization.models import normalization_field_flow
+    extracted = {r.get("source_id"): r for r in extraction_output.get("source_results", [])}
+    rows = normalization_output.get("source_results", [])
+    flow = []
+    for row in rows[:256]:
+        record = row.get("normalized_candidate_record") or {}
+        extracted_names = sorted({f["field_name"] for f in extracted.get(row.get("source_id"), {}).get("extracted_fields", [])
+                                  if isinstance(f, dict) and isinstance(f.get("field_name"), str) and field_contract(f["field_name"])})
+        available = "field_flow" in row or bool(record)
+        field_flow = row.get("field_flow") or normalization_field_flow(record)
+        normalized_names = field_flow["normalized_fields"]
+        flow.append({"source_id": row.get("source_id"), "candidate_id": row.get("candidate_id"),
+            "extracted_fields": extracted_names, "normalized_fields": normalized_names,
+            "lost_during_normalization": sorted(set(extracted_names) - set(normalized_names)) if available else None,
+            "field_flow_available": available,
+            "verified_fields": field_flow.get("verified_fields", []),
+            "omitted_fields": field_flow.get("omitted_fields", {}), "missing_fields": field_flow.get("missing_fields", []),
+            "normalization_action": row.get("normalization_action")})
+    validation_rows = validation_output.get("source_results", [])
+    promoted = promotion_result["promoted_count"]
+    return {"version": COLLECTION_PROCESS_VERSION,
+        "auto_validated_source_count": sum(r.get("validation_action") == "auto_validated" for r in validation_rows),
+        "excluded_source_count": sum(r.get("validation_action") == "excluded" for r in validation_rows),
+        "validation_failed_source_count": sum(r.get("validation_action") == "failed" for r in validation_rows),
+        "canonical_promoted_candidate_count": promoted,
+        "promotion_skipped": [{k: r.get(k) for k in ("candidate_id", "skip_reason", "action")}
+                              for r in promotion_result.get("skipped_items", [])[:256]],
+        "projection_refresh_status": "pending_launch" if promoted else "not_requested_no_promotion",
+        "public_visibility": "not_verified", "field_flow": flow, "field_flow_truncated": len(rows) > 256}
+
+
+def _persist_collection_outcome(*, run_id, outcome):
+    with open_connection(Settings.from_env()) as connection:
+        connection.execute("""UPDATE ingestion_run SET run_metadata = run_metadata || %(metadata)s::jsonb
+            WHERE run_id = %(run_id)s""", {"run_id": run_id,
+            "metadata": json.dumps({"collection_result": outcome}, ensure_ascii=True)})
 
 
 if __name__ == "__main__":

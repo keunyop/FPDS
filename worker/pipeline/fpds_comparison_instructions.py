@@ -30,6 +30,8 @@ CARD_RATE_CONTEXT_INSTRUCTIONS = (
 )
 
 ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
+    "No fixed monthly fees proves a zero base monthly fee only without waiver/duration conditions; "
+    "it does not prove free transfers, statements or other transactions. Preserve those separate costs. "
     "An explicit no minimum balance or no minimum balances statement does not qualify a separately explicit no monthly fee; "
     "retain actual balance thresholds, eligibility and duration conditions. Unlimited day-to-day transactions "
     "denotes ordinary account transactions only when unconditional; specific-channel unlimited benefits remain insufficient. "
@@ -47,6 +49,8 @@ ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
 )
 
 WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
+    "Full or partial redemption without penalty on the issue anniversary preserves that anniversary restriction; "
+    "it cannot mean unrestricted early access. "
     "Explicit redeemability after a waiting period and no penalty on payable interest establishes the permitted "
     "withdrawal conditions; never infer permission before that period. No interest paid on early redemption is "
     "a material consequence even without a numeric penalty. Copy complete withdrawal restrictions, lost-interest "
@@ -56,6 +60,12 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 )
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "Named regular card rate rows keep purchase and cash-advance columns distinct and retain default/payment "
+    "conditions. The same full labelled proof preserves optional cash rates through normalization; "
+    "a purchase-only fallback cannot supply another column. "
+    "A contract term comes from its own maturity/term label or term row; investment horizon, suitability "
+    "and redemption waiting periods cannot supply it. Resolve literal component placeholders only through "
+    "an explicit local alias and exact product identity, never execute JavaScript or borrow neighbouring records. "
     "A named mortgage Rate grid can contain internal fixed/variable term headers with explicit APR (%). "
     "Bind only their open/closed loan rows and complete linked APR/compounding/prime notes; exclude base-reference "
     "and positive-deposit-balance rows. Preserve exact term cells separately from the full rate conditions. "

@@ -16,7 +16,7 @@ def input_digest(context, candidates, requested_fields, collected_fields, *, day
         "fpds_field_contract.py", "fpds_collection_accuracy.py", "fpds_market_profile.py", "fpds_approval_policy.py",
         "fpds_collection_fields.py",
         "fpds_comparison_instructions.py", "fpds_ai_runtime.py", "fpds_rate_safety.py",
-        "../country_defaults.py", "../product_source_policy.py", "../native_rate_tables.py", "../native_information_records.py", "../source_content_validity.py")]
+        "../country_defaults.py", "../product_source_policy.py", "../native_rate_tables.py", "../native_information_records.py", "../native_component_values.py", "fpds_parse_chunk/parser.py", "fpds_parse_chunk/service.py", "../source_content_validity.py")]
     value = {"version": 1, "day": day or datetime.now(UTC).date().isoformat(),
         "model": configured_model_id(), "code": [sha256(p.read_bytes()).hexdigest() for p in files],
         "context": asdict(context), "candidates": [asdict(c) for c in candidates],
@@ -25,7 +25,16 @@ def input_digest(context, candidates, requested_fields, collected_fields, *, day
 
 
 def grounded_with_reuse(*, object_store, storage_config, run_id, context, candidates,
-                        requested_fields, collected_fields, extract):
+                        requested_fields, collected_fields, extract, reuse_cache=True):
+    if not reuse_cache:
+        # Explicit evaluation control only. Ordinary callers retain reuse;
+        # repeated paid trials must have separate actual provider receipts.
+        fields, notes, usage = extract(context=context, candidates=candidates,
+            requested_fields=requested_fields, collected_fields=collected_fields)
+        if usage is not None:
+            usage = {**usage, "reused": False, "cache_policy": "independent_evaluation",
+                "evaluation_input_digest": input_digest(context, candidates, requested_fields, collected_fields)}
+        return fields, notes, usage
     # Missing currency text does not block grounding of actual product facts.
     # The shared validator resolves and records the country default afterward.
     key = storage_config._join_key(storage_config.env_prefix, storage_config.extraction_object_prefix,

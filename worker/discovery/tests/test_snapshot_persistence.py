@@ -133,6 +133,12 @@ class SnapshotPersistenceTests(unittest.TestCase):
         persistence_sql = runner.calls[-1][1]
         self.assertIn("source_document.source_metadata ->> 'discovery_role'", persistence_sql)
         self.assertIn("THEN source_document.source_metadata", persistence_sql)
+        # A same-page failed capture keeps only this successful current-run
+        # selected snapshot AND parse; ordinary/foreign failures still replace.
+        self.assertIn("WHERE NOT COALESCE((", persistence_sql)
+        for guard in ("observed_snapshot_id", "observed_parsed_document_id", "run_source_item.error_count = 0",
+                      "EXCLUDED.selected_snapshot_id IS NULL", "'kind' = 'render_html'"):
+            self.assertIn(guard, persistence_sql)
 
 
 class EnvLoaderTests(unittest.TestCase):

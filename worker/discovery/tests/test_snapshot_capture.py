@@ -304,6 +304,56 @@ def _fetched_response(
     )
 
 
+
+class BoundedEvidenceCaptureTests(unittest.TestCase):
+    def setUp(self):
+        self.registry = load_registry(DEFAULT_REGISTRY_PATH)
+        self.fetch_policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)
+        self.base = CaptureSource.from_registry_source(self.registry.by_source_id("TD-SAV-002"))
+        self.store = _RecordingObjectStore()
+        self.service = SnapshotCaptureService(fetch_policy=self.fetch_policy,
+            storage_config=SnapshotStorageConfig(driver="filesystem", env_prefix="dev", snapshot_object_prefix="snapshots",
+                retention_class="hot", filesystem_root="ignored-for-tests"), object_store=self.store)
+        with patch("worker.discovery.fpds_snapshot.capture.fetch_response", return_value=_fetched_response(
+                body=b"<html>Current official product</html>", content_type="text/html", final_url=self.base.resolved_url)):
+            original = self.service.capture_sources(run_id="run", sources=[self.base]).source_results[0]
+        self.known = ExistingSnapshotRecord(**original.source_snapshot_record)
+        self.action = {"kind": "render_html", "run_id": "run", "source_document_id": self.base.source_document_id,
+            "url": self.base.normalized_source_url, "observed_snapshot_id": self.known.snapshot_id,
+            "observed_parsed_document_id": "parsed-original", "capture_checksum": self.known.checksum}
+
+    def capture(self, action=None):
+        source = replace(self.base, source_metadata={**self.base.source_metadata,
+            "_evidence_acquisition_action": action or self.action})
+        return self.service.capture_sources(run_id="run", sources=[source], existing_snapshots=[self.known]).source_results[0]
+
+    def test_render_enters_ordinary_snapshot_and_does_not_mutate_global_source_flags(self):
+        response = _fetched_response(body=b"<html>Current fee $5</html>", content_type="text/html", final_url=self.base.resolved_url,
+            headers={"x-fpds-fetch-method": "browser_html_fallback"})
+        with patch("worker.discovery.fpds_snapshot.capture.fetch_rendered_response", return_value=response) as fetch:
+            result = self.capture()
+        fetch.assert_called_once()
+        self.assertEqual(result.snapshot_action, "stored")
+        self.assertNotEqual(result.snapshot_id, self.known.snapshot_id)
+        source = replace(self.base, source_metadata={"_evidence_acquisition_action": self.action})
+        self.assertNotIn("_evidence_acquisition_action", source.to_source_document_record(discovered_at="now")["source_metadata"])
+
+    def test_failed_render_is_one_attempt_with_exact_preservation_guard(self):
+        with patch("worker.discovery.fpds_snapshot.capture.fetch_rendered_response", side_effect=TimeoutError("bounded")) as fetch:
+            result = self.capture()
+        fetch.assert_called_once()
+        self.assertEqual(result.snapshot_action, "failed")
+        self.assertEqual(result.attempt_count, 1)
+        self.assertEqual(result.run_source_item_record["stage_metadata"]["evidence_acquisition_action"], self.action)
+
+    def test_foreign_run_url_or_checksum_never_reaches_browser(self):
+        for field, value in (("run_id", "other"), ("url", "https://127.0.0.1"), ("capture_checksum", "wrong")):
+            with self.subTest(field=field), patch("worker.discovery.fpds_snapshot.capture.fetch_rendered_response") as fetch:
+                result = self.capture({**self.action, field: value})
+                fetch.assert_not_called()
+                self.assertEqual(result.snapshot_action, "failed")
+                self.assertEqual(result.attempt_count, 1)
+
 class _RecordingObjectStore:
     def __init__(self) -> None:
         self.writes: list[tuple[str, bytes, str]] = []

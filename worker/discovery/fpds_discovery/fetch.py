@@ -39,6 +39,25 @@ class NonRetryableFetchError(ValueError):
     """Fetch failed in a way that should not be retried by snapshot capture."""
 
 
+class BrowserRenderBudget:
+    """One render per URL and a hard bounded stage allowance, also on failures."""
+    def __init__(self, limit=48):
+        if not 0 <= limit <= 48:
+            raise ValueError("Browser render allowance must be between 0 and 48")
+        self.limit, self.urls, self.lock = limit, set(), Lock()
+
+    @property
+    def used(self):
+        with self.lock:
+            return len(self.urls)
+
+    def consume(self, url):
+        with self.lock:
+            if url in self.urls or len(self.urls) >= self.limit:
+                raise NonRetryableFetchError("Bounded browser render allowance exhausted")
+            self.urls.add(url)
+
+
 @dataclass(frozen=True)
 class DiscoveryFetchPolicy:
     allowed_domains: tuple[str, ...]
@@ -50,6 +69,7 @@ class DiscoveryFetchPolicy:
     browser_dom_snapshot_domains: tuple[str, ...] = ()
     browser_fallback_timeout_seconds: int = 120
     browser_executable: str | None = None
+    browser_render_budget: BrowserRenderBudget | None = None
 
     @classmethod
     def from_env(
@@ -517,6 +537,8 @@ def _fetch_response_via_browser_bounded(
     # headless sessions against one institution at once can retrigger the WAF
     # that this fallback is intended to clear. Keep the recovery bounded and
     # serial within the worker process; direct HTTP fetches remain concurrent.
+    if policy.browser_render_budget is not None:
+        policy.browser_render_budget.consume(url)
     with _BROWSER_FALLBACK_LOCK:
         response = _fetch_response_via_browser(url, policy, output_format=output_format)
     remaining_challenge = _html_access_challenge_kind(response)
@@ -678,3 +700,16 @@ def _resolve_browser_executable(explicit_executable: str | None) -> str | None:
         if resolved:
             return resolved
     return None
+
+
+def fetch_rendered_response(url: str, policy: DiscoveryFetchPolicy) -> FetchedResponse:
+    """One bounded official same-page HTML render using the existing safe fetch.
+
+    This adds no URL discovery, allowlist change or retry. A final mismatch is
+    rejected before storage; the ordinary capture validates the returned body.
+    """
+    normalized = validate_fetch_url(url, policy)
+    response = _fetch_response_via_browser_bounded(normalized, policy, output_format="html")
+    if validate_fetch_url(response.final_url, policy) != normalized:
+        raise NonRetryableFetchError("Same-page render changed the selected official URL")
+    return response

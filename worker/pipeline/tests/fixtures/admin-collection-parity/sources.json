@@ -1,0 +1,280 @@
+{
+  "captured_date": "2026-10-06",
+  "process_before": "2026-10-06-native-information-proof-v2",
+  "notes": "Official-source DOM reductions retain complete financial sections and literal product component configuration; navigation/analytics assets removed. Fixture hashes differ from private full snapshots. Expected facts are independently pinned from official direct assessment.",
+  "targets": [
+    {
+      "name": "Syncro Mastercard credit card",
+      "type": "credit-card",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/syncro.html",
+      "file": "syncro.html",
+      "fetched_at": "2026-10-06 14:17:43.545336+00:00",
+      "raw_sha256": "8e0ba496193be43bf7da6448340a477f3920d17738f773ceddec39b2138790fe",
+      "fixture_sha256": "ce4e87b6c97e543e87f54403c2a245ecc6f3ecb18028e7fb070588096eafc4a3",
+      "baseline_payload": {},
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "ECHO Cashback Mastercard credit card",
+      "type": "credit-card",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/echo.html",
+      "file": "echo.html",
+      "fetched_at": "2026-10-06 14:17:43.458028+00:00",
+      "raw_sha256": "0bfabe9ad80941fc07eeb1615bb721eac8154865955b7c81fd8e8c3e0ec3e9fc",
+      "fixture_sha256": "ca747da1edc8e5b286329586ea54bc06bf5dc01d0f727a7b020ec0bd4203e7f6",
+      "baseline_payload": {},
+      "expected_complete": true,
+      "expected_facts": {
+        "annual_fee": 30,
+        "purchase_interest_rate": 20.99
+      }
+    },
+    {
+      "name": "World Mastercard credit card",
+      "type": "credit-card",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/world.html",
+      "file": "world.html",
+      "fetched_at": "2026-10-06 14:17:44.292427+00:00",
+      "raw_sha256": "6bc25ed51f898f972ba438545dedfdc175071451890eb605af7864993da53f86",
+      "fixture_sha256": "91b3ae40e2e740975e507a66d408f670469687dfb4e5e6a86de310e90e8b7179",
+      "baseline_payload": {},
+      "expected_complete": true,
+      "expected_facts": {
+        "annual_fee": 115,
+        "purchase_interest_rate": 20.99
+      }
+    },
+    {
+      "name": "Platinum Mastercard",
+      "type": "credit-card",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/platinum.html",
+      "file": "platinum.html",
+      "fetched_at": "2026-10-06 14:17:51.580444+00:00",
+      "raw_sha256": "c396c9abb601e945efc4221b2c5080da2fe397c764a753ceeb1795faee8ed794",
+      "fixture_sha256": "5f4be6518325177dce5e5fa416bb335cd4efae629e41362de71fc8a0a794861b",
+      "baseline_payload": {},
+      "expected_complete": true,
+      "expected_facts": {
+        "annual_fee": 70,
+        "purchase_interest_rate": 20.99
+      }
+    },
+    {
+      "name": "World Elite Mastercard",
+      "type": "credit-card",
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/world-elite.html",
+      "file": "world-elite.html",
+      "fetched_at": "2026-10-06 14:17:43.285809+00:00",
+      "raw_sha256": "3902cf7a4fce429944a9021db922599eab335f41dd5785b5cc19c9d9a14fb3a6",
+      "fixture_sha256": "517e7019f6da1d06ddf710efa212877b75f5984c7f9bd98bafa751be6161311e",
+      "baseline_payload": {},
+      "expected_complete": true,
+      "expected_facts": {
+        "annual_fee": 150,
+        "purchase_interest_rate": 20.99
+      }
+    },
+    {
+      "name": "Redeemable Plus GIC",
+      "type": "gic",
+      "url": "https://www.nbc.ca/personal/savings-investments/gic/redeemable-plus.html",
+      "file": "redeemable-plus.html",
+      "fetched_at": "2026-10-06 14:28:39.639657+00:00",
+      "raw_sha256": "074a03b09a565c48a992c5201d1cb77469210a678e73dfc92b3dd971339640d8",
+      "fixture_sha256": "584ec908993956ae197e25bde13ac34a0b55ea403fb910c4d1fa318987508771",
+      "baseline_payload": {
+        "term_length_text": "1 year",
+        "early_withdrawal_penalty": "All or part of the GIC can be cashed in without penalty on the anniversary of the issue date."
+      },
+      "expected_complete": true,
+      "expected_facts": {
+        "standard_rate": 0.3,
+        "term_length_text": "36 months"
+      }
+    },
+    {
+      "name": "Redeemable GIC",
+      "type": "gic",
+      "url": "https://www.nbc.ca/personal/savings-investments/gic/redeemable.html",
+      "file": "redeemable.html",
+      "fetched_at": "2026-10-06 14:28:39.069364+00:00",
+      "raw_sha256": "ee13a45f68fb38e5df4665ff5bcfde98e7fc2fdb11bd2b9f9d2392be98d7b587",
+      "fixture_sha256": "53eac989b364f18c9c5ba95b60a8cf54277f74702f96e5a26eb9e8f9272f9022",
+      "baseline_payload": {},
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Extra GIC",
+      "type": "gic",
+      "url": "https://www.nbc.ca/personal/savings-investments/gic/extra.html",
+      "file": "extra.html",
+      "fetched_at": "2026-10-06 14:28:39.489752+00:00",
+      "raw_sha256": "da5b090f1463a0bcd41b77fdd373d9c08cf4952e6087c5031082dfab83b5d023",
+      "fixture_sha256": "e53ad6f2845173a61c15da8713660b2b7b4dabed048f2bf95a853f8fad3f01c7",
+      "baseline_payload": {},
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Redeemable Without Penalty GIC",
+      "type": "gic",
+      "url": "https://www.nbc.ca/personal/savings-investments/gic/redeemable-without-penalty.html",
+      "file": "redeemable-without-penalty.html",
+      "fetched_at": "2026-10-06 14:28:39.158121+00:00",
+      "raw_sha256": "3ada9310ddde115be5ed1d60881995493cffe08c7793ff4fff4df62ff5905929",
+      "fixture_sha256": "a3974bc038452c395e28dfe280972dc779bd4161ade7b6fc9cf84e838b298f35",
+      "baseline_payload": {},
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Redeemable USD GIC",
+      "type": "gic",
+      "url": "https://www.nbc.ca/personal/savings-investments/gic/redeemable-usd.html",
+      "file": "redeemable-usd.html",
+      "fetched_at": "2026-10-06 14:28:45.913348+00:00",
+      "raw_sha256": "05f8b78667d588afaed7ae1e4ffe2a4ff562a85c89f4ae38f8b49c8cbdbf8133",
+      "fixture_sha256": "ef2c3ca3e6939320f1b6c5cf06e710d13eaf1385c7abb56d7d5b6674a7f5aca6",
+      "baseline_payload": {
+        "redeemable_flag": true,
+        "term_length_text": "1 month to 5 years",
+        "non_redeemable_flag": false,
+        "interest_payment_frequency": "For online purchase of GIC, only annual payment of interest is available."
+      },
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Monthly Cash Management GIC",
+      "type": "gic",
+      "url": "https://www.nbc.ca/personal/savings-investments/gic/monthly-cash-management.html",
+      "file": "monthly-cash-management.html",
+      "fetched_at": "2026-10-06 14:28:45.758761+00:00",
+      "raw_sha256": "3f3ba6bd4256ec9a69aabb5dcfff1f953959b215af8e48780c6c71e1ad2cd42c",
+      "fixture_sha256": "3cc4d45fae979e4f25b6739020e76a7ba4cea56dc7faef23a88bf472cf96dfdc",
+      "baseline_payload": {
+        "payout_option": "Deposit in bank account at maturity only for non-registered accounts."
+      },
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Student Line of Credit",
+      "type": "line-of-credit",
+      "url": "https://www.nbc.ca/personal/borrowing/student-credit.html",
+      "file": "student-credit.html",
+      "fetched_at": "2026-10-06 14:43:11.397502+00:00",
+      "raw_sha256": "be396251e85e742652f9d386197ed5d3242257adf1a404c909a5c2de6610f8a3",
+      "fixture_sha256": "c29640879900500dcfaf67c4f1b20fbc7bec67d085e89d9fce7f5b1df7227af8",
+      "baseline_payload": {
+        "credit_limit_text": "your credit limit is based on your tuition fees and level of studies."
+      },
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Mortgage loans",
+      "type": "mortgage",
+      "url": "https://www.nbc.ca/personal/mortgages/loan.html",
+      "file": "loan.html",
+      "fetched_at": "2026-10-06 14:47:58.902673+00:00",
+      "raw_sha256": "e203826acba1760beb4a182902bc9b53f702172eb96ac92cec19550ec48ef3e0",
+      "fixture_sha256": "3a38a76f8861e1f6f5c3ac87ceb50faa389aa4290e943ff8725c5ad13a53e391",
+      "baseline_payload": {},
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Mortgage refinancing",
+      "type": "mortgage",
+      "url": "https://www.nbc.ca/personal/mortgages/refinancing.html",
+      "file": "refinancing.html",
+      "fetched_at": "2026-10-06 14:47:58.657276+00:00",
+      "raw_sha256": "e31078e0b0ea59fd0546d5894e99f4fbe925991d95e05073514495b63157145e",
+      "fixture_sha256": "74f87f6cb252082209b2cf5825f65ac041e9a76b99954274a3954d5032812876",
+      "baseline_payload": {
+        "term_length_text": "3 years"
+      },
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Mortgage for the self\u2011employed",
+      "type": "mortgage",
+      "url": "https://www.nbc.ca/personal/mortgages/self-employed.html",
+      "file": "self-employed.html",
+      "fetched_at": "2026-10-06 14:47:58.810944+00:00",
+      "raw_sha256": "8d9809ac12e9fb08f13435f1e31dd254131c1a3edbbd47a411440f96472f425d",
+      "fixture_sha256": "1b7c4620d167e3aaa6847003f153ed4e9578731e5ab9a134c85ae8a8c5e26b81",
+      "baseline_payload": {
+        "rate_type": "Fixed or variable"
+      },
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "Car loans",
+      "type": "personal-loan",
+      "url": "https://www.nbc.ca/personal/borrowing/car.html",
+      "file": "car.html",
+      "fetched_at": "2026-10-06 14:55:28.960303+00:00",
+      "raw_sha256": "11fda5eb6539a4ab633c064bf4bc1e7b2c4ce62c708b1211e7afba9eb7de7cc4",
+      "fixture_sha256": "c660f3738f9befcdd4645c44db66900066f61dff98e42ae22acd899174dfe0c6",
+      "baseline_payload": {},
+      "expected_complete": false,
+      "expected_facts": {}
+    },
+    {
+      "name": "High Interest Savings Account",
+      "type": "savings",
+      "url": "https://www.nbc.ca/personal/savings-investments/accounts/high-interest.html",
+      "file": "high-interest.html",
+      "fetched_at": "2026-10-06 15:00:20.153561+00:00",
+      "raw_sha256": "72888f40867f752c0ff8836c1afc137b5715f52630d9ea8d966d3f1907008d22",
+      "fixture_sha256": "1c372614c0410ebb1184ea6337d009e245ce2c338e18b5a5aedc9a621c111752",
+      "baseline_payload": {
+        "interest_payment_frequency": "monthly",
+        "interest_calculation_method": "Interest is calculated at the end of each day on the total daily balance."
+      },
+      "expected_complete": true,
+      "expected_facts": {
+        "monthly_fee": 0,
+        "standard_rate": 0.55
+      }
+    }
+  ],
+  "companions": [
+    {
+      "url": "https://www.nbc.ca/personal/mastercard-credit-cards/echo.html",
+      "file": "echo-rendered.html",
+      "fetched_at": "2026-10-06T23:20:11.664163+00:00",
+      "raw_sha256": "63dbbde2e29b4f0b2ed3cee35890b39fa6de284f86a314c8d2bd0b0d2677472f",
+      "fixture_sha256": "d89b64957e4f5c176029dbc9fc9e4676a6c4f971493c697586b08b52332d2229",
+      "kind": "rendered_detail"
+    },
+    {
+      "url": "https://www.nbc.ca/personal/savings-investments/gic/redeemable-plus.html",
+      "file": "redeemable-plus-rendered.html",
+      "fetched_at": "2026-10-06T23:20:20.474239+00:00",
+      "raw_sha256": "30101a22a9299f7c4990477d540c1cd723afe960e55a49916af35b68bd12d3f2",
+      "fixture_sha256": "f01172ab5dd04a377e0c4551ab801b208b2848c9c4fac59ec017c89ad08742c0",
+      "kind": "rendered_detail"
+    },
+    {
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/ppo_form_summary_terms_conditions_credit_card.pdf",
+      "file": "card-information.pdf",
+      "fetched_at": "2026-10-06T23:18:06.344357+00:00",
+      "fixture_sha256": "45fbda25718b4ac8d25571094d73f87d88d13caa0e3fcef2922fb131fa48721a",
+      "kind": "linked_pdf"
+    },
+    {
+      "url": "https://www.nbc.ca/content/dam/bnc/particuliers/pdf/cpg/32074-002-feuillets-cpg-rachetable-plus-gic-trim.pdf",
+      "file": "plus-disclosure.pdf",
+      "fetched_at": "2026-10-06 13:05:43.510295+00:00",
+      "fixture_sha256": "0c1266df26d62dbe969bd48af8b197c372e46a71a07cad52effd1e018a52cee8",
+      "kind": "linked_pdf"
+    }
+  ]
+}

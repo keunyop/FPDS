@@ -1,5 +1,208 @@
 # FPDS Development Journal
 
+## 2026-10-06 - Admin collection parity P2/P4 completion and P5/P6 preparation
+
+- Completed bounded same-page render/current-snapshot reparse on the ordinary
+  research/snapshot/parse path. Initial and later browser attempts share the
+  48/Run allowance, each URL is attempted once, optional-only gaps do not acquire
+  evidence, and unknown failed-stage usage conservatively consumes the allowance.
+  Existing safe-fetch checks, registry identity and two research waves remain.
+- Added private execution receipts for field loss, acquisition stops/failures,
+  validation source counts, actual promoted candidate counts and projection
+  launch status. Approval is distinct from Public visibility, which remains
+  unverified until an actual readback. Failed renders preserve only a matching
+  successful selection in the same Run; the SQL write behavior still needs
+  deployed PostgreSQL verification.
+- Exercised real filesystem snapshot capture and default-limit parse/chunk
+  storage, artifact loading, current-origin resolution, normalization, routing
+  and promotion gates. The actual 900-character chunk path initially produced
+  four failures and one error by losing material card reset/GIC payout wording;
+  bounded native financial records now remain indivisible. Also preserved
+  source-proven optional cash rates through the actual normalization quote gate.
+- The six independent National priorities pass the ordinary automatic
+  validation/promotion checks; the other eleven supplied inputs remain excluded.
+  Expected fees/rates, 36-month contract term, anniversary redemption conditions,
+  full card default/reset wording and GIC payout reductions are retained.
+  Database/provider/network write effects are fixture-controlled; this is not a
+  real canonical or Public publication result and creates no product Review.
+- Internal independent evaluation bypasses only the result cache, preserves
+  provider receipts and leaves ordinary reuse unchanged. Prepared matched-input
+  model evaluation and aligned API/Worker deployment with actual Admin,
+  canonical, aggregate projection and Public readback gates. No paid call,
+  fresh live collection, deployment or external data mutation was performed.
+- Key files: [implementation and release evidence](admin-collection-parity-implementation-2026-10-06.md),
+  API research/runner, Worker snapshot/parser/extraction/normalization services,
+  process/cache contracts and source-backed fixtures. Parser is v13; process is
+  `2026-10-06-admin-evidence-parity-v3`. Accuracy essentials and review history
+  remain unchanged.
+- Final verification: full Worker suite 808 tests passed (64.859s); full API suite
+  631 tests passed (10.567s). Snapshot and ordinary runner CLI help checks passed.
+  Changed-document links, harness prerequisites and fixture JSON passed using
+  the standard repository harness functions; git diff --check passed.
+  Full repo-doctor failed solely on the existing ignored temporary file
+  `tmp/public-top5-20261004/app/README.md` linking to a missing relative policy
+  document. The unrelated temporary artifact was preserved.
+- Next step: separately scope deployment and live database/Public acceptance.
+  Local fixtures establish the common code path, not live provider quality,
+  PostgreSQL writes, deployed process alignment or current Public counts.
+
+## 2026-10-06 - Admin collection parity P1/P3 implementation
+
+- Product Owner authorized the prepared parity plan. Added retained official
+  National fixtures for all 17 targets plus current disclosures/rendered captures;
+  hashes and six independent fact expectations precede pattern changes.
+- Ordinary stored extraction artifact, production origin resolution loader,
+  normalization and automatic routing now accept the six source-proven priorities.
+  No model, live collection, canonical/Public write or deployment was performed.
+- Added bounded literal component decoding with local alias/product ownership,
+  native named PDF financial records, exact referenced monthly fee/annual rate,
+  contract-term role checks and complete anniversary redemption conditions.
+  Shared instructions and parse/cache versions move together. Same-evidence
+  optional calculation/payment conditions remain in the normal typed payload.
+- Verification: seven initial source-backed parity tests passed; subsequent full
+  Worker run verified the financial cases and identified one new test fixture
+  assertion issue (corrected), while the full API suite passed 629 tests.
+- Next slice: verify bounded render/reparse execution, field-loss/publication
+  receipts and promotion integration, then run final affected suites and prepare
+  the matched-input evaluation/release checklist. Live Public proof remains open.
+
+## 2026-10-06 - Ordinary Admin collection and publication parity plan
+
+- Prepared the Product Owner-requested fundamental plan from the preserved
+  National six Runs/17 excluded candidates and current ordinary code. The Runs
+  recorded process `2026-10-06-native-information-proof-v2`; this failure cannot
+  be attributed solely to an older process being deployed. Existing October 5
+  research/financial fixes and their separate release limits remain preserved.
+- Read actual `evidence_research` receipts: credit-card 5, GIC 6 and savings 1
+  all stopped at `no_unvisited_official_lead` with zero planner calls for those
+  types. Other types made seven planner calls in total across three Runs.
+  Missing links and those stop reasons do not establish bank nondisclosure or
+  exhaustion of the respective research budgets. Same-page render and native
+  reprocessing need to be selectable ordinary acquisition actions.
+- Retained two confirmed meaning issues: HISA's exact no-fixed-monthly-fees
+  expression is rejected by the diagnostic quote gate; Plus's one-year
+  investment horizon survives as contract term despite the rendered 36-month
+  contract. No complete new automatic approval was demonstrated by these probes.
+- Plan P1-P6 specifies shared acquisition/provenance and financial-role evidence,
+  bounded rendering/reprocessing within the ordinary pipeline, proven-value
+  preservation, cross-bank positive/negative regressions, isolated model
+  comparisons and fresh authenticated Admin-to-canonical-to-Public acceptance.
+  Target six products are evaluation opportunities, not an approval count.
+- The configured model default and saved research-planner model are gpt-6-luna;
+  this does not prove exact Codex/final-grounding model identity or model quality
+  as the cause. Official OpenAI tools/evaluation guidance was read. Model
+  comparisons pin evidence, settings and variants before proposing a change.
+- Existing two research waves, two additional URLs/detail, 48/Run, eight planner
+  calls/Run and one final grounding/detail remain. Proposed render and paid
+  experiment ceilings are clearly proposals, not already executed/approved
+  budget increases. Existing optional omission, conditional financial essentials,
+  exact units/types, automatic exclusion and private evidence remain binding.
+- Key files: [parity plan](../01-planning/admin-collection-publication-parity-plan-2026-10-06.md),
+  planning/WBS navigation, docs map and the owned planning section in goal.md.
+  Private derived receipts are in tmp/national-direct-assessment-20261006.
+  No runtime code, model/collection calls, new captures, live DB changes,
+  registry/candidate/canonical writes, deployment or publication in this slice.
+- Verification: UTF-8 Korean and outline reviewed, receipt counts/process/stop
+  reasons recomputed from preserved data, financial examples and official URLs
+  checked against the earlier evidence. Changed-document standard harness
+  Markdown reference validation passes for all six documents; the plan's twelve
+  local references and independent-cache/UTF-8/whitespace checks pass. git diff
+  --check passes. Full repo doctor fails on the existing ignored copied README
+  tmp/public-top5-20261004/app/README.md and its relative pilot-report link;
+  this unrelated temporary artifact was not changed. The first targeted harness
+  invocation did not load under the host execution policy and was repeated
+  successfully with the repository's explicit Bypass invocation and terminating
+  errors. No application tests were run for this documentation-only slice.
+  Next implementation slice is P1/P2; full acceptance requires P6 actual ordinary
+  Admin/Public verification.
+
+## 2026-10-06 - National Bank direct evidence feasibility without Admin API
+
+- Read the latest six completed Runs (`collection_ofg23jRBr7UUrVNG`), started
+  07:15:52 America/Vancouver / 14:15:52 UTC, using a read-only DB transaction.
+  Seventeen candidates remain excluded, no approvals or review tasks. The
+  process receipt is `2026-10-06-native-information-proof-v2`.
+- Inspected all seventeen owned details and essential companion evidence.
+  Verified SHA-256 for 27 retained snapshots, including 17 same-day details,
+  current rate pages and five named GIC disclosure PDFs. Four bounded direct
+  official fetches and two explicit browser renders have local hash receipts.
+  Older selected supporting documents remain dated evidence; they were not
+  silently treated as fresh. No paid providers, Admin API calls, new Runs,
+  runtime changes, registry/canonical writes, approvals or publications.
+- ECHO, Platinum, World and World Elite are strong additional evidence
+  opportunities. The current [official card information box](https://www.nbc.ca/content/dam/bnc/particuliers/pdf/tarification-carte/ppo_form_summary_terms_conditions_credit_card.pdf)
+  lists ordinary annual main-card fees CAD 30 / 70 / 115 / 150 and regular
+  purchase interest 20.99% annually for these named cards. Current own-page
+  embedded product records agree. Retain Platinum's first-year reimbursement
+  separately; privileged/student offers and missed-payment rates do not replace
+  regular conditions. Old promotion copy does not prove current offer eligibility.
+- [HISA](https://www.nbc.ca/personal/savings-investments/accounts/high-interest.html)
+  shows 0.55%, no fixed monthly fees, daily-balance interest and monthly payment.
+  Its named [current rate page](https://www.nbc.ca/rates/bank-account-rates.html)
+  agrees across all balances. Transaction and paper-statement charges remain
+  distinct; zero monthly base fee does not mean every service is free.
+  Existing exact quote validation rejects `No fixed monthly fees`; the latest
+  candidate also lost the visible standard rate. This is a shared meaning/proof
+  issue, not demonstrated bank nondisclosure.
+- [Redeemable Plus](https://www.nbc.ca/personal/savings-investments/gic/redeemable-plus.html)
+  is a further concrete opportunity: direct rendered options show 36-month
+  simple/compound rows at 0.30%, with annual units and anniversary-only access
+  proved by its named disclosure. Preserve the full anniversary/no-penalty
+  boundary. The failed candidate retained `1 year` from the investment-horizon
+  panel; that is not the rendered 36-month contract term.
+- All six GIC details contain native product/rate/term records behind unresolved
+  visible templates. Further opportunities: Redeemable, Redeemable Without
+  Penalty, Extra and Monthly Cash Management. Required proof must bind each
+  exact row, annual rate and complete access/consequence record; do not take the
+  largest rate or assume month/day equivalence. Extra's 3-month row and 90-day
+  legal term need exact preservation. Monthly Cash Management has a 1-month row
+  and 30-day legal term, plus conflicting optional minimum amounts (500/5,000);
+  uncertain optional minimums must be omitted. Both have explicit no-access
+  before maturity and cancellation-without-interest clauses.
+- Retain GIC source conflicts: Redeemable USD's option instructions say
+  non-redeemable despite its identity/access and named PDF; the Without Penalty
+  detail mentions a 14-month variant while its disclosure and embedded rows
+  prove only 12-/24-month terms. A generic interpretation must preserve or
+  exclude conflicts; this investigation does not silently resolve them.
+- Syncro is conditional: its own embedded record gives CAD 35 / 8.90%, but its
+  legal purchase formula is prime +4% with an 8.90% floor. Do not infer the
+  effective scalar from a floor or reference rate; rendered product-scoped
+  proof and unchanged condition/origin gates are still needed.
+- The three mortgage targets (Mortgage loans, self-employed, refinancing) retain
+  family/eligibility/action boundaries. The main page includes fixed, variable
+  and mixed products; its [rates page](https://www.nbc.ca/personal/mortgages/rates.html)
+  has exact term-specific regular/promotional nominal rates and separate APR
+  assumptions. Do not borrow a family rate into each audience/refinancing
+  target or equate APR with nominal interest. New-origin eligibility also matters.
+  Car loans disclose repayment up to eight years but no proven own numeric rate
+  in the bounded inspection. Student LOC has a named rate lead, yet no explicit
+  own security proof was found; second-home security and government student-loan
+  conditions belong to other products. Both remain excluded.
+- Confirmed acquisition defect: normal direct fetch leaves ECHO and Redeemable
+  Plus templates unresolved; the existing render detector returns false for
+  both. One explicit safe browser render per URL removes all visible templates
+  and exposes owned numeric pricing/term rows. Safe JSON-only decoding also
+  locates the corresponding data inside original same-day raw HTML. No script
+  execution or new acceptance adapter was added; browser executes ordinary site
+  code only. Direct evidence does not itself prove full-path acceptance.
+- Verification: 27 saved hash checks, four direct receipts, two browser receipts,
+  five existing financial/security function probes and all 17 saved comparison
+  replays (all remain incomplete). Three quote probes accept actual rendered
+  ECHO fee/rate and Plus rate labels; HISA zero-fee phrasing fails and student
+  security is unknown. These are diagnostic functions, not extraction,
+  normalization, provenance, promotion or Public acceptance tests.
+- Private local receipts/scripts: `tmp/national-direct-assessment-20261006/`;
+  key files are original metadata, saved/direct/render receipts, embedded-record
+  diagnosis and financial-gate probes. Existing goal ownership is preserved.
+  Final read-only comparison confirms 17 candidates and six original Runs
+  unchanged; all 33 local raw hashes and five official journal links check.
+  Goal/diff reviewed and git diff --check exits zero. No application suite
+  rerun for this documentation-only investigation.
+  Next step is separately scoped generic rendering/meaning/term-origin correction
+  and identical-input ordinary-service verification, starting with four cards,
+  HISA and Redeemable Plus. Additional approval count remains unproven.
+
+
 ## 2026-10-06 - Generic Manulife corrections and five verified publications
 
 - Latest batch had seven exclusions and a skipped GIC family, on the already

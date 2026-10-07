@@ -1,5 +1,107 @@
 # Admin pre-handover review and fixes
 
+## Authorized Admin collection parity implementation - 2026-10-06
+
+Status: Complete for P1-P4 local implementation and P5/P6 preparation.
+Paid evaluation, deployment and live acceptance remain separate open gates.
+Ownership: preserve every preceding planning/data-operation goal and history.
+Objective: Implement ordinary Admin acquisition and automatic fact handling with
+shared services so source-proven facts can reach normal approval/publication.
+Scope: P1-P4 source-backed reproductions, bounded same-page acquisition actions,
+financial meaning/provenance preservation, actual ordinary artifact/validation
+integration, run result diagnostics, and P5/P6 evaluation/release preparation.
+Boundaries: unchanged financial essentials, optional omission, field units,
+security/private evidence, registered countries/types, no manual product review.
+Paid experiments, fresh live Runs, canonical/Public writes and deployment remain
+separately scoped operations; do not claim them from a local code/test result.
+Acceptance:
+- [x] Add source-backed failure and success fixtures before extending patterns;
+      reproduce National inputs and preserve independent expected facts.
+- [x] Shared acquisition resolves owned dynamic evidence with safe fetch and
+      per-detail/Run render and research limits, without optional-only work.
+- [x] Shared proof/normalization preserves exact period roles, fee meaning,
+      units, conditions and complete current-run field origins; negatives exclude.
+- [x] Actual ordinary artifact/origin/routing integration accepts complete
+      priority products, retains insufficient/conflicting exclusions, no Review.
+- [x] Execution receipts distinguish field losses, acquisition stop/failure,
+      approval and publication; cache/version boundaries prevent stale replay.
+- [x] Relevant Worker/API regressions and full affected suites, documentation
+      consistency checks and git diff --check pass; report real live limits.
+Verification: existing safe services with fixture-backed network/DB/provider,
+retained official inputs, regression and full affected Python boundary suites;
+prepare scoped evaluation/release readback without stateful external actions.
+
+Outcome: six independent National priorities pass ordinary artifact/origin,
+normalization, routing and promotion checks; eleven incomplete targets exclude.
+Full Worker 808/API 631 tests, CLI checks and changed-file harness checks passed.
+Full repo-doctor retains one unrelated ignored tmp README link failure.
+Implementation/release evidence: docs/00-governance/admin-collection-parity-implementation-2026-10-06.md.
+Keep this file because the preceding independent goals/history remain owned.
+
+## Admin collection publication parity plan - 2026-10-06
+
+Status: Complete for the planning/read-only diagnosis slice. P1-P6 runtime
+implementation and live acceptance remain future scoped work.
+
+Objective: Explain the recurring difference between direct official evidence
+assessment and ordinary FPDS Admin collection, and prepare a concrete shared
+collection-to-Public implementation and acceptance plan.
+
+In scope: Reconcile current policy, prior redesign evidence, the National Bank
+same-day captures and ordinary code path; distinguish proven defects from model
+or runtime hypotheses; specify bounded acquisition, meaning/provenance
+preservation, automatic gates, controlled evaluation and real Admin/Public
+acceptance; save the plan and update planning navigation and the journal.
+
+Out of scope: Runtime implementation, paid model/collection runs, migrations,
+registry/candidate/canonical mutations, deployment, live publication, new
+countries/types, manual product review and permanent recovery scheduling.
+
+Acceptance and verification:
+- [x] Root causes cite actual ordinary code and current source evidence, with
+      unverified explanations explicitly identified.
+- [x] The delivery plan defines shared ordinary/direct services, protected
+      financial/security rules, existing budgets, concrete slices and stop gates.
+- [x] The plan requires a fresh authenticated Admin run and current Public
+      projection readback for runtime completion; direct supplementation and
+      isolated replay cannot substitute for that gate.
+- [x] The model comparison keeps evidence/tools/configuration controlled and
+      never uses a confidence score to establish facts.
+- [x] Documentation links and financial examples are checked, the development
+      journal is updated, and git diff --check passes. Prior goal ownership and
+      unrelated changes remain preserved.
+
+Verification outcome: six changed-document standard reference checks pass;
+plan UTF-8/outline, twelve local references, private receipt counts and independent
+model-repetition conditions verified; prior goal/journal tails remain identical.
+git diff --check passes. Full repo doctor reports an existing broken reference in
+ignored tmp/public-top5-20261004/app/README.md; unrelated temporary content is
+preserved. No application tests or stateful collection/runtime operations.
+Preserve this file because earlier independently owned slices remain present.
+
+## Read-only slice: National Bank direct evidence assessment - 2026-10-06
+
+Objective: assess whether current official evidence for the latest National Bank
+targets supports additional automatic acceptance without FPDS Admin API.
+Ownership: preserve all earlier goal slices and their unresolved acceptance.
+Scope: read-only latest saved inputs; bounded official product/rate/terms
+inspection; unchanged-gate diagnostic probes; findings and journal.
+Exclusions: runtime changes, paid models, new Runs, registry/canonical writes,
+approval/publication, deployment, manual review and relaxed financial essentials.
+Acceptance: inspect all 17 latest targets; identify concrete essential evidence
+and blockers; distinguish evidence feasibility from demonstrated acceptance;
+record verification and preserve prior ownership.
+Verification: current official pages, read-only DB/stored artifact comparison,
+existing financial gate probes, final goal/diff review and git diff --check.
+Status: complete for this feasibility slice. All 17 targets inspected; 27 saved
+snapshot hashes, four direct receipts, two browser renders, five existing gate
+probes and 17 unchanged saved comparison failures verified. Four cards, HISA and
+Redeemable Plus are priority evidence opportunities; additional GIC/Syncro
+conditions and remaining mortgage/loan/security conflicts are documented. No
+new automatic acceptance, publication or runtime change is claimed. Preserve
+every earlier independently owned slice and unresolved acceptance.
+
+
 ## Authorized slice: generic Manulife corrections and direct publication - 2026-10-06
 
 Objective: inspect latest Manulife collection without Admin API, correct demonstrated generic defects and directly publish current products passing unchanged automatic gates.

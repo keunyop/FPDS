@@ -1,5 +1,7 @@
 # FPDS Docs Map
 
+Current collection implementation: [Admin evidence parity and release gates](00-governance/admin-collection-parity-implementation-2026-10-06.md).
+
 Status: Active navigation index · Updated: 2026-10-06
 
 Use this map to find the current contract or operating document. Dated reports
@@ -24,7 +26,9 @@ or exclusion; account/signup approval remains separate. Read the
 [collection accuracy policy](03-design/collection-accuracy-policy.md) before
 collection work.
 
-Latest read-only collection assessment: [Laurentian direct evidence opportunities and remaining gates](00-governance/laurentian-direct-evidence-assessment-2026-10-05.md); no new approvals or publications.
+Latest requested collection plan: [ordinary Admin acquisition, financial proof and actual Public acceptance](01-planning/admin-collection-publication-parity-plan-2026-10-06.md). Planning only; implementation and live acceptance remain subsequent slices.
+
+Latest read-only collection assessment: [National Bank direct evidence opportunities and remaining gates](00-governance/development-journal.md#2026-10-06---national-bank-direct-evidence-feasibility-without-admin-api); no new approvals or publications. Previous assessment: [Laurentian](00-governance/laurentian-direct-evidence-assessment-2026-10-05.md).
 
 Latest ordinary-process verification: [essential-evidence research redesign and runtime limits](00-governance/ordinary-collection-redesign-2026-10-05.md). This local result is distinct from direct data publication.
 

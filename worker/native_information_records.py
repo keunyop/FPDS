@@ -14,7 +14,7 @@ def name_key(value):
 
 def names_match(left, right):
     def key(value):
-        return tuple(t for t in name_key(value).split() if t not in {'card', 'cards', 'r', 'tm'})
+        return tuple(t for t in name_key(value).split() if t not in {'credit', 'card', 'cards', 'mastercard', 'visa', 'r', 'tm'})
     return bool(key(left)) and key(left) == key(right)
 
 
@@ -149,7 +149,7 @@ def pdf_information_records(page_text, *, page_no):
     lines = str(page_text).splitlines()
     names = [line.strip() for line in lines if re.fullmatch(r'.+?\bCard Information Box', line.strip(), re.I)]
     if len(names) != 1:
-        return []
+        return _shared_pdf_records(page_text)
     owner = re.sub(r'\s+Information Box$', '', names[0], flags=re.I)
     start = re.search(r'(?mi)^Annual Interest\s*\nRates\s*\n', page_text)
     end = re.search(r'(?mi)^Interest-free\s*\nGrace Period\b', page_text)
@@ -175,3 +175,51 @@ def information_card_rates(quote):
             return None
     values = tuple(Decimal(v) for v in match.groups())
     return values if all(v.is_finite() and 0 <= v < 100 for v in values) else None
+
+
+def shared_card_rates(quote):
+    match = re.search(r'Annual\s+interest rates\s+Regular interest rates:\s+Cards Purchases Cash advances and balance\s+transfers\s+(.+?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%', str(quote), re.I | re.S)
+    if not match or len(match[1]) > 1000 or '%' in match[1]:
+        return None
+    return tuple(Decimal(x) for x in match.groups()[1:])
+
+
+def shared_card_fee(quote):
+    match = re.fullmatch(r'Annual fees\s+Cards Main card Additional card\s+([^$\n]+)\s+\$(\d+(?:\.\d+)?)\s+\$(\d+(?:\.\d+)?)', str(quote).strip(), re.I)
+    if not match or re.search(r'\b(?:if|first|eligible|students?|privilege|until|waiv|reduced interest rate)\b', match[1], re.I):
+        return None
+    return Decimal(match[2])
+
+
+def _shared_pdf_records(page_text):
+    output = []
+    regular = re.search(r'Annual\s+interest rates\s+Regular interest rates:\s+Cards Purchases Cash advances and balance\s+transfers\s+(.+?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%', page_text, re.I | re.S)
+    if regular and len(regular[1]) <= 1000:
+        # The selected literal row keeps its unit/header and every applicable
+        # default/payment rule. Other product rates are not its scalar proof.
+        scope = re.search(r'Transactions charged.+?(?=Interest-free)', page_text, re.I | re.S)
+        quote = regular[0] + ('\n' + scope[0].strip() if scope else '')
+        if shared_card_rates(quote) and len(quote) <= 6400:
+            names = re.split(r',|\band\b', re.sub(r'\s+', ' ', regular[1]), flags=re.I)
+            output.extend(('named_card_regular_rates', n.strip(), quote) for n in names if n.strip())
+    fee_start = re.search(r'Annual fees\s+Cards Main card Additional card\s+', page_text, re.I)
+    if fee_start:
+        for line in page_text[fee_start.end():].splitlines():
+            quote = 'Annual fees\nCards Main card Additional card\n' + line.strip()
+            if shared_card_fee(quote) is not None:
+                label = line.split('$', 1)[0].strip()
+                # Only literal names without qualifier suffixes are owners.
+                for name in re.split(r',|\band\b', label, flags=re.I):
+                    if name.strip():
+                        output.append(('named_card_fee_row', name.strip(), quote))
+    # Named GIC disclosures establish annual units without donating a rate.
+    title = re.search(r'^(.+?Guaranteed\s+Investment\s+Certificate\s*\(GIC\))', page_text, re.I | re.S)
+    annual = re.search(r'Annual interest rate\s+.+?(?=Type of interest)', page_text, re.I | re.S)
+    if title and annual and len(title[1]) <= 200 and len(annual[0]) <= 1800:
+        owner = re.sub(r'Guaranteed\s+Investment\s+Certificate\s*\(GIC\)', 'GIC', title[1], flags=re.I)
+        owner = re.sub(r'\s+', ' ', owner).strip()
+        output.append(('named_product_rate_basis', owner, owner + '\n' + annual[0].strip()))
+        terms = re.search(r'Type of interest\s+.+?(?=Fees\s)', page_text, re.I | re.S)
+        if terms and len(terms[0]) <= 3000:
+            output.append(('named_product_interest_terms', owner, owner + '\n' + terms[0].strip()))
+    return output
