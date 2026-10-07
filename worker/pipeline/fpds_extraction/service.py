@@ -438,6 +438,10 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
     Detail heuristics remain detail-only. Companion evidence enters the existing
     single official grounding call and keeps its real document/snapshot origin.
     """
+    from worker.native_information_records import names_match
+    named_pdf_anchors = {"card_information_rate", "card_information_fee",
+        "named_card_regular_rates", "named_card_fee_row",
+        "named_product_rate_basis", "named_product_interest_terms"}
     output = []
     for item in inputs:
         context = item.context
@@ -463,6 +467,14 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                 parent = _canonical_official_source_url(metadata.get("parent_detail_url")) if isinstance(metadata, dict) else ""
                 named = [c for c in companion.candidates if tokens and len(tokens) >= 2
                          and tokens <= {t.removesuffix("s") if len(t) > 4 else t for t in re.findall(r"[a-z0-9]+", c.evidence_excerpt.lower())}]
+                # Some ordinary linked PDFs have no parent URL. A complete
+                # explicitly named native declaration can prove applicability
+                # without inventing a discovery relationship or donating facts
+                # from another product. Retain each record's current origin.
+                named_native = [c for c in companion.candidates
+                    if ctx.source_type == "pdf" and c.anchor_type in named_pdf_anchors
+                    and names_match(c.anchor_value, identity)]
+                named.extend(c for c in named_native if c not in named)
                 parents = metadata.get("parent_detail_urls") or [] if isinstance(metadata, dict) else []
                 named.extend(c for c in companion.candidates if c.anchor_type == "financial_table_cell"
                     and own_url in {_canonical_official_source_url(u) for u in re.findall(r"(?m)^https?://[^\s]+$", c.evidence_excerpt)}
@@ -480,7 +492,10 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                         continue
                     if c not in named and not (parent == own_url or re.search(r"legal|terms|conditions|notes", c.anchor_value or "", re.I)):
                         continue
-                    selected.append(replace(c, retrieval_metadata={**c.retrieval_metadata, "source_url": url, "captured_companion": True, "parent_detail_url": parent}))
+                    selected.append(replace(c, retrieval_metadata={**c.retrieval_metadata,
+                        "source_url": url, "captured_companion": True,
+                        "parent_detail_url": own_url if c in named_native else parent,
+                        **({"companion_binding": "exact_named_native_record"} if c in named_native else {})}))
         output.append(replace(item, grounding_candidates=list({c.evidence_chunk_id:c for c in selected}.values())))
     return output
 

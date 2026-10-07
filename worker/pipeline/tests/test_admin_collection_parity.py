@@ -115,6 +115,49 @@ class AdminCollectionParityTests(unittest.TestCase):
                     self.assertNotIn("term_length_days", record["candidate_payload"])
                     self.assertIn("anniversary", record["candidate_payload"]["early_withdrawal_penalty"])
 
+    def test_named_pdf_without_injected_parent_matches_actual_collection(self):
+        for target in MANIFEST["targets"]:
+            if target["type"] not in {"credit-card", "gic"} or not target["expected_complete"]:
+                continue
+            with self.subTest(product=target["name"]):
+                inputs = ordinary_inputs(target)
+                inputs = [self.without_parent_metadata(item) for item in inputs]
+                record, validation, _ = run_services(inputs)
+                self.assertEqual(validation.validation_action, "auto_validated",
+                                 record["candidate_payload"].get("_collection_accuracy"))
+                for field, expected in target["expected_facts"].items():
+                    self.assertEqual(record["candidate_payload"].get(field), expected, field)
+                if target["type"] == "gic":
+                    self.assertEqual(record["candidate_payload"]["term_length_text"], "36 months")
+                    self.assertIn("0.125%", record["candidate_payload"]["interest_calculation_method"])
+
+    @staticmethod
+    def without_parent_metadata(item):
+        if item.context.source_type != "pdf":
+            return item
+        metadata = dict(item.context.source_metadata)
+        discovery = dict(metadata.get("discovery_metadata") or {})
+        discovery.pop("parent_detail_url", None)
+        discovery.pop("parent_detail_urls", None)
+        metadata["discovery_metadata"] = discovery
+        return replace(item, context=replace(item.context, source_metadata=metadata))
+
+    def test_named_pdf_binding_keeps_exact_owner_and_capture_scope(self):
+        from worker.pipeline.fpds_extraction.service import _bind_grounding_evidence
+        target = next(t for t in MANIFEST["targets"] if t["name"] == "World Elite Mastercard")
+        detail, pdf = [self.without_parent_metadata(i) for i in ordinary_inputs(target)]
+        foreign_name = replace(pdf, candidates=[c for c in pdf.candidates
+            if c.anchor_type == "named_card_regular_rates" and c.anchor_value == "World"])
+        conflicts = [foreign_name,
+            replace(pdf, context=replace(pdf.context, bank_code="OTHER")),
+            replace(pdf, context=replace(pdf.context, country_code="US")),
+            replace(pdf, context=replace(pdf.context, source_language="fr"))]
+        for companion in conflicts:
+            with self.subTest(context=companion.context):
+                bound = _bind_grounding_evidence([detail, companion])[0]
+                self.assertFalse(any(c.anchor_type == "named_card_regular_rates"
+                                     for c in bound.grounding_candidates))
+
     def assert_real_promotion(self, record, validation, target, source_metadata):
         from api_service import candidate_auto_promotion as promotion
         from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid

@@ -2,7 +2,7 @@
 
 ## Ordinary Admin evidence parity - 2026-10-06
 
-Process `2026-10-06-admin-evidence-parity-v3` and parser v13 preserve owned
+Process `2026-10-06-named-companion-binding-v4` and parser v13 preserve owned
 literal values, exact fee/term roles and complete financial records through
 actual chunk/artifact storage and automatic gates. Essential gaps may trigger
 one same-page render or a current-snapshot/version reparse. Existing URL/model
@@ -12,6 +12,12 @@ only an exact already-successful current-Run selection. No manual product review
 Private Run receipts distinguish field omission/loss, automatic validation,
 canonical promotion and projection launch; Public visibility requires readback.
 [Implementation, regressions and separate release acceptance](../../docs/00-governance/admin-collection-parity-implementation-2026-10-06.md).
+
+Current captured official PDFs lacking discovery parent metadata bind only
+through exact named native financial declarations. The actual latest National
+Run exposed this missing association; the same saved input/real DB-origin replay
+now passes six priorities. This is a code/replay result; live National Public
+still contains one product until a separately scoped serving/data acceptance.
 
 ## Native information records and Manulife publication - 2026-10-06
 
@@ -334,6 +340,11 @@ uses shared native product-section and source-validity HTML proof. Run
 `uv sync --directory api/service` before restarting this API after the native
 evidence correction; the root Worker environment remains a separate boundary.
 The product-availability policy itself still uses the standard-library parser.
+Essential-evidence research reads parser identity from the dependency-free
+`worker.pipeline.fpds_parse_chunk.version` module, not from the HTML/PDF parser.
+`pypdf` stays in the root Worker project; worker stages continue to launch through
+that project. Run API tests in this independent API environment so Worker-only
+packages cannot mask import-boundary errors.
 
 ## Vercel API Deployment
 

@@ -26,6 +26,7 @@ from worker.pipeline.fpds_extraction.service import (
 )
 from worker.pipeline.fpds_evidence_retrieval.models import EvidenceChunkCandidate
 from worker.pipeline.fpds_parse_chunk.storage import ParseChunkStorageConfig, build_object_store
+from worker.pipeline.fpds_parse_chunk.version import PARSER_VERSION
 
 from worker.pipeline.fpds_collection_process import (
     COLLECTION_PROCESS_VERSION, MAX_RESEARCH_ROUNDS, MAX_ADDITIONAL_PER_DETAIL,
@@ -197,7 +198,6 @@ class EvidenceResearchPlanner:
                          remaining_sources - len(sources))
             owned_page = pages.get(ctx.source_document_id)
             if owned_page and owned_page.snapshot_id == ctx.snapshot_id and owned_page.parsed_document_id == ctx.parsed_document_id and owned_page.source_url == parent:
-                from worker.pipeline.fpds_parse_chunk.parser import PARSER_VERSION
                 version_gap = owned_page.parser_version and owned_page.parser_version != PARSER_VERSION
                 already_rendered = ('browser' in str(owned_page.response_metadata.get('fetch_method', '')).lower()
                     or owned_page.response_metadata.get('browser_fallback_attempted') is True)

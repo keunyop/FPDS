@@ -13,7 +13,8 @@ from .models import (
     ParseSourceSnapshot,
     ParsedArtifact,
 )
-from .parser import PARSER_VERSION, parse_snapshot_bytes
+from .parser import parse_snapshot_bytes
+from .version import PARSER_VERSION
 from .storage import ParseChunkObjectStore, ParseChunkStorageConfig
 
 

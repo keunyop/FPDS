@@ -1,5 +1,15 @@
 # FPDS Workspace
 
+## Actual Admin named-companion correction - 2026-10-06
+
+Ordinary captured PDFs without a discovery parent bind through exact named
+native financial declarations, retaining actual current origins and existing
+financial/security gates. Process: `2026-10-06-named-companion-binding-v4`;
+parser v13. The latest National live batch published/updated one product;
+six priorities pass the corrected same-input/read-only-origin replay. Serving
+rollout and live acceptance remain separate from this corrective code result.
+[Actual failure and verification](docs/00-governance/admin-collection-parity-implementation-2026-10-06.md#actual-national-run-companion-binding-correction---2026-10-06).
+
 ## Native information records and Manulife publication - 2026-10-06
 
 Parser v12 preserves named card information boxes, embedded mortgage APR term

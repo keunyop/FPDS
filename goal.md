@@ -1,5 +1,62 @@
 # Admin pre-handover review and fixes
 
+## Actual National Admin parity failure investigation - 2026-10-06
+
+Status: Complete for actual diagnosis and shared correction; fresh live approval/publication remains open.
+Objective: Explain the demonstrated 1/17 live outcome using the exact Run
+captures, evidence selection, extraction and normalization, and correct shared
+code defects within the already authorized parity implementation where proven.
+Ownership: preserve the previous import fix and all other goal history.
+Scope: read-only live/private evidence diagnosis; current-input provider-disabled
+reproduction; source-backed generic corrections with existing financial/security
+limits; real runtime boundary regression tests; accurate report/journal.
+Exclusions: fresh paid calls/recollection, deployment/restarts, canonical/Public
+writes, weaker essentials, manual review and new permanent recovery features.
+Acceptance:
+- [x] Trace the failed four regular cards and Plus GIC against test inputs.
+- [x] Identify the first actual evidence/field divergence, distinguishing observed
+      defects from uncertain provider or bank nondisclosure claims.
+- [x] Reproduce and test any generic corrective slice against exact retained
+      inputs with no paid calls or financial-policy relaxation.
+- [x] Record actual outcome, limits and next gate; verify diff/goal/docs.
+Verification: read-only DB and private objects; captured SHA-256; production
+loaders and provider-disabled proof/normalization; success/failure regressions.
+
+Outcome: exact captured-PDF product association was missing; earlier fixtures
+prefilled it. Five missing-parent failures reproduced before the shared fix.
+Exact latest Run input replay with production current-origin, taxonomy and
+routing SELECTs in a read-only database passes all six priorities, with no
+pre-injected association/provider calls/data writes. API 632 pass; Worker
+810 run has 809 pass and the known committed-fixture hash failure. Serving
+health HTTP 200 already reports process v4; no fresh Run or extra Public
+publication is claimed. Existing goals/evidence and one live National product
+are preserved. Implementation report records reproducible evidence and limits.
+
+## API parser-version import boundary correction - 2026-10-06
+
+Status: Complete for the reported API import correction; live deployment separate.
+Objective: Fix ordinary essential-evidence research in the independent API
+runtime without installing Worker-only PDF dependencies into that boundary.
+Scope: reproduce in the API virtualenv; dependency-free parser version contract;
+cache fingerprint consistency; missing-PDF-library regression; actual API and
+relevant Worker tests; boundary documentation and journal.
+Out of scope: financial policy changes, provider calls, collection/data writes,
+deployment/restarts and unrelated existing goal ownership.
+Acceptance:
+- [x] Reproduce the planner failure using the actual API environment.
+- [x] API actions use the exact Worker parser version without importing pypdf.
+- [x] Regression blocks PDF libraries and exercises render/reparse decisions;
+      relevant tests pass in their own runtime environments.
+- [x] Update runtime documentation/journal, inspect goal/diff and pass git diff --check.
+Verification: API virtualenv subprocess and suite, source-backed parser/parity
+and grounding-cache tests, standard changed-document checks.
+
+Outcome: actual API focused 37/full 632 and Worker parser/cache 20 cases pass.
+Expanded Worker selection retains a pre-existing committed fixture-hash failure
+(30/31 passed); no evidence bytes or expected hashes changed. See implementation
+report for the independent runtime reproduction and verification limitations.
+Preserve this file's other owned historical and unfinished slices.
+
 ## Authorized Admin collection parity implementation - 2026-10-06
 
 Status: Complete for P1-P4 local implementation and P5/P6 preparation.

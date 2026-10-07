@@ -43,7 +43,7 @@ manual product review or permanent recovery workflow.
   `completed` remains a processing result; Public visibility stays `not_verified`
   until separate readback establishes it.
 
-Current process version: `2026-10-06-admin-evidence-parity-v3`.
+P1-P4 process at initial local completion: `2026-10-06-admin-evidence-parity-v3`.
 Existing required/optional policies, currency defaults, financial units,
 accuracy/profile receipt versions, authentication, authorization and evidence
 privacy remain in force. Changed proof/parser/chunk code participates in the
@@ -149,3 +149,115 @@ truth and zero incorrect approvals take precedence over coverage scores.
 
 No fresh paid collection, model experiment, deploy, canonical/Public write or
 change to historical review/cutover evidence occurred in this implementation.
+
+
+## Independent API import correction - 2026-10-06
+
+The Product Owner reported `No module named 'pypdf'` during collection. The
+research planner imported the entire Worker parser just to read its version.
+The independent API environment correctly omits the Worker-only PDF library;
+previous parity tests ran in the root Worker environment and masked this defect.
+API startup could succeed because this import occurred only for owned evidence
+with an essential gap. In the actual API virtualenv, the focused pre-fix suite
+reproduced 24 import errors in 36 tests.
+
+Parser name/version now live in a dependency-free shared module; API research,
+Worker parser and Worker service use the same identity. Existing parser exports
+remain compatible, the parser stays v13 and the result-cache fingerprint includes
+the shared version source. No extra dependency, financial policy, acquisition
+budget, provider call or canonical/public write was introduced.
+
+The regression explicitly blocks PDF-library imports and exercises render,
+reparse, current-version and repeated-action decisions in a fresh process.
+After correction, the actual independent API environment passes all 632 tests;
+root Worker parse/cache tests pass all 20. The expanded Worker selection ran 31
+cases: 30 passed and one fixture-hash test failed. Nineteen of the 21 committed
+fixture files have hashes different from `sources.json`; their working bytes
+exactly equal HEAD and this correction changes none of those inputs or hashes.
+This existing fixture-integrity issue is retained as a verification limit rather
+than replacing evidence hashes merely to pass a test. Earlier dated Worker
+suite results do not establish the current committed fixture-integrity state.
+
+Applying this correction to a serving API requires the updated source and its
+normal restart/redeploy. No running process was restarted or deployment claimed.
+
+
+## Actual National Run companion binding correction - 2026-10-06
+
+The fresh ordinary Admin batch `collection_yFMnOp2sZ7_l2R7H` ran process v3 and
+parser v13. Six Runs completed with 17 candidates: one savings approval/current
+Public product and sixteen exclusions. Public snapshot
+`agg_YAvCxt_cLs-h90Nk` completed at 2026-10-07 02:26:35 UTC; list/detail HTTP 200
+readback confirmed HISA 0.55% and CAD 0 monthly base fee. This is an observed live
+result, not the six-product local fixture result.
+
+The four regular cards and Plus GIC failed because captured companion evidence
+was not associated with its named product in the ordinary binding layer:
+
+- Both required PDFs were already captured, parsed with v13 and present in the
+  Run. Thirteen inspected saved raw HTML/PDF objects passed their original
+  SHA-256 checks; the failure is not established as stale deployment, missing
+  source download or bank nondisclosure.
+- Card information records explicitly name ECHO Cashback, Platinum, World and
+  World Elite and disclose annual regular purchase 20.99% / cash 22.49%. The
+  generic token matcher required Mastercard from the detail title, while these
+  literal PDF rows omit that designation. Without parent metadata, it excluded
+  the named annual declarations before deterministic proof/model grounding.
+  Saved model notes then correctly reported that the supplied price evidence
+  lacked its annual basis.
+- The Plus GIC PDF's named annual-unit record was selected, but its empty parent
+  URL failed a later ownership guard. The captured 36-month / 0.30% contract
+  rows therefore could not receive their independent annual basis. A grounding
+  provider timeout also occurred, but cannot explain why existing deterministic
+  named evidence was unusable; no retry or model change is needed for this fix.
+- Earlier `ordinary_inputs` fixtures supplied the linked PDF's parent URL
+  explicitly. They verified downstream services and supplied evidence, while
+  hiding this actual registry/binding gap. The prior direct/Admin parity claim
+  was too broad; processing-path tests were not acquisition/association parity.
+
+The common binder now associates only exact named native financial declarations
+inside current captured official PDFs when a discovery parent is absent. The
+existing name normalization accepts omitted general card designations; distinct
+World/World Elite product names remain distinct. Each applicable record keeps
+its actual document, selected snapshot, parsed document, chunk and source URL.
+No generic issuer agreement, shared number or neighbouring name becomes proof.
+Bank/country/language/origin and exact financial meaning gates remain unchanged.
+Shared instructions match this behavior. Current process version is
+`2026-10-06-named-companion-binding-v4`; parser stays v13 and service/prompt code
+changes invalidate the ordinary grounding input fingerprint.
+
+Verification:
+
+- Before the fix, the new source-backed missing-parent regression failed for all
+  five expected products. Afterward both regressions passed, including different
+  exact owner/bank/country/language exclusions. No input parent is prefilled.
+- Replayed the exact latest Run registry and selected stored chunks through
+  ordinary extraction artifact loading, normalization and validation. Production
+  origin SELECTs, taxonomy and routing-policy SELECTs executed against the actual
+  database in an explicitly read-only transaction; only SQL transport was adapted
+  from psql variables to bound psycopg parameters. All six priorities pass
+  `auto_validated` with complete essentials and same-evidence optional conditions.
+  No source metadata or origin mapping was manually supplied to make this pass.
+- Real resolved-origin counts are 3 for each regular card, 10 for Plus and 7 for
+  HISA. Card fees remain 30/70/115/150; regular purchase/cash rates 20.99/22.49;
+  Plus remains 0.30%, 36 months, issue-anniversary redemption with full payout
+  conditions; HISA remains 0.55%, zero base monthly fee and calculation/payment
+  conditions. No inference of missing financial facts or generalized free costs.
+- Independent API full suite: 632 tests pass. Worker full suite: 810 tests run,
+  809 pass and the previously recorded committed-fixture hash test fails. Actual
+  inspected live objects have verified source hashes; fixture hashes were not
+  rewritten. Standard changed-document checks and git diff --check pass.
+
+Private reproducible receipts/scripts are in ignored
+`tmp/national-admin-live-parity-20261006`. Provider functions are disabled and
+output artifacts are temporary filesystem objects. No fresh official capture,
+paid provider call, Run/candidate/canonical mutation, deployment/restart or
+additional Public publication occurred in this corrective slice. The live
+catalogue remains one National product; the six automatic passes are a verified
+same-current-input replay, not six newly published products. Serving release and
+normal live readback remain separate gates.
+
+Serving health readback after the correction returned HTTP 200, status ok and
+`2026-10-06-named-companion-binding-v4`. The API reload was observed, not an
+agent-issued restart/deployment. This establishes its reported loaded process
+version; it does not establish a fresh full Admin Run or new Public publication.

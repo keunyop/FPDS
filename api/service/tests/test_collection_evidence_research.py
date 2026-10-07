@@ -3,6 +3,8 @@ from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
+import subprocess
+import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -396,6 +398,39 @@ class EvidenceAcquisitionActionTests(unittest.TestCase):
         for html in ('<p>Contact us for a price.</p>', '<p>Fee schedule ${p1.url|link:"Apply"}</p>',
                      '<script>var rate = "${rate}";</script><p>Apply online</p>'):
             self.assertEqual(self.plan(html=html)['actions'], [])
+
+    def test_planner_actions_do_not_import_worker_pdf_libraries(self):
+        script = r"""
+import importlib.abc
+import runpy
+import sys
+from dataclasses import replace
+from pathlib import Path
+sys.path.insert(0, str(Path('api/service').resolve()))
+class BlockPdfLibraries(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split('.')[0] in {'pypdf', 'PyPDF2'}:
+            raise ModuleNotFoundError('Worker-only PDF library imported: ' + fullname)
+sys.meta_path.insert(0, BlockPdfLibraries())
+fixtures = runpy.run_path('api/service/tests/test_collection_evidence_research.py')
+helper = fixtures['EvidenceResearchTests']()
+s = fixtures['source']()
+item, page = fixtures['evidence'](s, html='<p>Monthly fee ${product.monthlyFee}</p>')
+render = helper.plan(inputs=[item], pages=[page])['actions'][0]
+assert render['kind'] == 'render_html'
+from worker.pipeline.fpds_parse_chunk.version import PARSER_VERSION
+assert render['parser_version'] == PARSER_VERSION
+reparse = helper.plan(inputs=[item], pages=[replace(page, parser_version='old-parser')])['actions'][0]
+assert reparse['kind'] == 'reparse_snapshot'
+assert reparse['parser_version'] == PARSER_VERSION
+assert helper.plan(inputs=[item], pages=[replace(page, parser_version=PARSER_VERSION)])['actions'][0]['kind'] == 'render_html'
+assert helper.plan(inputs=[item], pages=[page], attempted_actions={render['action_id']})['actions'] == []
+assert 'worker.pipeline.fpds_parse_chunk.parser' not in sys.modules
+assert 'pypdf' not in sys.modules
+"""
+        result = subprocess.run([sys.executable, '-X', 'utf8', '-c', script], cwd=ROOT,
+                                capture_output=True, text=True, encoding='utf-8', timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_parse_version_change_reprocesses_owned_snapshot_once(self):
         s = source(); item, page = evidence(s, html='<p>Fee ${product.fee}</p>')

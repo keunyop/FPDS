@@ -11,9 +11,8 @@ from pypdf import PdfReader
 from worker.discovery.fpds_discovery.discovery import extract_structured_text_sections
 
 from .models import ParsedArtifact, ParsedSegment
+from .version import PARSER_NAME, PARSER_VERSION
 
-PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v13"
 _WHITESPACE_RE = re.compile(r"[ \t\r\f\v]+")
 
 

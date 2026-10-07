@@ -1,5 +1,63 @@
 # FPDS Development Journal
 
+## 2026-10-06 - Actual National Admin parity failure and named companion fix
+
+- Product Owner challenged the difference between the six local passes and the
+  fresh ordinary batch's one approval/16 exclusions. The batch ran v3/parser v13;
+  both required PDFs were captured and thirteen examined raw objects have their
+  original SHA-256 verified. Latest Public snapshot/list/detail show only HISA,
+  with the latest approved version and completed refresh; no new publication here.
+- Found the first actual divergence in captured-companion binding. Card token
+  matching required Mastercard absent from literal PDF rate-row owners. Plus's
+  named annual basis was selected but unusable without a parent association.
+  Prior fixtures prefilled that parent and masked the production registry gap.
+  A Plus provider timeout is also recorded, but existing source proof must work
+  independently of that response. Corrected the earlier breadth of parity claims.
+- Added source-backed missing-parent regression before code changes: five expected
+  products failed. Shared binding now accepts only exact named native declarations
+  in captured official PDFs and retains current source/snapshot/chunk origins.
+  Distinct World/World Elite, bank, country and language negatives remain blocked.
+  Shared prompts match; process is `2026-10-06-named-companion-binding-v4`, parser v13.
+- Actual-current-input replay uses immutable Run registries and stored chunks,
+  ordinary artifacts/normalization/validation, production origin SELECTs and actual
+  taxonomy/routing policy in a read-only DB transaction. Six priorities now pass
+  automatic validation with all financial essentials/conditions; no manual parent
+  injection, provider calls, fresh captures or candidate/canonical/Public writes.
+- Verification: two new regressions pass; independent API full 632 tests pass;
+  full Worker 810 run has 809 passes and the existing committed-fixture hash
+  failure. Live examined objects pass their raw source hashes. Changed-document
+  standard harness and git diff --check pass. Existing fixture history is preserved.
+- [Detailed actual failure, correction and verification limits](admin-collection-parity-implementation-2026-10-06.md#actual-national-run-companion-binding-correction---2026-10-06).
+  Private evidence/replay: tmp/national-admin-live-parity-20261006. No deployment
+  or restart performed. Read-only serving health already reports v4 with HTTP
+  200 after the source correction. This verifies API process loading, not a new
+  full Admin Run. Next: normal live acceptance; do not present the six replay
+  passes as six live approved/public products.
+
+## 2026-10-06 - Fix independent API pypdf import failure
+
+- Product Owner reported a collection-time missing pypdf module. Reproduced in
+  the actual API virtualenv: essential-gap research imported the Worker PDF
+  parser solely for PARSER_VERSION; 24 errors in the 36-case focused suite.
+  Prior root-Worker environment checks masked this boundary defect.
+- Added dependency-free shared parser identity; API planning and Worker parsing
+  now use the same name/version without loading PDF libraries into the API.
+  Preserved parser exports/version v13 and added version.py to the grounding
+  fingerprint. No dependency installation, financial-policy or data change.
+- Added a fresh-process regression explicitly denying PDF-library imports while
+  planning render/reparse/current-version/repeated-action cases. Updated API and
+  Worker environment guidance and the [implementation report](admin-collection-parity-implementation-2026-10-06.md#independent-api-import-correction---2026-10-06).
+- Verification: independent API focused 37 cases and full 632 cases pass; root
+  Worker parser/cache 20 cases pass. Expanded Worker 31-case selection has 30
+  passes and one pre-existing fixture-hash failure: 19 of 21 retained input hashes
+  differ from the manifest while all those file bytes exactly equal committed
+  HEAD. This slice changes no fixture or expected hash. The limitation is
+  recorded rather than silently replacing official-evidence fingerprints.
+- Changed-document harness links/prerequisites and git diff --check pass.
+  No paid call, new collection, canonical/Public write or process restart/deploy.
+  Next: apply corrected source to the serving API and independently reconcile
+  retained fixture provenance before claiming current full Worker parity.
+
 ## 2026-10-06 - Admin collection parity P2/P4 completion and P5/P6 preparation
 
 - Completed bounded same-page render/current-snapshot reparse on the ordinary

@@ -60,6 +60,9 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 )
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "A captured official PDF without discovery parent metadata applies only through its complete native "
+    "declaration explicitly naming the same product, with exact current document/snapshot/chunk origins. "
+    "Generic issuer terms, shared words, identical values and other product names cannot prove applicability. "
     "Named regular card rate rows keep purchase and cash-advance columns distinct and retain default/payment "
     "conditions. The same full labelled proof preserves optional cash rates through normalization; "
     "a purchase-only fallback cannot supply another column. "

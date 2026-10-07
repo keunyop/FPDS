@@ -2,7 +2,7 @@
 
 ## Ordinary Admin evidence parity - 2026-10-06
 
-Process `2026-10-06-admin-evidence-parity-v3` and parser v13 preserve owned
+Process `2026-10-06-named-companion-binding-v4` and parser v13 preserve owned
 literal values, exact fee/term roles and complete financial records through
 actual chunk/artifact storage and automatic gates. Essential gaps may trigger
 one same-page render or a current-snapshot/version reparse. Existing URL/model
@@ -12,6 +12,17 @@ only an exact already-successful current-Run selection. No manual product review
 Private Run receipts distinguish field omission/loss, automatic validation,
 canonical promotion and projection launch; Public visibility requires readback.
 [Implementation, regressions and separate release acceptance](../docs/00-governance/admin-collection-parity-implementation-2026-10-06.md).
+
+Parser identity is shared through [version.py](pipeline/fpds_parse_chunk/version.py),
+a dependency-free module usable by API acquisition planning. The actual parser
+still requires the root Worker `pypdf` dependency. Parser/version/service files
+all participate in the grounding cache fingerprint; the version remains v13.
+
+Current captured official PDFs lacking discovery parent metadata bind only
+through exact named native financial declarations. The actual latest National
+Run exposed this missing association; the same saved input/real DB-origin replay
+now passes six priorities. This is a code/replay result; live National Public
+still contains one product until a separately scoped serving/data acceptance.
 
 ## Native information records and Manulife publication - 2026-10-06
 
