@@ -133,6 +133,8 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     from worker.native_rate_tables import native_financial_sections
     sections.extend(_RawSegment(kind, owner, None, record)
                     for kind, owner, record in native_financial_sections(soup))
+    from worker.native_deposit_records import deposit_table_records
+    sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in deposit_table_records(soup))
     sections.extend(_rate_table_evidence_sections(soup))
     sections.extend(_linked_financial_table_cells(soup))
     full_text, segments = _finalize_segments(sections)

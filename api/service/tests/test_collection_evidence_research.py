@@ -60,6 +60,27 @@ class EvidenceResearchTests(unittest.TestCase):
             inputs=inputs or [item], captures=pages or [page], attempted_urls=attempted or {s.normalized_url},
             parent_counts=counts if counts is not None else {}, **kwargs)
 
+    def test_owned_native_deposit_group_stops_research_without_pdf_import(self):
+        detail = source(url='https://examplebank.com/ca/guaranteed-investment-certificates', product='gic', name='Guaranteed Investment Certificates')
+        companion = source(url='https://examplebank.com/ca/gic-rates', product='gic',
+            name='Current rates', source_id='rates', role='supporting_html')
+        a, page = evidence(detail, texts=[('Guaranteed Investment Certificates', 'document_heading'), ('Guaranteed Investment Certificates', 'document_title'),
+            ('Guaranteed Investment Certificates', 'section')])
+        quote = 'Short Term Certificates\nTerm\nRate (%)\n30-59 Days\n1.25\nThese deposits are non-redeemable. Interest is calculated per annum.'
+        b, other = evidence(companion, texts=[('/ca/guaranteed-investment-certificates', 'captured_product_link'),
+            (quote, 'named_deposit_schedule')])
+        b = replace(b, candidates=[b.candidates[0], replace(b.candidates[1], anchor_value='Short Term Certificates')])
+        result = self.plan(detail, inputs=[a, b], pages=[page, other], model=MagicMock())
+        self.assertEqual(result['sources'], [], result['diagnostics'])
+        self.assertEqual(result['diagnostics'][0]['missing_fields'], [])
+        self.assertEqual(result['diagnostics'][0]['resolved_variant_count'], 1)
+        self.assertEqual(result['diagnostics'][0]['stop_reason'], 'no_essential_gap')
+        incomplete = replace(b, candidates=[b.candidates[0], replace(b.candidates[1],
+            evidence_excerpt=quote.replace('These deposits are non-redeemable. ', ''))])
+        assessment = assess_captured_essentials(_bind_grounding_evidence([a, incomplete])[0], run_id='run')
+        self.assertTrue(assessment['missing_fields'])
+        self.assertEqual(assessment['resolved_variant_count'], 0)
+
     def test_required_rate_reserves_observed_current_rates_ahead_of_agreement(self):
         s = source(url='https://examplebank.com/ca/credit-line', product='line-of-credit', name='Example Credit Line')
         html = '<a href="/current-rates.html">Current rates</a><a href="/line-of-credit-agreement.pdf">Line of credit agreement</a>'

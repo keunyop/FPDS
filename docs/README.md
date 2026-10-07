@@ -1,8 +1,10 @@
 # FPDS Docs Map
 
+Current deposit-proof correction: [Oaken generic tables, actual-input regressions and four verified publications](00-governance/oaken-generic-collection-corrections-2026-10-07.md).
+
 Current collection implementation: [Admin evidence parity and release gates](00-governance/admin-collection-parity-implementation-2026-10-06.md).
 
-Status: Active navigation index · Updated: 2026-10-06
+Status: Active navigation index · Updated: 2026-10-07
 
 Use this map to find the current contract or operating document. Dated reports
 record historical results; product counts and test totals are not live status.
@@ -13,6 +15,7 @@ Archived documents retain traceability and do not override current policy.
 | Read in order | Purpose |
 |---|---|
 | [Handover guide](../descent/README.md) | Steps, owner responsibilities and acceptance gates |
+| [Admin developer guide (Korean draft)](../descent/FPDS_Admin_개발_가이드.md) · [AI skills](../descent/ai-skills/README.md) | Local setup, code entrypoints, implementation workflows and portable SKILL.md package |
 | [Scope and source inventory](../00-Scope/scope.md) | Included source, transfer exclusions and document ownership |
 | [Admin user manual](../descent/FPDS_Admin_사용자_매뉴얼.md) | Current operator workflow |
 | [Operations handbook](../descent/05-operations-handbook.md) | Daily checks, incidents and security/restore boundaries |
@@ -32,7 +35,7 @@ Latest read-only collection assessment: [National Bank direct evidence opportuni
 
 Latest ordinary-process verification: [essential-evidence research redesign and runtime limits](00-governance/ordinary-collection-redesign-2026-10-05.md). This local result is distinct from direct data publication.
 
-Latest collection result: [Manulife generic information-record corrections and five verified publications](00-governance/manulife-generic-collection-corrections-2026-10-06.md). Previous result: [Laurentian generic native-proof corrections and three verified publications](00-governance/laurentian-generic-collection-corrections-2026-10-05.md). Previous result: [FAIRSTONE / FNBC / HAVENTREE shared corrections and direct publication](00-governance/three-bank-generic-collection-corrections-2026-10-05.md). Previous result: [DESJARDINS / EQBANK](00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+Latest collection result: [Oaken generic deposit-proof corrections and four verified publications](00-governance/oaken-generic-collection-corrections-2026-10-07.md). Previous result: [Manulife generic information-record corrections and five verified publications](00-governance/manulife-generic-collection-corrections-2026-10-06.md). Previous result: [Laurentian generic native-proof corrections and three verified publications](00-governance/laurentian-generic-collection-corrections-2026-10-05.md). Previous result: [FAIRSTONE / FNBC / HAVENTREE shared corrections and direct publication](00-governance/three-bank-generic-collection-corrections-2026-10-05.md). Previous result: [DESJARDINS / EQBANK](00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
 
 ## Resume development
 

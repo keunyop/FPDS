@@ -1,0 +1,58 @@
+[
+  {
+    "url": "https://www.oaken.com/en-ca/oaken-savings-account/",
+    "final_url": "https://www.oaken.com/en-ca/oaken-savings-account/",
+    "fetched_at": "2026-10-07T13:03:16.305401+00:00",
+    "content_type": "text/html",
+    "sha256": "0c1e5cfdaa4f66d0dd66069b72588b48194bcdd4f2c5f89a76f530fc69a050c0",
+    "file": "savings.html",
+    "text_file": "current-88b97f01b93d.txt",
+    "parsed_file": "current-88b97f01b93d.parsed.txt",
+    "status": 200,
+    "kind": "savings",
+    "type": "savings",
+    "name": "Savings account"
+  },
+  {
+    "url": "https://www.oaken.com/en-ca/savings-account-rates/",
+    "final_url": "https://www.oaken.com/en-ca/savings-account-rates/",
+    "fetched_at": "2026-10-07T13:03:16.185721+00:00",
+    "content_type": "text/html",
+    "sha256": "f095f45d6bf98ebc42dadaa935eba1c390d647c7faba4313daa8aaa925c8759c",
+    "file": "savings-rates.html",
+    "text_file": "current-7950e153be67.txt",
+    "parsed_file": "current-7950e153be67.parsed.txt",
+    "status": 200,
+    "kind": "savings-rates",
+    "type": "savings",
+    "name": "Savings account rates"
+  },
+  {
+    "url": "https://www.oaken.com/en-ca/gic-rates/",
+    "final_url": "https://www.oaken.com/en-ca/gic-rates/",
+    "fetched_at": "2026-10-07T13:03:17.784444+00:00",
+    "content_type": "text/html",
+    "sha256": "0ad3c4e5edf967fc1e6484f775e40bcdf28f33646f24d29e330f1d61875392af",
+    "file": "gic-rates.html",
+    "text_file": "current-e880dd514c97.txt",
+    "parsed_file": "current-e880dd514c97.parsed.txt",
+    "status": 200,
+    "kind": "gic-rates",
+    "type": "gic",
+    "name": "Our GIC rates"
+  },
+  {
+    "url": "https://oaken.com/en-ca/guaranteed-investment-certificate/",
+    "final_url": "https://oaken.com/en-ca/guaranteed-investment-certificate/",
+    "fetched_at": "2026-10-07T13:03:17.758513+00:00",
+    "content_type": "text/html",
+    "sha256": "86f3bd8e44305363ffa85a46455d3b5d1931d7e5e283bf1af22328c2214357b8",
+    "file": "gic.html",
+    "text_file": "current-fc0f4ca9abc4.txt",
+    "parsed_file": "current-fc0f4ca9abc4.parsed.txt",
+    "status": 200,
+    "kind": "gic",
+    "type": "gic",
+    "name": "Guaranteed Investment Certificates (GICs)"
+  }
+]

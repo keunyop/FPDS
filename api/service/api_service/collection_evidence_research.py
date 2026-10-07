@@ -5,7 +5,7 @@ ordinary snapshot/parse/extraction/normalization/promotion gates in the same run
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from hashlib import sha256
 from pathlib import Path
 import re
@@ -70,30 +70,61 @@ def assess_captured_essentials(item: ExtractionInput, *, run_id: str) -> dict:
     policy = metadata_collection_fields(ctx.source_metadata, product_type=product_type, country_code=ctx.country_code)
     fields = list(dict.fromkeys([*policy['required_fields'], *policy['optional_fields']]))
     _, collected, _, unavailable = collect_captured_fields(extraction_input=item, field_names=fields, run_id=run_id)
-    payload, mappings = {}, {}
-    for f in collected:
-        value = f.candidate_value
-        if f.value_type == 'decimal':
-            try:
-                value = float(value)
-            except (ValueError, TypeError):
-                continue
-        payload[f.field_name] = value
-        mappings[f.field_name] = {**f.field_metadata, 'normalized_value': value,
-            'evidence_chunk_id': f.evidence_chunk_id,
-            'official_evidence_quote': f.field_metadata.get('evidence_quote')}
-    record = {'bank_code': ctx.bank_code, 'country_code': ctx.country_code,
-        'product_type': product_type, 'product_name': payload.get('product_name', ''),
-        'currency': payload.get('currency', ''), 'candidate_payload': payload,
-        'field_mapping_metadata': mappings}
+    from worker.pipeline.fpds_normalization.grounded_product_expansion import expand_grounded_product_inputs
+    from worker.pipeline.fpds_normalization.models import NormalizationInput, NormalizationExtractedField
+
+    # Acquisition and normalization must inspect the same complete named
+    # products. This is only a missing-proof diagnostic; publication still
+    # requires the normal stored-origin, taxonomy and routing gates.
+    captured = NormalizationInput(
+        source_id=ctx.source_id, source_document_id=ctx.source_document_id,
+        snapshot_id=ctx.snapshot_id, parsed_document_id=ctx.parsed_document_id,
+        extraction_model_execution_id='', extracted_storage_key='', metadata_storage_key=None,
+        bank_code=ctx.bank_code, country_code=ctx.country_code, source_type=ctx.source_type,
+        source_language=ctx.source_language, source_metadata=ctx.source_metadata,
+        schema_context={'product_type': product_type},
+        extracted_fields=[NormalizationExtractedField(**asdict(f)) for f in collected],
+        evidence_links=[], runtime_notes=[],
+    )
+    variants = expand_grounded_product_inputs(captured)
+    name = next((f for f in collected if f.field_name == 'product_name'), None)
+    raw_variants = name.field_metadata.get('grounded_product_variants') if name else None
+    # A rejected variant cannot disappear merely to stop essential research.
+    complete_expansion = bool(variants and len(variants) == len(raw_variants or []))
+    items = variants if complete_expansion else [captured]
     evidence = [{'evidence_chunk_id': c.evidence_chunk_id, 'evidence_excerpt': c.evidence_excerpt,
                  'source_url': c.retrieval_metadata.get('source_url'),
                  'anchor_type': c.anchor_type, 'anchor_value': c.anchor_value}
                 for c in item.grounding_candidates]
-    _, accuracy = sanitize_candidate(record, source_metadata=ctx.source_metadata, evidence=evidence)
-    return {'missing_fields': accuracy['missing_fields'], 'reasons': accuracy['reasons'],
-            'verified_fields': accuracy['verified_fields'], 'omitted_fields': accuracy['omitted_fields'],
-            'unavailable': unavailable}
+    assessments = []
+    for product in items:
+        payload, mappings = {}, {}
+        for f in product.extracted_fields:
+            value = f.candidate_value
+            if f.value_type == 'decimal':
+                try:
+                    value = float(value)
+                except (ValueError, TypeError):
+                    continue
+            payload[f.field_name] = value
+            mappings[f.field_name] = {**f.field_metadata, 'normalized_value': value,
+                'evidence_chunk_id': f.evidence_chunk_id,
+                'official_evidence_quote': f.field_metadata.get('evidence_quote')}
+        record = {'bank_code': ctx.bank_code, 'country_code': ctx.country_code,
+            'product_type': product_type, 'product_name': payload.get('product_name', ''),
+            'currency': payload.get('currency', ''), 'candidate_payload': payload,
+            'field_mapping_metadata': mappings}
+        _, accuracy = sanitize_candidate(record, source_metadata=product.source_metadata, evidence=evidence)
+        assessments.append(accuracy)
+    return {
+        'missing_fields': sorted({f for a in assessments for f in a['missing_fields']}),
+        'reasons': list(dict.fromkeys(r for a in assessments for r in a['reasons'])),
+        'verified_fields': sorted(set.intersection(*(set(a['verified_fields']) for a in assessments))),
+        'omitted_fields': {k: v for a in assessments for k, v in a['omitted_fields'].items()},
+        'unavailable': unavailable,
+        'resolved_variant_count': len(variants) if complete_expansion else 0,
+    }
+
 
 
 def _link_relevance(*, product_type, url, label, missing):

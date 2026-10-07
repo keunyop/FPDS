@@ -1,5 +1,89 @@
 # FPDS Development Journal
 
+## 2026-10-07 - Oaken actual-input correction and four verified publications
+
+- Product Owner requested latest Oaken diagnosis, direct official collection
+  without Admin API, generic corrections and publication. Original Savings/GIC
+  Runs (04:06 UTC, v4) captured all eleven selected sources but rejected both
+  candidates, with no manual reviews. Verified all preserved capture hashes and
+  acquired four current official pages directly; no provider/paid retry/API
+  collection calls. Pricing proof existed in previously skipped CMS sibling
+  tables; scalar percent-header units and blanket account fees were mishandled.
+- Added regressions before widening acceptance. Parser v14 preserves complete
+  named rows/groups/payment columns and observed detail links. Real latest
+  metadata reproduced another failure: generic Products SEO, acronym/line-break
+  main title and numeric H1 price. Shared identity keeps the actual name/route
+  proof and all registered/cashable qualifiers; two named headings still reject.
+  Variant metadata survives new product-name creation and ordinary artifacts;
+  evidence keeps real companion origins. Day ranges/month/year terms are literal,
+  incomplete/qualified grids and cashable consequences still fail closed.
+- Shared normalization keeps header-owned annual scalars and literal optional
+  calculation/payment phrases. Complete unconditional no-fees wording proves
+  only the applicable account fee; later conditions and linked notes block.
+  Money sentence punctuation no longer loses a proven $1,000 deposit. Essential
+  acquisition reuses the shared sibling expansion and sanitizer. Prompts/cache
+  and process v5 align; financial/security gates and existing budgets unchanged.
+- Bounded direct operation created two separate Runs and four candidates.
+  Production stored-origin, taxonomy/routing and automatic promotion pass;
+  rollback rehearsal restored canonical/versions/refresh exactly before commit.
+  Normal CA refresh completed; actual Public API/detail/site checks verify Savings,
+  Long Term GICs, Short Term GICs and Short Term GICs (RSP). CA 84→88; US 5 unchanged.
+  Twenty-four financial field links and financial terms match current capture
+  offsets/origins; no private evidence is exposed. Original two Runs/candidates,
+  eleven Run sources, 39 documents, 301 snapshots and 1,468 version facts remain;
+  one prior Savings version normally superseded. Other 442 canonical rows unchanged.
+  Concurrent RBC Runs were observed and preserved; no runtime restart/deploy.
+- Verification: 19 focused tests pass; independent API 633 pass;
+  Worker full suite: 823 run, 822 pass; the existing committed National
+  fixture-hash mismatch is the only failure. Historical fixtures/hashes were
+  preserved. Final-code stored-origin read-only replay passes all
+  four. Changed-document standard references/prerequisites/whitespace (eight files), foundation baseline and git diff --check pass.
+- [Diagnosis, verified publications and limits](oaken-generic-collection-corrections-2026-10-07.md).
+  Private receipts/before-images: tmp/oaken-improvement-20261007; applied operation
+  oaken-direct-20261007. No permanent recovery interface or manual review added.
+  Serving health still reports v4; the v5/v14 API/Worker release is separate from
+  completed direct publication. Cashable/qualified registered long-term grids
+  remain conservatively unpromoted until their full essential proof is resolved.
+
+## 2026-10-06 - Korean Admin developer handover and portable AI skills
+
+- Product Owner requested a Markdown development handover that enables the
+  receiving developer to work through AI, first in Korean before English.
+  Added the [developer guide](../../descent/FPDS_Admin_개발_가이드.md) with
+  architecture/source entrypoints, isolated local setup, current operator and
+  security boundaries, financial evidence/DB change workflows, relevant tests
+  and dated release/fixture limitations. This complements the existing operator
+  and cutover manuals without changing their acceptance gates.
+- Added [AI skill selection and usage guide](../../descent/ai-skills/README.md)
+  and five portable SKILL.md files: Admin UI, API/security, collection evidence,
+  database changes, verification/handover. Instructions resolve source paths
+  from the repository root after transfer; the guide provides inputs, outputs,
+  invocation examples and authority/cost boundaries. No automatic registration
+  or user-wide installation occurred. Current .agents/skills discovery locations
+  were checked against the fetched official OpenAI Build skills documentation.
+- Added navigation in root/docs/descent READMEs and the source-transfer inventory.
+  Existing goal ownership/history is preserved. No runtime, harness implementation,
+  dependency/lockfile, deployment, paid collection, account, schema or canonical/
+  Public data change occurred; English translation remains a subsequent request.
+- Verification: changed-document standard Markdown references and harness
+  prerequisites; UTF-8/newline/whitespace/fences; five skill names/frontmatter and
+  task scope; source entrypoints; nine PowerShell snippets parsed without execution;
+  Admin command names checked against package.json; foundation baseline and
+  git diff --check pass. Application tests/builds and live services were not run
+  for this documentation-only slice. Initial targeted checks hit PowerShell
+  execution-policy and temporary-script encoding/path issues; the standard Bypass
+  invocation with UTF-8 BOM on temporary PowerShell scripts resolved them.
+- Official skill-creator quick_validate.py was attempted but could not import
+  PyYAML. No package was installed. Independent checks validate this package's
+  simple two-scalar YAML frontmatter and Markdown structure; they are not claimed
+  as the official validator or independent behavioral evaluation.
+- Full repo-doctor fails on the existing ignored copied README at
+  tmp/public-top5-20261004/app/README.md and its missing relative collection-pilot
+  link. Changed documents pass separately; that unrelated artifact is preserved.
+  Full report-only cleanup audit was started and stopped after 301 seconds; no completed whole-workspace audit is claimed. Scoped standard link/prerequisite/whitespace checks pass for all 13 changed documents.
+  Next: use the Korean guide for an actual scoped development task; translate the
+  accepted content into English while preserving H01-H12, paths and identifiers.
+
 ## 2026-10-06 - Actual National Admin parity failure and named companion fix
 
 - Product Owner challenged the difference between the six local passes and the

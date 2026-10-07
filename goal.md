@@ -1,5 +1,76 @@
 # Admin pre-handover review and fixes
 
+## Oaken current evidence, generic correction and publication - 2026-10-07
+
+Status: Complete for diagnosis, shared code correction and direct publication.
+Preserve every earlier goal and its independent ownership.
+Objective: Diagnose latest Oaken results against current official evidence, fix
+shared demonstrated defects and publish only current automatically valid products.
+Scope: Read-only Run/evidence diagnosis; bounded official acquisition; generic
+source-backed regressions; shared Worker/API fixes and aligned instructions;
+one-off ordinary normalization/validation/promotion/CA refresh and Public readback.
+Exclusions: Admin API collection, manual product review, weaker essentials, new
+countries/types, permanent recovery features, paid retries, unrelated canonical
+changes and runtime deployment/restarts without a demonstrated need.
+Acceptance:
+- [x] Account for latest Oaken targets, process and exact exclusion reasons.
+- [x] Compare official proof with preserved inputs and reproduce shared defects.
+- [x] Verify fixes with positive/boundary/failure cases across banks/product types
+      and proportionate affected-runtime suites.
+- [x] Publish only current proven products through ordinary automatic gates;
+      preserve history/unrelated data and verify actual Public API/site.
+- [x] Update report/journal/contracts, review diff and goal, pass git diff --check.
+Verification: exact current source hashes/financial records, normal stored origins,
+Worker/API regressions, scoped before-images/rollback rehearsal and Public readback.
+
+
+Outcome: original v4 Runs rejected both candidates despite eleven successful
+captures. Four current official pages and actual recent metadata reproduced
+shared DOM/unit/identity/artifact/diagnostic losses. v5/v14 corrections pass
+thirteen deposit and nineteen focused multi-bank/type regressions; API 633 pass;
+Worker 823 run has 822 passes and the preserved pre-existing National hash failure.
+Stored-origin automatic validation/promotion and rollback rehearsal completed;
+four products are Public (CA 84→88, US 5 unchanged), with 24 field checks and
+all four site pages verified. Original history and 442 other canonical rows are
+preserved. Final-code stored-origin read-only replay still passes all four.
+Eight changed-document harness checks, foundation baseline and diff check pass.
+No provider/Admin collection API calls, schema/UI change, runtime deployment or
+restart. Serving reports v4; future Admin use requires the separate v5/v14
+API/Worker release. Keep this shared goal file for earlier unresolved ownership.
+
+## Independent slice: Korean Admin developer handover and AI skills - 2026-10-06
+
+Status: Complete for the Korean development guide and portable AI skills. Preserve all previous goal sections and unresolved ownership.
+Objective: Write a source-grounded Korean Markdown developer handover that lets
+the receiving developer continue FPDS Admin development through AI, and provide
+portable task-specific skills with usage explanations.
+Scope: Admin development guide, repository-contained skill package, handover/docs
+navigation and development journal. Read relevant runtime/security/data/UI
+contracts and source maps to verify instructions.
+Exclusions: runtime changes, dependency installation, live collection/model calls,
+canonical/database/account writes, deployment, expanded product scope and English
+translation in this slice. Do not change operational handover acceptance.
+Acceptance:
+- [x] Explain architecture, local setup, code entrypoints, current product/security
+      boundaries, change workflows, relevant tests and known handover limitations.
+- [x] Deliver usable SKILL.md files and explain selection, invocation, portability,
+      input/output and authority boundaries in Korean.
+- [x] Verify commands/paths against source, local Markdown links, UTF-8, skill
+      structure, repository documentation checks and git diff --check.
+- [x] Update navigation/journal, inspect final diff and re-read this shared goal.
+Verification: read-only repository inspection; skill-creator validator; existing
+documentation harness without dependency installs/builds or live side effects.
+
+Outcome: Korean guide with H01-H12 and five portable skills/usage examples
+completed and linked from handover/source/docs navigation. Source paths and
+commands reviewed; 13 changed-document links/prerequisites/whitespace and
+UTF-8/structure checks, nine PowerShell snippet parses, foundation baseline and
+diff check pass. Official skill validator is unavailable without PyYAML; five
+skills pass independent simple-frontmatter checks. Existing ignored-tmp broken
+link blocks full repo-doctor; full cleanup audit was stopped after 301 seconds.
+No runtime/data/deployment/install or English translation performed. Journal
+records exact limits; retain this shared goal for earlier unresolved ownership.
+
 ## Actual National Admin parity failure investigation - 2026-10-06
 
 Status: Complete for actual diagnosis and shared correction; fresh live approval/publication remains open.

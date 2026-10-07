@@ -7,7 +7,7 @@ from hashlib import sha256
 import json
 import re
 from typing import Any
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from worker.pipeline.fpds_ai_runtime import (
     configured_model_id,
@@ -481,6 +481,18 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                     and c not in named)
                 if own_url in {_canonical_official_source_url(u) for u in parents}:
                     parent = own_url
+                linked_detail = any(c.anchor_type == "captured_product_link"
+                    and _canonical_official_source_url(urljoin(url, c.evidence_excerpt)).replace('://www.', '://').rstrip('/') == own_url.replace('://www.', '://').rstrip('/')
+                    and c.source_document_id == ctx.source_document_id and c.source_snapshot_id == ctx.snapshot_id
+                    and c.parsed_document_id == ctx.parsed_document_id and c.bank_code == ctx.bank_code
+                    and c.country_code == ctx.country_code and c.source_language == ctx.source_language
+                    for c in companion.candidates)
+                deposit_anchors = ({"named_deposit_rate", "named_deposit_fee"} if _infer_product_type(context) == "savings"
+                    else {"named_deposit_schedule"} if _infer_product_type(context) == "gic" else set())
+                linked_native = [c for c in companion.candidates if linked_detail and c.anchor_type in deposit_anchors]
+                if linked_native:
+                    parent = own_url
+                    named.extend(c for c in linked_native if c not in named)
                 if parent != own_url and not named:
                     continue
                 # Include sibling legal chunks only inside the same selected
@@ -508,18 +520,32 @@ def _captured_native_product_title(context, candidates):
     # Literal H1 ownership and independently corroborating SEO/URL tokens,
     # not confidence or mutable metadata alone, establish the native name.
     from worker.native_information_records import name_key, names_match
+    def route_tokens(value):
+        # Compare a literal full name with its route without requiring the
+        # parenthetical spelling of an acronym also present in the full name.
+        # A qualifier (TFSA, cashable, etc.) is never discarded this way.
+        match = re.fullmatch(r"(.+?) \(([A-Z]{2,8}s?)\)", value)
+        if match:
+            initials = ''.join(w[0] for w in re.findall(r"[A-Za-z]+", match[1]))
+            if match[2].removesuffix('s') == initials.upper():
+                value = match[1]
+        return {t.removesuffix('s') if len(t) > 4 else t for t in name_key(value).split()}
     native_heads = [c for c in candidates if c.anchor_type == "document_heading"
         and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
         and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
         and c.country_code == context.country_code and c.source_language == context.source_language]
+    # CMS widgets sometimes style an isolated price as H1. It is financial
+    # text, not a second product identity. Two distinct named H1s still fail.
+    native_heads = [c for c in native_heads if not re.fullmatch(
+        r"(?:[$€£]\s*)?\d+(?:[,.]\d+)*\s*%?", _normalize_text(c.evidence_excerpt))]
     if len(native_heads) == 1:
         literal = _normalize_text(native_heads[0].evidence_excerpt)
-        native_tokens = set(name_key(literal).split()) - {"the", "bank", "card", "cards", "account", "accounts", "r", "tm"}
+        native_tokens = route_tokens(literal) - {"the", "bank", "card", "cards", "account", "accounts", "r", "tm"}
         captured_titles = [c.evidence_excerpt for c in candidates if c.anchor_type == "document_title"
             and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
             and c.parsed_document_id == context.parsed_document_id]
-        title_tokens = set(name_key(" ".join(captured_titles)).split())
-        url_tokens = set(name_key(urlsplit(url).path).split())
+        title_tokens = route_tokens(" ".join(captured_titles))
+        url_tokens = route_tokens(urlsplit(url).path)
         route_identity = native_tokens - set(name_key(context.bank_code).split())
         family = discovery.get("multi_product_family_overview") is True or "multi_product_family_overview" in discovery.get("page_evidence_reason_codes", [])
         card_price = (_infer_product_type(context) != "credit-card" or any(
@@ -538,7 +564,8 @@ def _captured_native_product_title(context, candidates):
                 and not re.search(r"^(?:get|benefit|plan|choose|compare|discover|find|open)\b", literal, re.I)
                 and not re.search(r"/(?:apply|application|login|calculator|insurance)(?:/|[.-]|$)",urlsplit(url).path,re.I)
                 and not non_product_identity_reason(product_type=_infer_product_type(context),primary_heading=literal,page_title=literal)
-                and any(c.anchor_type == "section" and _normalize_text(c.evidence_excerpt.splitlines()[0]) == literal
+                and any(c.anchor_type == "section" and (_normalize_text(c.evidence_excerpt) == literal
+                    or _normalize_text(c.evidence_excerpt).startswith(literal + " "))
                     for c in candidates if c.evidence_excerpt and c.source_document_id == context.source_document_id
                     and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
                     and c.bank_code == context.bank_code and c.country_code == context.country_code)):
@@ -722,6 +749,10 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                      and c.bank_code == context.bank_code and c.country_code == context.country_code
                      and c.source_language == context.source_language]
     basis_records = list({c.evidence_excerpt: c for c in basis_records}.values())
+    deposit_family_variants = []
+    if _infer_product_type(context) == "gic":
+        from worker.native_deposit_records import deposit_variants
+        deposit_family_variants = deposit_variants(context, candidates, url)
     proposals={}
     for c in candidates:
         own=(c.source_document_id==context.source_document_id and c.source_snapshot_id==context.snapshot_id
@@ -929,6 +960,21 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             term = re.search(r"Available terms range from [^\n.]+[.]?|Choose from [^\n.]+[.]?", quote, re.I)
             if term and re.search(r"\b(?:days?|months?|years?)\b", term[0], re.I):
                 values["term_length_text"] = _normalize_text(term[0])
+        if companion and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url and _infer_product_type(context) == "savings":
+            from worker.native_information_records import names_match
+            from worker.native_deposit_records import named_account_rate
+            if c.anchor_type == "named_deposit_rate" and names_match(c.anchor_value, identity):
+                rate = named_account_rate(quote)
+                if rate is not None:
+                    values["standard_rate"] = rate
+                    method = re.search(r"Savings account interest rates are annualized, (?P<calculation>calculated daily) and (?P<payment>paid monthly)[.]", quote, re.I)
+                    if method:
+                        values["interest_calculation_method"] = method["calculation"]
+                        values["interest_payment_frequency"] = method["payment"]
+            regular_name = re.sub(r"^non[- ]registered\s+", "", str(c.anchor_value), flags=re.I)
+            if c.anchor_type == "named_deposit_fee" and names_match(regular_name, identity):
+                values["monthly_fee"] = 0.0
+                if quote_supports_value("minimum_balance", 0, quote): values["minimum_balance"] = 0.0
         rate_basis = None
         if own and c.anchor_type == "owned_base_fee" and c.anchor_value == identity:
             if quote_supports_value("monthly_fee", 0, quote):
@@ -1044,7 +1090,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 field_metadata={**rate_record.field_metadata,"evidence_quote":term})]
             conflicts.discard("term_length_text")
     variants = next((f.field_metadata.get("grounded_product_variants") for f in fields
-                     if f.field_name == "product_name" and f.field_metadata.get("grounded_product_variants")), None)
+                     if f.field_name == "product_name" and f.field_metadata.get("grounded_product_variants")), None) or deposit_family_variants
     if variants:
         proven = [replace(f, field_metadata={**f.field_metadata, "grounded_product_variants": variants})
                   if f.field_name == "product_name" else f for f in proven]
@@ -5425,7 +5471,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)

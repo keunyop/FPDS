@@ -6,6 +6,8 @@ from typing import Any
 from .models import NormalizationEvidenceLink, NormalizationExtractedField, NormalizationInput
 
 _VARIANT_FIELD_TYPES = {
+    "gic": {"product_name": "string", "term_rate_table": "json", "non_redeemable_flag": "boolean",
+        "minimum_deposit": "decimal", "interest_calculation_method": "string", "interest_payment_frequency": "string"},
     "chequing": {
         "product_name": "string", "currency": "string", "monthly_fee": "decimal", "included_transactions": "integer",
         "additional_transaction_fee": "decimal", "unlimited_transactions_flag": "boolean",
@@ -26,6 +28,7 @@ _VARIANT_FIELD_TYPES = {
     },
 }
 _GROUNDING_METHODS = {
+    "gic": "deterministic_named_deposit_table",
     "chequing": "deterministic_named_product_section",
     "credit-card": "deterministic_sibling_product_block",
     "line-of-credit": "deterministic_sibling_lending_table",
@@ -45,14 +48,15 @@ def expand_grounded_product_inputs(item: NormalizationInput) -> list[Normalizati
     if product_name_field is None or not isinstance(product_name_field.field_metadata, dict):
         return []
     raw_variants = product_name_field.field_metadata.get("grounded_product_variants")
-    if not isinstance(raw_variants, list) or len(raw_variants) < 2:
+    minimum_variants = 1 if product_type == "gic" else 2
+    if not isinstance(raw_variants, list) or len(raw_variants) < minimum_variants:
         return []
     variants = [
         variant
         for value in raw_variants
         if (variant := _valid_variant(value, product_type=product_type)) is not None
     ]
-    if len(variants) < 2:
+    if len(variants) < minimum_variants:
         return []
     return [
         _build_variant_input(
@@ -68,11 +72,12 @@ def expand_grounded_product_inputs(item: NormalizationInput) -> list[Normalizati
 def _valid_variant(value: object, *, product_type: str) -> dict[str, Any] | None:
     if not isinstance(value, dict):
         return None
-    if product_type == "chequing":
+    if product_type in {"chequing", "gic"}:
         records = value.get("field_records")
-        if not isinstance(records, dict) or not {"product_name", "monthly_fee"} <= records.keys():
+        required = {"product_name", "term_rate_table", "non_redeemable_flag"} if product_type == "gic" else {"product_name", "monthly_fee"}
+        if not isinstance(records, dict) or not required <= records.keys():
             return None
-        if not ("unlimited_transactions_flag" in records or {"included_transactions", "additional_transaction_fee"} <= records.keys()):
+        if product_type == "chequing" and not ("unlimited_transactions_flag" in records or {"included_transactions", "additional_transaction_fee"} <= records.keys()):
             return None
         if {"included_transactions", "unlimited_transactions_flag"} <= records.keys():
             return None
@@ -85,7 +90,7 @@ def _valid_variant(value: object, *, product_type: str) -> dict[str, Any] | None
                     or not exact_quote(meta.get("evidence_quote"), row["evidence_text_excerpt"])
                     or not quote_supports_value(name, row.get("candidate_value"), row["evidence_text_excerpt"])):
                 return None
-        required_fields = ("product_name", "monthly_fee")
+        required_fields = ("product_name",) if product_type == "gic" else ("product_name", "monthly_fee")
     else:
         required_fields = (
             ("product_name", "annual_fee", "purchase_interest_rate")
@@ -123,13 +128,13 @@ def _build_variant_input(
     candidate_key = "grounded-" + product_type + "-" + sha256(product_name.casefold().encode("utf-8")).hexdigest()[:16]
     variant_field_types = _VARIANT_FIELD_TYPES[product_type]
     variant_field_names = set(variant_field_types)
-    if product_type == "chequing":
+    if product_type in {"chequing", "gic"}:
         # No family or neighbouring optional facts may leak into a sibling.
         variant_field_names.update(f.field_name for f in item.extracted_fields if f.field_name not in {"product_type", "product_family", "bank_code", "country_code", "source_language"})
     variant_fields = [
         _variant_field(item=item, variant=variant, field_name=field_name, value_type=value_type)
         for field_name, value_type in variant_field_types.items()
-        if field_name in variant and variant[field_name] not in {None, ""}
+        if field_name in variant and variant[field_name] is not None and variant[field_name] != ""
     ]
     variant_links = [
         _variant_evidence_link(item=item, variant=variant, field=field)
@@ -180,7 +185,7 @@ def _resolved_variant_source_metadata(
                 resolved_reasons.append("grounded_product_variants_resolved")
             resolved_discovery[reason_key] = list(dict.fromkeys(resolved_reasons))
         metadata["discovery_metadata"] = resolved_discovery
-    if item.source_metadata.get("product_type") == "chequing" and isinstance(metadata.get("discovery_metadata"), dict):
+    if item.source_metadata.get("product_type") in {"chequing", "gic"} and isinstance(metadata.get("discovery_metadata"), dict):
         metadata["discovery_metadata"].update(primary_heading=product_name, page_title=product_name, product_identity_match=True)
     metadata.update(
         {
@@ -207,8 +212,8 @@ def _variant_field(
         value_type=value_type,
         confidence=0.94,
         extraction_method="deterministic_sibling_product_block",
-        source_document_id=item.source_document_id,
-        source_snapshot_id=item.snapshot_id,
+        source_document_id=str(variant.get("source_document_id") or item.source_document_id),
+        source_snapshot_id=str(variant.get("source_snapshot_id") or item.snapshot_id),
         evidence_chunk_id=str(variant["evidence_chunk_id"]),
         evidence_text_excerpt=str(variant["evidence_text_excerpt"]),
         anchor_type=str(variant.get("anchor_type") or "") or None,
@@ -230,8 +235,8 @@ def _variant_evidence_link(
         candidate_value=str(field.candidate_value),
         evidence_chunk_id=str(field.evidence_chunk_id),
         evidence_text_excerpt=str(field.evidence_text_excerpt),
-        source_document_id=item.source_document_id,
-        source_snapshot_id=item.snapshot_id,
+        source_document_id=field.source_document_id,
+        source_snapshot_id=field.source_snapshot_id,
         citation_confidence=field.confidence,
         model_execution_id=item.extraction_model_execution_id,
         anchor_type=field.anchor_type,

@@ -4,11 +4,11 @@ import re
 from bs4 import BeautifulSoup
 
 _HEADER = re.compile(r"^(?:(?:Annual|Fixed|Variable|Minimum|Interest)\s+)*(?:%\s*)?(?:rate|yield)s?\s*(?:\(%\)|%)?$|^AP[RY]\s*(?:\(%\)|%)?$", re.I)
-_TERM = re.compile(r"^(?:\d+\s*[- ]?\s*(?:days?|months?|years?))$", re.I)
+_TERM = re.compile(r"^\d+(?:\s*[-–]\s*\d+)?\s*[- ]?\s*(?:days?|months?|years?)$", re.I)
 _NUMBER = re.compile(r"^\d+(?:\.\d+)?%?$" )
 
 def rate_schedules(quote, *, annual_only=False):
-    """Read a two-column Term/rate grid copied without unit rewriting.
+    """Read literal Term/rate or explicit interest-payment columns.
 
     Repeated identical responsive copies are harmless; conflicting repeats
     are not proof. Qualified rows remain in summaries, never scalar facts.
@@ -16,22 +16,26 @@ def rate_schedules(quote, *, annual_only=False):
     lines=[x.strip() for x in str(quote).splitlines() if x.strip()]
     found=[]
     for i in range(len(lines)-2):
-        if lines[i].casefold()!='term' or not _HEADER.fullmatch(lines[i+1]) or '%' not in lines[i+1]:
+        payment_columns = lines[i+1:i+4] == ["Annual (%)", "Semi Annual (%)", "Monthly (%)"]
+        if lines[i].casefold()!='term' or (not payment_columns and (not _HEADER.fullmatch(lines[i+1]) or '%' not in lines[i+1])):
             continue
-        if annual_only and not re.search(r'\bannual\b|\bAP[RY]\b',lines[i+1],re.I):
+        explicit_basis = bool(re.search(r'interest (?:is )?calculated per annum|interest rates? (?:is|are) annualized', str(quote), re.I))
+        if annual_only and (payment_columns and not explicit_basis or not payment_columns and not (re.search(r'\bannual\b|\bAP[RY]\b',lines[i+1],re.I) or explicit_basis)):
             continue
-        rows=[];j=i+2
+        rows=[];j=i+4 if payment_columns else i+2
         while j+1<len(lines) and _TERM.fullmatch(lines[j]):
             offset = 2 if lines[j+1] == lines[i+1] else 1
-            if j+offset >= len(lines) or not _NUMBER.fullmatch(lines[j+offset]):break
+            if j+offset >= len(lines) or not _NUMBER.fullmatch(lines[j+offset]):return []
+            if payment_columns and (j+3 >= len(lines) or not all(_NUMBER.fullmatch(v) and 0<=Decimal(v.removesuffix("%"))<100 for v in lines[j+1:j+4])):
+                return []
             number=Decimal(lines[j+offset].removesuffix('%'))
             if not number.is_finite() or not 0<=number<100:return []
-            rows.append({'term_label':lines[j],'rate':float(number)});j+=offset+1
+            rows.append({'term_label':lines[j],'rate':float(number)});j+=4 if payment_columns else offset+1
         if not rows:continue
         if len({r['term_label'].casefold() for r in rows})!=len(rows):return []
         # A qualified/non-term row is a part of the table, not a terminator
         # that permits treating a partial grid as a complete schedule.
-        if annual_only and j+1<len(lines) and _NUMBER.fullmatch(lines[j+1]):
+        if annual_only and j<len(lines) and (_TERM.fullmatch(lines[j]) or (j+1<len(lines) and _NUMBER.fullmatch(lines[j+1]))):
             return []
         if rows not in found:found.append(rows)
     return found

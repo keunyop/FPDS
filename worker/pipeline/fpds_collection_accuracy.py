@@ -30,7 +30,7 @@ CURRENCY_PATTERNS.update({
     "SGD": r"\bSGD\b|Singapore dollars?",
 })
 IDENTITY_FIELDS = ("country_code", "bank_code", "product_type", "product_name", "currency")
-_NUMBER = r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\w.])"
+_NUMBER = r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\w|\.\d)"
 _COUNT_WORDS = dict(zip(("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"), range(11)))
 _ANNUAL_RATE_BASIS = re.compile(
     r"\bannual(?:ized)?\s+(?:(?:interest|percentage)\s+)?(?:rates?|yield)\b"
@@ -488,6 +488,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if not number.is_finite() or number < 0:
         return False
     if contract.unit == "percentage_points":
+        from worker.native_deposit_records import named_account_rate
+        native_account_rate = named_account_rate(quote)
+        if native_account_rate is not None and field_name in {"standard_rate", "public_display_rate"}:
+            return number == Decimal(str(native_account_rate))
         if field_name in {"purchase_interest_rate", "cash_advance_rate"} and re.search(
             r"(?mi)^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Cash advance interest rate)\s*\n\d", quote):
             return _explicit_labelled_card_rate(field_name, number, quote)
@@ -518,6 +522,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if meaning and not re.search(meaning, q, re.I):
             return False
         return number < 100 and number in {Decimal(v) for v in rates} and bool(re.search(r"\b(?:rate|interest|apr|apy|yield)\b", q, re.I))
+    if number == 0 and field_name in {"monthly_fee", "public_display_fee"}:
+        from worker.native_deposit_records import BLANKET_FEE
+        if BLANKET_FEE.fullmatch(q) and not _money_has_condition(quote, field_name):
+            return True
     labels = {
         "monthly_fee": r"monthly.{0,25}?(?:fee|charge)|(?:fee|charge).{0,20}?(?:monthly|per month)",
         "public_display_fee": r"monthly.{0,25}?(?:fee|charge)|(?:fee|charge).{0,20}?(?:monthly|per month)",
@@ -764,7 +772,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
                 and name in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
                 and not exact_quote(e.get("evidence_excerpt"), quote)):
             reason = "native_rate_conditions_incomplete"
-        elif (name in {"interest_rate_summary", "term_rate_table"} and e.get("anchor_type") in {"native_rate_table", "named_mortgage_rate_schedule", "credit_limit_rate_schedule"}
+        elif (name in {"interest_rate_summary", "term_rate_table"} and e.get("anchor_type") in {"named_deposit_schedule", "native_rate_table", "named_mortgage_rate_schedule", "credit_limit_rate_schedule"}
                 and (not exact_quote(e.get("evidence_excerpt"), quote)
                      or (name == "term_rate_table" and any(
                          not exact_quote(e.get("evidence_excerpt"), row.get("notes")) for row in value)))):

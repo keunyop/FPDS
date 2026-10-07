@@ -92,8 +92,7 @@ def run_services(inputs, *, provider=False):
         if normalization.normalization_action != 'stored':
             raise AssertionError(normalization.error_summary)
         record = normalization.normalized_candidate_record
-        evidence_links = [ValidationEvidenceLink(None, record['candidate_id'], None, x.evidence_chunk_id,
-            x.source_document_id, x.field_name, x.candidate_value, x.citation_confidence) for x in links]
+        evidence_links = [ValidationEvidenceLink(**row) for row in normalization.field_evidence_link_records]
         vi = ValidationInput(ctx.source_id, ctx.source_document_id, ctx.snapshot_id, ctx.parsed_document_id,
             record['candidate_id'], 'run', normalization.normalization_model_execution_id,
             normalization.normalized_storage_key, None, ctx.bank_code, 'CA', ctx.source_type, 'en',

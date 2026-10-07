@@ -60,6 +60,11 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 )
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "Native product rate rows may state percentage units only in their own header; retain the exact named row and complete annual-basis note. "
+    "Keep all payout columns and local notes in a multi-column deposit table. An annual-payout column is not itself annual rate-basis proof. "
+    "Separate independently named GIC/CD groups by their exact term schedules, registration and withdrawal rules; never merge cashable and non-redeemable tables. "
+    "Associate a captured companion through an observed exact official detail link, preserving its actual source/document/snapshot. "
+    "An unconditional blanket no-fees statement for the same account proves its monthly fee only; an opening/transfer-fee benefit cannot. "
     "A captured official PDF without discovery parent metadata applies only through its complete native "
     "declaration explicitly naming the same product, with exact current document/snapshot/chunk origins. "
     "Generic issuer terms, shared words, identical values and other product names cannot prove applicability. "

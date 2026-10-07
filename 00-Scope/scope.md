@@ -33,6 +33,7 @@
 | 인수 범위와 최종 체크리스트 | 00-Scope/scope.md | 인수 범위, 제외 범위, 완료 판정 |
 | 외부 서비스 목록·계정 기입 템플릿 | 00-Scope/external-services-and-accounts.md | cloud, DB, storage, domain, DNS, TLS, LLM, monitoring의 현재 상태와 계정 양식 |
 | DB migration·schema·ERD | 00-Scope/database-migrations-schema-erd.md | 0001~0044 목록, shared dev 적용 상태, schema dictionary, ERD |
+| 개발 가이드와 AI 스킬셋 | descent/FPDS_Admin_개발_가이드.md, descent/ai-skills/ | 한국어 개발 인계: 로컬 실행, 코드 진입점, 변경·검증 절차, portable SKILL.md와 호출 예시 |
 | 전체 실행 순서 | docs/01-planning/fpds-admin-handover-minimum-playbook.md | 환경 준비, rehearsal, 교육, UAT, Cutover, Hypercare |
 | 환경변수 계약 | .env.dev.example, .env.prod.example | placeholder-only dev/prod 설정 목록 |
 | Admin web 운영 경계 | app/admin/README.md | 화면, route/code map, build 명령, 안전 경계 |

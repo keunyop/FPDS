@@ -1,5 +1,20 @@
 # FPDS API Service
 
+## Owned deposit tables and Oaken publication - 2026-10-07
+
+Parser v14/process `2026-10-07-owned-deposit-table-v5` preserve named deposit
+rate rows, complete sibling term/interest-payment tables and observed product
+links. Explicit percent/annual units, literal term boundaries and actual
+companion document/snapshot origins are required. Unconditional account-wide
+fee declarations stay separate from registered-account restrictions; later
+qualifications/linked notes, partial grids and unresolved cashability exclude.
+Acquisition diagnoses the same complete named variants as normalization.
+Verified same-record optional facts survive; financial/security essentials and
+research budgets remain unchanged. Four directly collected Oaken products are
+verified on Public; serving still reports v4, so future Admin use needs the
+API/Worker release. No deployment/restart occurred in this operation.
+[Diagnosis, corrections, publication and verification limits](../../docs/00-governance/oaken-generic-collection-corrections-2026-10-07.md).
+
 ## Ordinary Admin evidence parity - 2026-10-06
 
 Process `2026-10-06-named-companion-binding-v4` and parser v13 preserve owned

@@ -8,6 +8,8 @@
 [현행 사용자 매뉴얼](FPDS_Admin_사용자_매뉴얼.md)과
 [소스·문서 전달 목록](../00-Scope/scope.md)을 먼저 확인합니다.
 
+개발 인계 자료: [FPDS Admin 개발 가이드 (한국어 초안)](FPDS_Admin_개발_가이드.md) · [AI 개발 스킬셋](ai-skills/README.md)
+
 Kick-off 미팅 자료: [FPDS 인수인계 킥오프 미팅 (한국어・日本語)](00-kickoff-meeting.md)
 
 적용 범위: FPDS Admin, Admin API, worker, DB, private evidence storage

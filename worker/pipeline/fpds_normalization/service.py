@@ -3437,6 +3437,10 @@ def _percentage_value_absent_from_evidence(*, field_name: str, value: object, co
         expected = Decimal(str(value).replace(",", "").strip())
     except InvalidOperation:
         return False
+    from worker.native_deposit_records import named_account_rate
+    native_rate = named_account_rate(context)
+    if field_name in {'standard_rate', 'public_display_rate'} and native_rate is not None and expected == Decimal(str(native_rate)):
+        return False
     normalized_context = _normalize_text(context)
     if not normalized_context:
         return False
