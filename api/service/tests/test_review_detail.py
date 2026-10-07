@@ -135,7 +135,7 @@ class ReviewDetailTests(unittest.TestCase):
         self.assertIsNone(result)
         self.assertEqual(connection.execute.call_count, 2)
         fallback_sql, fallback_params = connection.execute.call_args.args
-        self.assertIn("regexp_replace(lower(cp.product_name)", fallback_sql)
+        self.assertIn("regexp_replace(replace(lower(cp.product_name), '+', ' plus ')", fallback_sql)
         self.assertEqual(
             fallback_params["product_name"],
             "enviro Visa Classic low interest for students",
@@ -161,7 +161,7 @@ class ReviewDetailTests(unittest.TestCase):
 
         self.assertIsNone(result)
         sql, params = connection.execute.call_args.args
-        self.assertIn("regexp_replace(lower(cp.product_name), '[^[:alnum:]]+'", sql)
+        self.assertIn("regexp_replace(replace(lower(cp.product_name), '+', ' plus '), '[^[:alnum:]]+'", sql)
         self.assertIn("'[[:space:]]+account$'", sql)
         self.assertEqual(params["product_name"], "Truist One\u00ae Checking account")
 

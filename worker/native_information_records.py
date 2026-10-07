@@ -9,7 +9,7 @@ RATE = re.compile(r'^\d+(?:\.\d+)?%$')
 
 
 def name_key(value):
-    return ' '.join(re.findall(r'[a-z0-9]+', str(value).casefold().replace('\u00ad', '')))
+    return ' '.join(re.findall(r'[a-z0-9]+', str(value).casefold().replace('\u00ad', '').replace('+', ' plus ')))
 
 
 def names_match(left, right):

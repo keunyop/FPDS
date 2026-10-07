@@ -61,6 +61,11 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
     "Native product rate rows may state percentage units only in their own header; retain the exact named row and complete annual-basis note. "
+    "Repeated identical responsive H1s retain one identity; different headings and named recommendation panels cannot donate prices. "
+    "Keep plus-sign product variants distinct. Same-document data-target references require one literal target and its complete note. "
+    "A named percent-header card table needs exact product identity or its observed detail link, explicit annual notes and the whole payment-default rule. "
+    "An all-balances savings row needs an adjacent single product name and explicit annual notes; tiered or qualified rows cannot become a scalar. "
+    "Ordinary monthly debit allowances and excess charges remain separate; Point of Sale is a transaction description, never a decimal number. "
     "Keep all payout columns and local notes in a multi-column deposit table. An annual-payout column is not itself annual rate-basis proof. "
     "Separate independently named GIC/CD groups by their exact term schedules, registration and withdrawal rules; never merge cashable and non-redeemable tables. "
     "Associate a captured companion through an observed exact official detail link, preserving its actual source/document/snapshot. "

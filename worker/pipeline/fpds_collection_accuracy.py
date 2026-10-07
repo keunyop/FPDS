@@ -44,6 +44,8 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
     # Keep its following text, including any actual balance/waiver condition.
     context = re.sub(r"(?mi)^Great if[ \t]*\r?\n(?=You (?:want|prefer)\b)", "Suitability\n", quote)
     if field_name in {"monthly_fee", "public_display_fee"}:
+        if re.search(r"little to no monthly fees|through.{0,40}rebates|offers for eligible", context, re.I):
+            return True
         # This service classification concerns paper statements/eligible groups,
         # not a waiver prerequisite for the independently stated base fee.
         # Retain the original quote and every actual fee condition.
@@ -64,7 +66,8 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
             "Separate excess-transaction pricing.", context, flags=re.I)
     if re.search(r"\b(?:if|when|waived|waiver|provided|qualify|qualifying|maintain|introductory|promotional)\b"
         r"|subject to(?!\s+change(?:\s+without\s+(?:prior\s+)?notice)?(?:[.!](?:\s|$)|$))"
-        r"|\bonly\s+for\b|\bfor\s+(?:eligible|selected|new)\s+(?:customers|cardholders)\b"
+        r"|\bonly\s+for\b|\bfor\s+(?:eligible|selected|new|full[- ]time|qualifying)\b"
+        r"|\bfor\s+(?:students?|seniors?|youth)\b"
         r"|\bfirst\s+(?:year|month|\d+\s+(?:years?|months?))\b", context, re.I):
         return True
     if field_name in {"monthly_fee", "public_display_fee", "annual_fee", "transaction_fee", "additional_transaction_fee"} and re.search(
@@ -311,6 +314,11 @@ def _rate_context_has_condition(field_name: str, value: Decimal, quote: str) -> 
 
 
 def _transaction_count_supported(value: int, quote: str) -> bool:
+    quote = re.sub(r"\bPoint[- ]of[- ]Sale\b", "Merchant purchases", quote, flags=re.I)
+    # An excess charge triggered by exceeding the allowance does not condition
+    # the independently stated count. The entire definition/exclusions remain.
+    if re.search(r"All Debit Transactions, including bill payments, count towards the number of included Debit Transactions per Month", quote, re.I):
+        quote = re.sub(r"if you go over the number of included (?:Debit Transactions per Month|debits per Month)", "on exceeding the allowance", quote, flags=re.I)
     if re.search(r"\b(?:if|when|provided|qualify|qualifying)\b", quote, re.I):
         return False
     # Do not read the final word/digits of an unsupported composite count.
@@ -496,7 +504,11 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             r"(?mi)^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Cash advance interest rate)\s*\n\d", quote):
             return _explicit_labelled_card_rate(field_name, number, quote)
         from worker.native_information_records import information_card_rates, shared_card_rates
-        information_rates = information_card_rates(quote) or shared_card_rates(quote)
+        from worker.native_named_rate_records import card_rate_values, balance_rate_value
+        native_balance = balance_rate_value(quote)
+        if native_balance is not None and field_name in {"standard_rate", "public_display_rate"}:
+            return number == native_balance
+        information_rates = information_card_rates(quote) or shared_card_rates(quote) or card_rate_values(quote)
         if information_rates is not None and field_name in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate"}:
             return number == information_rates[0 if field_name == "purchase_interest_rate" else 1]
         # Comparison benchmarks are not the named product's own payable rate.
@@ -523,6 +535,8 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return False
         return number < 100 and number in {Decimal(v) for v in rates} and bool(re.search(r"\b(?:rate|interest|apr|apy|yield)\b", q, re.I))
     if number == 0 and field_name in {"monthly_fee", "public_display_fee"}:
+        if re.search(r"(?mi)^Monthly fee\s*\nFree\s*$", quote) and not _money_has_condition(quote, field_name):
+            return True
         from worker.native_deposit_records import BLANKET_FEE
         if BLANKET_FEE.fullmatch(q) and not _money_has_condition(quote, field_name):
             return True
@@ -537,6 +551,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         "included_transactions": r"transactions?",
         "term_length_days": r"days?",
     }
+    if field_name == "additional_transaction_fee":
+        excess = re.findall(r"(?mi)^Debits Exceeding Monthly Limit\s*\n\$(\d+(?:\.\d+)?)(?: each)?\s*$", quote)
+        if excess:
+            return len(excess) == 1 and number == Decimal(excess[0]) and not _money_has_condition(quote, field_name)
     label = labels.get(field_name)
     if not label or not re.search(label, q, re.I):
         return False
@@ -691,6 +709,23 @@ def country_currency_fallback(record: Mapping, evidence: list[dict]) -> str | No
     currency = default_currency_for_country(record.get("country_code"))
     if not currency:
         return None
+    mappings = record.get("field_mapping_metadata") or {}
+    if any(m.get("captured_currency_conflict") is True for m in mappings.values() if isinstance(m, Mapping)):
+        return None
+    # Unverified optional retrieval snippets are not product denomination proof.
+    # When native facts establish ownership, use their full original contexts;
+    # legacy/model-only inputs retain the existing conservative whole-context rule.
+    native = any(str(m.get("official_grounding_method", "")).startswith("deterministic_")
+                 and m.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+                 for m in mappings.values() if isinstance(m, Mapping))
+    if native:
+        bound = {str(m.get("evidence_chunk_id")) for m in mappings.values() if isinstance(m, Mapping)
+                 and m.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+                 and m.get("official_verification_status") in {"match", "mismatch"}
+                 and any(str(e.get("evidence_chunk_id")) == str(m.get("evidence_chunk_id"))
+                         and exact_quote(m.get("official_evidence_quote"), e.get("evidence_excerpt"))
+                         for e in evidence)}
+        evidence = [e for e in evidence if str(e.get("evidence_chunk_id")) in bound]
     context = " ".join([str(record.get("product_name") or ""),
                         *(product_currency_context(record, str(e.get("evidence_excerpt") or "")) for e in evidence)])
     if any(re.search(pattern, context, re.I) for pattern in CURRENCY_PATTERNS.values()):
@@ -703,6 +738,20 @@ def country_currency_fallback(record: Mapping, evidence: list[dict]) -> str | No
     if re.search(r"foreign[- ]currency|multi[- ]currency|other currenc|denominated in", context, re.I):
         return None
     return currency
+
+
+def _native_record_belongs(record, chunk, source_metadata):
+    from worker.native_information_records import names_match
+    owner = str(chunk.get("anchor_value") or "")
+    if owner and names_match(owner, record.get("product_name")):
+        return True
+    if chunk.get("anchor_type") != "named_card_rate_table":
+        return False
+    from urllib.parse import urljoin
+    detail = canonical_url(source_metadata.get("normalized_source_url") or source_metadata.get("source_url"))
+    source = canonical_url(chunk.get("source_url"))
+    return bool(detail and source and any(canonical_url(urljoin(source, url)) == detail
+        for url in re.findall(r"(?m)^(?:https?://|/)[^\s]+$", str(chunk.get("evidence_excerpt") or ""))))
 
 
 def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list[dict]) -> tuple[dict, dict]:
@@ -750,6 +799,9 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             reason = "evidence_source_mismatch"
         elif not exact_quote(quote, e.get("evidence_excerpt")):
             reason = "exact_evidence_missing"
+        elif (e.get("anchor_type") in {"owned_account_assertion", "named_card_rate_table", "named_balance_rate"}
+                and not _native_record_belongs(record, e, source_metadata)):
+            reason = "native_product_mismatch"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
             any(code != record.get("currency") and re.search(pattern, product_currency_context(record, str(e.get("evidence_excerpt") or "")), re.I)
                 for code, pattern in CURRENCY_PATTERNS.items())
@@ -768,8 +820,10 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             # A balance that waives transaction charges is not an opening or
             # general minimum balance, nor a monthly-account-fee threshold.
             reason = "transaction_waiver_balance_not_minimum"
-        elif (e.get("anchor_type") == "card_information_rate"
-                and name in {"purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
+        elif (e.get("anchor_type") == "owned_account_assertion" and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
+            reason = "native_account_conditions_incomplete"
+        elif (e.get("anchor_type") in {"card_information_rate", "named_card_rate_table", "named_balance_rate"}
+                and name in {"standard_rate", "interest_rate_summary", "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
                 and not exact_quote(e.get("evidence_excerpt"), quote)):
             reason = "native_rate_conditions_incomplete"
         elif (name in {"interest_rate_summary", "term_rate_table"} and e.get("anchor_type") in {"named_deposit_schedule", "native_rate_table", "named_mortgage_rate_schedule", "credit_limit_rate_schedule"}

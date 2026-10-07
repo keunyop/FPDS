@@ -1,5 +1,20 @@
 # Worker Boundary
 
+## Owned prices, dynamic rates and RBC verification - 2026-10-07
+
+Parser v15/process `2026-10-07-owned-price-rate-proof-v6` keep exact repeated
+headings, native panel ownership, literal local notes and percent-header rows.
+Empty rate slots request bounded rendering even when legal notes contain a
+percentage. Rates require explicit annual basis and complete payment/default
+conditions; price/currency conflicts, qualified free fees and finite transaction
+cost gaps still exclude. Matching prompts, normalization and cache hashes apply
+across banks without bank-name branches. Fifteen current RBC candidates pass
+ordinary stored-artifact services and are published through normal automatic gates.
+Canonical matching also preserves plus variants; direct publication is verified
+separately from the pending API/Worker deployment.
+Full official regression capture bytes use `.bin` fixtures to prevent text hygiene
+from changing source hashes. See [diagnosis and verification](../docs/00-governance/rbc-generic-collection-corrections-2026-10-07.md).
+
 ## Owned deposit tables and Oaken publication - 2026-10-07
 
 Parser v14/process `2026-10-07-owned-deposit-table-v5` preserve named deposit

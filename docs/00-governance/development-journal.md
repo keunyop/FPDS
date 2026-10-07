@@ -1,5 +1,49 @@
 # FPDS Development Journal
 
+## 2026-10-07 - RBC generic owned-price/rate correction and direct publication
+
+- Product Owner requested latest RBC diagnosis, direct official collection without
+  Admin API, reusable correction and normal publication. Latest seven 12:51:49
+  UTC scopes have 41 rejected candidates/65 Run sources; mortgage skipped with
+  no eligible detail. Collecting Runs used v4; current health reports v5. Captured
+  56 current official URLs directly plus two bounded rendered rate pages. No
+  provider calls, manual review or essential-policy relaxation.
+- Reproduced missing own prices from repeated H1s, recommendation price leakage,
+  empty dynamic rows hidden by legal percentages, local data-target note loss,
+  percent-header/annual-note units, plus-name collisions and Point of Sale count
+  rejection. Parser v15/process v6, shared native ownership/named rows, real origin
+  lookup, normalization, instructions and cache hashes align. Exact/complete
+  notes and payment-default rules survive; actual currency conflicts veto default.
+  Regression exposed and now blocks eligible-student conditional free fees.
+- New full official capture fixtures retain hashes as opaque .bin assets with
+  -text attributes, preventing HTML hygiene/newline changes. Ordinary 900-character
+  chunks/stored extraction artifacts are tested. Final current replay: 15 automatic
+  passes (13 cards/1 savings/1 chequing), 26 exclusions. Direct operation is bounded
+  to original targets and uses normal stored-origin validation/promotion/refresh.
+  Public readback exposed canonical SQL erasing + as well; fixed both name
+  comparison/source cardinality generically. Five production-query SQL regressions
+  reproduce/fix base/plus, other-bank/type and multi-product source boundaries.
+  Corrected only this operation's wrong ION+ identity connection, restoring ION's
+  original ID. Approved financial payloads/candidates/times/evidence preserved;
+  before-images, audit and rollback rehearsal retained. Normal refresh yields
+  CA 88->103/RBC 1->16, US 5 unchanged. Independent 15 site/API detail readbacks and 78 current
+  field origins/financial meanings pass. Seven original Runs/41 candidates/65
+  Run sources, 100 bank documents/189 snapshots, 435 unrelated products and
+  1,472 original financial version facts preserved. No private evidence exposure.
+- Verification: relevant Worker 55 tests/new raw/ownership/render 21 pass; independent
+  API 639 pass; canonical approval path 56 tests pass; real ordinary fetch automatically renders both official rate URLs.
+  Full Worker 844 runs/842 pass, with two pre-existing National/Oaken fixture hash
+  failures; old hashes not rewritten to hide mismatch. Foundation baseline passes.
+  Changed Markdown/JSON/whitespace/UTF-8/source hashes and git diff --check pass;
+  final goal/diff reviewed. Actual site/API verification completed 16:17:44 UTC.
+- Key files: worker native ownership/account/rate modules, shared dynamic pricing,
+  discovery fetch and API research, parse/chunk/extraction/normalization/accuracy,
+  shared instructions/cache/version, API canonical identity SQL, source-backed
+  tests and runtime/policy docs.
+  No UI/schema/new market/type or permanent recovery feature. Runtime deployment
+  remains separate; release API/Worker v6 for future ordinary Admin collection.
+  [Diagnosis, exact values, publication and limits](rbc-generic-collection-corrections-2026-10-07.md).
+
 ## 2026-10-07 - Oaken actual-input correction and four verified publications
 
 - Product Owner requested latest Oaken diagnosis, direct official collection

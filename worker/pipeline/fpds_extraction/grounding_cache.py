@@ -16,7 +16,7 @@ def input_digest(context, candidates, requested_fields, collected_fields, *, day
         "fpds_field_contract.py", "fpds_collection_accuracy.py", "fpds_market_profile.py", "fpds_approval_policy.py",
         "fpds_collection_fields.py",
         "fpds_comparison_instructions.py", "fpds_ai_runtime.py", "fpds_rate_safety.py",
-        "../country_defaults.py", "../product_source_policy.py", "../native_rate_tables.py", "../native_deposit_records.py", "../native_information_records.py", "../native_component_values.py", "fpds_parse_chunk/parser.py", "fpds_parse_chunk/version.py", "fpds_parse_chunk/service.py", "../source_content_validity.py")]
+        "../country_defaults.py", "../product_source_policy.py", "../native_rate_tables.py", "../native_deposit_records.py", "../native_information_records.py", "../native_dom_ownership.py", "../native_owned_account_records.py", "../native_named_rate_records.py", "../native_component_values.py", "fpds_parse_chunk/parser.py", "fpds_parse_chunk/version.py", "fpds_parse_chunk/service.py", "../source_content_validity.py")]
     value = {"version": 1, "day": day or datetime.now(UTC).date().isoformat(),
         "model": configured_model_id(), "code": [sha256(p.read_bytes()).hexdigest() for p in files],
         "context": asdict(context), "candidates": [asdict(c) for c in candidates],

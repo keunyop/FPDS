@@ -481,7 +481,8 @@ def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy
             flags=re.IGNORECASE | re.DOTALL,
         )
     )
-    if unresolved_rate_placeholder:
+    from worker.dynamic_pricing import has_empty_dynamic_rate_slot
+    if unresolved_rate_placeholder or has_empty_dynamic_rate_slot(decoded):
         return True
     unresolved_pricing_placeholder = bool(
         re.search(r"\b(?:nan|undefined|null)\s*%?\s*(?:apy|apr|interest rate)\b", lowered)

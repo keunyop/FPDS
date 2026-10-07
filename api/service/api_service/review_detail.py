@@ -1433,6 +1433,8 @@ def _find_current_product(
         if product_row:
             return product_row
 
+    # A literal + is a named variant, equivalent to the spelled word plus.
+    # Preserve it in both source cardinality and canonical name matching.
     source_document_id = _string_or_none(review_row.get("source_document_id"))
     run_id = _string_or_none(review_row.get("run_id"))
     if source_document_id and run_id:
@@ -1459,7 +1461,7 @@ def _find_current_product(
               AND (
                     SELECT COUNT(
                         DISTINCT regexp_replace(
-                            lower(source_candidate.product_name),
+                            replace(lower(source_candidate.product_name), '+', ' plus '),
                             '[^a-z0-9]+',
                             '',
                             'g'
@@ -1513,14 +1515,14 @@ def _find_current_product(
           AND cp.product_type = %(product_type)s
           AND trim(
                 regexp_replace(
-                    regexp_replace(lower(cp.product_name), '[^[:alnum:]]+', ' ', 'g'),
+                    regexp_replace(replace(lower(cp.product_name), '+', ' plus '), '[^[:alnum:]]+', ' ', 'g'),
                     '[[:space:]]+account$',
                     '',
                     'g'
                 )
               ) = trim(
                 regexp_replace(
-                    regexp_replace(lower(%(product_name)s), '[^[:alnum:]]+', ' ', 'g'),
+                    regexp_replace(replace(lower(%(product_name)s), '+', ' plus '), '[^[:alnum:]]+', ' ', 'g'),
                     '[[:space:]]+account$',
                     '',
                     'g'

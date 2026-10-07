@@ -441,7 +441,7 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
     from worker.native_information_records import names_match
     named_pdf_anchors = {"card_information_rate", "card_information_fee",
         "named_card_regular_rates", "named_card_fee_row",
-        "named_product_rate_basis", "named_product_interest_terms"}
+        "named_product_rate_basis", "named_product_interest_terms", "named_card_rate_table", "named_balance_rate"}
     output = []
     for item in inputs:
         context = item.context
@@ -472,12 +472,12 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                 # without inventing a discovery relationship or donating facts
                 # from another product. Retain each record's current origin.
                 named_native = [c for c in companion.candidates
-                    if ctx.source_type == "pdf" and c.anchor_type in named_pdf_anchors
+                    if (ctx.source_type == "pdf" or c.anchor_type in {"named_card_rate_table", "named_balance_rate"}) and c.anchor_type in named_pdf_anchors
                     and names_match(c.anchor_value, identity)]
                 named.extend(c for c in named_native if c not in named)
                 parents = metadata.get("parent_detail_urls") or [] if isinstance(metadata, dict) else []
-                named.extend(c for c in companion.candidates if c.anchor_type == "financial_table_cell"
-                    and own_url in {_canonical_official_source_url(u) for u in re.findall(r"(?m)^https?://[^\s]+$", c.evidence_excerpt)}
+                named.extend(c for c in companion.candidates if c.anchor_type in {"financial_table_cell", "named_card_rate_table", "named_balance_rate"}
+                    and own_url in {_canonical_official_source_url(urljoin(url, u)) for u in re.findall(r"(?m)^(?:https?://|/)[^\s]+$", c.evidence_excerpt)}
                     and c not in named)
                 if own_url in {_canonical_official_source_url(u) for u in parents}:
                     parent = own_url
@@ -538,6 +538,7 @@ def _captured_native_product_title(context, candidates):
     # text, not a second product identity. Two distinct named H1s still fail.
     native_heads = [c for c in native_heads if not re.fullmatch(
         r"(?:[$€£]\s*)?\d+(?:[,.]\d+)*\s*%?", _normalize_text(c.evidence_excerpt))]
+    native_heads = list({_normalize_text(c.evidence_excerpt): c for c in native_heads}.values())
     if len(native_heads) == 1:
         literal = _normalize_text(native_heads[0].evidence_excerpt)
         native_tokens = route_tokens(literal) - {"the", "bank", "card", "cards", "account", "accounts", "r", "tm"}
@@ -772,6 +773,42 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             for currency, pattern in CURRENCY_PATTERNS.items():
                 if re.search(pattern, identity, re.I):
                     values["currency"] = currency
+        if c.anchor_type == "named_card_rate_table" and _infer_product_type(context) == "credit-card":
+            from worker.native_named_rate_records import card_rate_values
+            from worker.native_information_records import names_match
+            linked = url in {_canonical_official_source_url(u) for u in re.findall(r"(?m)^https?://[^\s]+$", quote)}
+            # Relative literal links resolve against this captured source only.
+            from urllib.parse import urljoin
+            linked = linked or any(_canonical_official_source_url(urljoin(c.retrieval_metadata.get("source_url", url), u)) == url
+                                  for u in re.findall(r"(?m)^/[^\s]+$", quote))
+            pair = card_rate_values(quote)
+            if pair and (names_match(c.anchor_value, identity) or linked):
+                values.update(purchase_interest_rate=float(pair[0]), cash_advance_rate=float(pair[1]),
+                              purchase_interest_rate_summary=_normalize_text(quote))
+        if c.anchor_type == "named_balance_rate" and _infer_product_type(context) == "savings":
+            from worker.native_named_rate_records import balance_rate_value
+            from worker.native_information_records import names_match
+            value = balance_rate_value(quote)
+            if value is not None and names_match(c.anchor_value, identity):
+                values.update(standard_rate=float(value), interest_rate_summary=_normalize_text(quote))
+        if own and c.anchor_type == "owned_account_assertion" and c.anchor_value == identity:
+            from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
+            for currency, pattern in CURRENCY_PATTERNS.items():
+                if re.search(pattern, quote, re.I) and quote_supports_value("currency", currency, quote):
+                    values["currency"] = currency
+            if quote_supports_value("monthly_fee", 0, quote):
+                values["monthly_fee"] = 0.0
+            fee = re.search(r"Monthly Fee:\s*\$(\d+(?:\.\d+)?)", quote, re.I)
+            if fee:
+                values["monthly_fee"] = float(fee[1])
+            counts = re.findall(r"(\d+) (?:debit )?transactions each month", quote, re.I)
+            if counts and len(set(counts)) == 1:
+                values["included_transactions"] = int(counts[0])
+            if quote_supports_value("unlimited_transactions_flag", True, quote):
+                values["unlimited_transactions_flag"] = True
+            excess = re.search(r"(?mi)^Debits Exceeding Monthly Limit\s*\n\$(\d+(?:\.\d+)?)", quote)
+            if excess:
+                values["additional_transaction_fee"] = float(excess[1])
         if c.anchor_type in {"card_information_rate", "card_information_fee", "named_card_regular_rates", "named_card_fee_row"} and _infer_product_type(context) == "credit-card":
             from worker.native_information_records import names_match, information_card_rates
             if names_match(c.anchor_value, identity):
@@ -860,6 +897,8 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 amount_first = re.search(r"(?mi)^\$(\d+(?:\.\d+)?)\s*\n" + label + r"\s*$", quote)
                 if amount_first:
                     values[name] = float(amount_first[1])
+            if quote_supports_value("monthly_fee", 0, quote):
+                values["monthly_fee"] = 0.0
             if re.search(r"(?mi)^Annual fee\s*\nNone(?:\n|$)", quote):
                 values["annual_fee"] = 0.0
         if own and c.anchor_type == "section" and _infer_product_type(context) == "credit-card":
@@ -1089,6 +1128,9 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 field_name="term_length_text", candidate_value=term,
                 field_metadata={**rate_record.field_metadata,"evidence_quote":term})]
             conflicts.discard("term_length_text")
+    if "currency" in conflicts:
+        proven = [replace(f, field_metadata={**f.field_metadata, "captured_currency_conflict": True})
+                  if f.field_name == "product_name" else f for f in proven]
     variants = next((f.field_metadata.get("grounded_product_variants") for f in fields
                      if f.field_name == "product_name" and f.field_metadata.get("grounded_product_variants")), None) or deposit_family_variants
     if variants:
@@ -5471,7 +5513,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"owned_account_assertion", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)

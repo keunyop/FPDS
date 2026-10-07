@@ -135,6 +135,9 @@ def _parse_html(body: bytes) -> ParsedArtifact:
                     for kind, owner, record in native_financial_sections(soup))
     from worker.native_deposit_records import deposit_table_records
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in deposit_table_records(soup))
+    from worker.native_owned_account_records import account_records
+    from worker.native_named_rate_records import named_rate_records
+    sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in [*account_records(soup), *named_rate_records(soup)])
     sections.extend(_rate_table_evidence_sections(soup))
     sections.extend(_linked_financial_table_cells(soup))
     full_text, segments = _finalize_segments(sections)
@@ -223,10 +226,11 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
     may supplement a scalar; default/offer conditions remain in the record.
     """
     root = soup.find("main") or soup.body or soup
-    headings = root.find_all("h1")
-    if len(headings) != 1:
+    from worker.native_dom_ownership import unique_heading, owns_label, local_notes, without_reference_markers
+    heading = unique_heading(root)
+    if heading is None:
         return []
-    identity = headings[0].get_text(" ", strip=True)
+    identity = heading.get_text(" ", strip=True)
     labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Annual fee|Monthly fee)$", re.I)
     basis = []
     for node in root.find_all(True):
@@ -238,14 +242,25 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
     basis = list(dict.fromkeys(basis))
     result, seen = [], set()
     for leaf in root.find_all(string=lambda t: t and labels.fullmatch(t.strip())):
+        if not owns_label(leaf.parent, root, identity):
+            continue
         block = leaf.parent
+        cell = leaf.find_parent(["td", "th"])
+        if cell is not None and cell.get_text(" ", strip=True).casefold() == str(leaf).strip().casefold():
+            following = cell.find_next_sibling(["td", "th"])
+            if following is not None:
+                from copy import deepcopy
+                paired = BeautifulSoup("<div></div>", "html.parser").div
+                paired.append(deepcopy(cell))
+                paired.append(deepcopy(following))
+                block = paired
         for _ in range(7):
             value = block.get_text("\n", strip=True)
             if len(value) > 900 or block is root:
                 break
             if sum(bool(labels.fullmatch(line.strip())) for line in value.splitlines()) > 1:
                 break
-            if re.search(r"\d+(?:\.\d+)?%|\$\d|\bNone\b", value, re.I):
+            if re.search(r"\d+(?:\.\d+)?%|\$\d|\b(?:None|Free)\b", value, re.I):
                 # A linked sibling product cannot inherit the page's main identity.
                 named = block.find_all(["h1", "h2", "h3"])
                 if named and any(h.get_text(" ", strip=True) != identity for h in named):
@@ -257,31 +272,11 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                     if scope.replace("\u00ad", "").casefold() != identity.replace("\u00ad", "").casefold():
                         result.append(_RawSegment("unresolved_financial_reference", identity, None, "\n".join([identity, value, scope])))
                         break
-                refs = []
-                bad = False
-                for ref in block.find_all(True):
-                    target = None
-                    if str(ref.get("href", "")).startswith("#"):
-                        target = str(ref["href"])[1:]
-                    elif "footnote" in ref.name and ref.get("target"):
-                        target = str(ref["target"])
-                    elif ref.get("aria-describedby"):
-                        ids = str(ref["aria-describedby"]).split()
-                        if len(ids) != 1:
-                            bad = True
-                            break
-                        target = ids[0]
-                    if not target:
-                        continue
-                    targets = soup.find_all(id=target)
-                    if len(targets) != 1:
-                        bad = True
-                        break
-                    note = targets[0].get_text(" ", strip=True)
-                    refs.append(note)
-                if bad:
+                refs = local_notes(soup, block)
+                if refs is None:
                     result.append(_RawSegment("unresolved_financial_reference", identity, None, "\n".join([identity, value])))
                     break
+                value = without_reference_markers(block)
                 parts = [identity, value]
                 if re.search(r"\b(?:first year|first month|eligible|until|if you|provided|maintain|introductory|promotional)\b", scope, re.I):
                     parts.append(scope)
@@ -302,22 +297,34 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
 def _linked_rate_records(soup: BeautifulSoup) -> list[_RawSegment]:
     """Keep a compact native detail rate with its exact local disclosure."""
     root = soup.find("main") or soup.body or soup
-    if len(root.find_all("h1")) != 1:
+    from worker.native_dom_ownership import unique_heading, owns_label, local_notes
+    heading = unique_heading(root)
+    if heading is None:
         return []
+    identity = heading.get_text(" ", strip=True)
     output = []
     for paragraph in root.find_all("p"):
         value = paragraph.get_text(" ", strip=True)
-        if not re.fullmatch(r"(?:Earn\s+)?\d+(?:\.\d+)?%\s*[*??\d]*\s*(?:annual\s+)?interest(?:\s+rate)?[.]?(?:\s*\d+)?", value, re.I):
+        labelled = bool(re.fullmatch(r"Interest Rate[^:]{0,40}:\s*\d+(?:\.\d+)?%", value, re.I))
+        if not labelled and not re.fullmatch(r"(?:Earn\s+)?\d+(?:\.\d+)?%\s*[*??\d]*\s*(?:annual\s+)?interest(?:\s+rate)?[.]?(?:\s*\d+)?", value, re.I):
             continue
         # A product-bearing sibling heading is a separate offer, not this
         # page's rate. Navigation/footer and comparison tables are excluded.
-        if paragraph.find_parent(["nav", "footer", "table", "aside"]):
+        if not owns_label(paragraph, root, identity) or paragraph.find_parent(["nav", "footer", "table", "aside"]):
             continue
         heading = paragraph.find_previous(["h1", "h2", "h3"])
         if heading is None:
             continue
         if heading.name != "h1" and re.search(
                 r"\b(?:account|card|mortgage|loan|GIC)\b", heading.get_text(), re.I):
+            continue
+        if labelled:
+            notes = local_notes(soup, paragraph)
+            if notes:
+                from worker.native_dom_ownership import without_reference_markers
+                record = "\n".join([without_reference_markers(paragraph), *notes])
+                if len(record) <= 6400:
+                    output.append(_RawSegment("linked_rate_record", "linked-rate", None, record))
             continue
         links = [a for a in paragraph.find_all("a", href=True) if str(a["href"]).startswith("#")]
         if not links:

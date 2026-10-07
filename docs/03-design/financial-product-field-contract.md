@@ -1,5 +1,14 @@
 # Financial Product Field Contract
 
+Native price/rate clarification (2026-10-07): native percent-header annual card
+and all-balances deposit values retain their literal named row, complete notes
+and actual companion origin. Purchase/cash columns and baseline/excess account
+costs remain distinct typed fields. A literal Point of Sale description is not
+a number word; plus-sign identities are distinct. Verified optional facts persist,
+unknowns are omitted, explicit currency conflicts block defaults and conditional
+free fees remain unproven. No field/unit/type/schema change. See
+[diagnosis and policy](../00-governance/rbc-generic-collection-corrections-2026-10-07.md).
+
 Native table clarification (2026-10-05): literal annual-percent headers bind
 native term/rate cells; complete conditions and exact typed rows must survive
 normalization. Do not infer month/year day counts, flatten qualified mortgage

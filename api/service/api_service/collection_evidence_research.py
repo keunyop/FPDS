@@ -151,6 +151,9 @@ def _link_relevance(*, product_type, url, label, missing):
 def _has_required_dynamic_lead(html, missing):
     """A dynamic financial value can fill an essential gap; login links cannot."""
     from bs4 import BeautifulSoup
+    from worker.dynamic_pricing import has_empty_dynamic_rate_slot
+    if any(re.search(r"rate|apr|apy", name, re.I) for name in missing) and has_empty_dynamic_rate_slot(html):
+        return True
     hints = [pattern for key, pattern in _FIELD_HINTS.items() if any(key in name for name in missing)]
     if not hints:
         return False

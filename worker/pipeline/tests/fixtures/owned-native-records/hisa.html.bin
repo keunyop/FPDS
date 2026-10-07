@@ -1,0 +1,3030 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+
+
+
+    
+
+
+
+<head>
+
+  
+    
+  
+  
+  
+  
+      <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Light.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Regular.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Bold.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Medium.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/RBCDisplay-Light.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/RBCDisplay-Bold.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Italic.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-MediumItalic.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-LightItalic.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" as="style" href="/dvl/v1.0/assets/css/dvl.min.css">
+<link rel="preload" as="script" href="/dvl/v1.0/assets/js/dvl.min.js">
+<link rel="stylesheet" href="/dvl/v1.0/assets/css/dvl.min.css">
+<!-- Custom CSS for RBC Insurance only -->
+
+      <title>High Interest Savings Account - Earn More with RBC HISA offer | RBC Royal Bank of Canada</title>
+      <meta name="description" content="Help maximize your savings with the RBC High Interest eSavings Account offer. Enjoy competitive interest rates, automated savings tools, and free online transfers. Open your account today and watch your money grow faster!" />
+      <meta name="keywords" content="rbc high interest esavings account, high interest savings account, savings accounts, rbc, royal bank of canada" />
+      <meta name="PI_PageID" content="ACCT_001_2400">
+      <meta property="og:title" content="High Interest Savings Account - Earn More with RBC HISA offer | RBC Royal Bank of Canada" />
+      <meta name="robots" content="index,follow">  
+      <!-- Ecommerce information -->
+      <script>
+        const ga4EcomInfo = {
+          promotions: {
+          },
+                view_item: ["027"]
+        } 
+      </script>
+
+      <script>
+          window.dataLayer = window.dataLayer || [];
+          dataLayer.push({
+            "lob": "accounts",
+            "content_group": "accounts : hisa",
+            "channel": "public",
+            "page_language": "en",
+            "page_title": "HISA product redisign page"
+          });
+      </script>
+  
+      
+      
+    <!-- ACCOUNTS -->
+
+    
+    
+    
+
+    
+        <script type="text/plain" class="optanon-category-3" src="https://client-rbc.cdn-v3.conductrics.com/ac-VyDHnrdzqf/v3/agent-api/js/f-BXnDgyehSJ/dt-FuGmpoSyp9pocP3U7tW3shfK8kMD3r?apikey=api-twHCbSC7tgpE31tzowIfmIUpP3"></script>
+    
+
+
+
+
+
+<!--script>
+var consent;
+// consent from URL case
+if(document.URL.indexOf("_ot=") != -1)
+{ consent = decodeURIComponent(document.URL.split("_ot=")[1].split("&")[0].split("-")[1].split(";")[0]); }
+
+// consent from cookie case
+else if (document.cookie.indexOf("OptanonConsent") != -1)
+{ consent = decodeURIComponent(document.cookie.split("OptanonConsent")[1].split(";")[0].split("groups=")[1].split("&")[0]); }
+
+// if url or cookie indicates consent is granted for personalization, then set the type to js
+if(consent.indexOf("3:1") != -1)
+{ document.getElementsByClassName("optanon-category-3")[0].setAttribute("type", "text/javascript"); }
+</script-->
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer',"GTM-KPSBBC6");</script>
+<!-- End Google Tag Manager -->
+      
+      <link rel="alternate" hreflang="fr" href="https://www.rbcbanqueroyale.com/comptes/e-savings.html" />
+      <link rel="alternate" hreflang="x-default" href="https://www.rbcroyalbank.com/bank-accounts/e-savings.html" />
+      <link rel="stylesheet" href="/bank-accounts/_assets-custom/css/styles-v1.0.css">
+      <link rel="stylesheet" href="/mega-navigation/_assets-custom/css/mega-navigation.css">
+      <link rel="canonical" href="https://www.rbcroyalbank.com/bank-accounts/savings-accounts/high-interest-savings-account.html" />
+      
+	
+		  <link rel="stylesheet" href="/credit-cards/transformer/css/main.css" />
+      <link rel="stylesheet" href="/credit-cards/transformer/css/homepage.css"/>
+
+      <link rel="stylesheet" href="/bank-accounts/savings-accounts/_assets-custom/compound-interest-calculator/css/calculator-final.css">
+
+      <style>
+        .icon-32 {
+          width: 32px;
+          height: 32px;
+        }
+
+        .mar-b-24 {
+          margin-bottom: 24px;
+        }
+
+        .pad-b-24 {
+          padding-bottom: 24px;
+        }
+
+        .fw-400 {
+          font-weight: 400;
+        }
+
+        .img-dark {
+          filter: brightness(0) saturate(100%) invert(16%) sepia(15%) saturate(10%) hue-rotate(324deg) brightness(98%) contrast(104%);
+        }
+
+        .card-details-offer-container {
+          border-radius: var(--Vertical-Spacing-Spacing-xs, 8px);
+          border: 1px solid #FFB500;
+          background: linear-gradient(180deg, rgba(255, 186, 0, 0.10) 0%, rgba(255, 186, 0, 0.00) 100%);
+          padding: 22px 16px 16px 16px;
+          position: relative;
+        }
+
+        .card-details-offer-caption {
+          position: absolute;
+          left: 16px;
+          top: -11px;
+          border-radius: 4px;
+          background: var(--Interaction-interactive-accent-hover, #FFBA00);
+          padding: 3px 10px;
+          color: var(--text-foregrounds-text-2, #252525);
+          text-align: center;
+          font-feature-settings: 'clig' off, 'liga' off;
+          font-family: Roboto;
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 16px;
+          text-transform: uppercase;
+        }
+
+        table.table-striped.table-yellow:not(.table-stack) tbody tr:nth-child(odd) td {
+          background-color: #FFFAD7;
+          border-bottom: 1px solid #B3B3B3;
+        }
+
+        table.table-yellow {
+          border-bottom: 1px solid #B3B3B3;
+        }
+
+        table.table-yellow thead tr {
+          border-bottom: 2px solid #000;
+        }
+
+        #more-account-features .table-wpr {
+          border-radius: 6px;
+          border: 1px solid rgba(0, 0, 0, 0.10);
+        }
+
+        #more-account-features .table-cell {
+          padding: 20px 48px;
+          height: 96px !important;
+          vertical-align: middle;
+        }
+
+        #more-account-features .table-cell p {
+          font-size: 18px;
+          line-height: 30px;
+        }
+
+        #banking-in-your-hands .block-wpr {
+          border-radius: 13px;
+          border: 1px solid #919191;
+          background: linear-gradient(114deg, #EDF7FC 0%, #FFF 100%);
+        }
+
+        #banking-in-your-hands .block-inner {
+          padding: 36px 25px 0px 28px;
+        }
+
+        #tailored-advice img {
+          max-height: 150px;
+          max-width: 100%;
+        }
+
+        .card-title {
+          font-family: Roboto;
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 24px; 
+        }
+
+        .card-details-header {
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+
+
+
+          span#Span1 {
+              position: absolute;
+              left: -9999px;
+          }
+  
+          #book,
+          #saving-phone,
+          #saving-visit {
+              display: none;
+          }
+  
+          .sa-callout {
+        border-radius: 8px;
+        background: var(--Backgrounds-background-1, #FFF);
+        box-shadow: 0px 54px 118px 0px rgba(37, 37, 37, 0.04), 0px 12.062px 26.357px 0px rgba(37, 37, 37, 0.06), 0px 3.591px 7.847px 0px rgba(37, 37, 37, 0.08);
+        display: flex;
+        flex-wrap: wrap;
+        padding-left: 60px;
+        padding-right: 60px;
+        gap: 32px;
+        max-width: 1165px;
+        margin: 0 auto;
+        min-height: 250px;
+        overflow: hidden;
+      }
+      .sa-callout .text {
+        padding: 24px 0 24px 0;
+        flex: 1;
+        align-self: center;
+      }
+      .sa-callout img {
+        width: 309px;
+        align-self: flex-end;
+      }
+          .savings-accounts-kids-sec .section-inner {
+              border-radius: 8px;
+              background: var(--Backgrounds-background-highlight, #F3F7F8);
+          }
+          .savings-accounts-kids {
+              max-width: 725px;
+              margin: 0 auto;
+          }
+          .interest-rates-boost p {
+              max-width: 725px;
+              margin-left: auto;
+              margin-right: auto;
+          }
+          .hisa-title {
+              display: block !important;
+          }
+          .default-title {
+              display: none;
+          }
+      @media screen and (max-width: 639px) {
+        .sa-callout img {
+          display: none;
+        }
+        .sa-callout {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+              .savings-accounts-kids div.text-center {
+                  text-align: left !important;
+              }
+              .savings-accounts-kids-sec .section-inner {
+                  padding: 32px 24px;
+              }
+              .interest-rates-boost div.text-center {
+                  text-align: left !important;
+              }
+
+        .mob-bg-contain {
+          background-size: contain !important;
+        }
+      }
+      /* Custom Sticky Nav START */
+
+	body .right-content .btn:not(.tablesaw-nav-btn).primary {
+
+			box-shadow: none;
+
+			border-radius: 50px;
+
+			line-height: 25px;
+
+			height: 50px;
+
+			font-weight: 400;
+
+			border: none;
+
+	}
+
+	body .is-sticky .nav-bar .nav-inner {
+
+			padding-top: 0 !important;
+
+			padding-bottom: 15px !important;
+
+	}
+
+				body .sticky-only-block,body .sticky-only-inline {
+
+			display: none !important
+
+	}
+
+	body .offer-bar.sticky-only-block {
+
+			display: none !important
+
+	}
+
+	body .nav-bar .right-content {
+
+			display: none
+
+	}
+
+	body .is-sticky .sticky-only-inline {
+
+			display: inline !important
+
+	}
+
+	body .is-sticky .sticky-only-block {
+
+			display: none !important
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .sticky-only-block {
+
+					display:block !important
+
+			}
+
+	}
+
+	body .is-sticky .product-sticky {
+
+			border-bottom: 3px solid #fedf01
+
+	}
+
+	body .is-sticky .product-sticky .nav-inner {
+
+			display: block
+
+	}
+
+	body .is-sticky .product-sticky .breadcrumb-wpr {
+
+			display: none !important
+
+	}
+
+	body .is-sticky .product-sticky .nav-location {
+
+			margin-top: 20px;
+
+			margin-right: 5px;
+
+			float: left;
+
+			transition-duration: 0s !important
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .product-sticky .nav-location {
+
+					display:flex;
+
+					margin-top: 10px;
+
+					margin-left: 5px
+
+			}
+
+	}
+
+	body .is-sticky .product-sticky .nav-btn {
+
+			display: none
+
+	}
+
+	body .is-sticky .product-sticky .additional-info {
+
+			font-size: 14px !important;
+
+			color: #252525;
+
+			float: left;
+
+			font-weight: 700 !important;
+
+			margin-top: 20px;
+
+			margin-left: 5px
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .product-sticky .additional-info {
+
+					margin-top:0;
+
+					font-size: 12px;
+
+					margin-left: 5px
+
+			}
+
+	}
+
+	body .is-sticky .product-sticky .right-content {
+
+			float: right;
+
+			height: 70px;
+
+			overflow: hidden;
+
+			display: flex;
+
+			align-items: center
+
+	}
+
+	body .is-sticky .product-sticky .right-content img {
+
+			height: 65px
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .product-sticky .right-content img {
+
+					display:none
+
+			}
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .product-sticky .right-content .text-script {
+
+					display:none !important
+
+			}
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .product-sticky .right-content .text-btn {
+
+					display:none !important
+
+			}
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .product-sticky .left-content {
+
+					display:flex;
+
+					float: left;
+
+					flex-direction: column
+
+			}
+
+	}
+
+	@media(max-width: 420px) {
+
+			body .is-sticky .product-sticky .left-content {
+
+					width:calc(100% - 160px)
+
+			}
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .product-sticky .left-content.vantage-h1-fix {
+
+					margin-top:15px
+
+			}
+
+	}
+
+	body .is-sticky .product-sticky .offer-bar {
+
+			display: none
+
+	}
+
+	@media(max-width: 996px) {
+
+			body .is-sticky .product-sticky .offer-bar {
+
+					min-height:34px;
+
+					display: block;
+
+					float: left;
+
+					margin-left: -15px;
+
+					margin-right: -15px;
+
+					width: calc(100% + 30px)
+
+			}
+
+	}
+
+	/* Custom Sticky Nav END */
+      .sticky-nav__custom {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            z-index: 11;
+
+            background-color: #fff;
+
+            box-shadow: 0px 6px 15px 0px rgba(0, 0, 0, 0.05);
+
+            display: none;
+
+        }
+
+				.sticky-nav__custom .btn:not(.tablesaw-nav-btn).primary {
+
+					border-radius: 0;
+
+				}
+
+        .sticky-nav__custom .left-col {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 16px;
+
+        }
+
+        .sticky-nav__custom h1 {
+
+            font-size: 24px;
+
+            font-weight: 500;
+
+            line-height: 32px; 
+
+            margin: 0;
+
+        }
+
+        .sticky-nav__custom .m-fee {
+
+            color: #000;
+
+            font-family: RBCDisplay;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            line-height: normal;
+
+        }
+
+        .sticky-nav__custom .right-col {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+        }
+
+        .sticky-nav__custom .right-col .offer-desk {
+
+            font-family: Georgia;
+
+            font-size: 16px;
+
+            font-style: italic;
+
+            font-weight: 400;
+
+            line-height: 24px;
+
+        }
+
+        .sticky-nav__custom .right-col .btn {
+
+            font-size: 14px;
+
+            font-weight: 500 !important;
+
+            line-height: 20px !important;
+
+            height: auto !important;
+
+            padding: 14px 20px;
+
+        }
+
+        .sticky-nav__custom-center {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            padding: 5px 15px;
+
+            max-width: 1170px;
+
+            margin: 0 auto;
+
+        }
+
+        .sticky-nav__custom .offer-mob {
+
+            display: none;
+
+        }
+      @media only screen and (max-width: 768px){
+
+					.sticky-nav__custom .left-col {
+
+						flex-direction: column;
+
+						align-items: flex-start;
+
+						gap: 8px;
+
+					}
+
+					.sticky-nav__custom h1 {
+
+						max-width: 415px;
+
+					}
+
+				}
+       @media only screen and (max-width: 639px){
+
+            .sticky-nav__custom {
+
+                box-shadow: none;
+
+                border-bottom: 1px solid #B3B3B3;
+
+            }
+
+            .sticky-nav__custom h1 {
+
+                font-size: 12px;
+
+                font-weight: 700;
+
+                line-height: 26px;
+
+            }
+
+            .sticky-nav__custom .left-col {
+
+                gap: 0;
+
+            }
+
+            .sticky-nav__custom .right-col .offer-desk {
+
+                display: none;
+
+            }
+
+            .sticky-nav__custom .m-fee {
+
+                color: #252525;
+
+                font-size: 12px;
+
+                line-height: 26px;
+
+            }
+
+            .sticky-nav__custom-center {
+
+                padding-left: 20px;
+
+            }
+
+            .sticky-nav__custom .offer-mob {
+
+                display: block;
+
+                background-color: #F3F7F8;
+
+                padding: 5px 0 5px 20px;
+
+                font-size: 12px;
+
+                font-weight: 400;
+
+                line-height: 24px;
+
+            }
+
+        }
+      </style>
+      <script>
+          const ecom_products = {
+              "eComProductLib": {
+                  "p1": {
+                      "pid": "100047",
+                      "position": 1,
+                      "productList": "Product Details"
+                  }
+              }
+          };
+          // const promotionList = ['p-87868'];
+          // const itemId = '100047';
+          // const ga4EcomInfo = {
+          //     'promo': {
+          //         'p-87868': {
+          //             'promo_items': ["100047"],
+          //             'promo_name': 'PB_ACC_SAV_JUNE_2021',
+          //             'promo_creative': 'https://www.rbcroyalbank.com/bank-accounts/_assets-custom/images/banners/woman-phone.jpg'
+          //         }
+          //     },
+          //     'item': ["100047"]
+          // }
+      </script>
+  
+  <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is a high interest savings account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A high interest savings account, such as RBC High Interest eSavings, typically offers a higher interest rate than traditional savings accounts. Interest is calculated daily and paid monthly. Promotions may also apply throughout the year."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I open a high interest savings account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can open an RBC High Interest eSavings account online, through the RBC Mobile app, by visiting a branch, or by calling 1-800-769-2561 (available 24/7)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are the best savings account rates?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "At RBC, the High Interest eSavings account typically offers the highest interest rate. Visit the savings accounts page for current rates."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I send an Interac e-Transfer?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can send an Interac e-Transfer via RBC Online or Mobile Banking. All you need is the recipient’s email or mobile number. Detailed steps are provided in the online or mobile platform."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are the Foreign Exchange rates?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can view the latest foreign exchange rates using RBC's Exchange Currency Converter online."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How many high interest savings accounts can you have?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In Canada, there’s no limit to how many high interest savings accounts you can have. RBC also does not impose a limit."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can you lose money in a high interest savings account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Generally, no. Your principal is protected (minus service fees) and insured by the Canada Deposit Insurance Corporation (CDIC)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the interest rate for the RBC High Interest eSavings account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Interest rates are subject to change based on market conditions. Promotional rates may also apply. Visit the RBC rates page for current offers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do high interest savings accounts work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You earn interest on every dollar saved. Interest is calculated daily and paid monthly, helping your savings grow faster."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are high interest savings accounts safe?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, RBC High Interest eSavings accounts are eligible for CDIC insurance, offering a safe place to store your savings."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I set up Save-Matic?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In Online Banking, use 'Pay Bills and Transfer Funds' to access 'Set Up Save-Matic'. Enter your details and confirm to schedule automatic transfers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I turn on NOMI Find & Save?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sign into the RBC Mobile app, tap ‘More’, then ‘NOMI Find & Save’ to turn it on. It helps you automatically save based on your spending habits."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you offer Mobile Cheque Deposit?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Use the RBC Mobile app or RBC Canada app to deposit cheques. Select 'Deposit Cheque' from the main menu and follow the prompts."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How to choose the best savings account for my goals?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Consider the interest rate, fees, accessibility, and minimum balance requirements. Choose the account that aligns with your savings goals."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How often do high interest savings accounts pay interest?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Interest is calculated daily and paid monthly based on your account balance and accrued interest throughout the month."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the difference between RBC eSavings and other RBC savings accounts?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "RBC High Interest eSavings offers a higher interest rate, free eStatements and eNotifications, compared to other RBC savings accounts."
+            }
+          }
+        ]
+      }
+  </script>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/high-interest-savings-account.html#webpage",
+  "url": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/high-interest-savings-account.html",
+  "name": "Open a High Interest Savings Account Online",
+  "description": "Maximize your savings with the RBC High Interest eSavings Account. Enjoy competitive interest rates, automated savings tools, and free online transfers. Open your account today and watch your money grow faster!",
+  "publisher": {
+    "@type": "Organization",
+    "name": "RBC Royal Bank of Canada",
+    "url": "https://www.rbcroyalbank.com"
+    }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@id": "https://www.rbcroyalbank.com/personal.html",
+        "name": "Personal"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "item": {
+        "@id": "https://www.rbcroyalbank.com/bank-accounts/index.html",
+        "name": "Bank Accounts"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "item": {
+        "@id": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/index.html",
+        "name": "Savings Accounts"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "item": {
+        "@id": "https://www.rbcroyalbank.com/bank-accounts/savings-accounts/high-interest-savings-account.html",
+        "name": "RBC High Interest eSavings account"
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BankAccount",
+  "name": "RBC High Interest eSavings",
+  "description": "Maximize your savings with the RBC High-Interest eSavings Account. Enjoy competitive interest rates, automated savings tools, and free online transfers.",
+  "bankAccountType": "Savings",
+  "feesAndCommissionsSpecification": "https://www.rbcroyalbank.com/onlinebanking/servicech/pdf/PDA_Account_Disclosure_Booklet.pdf",
+  "offers": {
+    "@type": "Offer",
+    "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": 0,
+      "priceCurrency": "CAD",
+      "eligibleQuantity": {
+        "@type": "QuantitativeValue",
+        "value": 1,
+        "unitCode": "MON"
+      }
+    },
+    "offeredBy": {
+      "@type": "BankOrCreditUnion",
+      "@id": "https://www.rbcroyalbank.com",
+      "name": "RBC Royal Bank of Canada"
+    }
+  }
+}
+</script>
+  
+  </head>
+  
+  <body>
+      <div id="dvl-wpr" data-lang-toggle="bank-accounts/_assets-custom/js">
+          <header data-loc="personal-banking">
+        
+        
+    
+    
+    
+    
+    
+
+
+<a href="#page-title" id="skip-nav">Skip to main content</a>
+<div id="nav-header" class="master-header mega-header" data-lob="banking">
+	<nav aria-label="Navigation with links to other RBC services">
+		<div class="primary-nav"></div>
+		<div class="secondary-nav">
+			<ul class="inverse">
+				<li class="adchoices-link"><a href="https://www.rbcroyalbank.com/privacy-security/interest-based-advertising/index.html" data-dig-id="enterprise-DDn35embWYSU-20">AdChoices</a></li>
+				<li class="promotions-link"><a href="https://www.rbcroyalbank.com/special-promotions/index-or.html" id="header-promotions-link" class="promo-link" data-dig-id="enterprise-DDn35embWYSU-21">Promotions</a></li>
+				<li class="dropdown-overlay right language pad-b-0">
+					<div class="dropdown-text" id="nav-language" role="button" tabindex="0" aria-expanded="false" aria-controls="content-language" aria-label="Select language">EN</div>
+					<div id="content-language" class="dropdown-content" role="region" aria-hidden="true" aria-labelledby="nav-language">
+						<ul id="header-language" class="horizontal"></ul>
+					</div>
+				</li>
+				<li class="contact">
+					<a href="https://www.rbcroyalbank.com/customer-service/index.html" class="standalone-link" id="header-contact-us" data-dig-id="enterprise-DDn35embWYSU-22">Contact Us</a>
+					<ul id="header-contact-list" class="display-none">
+						<li><a href="https://maps.rbcroyalbank.com/" class="branch-link">Find a Branch</a></li>
+						<li class="phone-link">Call <span class="tel-number">1-800-769-2511</span></li>
+						<li><a href="https://www.rbcroyalbank.com/customer-service/index.html" class="email-link">Email</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</nav>
+</div>
+<div id="header" class="master-header mega-header" data-domain="rbcroyalbank.com">
+	<!-- ** Logo ** -->
+	<a href="/personal.html" class="logo-wpr" data-dig-id="enterprise-DDn35embWYSU-27">
+		<div class="logo-img"><img src="/dvl/v1.0/assets/images/logos/rbc-logo-shield.svg" width="78" height="100"  alt="Royal Bank of Canada logo"></div>
+		<div class="logo-text">Royal Bank</div>
+	</a>
+
+	<div class="header-mega-nav">
+	<ul>
+		<li class="mega-nav-dd">
+			<button class="mega-nav-dd-btn" aria-controls="mn-product" aria-expanded="false" data-details="track - personal banking nav - light blue header - products">Product</button>
+			<div id="mn-product" class="mega-nav-dd-content product">
+				<div class="mega-nav-dd-content-inner">
+					<ul>
+						<li><a href="/bank-accounts/index.html" data-dig-id="enterprise-DDn35embWYSU-1"><span><img src="/mega-navigation/_assets-custom/images/icon-accounts.svg" alt=""></span>Accounts</a></li>
+						<li><a href="/credit-cards/index.html" data-dig-id="enterprise-DDn35embWYSU-2"><span><img src="/mega-navigation/_assets-custom/images/icon-credit-cards.svg" alt=""></span>Credit Cards</a></li>
+						<li><a href="/mortgages/index.html" data-dig-id="enterprise-DDn35embWYSU-3"><span><img src="/mega-navigation/_assets-custom/images/icon-mortgages.svg" alt=""></span>Mortgages</a></li>
+						<li><a href="/borrowing-solutions/index.html" data-dig-id="enterprise-DDn35embWYSU-4"><span><img src="/mega-navigation/_assets-custom/images/icon-loans.svg" alt=""></span>Loans</a></li>
+						<li><a href="/investments/index.html" data-dig-id="enterprise-DDn35embWYSU-5"><span><img src="/mega-navigation/_assets-custom/images/icon-investments.svg" alt=""></span>Investments</a></li>
+						<li><a href="/insurance/index.html" data-dig-id="enterprise-DDn35embWYSU-6"><span><img src="/mega-navigation/_assets-custom/images/insurance-icon.svg" alt=""></span>Insurance</a></li>
+					</ul>
+				</div>
+			</div>
+		</li>
+		<li class="mega-nav-dd">
+			<button class="mega-nav-dd-btn" aria-controls="mn-solution" aria-expanded="false" data-details="track - personal banking nav - light blue header - solutions">Solution</button>
+			<div id="mn-solution" class="mega-nav-dd-content solution">
+				<div class="mega-nav-dd-content-inner">
+					<ul>
+						<li><a href="/ways-to-bank/index.html" data-dig-id="enterprise-DDn35embWYSU-7"><span><img src="/mega-navigation/_assets-custom/images/icon-ways-to-bank.svg" alt=""></span>Ways to Bank</a></li>
+						<li><a href="/en-ca/new-to-canada/newcomers/" data-dig-id="enterprise-DDn35embWYSU-9"><span><img src="/mega-navigation/_assets-custom/images/icon-newcomers.svg" alt=""></span>Newcomers</a></li>
+						<li><a href="/retirement/index.html" data-dig-id="enterprise-DDn35embWYSU-11"><span><img src="/mega-navigation/_assets-custom/images/icon-retirement-planning.svg" alt=""></span>Retirement Planning</a></li>
+						<li><a href="/student-solution/index.html" data-dig-id="enterprise-DDn35embWYSU-12"><span><img src="/mega-navigation/_assets-custom/images/icon-student-solutions.svg" alt=""></span>Student Solutions</a></li>
+						<li><a href="/beyond-banking/index.html#personal-content" data-dig-id="enterprise-DDn35embWYSU-13"><span><img src="/mega-navigation/_assets-custom/images/icon-beyond-banking.svg" alt=""></span>Beyond Banking</a></li>
+						<li><a href="/sustainable-finance-solutions/index.html" data-dig-id="enterprise-DDn35embWYSU-14"><span><img src="/mega-navigation/_assets-custom/images/icon-sustainable-finance-solutions.svg" alt=""></span>Sustainable Finance <br>Solutions</a></li>
+						<li><a href="/rbcrewards/index.html" data-dig-id="enterprise-DDn35embWYSU-8"><span><img src="/mega-navigation/_assets-custom/images/icon-rewards.svg" alt=""></span>Rewards</a></li>
+						<li><a href="/international-banking/index.html" data-dig-id="enterprise-DDn35embWYSU-10"><span><img src="/mega-navigation/_assets-custom/images/ib-icon.svg" alt=""></span>International Banking</a></li>
+					</ul>
+				</div>
+			</div>
+		</li>
+		<li>
+			<a href="/en-ca/my-money-matters/" data-dig-id="enterprise-DDn35embWYSU-15">Advice</a>
+		</li>
+	</ul>
+</div>
+
+	<div class="header-content">
+
+		<!-- ** Search Bar ** -->
+		<div class="search-trigger" id="header-search-btn" aria-label="Open search dialog" role="button" tabindex="0">
+			<span class="search-text" id="header-search-text-btn"><img src="/mega-navigation/_assets-custom/images/icon-search.svg" width="21" height="21" alt=""><span class="offscreen">Search RBC...</span></span>
+		</div>
+	
+		<!-- ** Global Navigation ** -->
+		<div class="global-nav">
+			<!-- ** Secure Button ** -->
+			<div class="global-nav-item secure-btn">
+				<a href="https://secure.royalbank.com/signin.html" id="header-sign-in-btn" data-dig-id="enterprise-DDn35embWYSU-92" role="button" class="btn secondary fl-r" aria-label="Sign in to R B C Online Banking">Sign In</a>
+			</div>	
+		</div>	
+	</div>
+	
+	<div class="mobile-header-content">
+		<a href="/personal.html" class="mobile-logo-wpr" data-dig-id="enterprise-DDn35embWYSU-27">
+			<div class="logo-img"><img src="/dvl/v1.0/assets/images/logos/rbc-logo-shield.svg" width="31" height="40"  alt="Royal Bank of Canada logo"></div>
+			<div class="logo-text">Royal Bank</div>
+		</a>
+		<div class="mobile-nav">
+			<a href="https://secure.royalbank.com/signin.html" id="header-mobile-sign-in-btn" class="mobile-secure-btn" data-dig-id="enterprise-DDn35embWYSU-92" aria-label="Sign in to R B C Online Banking"><span>SIGN IN</span></a>
+			<button class="mobile-nav-btn"><span>MENU</span></button>
+		</div>
+	</div>
+</div>
+
+<!-- *** Intelli Bar Starts *** -->
+<div class="search-bar" id="search-bar" tabindex="-1" role="dialog" aria-labelledby="header-search" aria-hidden="true">
+	<div class="search-bar-inner">
+		<div class="search-logo">
+			<img src="/dvl/v1.0/assets/images/logos/rbc-logo-shield-blue.svg" width="63" height="72"  alt="Royal Bank of Canada logo">	
+		</div>
+		<div class="search-form">
+			<form method="get" action="https://www.rbcroyalbank.com/search-public/index.html" id="header-search-form">
+				<label for="header-search" class="offscreen">Ask your question</label>
+				<input type="hidden" name="type" id="header-search-type" value="0">
+				<input type="search" name="question" id="header-search" class="ui-autocomplete-input" autocomplete="off" placeholder="Ask your question">
+			</form>
+			<button type="button" id="search-close" class="search-close" aria-label="Close search"><img src="/dvl/v1.0/assets/images/ui/ui-close-blue.svg" alt="Close search"></button>
+		</div>
+	</div>
+</div>
+<!-- *** Intelli Bar Ends *** -->
+        
+
+
+    
+
+
+<div class="mega-nav-wpr">
+    <nav class="mega-nav-menu">
+        <ul>
+            <li class="mega-nav-overview"><a href="/bank-accounts/index.html" data-dig-id="enterprise-DDn35embWYSU-28">Accounts</a></li>
+            <li class="mega-nav-dd sub-dd">
+                <button class="mega-nav-dd-btn" aria-controls="mn-chequing-accounts" aria-expanded="false" data-details="track - personal banking nav - white nav - chequing accounts">Chequing Accounts</button>
+                <div id="mn-chequing-accounts" class="mega-nav-dd-content">
+                    <div class="mega-nav-dd-content-inner">
+                        <div class="dd-content-left">
+                            <ul class="mega-nav-links">
+                                <li>
+                                    <a href="/bank-accounts/chequing-accounts/index.html" data-dig-id="enterprise-DDn35embWYSU-69">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-chequing.svg" alt="">
+                                        <span>
+                                            <span>Chequing Accounts Overview</span>
+                                            <span>Unlock more from your everyday benefits</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/bank-accounts/chequing-accounts/compare-chequing-accounts.html" data-dig-id="enterprise-DDn35embWYSU-70">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-compare.svg" alt="">
+                                        <span>
+                                            <span>Compare Chequing Accounts</span>
+                                            <span>A range of accounts with the valuable features you want</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/bank-accounts/chequing-accounts/find-chequing-account.html" data-dig-id="enterprise-DDn35embWYSU-71">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-recommended.svg" alt="">
+                                        <span>
+                                            <span>Account Selector Tool</span>
+                                            <span>Find a chequing account</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/customer-service/index.html?lob=personal" data-dig-id="enterprise-DDn35embWYSU-29">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-customer-support.svg" alt="">
+                                        <span>
+                                            <span>Customer Support</span>
+                                            <span>Let us help you find the answers you're looking for...</span>
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dd-content-right">
+                            <div class="grid-wpr">
+                                <div class="grid-half">
+                                    <span class="dd-content-head">Canadian Banking</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/bank-accounts/chequing-accounts/day-to-day-banking.html" data-dig-id="enterprise-DDn35embWYSU-72">
+                                                <span>
+                                                    <span>Day to Day Banking</span>
+                                                    <span>The essentials you need, for a low monthly fee</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/chequing-accounts/advantage-banking.html" data-dig-id="enterprise-DDn35embWYSU-73">
+                                                <span>
+                                                    <span>Advantage Banking</span>
+                                                    <span>Unlimited debits and valuable features for a low fee</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="grid-half">
+                                    <span class="dd-content-head"></span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/bank-accounts/chequing-accounts/signature-no-limit-banking.html" data-dig-id="enterprise-DDn35embWYSU-74">
+                                                <span>
+                                                    <div class="snipe pill"><span>SPECIAL OFFER</span></div>
+                                                    <span>Signature No Limit Banking</span>
+                                                    <span>A chequing account with everyday benefits</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/chequing-accounts/vip-banking.html" data-dig-id="enterprise-DDn35embWYSU-75">
+                                                <span>
+                                                    <span>VIP Banking</span>
+                                                    <span>The most valuable features we offer – in a single account</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="mega-nav-dd sub-dd">
+                <button class="mega-nav-dd-btn" aria-controls="mn-savings-accounts" aria-expanded="false" data-details="track - personal banking nav - white nav - savings accounts">Savings Accounts</button>
+                <div id="mn-savings-accounts" class="mega-nav-dd-content">
+                    <div class="mega-nav-dd-content-inner">
+                        <div class="dd-content-left">
+                            <ul class="mega-nav-links">
+                                <li>
+                                    <a href="/bank-accounts/savings-accounts/index.html" data-dig-id="enterprise-DDn35embWYSU-76">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-savings.svg" alt="">
+                                        <span>
+                                            <span>Savings Accounts Overview</span>
+                                            <span>Get all your currency working harder for you</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/bank-accounts/savings-accounts/compare-savings-accounts.html" data-dig-id="enterprise-DDn35embWYSU-77">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-compare.svg" alt="">
+                                        <span>
+                                            <span>Compare Savings Accounts</span>
+                                            <span>Get a savings account recommendation</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/bank-accounts/savings-accounts/savings-interest-calculator.html" data-dig-id="">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-calc.svg" style="width: 16px;" alt="">
+                                        <span>
+                                            <span>Savings Calculator</span>
+                                            <span>See how your money could grow over time</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/customer-service/index.html?lob=personal" data-dig-id="enterprise-DDn35embWYSU-30">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-customer-support.svg" alt="">
+                                        <span>
+                                            <span>Customer Support</span>
+                                            <span>Let us help you find the answers you're <br>looking for...</span>
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dd-content-right">
+                            <div class="grid-wpr">
+                                <div class="grid-half">
+                                    <span class="dd-content-head">Canadian Banking</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/bank-accounts/savings-accounts/high-interest-savings-account.html" data-dig-id="enterprise-DDn35embWYSU-78">
+                                                <span>
+                                                    <span>High Interest Savings</span>
+                                                    <span>Maximize your savings with the RBC High Interest eSavings account</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/savings-accounts/day-to-day-savings.html" data-dig-id="enterprise-DDn35embWYSU-79">
+                                                <span>
+                                                    <span>Day to Day Savings</span>
+                                                    <span>Our basic savings account</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="grid-half">
+                                    <span class="dd-content-head"></span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/bank-accounts/nomi-find-and-save.html" data-dig-id="enterprise-DDn35embWYSU-31">
+                                                <span>
+                                                    <span>NOMI Find & Save</span>
+                                                    <span>NOMI finds and you save – It’s that simple!</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/savings-accounts/enhanced-savings.html" data-dig-id="enterprise-DDn35embWYSU-93">
+                                                <span>
+                                                    <span>Enhanced Savings</span>
+                                                    <span>Get the Most From Your Savings</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+
+            <li class="mega-nav-dd sub-dd">
+                <button class="mega-nav-dd-btn" aria-controls="mn-international-banking" aria-expanded="false" data-details="track - personal banking nav - white nav - international banking">International Banking</button>
+                <div id="mn-international-banking" class="mega-nav-dd-content">
+                    <div class="mega-nav-dd-content-inner">
+                        <div class="dd-content-left">
+                            <ul class="mega-nav-links">
+                                <li>
+                                    <a href="/international-banking/index.html" data-dig-id="enterprise-DDn35embWYSU-34">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-advantage.svg" alt="">
+                                        <span>
+                                            <span>International Banking Overview</span>
+                                            <span>Products and services to meet your financial needs abroad</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/banking-services/international-money-transfer.html " data-dig-id="enterprise-DDn35embWYSU-35">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-student.svg" alt="">
+                                        <span>
+                                            <span>No Fee International Money Transfers</span>
+                                            <span>Send up to $50,000 per day to almost any country in the world for zero dollars</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.royalbank.com/apps/foreign-exchange-calculator/#foreign-exchange" data-dig-id="enterprise-DDn35embWYSU-36">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-student.svg" alt="">
+                                        <span>
+                                            <span>Foreign Exchange Calculator</span>
+                                            <span>Convert over 30 foreign currencies and purchase through online banking</span>
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dd-content-right">
+                            <div class="grid-wpr">
+                                <div class="grid-one-third">
+                                    <span class="dd-content-head">International</span>
+
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/bank-accounts/us-foreign-currency-accounts.html" data-dig-id="enterprise-DDn35embWYSU-99">
+                                                <span>
+                                                    <span>Foreign Currency Accounts</span>
+                                                    <span>Manage your money globally with accounts in U.S. Dollar, HK Dollar, Euro and British Pound currencies</span>
+                                               </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/euro-savings-account.html" data-dig-id="enterprise-DDn35embWYSU-97">
+                                                <span>
+                                                    <span>Euro eSavings</span>
+                                                    <span>Earn interest on every Euro</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/british-pound-savings-account.html" data-dig-id="enterprise-DDn35embWYSU-98">
+                                                <span>
+                                                    <span>British Pound eSavings</span>
+                                                    <span>Earn interest on every British Pound</span>
+
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/hong-kong-dollar-savings-account.html" data-dig-id="enterprise-DDn35embWYSU-96">
+                                                <span>
+                                                    <span>Hong Kong Dollar eSavings</span>
+                                                    <span>Earn interest on every Hong Kong Dollar</span>
+
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="grid-one-third">
+                                    <span class="dd-content-head">NEW TO CANADA</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/new-to-canada/" data-dig-id="enterprise-DDn35embWYSU-41">
+                                                <span>
+                                                    <span>Newcomer Banking</span>
+                                                    <span>Designed for newcomers and loaded with great features and benefits</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/new-to-canada/bank-offers-for-permanent-resident-and-foreign-worker-newcomers/" data-dig-id="enterprise-DDn35embWYSU-100">
+                                                <span>
+                                                    <span>The RBC Newcomer Advantage</span>
+                                                    <span>No-monthly-fee banking for a year with RBC</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/new-to-canada/international-students/" data-dig-id="enterprise-DDn35embWYSU-42">
+                                                <span>
+                                                    <span>International Students</span>
+                                                    <span>Advice, banking, credit and more to help make your international studies easier</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="grid-one-third">
+                                    <span class="dd-content-head">U.S. CROSS-BORDER</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="https://www.rbcbank.com/usbanking/index.html?utm_campaign=IBMM" data-dig-id="enterprise-DDn35embWYSU-37">
+                                                <span>
+                                                    <span>U.S. Cross-Border Banking</span>
+                                                    <span>For Canadians who work, shop, travel, study or live in U.S.</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/us-personal-account.html" data-dig-id="enterprise-DDn35embWYSU-94">
+                                                <span>
+                                                    <span>U.S. Personal Chequing Account</span>
+                                                    <span>Deposit and withdraw U.S. dollars in Canada</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/bank-accounts/us-high-interest-savings-account.html" data-dig-id="enterprise-DDn35embWYSU-95">
+                                                <span>
+                                                    <span>U.S. High Interest eSavings</span>
+                                                    <span>High interest on every U.S. Dollar in Canada</span>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="https://www.rbcbank.com/cross-border/us-bank-accounts/preferred-money-market-savings.html?utm_campaign=IBMM" data-dig-id="enterprise-DDn35embWYSU-101">
+                                                <span>
+                                                    <span>U.S. Preferred Money Market Savings</span>
+                                                    <span>Earn our best interest rates on U.S. Dollars</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="mega-nav-dd sub-dd">
+                <button class="mega-nav-dd-btn" aria-controls="mn-student-banking" aria-expanded="false" data-details="track - personal banking nav - white nav - student banking">Student Banking</button>
+                <div id="mn-student-banking" class="mega-nav-dd-content">
+                    <div class="mega-nav-dd-content-inner">
+                        <div class="dd-content-left">
+                            <ul class="mega-nav-links">
+                                <li>
+                                    <a href="/bank-accounts/youth-student-banking/index.html" data-dig-id="enterprise-DDn35embWYSU-81">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-student.svg" alt="">
+                                        <span>
+                                            <span>Youth and Student Banking Overview</span>
+                                            <span>Accounts for Students and Youth</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/student-solution/index.html" data-dig-id="enterprise-DDn35embWYSU-47">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-student.svg" alt="">
+                                        <span>
+                                            <span>RBC Student Solutions</span>
+                                            <span>Everything you need to take on the challenges <br>of tomorrow</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/student/budget-calculator/">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-student.svg" alt="">
+                                        <span>
+                                            <span>Student Budget Calculator</span>
+                                            <span>How much will a school year really cost you?</span>
+                                        </span>
+                                    </a>
+                                </li>   
+                            </ul>
+                        </div>
+                        <div class="dd-content-right">
+                            <div class="grid-wpr">
+                                <div class="grid-half">
+                                    <span class="dd-content-head">Youth and Student Banking</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/bank-accounts/youth-student-banking/advantage-banking-students.html" data-dig-id="enterprise-DDn35embWYSU-80">
+                                                <span>
+                                                    <div class="snipe pill"><span>SPECIAL OFFER</span></div>
+                                                    <span>RBC Advantage Banking for students</span>
+                                                    <span>A premier student bank account that gives you more perks <br>for less</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="grid-half">
+                                    <span class="dd-content-head"></span>
+                                    <ul class="mega-nav-links">
+                                         <li>
+                                            <a href="/bank-accounts/youth-student-banking/leo-young-savers-account.html" data-dig-id="enterprise-DDn35embWYSU-46">
+                                                <span>
+                                                    <span>RBC Leo's Young Savers Account</span>
+                                                    <span>Kick-start your kids’ savings with $50 from RBC</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="mega-nav-dd sub-dd">
+                <button class="mega-nav-dd-btn" aria-controls="mn-help-with-my-account" aria-expanded="false" data-details="track - personal banking nav - white nav - help with my account">Help With My Account</button>
+                <div id="mn-help-with-my-account" class="mega-nav-dd-content">
+                    <div class="mega-nav-dd-content-inner">
+                        <div class="dd-content-left">
+                            <ul class="mega-nav-links">
+                                <li>
+                                    <a href="https://www1.royalbank.com/cgi-bin/rbaccess/rbunxcgi?F6=1&F7=IB&F21=IB&F22=HT&REQUEST=IBOnlineEnrollLink&LANGUAGE=ENGLISH&SPAGE=onlinenav1e" data-dig-id="enterprise-DDn35embWYSU-48">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-desktop.svg" alt="">
+                                        <span>
+                                            <span>Enrol in RBC Online Banking</span>
+                                            <span>Quick and easy control over your money</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/ways-to-bank/mobile/rbc-mobile-app/index.html" data-dig-id="enterprise-DDn35embWYSU-49">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-mobile.svg" alt="">
+                                        <span>
+                                            <span>Download the RBC Mobile App</span>
+                                            <span>Stay connected to your money</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.royalbank.com/apps/foreign-exchange-calculator" data-dig-id="enterprise-DDn35embWYSU-50">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-forex.svg" alt="">
+                                        <span>
+                                            <span>Foreign Exchange Calculator</span>
+                                            <span>Convert over 30 foreign currencies</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/customer-service/index.html?lob=personal" data-dig-id="enterprise-DDn35embWYSU-32">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-customer-support.svg" alt="">
+                                        <span>
+                                            <span>Customer Support</span>
+                                            <span>Need some additional help?</span>
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dd-content-right">
+                            <div class="grid-wpr">
+                                <div class="grid-one-third">
+                                    <span class="dd-content-head">Send Money & Make Payments</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/banking-services/international-money-transfer.html" data-dig-id="enterprise-DDn35embWYSU-82">
+                                                <span>
+                                                    <span>International Money Transfer</span>
+                                                    <span>Quickly delivered globally</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/interac-e-transfer.html" data-dig-id="enterprise-DDn35embWYSU-51">
+                                                <span>
+                                                    <span>Interac eTransfer</span>
+                                                    <span>Send, request, and receive money</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/pay-bills.html" data-dig-id="enterprise-DDn35embWYSU-52">
+                                                <span>
+                                                    <span>Pay Bills</span>
+                                                    <span>24/7 access to make a payment</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/wire-transfer.html" data-dig-id="enterprise-DDn35embWYSU-83">
+                                                <span>
+                                                    <span>Wire Transfer</span>
+                                                    <span>Send or receive a large sum</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/virtual-visa-debit/index.html" data-dig-id="enterprise-DDn35embWYSU-84">
+                                                <span>
+                                                    <span>Virtual Visa Debit</span>
+                                                    <span>Shop and pay bills directly from your account</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="grid-one-third">
+                                    <span class="dd-content-head">Additional Services</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/banking-services/additional-account-services.html" data-dig-id="enterprise-DDn35embWYSU-85">
+                                                <span>
+                                                    <span>All Additional Services</span>
+                                                    <span>For RBC Royal Bank account holders</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/overdraft-protection.html" data-dig-id="enterprise-DDn35embWYSU-53">
+                                                <span>
+                                                    <span>Overdraft Protection</span>
+                                                    <span>Be prepared for the unexpected</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/direct-deposit.html" data-dig-id="enterprise-DDn35embWYSU-86">
+                                                <span>
+                                                    <span>Direct Deposit</span>
+                                                    <span>No more waiting for cheques to arrive</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/ways-to-bank/banking-services/alerts.html" data-dig-id="enterprise-DDn35embWYSU-54">
+                                                <span>
+                                                    <span>Alerts</span>
+                                                    <span>Set up and receive alerts</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/order-cheques-stop-payment.html" data-dig-id="enterprise-DDn35embWYSU-55">
+                                                <span>
+                                                    <span>Cheques</span>
+                                                    <span>Order new cheques</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="grid-one-third">
+                                    <span class="dd-content-head">Support</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/search-public/index.html?requestType=NormalRequest&id=4713&source=5&question=What%20should%20I%20do%20if%20my%20client%20card%20was%20lost%20or%20stolen?" data-dig-id="enterprise-DDn35embWYSU-56">
+                                                <span>
+                                                    <span>Lost or Stolen Client Card</span>
+                                                    <span>Lock and report your card</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="https://maps.rbcroyalbank.com" data-dig-id="enterprise-DDn35embWYSU-57">
+                                                <span>
+                                                    <span>Change or Reset Your PIN</span>
+                                                    <span>Visit an RBC Royal Bank branch with <span class="no-wrap">2 valid</span> pieces of ID</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="https://www.rbc.com/cyber-security/how-to-contact-us/index.html" data-dig-id="enterprise-DDn35embWYSU-58">
+                                                <span>
+                                                    <span>Report Fraud</span>
+                                                    <span>Please contact your branch or call immediately</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/estatements.html" data-dig-id="enterprise-DDn35embWYSU-59">
+                                                <span>
+                                                    <span>Access Your eStatements</span>
+                                                    <span>7-year statement archiving</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="mega-nav-dd sub-dd">
+                <button class="mega-nav-dd-btn" aria-controls="mn-rbc-advantage" aria-expanded="false" data-details="track - personal banking nav - white nav - vantage">RBC Vantage</button>
+                <div id="mn-rbc-advantage" class="mega-nav-dd-content">
+                    <div class="mega-nav-dd-content-inner">
+                        <div class="dd-content-left">
+                            <ul class="mega-nav-links">
+                                <li>
+                                    <a href="/bank-accounts/value-program.html" data-dig-id="enterprise-DDn35embWYSU-87">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-value-program.svg" alt="">
+                                        <span>
+                                            <span>Value Program</span>
+                                            <span>Earn Avion points and save on monthly fees with any eligible account</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/benefits-of-banking-with-rbc/index.html" data-dig-id="accounts-jFLOXfaZzmCg-1">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-star.svg" alt="">
+                                        <span>
+                                            <span>Benefits of Banking with RBC</span>
+                                            <span>Explore rewards savings and perks</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/mobile/feature/nomi/index.html" data-dig-id="enterprise-DDn35embWYSU-61">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-statement.svg" alt="">
+                                        <span>
+                                            <span>NOMI Find and Save</span>
+                                            <span>A simple way to manage your day to day spending</span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/customer-service/index.html?lob=personal" data-dig-id="enterprise-DDn35embWYSU-33">
+                                        <img src="/mega-navigation/_assets-custom/images/icon-customer-support.svg" alt="">
+                                        <span>
+                                            <span>Customer Support</span>
+                                            <span>Let us help you find the answers you're looking for...</span>
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dd-content-right">
+                            <div class="grid-wpr">
+                                <div class="grid-half">
+                                    <span class="dd-content-head">Explore RBC Vantage</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/bank-accounts/rbc-vantage.html" data-dig-id="enterprise-DDn35embWYSU-88">
+                                                <span>
+                                                    <span>RBC Vantage</span>
+                                                    <span>Banking with Benefits</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/ways-to-bank/mobile/rbc-mobile-app/vantage-snapshot.html" data-dig-id="enterprise-DDn35embWYSU-62">
+                                                <span>
+                                                    <span>Vantage Snapshot</span>
+                                                    <span>See the benefits you get with your eligible RBC bank account</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/rbcrewards/" data-dig-id="enterprise-DDn35embWYSU-63">
+                                                <span>
+                                                    <span>Avion Rewards</span>
+                                                    <span>Cash back, Points and Savings — get it all with Avion Rewards</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/dms/mobile/lock-card/" data-dig-id="enterprise-DDn35embWYSU-64">
+                                                <span>
+                                                    <span>Card Lock</span>
+                                                    <span>Introducing Card Controls in the RBC Mobile app</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/petro-canada/" data-dig-id="enterprise-DDn35embWYSU-60">
+                                                <span>
+                                                    <span>Petro Canada</span>
+                                                    <span>Get Up To 7¢/L In Value</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="grid-half">
+                                    <span class="dd-content-head">Additional Services</span>
+                                    <ul class="mega-nav-links">
+                                        <li>
+                                            <a href="/mobile/feature/nomi/budgets/" data-dig-id="enterprise-DDn35embWYSU-65">
+                                                <span>
+                                                    <span>NOMI Budgets</span>
+                                                    <span>Take the hassle out of budgeting</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/banking-services/right-account-guarantee.html" data-dig-id="enterprise-DDn35embWYSU-66">
+                                                <span>
+                                                    <span>Right Account Guarantee</span>
+                                                    <span>We will refund up to 3 months of account fees</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/investments/myadvisor.html" data-dig-id="enterprise-DDn35embWYSU-67">
+                                                <span>
+                                                    <span>MyAdvisor</span>
+                                                    <span>Stay connected to your money and get help <br>reaching your goals</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="https://maps.rbcroyalbank.com" data-dig-id="enterprise-DDn35embWYSU-68">
+                                                <span>
+                                                    <span>Find a Branch</span>
+                                                    <span>Where are you located?</span>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Adding mega-menu-wpr div to trigger breadcrumb script -->
+<div class="mega-menu-wpr"></div>
+
+
+      </header>
+          <div class="side-menu" id="side-menu-id" role="dialog" aria-label="Menu Navigation" aria-hidden="true">
+	<div class="side-menu-inner">
+		<!-- *** Search Bar *** -->
+		<div class="side-menu-top">
+			<div class="side-menu-search">
+				<form method="get" id="sidebar-search-form" action="https://www.rbcroyalbank.com/search-public/index.html">
+					<label class="offscreen" for="sidebar-search">Search RBC</label>
+					<input type="hidden" name="type" id="sidebar-search-type" value="0">
+					<input type="text" name="question" id="sidebar-search" class="sidebar-search-input" autocomplete="off" placeholder="Search RBC">
+					<button type="button" class="search-btn" aria-label="Search"><img src="/dvl/v1.0/assets/images/icons/icon-search-yellow.svg" alt="Search" width="30" height="30"></button>
+				</form>
+			</div>
+		</div>
+		
+		<!-- *** Line of Business Dropdown *** -->
+		<div class="side-menu-lob">
+			<div class="lob-dropdown">
+				<button id="lob-toggle" class="lob-toggle collapsed" data-target="#side-menu-lob-content" data-toggle="collapse" aria-expanded="false" aria-controls="side-menu-lob-content">Personal Banking</button>
+				<div class="collapse" id="side-menu-lob-content">
+					<ul id="side-menu-lob" class="link-list"></ul>
+				</div>	
+			</div>
+		</div>
+		
+		<!-- *** Menu List *** -->
+		<div class="side-menu-list">
+			<ul id="menu-list" class="link-list">
+				<li class="lvl-root-menu"></li>
+			</ul>	
+		</div>
+
+		<div class="side-menu-link">
+			<div class="side-menu-promotions-link">
+				<a href="https://www.rbcroyalbank.com/special-promotions/index-or.html">Promotions</a>
+			</div>
+		</div>
+		
+		<!-- *** Secondary Menu *** -->
+		<div class="side-menu-secondary-menu">			
+			<ul class="secondary-menu-nav" role="tablist">
+                <li role="presentation" class="active"><a href="#side-menu-contactus" class="active" id="secondary-menu-contact-us" role="tab" data-toggle="tab" aria-controls="side-menu-contactus" aria-selected="true">Contact Us</a></li>
+				<li role="presentation"><a href="#side-menu-location" id="secondary-menu-location" role="tab" data-toggle="tab" aria-controls="side-menu-location" aria-selected="false">Language</a></li>
+            </ul>
+            <div class="secondary-menu-panels tab-content">
+                <div role="tabpanel" class="tab-pane active" id="side-menu-contactus" aria-labelledby="secondary-menu-contact-us">
+                	<ul id="side-menu-contact-list"></ul>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="side-menu-location" aria-labelledby="secondary-menu-location">
+                    <ul id="side-menu-language" class="link-list"></ul>
+                </div>
+            </div>
+		</div>
+
+		<div class="side-menu-link mar-0">
+			<div class="side-menu-adchoices-link">
+				<a href="https://www.rbcroyalbank.com/privacy-security/interest-based-advertising/index.html">AdChoices</a>
+			</div>
+		</div>
+
+		<button class="side-menu-close" aria-label="Close Menu"><img src="/dvl/v1.0/assets/images/ui/ui-close-white.svg" alt=""></button>
+	</div>
+</div>
+          <main data-menu="/bank-accounts/_assets-custom-reinvention/js/menu.json">
+            <div id="sticky-wrapper" class="sticky-wrapper product-sticky-wrapper">
+
+              <div class="nav-bar product-sticky" data-sticky="false">
+                               
+                <div class="nav-inner">
+
+                  <button class="nav-btn mar-t-hlf"><span>MENU</span></button>
+
+                  <div class="left-content">
+
+                    <h1 id="page-title" class="nav-location" tabindex="-1">High Interest Savings Account</h1>
+
+                    <span class="rbcdisplay sticky-only-inline additional-info">Monthly Fee: $0</span>
+
+                  </div>
+
+                  <div class="right-content">
+
+                    <span class="font-light text-black">
+
+                      <span class="font-light roboto-regular">Earn 4.60% interest for 3 months</span>
+
+                    </span>
+
+                    <a class="btn primary desktop-only mar-l-hlf mar-t" data-select-item="027" data-item-details="begin_checkout" target="_blank" href="https://public.rbcroyalbank.com/sgw1/cb/public-account-open?lang=en-CA&pid1=027" aria-label="Open Bank Account Online">Open Bank Account Online</a>
+
+                    <a class="btn primary mar-t-0 mobile-only" data-select-item="027" data-item-details="begin_checkout" target="_blank" href="https://public.rbcroyalbank.com/sgw1/cb/public-account-open?lang=en-CA&pid1=027" style="border-radius: 0px;">Open Account</a>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <aside class="sticky-nav__custom sticky-offset">
+
+              <div class="sticky-nav__custom-center">
+
+                  <div class="left-col">
+
+                      <h1>High Interest Savings Account</h1>
+
+                      <p class="m-fee">Monthly Fee: $0</p>
+
+                  </div>
+
+                  <div class="right-col">
+
+                      <!-- <p class="mar-0 mobile-hidden">Earn 4.60% interest for 3 months</p> -->
+
+                      <a data-select-item="027" data-item-details="begin_checkout" data-dig-id="accounts-QxWNv2dp270t-2" data-dig-details="pba- sticky open account cta" class="btn primary mar-0" target="_blank" href="https://public.rbcroyalbank.com/sgw1/cb/public-account-open?lang=en-CA&pid1=027" aria-label="Open Bank Account Online">Open Account</a>
+
+                  </div>
+
+              </div>
+
+              <!-- <p class="offer-mob mar-0">Earn 4.60% interest for 3 months</p> -->
+
+          </aside>
+             
+              <section>
+                <div class="section-inner">
+                  <div class="grid-wpr">
+                    <div class="grid-one-third">
+                      <div class="card-details-offer-container mar-b-24">
+                          <div class="card-details-offer-caption">Offer</div>
+                          <div class="card-details-offer-content fw-400">
+                              <!-- Earn 4.60% interest<sup><a href="#" data-target="#legal-1" class="scrollto">1</a></sup><sup>,</sup><sup><a href="#" data-target="#legal-2" class="scrollto">2</a></sup> for 3 months when you open your High Interest Savings account with RBC for the first time. Offer expires 3pm EST on October 27, 2026. -->
+                              Earn 4.60% interest<sup><a href="#" data-target="#legal-1" class="scrollto">1</a></sup><sup>,</sup><sup><a href="#" data-target="#legal-2" class="scrollto">2</a></sup> for 3 months when you open your RBC High Interest eSavings account for the first time. Offer expires 3pm EST on October 27, 2026.
+                          </div>
+                      </div>
+                      <div class="flex mar-b-hlf" style="justify-content: space-between;">
+                        <p class="mar-b-0">Monthly fee</p>
+                        <p><strong>Free<sup>+</sup></strong></p>
+                      </div>
+                      <p class="disclaimer mar-b-24"><sup>+</sup> This is the monthly account fee. Additional fees may apply depending on your account activity. View the <a href="#" data-target="#more-account-features" class="scrollto">fee details</a>.</p>
+                      <a href="https://public.rbcroyalbank.com/sgw1/cb/public-account-open?lang=en-CA&pid1=027" data-ecs-id="100047" class="btn primary w-100 mar-t-0 mar-b-hlf pad-tb-hlf" data-select-item="027" data-item-details="begin_checkout" target="_blank" data-dig-id="accounts-QxWNv2dp270t-1" data-dig-details="pba - top - open account">Open an Account<span class="offscreen"> (opens in new window)</span></a>
+                      <a href="#" class="scrollto" data-target="#legal-asterisk">View Legal Disclaimers</a>
+                    </div>
+                    <div class="grid-two-thirds">
+                      <div class="block-wpr rounded-corners bg-cool-white">
+                        <div class="block-inner pad">
+                          <h2 class="h4">Help Maximize Your Savings with a High Interest Savings Account</h2>
+                          <p>A high interest rate means your money works harder for you, which may help you reach your goals quicker.</p>
+                        </div>
+                      </div>
+                      <h3 class="h4 mar-b-24 mar-t">Account Benefits</h3>
+                      <div class="table-wpr">
+                        <div class="table-row">
+                          <div class="table-cell">
+                            <img src="/dvl/v1.0/assets/images/icons/icon-wallet.svg" alt="" class="icon-32 mar-r-hlf img-dark" />
+                          </div>
+                          <div class="table-cell">
+                            <h3 class="h5 mar-b-0">Earn interest on every dollar</h3>
+                            <p class="pad-b-24">Help grow your savings faster with interest calculated daily and paid monthly so every dollar works for you.</p>
+                          </div>
+                        </div>
+                        <div class="table-row">
+                          <div class="table-cell">
+                            <img src="/dvl/v1.0/assets/images/icons/icon-receipt.svg" alt="" class="icon-32 mar-r-hlf img-dark" />
+                          </div>
+                          <div class="table-cell">
+                            <h3 class="h5 mar-b-0">Access your money instantly</h3>
+                            <p class="pad-b-24">Transfer funds anytime between your RBC accounts online, by phone through self-served automated services, or at an RBC ATM with no fees or delays, plus one free RBC ATM cash withdrawal each month.</p>
+                          </div>
+                        </div>
+                        <div class="table-row">
+                          <div class="table-cell">
+                            <img src="/bank-accounts/_assets-custom/images/icon-hand-heart.svg" alt="" class="icon-32 mar-r-hlf" />
+                          </div>
+                          <div class="table-cell">
+                            <h3 class="h5 mar-b-0">Save automatically with no minimums</h3>
+                            <p>Start saving with any contribution, no monthly fee, and no minimum balance. Set up automatic transfers to help build your savings effortlessly toward your goals.</p>
+                          </div>
+                        </div>
+                      </div>
+                      <h3 class="h4">RBC High Interest eSavings Account <a href="/rates/persacct.html" data-dig-id="accounts-QxWNv2dp270t-9" data-dig-details="pba interest rates">Interest Rates</a></h3>
+                      <table class="table-striped table-yellow" id="swipe-table-example">
+                          <thead>
+                              <tr>
+                                  <th scope="col" class="w-25">Time</th>
+                                  <th scope="col">Rate</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              <tr>
+                                  <td>First 3 months</td>
+                                  <td>4.60%<sup><a href="#" class="scrollto" data-target="#legal-asterisk">*</a></sup></td>
+                              </tr>
+                              <tr>
+                                  <td>Thereafter</td>
+                                  <td>
+                                    0.550%
+                                  </td>
+                              </tr>
+                          </tbody>
+                      </table>
+                      <div class="block-wpr rounded-corners bg-light-blue">
+                        <div class="block-inner">
+                          <h3 class="h4">This Account May be Ideal for You&nbsp;If:</h3>
+                          <h4 class="h5 mar-b-0">You want to grow your savings faster</h4>
+                          <p>Earn competitive interest on every dollar, with your money working harder for you every day.</p>
+                          <h4 class="h5 mar-b-0">You’re interested in goal-based saving</h4>
+                          <p>Set up automatic transfers to effortlessly grow your savings toward future goals.</p>
+                          <hr>
+                          <h3 class="h4 mar-t-0">This Account May Not be Ideal for You&nbsp;If:</h3>
+                          <h4 class="h5">You make frequent transactions</h4>
+                          <p>This account is designed for saving — not for frequent debit use or bill payments.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section style="background-color: #FAFAFA;">
+                <div class="section-inner">
+                  <div class="grid-wpr">
+                    <div class="grid-one-third">
+                      <h2 class="h1 text-black">Learn about the RBC HISA</h2>
+                    </div>
+                    <div class="grid-two-thirds">
+                      <h3 class="h4 mar-b-qtr">What is a high interest savings account (HISA)?</h3>
+                      <p class="mar-b">A high interest savings account (HISA) or high yield savings account (HYSA) internationally, is a type of savings account that offers a higher interest rate than a standard savings account. Your money can grow faster over time, while still being available to you when you need it.</p>
+                      <h3 class="h4 mar-t-0 mar-b-qtr">How does HISA work?</h3>
+                      <p class="mar-b">Interest is calculated daily on the closing balance and paid monthly. It is a secure and convenient way to save for something that’s important to you.</p>
+                      <h3 class="h4 mar-t-0 mar-b-qtr">How do I use my HISA?</h3>
+                      <p>You can move money in and out of your HISA whenever you need. A great way to use your HISA is by setting up pre-authorized contributions so you don’t need to think about saving money over time.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section id="more-account-features">
+                <div class="section-inner">
+                  <h2 class="h1 text-center text-black mar-b">More Account Benefits and&nbsp;Fees</h2>
+                  <div class="table-wpr">
+                    <div class="table-row">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Currency</strong></p>
+                      </div>
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Canadian</strong></p>
+                      </div>
+                    </div>
+                    <div class="table-row bg-light-blue">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Monthly Debits<sup><a href="#" data-target="#legal-3" class="scrollto">3</a></sup></strong></p>
+                      </div>
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>1 Free RBC ATM cash withdrawal / month</strong></p>
+                      </div>
+                    </div>
+                    <div class="table-row">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Account Transfers</strong></p>
+                      </div>
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Free self-served transfers between any RBC Royal Bank personal deposit accounts in your name</strong></p>
+                      </div>
+                    </div>
+                    <div class="table-row bg-light-blue">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Debits Exceeding Monthly Limit</strong></p>
+                      </div>
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>$5.00 each</strong></p>
+                      </div>
+                    </div>
+                    <div class="table-row">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Interac and PLUS System ATM Network Access Fees<sup><a href="#" data-target="#legal-4" class="scrollto">4</a></sup></strong></p>
+                      </div>
+                      <div class="table-cell w-mob-50 mob-pad-lr-dbl">
+                        <p><strong>
+                          Interac: $2.00<br>
+                          PLUS System: $3.00 (Within Canada and U.S.)<br>
+                          PLUS System: $5.00 (Outside Canada and U.S.)
+                        </strong></p>
+                      </div>
+                    </div>
+                    <div class="table-row bg-light-blue">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Interac e-transfer<sup><a href="#" data-target="#legal-10" class="scrollto">10</a></sup></strong></p>
+                      </div>
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>$1.00 each<sup><a href="#" data-target="#legal-11" class="scrollto">11</a></sup></strong></p>
+                      </div>
+                    </div>
+                    <div class="table-row">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Cross-Border Debit<sup><a href="#" data-target="#legal-3" class="scrollto">3</a>,<a href="#" data-target="#legal-5" class="scrollto">5</a>,<a href="#" data-target="#legal-6" class="scrollto">6</a></sup></strong></p>
+                      </div>
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>$1.00 each</strong></p>
+                      </div>
+                    </div>
+                    <div class="table-row bg-light-blue">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>eStatement and eNotifications</strong></p>
+                      </div>
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Free — including cheque images viewed online less than 90 days old</strong></p>
+                      </div>
+                    </div>
+                    <div class="table-row">
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Access to Online, Mobile, and Telephone Banking<sup><a href="#" data-target="#legal-7" class="scrollto">7</a></sup></strong></p>
+                      </div>
+                      <div class="table-cell mob-pad-lr-dbl">
+                        <p><strong>Free</strong></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section id="tailored-advice">
+                <div class="section-inner">
+                  <h2 class="text-center centered" style="max-width: 964px;">Tailored Advice with a Trusted Advisor with Your High Interest Savings Account</h2>
+                  <div class="grid-wpr">
+                    <div class="grid-one-third">
+                      <img src="/bank-accounts/_assets-custom/images/talking-to-advisor.png" class="mob-centered" alt="" />
+                      <h3 class="h5 rbcdisplay-bold mar-b-qtr mar-t-hlf">Get personalized guidance</h3>
+                      <p>Gain confidence in money management with our trusted advisors.</p>
+                    </div>
+                    <div class="grid-one-third">
+                      <div class="flex" style="height: 150px; align-items: center;">
+                        <img src="/bank-accounts/_assets-custom/images/bank-location.png" class="mob-centered w-100" style="max-width: 311px;" alt="" />
+                      </div>
+                      <h3 class="h5 rbcdisplay-bold mar-b-qtr mar-t-hlf">Enjoy nationwide support</h3>
+                      <p>Get access to over 200 branches and ATMs that are ready to serve you.</p>
+                    </div>
+                    <div class="grid-one-third">
+                      <img src="/bank-accounts/_assets-custom/images/phone-call-language.png" class="mob-centered" alt="" />
+                      <h3 class="h5 rbcdisplay-bold mar-b-qtr mar-t-hlf">Speak with us in your preferred language</h3>
+                      <p>Receive help in more than 100 languages, ensuring every conversation feels comfortable and personal.</p>
+                    </div>
+                  </div>
+                  <a href="https://maps.rbcroyalbank.com/" class="btn tertiary centered" target="_blank" data-dig-id="accounts-QxWNv2dp270t-3" data-dig-details="pba connect to an advisor">Connect to an advisor<span class="offscreen"> (opens in new window)</span></a>
+                </div>
+              </section>
+
+              <section id="banking-in-your-hands" style="background-color: #FAFAFA;">
+                <div class="section-inner">
+                  <h2 class="text-center">All Your Banking, in Your Hands</h2>
+                  <div class="grid-wpr eh-wpr">
+                    <div class="grid-one-third">
+                      <div class="block-wpr eh">
+                        <div class="block-inner">
+                          <h3>Simplify budgeting</h3>
+                          <p>Receive tailored budget suggestions that match your spending and saving patterns.</p>
+                        </div>
+                        <div class="block-img" data-img="/bank-accounts/_assets-custom/images/phone-hands-callout.png" style="background: url('/bank-accounts/_assets-custom/images/phone-hands-callout.png'); background-repeat: no-repeat; background-position: bottom right; background-size: contain; background-blend-mode: multiply;"></div>
+                      </div>
+                    </div>
+                    <div class="grid-one-third">
+                      <div class="block-wpr eh">
+                        <div class="block-inner">
+                          <h3>Spot issues quickly</h3>
+                          <p>Receive alerts for duplicate or unusual transactions right in the RBC Mobile app.</p>
+                        </div>
+                        <div class="block-img" data-img="/bank-accounts/_assets-custom/images/lock-callout.png" style="background-repeat: no-repeat; background-position: bottom right; background-size: contain;"></div>
+                      </div>
+                    </div>
+                    <div class="grid-one-third">
+                      <div class="block-wpr eh">
+                        <div class="block-inner">
+                          <h3>Gain personal insights</h3>
+                          <p>Track grocery spending, upcoming payments and more with NOMI Insights.</p>
+                        </div>
+                        <div class="block-img mob-bg-contain" data-img="/bank-accounts/_assets-custom/images/nomi-phone-callout.png" style="background-repeat: no-repeat; background-position: bottom center; background-size: 85%;"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <a href="/mobile/feature/nomi/index.html" class="btn tertiary centered" data-dig-id="accounts-QxWNv2dp270t-4" data-dig-details="pba Meet NOMI">Meet NOMI</a>
+                </div>
+              </section>
+
+              <section style="background-color: #FAFAFA;">
+                <div class="section-inner">
+                  <div class="grid-wpr">
+                    <div class="grid-half">
+                      <img src="/bank-accounts/_assets-custom/images/phones-nomi-app.png" alt="" class="w-100" style="max-width: 421px;" />
+                    </div>
+                    <div class="grid-half">
+                      <h2 class="mar-b">RBC Mobile App</h2>
+                      <div class="flex" style="align-items: center; flex-wrap: nowrap;">
+                        <img src="/bank-accounts/_assets-custom/images/rbc-logo-square.png" alt="" style="height: 110px; margin-right: 24px; border-radius: 8px;" />
+                        <p>The RBC Mobile app gives you personalized tools and insights so you can save, spend and manage your money with ease.</p>
+                      </div>
+                      <div class="flex mar-t" style="align-items: center; flex-wrap: nowrap;">
+                        <!-- <div style="border-right: 1px solid #B3B3B3;" class="pad-r mar-r mob-pad-r-dbl mob-mar-r-dbl">
+                          <img src="/bank-accounts/_assets-custom/images/mobile-app-qr-code.png" alt="" style="height: 110px;" />
+                        </div> -->
+                        <div>
+                          <div class="mar-b-hlf">
+                            <a class="device-android pad-r-hlf" ga-event-action="click" ga-event-category="rbcroyalbank ways to bank" ga-event-label="Google Play Store Download Click" ga-on="click" href="https://play.google.com/store/apps/details?id=com.rbc.mobile.android&amp;hl=en" target="_blank" data-dig-id="accounts-QxWNv2dp270t-5" data-dig-details="pba google app">
+                        			<img alt="Get the RBC Mobile app on Google Play (opens in a new window)" border="0" class="mar-b-0 mob-mar-b-qtr mar-t-hlf" src="/mobile/wallet-app/_assets-custom/images/google-play.png">
+                        		</a> 
+                        		<a class="device-apple" ga-event-action="click" ga-event-category="RBC Mobile Student Edition" ga-event-label="Apple App Store Download Click" ga-on="click" href="https://itunes.apple.com/ca/app/rbc-mobile/id407597290?mt=8" target="_blank" data-dig-id="accounts-QxWNv2dp270t-6" data-dig-details="pba apple app">
+                        			<img alt="Get the RBC Mobile app in the App Store (opens in a new window)" border="0" class="mar-b-0 mob-mar-b-qtr mar-t-hlf" src="/mobile/wallet-app/_assets-custom/images/apple-store.png">
+                        		</a>
+                        	</div>
+                          <p>Scan or text “RBC” to 722722 and we’ll send you the link to your phone.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section style="background-color: #F3F7F8;">
+                <div class="section-inner">
+                  <h2 class="text-center">How We Keep Your Money Safe</h2>
+                  <div class="grid-wpr centered" style="max-width: 968px;">
+                    <div class="grid-half">
+                      <img src="/bank-accounts/_assets-custom/images/lock-img.png" class="mar-b-24" style="height: 72px;" alt="" />
+                      <p class="mar-b-qtr"><strong>Lock your card instantly</strong></p>
+                      <p>Easily lock your card if misplaced and unlock it again with just a tap.</p>
+                    </div>
+                    <div class="grid-half">
+                      <img src="/bank-accounts/_assets-custom/images/cdic-digital-symbol-en.svg" class="mar-b-24" style="height: 72px;" alt="" />
+                      <p class="mar-b-qtr"><strong>Security guarantee</strong></p>
+                      <p>Feel confident knowing your money is CDIC-insured up to $100,000 and secured against unauthorised transaction.<sup><a href="#" data-target="#legal-9" class="scrollto">9</a></sup></p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section style="background-color: #FAFAFA;">
+                <div class="section-inner">
+                  <div class="grid-wpr eh-wpr">
+                    <div class="grid-half eh">
+                      <img src="/bank-accounts/_assets-custom/images/reading-to-kid.png" class="w-100" alt="" style="max-width: 366px;" />
+                    </div>
+                    <div class="grid-half eh flex" style="align-items: center;"> 
+                      <div>
+                        <h2>Savings Accounts for Kids</h2>
+                        <p>It’s never too early for kids to start saving. A children’s savings account can help kids develop smart money habits while giving them a place to grow their savings. Take a look at our accounts for kids 0-12 and students 13+.</p>
+                        <a href="/accounts/youth-student-banking.html" class="btn tertiary mar-t-0 w-mob-100" data-dig-id="accounts-QxWNv2dp270t-7" data-dig-details="pba explore youth and student accounts">Explore Youth and Student Accounts</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- <section>
+                <div class="section-inner">
+                  <h2 class="h4 mar-b">Explore Our Other Savings Accounts</h2>
+                  <div id="card-grid-container" class="mar-b-24"></div> -->
+                  <!-- <div class="grid-wpr mar-b-24">
+                    <div class="grid-one-third">
+                      <div class="card-pad" style="border: 1px solid #E0E0E0; padding: 20px 24px;">
+                        <div class="card-details-header mar-b-hlf">
+                            <p class="card-title mar-b-0">RBC Avion Visa Infinite</p>
+                            <div class="card-details-annual-fee-container">
+                                <span class="no-wrap" style="height: auto;">Annual Fee</span>
+                                <div class="card-details-annual-fee">$120</div>
+                            </div>
+                        </div>
+                        <div class="divider mar-tb-hlf"></div>
+                        <div class="card-action-container">
+                            <div class="compare-card-button">
+                                <span class="hidden-xs" data-ecs_code="100223" data-card_image_path="/credit-cards/canada/travel/images/rbc-visa-platinum-avion.webp" data-card_name="RBC Avion Visa Platinum" data-card_pid="GCP">
+                                <a href="javascript:void(0)" class="btn-compare margin-auto" style="">Compare</a>
+                                <a href="javascript:void(0)" class="btn-compare margin-auto btn-compare-added" style="display: none !important;">Compare</a>
+                            </span>
+                            <span class="hidden-md hidden-sm hidden-lg" data-ecs_code="100223" data-card_image_path="/credit-cards/canada/travel/images/rbc-visa-platinum-avion.webp" data-card_name="RBC Avion Visa Platinum" data-card_pid="GCP">
+                                <a class="btn-compare margin-auto" href="/credit-cards/tools/compare-credit-cards.html">Compare</a>
+                            </span>
+                            </div>
+                            <div class="card-view-card pad-r-hlf">
+                                <a class="standalone-link-after" href="/credit-cards/travel/rbc-visa-platinum-avion.html" data-select-item="GCP" data-item-details="select_item">View Card<span class="offscreen">RBC Avion Visa Platinum</span></a>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="grid-one-third">
+                      <div class="card-pad" style="border: 1px solid #E0E0E0; padding: 20px 24px;">
+                        <div class="card-details-header mar-b-hlf">
+                            <p class="card-title mar-b-0">RBC British Airways Visa Infinite</p>
+                            <div class="card-details-annual-fee-container">
+                                <span class="no-wrap" style="height: auto;">Annual Fee</span>
+                                <div class="card-details-annual-fee">$165</div>
+                            </div>
+                        </div>
+                        <div class="divider mar-tb-hlf"></div>
+                        <div class="card-action-container">
+                            <div class="compare-card-button">
+                              <span class="hidden-xs" data-ecs_code="100193" data-card_image_path="/credit-cards/canada/travel/images/rbc-british-airways-visa-infinite.webp" data-card_name="RBC British Airways Visa Infinite" data-card_pid="BAP">
+                                <a href="javascript:void(0)" class="btn-compare margin-auto" style="" data-dig-details="click - product tile featured - i_BAP - 2 - compare" data-dig-id="creditCards-PYDijmvhxEO8-5" data-item-list-position="1">Compare</a>
+                                <a href="javascript:void(0)" class="btn-compare margin-auto btn-compare-added" style="display: none !important;">Compare</a>
+                              </span>
+                              <span class="hidden-md hidden-sm hidden-lg" data-ecs_code="100193" data-card_image_path="/credit-cards/canada/travel/images/rbc-british-airways-visa-infinite.webp" data-card_name="RBC British Airways Visa Infinite" data-card_pid="BAP">
+                                <a class="btn-compare margin-auto" href="/credit-cards/tools/compare-credit-cards.html" data-dig-details="click - product tile featured - i_BAP - 2 - compare" data-dig-id="creditCards-PYDijmvhxEO8-5" data-item-list-position="1">Compare</a>
+                              </span>
+                            </div>
+                            <div class="card-view-card pad-r-hlf">
+                                <a class="standalone-link-after" href="/credit-cards/travel/rbc-british-airways-visa-infinite.html" data-select-item="GCP" data-item-details="select_item">View Card<span class="offscreen">RBC Avion Visa Platinum</span></a>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="grid-one-third">
+                      <div class="card-pad" style="border: 1px solid #E0E0E0; padding: 20px 24px;">
+                        <div class="card-details-header mar-b-hlf">
+                            <p class="card-title mar-b-0">WestJet RBC World Elite Mastercard</p>
+                            <div class="card-details-annual-fee-container">
+                                <span class="no-wrap" style="height: auto;">Annual Fee</span>
+                                <div class="card-details-annual-fee">$139</div>
+                            </div>
+                        </div>
+                        <div class="divider mar-tb-hlf"></div>
+                        <div class="card-action-container">
+                            <div class="compare-card-button">
+                                <span class="hidden-xs" data-ecs_code="100238" data-card_image_path="/credit-cards/canada/travel/images/westjet-rbc-world-elite-mastercard.webp" data-card_name="WestJet RBC World Elite Mastercard" data-card_pid="MC4">
+                                <a href="javascript:void(0)" class="btn-compare margin-auto" style="" data-dig-details="click - product tile featured - i_MC4 - 1 - compare" data-dig-id="creditCards-PYDijmvhxEO8-5" data-item-list-position="0">Compare</a>
+                                <a href="javascript:void(0)" class="btn-compare margin-auto btn-compare-added" style="display: none !important;">Compare</a>
+                            </span>
+                            <span class="hidden-md hidden-sm hidden-lg" data-ecs_code="100238" data-card_image_path="/credit-cards/canada/travel/images/westjet-rbc-world-elite-mastercard.webp" data-card_name="WestJet RBC World Elite Mastercard" data-card_pid="MC4">
+                                <a class="btn-compare margin-auto" href="/credit-cards/tools/compare-credit-cards.html" data-dig-details="click - product tile featured - i_MC4 - 1 - compare" data-dig-id="creditCards-PYDijmvhxEO8-5" data-item-list-position="0">Compare</a>
+                            </span>
+                            </div>
+                            <div class="card-view-card pad-r-hlf">
+                                <a class="standalone-link-after" href="/credit-cards/travel/westjet-rbc-world-elite-mastercard.html" data-dig-details="click - product tile featured - i_MC4 - 1 - view details" data-dig-id="creditCards-PYDijmvhxEO8-4" data-item-list-name="Cards Homepage Featured Cards" data-item-list-position="0" data-select-item="MC4" data-item-details="select_item">View Credit Card<span class="offscreen">WestJet RBC World Elite Mastercard</span></a>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> -->
+                  <!-- <p class="h5">Need help deciding?</p>
+                  <a href="/credit-cards/tools/choose-a-credit-card.html" class="btn tertiary mar-t-0" data-dig-id="accounts-QxWNv2dp270t-8" data-dig-details="pba help me choose">Help Me Choose</a>
+                </div>
+              </section> -->
+
+              <!-- <section style="background-color: #FAFAFA;">
+                <div class="section-inner">
+                  <h2 class="h3 text-center"></h2>
+                </div>
+              </section> -->
+
+              <section aria-labelledby="already-customer">
+                  <div class="section-inner">
+                      <p id="already-customer" class="h2 text-center">Frequently Asked Questions</p>
+                      <div class="accordion" id="accordionSet2">
+                      <div class="grid-wpr">
+                          <div class="grid-half">
+                              <div class="accordion-panel">
+                                  <button id="accordion-title1" class="collapse-toggle collapsed" data-target="#accordion1" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion1">What are the benefits of opening a high interest savings account (HISA) with RBC?</button>
+                                  <div class="collapse-content collapse" id="accordion1" role="region" aria-labelledby="accordion-title1">
+                                      <div class="collapse-inner">
+                                        <p>Here are some of the benefits of opening a high interest savings account (HISA) with RBC:</p>
+                                        <ul class="disc-list mar-l-hlf">
+                                          <li>High interest rate on every dollar</li>
+                                          <li>Free account transfers 24/7 with no delay<sup><a href="#" data-target="#legal-8" class="scrollto">8</a></sup>, including ATM and unassisted telephone fund transfers, from this account to any other RBC Royal Bank personal deposit account in your name</li>
+                                          <li>Free access to RBC Online, Mobile, and Telephone Banking<sup><a href="#" data-target="#legal-7" class="scrollto">7</a></sup></li>
+                                          <li>No minimum deposit requirements</li>
+                                          <li>Ability to set up Save Matic from your banking account to your savings account</li>
+                                          <li>Know what your money is up to with MyAdvisor</li>
+                                        </ul>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title3" class="collapse-toggle collapsed" data-target="#accordion3" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion3">Which account offers the best savings account rates?</button>
+                                  <div class="collapse-content collapse" id="accordion3" role="region" aria-labelledby="accordion-title3">
+                                      <div class="collapse-inner">
+                                        <p>At RBC, the <a href="/bank-accounts/high-interest-savings-account.html">RBC High Interest eSavings account</a> typically offers the highest interest rate. For details on current rates, please see our <a href="/bank-accounts/savings-accounts.html">savings accounts</a>.</p>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title5" class="collapse-toggle collapsed" data-target="#accordion5" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion5">What is the interest rate for the RBC High Interest eSavings account?</button>
+                                  <div class="collapse-content collapse" id="accordion5" role="region" aria-labelledby="accordion-title5">
+                                      <div class="collapse-inner">
+                                        <p>
+                                          Like other types of savings accounts, the interest rate for the RBC High Interest eSavings account is subject to change based on market conditions. You can <a href="/rates/persacct.html">view the current rates here</a>.
+                                          <br><br>
+                                          From time to time, RBC may also offer a promotional rate for the <a href="/bank-accounts/high-interest-savings-account.html">RBC High Interest eSavings account</a>.
+                                        </p>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title7" class="collapse-toggle collapsed" data-target="#accordion7" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion7">How is interest for my high interest savings account (HISA) calculated?</button>
+                                  <div class="collapse-content collapse" id="accordion7" role="region" aria-labelledby="accordion-title7">
+                                      <div class="collapse-inner">
+                                        <p>While interest for the RBC High Interest eSavings account is calculated daily, it’s paid monthly. At the end of each day, we use your account balance to calculate a daily interest payment. Then, we add up your daily earned interest (if any) throughout the month to deliver a monthly interest payment at the end of each month.</p>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title9" class="collapse-toggle collapsed" data-target="#accordion9" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion9">What is the difference between an RBC High Interest eSavings account and other RBC savings accounts?</button>
+                                  <div class="collapse-content collapse" id="accordion9" role="region" aria-labelledby="accordion-title9">
+                                      <div class="collapse-inner">
+                                        <p>The main difference between the RBC High Interest eSavings account and other RBC savings accounts is that it offers higher interest.</p>
+                                        <p>Another difference is that the RBC High Interest eSavings account offers free eStatements and eNotifications. Other RBC savings accounts such as RBC Day to Day Savings and RBC Enhanced Savings also offer paper statements for a small fee.</p>
+                                        <p>For a full comparison of RBC savings accounts you can <a href="/bank-accounts/savings-accounts/compare-savings-accounts.html">compare savings accounts</a>.</p>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title11" class="collapse-toggle collapsed" data-target="#accordion11" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion11">How do I set up automatic savings with an RBC High Interest eSavings account?</button>
+                                  <div class="collapse-content collapse" id="accordion11" role="region" aria-labelledby="accordion-title11">
+                                      <div class="collapse-inner">
+                                        <p>The easiest way to commit to a regular savings plan is to arrange for pre-authorized transfers from your <a href="/products/deposits/banking-accounts.html">banking account</a> to your designated <a href="/products/deposits/savings-accounts.html" >savings account</a>. Simply specify the amount and how often you want the transfers to take place — for example, once a week, every two weeks or once a month. You may even want to schedule these to occur just after your paycheque is <a href="/products/deposits/pre-authorized-direct-deposit.html">direct-deposited</a> into your chequing account.</p>
+                                        <ul class="disc-list mar-l-hlf">
+                                          <li>Step 1: In your Online Banking, under Quick Payments and Transfers, click on Pay Bills and Transfer Funds.</li>
+                                          <li>Step 2: On the left hand menu, click on Set Up Save-Matic.</li>
+                                          <li>Step 3: Enter the Amount you want to save, choose your From and To accounts, When to start, and select how often from the Receive Frequency options, then click on Submit.</li>
+                                          <li>Step 4. Review your information and click on Confirm. </li>
+                                        </ul>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="grid-half">
+                              <div class="accordion-panel">
+                                  <button id="accordion-title2" class="collapse-toggle collapsed" data-target="#accordion2" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion2">How do I open a high interest savings account (HISA) with RBC?</button>
+                                  <div class="collapse-content collapse" id="accordion2" role="region" aria-labelledby="accordion-title2">
+                                      <div class="collapse-inner">
+                                        <p>You can open an RBC High Interest eSavings account online, in the <a href="/ways-to-bank/mobile/rbc-mobile-app/index.html">RBC Mobile</a> app, by <a href="https://maps.rbcroyalbank.com/" class="newwindow-link" target="_blank">visiting a branch<span class="offscreen"> (opens in new window)</span></a> or by calling us at <span class="tel-number no-wrap">1-800-769-2561</span>.</p>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title4" class="collapse-toggle collapsed" data-target="#accordion4" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion4">How to choose the best savings account for my goals?</button>
+                                  <div class="collapse-content collapse" id="accordion4" role="region" aria-labelledby="accordion-title4">
+                                      <div class="collapse-inner">
+                                        <p>When choosing a savings account, you’ll want to consider how it helps you reach your goals. Factors that are important to consider include:</p>
+                                        <ul class="disc-list mar-l-hlf">
+                                          <li>Interest rates. The higher the rate, the faster your money can grow</li>
+                                          <li>Fees. Monthly fees, fees for withdrawals or other charges could eat into your savings</li>
+                                          <li>Accessibility. Do you need easy access to your money? With some accounts, there are multiple steps or fees for withdrawing funds</li>
+                                          <li>Minimum balance. Some accounts pay higher interest when you reach minimum balance thresholds</li>
+                                        </ul>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title6" class="collapse-toggle collapsed" data-target="#accordion6" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion6">Are high interest savings accounts (HISAs) safe?</button>
+                                  <div class="collapse-content collapse" id="accordion6" role="region" aria-labelledby="accordion-title6">
+                                      <div class="collapse-inner">
+                                        <p>Yes, the <a href="/bank-accounts/high-interest-savings-account.html">RBC High Interest eSavings account</a> is a safe place to keep money that you don’t need to access every day. Deposits you make to your high interest savings account are eligible for protection by the <a href="/partners/cdic/index.html">Canada Deposit Insurance Corporation (CDIC)</a>.</p>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title8" class="collapse-toggle collapsed" data-target="#accordion8" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion8">Is my high interest savings account (HISA) return guaranteed?</button>
+                                  <div class="collapse-content collapse" id="accordion8" role="region" aria-labelledby="accordion-title8">
+                                      <div class="collapse-inner">
+                                        <p>Yes, the communicated rate is guaranteed. However, the rate will change when the Bank of Canada’s rate changes without any notice.</p>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title10" class="collapse-toggle collapsed" data-target="#accordion10" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion10">How many high interest savings accounts (HISAs) can you have?</button>
+                                  <div class="collapse-content collapse" id="accordion10" role="region" aria-labelledby="accordion-title10">
+                                      <div class="collapse-inner">
+                                        <p>In Canada, there’s no limit on the number of high interest savings accounts (HISAs) you can open across financial institutions. However, individual banks may have their own limits.</p>
+                                        <p>At RBC, there’s no limit on the number of HISAs you can open.</p>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="accordion-panel">
+                                  <button id="accordion-title12" class="collapse-toggle collapsed" data-target="#accordion12" data-toggle="collapse" data-parent="#accordionSet2" aria-expanded="false" aria-controls="accordion12">How do I find opportunities to save more money?</button>
+                                  <div class="collapse-content collapse" id="accordion12" role="region" aria-labelledby="accordion-title12">
+                                      <div class="collapse-inner">
+                                        <p>To find more ways to save, you can:</p>
+                                        <ul class="disc-list mar-l-hlf">
+                                          <li>Sign in to the RBC Mobile app,</li>
+                                          <li>Tap ‘More’</li>
+                                          <li>Tap ‘NOMI Find & Save’ and turn it on.</li>
+                                        </ul>
+                                        <p>After you turn on NOMI Find & Save, we will get to know your spending & saving habits in your source chequing account to find opportunities to save for you.</p>
+                                        <p><a href="/bank-accounts/savings-accounts/nomi-find-and-save.html">Learn More about NOMI Find & Save</a></p>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      </div>
+                  </div>
+              </section>
+
+              <!-- <section style="background-color: #F3F7F8;">
+                <div class="section-inner text-center">
+                  <h2></h2>
+                  <p></p>
+                  <a href="" class="btn tertiary"></a>
+                </div>
+              </section> -->
+              <section class="helpful-resources" style="background-color: #F3F7F8;">
+                <div class="section-inner">
+                  <h3 class="text-center mar-b-hlf">Learn More About High interest Savings in Canada</h3>
+                  <p class="text-center mar-b-dbl">Discover resources to help you grow your savings faster, including high-interest savings</p>
+                  <div class="img-bottom-callouts-container">
+                    <div class="img-bottom-callout">
+                      <a href="https://www.rbcroyalbank.com/en-ca/my-money-matters/money-academy/banking-basics/account-types/what-is-a-high-interest-savings-account/" data-dig-id="accounts-vRsIVAEQ2R9S-1" data-dig-details="a beginner’s guide to high interest savings accounts">
+                        <div class="img-bottom-callout-text">
+                          <p class="img-bottom-callout-heading">A Beginner’s Guide to High Interest Savings Accounts: What You Need to Know</p>
+                          <p>Learn about High Interest Savings Accounts (HISA) and how they can help you earn more interest on your savings. Get started with our beginner's guide.</p>
+                        </div>
+                        <div class="img-bottom-callout-img" style="background-image: url('_assets-custom/compound-interest-calculator/images/beginners-guide-hisa.webp'); background-position: center; background-size: cover;"></div>
+                      </a>
+                    </div>
+                    <div class="img-bottom-callout">
+                      <a href="/bank-accounts/savings-accounts/how-to-choose-the-best-savings-account-for-me.html" data-dig-id="accounts-vRsIVAEQ2R9S-2" data-dig-details="how to choose the best savings account for me">
+                        <div class="img-bottom-callout-text">
+                          <p class="img-bottom-callout-heading">How to choose the best savings account for me</p>
+                          <p>Learn how to choose the best savings account that fits your financial needs. Explore essential tips on comparing interest rates, features, and account types to make a smarter banking decision.</p>
+                        </div>
+                        <div class="img-bottom-callout-img" style="background-image: url('_assets-custom/compound-interest-calculator/images/2-three-piggy-banks-mag-glass.webp'); background-position: center; background-size: cover;"></div>
+                      </a>
+                    </div>
+                    <div class="img-bottom-callout">
+                      <a href="/bank-accounts/savings-accounts/how-does-interest-work-on-a-savings-account.html" data-dig-id="accounts-vRsIVAEQ2R9S-3" data-dig-details="how does interest work on a savings account">
+                        <div class="img-bottom-callout-text">
+                          <p class="img-bottom-callout-heading">How does interest work on a savings account?</p>
+                          <p>Most personal savings accounts offer simple interest (linear growth), while many investment accounts offer compound interest (exponential growth).</p>
+                        </div>
+                        <div class="img-bottom-callout-img" style="background-image: url('_assets-custom/compound-interest-calculator/images/1-interest-percentages.webp'); background-position: center; background-size: cover;"></div>
+                      </a>
+                    </div>
+                    <div class="img-bottom-callout">
+                      <a href="/bank-accounts/savings-accounts/what-are-the-different-types-of-savings-accounts-in-canada.html" data-dig-id="accounts-vRsIVAEQ2R9S-4" data-dig-details="what are the different types of savings accounts in Canada">
+                        <div class="img-bottom-callout-text">
+                          <p class="img-bottom-callout-heading">What are the different types of savings accounts in Canada?</p>
+                          <p>What makes these accounts different from each other? Which one earns the most interest? Which one is the best fit for me? To answer some of your questions, let’s dive into the different types of savings accounts in Canada – and how you can pick the best one(s) for your goals.</p>
+                        </div>
+                        <div class="img-bottom-callout-img" style="background-image: url('_assets-custom/compound-interest-calculator/images/3-coins-piggy-bank-interest-arrow-up.webp'); background-position: center; background-size: cover;"></div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+
+              <section aria-label="Disclaimers" id="disclaimer" class="disclaimer">
+                  <div class="section-inner">
+                      <p><button data-target="#disclaimers" data-toggle="collapse" aria-expanded="false" aria-controls="disclaimers" class="collapse-toggle collapsed"><span>View Legal Disclaimers</span><span>Hide Legal Disclaimers</span></button></p>
+                      <div class="collapse-content collapse" id="disclaimers">
+                          <div class="collapse-inner">
+                              <div class="table-wpr">
+                                  <div class="table-row" id="legal-asterisk">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> *</div>
+                                       <div class="table-cell">The interest rate is an annual interest rate. It is a simple interest calculation. Interest is calculated daily on the closing credit balance and paid monthly. Interest rate is subject to change at any time without notice.</div>
+                                  </div>
+                                  <div class="table-row" id="legal-1">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 1)</div>
+                                      <div class="table-cell">
+                                        The Bonus Interest Rate on June 12, 2026 of 4.05% within the RBC New eSavings Client Bonus Interest Rate Offer (“Offer”) is available to residents of Canada who are of the age of majority in the province or territory in which they reside as of the date the Eligible eSavings Account is opened and who were not the Primary Owner of an RBC High Interest eSavings Account at any time before the beginning of the Qualifying Period (as defined below), and who open a new RBC High Interest eSavings Account (“Eligible eSavings Account”) as the Primary Owner between June 12, 2026 and 3:00 PM EST on October 27, 2026 (the “Qualifying Period”). (Note: For added clarity, you will not qualify for this Offer by switching from another account type to an Eligible eSavings Account.) The Bonus Interest Rate on June 12, 2026 was 4.05% and is only applicable to deposits made in the Eligible eSavings Account for 3 months (90 days) from the date the Eligible eSavings Account was opened (the “Promotional Period”) and up to a maximum of $1,000,000 of the Eligible eSavings Account’s total balance. Any balances over $1,000,000 will be paid the Regular Interest Rate. “Promotional Interest Rate” is a combination of the Bonus Interest Rate plus the Regular Interest Rate. For example, if on June 12, 2026, the Regular Interest Rate was 0.55% per annum and the Bonus Interest Rate was 4.05% per annum, the Promotional Interest Rate would be 4.60% per annum. The Regular Interest Rate is subject to change without notice, and the most current rate is posted on our Personal Accounts Interest Rates webpage, which may be viewed at <a href="https://www.rbcroyalbank.com/rates/persacct.html" target="_blank" class="newwindow-link">https://www.rbcroyalbank.com/rates/persacct.html</a>. At the end of the Promotional Period, all balances will earn interest at the Regular Interest Rate only. Regular Interest Rate and Bonus Interest Rate are annualized rates, and (subject to certain exceptions) are calculated daily and paid monthly. Any Eligible eSavings Account that, prior to the payment of interest at the Bonus Interest Rate, is closed or switched to another product type which is not an RBC High Interest eSavings Account will forfeit any such interest calculated during the month in which the Eligible eSavings Account is closed or switched. Offer and interest rates are subject to change without notice. Offer may be withdrawn at any time. Conditions apply. For other defined terms and complete terms and conditions that apply to this Offer, please visit <a href="/investments/psi/june2026-hisa/terms.html" target="_blank" class="newwindow-link">www.rbc.com/junehisa26</a>.  
+                                      </div>
+                                  </div>
+                                  <div class="table-row" id="legal-2">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 2)</div>
+                                      <div class="table-cell">
+                                        Total of 90 days: For the purpose of this RBC New eSavings Client Bonus Interest Rate Offer and any related marketing, any reference to a period of 3 months means a period of 90 calendar days regardless of how many calendar days may fall within any given calendar 3-month period.
+                                      </div>
+                                  </div>
+                                  <div class="table-row" id="legal-3">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 3)</div>
+                                      <div class="table-cell">
+                                        <!-- The following debits will not count toward the number of included Debit Transactions per Month: RBC Virtual Visa<sup>‡</sup> Debits; Self-Serve electronic funds transfers from your personal deposit account to another personal deposit account in your name; pre-authorized or self-service transfers made to any RBC credit card; payments to your RBC Royal Bank personal loan, Royal Credit Line<sup>®</sup>, RBC residential mortgage or RBC Homeline Plan<sup>®</sup>; contributions made to RBC investments/ investment accounts such as Guaranteed Investment Certificates (GICs), Registered Retirement Savings Plans (RRSPs), Registered Education Savings Plans (RESPs), Registered Disability Savings Plans (RDSPs), Tax-Free Savings Accounts (TFSAs), and Royal Mutual Funds. Unless otherwise specified herein, all other debits, including bill payments, will count towards the number of included Debit Transactions and will result in an Excess Debit Transaction Fee if you go over the number of included debits per Month. Excess debit transaction fee may also apply depending on the account. Excess Debit Transactions are cumulative only within each month; you may not carry over unused free debit transactions from the previous month. -->
+
+All Debit Transactions, including bill payments, count towards the number of included Debit Transactions per Month and will result in an Excess Debit Transaction Fee if you go over the number of included Debit Transactions per Month, unless there is a specific exclusion as set out below. For all Banking and Savings Accounts, the following Debit Transactions will not count toward the number of included Debit Transactions per Month: RBC Virtual Visa Debits; Self-Serve electronic funds transfers from your personal deposit account to another personal deposit account in your name; pre-authorized or self-service transfers made to any RBC credit card; payments to your RBC Royal Bank personal loan, Royal Credit Line<sup>®</sup>, RBC residential mortgage or RBC Homeline Plan<sup>®</sup>; contributions made to RBC investments/ investment accounts such as Guaranteed Investment Certificates (GICs), Registered Retirement Savings Plans (RRSPs), Registered Education Savings Plans (RESPs), Registered Disability Savings Plans (RDSPs), Tax-Free Savings Accounts (TFSAs), and Royal Mutual Funds.
+<br>
+<br>
+For Banking Accounts only, Third Party Payments will not count toward the number of included Debit Transactions per Month. 
+<br>
+<br>
+For RBC Day to Day Banking Accounts only, Point of Sale Purchases made at public transit authority merchants classified by <em>Interac</em>’s “Merchant Category Code” (MCC) as “Local and Suburban Commuter Passenger Transportation, including ferries” will not count towards the number of included Debit Transactions per Month. Debits, including those Point-of-Sale Purchases, for which the merchant may offer public transit services but is not categorized under <em>Interac</em>’s “Local and Suburban Commuter Passenger Transportation, including ferries” MCC, will count towards the number of included Debit Transactions and will result in an Excess Debit Transaction Fee if you go over the number of included debits per Month. 
+<br>
+<br>
+For RBC High Interest eSavings Accounts, one cash withdrawal from an RBC ATM per month will not result in an Excess Debit Transaction Fee.
+                                      </div>
+                                  </div>
+                                  <div class="table-row" id="legal-4">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 4)</div>
+                                      <!-- !--#include virtual='/bank-accounts/_assets-custom/includes/legalnotes/disc_atm.html' -- -->
+                                      <div class="table-cell"><strong>ATM - RBC ATM Access fees waived</strong>
+    <br> An ATM operator surcharge (also called convenience fee) may be charged by other ATM operators. The convenience fee is not a Royal Bank fee. It is added directly to the amount of your cash withdrawal. All clients who use non-RBC ATMs may be charged a convenience fee regardless of the type of account they hold.
+    <br>
+    <br>
+    <strong>ATM use outside Canada</strong>
+    <br>Each Account cash withdrawal at an ATM outside Canada displaying the PLUS System symbol and any fees that may be imposed by any third party for using the ATM are converted to Canadian dollars at an exchange rate which is 2.5% above the benchmark rate set by the payment card company when the transaction is posted. Exchange rates fluctuate and, as such, the rate applied will usually differ from the posted exchange rate at the time of the transaction.
+    <br>
+    <br>
+    <strong>ATM - Unlimited banking transactions including <em>Interac</em> and PLUS System network fees waived</strong>
+    <br> ATM operator surcharge (also called a convenience fee) may be charged by other ATM operators. The convenience fee is not a Royal Bank fee and is added directly to the amount of your cash withdrawal. All clients who use non-RBC ATMs may be charged a convenience fee regardless of the type of account they hold. Each account cash withdrawal at an ATM outside Canada displaying the PLUS System symbol, and any fees that may be imposed by any third party for using the ATM, are converted to Canadian dollars at an exchange rate which is 2.5% above the bench mark rate set by the payment card company when the transaction is posted. Exchange rates fluctuate and, as such, the rate applied will usually differ from the posted exchange rate at the time of the transaction.
+    <br>
+    <br>
+    <strong>ATMs - 3 withdrawals from other bank ATMs refunded per Monthly Cycle</strong>
+    <br> ATM operator surcharge (also called a convenience fee) may apply. It is charged by a third party and added directly to the amount of your cash withdrawal. Totals are not cumulative, and if not used, may not be carried over into the next Monthly Cycle.
+</div>
+                                  </div>
+                                  <div class="table-row" id="legal-5">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 5)</div>
+                                       <div class="table-cell">On operating account only. $1 per cross border debit transaction on companion accounts. Not available on U.S. Personal Account.</div>
+                                  </div>
+                                  <div class="table-row" id="legal-6">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 6)</div>
+                                      <!-- !--#include virtual='/bank-accounts/_assets-custom/includes/legalnotes/disc_fxexchange.html' -- -->
+                                    <div class="table-cell">
+                                      In addition to the <em>Interac</em> Debit Cross Border fee, the purchase amount will be subject to foreign exchange rates. Transactions are converted to Canadian dollars at an exchange rate of 2.5% over the Interbank Spot Rate as defined by <em>Interac</em> Corp. 
+                                    </div>
+                                  </div>
+                                  <div class="table-row" id="legal-7">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 7)</div>
+                                      <div class="table-cell">                                        
+                                        Transaction fees may apply for bill payments or funds transfers made through Online Banking and are separate from access fees.
+                                      </div>
+                                  </div>
+                                  <div class="table-row" id="legal-8">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 8)</div>
+                                       <div class="table-cell">Fees may apply on the account from which the money has been transferred.</div>
+                                  </div>
+                                  <div class="table-row" id="legal-9">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 9)</div>
+                                       <div class="table-cell">For a definition of an unauthorized transaction and for full details regarding the protections and limitations of the RBC Online Banking Security Guarantee, please see your Electronic Access Agreement. This guarantee is given by Royal Bank of Canada in connection with its Online Banking service.</div>
+                                  </div>
+                                  <div class="table-row" id="legal-10">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 10)</div>
+                                      <div class="table-cell">
+                                        <em>Interac</em> e-Transfer Transactions expire 30 days after they are sent. You have 15 days to cancel without charge. A $5.00 <em>Interac</em> e-Transfer Transaction reclaim fee is charged when a recipient does not accept before expiry and the sender does not cancel within 15 days. 
+                                      </div>
+                                  </div>
+                                  <div class="table-row" id="legal-11">
+                                      <div class="table-cell"><span class="offscreen">Legal Bug</span> 11)</div>
+                                      <div class="table-cell">
+                                        For all Canadian dollar Savings Accounts, <em>Interac</em> e-Transfer transactions are $1 each, count as a Debit Transaction, and carry an Excess Debit Transaction Fee, if applicable.
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </section>
+          </main>
+  
+  
+          <footer>
+              <!-- *** Fat Footer Start *** -->
+<div class="fat-footer">
+  <div class="fat-footer-inner">
+    <div class="grid-wpr">
+      <div class="grid-one-fourth">
+        <p class="h6">Customer Service</p>
+        <ul class="chevron-list">
+          <li>
+            <a
+              href="/customer-service/index.html?lob=personal"
+              >General Inquiries</a
+            >
+          </li>
+          <li>
+            <a href="/bank-accounts/compare-chequing-accounts.html"
+              >Open an Account</a
+            >
+          </li>
+          <li>
+            <a href="https://maps.rbcroyalbank.com/"
+              >Find Branches &amp; ATMs</a
+            >
+          </li>
+        </ul>
+      </div>
+      <div class="grid-one-fourth">
+        <p class="h6">Account Information</p>
+        <ul class="chevron-list">
+          <li>
+            <a href="/rates/persacct.html"
+              >Account Interest Rates</a
+            >
+          </li>
+          <li>
+            <a href="/banking-services/additional-account-services.html">
+              Additional Service Fees
+            </a>
+          </li>
+          <li>
+            <a
+              href="/onlinebanking/servicech.html"
+              target="_blank"
+              >Disclosures &amp; Agreements related to Personal Deposit
+              Accounts</a
+            >
+          </li>
+          <li>
+            Use
+            <a href="https://www.canada.ca/en/services/finance/tools.html"
+              >FCAC Account Selector</a
+            >
+            to compare bank accounts in Canada
+          </li>
+        </ul>
+      </div>
+      <div class="grid-one-fourth">
+        <p class="h6">Get More From Your Account</p>
+        <ul class="chevron-list">
+          <li>
+            <a
+            href="/ways-to-bank/online-banking/index.html"
+              >Enrol in Online Banking</a
+            >
+          </li>
+          <li>
+            <a href="/ways-to-bank/banking-services/alerts.html">
+              Set Up Alerts
+            </a>
+          </li>
+          <li>
+            <a href="/banking-services/pay-bills.html">
+              Pay Bills
+            </a>
+          </li>
+          <li>
+            <a
+              href="/mobile/feature/nomi/index.html"
+              >Learn About NOMI on RBC Mobile</a
+            >
+          </li>
+        </ul>
+      </div>
+      <div class="grid-one-fourth">
+        <h6 class="mar-t-0">Protecting Your Money</h6>
+        <ul class="chevron-list mar-b-hlf">
+          <li>
+            <a href="/partners/cdic/index.html">
+              Canada Deposit Insurance Corporation Member Info
+            </a>
+          </li>
+        </ul>
+        <a
+          href="http://www.cdic.ca/SiteAssets/financial-community/protecting-your-deposits.aspx"
+          ><img
+            src="/bank-accounts/_assets-custom/images/cdic-digital-symbol-en.svg"
+            style="width: 139px"
+            alt="Deposit Protection"
+        /></a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- *** Fat Footer End *** -->
+              <div class="main-footer">
+	<div class="main-footer-inner">
+		<div class="footer-left">
+			<p>
+				Royal Bank of Canada Website, <span id="footer-custom-param"></span><span class="no-wrap">&copy; 1995-<span class="footer-year"></span></span>
+			</p>
+			<p><a href="https://www.rbc.com/legal/" class="popup" data-popup-type="default" target="_blank" title="(opens in new window)">Legal<span class="offscreen"> (opens in a new window)</span></a> | <a href="https://www.rbc.com/accessibility/index.html" class="popup" data-popup-type="default" target="_blank" title="(opens in new window)">Accessibility<span class="offscreen"> (opens in a new window)</span></a> | <a href="https://www.rbc.com/privacysecurity/ca/index.html" class="popup" data-popup-type="default" target="_blank" title="(opens in new window)">Privacy &amp; Security<span class="offscreen"> (opens in a new window)</span></a> | <a role="button" href="javascript:void(0)" class="ot-sdk-show-settings">Advertising &amp; Cookies<span class="offscreen"> (opens in a modal window)</span></a></p>
+		</div>	
+		<div class="footer-right">
+			<ul class="social-links">
+				<li><a href="https://www.facebook.com/rbc"><img src="/dvl/v1.0/assets/images/social/scl-facebook-master-white.svg" alt="Facebook"></a></li>
+				<li><a href="https://www.instagram.com/rbc/"><img src="/dvl/v1.0/assets/images/social/scl-instagram-master-white.svg" alt="Instagram"></a></li>
+				<li><a href="https://twitter.com/RBC"><img src="/dvl/v1.0/assets/images/social/scl-twitter-master-white.svg" alt="Twitter"></a></li>
+				<li><a href="https://www.youtube.com/user/RBC"><img src="/dvl/v1.0/assets/images/social/scl-youtube-master-white.svg" alt="YouTube"></a></li>
+				<li><a href="https://www.linkedin.com/company/rbc"><img src="/dvl/v1.0/assets/images/social/scl-linkedin-master-white.svg" alt="LinkedIn"></a></li>
+			</ul>
+			<div class="to-top">
+				<a href="#skip-nav" class="scrollto">
+					<img src="/dvl/v1.0/assets/images/ui/ui-to-top-white.svg" width="15" height="20" alt="">
+					<span><span class="offscreen">Back to </span>Top</span>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	var footerParam = window.location.href.split("?ftr=")[1];
+	if(footerParam == "inv") {
+		console.log("inv");
+		document.getElementById("footer-custom-param").innerHTML = "<span class='tel-number'>1-844-937-4177</span>, RBC WaterPark Place, 88 Queens Quay West, Toronto, ON, M5J 0B8 "
+	} else if(footerParam == "acc") {
+		console.log("acc");
+		document.getElementById("footer-custom-param").innerHTML = "<span class='tel-number'>1-844-937-4199</span>, RBC WaterPark Place, 88 Queens Quay West, Toronto, ON, M5J 0B8 "
+	} else {
+		console.log("else");
+		document.getElementById("footer-custom-param").innerHTML = "RBC WaterPark Place, 88 Queens Quay West, Toronto, ON, M5J 0B8. <span class='tel-number'>1-844-491-1330</span>. "
+	}
+</script>
+          </footer>
+
+          <!-- *** Compare Tray Start *** -->
+
+          <!--include virtual="/credit-cards/_assets-custom/includes/compare-tray.html" -->
+
+          <!-- *** Compare Tray End *** -->
+
+          <!-- *** Compare Modal Start *** -->
+
+          <!-- "/credit-cards/_assets-custom/includes/hub-modal.html" -->
+
+          <!-- *** Compare Modal End *** -->
+  
+      </div>
+      <script src="/dvl/v1.0/assets/js/purify.min.js"></script>
+<script src="/dvl/v1.0/assets/js/jquery.min.js"></script>
+<script src="/dvl/v1.0/assets/js/jquery-ui.min.js"></script>
+<script src="/dvl/v1.0/assets/js/bootstrap.min.js"></script>
+<script src="/dvl/v1.0/assets/js/underscore.min.js"></script>
+<script src="/dvl/v1.0/assets/js/bowser.min.js"></script>
+<script src="/dvl/v1.0/assets/js/dvl.min.js"></script>
+<script src="/dvl/v1.0/assets/js/carryover.min.js"></script>
+<div class="high-contrast-test" style="width: 0px; height: 0px; background-image: url(/dvl/v1.0/assets/images/ui/ui-checkmark-blue.svg)"></div>
+<script>
+    if (typeof DOMPurify === "undefined") {
+        DOMPurify = {
+            sanitize: (params) => { return params; }
+        };
+    }
+
+    // High contrast mode checker. if there is no background-image we are in high contrast mode
+    if ($('.high-contrast-test').css('background-image') === 'none') {
+        $('html').addClass('high-contrast-mode');
+    }
+
+    // Datalyer push for the Promotions link in the header
+    $(document).ready(function() {
+
+        $('#header-promotions-link').on('click', function(event) {
+            dataLayer.push({
+                'event':'dvlEvent',
+                'category':'header DVL1_0',
+                'action':'Click Link',
+                'label':'Promotions'
+            });  
+        });
+
+        $('.side-menu-promotions-link a').on('click', function(event) {
+            dataLayer.push({
+                'event':'dvlEvent',
+                'category':'header DVL1_0',
+                'action':'Click Link',
+                'label':'Promotions'
+            });  
+        });
+          
+    });
+
+    // OneTrust Modal Trigger
+    $('.ot-sdk-show-settings').on('click', function(event) {
+        event.preventDefault();
+        OneTrust.ToggleInfoDisplay();
+    });
+</script>
+
+      <script src="/bank-accounts/_assets-custom/js/accounts.js"></script>
+      <script src="/bank-accounts/_assets-custom/js/ecommerce-dl-push.js"></script>
+	<script src="/credit-cards/_assets-custom/js/ecommerce-dl-push.js"></script>
+
+		<script type="text/javascript" src="/credit-cards/_assets-custom/js/main-card-list.js" data-page-type="public"></script>
+		<script src="/credit-cards/_assets-custom/js/ecommerce-dl-push.js"></script>
+		<script type="text/javascript" src="/_assets-custom/js/core-vitals.js"></script>
+		<script type="text/javascript" src="../_assets-custom/js/hisa-compare-cards.js"></script>
+		<script type="text/javascript" src="../_assets-custom/js/hisa-card-controller.js"></script>
+	<script type="text/javascript" src="/credit-cards/transformer/js/travel/travel-app.js"></script>
+	<script type="text/javascript" src="/credit-cards/transformer/js/func-affinity.js"></script>
+	<script type="text/javascript" src="/credit-cards/transformer/js/func-compare-cards.js"></script>
+     <!-- <script src="/bank-accounts/_assets-custom/js/datalayerPush.js"></script> -->
+  
+      <!-- upperFunnelHandler.js -->
+      <script src="/gtm/upperFunnelHandler.js"></script>
+  
+      <script src="/gtm/upperFunnelTagger.js"></script>
+  
+    <script>
+          // let showIntroTable = true;
+          // document.querySelector(".more-account-features-btn").addEventListener("click", () => {
+          //     if(showIntroTable) {
+          //         document.querySelector(".intro-table").style.display = "none";
+          //         showIntroTable = false;
+          //     } else {
+          //         document.querySelector(".intro-table").style.display = "table";
+          //         showIntroTable = true;
+          //     }
+          // });
+  
+      tagUpperFunnelBeginCheckout("/apps/account-open/?pid1=027&lang=en#!/main/intro", "027");
+          tagUpperFunnelBeginCheckout("/apps/account-open/?pid1=027&lang=en", "027");
+          tagUpperFunnelCall("tel:18007692561", "027");
+          tagUpperFunnelDetails("/investments/psi/hisa.html", "027");// global event handler to catch compare checkbox. Compare checkboxes are added dynamically on page after load. 
+
+        document.addEventListener("click", (event) => {
+          const elementClasslist = event.target.classList;
+          if(elementClasslist.contains("btn-compare") && !elementClasslist.contains("btn-compare-added")) {
+            // card info is contained in data-card_name attribute of parent
+            let parent = event.target.parentNode
+            let cardName = parent.getAttribute("data-card_name")
+            
+            // build string output
+            let details = "click - compare - "
+
+            switch (cardName) {
+              case "RBC Avion Visa Infinite":
+                details += "IAV"
+                break;
+              case "WestJet RBC World Elite Mastercard":
+                details += "MC4"
+                break;
+              case "RBC Avion Visa Infinite Privilege":
+                details += "AVP"
+                break;
+              case "RBC Avion Visa Platinum":
+                details += "GCP"
+                break;
+              case "WestJet RBC Mastercard":
+                details += "MC2"
+                break;
+              case "RBC British Airways Visa Infinite":
+                details += "BAP"
+                break;
+            }
+
+            dataLayer.push({ 
+              event: "click", 
+              details: details.trim()
+            });
+          }
+        });
+
+        window.addEventListener("scroll", () => {
+
+					const stickyNavCustomEl = document.querySelector(".sticky-nav__custom");
+
+					const stickyWrapperElTopPos = document.querySelector("#sticky-wrapper").getBoundingClientRect().top;
+
+					if(stickyWrapperElTopPos < 1) {
+
+							stickyNavCustomEl.style.display = "block";
+
+					} else {
+
+							stickyNavCustomEl.style.display = "none";
+
+					}
+
+				});
+    </script>
+      <script src="/mega-navigation/_assets-custom/js/mega-navigation.js"></script>
+      <script src="/business/accounts/_assets-custom/js/ratesApiHandler.js"></script>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"cfc316c1f499450ea6c60e18cd37e5ce","spa":2}' crossorigin="anonymous"></script>
+</body>
+  
+  </html>

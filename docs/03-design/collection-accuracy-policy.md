@@ -1,5 +1,23 @@
 # Product collection accuracy and automatic acceptance
 
+## Owned price and rate proof clarification - 2026-10-07
+
+Parser v15/process `2026-10-07-owned-price-rate-proof-v6` bind native labelled
+prices to their actual product panel, deduplicate only identical responsive main
+headings and retain unique literal local notes. Recommendation panels and plus
+variants cannot donate prices. Canonical name matching and per-source identity
+cardinality also preserve meaningful plus symbols as the word plus. Named
+percent-header card rows need an exact product name or observed detail link, explicit annual basis and complete payment
+consequences; unresolved/retired references and unknown qualifications exclude.
+All-balances savings rows need adjacent single ownership; tiers and linked
+packages cannot become a scalar. Full native contexts survive actual origin
+lookup/normalization. Only verified product-owned currency contexts can establish
+denomination; explicit owned conflicts veto country defaults. Conditional free
+fees and channel-only transactions remain insufficient. Empty dynamic pricing
+slots can request bounded rendering despite percentages in unrelated notes.
+No essential, unit/type, country/type, security or approval-policy relaxation.
+[Source-backed diagnosis and verification](../00-governance/rbc-generic-collection-corrections-2026-10-07.md).
+
 ## Owned deposit tables and Oaken publication - 2026-10-07
 
 Parser v14/process `2026-10-07-owned-deposit-table-v5` preserve named deposit

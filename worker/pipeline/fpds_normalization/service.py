@@ -3438,7 +3438,13 @@ def _percentage_value_absent_from_evidence(*, field_name: str, value: object, co
     except InvalidOperation:
         return False
     from worker.native_deposit_records import named_account_rate
+    from worker.native_named_rate_records import card_rate_values, balance_rate_value
+    pair = card_rate_values(context)
+    if pair and field_name in {"purchase_interest_rate", "cash_advance_rate"} and expected == pair[0 if field_name == "purchase_interest_rate" else 1]:
+        return False
     native_rate = named_account_rate(context)
+    if native_rate is None:
+        native_rate = balance_rate_value(context)
     if field_name in {'standard_rate', 'public_display_rate'} and native_rate is not None and expected == Decimal(str(native_rate)):
         return False
     normalized_context = _normalize_text(context)
@@ -5703,7 +5709,7 @@ def _official_grounding_mapping_metadata(field: NormalizationExtractedField) -> 
     if metadata.get("official_grounding_contract_version") != "collection-official-grounding-v2":
         return {}
     return {
-        **{key: metadata[key] for key in ("annual_basis_evidence_chunk_id", "annual_basis_evidence_quote", "annual_basis_product_name") if key in metadata},
+        **{key: metadata[key] for key in ("annual_basis_evidence_chunk_id", "annual_basis_evidence_quote", "annual_basis_product_name", "captured_currency_conflict") if key in metadata},
         "official_grounding_contract_version": "collection-official-grounding-v2",
         "official_grounding_method": metadata.get("official_grounding_method"),
         "official_verification_status": metadata.get("official_verification_status"),

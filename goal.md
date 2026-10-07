@@ -1783,3 +1783,40 @@ Exclusions: CMS/dependency installation, personalized recommendations, canonical
 Acceptance: two articles discoverable in all three languages; named account conditions accurately sourced with explicit check date; transparent hypothetical arithmetic; new article targets checking catalog; unique canonical/hreflang/BlogPosting/social image and sitemap entries; existing article retained; readable without JavaScript and responsive at 390/768/1440px.
 Verification: official-source inspection; Public unit tests, lint, typecheck and isolated build; focused blog browser/HTTP/SEO audit; final diff and goal review; journal/policy update.
 Status: complete for this article slice. Both articles/index pass 60 focused browser/HTTP/SEO checks in EN/KO/JA at 390/768/1440px, including sources, arithmetic, metadata/structured data, nine sitemap URLs, distinct previews, no-JavaScript reading and localized catalog handoffs. Public 102 tests, lint, isolated typecheck/build and foundation baseline pass; representative Korean screens independently inspected. No deployment or canonical/private-data operation. Changed Markdown links/route JSON, twenty-file UTF-8/whitespace checks, unchanged first-article content comparison and final git diff --check pass. Acceptance criteria reviewed and satisfied. Existing shared goal remains for independently owned unresolved work.
+
+## RBC evidence, generic correction and direct publication - 2026-10-07
+
+Status: Complete for this authorized local correction and direct publication
+slice. Preserve all earlier goal sections and independent ownership.
+Objective: Audit latest RBC collections against directly inspected current
+ official evidence; correct demonstrated shared defects and publish verified passes.
+Scope: Read-only Run/candidate/capture diagnosis; bounded direct official capture;
+source-backed cross-bank/type regressions; shared pipeline fixes and aligned
+prompts/gates; one-off normal automatic validation/promotion/projection/readback.
+Exclusions: Admin API collection, manual review/overrides, weakened essentials,
+new countries/types, unrelated data/registry changes, paid retry loops, permanent
+recovery features and unrequested runtime deployment/restarts.
+Acceptance:
+- [x] Explain every latest RBC scope, serving version and candidate disposition.
+- [x] Establish direct opportunities from exact current official proof and
+      reproduce demonstrated defects before broadening accepted patterns.
+- [x] Verify reusable corrections across banks/types and negative boundaries;
+      repeat actual-input ordinary services until demonstrated defects resolve.
+- [x] Publish current automatic passes, preserve history/unrelated records and
+      verify actual canonical, private evidence and Public API/site results.
+- [x] Update report/journal/contracts as needed; review goal/diff and run checks.
+Verification: immutable original inputs/hashes; ordinary artifact/origin lookup;
+focused and affected-runtime tests; scoped before-images/rollback rehearsal;
+independent financial/evidence/Public readback and git diff --check.
+Outcome: latest 7 scopes/41 automatic exclusions diagnosed; exact current-input
+replay 0->15 passes with generic ownership/rate/cost/currency/identity corrections.
+Normal automatic approval produces 15 distinct products/versions; ION/ION+ ID
+connection repair preserves exact approved facts/evidence and original ION ID.
+Rollback rehearsals, persisted origins and 78 current financial field checks pass.
+All 15 Public API/site details verified: CA 88->103, RBC 1->16, US 5 unchanged;
+original/unrelated data and private evidence boundaries preserved. Worker focused
+55/API approval 56/full API 639 pass. Full Worker 844 runs/842 pass, with two
+unchanged pre-existing National/Oaken fixture hash failures explicitly recorded.
+Foundation, changed documentation/JSON/source hygiene, final goal/diff review and
+git diff --check pass. Local API/Worker v6 deployment remains a separate action;
+no deployment/restart, paid provider call or Admin collection API call performed.

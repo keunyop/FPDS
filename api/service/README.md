@@ -1,5 +1,18 @@
 # FPDS API Service
 
+## Owned prices, dynamic rates and RBC verification - 2026-10-07
+
+Process `2026-10-07-owned-price-rate-proof-v6` shares dependency-free empty rate
+slot detection with safe fetch. Existing render/research limits, official origin,
+authentication and automatic financial gates remain. Parser v15/native evidence,
+normalization, prompts and cache invalidation distinguish the selected product's
+prices from recommendation panels and preserve complete rate conditions.
+Canonical name/source-cardinality SQL preserves meaningful plus variants.
+Five SQL behavior regressions and the full independent API suite (639 tests) pass.
+Fifteen RBC products pass the corrected local pipeline and normal publication;
+serving reports v5, so future Admin use requires the normal API/Worker release. Direct publication is a separate bounded operation with zero Admin
+collection API or provider calls. See [diagnosis and verification](../../docs/00-governance/rbc-generic-collection-corrections-2026-10-07.md).
+
 ## Owned deposit tables and Oaken publication - 2026-10-07
 
 Parser v14/process `2026-10-07-owned-deposit-table-v5` preserve named deposit

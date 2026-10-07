@@ -1,0 +1,658 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+	<title>Personal Accounts Interest Rates - RBC Royal Bank</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta property="og:title" content="View Personal Accounts Interest Rates" />
+	<meta property="og:description" content="View current daily interest rates for RBC Royal Bank banking and savings personal deposit accounts." />
+	<meta name="description" content="View current daily interest rates for RBC Royal Bank banking and savings personal deposit accounts." />
+	<meta name="keywords" content="banking account interest rates, rates, chequing savings account interest rate rates, personal accounts interest rate rates, rbc royal bank, canada" />
+	<style>
+		/* standard:; 30px 0 */
+		.small-dividers .divider {
+			margin: 15px 0;
+		}
+
+		/* standard: 10px */
+		.small-dividers .collapse-inner {
+			padding-left: 0;
+		}
+
+		.small-dividers .collapse-inner p,
+		.small-dividers .collapse-inner ul {
+			margin-top: 30px;
+		}
+
+		/* standard: max-width is 770px */
+		.small-dividers .collapse-content {
+			max-width: 100%;
+		}
+
+		.small-dividers .collapse-content a {
+			font-weight: 300 !important;
+			text-decoration: underline !important;
+		}
+
+		/* style all the rates tables */
+		table.outlines th {
+			text-align: left;
+			vertical-align: top;
+			padding: 15px;
+			border-bottom: 2px solid #73b0e3;
+		}
+
+		table.outlines td:first-child {
+			font-weight: 500;
+		}
+
+		table.outlines th,
+		table.outlines td {
+			min-width: 50%;
+			width: 50%;
+		}
+
+		.table-morph:last-child {
+			margin-bottom: 30px;
+		}
+
+		/* disclaimer font size adjustment */
+		.text-disclaimer p,
+		.text-disclaimer ul li {
+			font-size: 16px;
+			line-height: 24px;
+		}
+		/* design-specific quirks */
+		@media print {
+			.collapse-content.collapse {
+				display: block !important;
+			}
+			.collapse-toggle:before, .collapse-toggle:after {
+				content: none !important;
+			}
+		}
+	</style>
+	
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Light.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Regular.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Bold.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Medium.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/RBCDisplay-Light.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/RBCDisplay-Bold.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-Italic.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-MediumItalic.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/dvl/v1.0/assets/fonts/Roboto-LightItalic.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" as="style" href="/dvl/v1.0/assets/css/dvl.min.css">
+<link rel="preload" as="script" href="/dvl/v1.0/assets/js/dvl.min.js">
+<link rel="stylesheet" href="/dvl/v1.0/assets/css/dvl.min.css">
+<!-- Custom CSS for RBC Insurance only -->
+
+<style>.async-hide { opacity: 0 !important} </style>
+<script>(function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;
+h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
+(a[n]=a[n]||[]).hide=h;setTimeout(function(){i();h.end=null},c);h.timeout=c;
+})(window,document.documentElement,'async-hide','dataLayer',4000,
+{'GTM-K5TWTL':true});</script>
+<!-- Google Tag Manager -->
+<script>var dataLayer=window.dataLayer=window.dataLayer||[];dataLayer.push({"LOB":"Enterprise"});
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-K5TWTL');</script>
+<!-- End Google Tag Manager -->
+</head>
+
+<body>
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K5TWTL"
+	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->
+	<div id="dvl-wpr" data-lang-toggle="rates/_assets-custom/js">
+
+		<header class="n-search n-location n-language n-contact n-secure" data-lob="personal">
+			<a href="#page-title" id="skip-nav">Skip to main content</a>
+<div id="header" class="main-header" data-domain="rbcroyalbank.com" data-lob="banking">
+	<!-- ** Logo ** -->
+	<a href="/personal.html" class="logo-wpr">
+		<div class="logo-img"><img src="/dvl/v1.0/assets/images/logos/rbc-logo-shield.svg" width="45" height="60" alt="Royal Bank of Canada logo"></div>
+		<div class="logo-text">Royal Bank</div>
+	</a>
+
+	<div class="header-content">
+		<!-- ** Search Bar ** -->
+		<div class="search-trigger" aria-label="Search RBC (open search dialog)" role="button" tabindex="0">
+			<span class="search-text"><img src="/dvl/v1.0/assets/images/icons/icon-search-inverse.svg" width="24" height="25" alt="">Search RBC ...</span>
+		</div>
+		
+		<!-- ** Global Navigation ** -->
+		<div class="global-nav">
+			<div class="global-nav-item dropdown-overlay right contact">
+				<div class="dropdown-text" id="nav-contact" role="button" tabindex="0" aria-expanded="false" aria-controls="content-contact">Contact Us</div>
+				<div id="content-contact" class="dropdown-content" role="region" aria-hidden="true" aria-labelledby="nav-contact">
+					<ul id="header-contact-list">
+						<li><a href="https://maps.rbcroyalbank.com/" class="branch-link">Find a Branch</a></li>
+						<li class="phone-link">Call <span class="tel-number">1-800-769-2511</span></li>
+						<li><a href="https://www.rbcroyalbank.com/customer-service/index.html" class="email-link">Email</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="global-nav-item dropdown-overlay right language">
+				<div class="dropdown-text" id="nav-language" role="button" tabindex="0" aria-expanded="false" aria-controls="content-language" aria-label="Select language"><img src="/dvl/v1.0/assets/images/icons/icon-flag-Canada.svg" class="country-flag-img" width="27" height="13" alt="Canada">EN</div>
+				<div id="content-language" class="dropdown-content" role="region" aria-hidden="true" aria-labelledby="nav-language">
+					<ul id="header-language"></ul>
+				</div>
+			</div>
+			<!-- ** Secure Button ** -->
+			<div class="global-nav-item secure-btn">
+				<a href="https://secure.royalbank.com/signin.html" class="btn secondary fl-r" role="button" aria-label="Sign in to R B C Online Banking" >Sign In</a>
+			</div>	
+		</div>
+	</div>
+	
+	<div class="mobile-header-content">
+		<a href="/personal.html" class="mobile-logo-wpr">
+			<div class="logo-img"><img src="/dvl/v1.0/assets/images/logos/rbc-logo-shield.svg" width="31" height="40" alt="Royal Bank of Canada logo"></div>
+			<div class="logo-text">Royal Bank</div>
+		</a>
+		<div class="mobile-nav">
+			<a href="https://secure.royalbank.com/signin.html" class="mobile-secure-btn" role="button" aria-label="Sign in to R B C Online Banking" ><span>SIGN IN</span></a>
+			<button class="mobile-nav-btn"><span>MENU</span></button>
+		</div>
+	</div>
+</div>
+
+<!-- *** Intelli Bar Starts *** -->
+<div class="search-bar" id="search-bar" tabindex="-1" role="dialog" aria-labelledby="header-search" aria-hidden="true">
+	<div class="search-bar-inner">
+		<div class="search-logo">
+			<img src="/dvl/v1.0/assets/images/logos/rbc-logo-shield-blue.svg" width="63" height="72" alt="Royal Bank of Canada logo">	
+		</div>
+		<div class="search-form">
+			<form method="get" action="https://www.rbcroyalbank.com/search-public/index.html" id="header-search-form">
+				<label for="header-search" class="offscreen">Ask your question</label>
+				<input type="hidden" name="type" id="header-search-type" value="0">
+				<input type="search" name="question" id="header-search" class="ui-autocomplete-input" autocomplete="off" placeholder="Ask your question">
+			</form>
+			<button type="button" id="search-close" class="search-close" aria-label="Close search"><img src="/dvl/v1.0/assets/images/ui/ui-close-blue.svg" alt="Close search"></button>
+		</div>
+	</div>
+</div>
+<!-- *** Intelli Bar Ends *** -->
+		</header>
+
+		<div class="side-menu" id="side-menu-id" role="dialog" aria-label="Menu Navigation" aria-hidden="true">
+	<div class="side-menu-inner">
+		<!-- *** Search Bar *** -->
+		<div class="side-menu-top">
+			<div class="side-menu-search">
+				<form method="get" id="sidebar-search-form" action="https://www.rbcroyalbank.com/search-public/index.html">
+					<label class="offscreen" for="sidebar-search">Search RBC</label>
+					<input type="hidden" name="type" id="sidebar-search-type" value="0">
+					<input type="text" name="question" id="sidebar-search" class="sidebar-search-input" autocomplete="off" placeholder="Search RBC">
+					<button type="button" class="search-btn" aria-label="Search"><img src="/dvl/v1.0/assets/images/icons/icon-search-yellow.svg" alt="Search" width="30" height="30"></button>
+				</form>
+			</div>
+		</div>
+		
+		<!-- *** Line of Business Dropdown *** -->
+		<div class="side-menu-lob">
+			<div class="lob-dropdown">
+				<button id="lob-toggle" class="lob-toggle collapsed" data-target="#side-menu-lob-content" data-toggle="collapse" aria-expanded="false" aria-controls="side-menu-lob-content">Personal Banking</button>
+				<div class="collapse" id="side-menu-lob-content">
+					<ul id="side-menu-lob" class="link-list"></ul>
+				</div>	
+			</div>
+		</div>
+		
+		<!-- *** Menu List *** -->
+		<div class="side-menu-list">
+			<ul id="menu-list" class="link-list">
+				<li class="lvl-root-menu"></li>
+			</ul>	
+		</div>
+
+		<div class="side-menu-link">
+			<div class="side-menu-promotions-link">
+				<a href="https://www.rbcroyalbank.com/special-promotions/index-or.html">Promotions</a>
+			</div>
+		</div>
+		
+		<!-- *** Secondary Menu *** -->
+		<div class="side-menu-secondary-menu">			
+			<ul class="secondary-menu-nav" role="tablist">
+                <li role="presentation" class="active"><a href="#side-menu-contactus" class="active" id="secondary-menu-contact-us" role="tab" data-toggle="tab" aria-controls="side-menu-contactus" aria-selected="true">Contact Us</a></li>
+				<li role="presentation"><a href="#side-menu-location" id="secondary-menu-location" role="tab" data-toggle="tab" aria-controls="side-menu-location" aria-selected="false">Language</a></li>
+            </ul>
+            <div class="secondary-menu-panels tab-content">
+                <div role="tabpanel" class="tab-pane active" id="side-menu-contactus" aria-labelledby="secondary-menu-contact-us">
+                	<ul id="side-menu-contact-list"></ul>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="side-menu-location" aria-labelledby="secondary-menu-location">
+                    <ul id="side-menu-language" class="link-list"></ul>
+                </div>
+            </div>
+		</div>
+
+		<div class="side-menu-link mar-0">
+			<div class="side-menu-adchoices-link">
+				<a href="https://www.rbcroyalbank.com/privacy-security/interest-based-advertising/index.html">AdChoices</a>
+			</div>
+		</div>
+
+		<button class="side-menu-close" aria-label="Close Menu"><img src="/dvl/v1.0/assets/images/ui/ui-close-white.svg" alt=""></button>
+	</div>
+</div>
+
+		<main role="main" data-menu="_assets-custom/js/menu.json">
+
+			<div class="nav-bar">
+				<div class="nav-inner">
+					<button class="nav-btn"><span>MENU</span></button>
+					<h1 id="page-title" class="nav-location">Personal Accounts Interest Rates</h1>
+				</div>
+			</div>
+
+			<!-- main section -->
+			<section class="small-dividers" aria-labelledby="todays-rates">
+				<div class="section-inner">
+
+					<p class="text-script">Rates for
+						07 October 2026
+					</p>
+					<p><a class="standalone-link" href="/accounts/index.html">Banking Accounts &amp; Services</a></p>
+
+					<h2 id="todays-rates" class="h3 text-center mar-t-dbl mar-b">Banking and Saving Personal Deposit Accounts Interest
+						Rates</h2>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#baspdair-savings" data-toggle="collapse" aria-expanded="false"
+						 aria-controls="baspdair-savings">Savings Accounts</button></p>
+					<div class="collapse-content collapse" id="baspdair-savings">
+						<div class="collapse-inner">
+
+							<p id="esavings"><a href="/accounts/e-savings.html">RBC High Interest eSavings</a><sup>&trade;</sup></p>
+							<div class="table-morph" id="public-rates_esavingsnotiers"></div>
+
+							<p id="enhancedsavings"><a href="/accounts/enhanced-savings.html">RBC Enhanced Savings</a><sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_enhancedsavings"></div>
+
+							<p id="daysavings"><a href="/accounts/day-to-day-savings.html">RBC Day to Day Savings</a><sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_daysavings"></div>
+
+							<p id="findsave">Find &amp; Save&trade;</p>
+							<div class="table-morph" id="public-rates_findsave"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#baspdair-savings-youth" data-toggle="collapse"
+						 aria-expanded="false" aria-controls="baspdair-savings-youth">Savings Accounts for Youth</button></p>
+					<div class="collapse-content collapse" id="baspdair-savings-youth">
+						<div class="collapse-inner">
+
+							<p id="leoyoungsavers"><a href="/accounts/leo-young-savers-account.html">RBC Leo's Young Savers
+									Account</a><sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_leoyoungsavers"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#baspdair-banking" data-toggle="collapse" aria-expanded="false"
+						 aria-controls="baspdair-banking">Banking Accounts</button></p>
+					<div class="collapse-content collapse" id="baspdair-banking">
+						<div class="collapse-inner">
+
+							<ul>
+								<li>No interest is payable on the following accounts</li>
+								<li id="vipbanking"><a href="/accounts/vip-banking.html">RBC VIP Banking</a><sup>&reg;</sup></li>
+								<li><a href="/accounts/signature-no-limit-banking.html">RBC Signature No Limit Banking</a>&trade;</li>
+								<li>RBC No Limit Banking&trade;</li>
+								<li><a href="/accounts/day-to-day-banking.html">RBC Day to Day Banking</a><sup>&reg;</sup></li>
+								<li><a href="https://www.rbcroyalbank.com/accounts/advantage-banking.html" >RBC Advantage<sup>TM</sup> Banking</a></li>
+							</ul>
+
+							<div class="table-morph" id="public-rates_vipbanking"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#baspdair-banking-students" data-toggle="collapse"
+						 aria-expanded="false" aria-controls="baspdair-banking-students">Banking Accounts for Students</button></p>
+					<div class="collapse-content collapse" id="baspdair-banking-students">
+						<div class="collapse-inner">
+
+							<ul>
+								<li>No interest is payable on the following account</li>
+								<li id="studentbanking"><a href="https://www.rbcroyalbank.com/accounts/advantage-banking-students.html">RBC Advantage<sup>TM</sup> Banking for students</a></li>
+							</ul>
+							<div class="table-morph" id="public-rates_studentbanking"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#baspdair-banking-savings" data-toggle="collapse"
+						 aria-expanded="false" aria-controls="baspdair-banking-savings">Banking and Savings Accounts - Companion accounts to Premium Banking packages</button></p>
+					<div class="collapse-content collapse" id="baspdair-banking-savings">
+						<div class="collapse-inner">
+
+							<p>No interest is payable on the following account</p>
+<p id="daybanking"><a href="/accounts/day-to-day-banking.html">RBC Day to Day Banking</a><sup>&reg;</sup>
+								linked to VIP<sup>1</sup>, PRF<sup>2</sup> or PRI<sup>3</sup><br></p>
+							<div class="table-morph" id="public-rates_daybanking"></div>
+
+							<p id="daysavingsspecial"><a href="/accounts/day-to-day-savings.html">RBC Day to Day Savings</a><sup>&reg;</sup>
+								linked to VIP<sup>1</sup>, PRF<sup>2</sup> or PRI<sup>3</sup></p>
+							<div class="table-morph" id="public-rates_daysavingsspecial"></div>
+
+							<p id="enhancedsavingsspecial"><a href="/accounts/enhanced-savings.html">RBC Enhanced Savings</a><sup>&reg;</sup>
+								linked to VIP<sup>1</sup>, PRF<sup>2</sup> or PRI<sup>3</sup></p>
+							<div class="table-morph" id="public-rates_enhancedsavingsspecial"></div>
+
+							<p id="uspersonalaccount"><a href="/accounts/us-personal-account.html">U.S. Personal&trade; Account</a>
+								linked to VIP<sup>1</sup>, PRF<sup>2</sup> or PRI<sup>3</sup><br><span class="text-small">No interest is
+									payable</span></p>
+							<div class="table-morph" id="public-rates_uspersonalaccount"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#baspdair-us" data-toggle="collapse" aria-expanded="false"
+						 aria-controls="baspdair-us">U.S. & Foreign Currency Accounts</button></p>
+					<div class="collapse-content collapse" id="baspdair-us">
+						<div class="collapse-inner">
+
+							<p id="usesavings"><a href="/accounts/us-e-savings.html">RBC U.S. High Interest eSavings</a>&trade;</p>
+							<div class="table-morph" id="public-rates_usesavingsnotiers"></div>
+
+							<p id="uspersonalaccount2"><a href="/accounts/us-personal-account.html">U.S. Personal&trade; Account</a></p>
+							<div class="table-morph" id="public-rates_uspersonalaccount2"></div>
+
+							<p id="euroesavings"><a href="/accounts/euro-e-savings.html">RBC Euro eSavings</a>&trade;</p>
+							<div class="table-morph" id="public-rates_euroesavings"></div>
+
+							<p id="hkdesavings"><a href="/accounts/hong-kong-dollar-e-savings.html">RBC Hong Kong Dollar eSavings</a>&trade;</p>
+							<div class="table-morph" id="public-rates_hongkongesavings"></div>
+
+							<p id="britishpoundesavings"><a href="/accounts/british-pound-e-savings.html">RBC British Pound eSavings</a>&trade;</p>
+							<div class="table-morph" id="public-rates_britishesavings"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#baspdair-private-banking" data-toggle="collapse"
+						 aria-expanded="false" aria-controls="baspdair-private-banking">Private Banking Accounts</button></p>
+					<div class="collapse-content collapse" id="baspdair-private-banking">
+						<div class="collapse-inner">
+
+							<p>Account information is available in <a href="http://www.rbcinvestments.com/private-banking/" class="underline">Private
+									Banking</a> Centres only</p>
+
+							<p id="ratelinkpreference">RateLink Preference<sup>&reg;</sup> Private Banking including linked accounts<sup>4,5</sup></p>
+							<div class="table-morph" id="public-rates_ratelinkpreference"></div>
+
+							<p id="daybankingprivate">RBC Private Banking&trade;</p>
+							<div class="table-morph" id="public-rates_daybankingprivate"></div>
+
+							<p id="daysavingsprivate">RBC Private Banking Savings&trade;</p>
+							<div class="table-morph" id="public-rates_daysavingsprivate"></div>
+
+							<p id="enhancedsavingsprivate">RBC Private Banking Enhanced Savings&trade;</p>
+							<div class="table-morph" id="public-rates_enhancedsavingsprivate"></div>
+
+							<p id="uspersonalaccountprivate">U.S. Personal&trade; Private Banking</p>
+							<div class="table-morph" id="public-rates_uspersonalaccountprivate"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+				</div>
+			</section>
+
+			<section class="small-dividers" aria-labelledby="not-offered-for-sale">
+				<div class="section-inner">
+
+					<h2 id="not-offered-for-sale" class="h3 text-center mar-b">Not Offered for Sale</h2>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#nofs-rba" data-toggle="collapse" aria-expanded="false"
+						 aria-controls="nofs-rba">Royal Bank Accounts</button></p>
+					<div class="collapse-content collapse" id="nofs-rba">
+						<div class="collapse-inner">
+
+							<p id="ratelink">RateLink Essential<sup>&reg;</sup> and RateLink Preference<sup>&reg;</sup> including linked accounts<sup>4,5</sup></p>
+							<div class="table-morph" id="public-rates_ratelink"></div>
+
+							<p id="royalmoneymakerplus60plus">Royal Money Maker Plus<sup>&reg;</sup> Sixty-Plus<sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_royalmoneymakerplus60plus"></div>
+
+							<p id="calculatorplus60plus">Calculator Plus<sup>&reg;</sup> Sixty-Plus<sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_calculatorplus60plus"></div>
+
+							<p id="signatureplus60plus">Signature Plus<sup>&reg;</sup> Sixty-Plus<sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_signatureplus60plus"></div>
+
+							<p id="uspersonal60plus">U.S. Personal&trade; Sixty-Plus<sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_uspersonal60plus"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#nofs-bssa" data-toggle="collapse" aria-expanded="false"
+						 aria-controls="nofs-bssa">Banking and Savings Special Accounts - Companion Accounts to Premium Banking Packages</button></p>
+					<div class="collapse-content collapse" id="nofs-bssa">
+						<div class="collapse-inner">
+
+							<p id="daybankingnot"><a href="/accounts/day-to-day-banking.html">RBC Day to Day Banking</a><sup>&reg;</sup><a
+								 href="/accounts/day-to-day-banking.html">Special</a> including accounts
+								linked to VIP<sup>1</sup>, PRF<sup>2</sup> or PRI<sup>3</sup><br><span class="text-small">No interest paid on
+									accounts opened on and after Nov 26, 2010</span></p>
+							<div class="table-morph" id="public-rates_daybankingnot"></div>
+
+							<p id="daysavingsspecialnot"><a href="/day-to-day-savings.html">RBC Day to Day Savings</a><sup>&reg;</sup><a
+								 href="/accounts/day-to-day-savings.html">Special</a> including accounts
+								linked to VIP<sup>1</sup>, PRF<sup>2</sup> or PRI<sup>3</sup></p>
+							<div class="table-morph" id="public-rates_daysavingsspecialnot"></div>
+
+							<p id="enhancedsavingsspecialnot"><a href="/accounts/enhanced-savings.html">RBC Enhanced Savings</a><sup>&reg;</sup><a
+								 href="/accounts/enhanced-savings.html">Special</a> including accounts
+								linked to VIP<sup>1</sup>, PRF<sup>2</sup> or PRI<sup>3</sup></p>
+							<div class="table-morph" id="public-rates_enhancedsavingsspecialnot"></div>
+
+							<p id="uspersonalaccountnot"><a href="/accounts/us-personal-account.html">U.S. Personal&trade; Account
+									Special</a> including accounts linked to VIP<sup>1</sup>, PRF<sup>2</sup> or PRI<sup>3</sup><br><span class="text-small">No
+									interest paid on accounts opened on and after Nov 26, 2010</span></p>
+							<div class="table-morph" id="public-rates_uspersonalaccountnot"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<p><button class="collapse-toggle collapsed" data-target="#nofs-rta" data-toggle="collapse" aria-expanded="false"
+						 aria-controls="nofs-rta">Royal Trust Accounts</button></p>
+					<div class="collapse-content collapse" id="nofs-rta">
+						<div class="collapse-inner">
+
+							<p id="rtallianceplan">Royal Trust Alliance Plan<sup>&reg;</sup> <span class="text-small">including linked accounts<sup>4</sup></span></p>
+							<div class="table-morph" id="public-rates_rtallianceplan"></div>
+
+							<p id="rttbillssavings">Royal Trust T-Bills Savings<sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_rttbillssavings"></div>
+
+							<p id="rtdailyinterestsavings">Royal Trust Daily Interest Savings<sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_rtdailyinterestsavings"></div>
+
+							<p id="rtdailyinterestchequing">Royal Trust Daily Interest Chequing<sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_rtdailyinterestchequing"></div>
+
+							<p id="rtusdailyinterest">Royal Trust US Daily Interest<sup>&reg;</sup></p>
+							<div class="table-morph" id="public-rates_rtusdailyinterest"></div>
+
+						</div>
+					</div>
+
+					<div class="divider"></div>
+
+					<!-- r: should be padding 30px -->
+					<div class="text-disclaimer pad-t">
+
+						<!-- r: should be 16px, 24px line height -->
+						<p>If you have any questions about today's rates, please visit your local branch or call us at <span class="tel-number">1
+								800 769-2511</span>.</p>
+
+						<p><span class="h5">NOTES</span></p>
+
+						<ul>
+							<li>P &nbsp; Denotes interest is calculated at this rate on the applicable portion of the daily closing credit
+								account balance.</li>
+
+							<li><sup>1</sup> &nbsp;&nbsp; <span class="roboto-medium">VIP</span> means the account is linked to an RBC VIP
+								Banking package.</li>
+							<li><sup>2</sup> &nbsp;&nbsp; <span class="roboto-medium">PRF</span> means the account is linked to a RateLink
+								Preference package.</li>
+							<li><sup>3</sup> &nbsp;&nbsp; <span class="roboto-medium">PRI</span> means the account is linked to a Private
+								Banking package.</li>
+							<li><sup>4</sup> &nbsp;&nbsp; Canadian dollar linked accounts that are non-interest bearing do not pay interest.</li>
+							<li><sup>5</sup> &nbsp;&nbsp; Only Canadian dollar personal deposit accounts can be linked.</li>
+							<li>Interest rates are subject to change without notice at any time.</li>
+							<li>Interest is earned in the currency of the account.</li>
+							<li>Interest is calculated daily on the closing credit balance and paid monthly on the 2nd business day of the
+								following calendar month backdated to the previous business day. The interest rate is an annual interest rate.
+								The interest calculation for each account is a simple interest calculation.</li>
+							<li>Foreign Currency Accounts: Deposit Interest is credited to the Account on the last Business Day of the calendar month. If it is a non-Business Day, the interest will be paid the next Business Day.</li>
+							<li><sup>&reg;</sup> &nbsp;&nbsp; Registered trademarks of Royal Bank of Canada. RBC and Royal Bank are
+								registered trademarks of Royal Bank of Canada.</li>
+							<li>&trade; &nbsp; Trademarks of Royal Bank of Canada.</li>
+						</ul>
+
+					</div>
+
+				</div>
+			</section>
+
+		</main>
+
+		<footer>
+			<div class="main-footer">
+	<div class="main-footer-inner">
+		<div class="footer-left">
+			<p>Royal Bank of Canada Website, <span class="no-wrap">&copy; 1995-<span class="footer-year"></span></span></p>
+			<p><a href="https://www.rbc.com/legal/" class="popup" data-popup-type="default" target="_blank" title="(opens in new window)">Legal<span class="offscreen"> (opens in a new window)</span></a> | <a href="https://www.rbc.com/accessibility/index.html" class="popup" data-popup-type="default" target="_blank" title="(opens in new window)">Accessibility<span class="offscreen"> (opens in a new window)</span></a> | <a href="https://www.rbc.com/privacysecurity/ca/index.html" class="popup" data-popup-type="default" target="_blank" title="(opens in new window)">Privacy &amp; Security<span class="offscreen"> (opens in a new window)</span></a> | <a role="button" href="javascript:void(0)" class="ot-sdk-show-settings">Advertising &amp; Cookies<span class="offscreen"> (opens in a modal window)</span></a></p>
+		</div>	
+		<div class="footer-right">
+			<ul class="social-links">
+				<li><a href="https://www.facebook.com/rbc"><img src="/dvl/v1.0/assets/images/social/scl-facebook-master-white.svg" alt="Facebook"></a></li>
+				<li><a href="https://www.instagram.com/rbc/"><img src="/dvl/v1.0/assets/images/social/scl-instagram-master-white.svg" alt="Instagram"></a></li>
+				<li><a href="https://twitter.com/RBC"><img src="/dvl/v1.0/assets/images/social/scl-twitter-master-white.svg" alt="Twitter"></a></li>
+				<li><a href="https://www.youtube.com/user/RBC"><img src="/dvl/v1.0/assets/images/social/scl-youtube-master-white.svg" alt="YouTube"></a></li>
+				<li><a href="https://www.linkedin.com/company/rbc"><img src="/dvl/v1.0/assets/images/social/scl-linkedin-master-white.svg" alt="LinkedIn"></a></li>
+			</ul>
+			<div class="to-top">
+				<a href="#skip-nav" class="scrollto">
+					<img src="/dvl/v1.0/assets/images/ui/ui-to-top-white.svg" width="15" height="20" alt="">
+					<span><span class="offscreen">Back to </span>Top</span>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+		</footer>
+
+	</div>
+
+	<script src="/dvl/v1.0/assets/js/purify.min.js"></script>
+<script src="/dvl/v1.0/assets/js/jquery.min.js"></script>
+<script src="/dvl/v1.0/assets/js/jquery-ui.min.js"></script>
+<script src="/dvl/v1.0/assets/js/bootstrap.min.js"></script>
+<script src="/dvl/v1.0/assets/js/underscore.min.js"></script>
+<script src="/dvl/v1.0/assets/js/bowser.min.js"></script>
+<script src="/dvl/v1.0/assets/js/dvl.min.js"></script>
+<script src="/dvl/v1.0/assets/js/carryover.min.js"></script>
+<div class="high-contrast-test" style="width: 0px; height: 0px; background-image: url(/dvl/v1.0/assets/images/ui/ui-checkmark-blue.svg)"></div>
+<script>
+    if (typeof DOMPurify === "undefined") {
+        DOMPurify = {
+            sanitize: (params) => { return params; }
+        };
+    }
+
+    // High contrast mode checker. if there is no background-image we are in high contrast mode
+    if ($('.high-contrast-test').css('background-image') === 'none') {
+        $('html').addClass('high-contrast-mode');
+    }
+
+    // Datalyer push for the Promotions link in the header
+    $(document).ready(function() {
+
+        $('#header-promotions-link').on('click', function(event) {
+            dataLayer.push({
+                'event':'dvlEvent',
+                'category':'header DVL1_0',
+                'action':'Click Link',
+                'label':'Promotions'
+            });  
+        });
+
+        $('.side-menu-promotions-link a').on('click', function(event) {
+            dataLayer.push({
+                'event':'dvlEvent',
+                'category':'header DVL1_0',
+                'action':'Click Link',
+                'label':'Promotions'
+            });  
+        });
+          
+    });
+
+    // OneTrust Modal Trigger
+    $('.ot-sdk-show-settings').on('click', function(event) {
+        event.preventDefault();
+        OneTrust.ToggleInfoDisplay();
+    });
+</script>
+
+	<script src="/rates/_assets-custom/js/rates.js"></script>
+	<script src="/rates/_assets-custom/js/ratesIdMapping/pd.js"></script>
+	<script src="/rates/_assets-custom/js/publicRates.js"></script>
+	<script src="/rates/_assets-custom/js/anchorLinks.js"></script>
+	<script>
+	  dataLayer.push({
+	    "event": "virtualPageview",
+	    "vpvURL": "https://www.rbcroyalbank.com/rates/persacct.html",
+	    "LOB": "Enterprise",
+	    "vpvPageName": "Personal Accounts Interest Rates",
+	    "pageLanguage": "EN",
+	    "vpPageType": "Rates"
+	  });
+	</script>
+
+    <!-- o l s -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"cfc316c1f499450ea6c60e18cd37e5ce","spa":2}' crossorigin="anonymous"></script>
+</body>
+
+</html>
