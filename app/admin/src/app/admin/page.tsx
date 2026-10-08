@@ -11,7 +11,7 @@ import {
   fetchDashboardHealth,
   fetchRunStatusList,
   fetchSignupRequests,
-  getAdminApiOrigin,
+  getAdminBrowserApiOrigin,
 } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale, type AdminLocale } from "@/lib/admin-i18n";
 
@@ -216,7 +216,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
       csrfToken={activeSession.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: activeSession.user.display_name,
         loginId: activeSession.user.login_id,

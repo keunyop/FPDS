@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AdminLoginForm } from "@/components/fpds/admin/admin-login-form";
-import { fetchAdminSession, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type LoginPageProps = {
@@ -25,5 +25,5 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(buildAdminHref("/admin", new URLSearchParams(), locale));
   }
 
-  return <AdminLoginForm apiOrigin={getAdminApiOrigin()} locale={locale} nextPath={nextParam ?? buildAdminHref("/admin", new URLSearchParams(), locale)} />;
+  return <AdminLoginForm apiOrigin={getAdminBrowserApiOrigin()} locale={locale} nextPath={nextParam ?? buildAdminHref("/admin", new URLSearchParams(), locale)} />;
 }

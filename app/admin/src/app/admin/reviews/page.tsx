@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { ReviewQueueSurface } from "@/components/fpds/admin/review-queue-surface";
-import { fetchAdminSession, fetchBankList, fetchProductTypeList, fetchReviewQueue, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchBankList, fetchProductTypeList, fetchReviewQueue, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 import { buildReviewQueueApiSearchParams, parseReviewQueueFilters } from "@/lib/review-queue-query";
 
@@ -57,7 +57,7 @@ export default async function ReviewQueuePage({ searchParams }: ReviewQueuePageP
       csrfToken={session.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

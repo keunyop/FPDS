@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { SignupRequestForm } from "@/components/signup-request-form";
-import { fetchAdminSession, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type SignupPageProps = {
@@ -23,5 +23,5 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
     redirect(buildAdminHref("/admin", new URLSearchParams(), locale));
   }
 
-  return <SignupRequestForm apiOrigin={getAdminApiOrigin()} locale={locale} />;
+  return <SignupRequestForm apiOrigin={getAdminBrowserApiOrigin()} locale={locale} />;
 }

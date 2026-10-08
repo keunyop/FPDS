@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { CountryRegistrySurface } from "@/components/fpds/admin/country-registry-surface";
-import { fetchAdminSession, fetchCountryRegistry, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchCountryRegistry, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type CountriesPageProps = {
@@ -47,7 +47,7 @@ export default async function CountriesPage({ searchParams }: CountriesPageProps
       csrfToken={session.csrf_token}
       environmentLabel={adminEnvironmentLabel(session.environment)}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

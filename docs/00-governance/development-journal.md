@@ -1,5 +1,37 @@
 # FPDS Development Journal
 
+## 2026-10-08 - FPDS Admin Vercel deployment preparation
+
+- Prepared an independent Next.js project rooted at app/admin, Node 24 engines,
+  frozen pnpm install/build config, secret/build upload exclusions and a Korean
+  deployment runbook. Existing root API/Public config and lockfiles are intact.
+- Replaced direct browser API auth targets with same-origin countries/login/
+  signup/logout handlers. Preserve API session/country/role/CSRF authority,
+  status/body, audit input headers, separate host cookies, expiry/deletion,
+  HttpOnly/SameSite and Secure on HTTPS. Unknown actions/methods, cross-origin
+  writes, redirects and missing/insecure hosted API targets fail closed.
+- Actual next-start/Chrome reproduced internal localhost URL vs browser Host
+  rejection; corrected Origin verification and added proxy/HTTPS regressions.
+  Updated Admin/API README and the security transport contract. No visual,
+  translation, financial-policy, API/Worker runtime or migration changes.
+- Verification: Admin 56 tests pass (16 new configuration/auth cases); isolated
+  typecheck and final production build with Next 16.2.3 pass. Real Chrome fixture
+  validates EN/KO/JA login/signup at 390/768/1440px, keyboard focus, pending/error,
+  country empty/error, read-only empty Runs, login/session reload/UI logout,
+  host HttpOnly/CSRF cookies/deletion and same-origin requests (21 layout/state
+  cases, zero browser exceptions). Korean 390px screenshot visually inspected.
+- Foundation baseline, delivery Markdown/JSON, UTF-8, runtime-copy identity and
+  git diff --check pass. Full repo-doctor reports an ignored isolated-copy README
+  relative link under tmp/admin-vercel-prep-20261008/admin; source links pass.
+  Browser reports/screenshots/test log are retained in that private tmp directory.
+- Read-only existing Vercel API health returned HTTP 200/status ok. Real remote
+  login, project/environment creation, push/deployment, account/DB/provider writes
+  and collection were not performed. The existing detached subprocess/local-plan
+  collection requires a persistent API/Worker host or separately requested durable
+  execution design. Next: configure an independent Admin project and isolated
+  Preview API, run hosted smoke, then deploy in the requested environment.
+
+
 ## 2026-10-08 - TD/Vancity/WealthONE shared correction and direct publication
 
 - Inspected seventeen latest ordinary Runs: TD 24 candidates/four approvals,

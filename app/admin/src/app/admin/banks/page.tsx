@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { BankRegistrySurface, type BankRegistryPageFilters } from "@/components/fpds/admin/bank-registry-surface";
-import { fetchAdminSession, fetchBankDetail, fetchBankList, fetchProductTypeList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchBankDetail, fetchBankList, fetchProductTypeList, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type BankRegistryPageProps = {
@@ -54,7 +54,7 @@ export default async function BankRegistryPage({ searchParams }: BankRegistryPag
       csrfToken={session.csrf_token}
       environmentLabel={adminEnvironmentLabel(session.environment)}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

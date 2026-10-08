@@ -173,6 +173,16 @@ human RBAC baseline은 아래 3개 역할이다.
 
 ## 8. Session / CSRF / Browser Security
 
+Current Admin hosting transport (2026-10-08): the Next.js Admin host proxies only
+countries/login/signup-request/logout under `/api/admin/auth/[action]`. API-issued
+session/CSRF cookies are scoped to the Admin host, retain HttpOnly/SameSite/expiry
+and gain Secure on HTTPS; upstream Domain attributes are removed. No cross-domain
+cookie or wider CORS allowlist is needed. POST requires the browser Origin to
+match the request Host and effective HTTPS protocol (the internal Next URL can
+be localhost). API session, role, country and CSRF checks remain authoritative.
+See the [Admin deployment guide](../../app/admin/VERCEL.md); web hosting preparation
+does not establish durable collection execution or a live deployment.
+
 - admin cookie baseline:
   - `HttpOnly`
   - `SameSite=Lax`

@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { RunDetailSurface } from "@/components/fpds/admin/run-detail-surface";
-import { fetchAdminSession, fetchRunStatusDetail, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchRunStatusDetail, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type RunDetailPageProps = {
@@ -51,7 +51,7 @@ export default async function RunDetailPage({ params, searchParams }: RunDetailP
       csrfToken={session.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

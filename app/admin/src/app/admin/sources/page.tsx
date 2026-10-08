@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { SourceRegistrySurface, type SourceRegistryPageFilters } from "@/components/fpds/admin/source-registry-surface";
-import { fetchAdminSession, fetchSourceRegistryList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchSourceRegistryList, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type SourceRegistryPageProps = {
@@ -48,7 +48,7 @@ export default async function SourceRegistryPage({ searchParams }: SourceRegistr
       csrfToken={session.csrf_token}
       environmentLabel={adminEnvironmentLabel(session.environment)}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

@@ -136,6 +136,20 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 - There is no standalone Product Record, Publish Monitor, Audit, Usage, global
   search, localization-health, or existing-account-management page.
 
+## Vercel Deployment
+
+Use a separate Next.js Vercel project with Root Directory `app/admin`, Node 24
+and the package's frozen pnpm lockfile. The root Vercel project remains FastAPI.
+See the [Admin Vercel deployment guide](VERCEL.md) for exact project/environment
+settings, Preview isolation, smoke checks, collection-host limits and rollback.
+
+`FPDS_ADMIN_API_ORIGIN` is server-only. Browser countries/login/signup/logout
+use the bounded same-origin `/api/admin/auth/[action]` handlers, so session/CSRF
+cookies belong to the Admin host even when API and Admin use separate domains.
+API roles, country isolation and CSRF remain authoritative. Hosted configuration
+requires an explicit remote HTTPS origin. Web deployment alone does not move the
+current long-running API/Worker collection process to Vercel.
+
 ## Local Commands
 
 From this directory:

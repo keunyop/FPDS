@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { SourceDetailSurface } from "@/components/fpds/admin/source-detail-surface";
-import { fetchAdminSession, fetchSourceRegistryDetail, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchSourceRegistryDetail, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type SourceDetailPageProps = {
@@ -53,7 +53,7 @@ export default async function SourceDetailPage({ params, searchParams }: SourceD
       csrfToken={session.csrf_token}
       environmentLabel={adminEnvironmentLabel(session.environment)}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

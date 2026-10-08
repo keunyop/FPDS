@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { RunStatusSurface, type RunStatusPageFilters } from "@/components/fpds/admin/run-status-surface";
-import { fetchAdminSession, fetchRunStatusList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchRunStatusList, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type RunStatusPageProps = {
@@ -51,7 +51,7 @@ export default async function RunStatusPage({ searchParams }: RunStatusPageProps
       csrfToken={session.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

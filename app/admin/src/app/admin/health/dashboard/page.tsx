@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminApiUnavailable } from "@/components/fpds/admin/admin-api-unavailable";
 import { HealthDashboardSurface } from "@/components/fpds/admin/health-dashboard-surface";
-import { fetchAdminSession, fetchDashboardHealth, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchDashboardHealth, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type DashboardHealthPageProps = {
@@ -48,7 +48,7 @@ export default async function DashboardHealthPage({ searchParams }: DashboardHea
       csrfToken={session.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

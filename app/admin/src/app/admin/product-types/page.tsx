@@ -7,7 +7,7 @@ import {
   ProductTypeRegistrySurface,
   type ProductTypePageFilters,
 } from "@/components/fpds/admin/product-type-registry-surface";
-import { fetchAdminSession, fetchProductTypeDetail, fetchProductTypeList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchProductTypeDetail, fetchProductTypeList, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type ProductTypePageProps = {
@@ -53,7 +53,7 @@ export default async function ProductTypePage({ searchParams }: ProductTypePageP
       csrfToken={session.csrf_token}
       environmentLabel={adminEnvironmentLabel(session.environment)}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

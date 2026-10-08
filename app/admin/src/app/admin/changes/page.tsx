@@ -7,7 +7,7 @@ import {
   ChangeHistorySurface,
   type ChangeHistoryPageFilters,
 } from "@/components/fpds/admin/change-history-surface";
-import { fetchAdminSession, fetchChangeHistoryList, fetchProductTypeList, getAdminApiOrigin } from "@/lib/admin-api";
+import { fetchAdminSession, fetchChangeHistoryList, fetchProductTypeList, getAdminBrowserApiOrigin } from "@/lib/admin-api";
 import { buildAdminHref, resolveAdminLocale } from "@/lib/admin-i18n";
 
 type ChangeHistoryPageProps = {
@@ -56,7 +56,7 @@ export default async function ChangeHistoryPage({ searchParams }: ChangeHistoryP
       csrfToken={session.csrf_token}
       environmentLabel={envLabel}
       locale={locale}
-      logoutApiOrigin={getAdminApiOrigin()}
+      logoutApiOrigin={getAdminBrowserApiOrigin()}
       user={{
         name: session.user.display_name,
         loginId: session.user.login_id,

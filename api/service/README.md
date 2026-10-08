@@ -394,6 +394,20 @@ Essential-evidence research reads parser identity from the dependency-free
 that project. Run API tests in this independent API environment so Worker-only
 packages cannot mask import-boundary errors.
 
+## Admin Web Hosting Preparation - 2026-10-08
+
+Admin now has independent Vercel configuration under `app/admin`; follow its
+[deployment guide](../../app/admin/VERCEL.md). This preparation did not create or
+deploy a project or change the existing API environment. Browser authentication
+passes through same-origin Admin handlers and host-scoped cookies; server calls
+still use the normal API session, CSRF and country/role contracts. Keep the exact
+CORS allowlists and API secrets; no wildcard or shared cross-domain cookie is needed.
+
+The catalog collection launcher still writes local plan/log files and starts a
+detached subprocess. Its completion is not guaranteed by a serverless web/API
+deployment. A persistent collection-capable API/Worker host or separately
+requested durable execution design is required for full hosted collection.
+
 ## Vercel API Deployment
 
 The repository root is the Vercel project root. Root `app.py` exposes the

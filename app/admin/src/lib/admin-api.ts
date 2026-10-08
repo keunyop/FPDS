@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 
+import { resolveAdminApiOrigin } from "@/lib/admin-api-origin";
+
 export type AdminSession = {
   environment?: string;
   country_code: string;
@@ -1025,8 +1027,13 @@ type AdminApiResponse<T> = {
   data: T;
 };
 
+// Browser authentication always uses this app's host, including local development.
+export function getAdminBrowserApiOrigin() {
+  return "";
+}
+
 export function getAdminApiOrigin() {
-  return process.env.FPDS_ADMIN_API_ORIGIN ?? "http://localhost:4000";
+  return resolveAdminApiOrigin(process.env.FPDS_ADMIN_API_ORIGIN, Boolean(process.env.VERCEL));
 }
 
 async function fetchAdminData<T>(

@@ -1,5 +1,34 @@
 # Admin pre-handover review and fixes
 
+## FPDS Admin Vercel deployment preparation - 2026-10-08
+
+Status: Complete for local deployment preparation; actual hosting remains separate. Preserve all earlier goal ownership and unfinished work.
+Scope: Independent app/admin Vercel configuration, same-origin browser auth,
+server-only API target validation, deployment/rollback instructions and checks.
+Acceptance:
+- [x] Admin has its own Next.js Vercel root/config and excluded local secrets.
+- [x] Login/countries/signup/logout work through bounded same-origin handlers;
+      session/CSRF cookies and API authority/statuses remain intact.
+- [x] Vercel configuration fails closed without an explicit HTTPS API origin.
+- [x] Auth success/boundary/failure tests, typecheck/build and delivery-file repository checks pass.
+- [x] Document settings, preview isolation, smoke/rollback and collection host
+      limitations; journal actual checks and re-read goal/final diff.
+Limits: Preparation only; no Vercel project creation/deployment, remote config,
+account/DB writes, provider/collection calls or unrelated runtime restart.
+
+Outcome: independent Next.js config/Node 24/pinned pnpm, bounded same-origin auth,
+HTTPS hosted-origin validation and host-scoped API cookies prepared. Reproduced
+internal localhost vs browser Host rejection fixed with success/failure coverage.
+Admin 56 tests and isolated typecheck/production build pass. Real Chrome fixture
+checks pass for EN/KO/JA at 390/768/1440px, country empty/error, signup/login,
+session reload, UI logout and cookie deletion (21 responsive/state cases).
+Foundation baseline, changed-document links/JSON, UTF-8/source identity and diff
+checks pass. Whole repo-doctor sees broken relative README links in the ignored
+isolated tmp copy; delivery references pass. Existing API health HTTP 200; no
+live authentication, data/provider/collection write or remote deployment.
+Deployment guide records Preview isolation, exact settings, root CLI boundary,
+rollback and need for a persistent host for current detached collection work.
+
 ## TD, Vancity and WealthONE direct diagnosis and publication - 2026-10-08
 
 Status: Complete for shared code, current data publication and Public readback. Preserve every prior ownership and unrelated change.
