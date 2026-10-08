@@ -43,6 +43,8 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
     # A standalone suitability heading is not a condition on a preceding fee.
     # Keep its following text, including any actual balance/waiver condition.
     context = re.sub(r"(?mi)^Great if[ \t]*\r?\n(?=You (?:want|prefer)\b)", "Suitability\n", quote)
+    if field_name == "annual_fee":
+        context = re.sub(r"(?mi)^\(for primary cardholder and up to \d+ additional cards\)[ \t]*$", "Cardholder scope", context)
     if field_name in {"monthly_fee", "public_display_fee"}:
         if re.search(r"little to no monthly fees|through.{0,40}rebates|offers for eligible", context, re.I):
             return True
@@ -92,7 +94,7 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
 _COUNT_ROW_LABEL = r"Transactions? included per month(?:[ \t]+\d+(?:[ \t]*,[ \t]*\d+)*)?"
 _EXCESS_ROW_LABEL = r"(?:Additional|Extra|Excess|Overage) transaction (?:fee|charge)s?(?:[ \t]+\d+)?"
 
-_ORDINARY_UNLIMITED = r"\bunlimited\s+(?:(?:ordinary|free|no fee|debit|everyday|day-to-day|banking|monthly)\s+){0,3}transactions?\b"
+_ORDINARY_UNLIMITED = r"(?:\bunlimited\s+(?:number of )?(?:(?:ordinary|free|no fee|debit|daily|everyday|day-to-day|banking|monthly)\s+){0,3}transactions?\b|\bunlimited debit purchases, bill payments and withdrawals\b)"
 
 
 def _named_account_row_value(field_name: str, value: object, quote: str) -> bool | None:
@@ -799,7 +801,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             reason = "evidence_source_mismatch"
         elif not exact_quote(quote, e.get("evidence_excerpt")):
             reason = "exact_evidence_missing"
-        elif (e.get("anchor_type") in {"owned_account_assertion", "named_card_rate_table", "named_balance_rate"}
+        elif (e.get("anchor_type") in {"owned_account_assertion", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates"}
                 and not _native_record_belongs(record, e, source_metadata)):
             reason = "native_product_mismatch"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
@@ -822,9 +824,11 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             reason = "transaction_waiver_balance_not_minimum"
         elif (e.get("anchor_type") == "owned_account_assertion" and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
             reason = "native_account_conditions_incomplete"
-        elif (e.get("anchor_type") in {"card_information_rate", "named_card_rate_table", "named_balance_rate"}
+        elif (e.get("anchor_type") in {"card_information_rate", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate"}
                 and name in {"standard_rate", "interest_rate_summary", "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
-                and not exact_quote(e.get("evidence_excerpt"), quote)):
+                and (not exact_quote(e.get("evidence_excerpt"), quote)
+                     or (name in {"interest_rate_summary", "purchase_interest_rate_summary"}
+                         and not exact_quote(e.get("evidence_excerpt"), value)))):
             reason = "native_rate_conditions_incomplete"
         elif (name in {"interest_rate_summary", "term_rate_table"} and e.get("anchor_type") in {"named_deposit_schedule", "native_rate_table", "named_mortgage_rate_schedule", "credit_limit_rate_schedule"}
                 and (not exact_quote(e.get("evidence_excerpt"), quote)
@@ -847,6 +851,12 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     # Derived display aliases may only copy an accepted field of the same meaning.
     if "monthly_fee" in verified:
         payload["public_display_fee"] = payload["monthly_fee"]
+        mappings["public_display_fee"] = {
+            **dict(mappings["monthly_fee"]),
+            "source_field_name": "monthly_fee",
+            "normalization_method": "canonical_public_display_fee_alignment",
+        }
+        result["field_mapping_metadata"] = mappings
         verified.append("public_display_fee")
     identity_verified = "product_name" in verified and payload.get("product_name") == record.get("product_name")
     reasons = []

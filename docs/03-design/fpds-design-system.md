@@ -5,7 +5,6 @@ Date: 2026-04-13
 Status: Approved Working Baseline after Shadcnblocks Template-First Overhaul
 
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
 - `docs/03-design/product-grid-information-architecture.md`
 - `docs/03-design/admin-information-architecture.md`
 - `docs/03-design/insight-dashboard-metric-definition.md`

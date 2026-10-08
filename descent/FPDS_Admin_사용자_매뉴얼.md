@@ -11,8 +11,7 @@ FPDS Admin은 공식 금융상품 자료를 수집하고 실행 결과와 근거
 
 **과거 검토 기록:** More tools → Review history
 
-이전 정책의 PDF·화면 이미지는 [과거 매뉴얼](../docs/archive/admin-manual/FPDS_Admin_사용자_매뉴얼.md)에
-보존했습니다. 현재 작업 절차는 이 문서를 기준으로 합니다.
+현재 작업 절차는 이 문서를 기준으로 합니다.
 
 ## 1. 로그인·국가·언어
 

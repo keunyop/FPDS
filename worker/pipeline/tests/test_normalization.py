@@ -3253,7 +3253,12 @@ class NormalizationServiceTests(unittest.TestCase):
             self.assertEqual(candidate["candidate_payload"]["monthly_fee"], 0.0)
             self.assertEqual(candidate["candidate_payload"]["standard_rate"], 1.25)
             self.assertEqual(candidate["candidate_payload"]["public_display_rate"], 1.25)
-            self.assertEqual(len(source_result.field_evidence_link_records), 4)
+            self.assertEqual(len(source_result.field_evidence_link_records), 5)
+            fee_links = {link["field_name"]: link for link in source_result.field_evidence_link_records
+                         if link["field_name"] in {"monthly_fee", "public_display_fee"}}
+            self.assertEqual(fee_links["monthly_fee"]["evidence_chunk_id"], fee_links["public_display_fee"]["evidence_chunk_id"])
+            self.assertEqual(fee_links["monthly_fee"]["source_document_id"], fee_links["public_display_fee"]["source_document_id"])
+            self.assertNotEqual(fee_links["monthly_fee"]["field_evidence_link_id"], fee_links["public_display_fee"]["field_evidence_link_id"])
 
             normalized_path = temp_path / Path(str(source_result.normalized_storage_key).replace("/", "\\"))
             metadata_path = temp_path / Path(str(source_result.metadata_storage_key).replace("/", "\\"))
@@ -6644,7 +6649,7 @@ class NormalizationPersistenceTests(unittest.TestCase):
 
         self.assertEqual(result.run_state, "completed")
         self.assertEqual(result.candidate_count, 1)
-        self.assertEqual(result.field_evidence_link_count, 4)
+        self.assertEqual(result.field_evidence_link_count, 5)
         self.assertEqual(result.model_execution_count, 1)
         self.assertEqual(runner.last_variables()["candidate_count"], "1")
 

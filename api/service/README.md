@@ -1,5 +1,13 @@
 # FPDS API Service
 
+## Essential research scope and native disclosure parity - 2026-10-07
+
+Process `2026-10-07-referenced-disclosure-proof-v8` excludes business-product
+leads from consumer essential research and rejects explicit foreign-language
+paths, including nested document assets. Existing source/parent/origin checks and
+acquisition budgets remain unchanged. Deploy the shared API/Worker change together;
+Public data publication is a separate operation. See the [shared accuracy contract](../../docs/03-design/collection-accuracy-policy.md).
+
 ## Owned prices, dynamic rates and RBC verification - 2026-10-07
 
 Process `2026-10-07-owned-price-rate-proof-v6` shares dependency-free empty rate

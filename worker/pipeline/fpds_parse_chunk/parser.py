@@ -122,6 +122,10 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     sections.extend(_product_terms_sections(soup))
     sections.extend(_labelled_disclosure_sections(soup))
     sections.extend(_linked_rate_records(soup))
+    from worker.native_application_disclosures import application_disclosure_records
+    sections.extend(_RawSegment(kind, owner, None, literal) for kind, owner, literal in application_disclosure_records(soup))
+    from worker.native_referenced_disclosures import referenced_annual_records
+    sections.extend(_RawSegment(kind, owner, None, literal) for kind, owner, literal in referenced_annual_records(soup))
     sections.extend(_owned_contract_rows(soup))
     sections.extend(_owned_base_fee_records(soup))
     sections.extend(_owned_withdrawal_records(soup))
@@ -261,6 +265,9 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
             if sum(bool(labels.fullmatch(line.strip())) for line in value.splitlines()) > 1:
                 break
             if re.search(r"\d+(?:\.\d+)?%|\$\d|\b(?:None|Free)\b", value, re.I):
+                if block.select('input:not([type="hidden"]), textarea, select, [role="slider"]'):
+                    # Calculator/input values are user scenarios, not account prices.
+                    break
                 # A linked sibling product cannot inherit the page's main identity.
                 named = block.find_all(["h1", "h2", "h3"])
                 if named and any(h.get_text(" ", strip=True) != identity for h in named):
@@ -663,7 +670,11 @@ def _parse_pdf(body: bytes) -> ParsedArtifact:
         )
 
     for page_index, page in enumerate(reader.pages, start=1):
-        raw_segments.extend(_pdf_purchase_rate_cells(page.extract_text(extraction_mode="layout") or "", page_no=page_index))
+        layout = page.extract_text(extraction_mode="layout") or ""
+        raw_segments.extend(_pdf_purchase_rate_cells(layout, page_no=page_index))
+        from worker.native_information_records import pdf_summary_records
+        raw_segments.extend(_RawSegment(kind, owner, page_index, record)
+                            for kind, owner, record in pdf_summary_records(layout))
 
     full_text, segments = _finalize_segments(raw_segments)
     if not full_text.strip():

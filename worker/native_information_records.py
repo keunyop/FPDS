@@ -178,6 +178,13 @@ def information_card_rates(quote):
 
 
 def shared_card_rates(quote):
+    from worker.native_application_disclosures import application_card_rates
+    application = application_card_rates(quote)
+    if application is not None:
+        return application
+    summary = summary_card_rates(quote)
+    if summary is not None:
+        return summary
     match = re.search(r'Annual\s+interest rates\s+Regular interest rates:\s+Cards Purchases Cash advances and balance\s+transfers\s+(.+?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%', str(quote), re.I | re.S)
     if not match or len(match[1]) > 1000 or '%' in match[1]:
         return None
@@ -223,3 +230,87 @@ def _shared_pdf_records(page_text):
         if terms and len(terms[0]) <= 3000:
             output.append(('named_product_interest_terms', owner, owner + '\n' + terms[0].strip()))
     return output
+
+
+_SUMMARY_DEFAULT = re.compile(
+    r'If you do not make your Required Payment by the payment due date \d+ times in any \d+ month '
+    r'period, your interest rate may increase to \d+(?:\.\d+)?% on Purchases and \d+(?:\.\d+)?% on Cash Advances, '
+    r'Balance Transfers and Convenience Cheques for at least \d+ months\. This increase will take effect in '
+    r'the third statement period following the missed payment that caused the rate to increase\. '
+    r'Required Payment means: a\) any interest; plus b\) fees \(excluding the annual fee\); plus '
+    r'c\) any past due amount; plus d\) the lesser of either \$\d+(?:\.\d+)?, or your Balance minus a\) to c\)\. '
+    r'If your Balance is under \$\d+(?:\.\d+)?, that lesser amount is your Minimum Payment\.', re.I)
+
+
+def summary_card_rates(quote):
+    """One explicit annual purchase/cash row with its complete default disclosure."""
+    lines = [' '.join(line.split()) for line in str(quote).splitlines() if line.strip()]
+    # Normalization prefixes the real anchor owner to the complete excerpt.
+    # Accept only that exact same owner; never discard arbitrary preceding copy.
+    if len(lines) >= 10 and lines[0] == lines[4] + ' Annual':
+        lines[0] = 'Annual'
+    if (len(lines) < 10 or lines[:4] != ['Annual', 'Interest', 'Rates', 'Card Product']
+            or lines[5] != 'Purchases' or lines[7:9] != ['Cash Advances, Balance Transfers', 'and Convenience Cheques']
+            or not re.fullmatch(r'\d+(?:\.\d+)?%', lines[6])
+            or not re.fullmatch(r'\d+(?:\.\d+)?%', lines[9])
+            or re.search(r'\b(?:if|except|eligible|introductory|promotional|retired|no longer)\b', lines[4], re.I)):
+        return None
+    tail = ' '.join(lines[10:])
+    # Truncated, changed or additional qualifications never become ordinary AIRs.
+    if not _SUMMARY_DEFAULT.fullmatch(tail):
+        return None
+    values = tuple(Decimal(lines[i][:-1]) for i in [6, 9])
+    return values if all(0 <= v < 100 for v in values) else None
+
+
+def pdf_summary_records(layout):
+    """Retain literal PDF column ownership, wrapped identity and full conditions.
+
+    This bounded layout has one product/rate pair. Multi-product rows, missing
+    columns/units, extra percentages and unresolved notes fail closed.
+    """
+    lines = str(layout).splitlines()
+    headers = [(i, re.search(r'Card Product', line), re.search(r'(?<!\S)Purchases(?!\S)', line),
+                re.search(r'Cash Advances, Balance Transfers', line))
+               for i, line in enumerate(lines) if 'Card Product' in line]
+    if len(headers) != 1:
+        return []
+    hi, product, purchase, cash = headers[0]
+    if not all([product, purchase, cash]) or not product.end() < purchase.start() < cash.start():
+        return []
+    left = (product.end() + purchase.start()) // 2
+    right = (purchase.end() + cash.start()) // 2
+    annual = [line[:product.start()].strip() for line in lines[hi:hi+3] if line[:product.start()].strip()]
+    if annual != ['Annual', 'Interest', 'Rates']:
+        return []
+    stops = [i for i in range(hi+3, len(lines)) if re.match(r'\s*Interest-\s+', lines[i])]
+    if len(stops) != 1:
+        return []
+    body = lines[hi+3:stops[0]]
+    pairs = [(i, line[left:right].strip(), line[right:].strip()) for i, line in enumerate(body)
+             if re.fullmatch(r'\d+(?:\.\d+)?%', line[left:right].strip())
+             and re.fullmatch(r'\d+(?:\.\d+)?%', line[right:].strip())]
+    if len(pairs) != 1:
+        return []
+    ri, buy, advance = pairs[0]
+    names = []
+    ni = ri
+    while ni > 0 and body[ni-1].strip():
+        ni -= 1
+    end = ri + 1
+    while end < len(body) and body[end].strip():
+        end += 1
+    for line in body[ni:end]:
+        name = line[:left].strip()
+        if name:
+            names.append(name)
+        if line != body[ri] and (line[left:right].strip() or line[right:].strip()):
+            return []
+    owner = ' '.join(names)
+    if not owner or len(owner) > 200 or not re.search(r'\b(?:Visa|Mastercard|Card)\b',owner,re.I):
+        return []
+    # The complete rest of the annual-rate cell belongs to this single named row.
+    notes = '\n'.join(' '.join(line.split()) for line in body[end:] if line.strip())
+    cash_continuation = lines[hi+1][right:].strip()
+    quote = '\n'.join([*annual, product[0], owner, purchase[0], buy, cash[0], cash_continuation, advance, notes])
+    return [('named_card_regular_rates', owner, quote)] if summary_card_rates(quote) and len(quote) <= 6400 else []

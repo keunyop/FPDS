@@ -1,5 +1,189 @@
 # FPDS Development Journal
 
+## 2026-10-07 - Tangerine shared evidence correction and direct publication
+
+- Latest six retained Runs used process v7: 38 successful source items, fourteen
+  automatic exclusions, no new approval/promotion; mortgage discovery skipped.
+  Actual captures proved missing annual-note ownership, named HTML card disclosure
+  binding and a calculator fee falsely shadowing the account's own free fee.
+- Added nineteen immutable compressed full-source captures and ordinary artifact,
+  origin, normalization and routing regressions before accepted-pattern changes.
+  Common parser/grounding fixes preserve complete annual/default/payment rules;
+  normalization no longer duplicates the owner, reconstructs verified schedules
+  with invented days/lost notes, or rewrites verified calculation sentences.
+  Daily account assertions retain adjacent conditions. Essential acquisition now
+  excludes business and explicitly different-language document paths.
+- Updated shared comparison instructions, parser v17/process v8 and accuracy
+  policy/Worker/API documentation. No bank-name/value production branches,
+  weaker essentials, manual review, paid provider calls or Admin collection API.
+- Verification: API 644 pass; final financial/parser/normalization 192 pass plus
+  one final qualification check. Native/Simplii/RBC boundary checks passed in the
+  related 43-test run apart from five new optional-fact errors subsequently fixed
+  and reverified. Full Worker 868 initially had three failures: the parser-version
+  expectation was updated and reverified; two pre-existing National/Oaken hash
+  tests remain. All 23 mismatching original files are byte-identical to HEAD;
+  expected hashes and historical source bytes are preserved.
+- Current direct dry run: nine automatic passes (five Savings, three cards, one
+  Chequing); four GICs retain exact nine-row schedules but lack a safe conditional
+  access/consequence mapping, and HELOC lacks qualified rate/security proof.
+  Mortgage remains outside the candidate boundary. Same-source savings daily
+  calculation/monthly payment and complete card default/reset terms are retained.
+- Publication completed through normal automatic gates after actual stored-origin
+  joins and a successful rollback rehearsal: nine approved/public products (five
+  Savings, three cards, one updated Chequing), eight additional products. Tangerine
+  Public increased 1->9, CA 106->114; US remains five. All nine live detail pages
+  and fifty current field-evidence checks pass, including complete card conditions.
+  The original six Runs/fourteen candidates, source artifacts and 1,494 historical
+  version facts remain intact; unrelated records and private evidence are preserved.
+  No paid provider/Admin collection API calls, manual review or overrides.
+- Final hygiene: foundation baseline, task Markdown references, strict UTF-8,
+  Python syntax/operation JSON and task-scoped git diff --check pass. Full workspace
+  diff check retains only the pre-existing Korean developer-guide trailing space
+  at line 120. Private operation receipts are in tmp/tangerine-improvement-20261007.
+- Runtime: no API/Worker deployment or restart. Serving API health reports v6;
+  the diagnosed collection Runs used v7, and this local correction is v8.
+
+
+## 2026-10-07 - PDF-based English Admin manual with image placeholders
+
+- Rewrote descent/FPDS_Admin_User_Manual.md from all 11 pages of the supplied
+  September 14 PDF. The user confirmed this destination and requested current
+  automatic approval/exclusion in place of retired manual product review.
+- Retained the ten-section order and detailed bank/source/product-type/country
+  instructions. Added 13 numbered screenshot placeholders and one flowchart
+  placeholder, each with a PDF page comment and current English screen guidance.
+- Updated Overview, Runs, Review history, compatibility-policy wording and the
+  approval diagram instructions; retained current country collection-field
+  settings, Public counts, evidence privacy and permissions/error references.
+- Verification: full PDF text/image inventory, relevant current Admin labels,
+  policy/manual comparison, section and placeholder ordering, strict UTF-8,
+  visible English text, Markdown structure, local links and file whitespace pass.
+  Hashes confirm the PDF, Korean manual and both development guides are unchanged.
+- Limits: no screenshot insertion or visual rendering, application execution,
+  collection, deployment or data changes. Full git diff --check reports only
+  pre-existing whitespace in the Korean developer guide at line 120; this task's
+  manual, goal and journal checks pass. Prior goal/journal content is preserved.
+- Next: user inserts current English screenshots and the updated flow diagram.
+
+## 2026-10-07 - English Admin user manual
+
+- Added descent/FPDS_Admin_User_Manual.md as a complete English translation of
+  the current Korean user manual, including Mermaid labels and the October 4
+  collection-field and bank-count addendum.
+- Preserved automatic approval/exclusion rules, account/security permissions,
+  source privacy, UI identifiers, both link targets and the original source hash.
+- Verification: strict UTF-8/final newline, all nine sections, table/list/fence
+  counts, local references, literal identifiers, Mermaid graph structure and
+  new-file whitespace passed. Final translation and journal diff checks passed.
+- Limits: full git diff --check still reports the existing trailing space in
+  descent/FPDS_Admin_개발_가이드.md:120; preserved unrelated changes. No UI build,
+  visual Mermaid rendering, application execution, deployment or data operation.
+- Next: English manual is ready to use alongside the Korean original.
+
+## 2026-10-07 - English Admin development guide
+
+- Added descent/FPDS_Admin_Development_Guide.md as an English translation of the
+  current Korean guide, including tables, terminal comments and the AI task prompt.
+- Preserved all five sections, 22 link targets, financial/security instructions
+  and three executable PowerShell blocks; the prompt points to the English guide.
+- Verification: source SHA-256 unchanged, strict UTF-8/final newline, matching
+  section/table/bullet/fence counts, identical commands and existing local link
+  targets passed. Translation and journal diff whitespace checks passed.
+- Limits: full git diff --check reports existing trailing whitespace at line 120
+  of the Korean source; left unchanged to preserve the requested original.
+  Documentation only; no application build, runtime, deployment or data changes.
+- Next: English guide is ready to use; retain the Korean source alongside it.
+
+## 2026-10-07 - Simplii generic native-disclosure correction and publication
+
+- Diagnosed the latest six Simplii Runs from real selected original snapshot/
+  parse/artifact inputs: 17 successful sources, seven candidates, one approval.
+  Reproduced lost H3 ordinary transactions, primary/additional-card fee scope,
+  wrapped annual PDF columns/full default conditions, annual savings table and
+  unrelated network-card pricing leads; fixed shared API/Worker rules and prompts.
+- Added exact official HTML/PDF .bin fixtures and multi-bank/type rejection
+  boundaries. Parser v16/process v7 preserve units/conditions/ownership and proven
+  optional calculation/payment facts. Public readback found an additional equal
+  fee alias retaining stale provenance; reproduced/fixed shared mapping and
+  persisted link derivation and updated normalization persistence assertions.
+- Direct official capture and one bounded identical-input corrective automatic
+  run publish three distinct products: Chequing, Cash Back Visa and USD Savings.
+  Simplii Public 1 -> 3, CA 104 -> 106, US five unchanged. Final seven candidates:
+  three automatic approvals/four exclusions; no manual queue, provider or Admin
+  collection API calls. HISA/GIC unresolved rates and lending essentials exclude.
+- Actual selected DB origins, automatic promotion/rollback rehearsals, 17 final
+  financial/evidence checks and all three live API/site details pass, including
+  complete card default/payment conditions. Original and first-operation history,
+  immutable raw/parse artifacts, other banks/US and private evidence boundaries
+  are preserved; prior approved versions are normally superseded.
+- Verification: native 14, focused 67, updated normalization two, independent API
+  641 pass. Full final Worker 858 run/856 pass; two unchanged National/Oaken
+  immutable fixture hash tests fail. All 23 discrepancies equal committed HEAD;
+  manifests were not changed. Foundation/reference/JSON/UTF-8/diff checks pass.
+- Key files: native record helpers, parse/extraction/normalization/accuracy gates,
+  source_catalog, native-disclosure-parity fixtures/tests and the linked report:
+  docs/00-governance/simplii-generic-collection-corrections-2026-10-07.md.
+- Limit/next: live health still reports v6; generic v7 API/Worker code is local.
+  Runtime deployment remains a separate release. Data publication/readback is
+  complete; no deployment/restart or permanent recovery feature was introduced.
+
+## 2026-10-07 - Fresh DB setup documentation
+
+- Rewrote db/README.md around empty PostgreSQL setup, pgvector/psql prerequisites,
+  all 47 SQL files in order, stop-on-error execution, setup checks and first-account
+  handoff. Removed migration commentary and the existing-DB cutover summary from
+  this entrypoint; SQL files and operational records remain unchanged.
+- Changed only the DB startup sentence in descent/FPDS_Admin_개발_가이드.md.
+  Exact comparison with the pre-task snapshot preserves the user's other edits.
+- Verification: repository Markdown reference checks, strict UTF-8/final newline,
+  seven PowerShell block syntax checks, contiguous 0001-0047 filenames and 44
+  migration-history inserts matched to source; git diff --check passed.
+- Limits: documentation only; no actual PostgreSQL replay, account write,
+  collection, runtime change or deployment. Next: use the documented procedure
+  when building a new development DB.
+
+## 2026-10-07 - Post-MVP recipient development guide and cleanup
+
+- Product Owner confirmed MVP completion and requested a simpler Korean guide
+  for recipient-led country/language localization and feature maintenance.
+  Replaced the developer guide with one 161-line entrypoint covering setup,
+  change locations, financial/security boundaries, tests and all skill explanations.
+- Replaced five layer-specific skills with four task-specific skills:
+  fpds-localize-market, fpds-change-feature, fpds-fix-collection and
+  fpds-verify-change. Actual SKILL.md files remain portable under descent;
+  the separate skill explanation README was removed.
+- Removed 65 individually reviewed tracked files (4,175,575 bytes): 37 closed
+  archive/prototype/manual assets, six planning/playbook/demo documents, two
+  initial requirement/baseline documents, six MVP governance documents, eight
+  superseded design drafts/inventories, and six old skill-package files.
+  Checked consumers before deletion and each path/hash immediately before
+  deleting individual files within the workspace. No runtime consumer was found.
+- Preserved runtime source/tests, official regression fixtures, migrations,
+  lockfiles, environment examples, current financial/security/UI contracts,
+  operator/ownership/recovery documents and dated operational/data outcomes.
+  Private evidence and local collection files remain untouched. The 355-product/
+  470-review cutover history and automatic collection policy are unchanged.
+- Simplified root README, AGENTS, docs navigation and harness/CI documentation.
+  Future work starts from the guide, affected package README and relevant
+  contracts; obsolete MVP plans, stage gates and full-journal reading are no
+  longer prerequisites. Updated surviving links and kept historical citations
+  retrievable at pre-cleanup commit 56ac0635da2b903d9fe74df6f3b3597825e88406.
+- Verification: repository harness functions passed for required paths,
+  all 121 retained/new Markdown files, eight PowerShell files, 65 JSON files
+  and changed-file whitespace. Four guide PowerShell blocks parse; referenced
+  code paths/package scripts and current research limits match source.
+  UTF-8/final newline, four simple frontmatters/folder names, exact removal
+  scope and 13 historical Git targets passed. Foundation baseline and
+  git diff --check passed.
+- Limit: skill-creator quick_validate.py could not start because this Python
+  environment lacks PyYAML; plain scalar name/description frontmatter, length,
+  names and package count were checked independently. No dependency installation,
+  app build/runtime suite, full local temporary-tree scan, live collection,
+  DB change, deployment or external ownership transfer was performed.
+- Next: recipient uses the development guide and task-specific skill for the
+  requested country/feature. English translation is a later document task.
+  Existing unrelated goal ownership and unresolved operational work are retained.
+
 ## 2026-10-07 - RBC generic owned-price/rate correction and direct publication
 
 - Product Owner requested latest RBC diagnosis, direct official collection without
@@ -98,7 +282,7 @@
   security boundaries, financial evidence/DB change workflows, relevant tests
   and dated release/fixture limitations. This complements the existing operator
   and cutover manuals without changing their acceptance gates.
-- Added [AI skill selection and usage guide](../../descent/ai-skills/README.md)
+- Added AI skill selection and usage guide (history: `git show 56ac0635da2b:descent/ai-skills/README.md`)
   and five portable SKILL.md files: Admin UI, API/security, collection evidence,
   database changes, verification/handover. Instructions resolve source paths
   from the repository root after transfer; the guide provides inputs, outputs,
@@ -283,7 +467,7 @@
   experiment ceilings are clearly proposals, not already executed/approved
   budget increases. Existing optional omission, conditional financial essentials,
   exact units/types, automatic exclusion and private evidence remain binding.
-- Key files: [parity plan](../01-planning/admin-collection-publication-parity-plan-2026-10-06.md),
+- Key files: parity plan (history: `git show 56ac0635da2b:docs/01-planning/admin-collection-publication-parity-plan-2026-10-06.md`),
   planning/WBS navigation, docs map and the owned planning section in goal.md.
   Private derived receipts are in tmp/national-direct-assessment-20261006.
   No runtime code, model/collection calls, new captures, live DB changes,
@@ -957,9 +1141,9 @@ Version: 1.2
 Date: 2026-04-22
 Status: Active
 Source Documents:
-- `docs/00-governance/working-agreement.md`
-- `docs/01-planning/WBS.md`
-- `docs/02-requirements/scope-baseline.md`
+- `git show 56ac0635da2b:docs/00-governance/working-agreement.md`
+- `git show 56ac0635da2b:docs/01-planning/WBS.md`
+- `git show 56ac0635da2b:docs/02-requirements/scope-baseline.md`
 
 ---
 
@@ -2087,7 +2271,7 @@ As of 2026-09-16 (SwitchaBank Public growth investigation, complete):
 
 As of 2026-09-12 (Admin purpose/features source reconciliation, complete):
 
-- added the Korean [Admin purpose and feature guide](../03-design/fpds-admin-purpose-and-features.md),
+- added the Korean Admin purpose and feature guide (history: `git show 56ac0635da2b:docs/03-design/fpds-admin-purpose-and-features.md`),
   covering purpose, workflow, every current screen, API-enforced roles, shared
   Product Types versus country-owned data, AI verification/promotion, Public
   refresh, and explicitly deferred or removed capabilities
@@ -2451,12 +2635,9 @@ As of `2026-08-09`:
 - the latest official-source accuracy slice replaced Oaken's expired 2023 6% Savings publication with the current 2.80% rate, reconstructed the current Oaken GIC schedule from a column-header rate table, removed National card-family and Oaken commercial false candidates, and kept unresolved family/dynamic-card facts in Review rather than inferring them
 - `docs/archive/` now holds old gate notes, prototype planning docs, and prototype evidence artifacts
 
-Read before coding:
-1. `README.md`
-2. `docs/README.md`
-3. this journal
-4. `docs/01-planning/WBS.md`
-5. the relevant active design doc for the slice
+Post-MVP startup (2026-10-07): use the [development guide](../../descent/FPDS_Admin_개발_가이드.md),
+the affected package README and only relevant contracts. The dated snapshots
+above describe their original period; they do not impose a current MVP stage.
 
 ---
 
@@ -2660,7 +2841,7 @@ Read before coding:
   - added a one-page final GO/NO-GO checklist and linked the playbook as the
     primary Admin handover entrypoint from the root README and docs map
 - Key files:
-  - `docs/01-planning/fpds-admin-handover-minimum-playbook.md`
+  - `git show 56ac0635da2b:docs/01-planning/fpds-admin-handover-minimum-playbook.md`
   - `README.md`
   - `docs/README.md`
 - Verification:
@@ -2775,7 +2956,7 @@ Read before coding:
   - `worker/discovery/fpds_registry_refresh/service.py`
   - `db/migrations/0044_remove_admin_collection_scheduler.sql`
   - `docs/00-governance/decision-log.md`
-  - `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+  - `git show 56ac0635da2b:docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
   - `00-Scope/scope.md`
 - Verification:
   - full API unit suite: 431 tests passed
@@ -2817,9 +2998,9 @@ Read before coding:
   - `app/README.md`
   - `worker/README.md`
   - `worker/pipeline/README.md`
-  - `docs/01-planning/WBS.md`
-  - `docs/archive/00-governance/gate-b-prototype-review-note.md`
-  - `docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`
+  - `git show 56ac0635da2b:docs/01-planning/WBS.md`
+  - `git show 56ac0635da2b:docs/archive/00-governance/gate-b-prototype-review-note.md`
+  - `git show 56ac0635da2b:docs/archive/01-planning/evidence/2026-04-11-first-successful-run/evidence-pack.md`
 - Verification:
   - exact Public path diff guard: passed; no Public code, API, test, deployment,
     or Public-only document diff remains
@@ -3437,7 +3618,7 @@ Read before coding:
   - `api/service/README.md`
   - `docs/03-design/source-registry-refresh-and-approval-policy.md`
   - `docs/00-governance/decision-log.md`
-  - `docs/01-planning/WBS.md`
+  - `git show 56ac0635da2b:docs/01-planning/WBS.md`
 - Boundaries: no unrelated bank or Product Type was recollected, no manual
   Review decision was applied, and no official-domain, SSRF, evidence,
   canonical, or publication gate was relaxed. Historical Failed rows were not
@@ -3737,3 +3918,29 @@ Read before coding:
 - No API, ranking, financial data or database changes. Unrelated proposal
   edits preserved. Next step: deploy Public through the normal release flow;
   production deployment was not performed in this slice.
+
+
+## 2026-10-07 - Tangerine latest collection and direct evidence assessment
+
+- Read-only repeatable-read DB diagnosis, without FPDS Admin API: latest six
+  scopes ran 19:42-20:53 Vancouver using process v7/parser v16. Thirty-eight
+  successful source items; fourteen candidates all automatically excluded,
+  zero approval/promotion/manual review. Mortgage skipped before capture for
+  unresolved product boundary. Existing active Chequing is a separate prior result.
+- Directly captured seven current official pages, including rendered Savings/GIC
+  rates and named card/account disclosures. Card three/Savings five/GIC four
+  have concrete additional evidence opportunities; preserve ordinary annual rates,
+  complete default/reset, variant terms and actual early-redemption consequences.
+  No guaranteed twelve-product approval count. HELOC security and mortgage
+  posted/preferred boundary remain unresolved; Chequing is reverification only.
+- Verification: all 38 retained raw and seven current capture SHA-256 checks pass;
+  production captured-proof preflight replay across 14 saved targets still has
+  gaps in all 14. These are acquisition diagnostics, not final approval receipts.
+  Task script syntax, JSON/UTF-8 and task-document diff checks pass. Full workspace
+  diff check retains the unrelated Korean developer-guide line 120 trailing space.
+- Private receipts/summary are in tmp/tangerine-assessment-20261007; only goal.md
+  and this journal receive task documentation edits. Prior goal ownership and
+  unrelated working changes preserved. No provider/Admin API calls, DB/private
+  object-store writes, canonical changes, publication, runtime code or deployment.
+  Next action if requested: reproduce generic evidence-binding/condition losses,
+  add regressions, then run ordinary stored-origin automatic gates on current proof.

@@ -34,7 +34,7 @@
 | 외부 서비스 목록·계정 기입 템플릿 | 00-Scope/external-services-and-accounts.md | cloud, DB, storage, domain, DNS, TLS, LLM, monitoring의 현재 상태와 계정 양식 |
 | DB migration·schema·ERD | 00-Scope/database-migrations-schema-erd.md | 0001~0044 목록, shared dev 적용 상태, schema dictionary, ERD |
 | 개발 가이드와 AI 스킬셋 | descent/FPDS_Admin_개발_가이드.md, descent/ai-skills/ | 한국어 개발 인계: 로컬 실행, 코드 진입점, 변경·검증 절차, portable SKILL.md와 호출 예시 |
-| 전체 실행 순서 | docs/01-planning/fpds-admin-handover-minimum-playbook.md | 환경 준비, rehearsal, 교육, UAT, Cutover, Hypercare |
+| 전체 실행 순서 | descent/README.md | 환경 준비, rehearsal, 교육, UAT, Cutover, Hypercare |
 | 환경변수 계약 | .env.dev.example, .env.prod.example | placeholder-only dev/prod 설정 목록 |
 | Admin web 운영 경계 | app/admin/README.md | 화면, route/code map, build 명령, 안전 경계 |
 | Admin API 운영 경계 | api/service/README.md | API, auth, Vercel Public-read 예외, test/실행 방법 |
@@ -158,8 +158,9 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
 | DB·스토리지 | `db/`, `storage/` | migration 원본과 접근 계약 유지. 과거 migration도 삭제하지 않음 |
 | 검증·운영 도구 | `scripts/harness/`, `scripts/maintenance/` | 정식 도구 유지. 상태 변경 도구는 관련 기록과 승인 범위를 먼저 확인 |
 | 현재 인수 문서 | `descent/`, `00-Scope/` | 사용자 매뉴얼·운영 핸드북·범위·계정 템플릿·DB 목록·실행 가이드 |
-| 현재 제품 계약 | `docs/00-governance/`, `01-planning/`, `02-requirements/`, `03-design/` | 요구사항·설계·결정·위험·개발일지와 날짜별 작업 결과 유지 |
-| 과거 참고자료 | `docs/archive/` | 게이트·프로토타입·정리 전 README·이전 정책 매뉴얼/PDF/화면 이미지 보존 |
+| 현재 제품 계약 | `docs/03-design/` | 금융·보안·데이터·UI·환경 계약 유지. 변경 영역에 필요한 문서만 참조 |
+| 운영 이력 | `docs/00-governance/` | 실제 데이터 전환·공개·복구 보고서와 개발일지·결정·위험 기록 유지 |
+| 제거한 MVP 자료 | Git 이력에서 확인 | 완료된 계획·WBS·초기 요구사항·단계 승인·설계 초안·prototype·구 매뉴얼 및 자산 |
 | 별도 Public 영역 | `app/public/`, `app.py`, `vercel.json` | 저장소에는 유지. Admin 운영 호스트 또는 Public 인수 완료로 간주하지 않음 |
 | 실행 중 로컬 자료 | `tmp/`, `.tmp/`, `__pycache__/`, `*.pyc`, `.venv/`, `node_modules/`, `.next/` | 소스 전달에서 제외. 이번 정리에서는 기존 로컬 파일을 삭제하지 않음 |
 | 제한 인수 증거 | `FPDS-Admin-Handover/`, 실제 `.env` 파일 | Git 제외. 계정·backup·UAT·서명 증거는 의뢰자 제한 저장소/secret manager에서 관리 |
@@ -176,8 +177,7 @@ Python bytecode 7개와 `tmp/`의 과거 일회성 도구 4개는 Git 추적에�
 [현행 사용자 매뉴얼](../descent/FPDS_Admin_사용자_매뉴얼.md) →
 [운영 핸드북](../descent/05-operations-handbook.md)입니다.
 기술 계약은 [문서 지도](../docs/README.md)에서 찾습니다.
-[과거 매뉴얼](../docs/archive/admin-manual/FPDS_Admin_사용자_매뉴얼.md)은
-이전 수동 상품 검토 정책의 참고자료입니다. 현행 업무 절차로 사용하지 않습니다.
+개발 작업은 [개발 가이드](../descent/FPDS_Admin_개발_가이드.md)와 해당 코드 영역의 README에서 시작합니다. 구 매뉴얼과 중복 스킬 설명서는 제거했으며 과거 내용은 Git 이력으로 확인합니다.
 
 수집 중인 작업공간에서는 코드 이동·삭제, 의존성 재설치, build, 프로세스 재시작,
 로그·증거·임시 폴더 삭제를 피합니다. 전체 인수 검증은 별도 깨끗한 clone에서

@@ -1,5 +1,14 @@
 # Worker Boundary
 
+## Referenced disclosures and normalization parity - 2026-10-07
+
+Parser v17/process `2026-10-07-referenced-disclosure-proof-v8` retain uniquely
+referenced annual notes, named HTML application disclosures and complete default
+conditions. Calculator input prices cannot suppress actual account fees; exact
+calendar schedules and verified calculation/payment prose survive normalization.
+Native cross-bank/origin/condition regressions and ordinary stored-origin gates
+remain mandatory. See the [shared accuracy contract](../docs/03-design/collection-accuracy-policy.md).
+
 ## Owned prices, dynamic rates and RBC verification - 2026-10-07
 
 Parser v15/process `2026-10-07-owned-price-rate-proof-v6` keep exact repeated

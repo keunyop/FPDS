@@ -4,8 +4,6 @@ Version: 3.0
 Date: 2026-04-22
 Status: Active current benchmark
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/02-requirements/scope-baseline.md`
 - `docs/03-design/product-grid-information-architecture.md`
 - `docs/03-design/insight-dashboard-metric-definition.md`
 - `docs/03-design/product-type-visualization-principles.md`

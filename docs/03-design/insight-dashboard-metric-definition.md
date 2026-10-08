@@ -31,11 +31,7 @@ Version: 1.0
 Date: 2026-04-05
 Status: Approved Baseline for WBS 1.7.2
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/WBS.md`
-- `docs/02-requirements/scope-baseline.md`
 - `docs/03-design/api-interface-contracts.md`
-- `docs/03-design/aggregate-cache-refresh-strategy.md`
 - `docs/03-design/domain-model-canonical-schema.md`
 - `docs/03-design/product-grid-information-architecture.md`
 - `docs/00-governance/decision-log.md`
@@ -61,7 +57,7 @@ Goals:
 - align aggregate snapshot, API contract, and public UI vocabulary before implementation
 
 This is a design baseline, not an implementation start signal.
-Implementation still waits for `Gate A = Pass + Product Owner explicit approval`.
+Post-MVP work follows the current Product Owner request and the development guide.
 
 ---
 

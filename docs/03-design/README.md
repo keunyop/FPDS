@@ -1,73 +1,54 @@
-# FPDS Design Docs
+# FPDS Design References
 
-Status: Active design index
-Last updated: 2026-09-12
+Read only the contracts affected by the task. The
+[development guide](../../descent/FPDS_Admin_개발_가이드.md) explains the usual
+country/localization and feature workflows.
 
-Use this file to avoid opening every design doc.
+## Data, API And Security
 
-## Core Runtime Design
+- [Collection accuracy](collection-accuracy-policy.md): automatic acceptance
+  or exclusion, optional facts and legacy cutover constraints.
+- [Financial fields](financial-product-field-contract.md): exact types, units
+  and evidence requirements.
+- [Canonical model](domain-model-canonical-schema.md).
+- [Ingestion states](workflow-state-ingestion-design.md) and
+  [Run, publication and historical Review](review-run-publish-audit-state-design.md).
+- [API contracts](api-interface-contracts.md).
+- [Security and access](security-access-control-design.md).
+- [Source governance](source-registry-refresh-and-approval-policy.md).
+- [Data retention](bounded-data-retention-policy.md).
 
-- [Collection accuracy](collection-accuracy-policy.md): automatic acceptance/exclusion, common types and applied legacy data cutover (D-090; API retirement deployment pending)
+## Admin And Localization
 
-- `domain-model-canonical-schema.md`: canonical fields, validation, and taxonomy
-- `financial-product-field-contract.md`: cross-bank field types, units, field notes, evidence merge, and collection verification
-- `workflow-state-ingestion-design.md`: ingestion workflow stages and state model
-- `review-run-publish-audit-state-design.md`: review, run, publish, and audit lifecycle
-- `api-interface-contracts.md`: public, admin, internal, and external interface contracts
-- `security-access-control-design.md`: auth, RBAC, CSRF, SSRF, and browser security baseline
-- `source-registry-refresh-and-approval-policy.md`: source registry governance and admin update rules
-- `bounded-data-retention-policy.md`: active keep/expire/remove rules for
-  evidence, run metadata, Public snapshots, model executions, auth records,
-  and removed operational log tables
+- [Current operator manual](../../descent/FPDS_Admin_사용자_매뉴얼.md).
+- [Admin information architecture](admin-information-architecture.md).
+- [Design system](fpds-design-system.md) and [Stripe benchmark](fpds_design_system_stripe_benchmark.md).
+- [Localization and fallback](localization-governance-and-fallback-policy.md).
+- [Vendor adoption](shadcnblocks-adoption-log.md),
+  [inventory](shadcnblocks-block-inventory.md) and [overrides](ui-override-register.md).
 
-## Infrastructure Baselines
+## Environment And Operations
 
-- `dev-prod-environment-spec.md`: active env contract
-- `db-migration-baseline.md`: DB baseline
-- `object-storage-evidence-bucket-baseline.md`: object storage baseline
-- `monitoring-error-tracking-baseline.md`: observability contract
-- `localization-governance-and-fallback-policy.md`: i18n ownership and fallback
+- [Dev/prod environment](dev-prod-environment-spec.md).
+- [Migration baseline](db-migration-baseline.md) and
+  [current migration/schema inventory](../../00-Scope/database-migrations-schema-erd.md).
+- [Private evidence storage](object-storage-evidence-bucket-baseline.md).
+- [Monitoring](monitoring-error-tracking-baseline.md).
 
-## Public Experience
+## Public, When Included In The Request
 
-- [SwitchaBank blog](public-blog-policy.md): sourced bank comparison, localized editorial discovery and authoring workflow
+- [Product grid](product-grid-information-architecture.md),
+  [metrics](insight-dashboard-metric-definition.md) and
+  [visualization](product-type-visualization-principles.md).
+- [Deposit comparisons](public-deposit-comparison-policy.md),
+  [curated comparisons](public-curated-comparison-policy.md),
+  [comparison lists](public-comparison-list-policy.md) and
+  [scenario calculator](public-scenario-calculator-policy.md).
+- [Verification freshness](public-verification-freshness-policy.md) and
+  [bank handoff](public-bank-handoff-policy.md).
+- [Comparison guides](public-comparison-guides-policy.md) and
+  [blog](public-blog-policy.md).
 
-- [Authored comparison guides](public-comparison-guides-policy.md): localized explanations, sources/corrections and bounded search discovery
-
-- [Official bank handoff](public-bank-handoff-policy.md): disclosed conditions, mobile actions and read-only operator URL checks
-
-- [Same-amount calculator](public-scenario-calculator-policy.md): formulas, exact maturity rows, unavailable states and browser-only inputs
-
-- [Persistent comparison lists](public-comparison-list-policy.md): country-scoped selection, noindex sharing, device save/delete and current-data rechecks
-
-- [Curated Canadian comparisons](public-curated-comparison-policy.md): purpose pages, shared launch gate, Home fallbacks and bounded search discovery
-
-- [Deposit comparison and estimates](public-deposit-comparison-policy.md): compatible currency/basis/terms, scenario inputs and unavailability
-
-- [Product verification freshness](public-verification-freshness-policy.md): elapsed review/expiry policy, separate snapshot timing and manual operator report
-
-- `product-grid-information-architecture.md`
-- `insight-dashboard-metric-definition.md`
-- `product-type-visualization-principles.md`
-
-## Admin Experience
-
-- [FPDS Admin purpose and complete feature guide (Korean)](fpds-admin-purpose-and-features.md): current implementation inventory verified against source on 2026-09-12
-
-- `admin-information-architecture.md`
-- `fpds-design-system.md`
-- `fpds_design_system_stripe_benchmark.md`
-- `shadcnblocks-adoption-log.md`
-- `shadcnblocks-block-inventory.md`
-- `ui-override-register.md`
-
-## Historical Or Less Common Design References
-
-Open only when the current slice needs them:
-- `environment-separation-strategy.md`
-- `source-snapshot-evidence-storage-strategy.md`
-- `retrieval-vector-starting-point.md`
-- `aggregate-cache-refresh-strategy.md`
-- `system-context-diagram.md`
-- `erd-draft.md`
-- `homepage-discovery-scoring-enhancement.md`
+Dated updates in retained contracts override their earlier baseline sections.
+Use current source/tests to verify behavior when extending a contract; older
+WBS labels are historical references, not a new development gate.

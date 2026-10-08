@@ -7,6 +7,12 @@ FEE_CHANGE_NOTICE_INSTRUCTIONS = (
 )
 
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    "Named HTML Application Disclosure Statements bind only their explicitly named cards. Preserve the Standard Rates "
+    "purchase/cash pair, separate promotional balance-transfer scope, complete default trigger/start/reset and Minimum Payment definition. "
+    "A native named annual purchase/cash PDF row must retain its complete separate Required Payment "
+    "default consequence, including increased rates, timing and payment formula. Wrapped cells do not change ownership. "
+    "An annual-fee parenthetical covering the primary cardholder and up to a stated count of additional cards "
+    "describes cardholder scope; preserve it and reject any eligibility, waiver or duration condition. "
     "A native Card Information Box binds its ordinary Annual Interest Rates purchase/cash labels separately from "
     "its complete missed-minimum-payment increased-rate rule. Preserve that whole rule, its start and reset duration; "
     "never use the increased rate as the ordinary rate or truncate a condition. Its Annual Fees row is independent. "
@@ -30,6 +36,11 @@ CARD_RATE_CONTEXT_INSTRUCTIONS = (
 )
 
 ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
+    "An unconditional unlimited number of daily transactions means ordinary coverage; preserve adjacent restrictions. "
+    "Calculator input/example prices do not describe this account and cannot replace or suppress its independently verified fee. "
+    "An owned one-row Annual rate table is annual deposit evidence only with its complete local disclosure; preserve the literal percent and account name, and reject dynamic placeholders, competing tables, unresolved references or added eligibility conditions. "
+    "An owned unconditional declaration of unlimited debit purchases, bill payments and withdrawals "
+    "proves ordinary transaction coverage; preserve its complete conditions and never use a single-channel claim. "
     "No fixed monthly fees proves a zero base monthly fee only without waiver/duration conditions; "
     "it does not prove free transfers, statements or other transactions. Preserve those separate costs. "
     "An explicit no minimum balance or no minimum balances statement does not qualify a separately explicit no monthly fee; "
@@ -60,6 +71,10 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 )
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "A typographic reference needs one exact matching note explicitly covering the same product family and annual rate basis; "
+    "retain the complete note and reject unresolved, competing or unrelated declarations. Percent units may be explicit in every "
+    "rate cell. Keep decimal calendar terms and complete proven schedules unchanged through normalization; supplementary "
+    "flattened text must not invent day counts, duplicate rows or erase their notes. "
     "Native product rate rows may state percentage units only in their own header; retain the exact named row and complete annual-basis note. "
     "Repeated identical responsive H1s retain one identity; different headings and named recommendation panels cannot donate prices. "
     "Keep plus-sign product variants distinct. Same-document data-target references require one literal target and its complete note. "

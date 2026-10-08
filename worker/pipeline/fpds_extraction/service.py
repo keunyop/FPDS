@@ -472,7 +472,7 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                 # without inventing a discovery relationship or donating facts
                 # from another product. Retain each record's current origin.
                 named_native = [c for c in companion.candidates
-                    if (ctx.source_type == "pdf" or c.anchor_type in {"named_card_rate_table", "named_balance_rate"}) and c.anchor_type in named_pdf_anchors
+                    if (ctx.source_type == "pdf" or c.anchor_type in {"named_card_rate_table", "named_balance_rate", "named_card_regular_rates"}) and c.anchor_type in named_pdf_anchors
                     and names_match(c.anchor_value, identity)]
                 named.extend(c for c in named_native if c not in named)
                 parents = metadata.get("parent_detail_urls") or [] if isinstance(metadata, dict) else []
@@ -560,8 +560,17 @@ def _captured_native_product_title(context, candidates):
                     and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url))
             and c.bank_code == context.bank_code and c.country_code == context.country_code
             and c.source_language == context.source_language for c in candidates))
+        owned_account = (_infer_product_type(context) in {"savings", "chequing"}
+            and any(c.anchor_type == "owned_account_assertion" and names_match(c.anchor_value, literal)
+                and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+                and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
+                and c.country_code == context.country_code and c.source_language == context.source_language
+                for c in candidates))
+        title_corroborates = (native_tokens <= (title_tokens | url_tokens) or
+            (owned_account and native_tokens - {"daily", "everyday"} <= title_tokens
+             and bool(native_tokens & url_tokens)))
         if (card_price and not family and route_identity and bool((route_identity - {"credit", "mastercard", "visa", "savings", "interest", "gic"}) & url_tokens) and len(native_tokens) >= 2 and len(literal.split()) <= 10
-                and native_tokens <= (title_tokens | url_tokens)
+                and title_corroborates
                 and not re.search(r"^(?:get|benefit|plan|choose|compare|discover|find|open)\b", literal, re.I)
                 and not re.search(r"/(?:apply|application|login|calculator|insurance)(?:/|[.-]|$)",urlsplit(url).path,re.I)
                 and not non_product_identity_reason(product_type=_infer_product_type(context),primary_heading=literal,page_title=literal)
@@ -791,6 +800,10 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             value = balance_rate_value(quote)
             if value is not None and names_match(c.anchor_value, identity):
                 values.update(standard_rate=float(value), interest_rate_summary=_normalize_text(quote))
+                calculation = re.search(r"Interest is calculated on the daily closing balance and is paid into your account monthly[.]", quote, re.I)
+                if calculation:
+                    values["interest_calculation_method"] = calculation[0]
+                    values["interest_payment_frequency"] = "monthly"
         if own and c.anchor_type == "owned_account_assertion" and c.anchor_value == identity:
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
             for currency, pattern in CURRENCY_PATTERNS.items():
@@ -885,7 +898,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if _infer_product_type(context)=='gic' and quote_supports_value('non_redeemable_flag',True,quote): values['non_redeemable_flag']=True
         if own and c.anchor_type == "labelled_financial_record" and c.anchor_value == identity:
             for name, pattern in (("monthly_fee", r"(?mi)^Monthly fee\s*\n\$(\d+(?:\.\d+)?)"),
-                                  ("annual_fee", r"(?mi)^Annual fee\s*\n\$(\d+(?:\.\d+)?)"),
+                                  ("annual_fee", r"(?mi)^Annual fee\s*\n(?:\(for primary cardholder and up to \d+ additional cards\)\s*\n)?\$(\d+(?:\.\d+)?)"),
                                   ("purchase_interest_rate", r"(?mi)^(?:Interest rate on purchases|Purchase interest rate)\s*\n(\d+(?:\.\d+)?)%"),
                                   ("cash_advance_rate", r"(?mi)^Interest rate on cash advances\s*\n(\d+(?:\.\d+)?)%")):
                 m = re.search(pattern, quote)
@@ -1025,6 +1038,11 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 values["term_length_text"] = term[1]
                 values["standard_rate"] = float(rate[1])
                 rate_basis = basis_records[0]
+        if own and c.anchor_type == "named_product_interest_terms" and c.anchor_value == identity and _infer_product_type(context) in {"savings", "chequing"}:
+            calculation = re.search(r"Interest is calculated daily and paid monthly on our Savings and Chequing Accounts[.]", quote, re.I)
+            if calculation:
+                values["interest_calculation_method"] = calculation[0]
+                values["interest_payment_frequency"] = "monthly"
         if companion and c.anchor_type == "named_product_interest_terms" and c.anchor_value == identity:
             values["interest_calculation_method"] = _normalize_text(quote)
         if own and c.anchor_type == "owned_withdrawal_terms" and _infer_product_type(context) == "gic" and c.anchor_value == identity:
@@ -1054,7 +1072,8 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 values["standard_rate"] = float(rates[0])
                 # Calculation/payment facts are proven by this same referenced
                 # note; no optional-only query or later retry is needed.
-                if re.search(r"Interest is calculated", quote, re.I):
+                calculation = re.search(r"Interest is calculated daily and paid monthly on our Savings and Chequing Accounts[.]", quote, re.I)
+                if not calculation and re.search(r"Interest is calculated", quote, re.I):
                     values["interest_calculation_method"] = _normalize_text(quote)
                 payment = re.search(r"It will be paid monthly[.]", quote, re.I)
                 if payment:

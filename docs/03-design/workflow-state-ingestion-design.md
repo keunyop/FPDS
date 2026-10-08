@@ -14,13 +14,8 @@ Version: 1.0
 Date: 2026-03-31
 Status: Approved Baseline for WBS 1.3.1
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/plan.md`
-- `docs/01-planning/WBS.md`
 - `docs/03-design/domain-model-canonical-schema.md`
 - `docs/00-governance/decision-log.md`
-- `docs/02-requirements/scope-baseline.md`
-- `docs/00-governance/stage-gate-checklist.md`
 
 ---
 

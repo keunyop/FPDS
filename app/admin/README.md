@@ -35,9 +35,10 @@ This package is the authenticated operator workspace. It keeps collection,
 review, and canonical-change context private while the Public package
 reads only approved projections.
 
-For the complete source-verified Korean overview, read
-[Admin purpose and features](../../docs/03-design/fpds-admin-purpose-and-features.md).
-It distinguishes implemented screens from removed and deferred capabilities.
+For current operator flows, read the
+[Admin manual](../../descent/FPDS_Admin_사용자_매뉴얼.md). For localization, feature
+changes and AI skills, start with the
+[development guide](../../descent/FPDS_Admin_개발_가이드.md).
 
 ## Operator Workflow
 

@@ -34,3 +34,16 @@ class CapturedPricingCompanionTests(unittest.TestCase):
         rate=next(x for x in links if 'annual-interest-rate-fees' in x.link.normalized_url)
         self.assertEqual(len(links),2)
         self.assertEqual(set(rate.parent_detail_urls),set(parents))
+
+
+class ProductScopedRateLeadTests(unittest.TestCase):
+    def test_network_named_card_rates_never_become_another_family_companion(self):
+        for bank in ['examplebank.com','anotherbank.ca']:
+            for typ in ['savings','chequing','gic','mortgage','personal-loan','line-of-credit']:
+                with self.subTest(bank=bank,typ=typ):
+                    self.assertEqual(_detail_companion_link_score(product_type=typ,normalized_url='https://'+bank+'/rates/cash-back-visa-rates.html',anchor_text='Rates and fees'),0)
+            self.assertGreater(_detail_companion_link_score(product_type='credit-card',normalized_url='https://'+bank+'/rates/cash-back-visa-rates.html',anchor_text='Rates and fees'),0)
+    def test_observed_current_rate_hubs_and_owned_type_leads_are_eligible(self):
+        for typ,slug in [('savings','high-interest-savings-account'),('gic','gic'),('line-of-credit','personal-line-of-credit'),('personal-loan','loan')]:
+            self.assertGreater(_detail_companion_link_score(product_type=typ,normalized_url='https://examplebank.com/en/rates.html',anchor_text="Today's rates"),0)
+            self.assertGreater(_detail_companion_link_score(product_type=typ,normalized_url='https://examplebank.com/en/rates/'+slug+'-rates.html',anchor_text=slug.replace('-',' ')),0)

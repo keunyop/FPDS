@@ -51,6 +51,15 @@ def card_rate_values(quote):
 
 def balance_rate_value(quote):
     lines = _lines(quote)
+    if len(lines) > 3 and lines[1] == lines[0]:
+        lines = lines[1:]
+    if len(lines) >= 4 and lines[1] == "Annual rate" and re.fullmatch(r"\d+(?:\.\d+)?%", lines[2]):
+        notes = " ".join(lines[3:])
+        if (not re.search(r"savings account", lines[0], re.I) or re.search(r"linked|package|not offered|no longer|discontinued|promotional|eligible|qualif\w*", lines[0], re.I) or not re.fullmatch(
+                r"Interest is calculated on the daily closing balance and is paid into your account monthly[.] Rates subject to change[.]", notes, re.I)):
+            return None
+        value = Decimal(lines[2][:-1])
+        return value if 0 <= value < 100 else None
     if len(lines) < 7 or lines[1:5] != ["If Balance is", "Interest Rate [%]", "All balances", lines[4]] or not NUMBER.fullmatch(lines[4]) or lines[5] != "NOTES":
         return None
     if re.search(r"linked|package|not offered|no longer|not payable|promotional|eligible|qualif\w*", lines[0], re.I):
@@ -66,7 +75,7 @@ def named_rate_records(soup):
     root = soup.find("main") or soup.body or soup
     note_heads = [n for n in root.find_all(["p", "h2", "h3", "h4"]) if n.get_text(" ", strip=True).casefold() == "notes"]
     if len(note_heads) != 1:
-        return []
+        return compact_annual_balance_records(soup)
     head = note_heads[0]
     scope = head.find_next_sibling("ul")
     if scope is None:
@@ -76,7 +85,7 @@ def named_rate_records(soup):
         return []
     card_notes = [n for n in global_notes if not re.match(r"Our Prime Rate\b|(?:Registered )?trademark", n, re.I)]
     deposit_notes = [n for n in global_notes if not re.match(r"Foreign Currency Accounts:", n, re.I)]
-    output = []
+    output = compact_annual_balance_records(soup)
     for table in root.find_all("table")[:64]:
         if table.find("table") or table.select("[rowspan]"):
             continue
@@ -126,4 +135,49 @@ def named_rate_records(soup):
             quote = "\n".join([owner, *headers, *[c.get_text(" ", strip=True) for c in cells], "NOTES", *deposit_notes, *(notes or []), *[a["href"] for a in heading.select("a[href]") if not a["href"].startswith("#")]])
             if notes is not None and len(quote) <= 6400 and balance_rate_value(quote) is not None:
                 output.append(("named_balance_rate", owner, quote))
+    return list(dict.fromkeys(output))
+
+
+def compact_annual_balance_records(soup):
+    """An owned one-row annual table and complete local disclosure, unchanged."""
+    from worker.native_dom_ownership import unique_heading, owns_label
+    root = soup.find("main") or soup.body or soup
+    heading = unique_heading(root)
+    if heading is None:
+        return []
+    parts = _lines(heading.get_text("\n", strip=True))
+    if len(parts) > 1 and parts[0] == "Accounts":
+        parts = parts[1:]
+    owner = " ".join(parts)
+    if not re.search(r"savings account", owner, re.I):
+        return []
+    output = []
+    for table in root.find_all("table")[:64]:
+        if table.find("table") or table.select("[rowspan], [colspan]") or not owns_label(table, root, owner):
+            continue
+        rows = table.find_all("tr")
+        if len(rows) != 1:
+            continue
+        cells = rows[0].find_all(["th", "td"], recursive=False)
+        if len(cells) != 2:
+            continue
+        values = [" ".join(c.get_text(" ", strip=True).split()) for c in cells]
+        if values[0] != "Annual rate" or not re.fullmatch(r"\d+(?:\.\d+)?%", values[1]):
+            continue
+        previous = table.find_previous(["h1", "h2", "h3", "h4", "h5", "h6"])
+        if previous is not None and previous.name != "h1" and re.search(r"account|card|loan|GIC|certificate", previous.get_text(), re.I):
+            continue
+        for scope in list(table.parents)[:8]:
+            if scope is root or len(scope.get_text()) > 1500 or len(scope.find_all("table")) != 1:
+                break
+            notes = [" ".join(p.get_text(" ", strip=True).split()) for p in scope.find_all("p")]
+            if not notes:
+                continue
+            references = local_notes(soup, scope)
+            if references is None or not owns_label(scope, root, owner):
+                break
+            quote = "\n".join([owner, *values, *notes, *references])
+            if balance_rate_value(quote) is not None:
+                output.append(("named_balance_rate", owner, quote))
+            break
     return list(dict.fromkeys(output))

@@ -1,5 +1,63 @@
 # Admin pre-handover review and fixes
 
+## PDF-based English Admin user manual - 2026-10-07
+
+Status: Complete for this documentation rewrite. Preserve prior goal ownership.
+Scope: Rewrite descent/FPDS_Admin_User_Manual.md using the supplied 11-page
+Korean PDF's ten-section structure and illustration locations; update retired
+manual product review to current automatic acceptance/exclusion, as requested.
+Preserve both development guides, the Korean manual/PDF and unrelated changes.
+Acceptance:
+- [x] Retain all ten PDF sections and relevant detailed operating instructions.
+- [x] Provide numbered placeholders for 13 screenshots and the approval-flow diagram.
+- [x] Use current automatic collection and read-only review history rules.
+- [x] Verify references, UTF-8, placeholder placement, policy and diff; add journal.
+Verification: full PDF extraction, current manual/policy and relevant Admin
+controls; section/placeholder checks, original-file hashes and diff checks.
+No application/data/deployment changes; images will be supplied by the user.
+
+Outcome: Rewrote the English manual with all ten PDF sections, 13 screenshot
+placeholders and one flowchart placeholder, current automatic collection rules,
+country field settings and permission/error references. Full source extraction,
+control-label checks, placeholder/reference/UTF-8/policy/Markdown checks and
+preservation hashes passed. Full workspace diff check reports only the existing
+Korean developer-guide trailing space at line 120; task-file checks pass.
+Images are intentionally left for the user. No runtime/data/deployment changes.
+
+## Post-MVP recipient development handover and document cleanup - 2026-10-07
+
+Status: Complete for this documentation/skill cleanup; preserve previous goal ownership and unresolved work.
+Objective: Simplify the Korean developer guide for the recipient's future country
+localization and feature maintenance; integrate skill explanations into that
+single guide and replace skills with future-task workflows. Remove unnecessary
+MVP planning/prototype documents and update surviving references/startup rules.
+Scope: source-grounded guide/skills, document inventory and dependency audit,
+explicitly identified obsolete tracked documentation/assets, navigation/agent
+instructions and any necessary documentation-check integration.
+Exclusions: product code/financial-policy changes, new country rollout, live data,
+accounts, collection/provider calls, deployment, private evidence/fixtures,
+migrations/lockfiles and unrelated local or user changes.
+Acceptance:
+- [x] One concise Korean guide covers setup, country/locale extension, feature
+      changes, essential safeguards, tests and future-skill usage.
+- [x] Task-specific SKILL.md files support recipient needs and use current paths;
+      separate skill explanation README and obsolete skill definitions removed.
+- [x] Obsolete MVP artifacts are removed after reference/consumer inspection;
+      preserve operational contracts, financial history and recovery evidence.
+- [x] Startup/navigation no longer mandates removed MVP planning; retained links,
+      harness prerequisites, skills/commands, UTF-8 and git diff --check verified.
+- [x] Record removals, preservation decisions, real checks and limits in journal;
+      inspect final diff and re-read this goal without deleting prior ownership.
+Verification: tracked file/reference inventory; safe contained file deletion;
+standard changed/tracked document checks and relevant harness checks only.
+Outcome: one concise Korean guide with four future-task skills; 65 reviewed
+obsolete files removed. All retained/new tracked document references, required
+harness paths, script/JSON syntax, command syntax, UTF-8 and diff checks passed.
+Official skill validation was unavailable without PyYAML; independent plain
+frontmatter checks passed. No runtime/data/environment changes. Earlier goal
+sections remain intact.
+
+
 ## Oaken current evidence, generic correction and publication - 2026-10-07
 
 Status: Complete for diagnosis, shared code correction and direct publication.
@@ -1820,3 +1878,123 @@ unchanged pre-existing National/Oaken fixture hash failures explicitly recorded.
 Foundation, changed documentation/JSON/source hygiene, final goal/diff review and
 git diff --check pass. Local API/Worker v6 deployment remains a separate action;
 no deployment/restart, paid provider call or Admin collection API call performed.
+
+## 신규 DB 구축 문서 정리 - 2026-10-07
+
+Status: Complete for this documentation slice; preserve all previous goal ownership.
+Scope: db/README.md 신규 구축 안내와 개발 가이드의 DB 시작 문장만 수정.
+Acceptance: 기존 DB 적용/전환 설명 제거, 모든 SQL migration의 순서와 의존성 안내,
+사용자가 수정한 개발 가이드의 나머지 내용과 기존 SQL/운영 기록 보존.
+Verification: 파일 목록/SQL 대조, PowerShell 구문, 문서 참조/UTF-8/diff 검사,
+작업 전 snapshot과 개발 가이드 변경 범위 및 기존 goal/journal 보존 비교.
+Limits: 문서만 수정하며 DB 생성/SQL 적용, 계정 변경, 수집, 배포를 실행하지 않음.
+Outcome: 신규 DB 안내로 재작성, 개발 가이드의 DB 시작 문장 한 곳만 수정.
+47개 연속 SQL/44개 기록 대조, 문서 참조·UTF-8·7개 명령 블록 구문 검사 통과.
+작업 전 사용자 수정 보존 비교와 git diff --check 통과. 실제 DB 작업 없음.
+
+## Simplii evidence, generic correction and direct publication - 2026-10-07
+
+Status: Complete for this authorized local correction and direct publication
+slice. Preserve all earlier goal ownership and unfinished work.
+Objective: Reproduce latest Simplii Admin losses, correct shared defects and
+publish only current automatically verified products through ordinary gates.
+Scope: retained Run/capture/artifact diagnosis, bounded official acquisition,
+generic multi-bank/type regressions and coordinated proof/discovery/prompt/cache
+fixes, one-off ordinary normalization/validation/promotion and CA Public readback.
+Exclusions: Admin collection API, manual review/overrides, weaker essentials,
+unrelated data/countries/types, permanent recovery and paid retry loops.
+Acceptance:
+- [x] Diagnose first actual field/evidence losses across the latest six Runs.
+- [x] Resolve demonstrated generic defects with positive/boundary/failure regressions.
+- [x] Verify real stored-origin services and affected Worker/independent API suites.
+- [x] Publish current automatic passes with scoped before-images/rollback rehearsal;
+      preserve history/unrelated data and verify actual Public API/site.
+- [x] Review final goal/diff, pass hygiene checks and update report/journal/contracts.
+Verification: original source hashes, exact typed facts/conditions, cross-bank/type
+regressions, real provenance/promotion/public eligibility and Public readback.
+Deployment: serving deployment remains separately reported from local code/data.
+Outcome: original six scopes/seven candidates diagnosed; native account/card/
+annual deposit evidence and shared companion/normalization proof fixed with
+immutable multi-bank/type boundaries. Live readback uncovered an equal fee-alias
+provenance defect; a failed regression and generic correction were followed by
+one bounded identical-input automatic corrective publication. Three distinct
+Public products now verified (Simplii 1->3; CA 104->106; US five unchanged), with
+17 financial/evidence checks, complete card default conditions, persisted-origin
+and rollback checks, private/history/unrelated-record preservation. Native14/
+focused67/normalization2/API641 pass; full Worker858 runs/856 pass and two unchanged
+National/Oaken hash-test failures documented against committed source bytes.
+Foundation/reference/JSON/UTF-8/diff checks and acceptance review pass. Serving
+health remains v6; local API/Worker v7 deployment is a separate release. No paid
+provider/Admin collection API calls, deployment/restart or permanent recovery.
+
+## Read-only slice: Tangerine latest collection and direct feasibility - 2026-10-07
+
+Status: Complete for this read-only feasibility slice; preserve earlier ownership.
+Scope: latest retained Tangerine Runs/candidates/capture records and bounded
+current official product evidence; assess additional automatic acceptance.
+Exclusions: FPDS Admin API, paid providers, new collection Runs, canonical writes,
+publication, runtime changes, weaker financial essentials and manual review.
+Acceptance:
+- [x] Reconcile latest target scopes, execution results and exclusion reasons.
+- [x] Inspect current official evidence for actual targets and identify justified
+      additional opportunities with their remaining gate/evidence limitations.
+- [x] Preserve diagnosis privately; record outcome/verification/limits, inspect
+      final task diff and re-read goal before completion.
+Verification: read-only repeatable-read DB, preserved artifacts and official
+page evidence, exact financial meaning, UTF-8/reference and git diff checks.
+
+Outcome: Latest six Runs (Vancouver 19:42-20:53), 38 successful source items,
+14 automatic exclusions, zero new approvals/promotions/manual reviews; Mortgage
+skipped at discovery. Existing active Chequing is separate. Verified 38 retained
+raw hashes plus seven direct current official captures. Saved 14-target current
+proof preflight remains incomplete for all 14. Named card (three), annual savings
+(five) and term/access GIC (four) evidence supports further gated investigation,
+not a guaranteed approval count. Qualified mortgage boundaries and HELOC security
+remain unresolved. Local private JSON receipts/probes and script syntax pass.
+Task document diff check passes; full workspace diff check retains the existing
+Korean developer-guide trailing space at line 120. No Admin API/model calls,
+DB/object-store writes, product approval/publication, code changes or deployment.
+
+## Tangerine shared collection correction and direct publication - 2026-10-07
+
+Status: Complete for this local correction and direct publication slice; preserve
+earlier goals, unrelated changes and ownership.
+Objective: Reproduce actual Tangerine Admin evidence losses, fix reusable shared
+collection defects, verify repeatedly and publish current automatic passes.
+Scope: retained Run/capture/artifact diagnosis, bounded current official evidence,
+source-backed cross-bank/type regression, shared acquisition/parser/grounding/
+normalization fixes with aligned instructions/version/cache, ordinary automatic
+stored-origin validation/promotion and actual CA Public projection/readback.
+Exclusions: Admin collection API, weaker essentials, manual override/review,
+new countries/types, unrelated canonical data, paid retry loops and permanent
+recovery feature. Runtime deployment is separately verified and reported.
+Acceptance:
+- [x] Reproduce earliest actual evidence/condition/origin losses with fixtures.
+- [x] Correct demonstrated shared defects with positive/adversarial regressions.
+- [x] Verify real artifacts/origins and affected Worker/independent API behavior.
+- [x] Publish current automatic passes with before-images/rollback rehearsal;
+      verify field-level financial proof, history/unrelated data and Public.
+- [x] Review final diff/goal, document actual outcome and checks/limitations.
+Verification: immutable source hashes; typed facts and complete qualifications;
+shared regressions, ordinary stored-origin gates, scoped rollback and live readback.
+Outcome: Reproduced actual v7 collection evidence losses and corrected shared
+annual-note/disclosure ownership, account/calculator boundaries, acquisition scope,
+normalization and exact optional-fact preservation. Local parser v17/process v8
+has immutable official-source and cross-bank/type boundary regression coverage.
+Nine products passed actual stored-origin gates and normal automatic promotion:
+five Savings, three cards and one updated Chequing (eight additional products).
+Public Tangerine 1->9; CA 106->114, US five unchanged. All nine live detail pages
+and fifty field-evidence checks pass. Rollback rehearsal succeeded; the original
+six Runs/fourteen candidates, source history, 1,494 version facts and unrelated
+records are preserved. Four GICs and HELOC remain excluded for unresolved required
+conditions; Mortgage retains its prior discovery skip. No manual review/override,
+paid provider/Admin collection API calls or permanent recovery feature.
+Verification: independent API 644 and final related Worker 192 tests pass plus one
+final qualification check. The initial full Worker run's parser-version failure
+was corrected/reverified; two pre-existing National/Oaken source-hash failures
+remain, with all 23 affected source files byte-identical to HEAD. Foundation,
+task references, strict UTF-8/Python syntax/JSON and task diff checks pass; the
+full workspace retains the unrelated developer-guide line-120 trailing space.
+Deployment: no API/Worker deployment or restart performed. Observed serving API
+is v6; original collection Runs used v7. Shared local v8 requires its normal
+runtime release separately; the nine-product Public data publication is complete.

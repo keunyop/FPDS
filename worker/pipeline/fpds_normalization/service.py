@@ -248,6 +248,16 @@ class NormalizationService:
             )
             accepted_fields = set(accuracy["verified_fields"])
             evidence_links = [link for link in evidence_links if link["field_name"] in accepted_fields]
+            if "monthly_fee" in accepted_fields:
+                # The final sanitizer derives the display alias from this exact
+                # verified fee even when a previous heuristic had the same value.
+                monthly_links = [link for link in evidence_links if link["field_name"] == "monthly_fee"]
+                evidence_links = [link for link in evidence_links if link["field_name"] != "public_display_fee"]
+                evidence_links.extend({
+                    **link,
+                    "field_evidence_link_id": _build_field_evidence_link_id(candidate_id, "public_display_fee", link["evidence_chunk_id"]),
+                    "field_name": "public_display_fee",
+                } for link in monthly_links)
             runtime_notes.append("Automatic accuracy check: " + ("accepted" if accuracy["accepted"] else "excluded")
                                  + "; omitted fields: " + ", ".join(sorted(accuracy["omitted_fields"])))
             agent_name = str(normalization_meta.get("agent_name") or self.agent_name)
@@ -647,11 +657,9 @@ def _normalize_candidate(
 
     evidence_links_for_output = list(item.evidence_links)
     evidence_context_by_field = {
-        field_name: " ".join(
-            part
-            for part in (field.anchor_value or "", field.evidence_text_excerpt or "")
-            if part
-        )
+        field_name: (field.evidence_text_excerpt
+            if str(field.evidence_text_excerpt or "").splitlines()[:1] == [str(field.anchor_value or "")]
+            else " ".join(part for part in (field.anchor_value or "", field.evidence_text_excerpt or "") if part))
         for field_name, field in extracted_by_field.items()
     }
     for field_name in dynamic_field_names:
@@ -1942,6 +1950,16 @@ def _complete_gic_term_rate_table_from_split_evidence(
     if product_type_family != "gic":
         return
     existing_table = candidate_payload.get("term_rate_table")
+    mapping = field_mapping_metadata.get("term_rate_table") or {}
+    from worker.pipeline.fpds_collection_accuracy import quote_supports_value
+    if (existing_table and mapping.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+            and mapping.get("official_verification_status") == "match"
+            and mapping.get("normalized_value") == existing_table
+            and quote_supports_value("term_rate_table", existing_table, str(mapping.get("official_evidence_quote") or ""))):
+        # A complete proven schedule already carries its exact calendar terms
+        # and qualifiers. Flattened supplementary prose cannot manufacture days
+        # or overwrite those conditions with duplicate guessed rows.
+        return
     rows = [dict(row) for row in existing_table if isinstance(row, dict)] if isinstance(existing_table, list) else []
     recovering_missing_table = len(rows) < 2
     target_identity = _normalized_product_identity_phrase(candidate_payload.get("product_name"))
@@ -3412,7 +3430,12 @@ def _clean_product_context_fields(
             calculation_method,
             flags=re.IGNORECASE,
         )
-        if daily_monthly_match is not None:
+        method_mapping = (field_mapping_metadata or {}).get("interest_calculation_method") or {}
+        from worker.pipeline.fpds_collection_accuracy import quote_supports_value
+        grounded_method = (method_mapping.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+            and method_mapping.get("official_verification_status") == "match"
+            and quote_supports_value("interest_calculation_method", calculation_method, str(method_mapping.get("official_evidence_quote") or "")))
+        if daily_monthly_match is not None and not grounded_method:
             cleaned_method = "Interest is calculated daily and paid monthly."
             if calculation_method != cleaned_method:
                 candidate_payload["interest_calculation_method"] = cleaned_method

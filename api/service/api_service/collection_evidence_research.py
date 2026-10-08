@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 from api_service.source_catalog import (
     _detail_companion_link_score, _extract_allowed_links,
     _has_excluded_link_signal, _is_non_product_supporting_document,
-    _url_country_scope_conflicts,
+    _url_country_scope_conflicts, _url_locale_conflicts_source_language, _source_scope_exclusion_reason,
 )
 from worker.discovery.fpds_discovery.registry import load_registry
 from worker.pipeline.fpds_ai_runtime import configured_model_id, invoke_openai_json_schema, llm_provider_configured
@@ -128,6 +128,8 @@ def assess_captured_essentials(item: ExtractionInput, *, run_id: str) -> dict:
 
 
 def _link_relevance(*, product_type, url, label, missing):
+    if _source_scope_exclusion_reason(product_type=product_type, fingerprint=f'{url} {label}') == 'non_consumer_business_page':
+        return 0
     if _has_excluded_link_signal(normalized_url=url, anchor_text=label):
         return 0
     if _is_non_product_supporting_document(product_type=product_type, normalized_url=url, anchor_text=label):
@@ -272,7 +274,8 @@ class EvidenceResearchPlanner:
                 for link in _extract_allowed_links(html_text=page.html, base_url=page.source_url,
                         hostname=urlparse(page.source_url).hostname or '', allowed_domains=registry.allowed_domains):
                     url = link.normalized_url
-                    if url in attempted_urls or url == parent or _url_country_scope_conflicts(country_code=ctx.country_code, normalized_url=url):
+                    if (url in attempted_urls or url == parent or _url_country_scope_conflicts(country_code=ctx.country_code, normalized_url=url)
+                            or _url_locale_conflicts_source_language(normalized_url=url, source_language=ctx.source_language)):
                         continue
                     score = _link_relevance(product_type=registry.product_type, url=url, label=link.anchor_text, missing=missing)
                     if score <= 0:

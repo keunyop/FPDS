@@ -10,17 +10,17 @@ def account_records(soup):
         return []
     owner = heading.get_text(" ", strip=True)
     output = []
-    for node in root.find_all(["p", "li"])[:2048]:
+    for node in root.find_all(["p", "li", "h2", "h3", "h4", "h5", "h6"])[:2048]:
         if node.find_parent(["nav", "aside", "footer", "table"]) or node.find(["p", "li"]):
             continue
         if not owns_label(node, root, owner):
             continue
         value = node.get_text(" ", strip=True)
-        if not re.search(r"no monthly (?:account )?fee|monthly (?:account )?fee\s*:\s*\$|\b(?:unlimited|\d+)\s+(?:debit )?transactions|(?:U\.?S\.?|Canadian) dollars?|\b(?:CAD|USD|EUR|GBP)\b", value, re.I):
+        if not re.search(r"no monthly (?:account )?fee|monthly (?:account )?fee\s*:\s*\$|\b(?:unlimited|\d+)\s+(?:number of )?(?:daily |debit )?(?:transactions|purchases)|(?:U\.?S\.?|Canadian) dollars?|\b(?:CAD|USD|EUR|GBP)\b", value, re.I):
             continue
         if re.search(r"exchange rate|currency conversion|benchmark rate|reference rate", value, re.I):
             continue
-        if len(value) > 700:
+        if len(value) > 700 or re.search(r"\b(?:looking for|consider|might|could|would you|try our|for example)\b", value, re.I):
             continue
         previous = node.find_previous(["h1", "h2", "h3", "h4", "h5", "h6"])
         scope = previous.get_text(" ", strip=True) if previous else ""
@@ -29,10 +29,22 @@ def account_records(soup):
                 continue
             if re.search(r"ideal|if:|not be ideal|consider|you want", scope, re.I):
                 continue
-        notes = local_notes(soup, node)
+        disclosure = node
+        if node.name.startswith("h") and re.search(r"\bunlimited\b", value, re.I):
+            for scope_node in list(node.parents)[:4]:
+                if scope_node is root or len(scope_node.get_text()) > 1400:
+                    break
+                if len(scope_node.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])) != 1:
+                    break
+                if scope_node.find(["p", "li"]) is not None:
+                    disclosure = scope_node
+                    break
+            if not owns_label(disclosure, root, owner):
+                continue
+        notes = local_notes(soup, disclosure)
         if notes is None:
             continue
-        quote = "\n".join([owner, without_reference_markers(node), *notes])
+        quote = "\n".join([owner, without_reference_markers(disclosure), *notes])
         if len(quote) <= 6400:
             output.append(("owned_account_assertion", owner, quote))
     for row in root.select('tr, [role="row"], .table-row')[:1024]:

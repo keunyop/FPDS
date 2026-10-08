@@ -1,5 +1,58 @@
 # Product collection accuracy and automatic acceptance
 
+## Referenced annual disclosures and normalization parity - 2026-10-07
+
+Parser v17/process `2026-10-07-referenced-disclosure-proof-v8` preserve an owned
+rate widget or term table with its uniquely matched typographic note. The complete
+note must explicitly cover that product family and annual interest basis. Every
+rate cell can supply its own percent unit; decimal calendar terms stay literal.
+Unresolved/competing notes, other named panels, placeholders and conditional scalar
+rates remain excluded. Complete grounded schedules are not reconstructed from
+flattened prose: no invented day counts, duplicated rows or lost conditions.
+
+Named HTML Application Disclosure Statements bind only their explicitly listed
+cards. Standard purchase/cash rates remain separate from promotional balance
+transfers and carry the full default trigger, start, reset and Minimum Payment
+definition. Normalization keeps the original full evidence without duplicating its
+owner into the first line. Current-run origin and final complete-context gates
+remain mandatory. Same-record savings calculation/payment facts are preserved.
+
+Owned daily transaction declarations keep their adjacent conditions. Calculator
+inputs and example prices cannot donate prices or suppress independent verified
+account fees. A separately proven account H1/cost record can retain its daily or
+everyday qualifier when the captured title and product route corroborate it.
+Essential research rejects explicitly different-language paths, including nested
+asset paths, and consumer/business scope conflicts before spending its unchanged
+acquisition budget. No optional-only research, bank-specific values, weaker
+withdrawal/security requirements, manual review or new recovery feature is added.
+Ambiguous discretionary redemption exceptions and cancellation windows do not
+become unconditional access flags. Public publication and runtime deployment
+remain separately verified operations.
+
+## Native disclosure proof clarification - 2026-10-07
+
+Parser v16/process `2026-10-07-native-disclosure-proof-v7` retain owned heading
+assertions of unlimited debit purchases, bill payments and withdrawals and
+single-row annual savings tables with complete local disclosure. The owned annual
+row uses the literal product name after a separately rendered category label.
+Single-channel coverage,
+recommendations, other named panels, conditions, retired/linked products,
+dynamic placeholders, competing rate rows and unresolved references exclude.
+Named wrapped PDF annual purchase/cash columns retain the complete missed-payment
+consequences and payment definition. Regular and default rates stay separate;
+unknown or shortened qualifications reject. Cardholder-count fee scope is
+independent of real eligibility/duration/balance waivers. Final ownership and
+full-disclosure checks apply to numeric fields and retained summaries; same-record
+registered daily-calculation/monthly-payment facts survive normalization.
+Derived display fees copy the exact accepted monthly-fee mapping and persisted
+evidence links, including when an earlier heuristic produced the same amount.
+Product-family signals veto unrelated card-network pricing links even when a
+navigation label says Rates and fees. Observed current-rate hubs and own-family
+rate paths remain eligible within unchanged acquisition budgets. These are shared
+Admin/direct proof rules, with no bank-specific values, essential relaxation,
+manual review or added research budget. Serving deployment is a separate action.
+[Source-backed diagnosis and verification](../00-governance/simplii-generic-collection-corrections-2026-10-07.md).
+
 ## Owned price and rate proof clarification - 2026-10-07
 
 Parser v15/process `2026-10-07-owned-price-rate-proof-v6` bind native labelled

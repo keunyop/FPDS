@@ -4,9 +4,6 @@ Version: 1.0
 Date: 2026-04-06
 Status: Approved Baseline for WBS 1.7.5 - 1.7.7
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/WBS.md`
-- `docs/02-requirements/scope-baseline.md`
 - `docs/03-design/domain-model-canonical-schema.md`
 - `docs/03-design/api-interface-contracts.md`
 - `docs/03-design/product-grid-information-architecture.md`
@@ -29,7 +26,7 @@ Source Documents:
 - Japanese glossary의 scope, owner, change rule을 정의해 Phase 2 확장 전에 terminology drift를 줄인다.
 
 이 문서는 구현 시작 신호가 아니다.
-구현은 `Gate A = Pass + Product Owner explicit approval` 이후에만 시작한다.
+Post-MVP work follows the current Product Owner request and the development guide.
 
 ---
 

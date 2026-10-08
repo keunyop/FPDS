@@ -151,4 +151,4 @@ storage와 이를 운영하는 데 직접 필요한 외부 계정
 - monitoring: shared/observability/README.md,
   docs/03-design/monitoring-error-tracking-baseline.md
 - 전체 인수 순서:
-  docs/01-planning/fpds-admin-handover-minimum-playbook.md
+  descent/README.md

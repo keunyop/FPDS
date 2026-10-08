@@ -4,12 +4,9 @@ Version: 1.0
 Date: 2026-04-07
 Status: Approved Baseline for WBS 2.3
 Source Documents:
-- `docs/01-planning/WBS.md`
-- `docs/03-design/erd-draft.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/03-design/review-run-publish-audit-state-design.md`
 - `docs/03-design/domain-model-canonical-schema.md`
-- `docs/03-design/retrieval-vector-starting-point.md`
 - `docs/03-design/dev-prod-environment-spec.md`
 
 ---

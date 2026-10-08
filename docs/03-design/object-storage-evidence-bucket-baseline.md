@@ -4,9 +4,6 @@ Version: 1.0
 Date: 2026-04-07
 Status: Approved Baseline for WBS 2.4
 Source Documents:
-- `docs/01-planning/WBS.md`
-- `docs/03-design/source-snapshot-evidence-storage-strategy.md`
-- `docs/03-design/environment-separation-strategy.md`
 - `docs/03-design/security-access-control-design.md`
 - `docs/03-design/dev-prod-environment-spec.md`
 - `docs/03-design/db-migration-baseline.md`

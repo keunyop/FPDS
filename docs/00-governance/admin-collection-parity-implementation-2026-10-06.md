@@ -6,7 +6,7 @@ not been executed. This is a code result, not a National publication result.
 
 ## What changed
 
-The [approved plan](../01-planning/admin-collection-publication-parity-plan-2026-10-06.md)
+The approved plan (history: `git show 56ac0635da2b:docs/01-planning/admin-collection-publication-parity-plan-2026-10-06.md`)
 now runs on shared ordinary services. There is no bank-specific approval branch,
 manual product review or permanent recovery workflow.
 

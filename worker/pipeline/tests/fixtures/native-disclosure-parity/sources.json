@@ -1,0 +1,268 @@
+[
+  {
+    "fixture": "checking.html.bin",
+    "url": "https://www.simplii.com/en/bank-accounts/no-fee-chequing.html",
+    "sha256": "9f9bc95a3c8b9bb87c6fb939c31ded2868ba04c1a0c403bcc8bbbd7f1831c05e",
+    "fetched_at": "2026-10-07 23:43:50.788075+00:00",
+    "content_type": "text/html",
+    "source_metadata": {
+      "normalized_source_url": "https://www.simplii.com/en/bank-accounts/no-fee-chequing.html",
+      "official_domain_allowlist": [
+        "simplii.com"
+      ],
+      "product_type": "chequing",
+      "product_family": "deposit",
+      "discovery_role": "detail",
+      "discovery_metadata": {
+        "page_title": "No Fee Chequing Account | Simplii Financial",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "Accounts No Fee Chequing Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Explicitly identifies a named No Fee Chequing Account and is linked as a page to learn more about it.",
+        "market_profile_key": "CA:chequing",
+        "page_evidence_score": 9,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 9,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "4c44353194af0216fd58bbd46d8d9de41782e24e5ad910a205b5bdf5a6725f40"
+      }
+    }
+  },
+  {
+    "fixture": "card.html.bin",
+    "url": "https://www.simplii.com/en/credit-cards/cash-back-visa.html",
+    "sha256": "307a4cc73a95ac7b769a6ed806b78799059f4ae47e32f457b701c71d89c208d4",
+    "fetched_at": "2026-10-08 00:01:29.694796+00:00",
+    "content_type": "text/html",
+    "source_metadata": {
+      "normalized_source_url": "https://www.simplii.com/en/credit-cards/cash-back-visa.html",
+      "official_domain_allowlist": [
+        "simplii.com"
+      ],
+      "product_type": "credit-card",
+      "product_family": "lending",
+      "discovery_role": "detail",
+      "discovery_metadata": {
+        "page_title": "Simplii Financial Cash Back Visa Card | Simplii Financial Back Button Search Icon Filter Icon",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 13,
+        "primary_heading": "Simplii Financial™ Cash Back Visa* Card",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.8,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The URL identifies a dedicated Cash Back Visa page, likely describing one named Simplii credit card.",
+        "market_profile_key": "CA:credit-card",
+        "page_evidence_score": 10,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 10,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "url_product_identity_signal",
+          "pricing_or_feature_signal"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "url_product_identity_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "a3d36b4aca3e73463d226fca043bdf8c3b86ea7fda3c25ee2bbd3697b52c8ebe"
+      }
+    }
+  },
+  {
+    "fixture": "card-summary.pdf.bin",
+    "url": "https://www.simplii.com/content/dam/simplii-public-assets/documents/pdf/credit-cards/L12658EINT.pdf",
+    "sha256": "49e2ba7a4e8f0ed13a8b683ed0308f3ac174a1f4021ea55280b3b73bfa1d58fc",
+    "fetched_at": "2026-08-27 05:20:52.510244+00:00",
+    "content_type": "application/pdf",
+    "source_metadata": {
+      "normalized_source_url": "https://www.simplii.com/content/dam/simplii-public-assets/documents/pdf/credit-cards/L12658EINT.pdf",
+      "official_domain_allowlist": [
+        "simplii.com"
+      ],
+      "product_type": "credit-card",
+      "product_family": "lending",
+      "discovery_role": "linked_pdf",
+      "discovery_metadata": {
+        "selection_path": "selected_detail_companion",
+        "heuristic_score": 27,
+        "candidate_origin": "selected_detail_outbound_link",
+        "parent_detail_url": "https://www.simplii.com/en/credit-cards/cash-back-visa.html",
+        "market_profile_key": "CA:credit-card",
+        "parent_detail_urls": [
+          "https://www.simplii.com/en/credit-cards/cash-back-visa.html"
+        ],
+        "selection_confidence": "high",
+        "market_profile_version": "2026-10-01-v7",
+        "selection_reason_codes": [
+          "exact_product_detail_link",
+          "pricing_or_terms_companion"
+        ],
+        "market_profile_resolution": "canada_baseline"
+      }
+    }
+  },
+  {
+    "fixture": "savings.html.bin",
+    "url": "https://www.simplii.com/en/bank-accounts/usd-savings-account.html",
+    "fetched_at": "2026-10-08T02:01:56.401755+00:00",
+    "sha256": "fd6daca5383c58cb0f6b65752df85add7968e77543b417ec7231bb67fd531ed7",
+    "content_type": "text/html",
+    "source_metadata": {
+      "purpose": "The URL and label indicate a specific USD-denominated savings account.",
+      "priority": "P1",
+      "source_id": "AUTO-SIMPLII-SAV-4a08dfd4fa",
+      "product_type": "savings",
+      "discovery_role": "detail",
+      "product_family": "deposit",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "monthly_fee",
+        "public_display_fee",
+        "minimum_balance",
+        "interest_rate_summary",
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "compounding_frequency",
+        "payout_option",
+        "tiered_rate_flag",
+        "tier_definition_text",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag",
+        "minimum_deposit",
+        "fee_waiver_condition"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "seed_source_flag": false,
+      "product_type_name": "Savings",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "discovery_metadata": {
+        "page_title": "U.S. Dollar Savings Bank Account for Canadians | Simplii Back Button Search Icon Filter Icon",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 6,
+        "primary_heading": "Accounts Simplii Financial™ USD Savings Account",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The URL and label indicate a specific USD-denominated savings account.",
+        "market_profile_key": "CA:savings",
+        "page_evidence_score": 7,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 10,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "url_product_identity_signal",
+          "pricing_or_feature_signal"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "detail_page_layout_signal",
+          "url_product_identity_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "0bc7b4d7acae8d1ae78b00d1c1afea4cddd0b6fa2cb820c692d2811c07a881d5"
+      },
+      "normalized_source_url": "https://www.simplii.com/en/bank-accounts/usd-savings-account.html",
+      "collection_field_policy": {},
+      "product_type_description": "Savings accounts collected for ongoing rate, monthly fee, and minimum balance.",
+      "official_domain_allowlist": [
+        "simplii.com"
+      ]
+    }
+  }
+]

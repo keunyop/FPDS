@@ -5539,12 +5539,24 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
         bool(re.search(r"(?:^|[-_/])(?:rates?|pricing)(?:$|[-_/.])", parsed.path.lower()))
         and (_canonical_product_type_code(product_type) in {"mortgage", "personal-loan", "line-of-credit"}
              and bool(re.search(r"\b(?:rates?|APR|pricing)\b", anchor, re.I))
-             or re.fullmatch(r"(?:current |interest |our )?(?:rates|pricing|rates and fees)", anchor))
+             or re.fullmatch(r"(?:current |interest |our |today['?]s |all )?(?:rates|pricing|rates and fees)", anchor)
+             or (re.search(r"[-_](?:rates|pricing)(?:\.html)?$", parsed.path.lower())
+                 and not _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint)))
     )
     # This helper is used only for links from a selected detail page. A bank
     # may publish several product types in one rate schedule; keep it as
     # evidence-only, and require exact product proof later in grounding.
-    if not shared_product_pricing and _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint):
+    unrelated = _has_unrelated_product_type_signal(product_type=product_type, fingerprint=fingerprint)
+    # Network-branded card URLs can omit the words credit-card. A navigation
+    # label such as Rates and fees does not make them a cross-family schedule.
+    card_network = bool(re.search(r"(?:^|[-_/ ])(?:visa|mastercard|american[- ]express)(?:[-_/ .]|$)", fingerprint))
+    if card_network and _canonical_product_type_code(product_type) != "credit-card" and not re.search(r"debit[- ](?:visa|mastercard)", fingerprint):
+        unrelated = True
+    shared_lending_schedule = (shared_product_pricing
+        and _canonical_product_type_code(product_type) in {"mortgage", "personal-loan", "line-of-credit"}
+        and bool(re.search(r"mortgage|loan|line[- ]of[- ]credit", fingerprint))
+        and not re.search(r"visa|mastercard|credit[- ]cards?|savings|chequing|checking|\bgic\b", fingerprint))
+    if unrelated and not shared_lending_schedule:
         return 0
 
     # A selected deposit detail can delegate its exact withdrawal terms to
@@ -6396,10 +6408,10 @@ def _url_locale_conflicts_source_language(*, normalized_url: str, source_languag
         host_locale = {"zt": "zh"}.get(hostname_labels[0], hostname_labels[0])
         if host_locale in known_languages and host_locale != requested:
             return True
-    for segment in [item for item in parsed.path.lower().split("/") if item][:3]:
+    for segment in [item for item in parsed.path.lower().split("/") if item]:
         locale = segment.replace("_", "-").split("-", 1)[0]
-        if locale in known_languages:
-            return locale != requested
+        if locale in known_languages and locale != requested:
+            return True
     return False
 
 

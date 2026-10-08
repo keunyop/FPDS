@@ -31,11 +31,7 @@ Version: 1.0
 Date: 2026-04-05
 Status: Approved Baseline for WBS 1.7.1
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/WBS.md`
-- `docs/02-requirements/scope-baseline.md`
 - `docs/03-design/api-interface-contracts.md`
-- `docs/03-design/aggregate-cache-refresh-strategy.md`
 - `docs/03-design/domain-model-canonical-schema.md`
 - `docs/00-governance/decision-log.md`
 

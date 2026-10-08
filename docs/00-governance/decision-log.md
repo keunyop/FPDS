@@ -107,11 +107,11 @@ Version: 2.0
 Date: 2026-04-22
 Status: Active current baseline
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/02-requirements/scope-baseline.md`
-- `docs/01-planning/plan.md`
-- `docs/01-planning/WBS.md`
-- `docs/00-governance/working-agreement.md`
+- `git show 56ac0635da2b:docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `git show 56ac0635da2b:docs/02-requirements/scope-baseline.md`
+- `git show 56ac0635da2b:docs/01-planning/plan.md`
+- `git show 56ac0635da2b:docs/01-planning/WBS.md`
+- `git show 56ac0635da2b:docs/00-governance/working-agreement.md`
 
 ---
 
@@ -122,7 +122,7 @@ This file keeps the current decisions that still shape active implementation wor
 Rules:
 - keep only decisions that still matter for current execution
 - do not use this file as a full historical archive
-- move old gate and prototype context to `docs/archive/`
+- retrieve removed gate/prototype documents from Git history; keep operational decisions here
 - update this file when a decision changes current execution, scope, architecture, or release posture
 
 ---
@@ -135,14 +135,11 @@ Use this document to answer:
 - what boundaries must not be reopened casually
 - what decisions future slices should assume by default
 
-If a topic is not covered here, follow document authority:
-1. latest Product Owner instruction
-2. requirements
-3. plan
-4. WBS
-5. this decision log
-6. RAID log
-7. detailed design docs
+Post-MVP workflow (2026-10-07): the latest Product Owner request sets scope and
+acceptance, subject to current financial/security contracts. Use the development
+guide and affected package README. Completed MVP stages in D-002/D-014 and their
+old planning prerequisites no longer select or authorize new work. Other runtime,
+data and security decisions remain applicable unless explicitly superseded.
 
 ---
 
@@ -161,10 +158,10 @@ If a topic is not covered here, follow document authority:
 | D-009 | 2026-04-07 | Auth Baseline | Admin auth uses server-side session auth managed by the Python API. | This remains the baseline for admin runtime work and route protection. | security design, README |
 | D-010 | 2026-04-07 | Environment Baseline | Official env model remains `dev` and `prod`, with real BX-PF write-back allowed only in `prod`. | Keeps env and secret handling consistent across active slices. | env spec |
 | D-011 | 2026-04-07 | Data and Evidence Baseline | Evidence artifacts stay private, browser surfaces never get direct raw object access, and canonical truth stays separate from public projection or publish state. | Protects evidence boundaries and keeps public serving decoupled from internal storage. | storage baseline, workflow design |
-| D-012 | 2026-04-11 | Gate B Outcome | Gate B passed and the prototype stage is complete. | Confirms prototype planning and evidence docs are archival by default. | `docs/archive/00-governance/gate-b-prototype-review-note.md` |
+| D-012 | 2026-04-11 | Gate B Outcome | Gate B passed and the prototype stage is complete. | Confirms prototype planning and evidence docs are archival by default. | `git show 56ac0635da2b:docs/archive/00-governance/gate-b-prototype-review-note.md` |
 | D-013 | 2026-04-12 | Admin Account Baseline | Admin runtime starts from DB-backed operator accounts and DB-backed sessions, not env-only bootstrap auth. | This remains the durable auth direction for admin operations. | WBS 4.1 implementation |
-| D-014 | 2026-04-13 | Gate C Outcome | Gate C passed, WBS 4 is complete, and WBS 5 is the active stage. | Confirms current execution should focus on WBS 5 and Phase 1 readiness. | `docs/archive/00-governance/gate-c-admin-ops-review-note.md`, WBS |
-| D-015 | 2026-04-13 | Source Registry Baseline | Canada Big 5 source registry is the active source coverage baseline for Phase 1. | Current source expansion and collection behavior should build on this baseline. | `docs/01-planning/canada-big5-source-registry.md` |
+| D-014 | 2026-04-13 | Gate C Outcome | Gate C passed, WBS 4 is complete, and WBS 5 is the active stage. | Confirms current execution should focus on WBS 5 and Phase 1 readiness. | `git show 56ac0635da2b:docs/archive/00-governance/gate-c-admin-ops-review-note.md`, WBS |
+| D-015 | 2026-04-13 | Source Registry Baseline | Canada Big 5 source registry is the active source coverage baseline for Phase 1. | Current source expansion and collection behavior should build on this baseline. | `git show 56ac0635da2b:docs/01-planning/canada-big5-source-registry.md` |
 | D-016 | 2026-04-13 | Aggregate Vocabulary | Public aggregate buckets and product filtering vocabulary are approved and should be reused consistently across APIs and UI. | Prevents filter semantics and dashboard metrics from drifting. | product-grid IA, WBS |
 | D-017 | 2026-04-18 | Discovery Direction | Homepage-first discovery stays bounded and same-domain, but quality improvements should use hybrid candidate scoring rather than unconstrained crawling. | This is the current direction for source discovery hardening. | homepage discovery enhancement |
 | D-018 | 2026-04-21 | Aggregate Refresh Behavior | Canonical approval should enqueue asynchronous aggregate refresh, and public serving should fall back to the latest successful snapshot if a newer refresh fails. | This is the live serving and health behavior for public data. | development journal, admin health slice |

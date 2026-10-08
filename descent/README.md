@@ -8,7 +8,7 @@
 [현행 사용자 매뉴얼](FPDS_Admin_사용자_매뉴얼.md)과
 [소스·문서 전달 목록](../00-Scope/scope.md)을 먼저 확인합니다.
 
-개발 인계 자료: [FPDS Admin 개발 가이드 (한국어 초안)](FPDS_Admin_개발_가이드.md) · [AI 개발 스킬셋](ai-skills/README.md)
+인수 후 개발은 **[개발 가이드](FPDS_Admin_개발_가이드.md)**에서 시작합니다. 국가별 로컬라이징, 기능 변경과 4개 AI 스킬의 설명을 한 파일에 담았습니다. 아래 단계는 계정·환경·운영 책임 이전에 필요한 경우에만 사용합니다.
 
 Kick-off 미팅 자료: [FPDS 인수인계 킥오프 미팅 (한국어・日本語)](00-kickoff-meeting.md)
 
@@ -411,7 +411,6 @@ UAT 기록에 최소한 다음을 포함한다.
 
 상세 확인이 필요할 때만 아래 문서를 참고한다.
 
-- [Admin 인수인계 최소 실행 플레이북](../docs/01-planning/fpds-admin-handover-minimum-playbook.md)
 - [인수인계 범위와 최종 체크리스트](../00-Scope/scope.md)
 - [외부 서비스 및 계정 대장](../00-Scope/external-services-and-accounts.md)
 - [DB migration, schema와 ERD](../00-Scope/database-migrations-schema-erd.md)

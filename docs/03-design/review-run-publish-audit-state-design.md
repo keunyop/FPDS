@@ -27,14 +27,9 @@ Version: 1.0
 Date: 2026-04-01
 Status: Approved Baseline for WBS 1.3.2 - 1.3.5
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/plan.md`
-- `docs/01-planning/WBS.md`
 - `docs/03-design/domain-model-canonical-schema.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/00-governance/decision-log.md`
-- `docs/02-requirements/scope-baseline.md`
-- `docs/00-governance/stage-gate-checklist.md`
 
 ---
 
@@ -49,7 +44,7 @@ Goals:
 - define the audit trail scope, event taxonomy, and required metadata for `WBS 1.3.5`
 - provide a stable baseline for ERD, admin API, runbook, and audit-log implementation work
 
-This is still a design document. It does not authorize coding by itself and does not replace Gate A or Product Owner build-start approval.
+Post-MVP work follows the current Product Owner request and the development guide.
 
 ---
 

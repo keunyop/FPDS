@@ -1,250 +1,78 @@
-# FPDS Database Baseline
+# FPDS 신규 DB 구축
 
-## Product Type collection targets - 2026-10-04
+빈 PostgreSQL DB에 FPDS schema와 초기 기준 데이터를 구성하는 방법이다.
+아래 명령은 저장소 루트의 PowerShell에서 실행한다.
 
-Migration `0047_product_type_collection_fields.sql` adds the object-valued
-`product_type_registry.collection_field_policy`, keyed by working country.
-Each override stores typed `required_fields` and `optional_fields`; executable
-financial essentials remain protected in the shared contract. Updates merge one
-country key rather than overwriting other markets. Apply after `0046` and before
-the matching API/Worker/Admin release. No live migration is claimed here.
+## 1. 준비
 
+- PostgreSQL 서버, 접속 가능한 빈 DB와 해당 DB의 schema를 생성할 계정을 준비한다.
+- `psql`을 설치하고 PATH에서 실행할 수 있게 한다.
+- PostgreSQL 서버에 `pgvector`를 설치한다. 전체 migration 적용 과정의
+  `0012`에서 `vector` extension을 생성하므로 extension 생성 권한도 필요하다.
+  권한이 제한된 환경에서는 DB 관리자가 대상 DB에 extension을 먼저 생성한다.
+- [.env.dev.example](../.env.dev.example)을 참고해 로컬 `.env.dev`의
+  `FPDS_DATABASE_URL`을 신규 개발 DB의 연결 정보로 설정한다. 연결 정보는 Git에 넣지 않는다.
 
-## Approved accuracy cutover — 2026-09-30
-
-The fixed-scope `scripts/maintenance/collection_accuracy_cutover.py` applied
-355 versioned inactive products, 470 automatic review closures and two empty
-CA/US Public snapshots in one transaction. It requires the original approved
-manifest SHA-256 and current version/value/state checks, defaults to rollback,
-and recognizes an already-applied operation without additional writes. Original
-versions/evidence and product verification timestamps are retained. This is a
-one-time data operation, not a schema migration or a fresh-DB seed. Preserve the
-private manifest and before-image identified in the
-[applied record](../docs/00-governance/collection-accuracy-audit-2026-09-30.md).
-
-
-This directory holds the database and migration baseline for WBS `2.3`.
-
-Current decisions:
-- PostgreSQL is the baseline database.
-- Migrations are SQL-first so the repo is not blocked on a framework or ORM choice.
-- Primary keys use application-generated `text` ids for now, which avoids taking a UUID extension dependency before the runtime is chosen.
-- Opaque technical IDs stay stable across country moves and imports. Country is
-  part of bank/source business uniqueness and country-owned lookup indexes,
-  rather than being concatenated into every technical primary key.
-- Flexible candidate and canonical field payloads live in `jsonb` until the implementation needs stricter column-level expansion.
-- `0012_evidence_chunk_embeddings.sql` is retained as migration history, but
-  `0040_bounded_operational_storage.sql` removes the embedding side table and
-  makes metadata-scored evidence retrieval the current baseline.
-- Runtime admin and API reads no longer auto-reseed `bank`, `product_type_registry`, `source_registry_catalog_item`, or `source_registry_item` from committed JSON seed baselines. Empty tables now remain empty until an explicit operator write, import step, or full migration replay repopulates them.
-
-Current handoff snapshot:
-- [database migrations, schema, and ERD](../00-Scope/database-migrations-schema-erd.md)
-  lists every migration through
-  0046, records the latest dated shared-dev migration/schema observation, and
-  provides the current physical schema plus ERD. Treat the SQL files here as
-  migration authority and the handoff file as a dated environment observation.
-
-Files:
-- `migrations/0001_initial_baseline.sql`: core schema and seed data
-- `migrations/0002_admin_auth.sql`: DB-backed admin user, session, and login-attempt tables for `WBS 4.1`
-- `migrations/0003_aggregate_refresh.sql`: aggregate snapshot execution history plus public projection tables
-- `migrations/0009_backfill_review_edit_approved_candidate_product_name.sql`: backfills `normalized_candidate.product_name` plus `candidate_payload.product_name` from the latest stored `edit_approve` product-name override
-- `migrations/0010_aggregate_refresh_queue.sql`: aggregate refresh request queue for auto-enqueued review approvals and manual retry
-- `migrations/0011_admin_signup_requests.sql`: login-id-first admin auth updates plus approval-gated signup requests
-- `migrations/0012_evidence_chunk_embeddings.sql`: pgvector-backed `evidence_chunk_embedding` side table for vector-assisted evidence retrieval
-- `migrations/0013_operator_managed_product_types.sql`: removes the historical product-type classification flag so every product type is an operator-managed DB row
-- `migrations/0014_canonical_deposit_taxonomy_backfill.sql`: restores canonical chequing, savings, and GIC subtype taxonomy rows when operator-managed product types have been reset or recreated
-- `migrations/0015_phase1_review_confidence_policy.sql`: lowers the Phase 1 auto-approve confidence policy to `0.82` while preserving validation-error and force-review gates
-- `migrations/0016_auto_promotion_aggregate_trigger.sql`: allows aggregate refresh requests triggered by audited candidate auto-promotion
-- `migrations/0017_canonical_identity_alias_repair.sql`: repairs common bank and product-type identity aliases such as RBC/TD/SCOTIA and GIC
-- `migrations/0018_canonical_source_document_identity_repair.sql`: realigns `source_document_id` values with canonical bank/url/type identity after alias repair
-- `migrations/0019_canada_lending_product_types.sql`: registers the Canada retail lending Product Type baseline (`credit-card`, `mortgage`, `personal-loan`, `line-of-credit`) plus generic `other` lending taxonomy fallback rows
-- `migrations/0020_canada_recognized_banks_full_coverage.sql`: adds bank logo metadata, registers recognized Canadian retail/direct banking brands, and creates active source-catalog coverage for every active Canadian bank/Product Type pair
-- `migrations/0021_vancity_credit_union_full_coverage.sql`: registers Vancity per Product Owner request and creates active source-catalog coverage for every active Product Type
-- `migrations/0022_bank_logo_asset_refresh.sql`: replaces recognized-bank favicon defaults with verified official logo assets while preserving operator-supplied custom logo URLs
-- `migrations/0023_versioned_parsed_documents.sql`: permits one immutable parsed artifact per snapshot and parser version so parser upgrades can reparse without overwriting earlier evidence lineage
-- `migrations/0024_deposit_field_contract_defaults.sql`: aligns deposit product-type expected fields with the executable cross-bank field contract and records the registry change in history
-- `migrations/0025_country_scoped_admin.sql`: adds the enabled-country registry,
-  country-bound Admin sessions and ingestion runs, country/bank composite
-  integrity, country-aware source uniqueness, and country-qualified product
-  lookup indexes
-- `migrations/0026_country_registry_management.sql`: adds the stored English
-  country-name fallback and country registry lookup index used by the
-  admin-only prepared-country activation workflow
-- `migrations/0027_standalone_ai_operations.sql`: permits operational
-  `model_execution` and `llm_usage_record` rows without an ingestion run so
-  country-scoped AI registry actions can retain execution and cost lineage
-- `migrations/0028_source_catalog_coverage_evidence.sql`: preserves the
-  official Product Type coverage URL that justified each catalog row so
-  collection can start from that verified route
-- `migrations/0029_collection_ai_autopilot_policy.sql`: enables bounded
-  collection-time AI review remediation and the official-grounding thresholds
-  that allow dynamic/lending candidates to use normal policy auto-approval
-- `migrations/0030_collection_approval_field_policy.sql`: replaces the
-  all-requested-field approval denominator with identity plus populated or
-  blocking decision fields; empty optional fields are explicit omissions
-- `migrations/0031_catalog_coverage_route_evidence.sql`: adds private structured
-  evidence for verified product-specific consumer-brand coverage domains and
-  explicit not-currently-offered catalog outcomes
-- `migrations/0032_comparison_grade_collection_quality.sql`: supersedes the
-  populated-only lending approval denominator, adds rate-summary coverage to
-  lending field registries, and activates comparison-grade AI policy notes
-- `migrations/0033_essential_field_low_touch_publication.sql`: narrows current
-  Deposit and Lending registry rows to type-specific comparison essentials,
-  requires complete essential grounding, and makes partial-source/confidence
-  warnings non-blocking by themselves
-- `migrations/0034_country_product_market_profiles.sql`: backfills active US
-  source rows to the versioned US comparison contract, records market-profile
-  lineage in discovery metadata, reclassifies governing documents as
-  supporting evidence, and removes known action/calculator detail rows from
-  active collection scope
-- `migrations/0035_collection_publication_automation.sql`: retained historical
-  migration that introduced the former recurring collection policy
-- `migrations/0036_us_pricing_evidence_companions.sql`: moves active US card
-  sources to the current market profile and requests the range-preserving
-  `purchase_interest_rate_summary` alongside annual fee and purchase rate
-- `migrations/0037_us_pricing_companion_scope_cleanup.sql`: inactivates generic
-  online-banking service agreements mistakenly linked as pricing companions
-  while retaining their source history
-- `migrations/0038_us_cross_product_support_cleanup.sql`: inactivates legacy US
-  credit-card supporting rows that actually point to auto/vehicle-loan pages;
-  the runtime also excludes any future active supporting row with a conflicting
-  Product Type fingerprint
-- `migrations/0039_us_credit_card_apr_range_contract.sql`: makes the qualified
-  Purchase APR summary the preferred US credit-card rate requirement, leaving
-  an exact fixed scalar rate as a bounded alternative rather than reducing a
-  disclosed range to its lower endpoint
-- `migrations/0040_bounded_operational_storage.sql`: removes physical audit,
-  LLM usage, evidence embedding, and derived dashboard snapshot tables; adds
-  discard-only rolling-deployment views for the two obsolete log writers; and
-  installs bounded evidence, model execution, aggregate, auth, and run JSON
-  retention
-- `migrations/0041_vancity_official_product_routes.sql`: pins Vancity's seven
-  active retail Product Types to the audited official account, card, GIC,
-  mortgage, and consumer-lending hubs before exact-product seed expansion
-- `migrations/0042_three_bank_partial_run_scope_hardening.sql`: replaces the
-  blanket Bridgewater/EQ/Fairstone Product Type baseline with ten verified
-  official retail routes, inactivates eleven known non-collectable catalog
-  scopes and any older active sources under them, and retains all run/source
-  history
-- `migrations/0043_generic_zero_detail_scope_quarantine.sql`: pins twelve
-  verified FNBC/Haventree/HomeEquity routes, inactivates nine exact unsupported
-  named-bank scopes, and generically quarantines any remaining migration-0020
-  blanket row with no coverage route, active detail source, or successful
-  non-empty collection; historical rows remain and reactivation is evidence-led
-- `migrations/0044_remove_admin_collection_scheduler.sql`: removes the former
-  recurring collection and recovery policy rows; Admin collection remains
-  operator-initiated
-- `migrations/0045_public_product_engagement.sql`: adds 400-day bounded daily
-  product counters for Public detail clicks, official-bank clicks, and finder
-  selections. The table stores no visitor, query, cookie, IP, or profile value.
-- `migrations/0046_public_feedback_submission.sql`: adds 400-day bounded
-  anonymous product-error and site-feedback submissions with authoritative
-  Public snapshot/product context and no visitor/contact/browser identity.
-
-How to apply when a database is available:
+`psql`은 `.env.dev`를 자동으로 읽지 않는다. 같은 연결 정보를 현재 터미널에도 설정한다.
 
 ```powershell
-psql $env:FPDS_DATABASE_URL -f db/migrations/0001_initial_baseline.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0002_admin_auth.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0003_aggregate_refresh.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0011_admin_signup_requests.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0012_evidence_chunk_embeddings.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0013_operator_managed_product_types.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0014_canonical_deposit_taxonomy_backfill.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0015_phase1_review_confidence_policy.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0016_auto_promotion_aggregate_trigger.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0017_canonical_identity_alias_repair.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0018_canonical_source_document_identity_repair.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0019_canada_lending_product_types.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0020_canada_recognized_banks_full_coverage.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0021_vancity_credit_union_full_coverage.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0022_bank_logo_asset_refresh.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0023_versioned_parsed_documents.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0024_deposit_field_contract_defaults.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0025_country_scoped_admin.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0027_standalone_ai_operations.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_evidence.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0029_collection_ai_autopilot_policy.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0030_collection_approval_field_policy.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0031_catalog_coverage_route_evidence.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0032_comparison_grade_collection_quality.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0033_essential_field_low_touch_publication.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0034_country_product_market_profiles.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0035_collection_publication_automation.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0036_us_pricing_evidence_companions.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0037_us_pricing_companion_scope_cleanup.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0038_us_cross_product_support_cleanup.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0039_us_credit_card_apr_range_contract.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0040_bounded_operational_storage.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_routes.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_hardening.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0045_public_product_engagement.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0046_public_feedback_submission.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0047_product_type_collection_fields.sql
+$env:FPDS_DATABASE_URL = 'postgres://fpds_dev_user:replace-me@localhost:5432/fpds_dev'
+psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT current_database(), current_user;'
 ```
 
-Notes:
-- `psql` is available in the prepared local toolchain, but the migrations still need a reachable Postgres target.
-- Use the connection target from `.env.dev.example` or `.env.prod.example`.
-- Prefer additive migrations, but use a reviewed destructive migration when a
-  Product Owner storage decision explicitly removes nonessential telemetry.
-- Put extension-specific or vendor-specific migrations in later numbered files.
-- Historical fresh-DB bootstrap inserts still exist in `0001_initial_baseline.sql` for `bank` only. `product_type_registry` is schema-only until later additive migrations; `0019_canada_lending_product_types.sql` registers the approved lending baseline, `0020_canada_recognized_banks_full_coverage.sql` expands the Canadian bank/logo baseline and source-catalog coverage, `0021_vancity_credit_union_full_coverage.sql` adds Vancity to that coverage set, and `0022_bank_logo_asset_refresh.sql` upgrades eligible favicon defaults to verified official logo assets. Migration `0043` then makes a fresh replay fail closed by inactivating blanket coverage that still lacks route, detail-source, or non-empty-run evidence. Future product types should still be registered through admin/operator DB writes or explicit approved migrations.
-- `country_registry` is the operational allowlist for Admin login. Adding a new
-  country is an explicit enablement step and does not by itself authorize
-  collection or release for that market.
-- Country removal is an `inactive` status transition rather than row deletion,
-  preserving country-scoped foreign keys and historical records.
-- Apply `0027` before enabling AI bank onboarding. Standalone operational AI
-  rows keep `run_id=NULL`; their country and operation lineage lives in
-  execution metadata, while ingestion-backed executions remain linked to
-  their run as before.
-- Apply `0028` before relying on AI onboarding coverage evidence as the
-  collection entry route. Existing catalog rows remain valid with a null
-  coverage URL and continue to use bounded homepage discovery.
-- Apply `0029` to persist the Product Owner-approved collection AI autopilot,
-  80% official-grounding thresholds, and per-run cost bound. Code defaults to
-  the same enabled policy so deployment does not silently revert to blanket
-  manual review if the migration and runtime roll out together.
-- Apply `0030` to keep the 80% safety threshold while changing its denominator
-  to approval-relevant fields. Identity and an official source remain
-  mandatory, and ambiguous product boundaries, partial source failures, and
-  invalid taxonomy remain hard blockers.
-- Apply `0032` to require rate/price plus the product-type-specific amount or
-  term facts independently of the 80% score. An APR range or conditional rate
-  formula remains source text in `interest_rate_summary`; it is not coerced to
-  a misleading scalar.
-- Apply `0033` to make the smaller essential-field contract authoritative for
-  new collection, Review, approval, and Public projection. It supersedes the
-  active 80% policies with 100% coverage of the smaller set and removes
-  `partial_source_failure` from force-review policy without weakening identity,
-  taxonomy, type/range, conflict, or ambiguity blockers.
-- Apply `0034` before the next US recollection so existing registry rows request
-  the US market-profile essentials and retain their profile key/version. The
-  migration changes source roles/status only for deterministic US legal,
-  enrollment, service, and calculator non-product patterns; canonical product
-  status still changes only through the guarded remediation workflow.
-- Apply `0040` after all earlier migrations. It is the active storage baseline:
-  audit/usage writes are discarded, evidence retrieval is metadata-only, and
-  Public dashboard datasets derive from the latest projection. Run
-  `fpds_apply_data_retention()` explicitly during approved maintenance.
-- Apply `0042` after `0020` and `0031`. It makes the recognized-bank
-  cross-product seed a bootstrap mechanism rather than current-offering
-  evidence for Bridgewater, EQ Bank, and Fairstone. Inactive rows and their
-  historical sources are retained but cannot enter operator-initiated
-  collection until an operator supplies new attributable official evidence.
-- Apply `0044` after `0035`. It removes all former collection-automation policy
-  rows; no environment flag or database policy can start background collection.
-- Apply `0045` before enabling Public engagement recording or `/admin`
-  analytics. Its statement trigger and event-date index keep the daily
-  product/event aggregates bounded to 400 days.
-- Apply `0046` before enabling Public feedback submission or the FPDS Admin
-  Feedback inbox. Its constraints enforce type/category/product context and its
-  submitted-time trigger/index bound retention to 400 days.
+예시의 계정·암호·host·port·DB 이름을 준비한 환경 값으로 바꾼다.
+출력에서 신규 DB와 실행 계정을 확인한 뒤 다음 단계로 진행한다.
+
+## 2. 전체 migration 적용
+
+[migrations](migrations)의 SQL 파일을 이름의 번호순으로 모두 적용한다.
+현재 순서는 `0001`부터 `0047`까지이며, 중간 파일도 생략하지 않는다.
+SQL 파일에 정의된 transaction 범위대로 적용하며 오류가 발생하면 다음 파일로 진행하지 않는다.
+
+```powershell
+if ([string]::IsNullOrWhiteSpace($env:FPDS_DATABASE_URL)) {
+    throw 'FPDS_DATABASE_URL을 신규 DB 연결 정보로 설정하세요.'
+}
+
+$fpdsMigrations = @(Get-ChildItem -LiteralPath 'db/migrations' -Filter '*.sql' -File | Sort-Object Name)
+if ($fpdsMigrations.Count -eq 0) {
+    throw '저장소 루트에서 실행하고 db/migrations를 확인하세요.'
+}
+
+foreach ($fpdsMigration in $fpdsMigrations) {
+    Write-Host "Applying $($fpdsMigration.Name)"
+    psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$($fpdsMigration.FullName)"
+    if ($LASTEXITCODE -ne 0) {
+        throw "Migration 실패: $($fpdsMigration.Name). 원인을 해결하기 전 다음 파일을 적용하지 마세요."
+    }
+}
+```
+
+SQL 오류가 발생하면 실행이 멈춘다. 명시적 transaction 안에서 실패한 변경은 취소된다.
+앞서 성공한 파일은 이미 반영되어 있으므로, 실패 원인과 반영 상태를 확인한 뒤
+실패한 파일부터 나머지 파일을 번호순으로 적용한다.
+
+## 3. 구축 확인
+
+```powershell
+psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT migration_name FROM migration_history ORDER BY migration_name;'
+psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT count(*) AS applied_migrations FROM migration_history;'
+psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -c '\dt'
+psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT country_code, status FROM country_registry ORDER BY country_code;'
+```
+
+적용 기록을 확인한다. 현재 47개 SQL 파일을 모두 적용하면
+44개 기록과 마지막 `0047_product_type_collection_fields.sql`이 남는다.
+`0009`, `0014`, `0015`는 적용 기록을 추가하지 않으므로 SQL 실행 결과도 함께 확인한다.
+테이블과 국가 기준 데이터도 확인한다.
+
+초기 기준 데이터는 migration에 포함되며 실제 수집 상품이나 Public 결과를
+채우지는 않는다. 은행·상품 유형·출처 registry는 API를 실행하거나 조회하는
+것만으로 자동으로 채워지지 않는다. 필요한 추가 등록은 Admin의 운영 기능을 사용한다.
+
+## 4. 최초 계정과 앱 실행
+
+[API README의 최초 운영 계정 bootstrap](../api/service/README.md#local-run)을
+따라 계정을 생성한다. API가 동일한 신규 DB의 `.env.dev`를 사용하도록 설정하고,
+[개발 가이드](../descent/FPDS_Admin_개발_가이드.md#2-처음-실행하기)에 따라
+API와 Admin을 실행한 뒤 로그인과 국가 선택을 확인한다.

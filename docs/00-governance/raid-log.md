@@ -52,10 +52,10 @@ Version: 2.0
 Date: 2026-04-22
 Status: Active current baseline
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/WBS.md`
+- `git show 56ac0635da2b:docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
+- `git show 56ac0635da2b:docs/01-planning/WBS.md`
 - `docs/00-governance/decision-log.md`
-- `docs/00-governance/working-agreement.md`
+- `git show 56ac0635da2b:docs/00-governance/working-agreement.md`
 
 ---
 

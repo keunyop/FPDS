@@ -4,10 +4,6 @@ Version: 1.0
 Date: 2026-04-07
 Status: Approved Baseline for WBS 2.7
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/WBS.md`
-- `docs/archive/01-planning/prototype-backlog.md`
-- `docs/03-design/environment-separation-strategy.md`
 - `docs/03-design/dev-prod-environment-spec.md`
 - `docs/03-design/api-interface-contracts.md`
 - `docs/00-governance/decision-log.md`

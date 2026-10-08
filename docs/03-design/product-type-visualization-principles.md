@@ -4,8 +4,6 @@ Version: 1.0
 Date: 2026-04-05
 Status: Approved Baseline for WBS 1.7.3
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/WBS.md`
 - `docs/03-design/product-grid-information-architecture.md`
 - `docs/03-design/insight-dashboard-metric-definition.md`
 - `docs/03-design/api-interface-contracts.md`

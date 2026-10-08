@@ -28,23 +28,19 @@ Version: 1.3
 Date: 2026-09-12
 Status: Approved Baseline for WBS 1.7.4 plus source-registry follow-on
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/WBS.md`
-- `docs/02-requirements/scope-baseline.md`
 - `docs/03-design/api-interface-contracts.md`
 - `docs/03-design/security-access-control-design.md`
 - `docs/03-design/review-run-publish-audit-state-design.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/03-design/source-registry-refresh-and-approval-policy.md`
-- `docs/03-design/erd-draft.md`
 - `docs/00-governance/decision-log.md`
 
 ---
 
 ## Current implementation status — 2026-09-12
 
-The [Admin purpose and feature guide](fpds-admin-purpose-and-features.md) is the
-source-verified current inventory. Product Record, Publish Monitor, global
+The [Admin manual](../../descent/FPDS_Admin_사용자_매뉴얼.md) and
+[route manifest](../../app/admin/routes.manifest.json) describe current operations. Product Record, Publish Monitor, global
 search, and Localization Health remain design-only follow-ons; their descriptions
 below do not imply live routes. Product Types is implemented as a shared
 registry. D-044 removes generic audit/usage retention, and D-069 removes recurring

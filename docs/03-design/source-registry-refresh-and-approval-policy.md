@@ -4,12 +4,8 @@ Version: 1.2
 Date: 2026-04-21
 Status: Active Operating Baseline
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/02-requirements/scope-baseline.md`
-- `docs/01-planning/WBS.md`
 - `docs/03-design/admin-information-architecture.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
-- `docs/03-design/source-snapshot-evidence-storage-strategy.md`
 - `docs/00-governance/decision-log.md`
 
 ---
@@ -217,7 +213,7 @@ Current live product-type onboarding note:
   values only with fixed size/node/count limits and the normal same-domain,
   HTTPS, role, and page-evidence checks.
 - Homepage-first discovery may infer a bounded discovery profile from the stored display name, description, and discovery keywords. For example, a registered `saving` row whose definition clearly describes savings accounts can use `savings` discovery signals, while generated source rows still preserve the registered product type code.
-- the approved follow-on design now upgrades discovery quality through bounded AI parallel scoring, stronger product-type-description grounding, and page-level evidence scoring before `detail` promotion. See `docs/03-design/homepage-discovery-scoring-enhancement.md`.
+- Discovery uses bounded scoring, product-type-description grounding and page-level evidence before detail promotion. See [current discovery behavior](../../worker/discovery/README.md).
 - generated source rows now persist structured `discovery_metadata`, and `/admin/sources/:sourceId` exposes that explainability block for operator inspection.
 - Operator-managed product types without specialized parser support, including
   the current lending baseline, continue through generic AI
@@ -423,7 +419,7 @@ Current repository state:
 - when no detail survives, the run summary prioritizes that rejection aggregate
   and a representative rejected detail over incidental hub-fetch noise.
 - seed detail hints retain discovery continuity but cannot reduce the current Product Type expected-field baseline; generated details request the union so stale seed metadata cannot create structurally incomplete approved products.
-- operator-managed product type onboarding is now live, and its next discovery-quality improvements are documented in `docs/03-design/homepage-discovery-scoring-enhancement.md`
+- Operator-managed product type onboarding is live; see [current discovery behavior](../../worker/discovery/README.md) for the implemented pipeline.
 - the Canada retail lending Product Type baseline is live in DB through migration `0019`, with active generic `other` taxonomy fallback rows for `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit`
 - the recognized Canada financial-institution baseline is live in DB through migrations `0020`, `0021`, and `0022`, with 28 active Canadian bank/direct-bank/credit-union profiles, refreshed official logo metadata where publicly available, and full active Product Type source-catalog coverage for every active Canadian financial institution
 

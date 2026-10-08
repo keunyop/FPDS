@@ -4,13 +4,7 @@ Version: 1.0
 Date: 2026-04-06
 Status: Recommended Baseline
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/02-requirements/scope-baseline.md`
-- `docs/01-planning/plan.md`
-- `docs/01-planning/WBS.md`
-- `docs/archive/01-planning/td-savings-source-inventory.md`
 - `docs/03-design/security-access-control-design.md`
-- `docs/03-design/environment-separation-strategy.md`
 - `docs/03-design/api-interface-contracts.md`
 - `docs/00-governance/decision-log.md`
 
@@ -48,7 +42,7 @@ Source Documents:
 2. OpenAI 기반 LLM/API 문서와 사용 기준을 확인해야 한다.
 3. Node/Next.js 기반 공통 의존성과 패키지 정보를 확인해야 한다.
 4. FPDS 권장 스택인 Vercel, Supabase, AWS, Sentry 관련 공식 문서를 확인해야 한다.
-5. 이후 Phase 1에서 Canada Big 5 source registry를 확장해야 한다.
+5. 요청된 국가의 공식 금융기관 출처를 확인해야 한다.
 
 ---
 
@@ -57,11 +51,11 @@ Source Documents:
 ### 4.1 Tier A: Recommended Initial Allowlist
 
 지금 시점에서 가장 먼저 허용할 도메인이다.
-Prototype 문서 정리, 설계, 구현, 테스트 준비까지 커버하는 최소 추천값이다.
+아래는 기존 개발 환경의 예시다. 실제 허용 도메인은 이번 작업의 공식 출처와 사용 서비스에 맞춰 정한다.
 
 | Domain | Why It Is Needed | Basis |
 |---|---|---|
-| `td.com` | Prototype source inventory의 공식 public source와 PDF 검증 | `docs/archive/01-planning/td-savings-source-inventory.md` |
+| `td.com` | TD 공식 public source와 PDF 검증 | 해당 은행 수집 작업이 요청된 경우 |
 | `openai.com` | OpenAI 제품/정책/안내 문서의 공식 루트 | PRD suggested stack: OpenAI |
 | `platform.openai.com` | API/usage/auth 문서 확인 | PRD suggested stack: OpenAI |
 | `developers.openai.com` | 최신 개발 문서 확인 | PRD suggested stack: OpenAI |
@@ -73,7 +67,7 @@ Prototype 문서 정리, 설계, 구현, 테스트 준비까지 커버하는 최
 
 ### 4.2 Tier B: Recommended Phase 1 Banking Source Domains
 
-Prototype 이후 `Canada Big 5` 확장을 고려하면 같이 허용해 둘 만한 은행 공식 도메인이다.
+아래는 기존 캐나다 은행 출처 예시다. 모든 작업에서 이 도메인을 필요로 하지는 않는다.
 
 | Domain | Why It Is Needed | Basis |
 |---|---|---|

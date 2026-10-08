@@ -4,13 +4,8 @@ Version: 1.0
 Date: 2026-04-05
 Status: Approved Baseline for WBS 1.6.1-1.6.7
 Source Documents:
-- `docs/02-requirements/FPDS_Requirements_Definition_v1_5.md`
-- `docs/01-planning/WBS.md`
-- `docs/03-design/system-context-diagram.md`
-- `docs/03-design/environment-separation-strategy.md`
 - `docs/03-design/api-interface-contracts.md`
 - `docs/03-design/review-run-publish-audit-state-design.md`
-- `docs/03-design/source-snapshot-evidence-storage-strategy.md`
 - `docs/00-governance/decision-log.md`
 
 ---
@@ -22,10 +17,9 @@ Source Documents:
 목적:
 - admin auth, RBAC, external API auth, CORS, crawler safe fetch, session/CSRF/security header, secret rotation 기준을 하나의 baseline으로 고정한다.
 - `public/admin/API/worker/storage/BX-PF` 경계가 같은 trust model을 참조하도록 만든다.
-- Gate A 이전에 닫아야 하는 security/access open item을 문서 기준으로 종료한다.
 
 이 문서는 구현 지시서가 아니라 설계 baseline이다.
-구현은 `Gate A = Pass + Product Owner explicit approval` 이후에만 시작한다.
+Post-MVP work follows the current Product Owner request and the development guide.
 
 ---
 

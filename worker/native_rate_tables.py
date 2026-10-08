@@ -4,7 +4,7 @@ import re
 from bs4 import BeautifulSoup
 
 _HEADER = re.compile(r"^(?:(?:Annual|Fixed|Variable|Minimum|Interest)\s+)*(?:%\s*)?(?:rate|yield)s?\s*(?:\(%\)|%)?$|^AP[RY]\s*(?:\(%\)|%)?$", re.I)
-_TERM = re.compile(r"^\d+(?:\s*[-–]\s*\d+)?\s*[- ]?\s*(?:days?|months?|years?)$", re.I)
+_TERM = re.compile(r"^\d+(?:\.\d+)?(?:\s*[-–]\s*\d+)?\s*[- ]?\s*(?:days?|months?|years?)$", re.I)
 _NUMBER = re.compile(r"^\d+(?:\.\d+)?%?$" )
 
 def rate_schedules(quote, *, annual_only=False):
@@ -17,9 +17,9 @@ def rate_schedules(quote, *, annual_only=False):
     found=[]
     for i in range(len(lines)-2):
         payment_columns = lines[i+1:i+4] == ["Annual (%)", "Semi Annual (%)", "Monthly (%)"]
-        if lines[i].casefold()!='term' or (not payment_columns and (not _HEADER.fullmatch(lines[i+1]) or '%' not in lines[i+1])):
+        if lines[i].casefold()!='term' or (not payment_columns and not _HEADER.fullmatch(lines[i+1])):
             continue
-        explicit_basis = bool(re.search(r'interest (?:is )?calculated per annum|interest rates? (?:is|are) annualized', str(quote), re.I))
+        explicit_basis = bool(re.search(r'interest (?:is )?calculated per annum|interest rates? (?:is|are) annualized|interest rates?[^.!?]{0,130} are annual interest rates', str(quote), re.I))
         if annual_only and (payment_columns and not explicit_basis or not payment_columns and not (re.search(r'\bannual\b|\bAP[RY]\b',lines[i+1],re.I) or explicit_basis)):
             continue
         rows=[];j=i+4 if payment_columns else i+2
@@ -28,6 +28,7 @@ def rate_schedules(quote, *, annual_only=False):
             if j+offset >= len(lines) or not _NUMBER.fullmatch(lines[j+offset]):return []
             if payment_columns and (j+3 >= len(lines) or not all(_NUMBER.fullmatch(v) and 0<=Decimal(v.removesuffix("%"))<100 for v in lines[j+1:j+4])):
                 return []
+            if not payment_columns and '%' not in lines[i+1] and not lines[j+offset].endswith('%'):return []
             number=Decimal(lines[j+offset].removesuffix('%'))
             if not number.is_finite() or not 0<=number<100:return []
             rows.append({'term_label':lines[j],'rate':float(number)});j+=4 if payment_columns else offset+1
