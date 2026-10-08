@@ -1,5 +1,29 @@
 # Admin pre-handover review and fixes
 
+## Admin Vercel pnpm bootstrap correction - 2026-10-08
+
+Status: Complete for local configuration correction; preserve all prior ownership.
+Scope: Correct Vercel package-manager bootstrap for the reported cold-clone
+lockfile failure; keep exact dependencies, frozen lockfile and application code.
+Acceptance:
+- [x] Install and build explicitly execute pnpm 10.33.0 without root Corepack discovery.
+- [x] Exact configured commands pass in an isolated app with no repository-root package.json;
+      verify lockfile preservation and final output.
+- [x] Update deploy/retry guidance and journal; pass task references/JSON/UTF-8/diff checks.
+Limits: no remote project/environment changes, push, deployment, DB or collection.
+
+Outcome: install/build now use npx --yes pnpm@10.33.0; packageManager and frozen
+lockfile remain intact. npx selected 10.33.0 and accepted the lockfile without
+root package.json. Windows cold npx import terminated with native exit
+-1073740791 (copy/concurrency overrides did not resolve it); the existing same-
+version pnpm executable completed offline installation. Exact configured npx
+frozen install and production build then passed in that prepared isolated tree.
+This is local warmed-install/build evidence, not a successful Vercel cold deploy.
+Foundation, task Markdown/JSON, UTF-8 and diff checks pass. Runtime source,
+financial contracts, dependencies and existing API/Public configs are unchanged.
+Next: commit/push corrected settings, remove unnecessary Corepack enablement,
+clear stale Dashboard command overrides and deploy the new commit on Vercel.
+
 ## FPDS Admin Vercel deployment preparation - 2026-10-08
 
 Status: Complete for local deployment preparation; actual hosting remains separate. Preserve all earlier goal ownership and unfinished work.

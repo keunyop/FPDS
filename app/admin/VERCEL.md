@@ -14,8 +14,8 @@ Admin 설정은 다음과 같다. `fpds-admin`은 제안 이름이며 실제 도
 | Framework Preset | Next.js |
 | Node.js Version | 24.x |
 | Package manager | `pnpm@10.33.0` (`package.json`) |
-| Install Command | `pnpm install --frozen-lockfile` |
-| Build Command | `pnpm run build` |
+| Install Command | `npx --yes pnpm@10.33.0 install --frozen-lockfile` |
+| Build Command | `npx --yes pnpm@10.33.0 run build` |
 | Output Directory | Next.js 기본값 |
 
 Admin의 [vercel.json](vercel.json)을 사용한다. 저장소 루트의 `vercel.json`은
@@ -41,11 +41,19 @@ Admin 프로젝트에는 아래 서버/빌드 환경변수를 등록한다.
 | Production | `FPDS_ADMIN_API_ORIGIN` | 기존 API 사용 시 `https://switchabank-api.vercel.app` |
 | Preview | `FPDS_ADMIN_API_ORIGIN` | 별도 Preview API의 고정 HTTPS origin |
 | Local | `FPDS_ADMIN_API_ORIGIN` | `http://localhost:4000` |
-| Production / Preview (build) | `ENABLE_EXPERIMENTAL_COREPACK` | `1` |
 
-[Vercel Corepack 설정](https://vercel.com/docs/builds/configure-a-build#corepack)에 따라
-빌드 환경의 Corepack을 활성화해 `packageManager`에 고정된 pnpm 버전을 사용한다.
-`package.json`의 `engines.node`도 24.x로 고정되어 있다.
+설치와 빌드가 `npx --yes pnpm@10.33.0`을 직접 실행한다. 저장소 루트에는
+`package.json`이 없으므로 Vercel의 루트 Corepack 자동 발견에 의존하지 않는다.
+`ENABLE_EXPERIMENTAL_COREPACK`은 필요하지 않으며 기존에 등록했다면 제거한다.
+Admin의 `packageManager`와 frozen lockfile은 그대로 유지하며 `engines.node`는 24.x다.
+[Vercel 사용자 지정 설치 명령](https://vercel.com/docs/builds/configure-a-build)을 따른다.
+
+2026-10-08 설치 실패 복구: 수정한 `app/admin/vercel.json`을 push한 뒤 새 commit을
+배포한다. Dashboard의 Install/Build Command에 기존 `pnpm ...` Override가 있으면
+저장소 설정을 사용하도록 Override를 해제하거나 위 명령으로 동일하게 맞춘다.
+Root Directory는 `app/admin`을 유지한다. 이전 실패 deployment를 같은 commit으로
+재시도하기보다 수정된 commit을 배포한다. 빌드 로그에서 pnpm 10.33.0 실행과 frozen
+install 성공을 확인한다. 잠금파일을 삭제하거나 frozen 검증을 해제하지 않는다.
 
 Preview API는 분리된 DB와 해당 환경의 session/CSRF secret을 사용한다.
 Preview에 Production API를 그대로 연결하면 로그인·국가 전환·운영 mutation이

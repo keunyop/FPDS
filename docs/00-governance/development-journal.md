@@ -1,5 +1,29 @@
 # FPDS Development Journal
 
+## 2026-10-08 - Admin Vercel pnpm bootstrap correction
+
+- User's main/f9c923c deployment log shows failed Corepack packageManager
+  discovery, incompatible pnpm lockfile and aborted frozen install. Admin has
+  pnpm@10.33.0 metadata and a v9 lockfile, but the repository root has no
+  package.json. The previous bare pnpm commands depended on platform selection.
+- app/admin/vercel.json now pins both install and build via
+  npx --yes pnpm@10.33.0. Admin README/VERCEL.md explain removing unnecessary
+  ENABLE_EXPERIMENTAL_COREPACK, matching/clearing Dashboard overrides and
+  deploying the newly pushed commit. Frozen validation and lockfile are retained.
+- Verification: npx selected 10.33.0 and accepted the frozen lockfile. Windows
+  cold package import terminated with native exit -1073740791, including a
+  bounded retry and copy/concurrency workaround; no Linux/Vercel success claimed.
+  Existing pnpm 10.33.0 completed offline installation of the same 447 packages.
+  Configured npx frozen install then passed in the prepared isolated tree and
+  configured npx build passed with Next 16.2.3, TypeScript and all routes.
+- Root metadata remained absent; source/isolated/HEAD lockfile bytes unchanged.
+  Foundation baseline, affected Markdown references/JSON, UTF-8/whitespace and
+  git diff --check pass. No runtime source/security/financial or dependency change;
+  no unrelated API/Public config change, commit/push, remote deployment, account,
+  DB or collection action. Previous goal ownership preserved. Next: user commits
+  and pushes the five task files, then deploys the new commit and checks live logs.
+
+
 ## 2026-10-08 - FPDS Admin Vercel deployment preparation
 
 - Prepared an independent Next.js project rooted at app/admin, Node 24 engines,

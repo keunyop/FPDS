@@ -139,7 +139,9 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 ## Vercel Deployment
 
 Use a separate Next.js Vercel project with Root Directory `app/admin`, Node 24
-and the package's frozen pnpm lockfile. The root Vercel project remains FastAPI.
+and the package's frozen pnpm lockfile. Install/build explicitly run
+`npx --yes pnpm@10.33.0`; no repository-root Corepack discovery is required.
+The root Vercel project remains FastAPI.
 See the [Admin Vercel deployment guide](VERCEL.md) for exact project/environment
 settings, Preview isolation, smoke checks, collection-host limits and rollback.
 
