@@ -1,5 +1,18 @@
 # Worker Boundary
 
+## Independent native identity and annual units - 2026-10-08
+
+Parser v18/process `2026-10-08-owned-source-identity-proof-v9` preserve independently
+proved current native identity, whitespace-only owned-name equality, exact named
+all-balance dated rows and their complete annual disclosure. Owned colon card-rate
+labels retain literal annual-unit notes without borrowing prices or conditions.
+Annual rate units remain distinct from actual interest payout choices; verified
+same-record monthly payment and calculation survive normalization. Other product
+panels, Plus variants, conditions, placeholders, currency conflicts and unresolved
+notes remain excluded. Failed best-effort renders retain already successful
+static evidence within unchanged budgets; actual access challenges fail closed.
+[Diagnosis, source regressions and separate publication/release results](../docs/00-governance/td-vancity-wealthone-generic-collection-corrections-2026-10-08.md).
+
 ## Referenced disclosures and normalization parity - 2026-10-07
 
 Parser v17/process `2026-10-07-referenced-disclosure-proof-v8` retain uniquely

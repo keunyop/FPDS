@@ -7,6 +7,10 @@ FEE_CHANGE_NOTICE_INSTRUCTIONS = (
 )
 
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    "Owned Interest: Purchases and Interest: Cash Advances labels keep their exact percentages and literal "
+    "page-wide Annual interest rates disclosure, including every captured effective-date statement. "
+    "The annual disclosure proves units only, never prices or removal of a condition. "
+
     "Named HTML Application Disclosure Statements bind only their explicitly named cards. Preserve the Standard Rates "
     "purchase/cash pair, separate promotional balance-transfer scope, complete default trigger/start/reset and Minimum Payment definition. "
     "A native named annual purchase/cash PDF row must retain its complete separate Required Payment "
@@ -71,6 +75,7 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 )
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "Annual interest rate units are independent of payment or compounding frequency. Preserve a same-record paid-monthly fact; actual multiple payout options remain distinct. "
     "A typographic reference needs one exact matching note explicitly covering the same product family and annual rate basis; "
     "retain the complete note and reject unresolved, competing or unrelated declarations. Percent units may be explicit in every "
     "rate cell. Keep decimal calendar terms and complete proven schedules unchanged through normalization; supplementary "
@@ -110,6 +115,12 @@ NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
 )
 
 COMPARISON_INSTRUCTIONS = (
+    "Configured optional targets limit research, not preservation of profile/registered optional facts proved in the same complete captured record. Preserve their typed values and origins without extra searches or calls. "
+    "A current independently proved native product identity is usable even if discovery supplied the same tentative "
+    "name with an identity mismatch. Scores alone remain insufficient. Normalize layout whitespace only, preserving "
+    "different names and Plus variants. Dated Accounts rows stating all balances need their own literal percent token "
+    "and the unique complete account-wide annual disclosure. Never borrow registered or tiered rates. "
+
     "Use complete product-owned financial declarations and explicit purchase columns as evidence units. "
     "Separate welcome offers, additional-card fees, cash-advance and default-rate columns from regular pricing; "
     "retain all conditions attached to the selected record and exceptions in family-wide rate declarations. "

@@ -930,6 +930,52 @@ class FetchPolicyTests(unittest.TestCase):
         self.assertEqual(response.headers["x-fpds-browser-fallback-error-type"], "RuntimeError")
         self.assertEqual(response.headers["x-fpds-browser-fallback-error"], "render timed out with details")
 
+    def test_exhausted_render_enhancement_preserves_direct_snapshot(self) -> None:
+        policy = DiscoveryFetchPolicy(
+            allowed_domains=("examplebank.ca",),
+            block_private_networks=False,
+            browser_fallback_domains=("examplebank.ca",),
+        )
+
+        class _DirectHeaders(dict):
+            def get_content_type(self):
+                return "text/html"
+
+        class _DirectPlaceholderResponse:
+            status = 200
+            headers = _DirectHeaders({"content-type": "text/html; charset=utf-8"})
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, traceback):
+                return False
+
+            def geturl(self):
+                return "https://www.examplebank.ca/investments/gic.html"
+
+            def read(self):
+                return b"<html>1 year RDS%rate[5].GIC.Published(1_year)(#O3#)%</html>"
+
+        class _FakeOpener:
+            def open(self, request, timeout):
+                del request, timeout
+                return _DirectPlaceholderResponse()
+
+        with (
+            patch("worker.discovery.fpds_discovery.fetch.urllib.request.build_opener", return_value=_FakeOpener()),
+            patch(
+                "worker.discovery.fpds_discovery.fetch._fetch_response_via_browser",
+                side_effect=NonRetryableFetchError("Bounded browser render allowance exhausted"),
+            ),
+        ):
+            response = fetch_response("https://www.examplebank.ca/investments/gic.html", policy)
+
+        self.assertEqual(response.content_type, "text/html")
+        self.assertEqual(response.headers["x-fpds-browser-fallback-attempted"], "true")
+        self.assertEqual(response.headers["x-fpds-browser-fallback-error-type"], "NonRetryableFetchError")
+        self.assertEqual(response.headers["x-fpds-browser-fallback-error"], "Bounded browser render allowance exhausted")
+
     def test_product_page_with_unresolved_datacode_rate_requests_browser_rendering(self) -> None:
         policy = DiscoveryFetchPolicy(
             allowed_domains=("examplebank.ca",),

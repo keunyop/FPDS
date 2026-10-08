@@ -128,6 +128,9 @@ def assess_captured_essentials(item: ExtractionInput, *, run_id: str) -> dict:
 
 
 def _link_relevance(*, product_type, url, label, missing):
+    # Prudential/capital disclosures do not state consumer product essentials.
+    if re.search(r"basel|pillar[+ _-]*3|capital[+ _-]+adequacy", f'{urlparse(url).path} {label}', re.I):
+        return 0
     if _source_scope_exclusion_reason(product_type=product_type, fingerprint=f'{url} {label}') == 'non_consumer_business_page':
         return 0
     if _has_excluded_link_signal(normalized_url=url, anchor_text=label):
@@ -162,6 +165,26 @@ def _has_required_dynamic_lead(html, missing):
     soup = BeautifulSoup(html, 'html.parser')
     for tag in soup(['script', 'style', 'nav', 'header', 'footer']):
         tag.decompose()
+    # Owned financial labels can point to a modal note absent from static HTML.
+    # Rendering acquires the note only; unchanged gates still prove every fact.
+    from worker.native_dom_ownership import unique_heading, owns_label, local_notes
+    root = soup.find('main') or soup.body or soup
+    heading = unique_heading(root)
+    required_labels = []
+    if 'monthly_fee' in missing: required_labels.append(r'monthly (?:account )?fee')
+    if any('transaction' in name for name in missing): required_labels.append(r'transactions? (?:included|per month)|included transactions|unlimited transactions|additional transactions?')
+    if any('rate' in name for name in missing): required_labels.append(r'interest(?::| rate)|purchase interest|annual percentage')
+    if heading is not None and required_labels:
+        owner = heading.get_text(' ', strip=True)
+        for ref in root.select('a[href^="#"]')[:512]:
+            if ref.find('sup') is None or ref.find_parent(['nav','aside']) is not None:
+                continue
+            for scope in [ref.parent, *list(ref.parents)[1:4]]:
+                if scope is root or len(scope.get_text()) > 1200:
+                    break
+                value = scope.get_text(' ', strip=True)
+                if any(re.search(label,value,re.I) for label in required_labels) and owns_label(scope,root,owner) and local_notes(soup,scope) is None:
+                    return True
     for node in list(soup.find_all(string=re.compile(r'\$\{|\{\{')))[:256]:
         tokens = re.findall(r'\$\{([^}]{1,256})\}|\{\{([^}]{1,256})\}\}', str(node))
         if not any(not re.search(r'\|\s*(?:link|image)\s*:|^(?:url|image|nomProduit|productName)', a or b, re.I) for a, b in tokens):
@@ -204,6 +227,12 @@ class EvidenceResearchPlanner:
 
     def plan(self, *, run_id, registry, inputs, captures, attempted_urls, parent_counts,
              remaining_sources=MAX_ADDITIONAL_PER_RUN, remaining_model_calls=MAX_PLANNER_CALLS_PER_RUN, attempted_actions=(), remaining_renders=MAX_RENDERS_PER_RUN):
+        # Match the same canonical URL identity enforced by SourceRegistry.
+        # A fragment/tracking/port variant must not create a second source or
+        # retry an already attempted capture. Preserve priced query identities.
+        from worker.discovery.fpds_discovery.url_utils import normalize_source_url
+        attempted_urls = {normalize_source_url(url) for url in attempted_urls}
+        attempted_urls.update(s.normalized_url for s in registry.sources)
         bound = _bind_grounding_evidence(inputs)
         pages = {page.source_document_id: page for page in captures}
         sources, diagnostics, calls, actions = {}, [], 0, []

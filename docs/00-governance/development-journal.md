@@ -1,5 +1,39 @@
 # FPDS Development Journal
 
+## 2026-10-08 - TD/Vancity/WealthONE shared correction and direct publication
+
+- Inspected seventeen latest ordinary Runs: TD 24 candidates/four approvals,
+  Vancity 37/one, WEALTHONE three/zero. Actual saved/current source evidence
+  showed canonical-URL research duplication, lost HTTP evidence on failed
+  enhancement, independently proved identity veto, native annual-label/row loss,
+  whitespace ownership mismatch and a rate-unit/payment-frequency confusion.
+- Shared acquisition, parser, extraction and normalization corrections preserve
+  exact units/currencies, owner/origin/condition boundaries and same-record
+  optional facts. Required absent modal notes request one existing-budget render;
+  prudential reports do not consume consumer essential research. No bank-specific
+  acceptance branch, weaker essential, manual review or permanent recovery feature.
+- Added six immutable compressed current official captures and multi-bank/type
+  success/boundary/failure regressions, including annual-note ownership and
+  unresolved references. Prompts, parser v18/process v9 and boundary/policy docs
+  are aligned. API 647 pass; final affected financial/parser/normalization tests
+  248 pass (including eleven new tests). Full Worker 881 has only two pre-existing
+  National/Oaken hash failures; all 23 affected source files/manifests equal HEAD.
+- Current direct collection without Admin API/provider calls yields seven normal
+  automatic passes: five TD cards, TD Unlimited and Vancity Jumpstart. WEALTHONE
+  remains excluded due contradictory tier evidence and unproven conditional
+  withdrawal access. First reservation was stopped before DB writes to preserve
+  verified monthly-payment information; retained history proves no canonical change.
+- Actual DB-selected origins matched seven automatic passes; rollback rehearsal
+  restored canonical/versions/refresh exactly. Normal promotion/public refresh
+  completed seven current approved versions: six Public additions and one TD
+  Unlimited update. All seven Public API/detail/site pages and 32 field links
+  verified; CA 114 to 120, US five and unrelated/history facts unchanged. No private
+  evidence exposure or review queue. Latest shared code also passes live-origin replay.
+- Configured targets no longer discard same-record proved profile optional facts.
+  References, delivery UTF-8/JSON/Python syntax and diff checks pass. Serving v8
+  remains separate from the local v9/v18 release; no runtime deployment.
+- [Diagnosis, shared corrections and verification](td-vancity-wealthone-generic-collection-corrections-2026-10-08.md).
+
 ## 2026-10-07 - Tangerine shared evidence correction and direct publication
 
 - Latest six retained Runs used process v7: 38 successful source items, fourteen
@@ -3944,3 +3978,16 @@ above describe their original period; they do not impose a current MVP stage.
   object-store writes, canonical changes, publication, runtime code or deployment.
   Next action if requested: reproduce generic evidence-binding/condition losses,
   add regressions, then run ordinary stored-origin automatic gates on current proof.
+
+## 2026-10-08 - Requested Admin run status check
+
+- Outcome at 09:11 America/Vancouver: batch collection__b-c3vanBXNiibbn has
+  four active lifecycle records: Vancity savings discovering; WealthONE GIC,
+  line-of-credit and savings queued behind it. No stopped run was demonstrated.
+- Verification: existing tmp/run-stall-check.py performed two read-only DB
+  snapshots; the matching catalog runner process was alive and its CPU increased
+  from 436.578125 to 437.6875 seconds. Vancity preparation last updated at 09:09:05;
+  API health returned HTTP 200 with process version referenced-disclosure-proof-v8.
+- No restart, duplicate collection, provider retry or canonical mutation.
+  tmp/run-stall-check.json is the private diagnostic receipt. Queued scopes remain
+  with the existing sequential runner; this check does not establish final results.

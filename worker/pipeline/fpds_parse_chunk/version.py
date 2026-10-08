@@ -1,4 +1,4 @@
 """Dependency-free parser identity shared with API acquisition planning."""
 
 PARSER_NAME = "fpds-parse-chunk"
-PARSER_VERSION = "fpds-parse-chunk-v17"
+PARSER_VERSION = "fpds-parse-chunk-v18"

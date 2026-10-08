@@ -234,8 +234,6 @@ def fetch_response(
                             },
                         }
                     )
-                except NonRetryableFetchError:
-                    raise
                 except Exception as exc:
                     fallback_error = re.sub(r"\s+", " ", str(exc)).strip()[:500]
                     if access_challenge_kind:

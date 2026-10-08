@@ -1,5 +1,33 @@
 # Product collection accuracy and automatic acceptance
 
+## Independent owned proof and annual units - 2026-10-08
+
+Parser v18/process `2026-10-08-owned-source-identity-proof-v9` accept independently
+proved current native H1/title/route/financial identity even when tentative
+discovery supplies the same unverified name. Every actual current source,
+snapshot, bank, country and language check remains. Owned label equality
+normalizes whitespace only; other panels and meaningful Plus variants stay distinct.
+
+Exact named `(all balances)` rows under dated `Accounts` rate headers require a
+literal percent and complete uniquely applicable annual/calculation disclosure.
+Tiers, qualification, competing annual notes, placeholders and unresolved local
+references cannot supply a scalar. Owned colon purchase/cash labels retain the
+complete literal page-wide annual-unit statements and their dates. Those notes
+supply units only, never prices or discarded conditions. Annual interest rate
+units do not count as annual payment options; actual multiple payouts remain
+separate. Same-record verified monthly payment and calculation are retained.
+
+Essential research shares SourceRegistry's normalized URL identity, including
+fragment/tracking/default-port handling and meaningful product queries. Missing
+owned required modal notes can request one existing-budget render; resolved,
+already attempted/rendered and optional-only cases cannot. Best-effort rendering
+failure retains only an already successful static response with diagnostics;
+actual access challenges still fail closed. Prudential/capital-adequacy reports
+do not supply consumer product essentials. Existing budgets, exact financial units,
+conditional transaction/access/security essentials and automatic origin/acceptance
+gates remain; no manual review or bank-specific acceptance exception is added.
+[Source-backed diagnosis and verified data/release limits](../00-governance/td-vancity-wealthone-generic-collection-corrections-2026-10-08.md).
+
 ## Referenced annual disclosures and normalization parity - 2026-10-07
 
 Parser v17/process `2026-10-07-referenced-disclosure-proof-v8` preserve an owned

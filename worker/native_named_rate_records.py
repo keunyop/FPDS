@@ -1,7 +1,7 @@
 """Named percent-header rate rows with explicit annual notes, never invented units."""
 import re
 from decimal import Decimal
-from worker.native_dom_ownership import local_notes, without_reference_markers
+from worker.native_dom_ownership import local_notes, owns_label, without_reference_markers
 
 CARD_HEADERS = ["Credit Cards", "Purchases Interest Rate [%]", "Cash Advances / Cheques Interest Rate [%]"]
 NUMBER = re.compile(r"^\d+(?:\.\d+)?$")
@@ -53,6 +53,14 @@ def balance_rate_value(quote):
     lines = _lines(quote)
     if len(lines) > 3 and lines[1] == lines[0]:
         lines = lines[1:]
+    if (len(lines) >= 7 and lines[1] == "Accounts" and re.fullmatch(r"Rates as of \d{4}[-\u2011]\d{2}[-\u2011]\d{2}", lines[2])
+            and lines[3] == lines[0] + " (all balances)" and re.fullmatch(r"\d+(?:\.\d+)?\s*%", lines[4]) and lines[5] == "NOTES"):
+        notes = " ".join(lines[6:])
+        if (not _annual(notes) or re.search(r"%|\b(?:if|when|provided|eligible|qualif\w*|first|introductory|promotional|bonus|tier|up to|minimum balance)\b", notes, re.I)
+                or re.search(r"linked|package|not offered|no longer|discontinued", lines[0], re.I)):
+            return None
+        value = Decimal(lines[4].replace("%", "").strip())
+        return value if 0 <= value < 100 else None
     if len(lines) >= 4 and lines[1] == "Annual rate" and re.fullmatch(r"\d+(?:\.\d+)?%", lines[2]):
         notes = " ".join(lines[3:])
         if (not re.search(r"savings account", lines[0], re.I) or re.search(r"linked|package|not offered|no longer|discontinued|promotional|eligible|qualif\w*", lines[0], re.I) or not re.fullmatch(
@@ -75,7 +83,7 @@ def named_rate_records(soup):
     root = soup.find("main") or soup.body or soup
     note_heads = [n for n in root.find_all(["p", "h2", "h3", "h4"]) if n.get_text(" ", strip=True).casefold() == "notes"]
     if len(note_heads) != 1:
-        return compact_annual_balance_records(soup)
+        return [*compact_annual_balance_records(soup), *dated_account_rate_records(soup)]
     head = note_heads[0]
     scope = head.find_next_sibling("ul")
     if scope is None:
@@ -85,7 +93,7 @@ def named_rate_records(soup):
         return []
     card_notes = [n for n in global_notes if not re.match(r"Our Prime Rate\b|(?:Registered )?trademark", n, re.I)]
     deposit_notes = [n for n in global_notes if not re.match(r"Foreign Currency Accounts:", n, re.I)]
-    output = compact_annual_balance_records(soup)
+    output = [*compact_annual_balance_records(soup), *dated_account_rate_records(soup)]
     for table in root.find_all("table")[:64]:
         if table.find("table") or table.select("[rowspan]"):
             continue
@@ -180,4 +188,53 @@ def compact_annual_balance_records(soup):
             if balance_rate_value(quote) is not None:
                 output.append(("named_balance_rate", owner, quote))
             break
+    return list(dict.fromkeys(output))
+
+
+def dated_account_rate_records(soup):
+    """Explicit named all-balance rows with a unique account-wide annual note.
+
+    Keep the literal owner, date header, percent token and complete disclosure.
+    This does not map tiers, registered variants or conditional promotional rows.
+    """
+    root = soup.find("main") or soup.body or soup
+    paragraphs = [p for p in root.find_all("p") if not p.find_parent(["table", "aside", "nav", "footer"])]
+    annual = [p for p in paragraphs if _annual(p.get_text(" ", strip=True))]
+    if len(annual) != 1:
+        return []
+    note = annual[0]
+    note_references = local_notes(soup, note)
+    if note_references is None:
+        return []
+    literal = " ".join(note.get_text(" ", strip=True).split())
+    if not re.search(r"Interest is calculated on the closing daily balance in an account and paid monthly", literal, re.I):
+        return []
+    following = note.find_next_sibling("p")
+    notes = [literal, *note_references]
+    if following is not None and re.match(r"Rates are subject to change", following.get_text(" ", strip=True), re.I):
+        notes.append(" ".join(following.get_text(" ", strip=True).split()))
+    output = []
+    for table in root.find_all("table")[:64]:
+        if table.find("table") or table.select("[rowspan], [colspan]"):
+            continue
+        rows = table.find_all("tr")
+        headers = [" ".join(c.get_text(" ", strip=True).split()) for c in rows[0].find_all(["th", "td"], recursive=False)] if rows else []
+        if len(headers) != 2 or headers[0] != "Accounts" or not re.fullmatch(r"Rates as of \d{4}[-\u2011]\d{2}[-\u2011]\d{2}", headers[1]):
+            continue
+        for row in rows[1:]:
+            cells = row.find_all(["th", "td"], recursive=False)
+            if len(cells) != 2:
+                continue
+            label, value = [" ".join(c.get_text(" ", strip=True).split()) for c in cells]
+            if not label.endswith(" (all balances)") or not re.fullmatch(r"\d+(?:\.\d+)?\s*%", value):
+                continue
+            owner = label.removesuffix(" (all balances)")
+            if not owns_label(note, root, owner):
+                continue
+            references = local_notes(soup, row)
+            if references is None:
+                continue
+            quote = "\n".join([owner, *headers, label, value, "NOTES", *notes, *references])
+            if len(quote) <= 6400 and balance_rate_value(quote) is not None:
+                output.append(("named_balance_rate", owner, quote))
     return list(dict.fromkeys(output))

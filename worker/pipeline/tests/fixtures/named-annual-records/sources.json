@@ -1,0 +1,582 @@
+[
+  {
+    "slug": "savings",
+    "url": "https://www.vancity.com/bank/accounts/jumpstart-high-interest",
+    "bank_code": "VANCITY",
+    "country_code": "CA",
+    "source_language": "en",
+    "sha256": "78d974c1d106914152bb4555c0e1af73c052d8b4cc8781f31a3c7950eee6c0ac",
+    "fixture": "savings.html.gz",
+    "source_metadata": {
+      "purpose": "The URL and label identify a specific high-interest savings account, likely its public product detail page.",
+      "priority": "P0",
+      "source_id": "AUTO-VANCITY-SAV-327a23f331",
+      "product_type": "savings",
+      "discovery_role": "detail",
+      "product_family": "deposit",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "monthly_fee",
+        "public_display_fee",
+        "minimum_balance",
+        "interest_rate_summary",
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "compounding_frequency",
+        "payout_option",
+        "tiered_rate_flag",
+        "tier_definition_text",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag",
+        "minimum_deposit",
+        "fee_waiver_condition"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "seed_source_flag": false,
+      "product_type_name": "Savings",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "discovery_metadata": {
+        "page_title": "Jumpstart™ High Interest Savings | No Monthly Fee - Vancity Back Button Search Icon Filter Icon",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "Jumpstart™ High Interest Savings",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.5,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "The URL and label identify a specific high-interest savings account, likely its public product detail page.",
+        "market_profile_key": "CA:savings",
+        "page_evidence_score": 3,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "low",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 10,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": false,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "structured_component_evidence",
+          "pricing_or_feature_signal",
+          "high_confidence_structured_product_route"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "structured_component_evidence",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "a82d6d34baa40f7134f1933120a7274f1c3edf1817abb07bdb8f0f9331762a83"
+      },
+      "normalized_source_url": "https://www.vancity.com/bank/accounts/jumpstart-high-interest",
+      "collection_field_policy": {},
+      "product_type_description": "Savings accounts collected for ongoing rate, monthly fee, and minimum balance.",
+      "official_domain_allowlist": [
+        "vancity.com"
+      ]
+    },
+    "captured_at": "2026-10-08T16:32:03.886550+00:00",
+    "capture_kind": "current_safe_fetch"
+  },
+  {
+    "slug": "savings-rates",
+    "url": "https://www.vancity.com/rates/accounts",
+    "bank_code": "VANCITY",
+    "country_code": "CA",
+    "source_language": "en",
+    "sha256": "7d4480912e39f02926b162a3194e3ae0ecaaecfced98ecacb19cca55244a4046",
+    "fixture": "savings-rates.html.gz",
+    "source_metadata": {
+      "purpose": "Vancity account rates supporting evidence",
+      "priority": "P0",
+      "source_id": "VANCITY-SAV-003",
+      "product_type": "savings",
+      "discovery_role": "supporting_html",
+      "product_family": "deposit",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "standard_rate",
+        "base_12_month_rate",
+        "public_display_rate",
+        "monthly_fee",
+        "public_display_fee",
+        "minimum_balance",
+        "interest_rate_summary",
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "compounding_frequency",
+        "payout_option",
+        "tiered_rate_flag",
+        "tier_definition_text",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag",
+        "minimum_deposit",
+        "fee_waiver_condition"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "seed_source_flag": false,
+      "product_type_name": "Savings",
+      "discovery_keywords": [
+        "savings account",
+        "interest savings account",
+        "high interest savings",
+        "daily interest savings",
+        "everyday savings account",
+        "personal savings",
+        "flex savings",
+        "easy access savings",
+        "interest on balance",
+        "savings"
+      ],
+      "discovery_metadata": {
+        "selection_path": "seed_supporting_hint",
+        "candidate_origin": "seed_supporting_hint",
+        "market_profile_key": "CA:savings",
+        "selection_confidence": "high",
+        "market_profile_version": "2026-10-01-v7",
+        "selection_reason_codes": [
+          "seed_hint_alignment",
+          "supporting_source_seed"
+        ],
+        "market_profile_resolution": "canada_baseline"
+      },
+      "normalized_source_url": "https://www.vancity.com/rates/accounts",
+      "collection_field_policy": {},
+      "product_type_description": "Savings accounts collected for ongoing rate, monthly fee, and minimum balance.",
+      "official_domain_allowlist": [
+        "vancity.com"
+      ]
+    },
+    "captured_at": "2026-10-08T16:32:19.890733+00:00",
+    "capture_kind": "current_safe_fetch"
+  },
+  {
+    "slug": "rewards-card",
+    "url": "https://www.td.com/ca/en/personal-banking/products/credit-cards/travel-rewards/rewards-visa-card",
+    "bank_code": "TD",
+    "country_code": "CA",
+    "source_language": "en",
+    "sha256": "c2c410378fdf97e3e7f95bea94732824f703f79cb065f4ad74ef59f60d730cfd",
+    "fixture": "rewards-card.html.gz",
+    "source_metadata": {
+      "purpose": "Named TD Rewards credit card with a product-specific URL.",
+      "priority": "P1",
+      "source_id": "AUTO-TD-CRE-e550cba74c",
+      "product_type": "credit-card",
+      "discovery_role": "detail",
+      "product_family": "lending",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "annual_fee",
+        "purchase_interest_rate"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "seed_source_flag": false,
+      "product_type_name": "Credit Card",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "discovery_metadata": {
+        "page_title": "TD Rewards Visa* Credit Card | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 10,
+        "primary_heading": "TD Rewards Visa* Card",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Named TD Rewards credit card with a product-specific URL.",
+        "market_profile_key": "CA:credit-card",
+        "page_evidence_score": 10,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 6,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "url_product_identity_signal",
+          "pricing_or_feature_signal"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "url_product_identity_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "12ab4542d9a68ca6d26e6b234e2c169950788798c5288b7b1b83c41b60683a8c"
+      },
+      "normalized_source_url": "https://www.td.com/ca/en/personal-banking/products/credit-cards/travel-rewards/rewards-visa-card",
+      "collection_field_policy": {},
+      "product_type_description": "Retail credit cards collected for annual fee and purchase interest rate.",
+      "official_domain_allowlist": [
+        "td.com"
+      ]
+    },
+    "captured_at": "2026-10-08T16:35:38.776644+00:00",
+    "capture_kind": "current_safe_fetch"
+  },
+  {
+    "slug": "cashback-card",
+    "url": "https://www.td.com/ca/en/personal-banking/products/credit-cards/cash-back/cash-back-visa-card",
+    "bank_code": "TD",
+    "country_code": "CA",
+    "source_language": "en",
+    "sha256": "71ba507d3443d07eaa2d9714761bb0f532b558800fce19f5ecd94ffb993d0ab1",
+    "fixture": "cashback-card.html.gz",
+    "source_metadata": {
+      "purpose": "Named cash-back credit card with a product-specific URL.",
+      "priority": "P1",
+      "source_id": "AUTO-TD-CRE-437579de66",
+      "product_type": "credit-card",
+      "discovery_role": "detail",
+      "product_family": "lending",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "annual_fee",
+        "purchase_interest_rate"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "seed_source_flag": false,
+      "product_type_name": "Credit Card",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "discovery_metadata": {
+        "page_title": "Apply for a TD Cash Back Visa* Card | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 10,
+        "primary_heading": "TD Cash Back Visa* Card",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 10.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Named cash-back credit card with a product-specific URL.",
+        "market_profile_key": "CA:credit-card",
+        "page_evidence_score": 10,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 8,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "url_product_identity_signal",
+          "pricing_or_feature_signal"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "url_product_identity_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "2b8fc865b8ebbaa0a71a865049b3afa232c9ef6671f462fb242cb7cf18412560"
+      },
+      "normalized_source_url": "https://www.td.com/ca/en/personal-banking/products/credit-cards/cash-back/cash-back-visa-card",
+      "collection_field_policy": {},
+      "product_type_description": "Retail credit cards collected for annual fee and purchase interest rate.",
+      "official_domain_allowlist": [
+        "td.com"
+      ]
+    },
+    "captured_at": "2026-10-08T16:35:28.980849+00:00",
+    "capture_kind": "current_safe_fetch"
+  },
+  {
+    "slug": "usd-card",
+    "url": "https://www.td.com/ca/en/personal-banking/products/credit-cards/us-dollar/us-dollar-visa-card",
+    "bank_code": "TD",
+    "country_code": "CA",
+    "source_language": "en",
+    "sha256": "28563b756463ebbd9092ca11ddba28c03cdf199ac2441fe1d21e66a9f2a03797",
+    "fixture": "usd-card.html.gz",
+    "source_metadata": {
+      "purpose": "Product-specific URL and label indicate TD's U.S. Dollar Visa credit card.",
+      "priority": "P1",
+      "source_id": "AUTO-TD-CRE-94b1075d32",
+      "product_type": "credit-card",
+      "discovery_role": "detail",
+      "product_family": "lending",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "annual_fee",
+        "purchase_interest_rate"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "seed_source_flag": false,
+      "product_type_name": "Credit Card",
+      "discovery_keywords": [
+        "credit cards",
+        "cash back",
+        "rewards",
+        "annual fee",
+        "purchase interest rate",
+        "balance transfer",
+        "travel rewards",
+        "low interest credit card",
+        "no fee credit card",
+        "student credit card"
+      ],
+      "discovery_metadata": {
+        "page_title": "Apply for a TD U.S. Dollar Visa* Card | TD Canada Trust",
+        "heading_match": true,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 8,
+        "primary_heading": "TD U.S. Dollar Visa* Card",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Product-specific URL and label indicate TD's U.S. Dollar Visa credit card.",
+        "market_profile_key": "CA:credit-card",
+        "page_evidence_score": 10,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "high",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 8,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "title_semantic_match",
+          "url_product_identity_signal",
+          "pricing_or_feature_signal"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "title_semantic_match",
+          "detail_page_layout_signal",
+          "url_product_identity_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "d5330c183847299e86f99a31216a58b5f9cb23e9710991b3b39765f9cc34bdb6"
+      },
+      "normalized_source_url": "https://www.td.com/ca/en/personal-banking/products/credit-cards/us-dollar/us-dollar-visa-card",
+      "collection_field_policy": {},
+      "product_type_description": "Retail credit cards collected for annual fee and purchase interest rate.",
+      "official_domain_allowlist": [
+        "td.com"
+      ]
+    },
+    "captured_at": "2026-10-08T16:35:36.382049+00:00",
+    "capture_kind": "current_safe_fetch"
+  },
+  {
+    "slug": "checking",
+    "url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/all-inclusive-banking-plan",
+    "bank_code": "TD",
+    "country_code": "CA",
+    "source_language": "en",
+    "sha256": "0f38e3180e2a6d67a7b7f05b5e7d21fd7ee90624e4223160a9c9b6c7483fa365",
+    "fixture": "checking.html.gz",
+    "source_metadata": {
+      "purpose": "Named all-inclusive banking plan in the chequing-account product section, likely describing account terms and features.",
+      "priority": "P0",
+      "source_id": "TD-CHQ-002",
+      "product_type": "chequing",
+      "discovery_role": "detail",
+      "product_family": "deposit",
+      "expected_fields": [
+        "product_name",
+        "currency",
+        "monthly_fee",
+        "public_display_fee",
+        "unlimited_transactions_flag",
+        "included_transactions",
+        "transaction_fee",
+        "additional_transaction_fee",
+        "minimum_balance",
+        "fee_waiver_condition",
+        "standard_rate",
+        "public_display_rate",
+        "interest_rate_summary",
+        "interest_calculation_method",
+        "interest_payment_frequency",
+        "compounding_frequency",
+        "payout_option",
+        "tiered_rate_flag",
+        "tier_definition_text",
+        "promotional_rate",
+        "promotional_period_text",
+        "introductory_rate_flag",
+        "minimum_deposit"
+      ],
+      "fallback_policy": "generic_ai_review",
+      "seed_source_flag": false,
+      "product_type_name": "Chequing",
+      "discovery_keywords": [
+        "chequing account",
+        "chequing",
+        "everyday banking",
+        "daily banking",
+        "transaction account",
+        "debit card",
+        "bill payments",
+        "e-transfer",
+        "overdraft",
+        "no monthly fee",
+        "unlimited transactions"
+      ],
+      "discovery_metadata": {
+        "page_title": "Open the TD All-Inclusive Bank Account Plan Online | TD Canada Trust",
+        "heading_match": false,
+        "ai_unavailable": false,
+        "selection_path": "seed_hint_plus_ai_plus_page_evidence",
+        "ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "heuristic_score": 4,
+        "primary_heading": "TD All-Inclusive Banking Plan",
+        "candidate_origin": "seed_detail_hint",
+        "ai_parallel_score": 9.0,
+        "ai_predicted_role": "detail",
+        "ai_confidence_band": "high",
+        "ai_short_rationale": "Named all-inclusive banking plan in the chequing-account product section, likely describing account terms and features.",
+        "market_profile_key": "CA:chequing",
+        "page_evidence_score": 4,
+        "raw_ai_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment"
+        ],
+        "selection_confidence": "medium",
+        "negative_signal_count": 0,
+        "attribute_signal_count": 11,
+        "market_profile_version": "2026-10-01-v7",
+        "product_identity_match": true,
+        "selection_reason_codes": [
+          "product_type_semantic_match",
+          "detail_page_layout_signal",
+          "pricing_or_feature_signal",
+          "seed_hint_alignment",
+          "product_identity_signal",
+          "url_product_identity_signal"
+        ],
+        "market_profile_resolution": "canada_baseline",
+        "page_evidence_reason_codes": [
+          "product_identity_signal",
+          "url_product_identity_signal",
+          "product_type_semantic_match",
+          "pricing_or_feature_signal"
+        ],
+        "captured_content_fingerprint": "70f70f563aebcf98ea7c3e2e614303c97a88fe50bbe8045e4de843f23f44d0d9"
+      },
+      "normalized_source_url": "https://www.td.com/ca/en/personal-banking/products/bank-accounts/chequing-accounts/all-inclusive-banking-plan",
+      "collection_field_policy": {},
+      "product_type_description": "Chequing accounts collected for monthly fee, minimum balance, and included or unlimited transactions.",
+      "official_domain_allowlist": [
+        "td.com"
+      ]
+    },
+    "captured_at": "2026-10-08T16:35:53.656831+00:00",
+    "capture_kind": "current_safe_fetch"
+  }
+]

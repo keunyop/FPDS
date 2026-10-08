@@ -1,5 +1,32 @@
 # Admin pre-handover review and fixes
 
+## TD, Vancity and WealthONE direct diagnosis and publication - 2026-10-08
+
+Status: Complete for shared code, current data publication and Public readback. Preserve every prior ownership and unrelated change.
+Scope: latest retained Runs and official direct collection without Admin collection API;
+generic demonstrated fixes; ordinary automatic gates and publication in existing DB.
+Acceptance:
+- [x] Account for targets, outcomes and first evidence divergences.
+- [x] Add source-backed multi-bank/type success/boundary/failure regressions; fix
+      shared paths and align instructions/versions; run affected suites.
+- [x] Publish current proven facts through normal gates and stored origins;
+      rehearse rollback, preserve history/unrelated data, verify Public readback.
+- [x] Complete report/journal and final diff/goal checks.
+Limits: no weaker essentials/manual review, paid retry loops, permanent recovery
+feature, unrelated countries/types or unrequested runtime deployment/restart.
+
+
+Outcome: latest seventeen Runs/64 candidates diagnosed; generic parser v18 /
+process v9 and profile optional-fact preservation verified. API 647 and final
+related 248 pass; full Worker 881 has only two unchanged HEAD fixture hash failures.
+Fourteen bounded one-off Runs: 58 candidates, seven approvals, 51 exclusions,
+zero review/provider/Admin collection API calls. Actual stored-origin and rollback
+checks passed; six products added to Public and TD Unlimited updated. All seven
+Public list/detail/site pages and 32 field links verified, CA 114 to 120, US five
+unchanged. Original history/unrelated data/private boundaries verified. Report,
+journal and reference/UTF-8/syntax/diff checks complete. Serving remains v8;
+no runtime deployment/restart or permanent recovery feature was added.
+
 ## PDF-based English Admin user manual - 2026-10-07
 
 Status: Complete for this documentation rewrite. Preserve prior goal ownership.

@@ -1,5 +1,17 @@
 # FPDS API Service
 
+## Canonical research identities and owned notes - 2026-10-08
+
+Process `2026-10-08-owned-source-identity-proof-v9` compares essential research
+URLs with SourceRegistry's canonical identities, preserving meaningful query
+variants and preventing fragment/tracking/default-port duplicates. Owned missing
+required modal notes may request one existing-budget render; optional-only,
+resolved and attempted actions do not. Prudential capital disclosures are not
+consumer product-essential leads. Successful static captures survive failed
+best-effort enhancement; access challenges still fail closed. Deploy API/Worker
+together; direct data publication and serving release remain separate.
+[Diagnosis, source regressions and publication verification](../../docs/00-governance/td-vancity-wealthone-generic-collection-corrections-2026-10-08.md).
+
 ## Essential research scope and native disclosure parity - 2026-10-07
 
 Process `2026-10-07-referenced-disclosure-proof-v8` excludes business-product

@@ -725,7 +725,8 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
     identity=_authoritative_discovery_product_title(context)
     url=_canonical_official_source_url(metadata.get("normalized_source_url") or metadata.get("source_url"))
     native_title = _captured_native_product_title(context, candidates)
-    native_identity_proven = bool(native_title and not identity)
+    profile = country_product_profile(country_code=context.country_code, product_type=_infer_product_type(context))
+    native_identity_proven = bool(native_title)
     identity = native_title or identity
     if (metadata.get("discovery_role") != "detail" or not identity
             or (discovery.get("product_identity_match") is not True and not native_identity_proven)
@@ -738,7 +739,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
     # Complete linked disclosures supersede flattened copies of the same
     # owned label, including when a condition makes their scalar unusable.
     linked_labels = {name for c in candidates
-        if c.anchor_type in {"labelled_financial_record", "unresolved_financial_reference"} and c.anchor_value == identity
+        if c.anchor_type in {"labelled_financial_record", "unresolved_financial_reference"} and _normalize_text(str(c.anchor_value or "")) == identity
         and c.source_document_id == context.source_document_id
         and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
         and c.bank_code == context.bank_code and c.country_code == context.country_code
@@ -746,7 +747,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
         for name, label in (("annual_fee", "Annual fee"), ("monthly_fee", "Monthly fee"))
         if re.search(r"(?mi)^" + label + r"\s*$", c.evidence_excerpt)}
     owned_prices = [c for c in candidates if c.anchor_type == "labelled_financial_record"
-        and c.anchor_value == identity and c.source_document_id == context.source_document_id
+        and _normalize_text(str(c.anchor_value or "")) == identity and c.source_document_id == context.source_document_id
         and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
         and c.bank_code == context.bank_code and c.country_code == context.country_code
         and c.source_language == context.source_language
@@ -800,11 +801,11 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             value = balance_rate_value(quote)
             if value is not None and names_match(c.anchor_value, identity):
                 values.update(standard_rate=float(value), interest_rate_summary=_normalize_text(quote))
-                calculation = re.search(r"Interest is calculated on the daily closing balance and is paid into your account monthly[.]", quote, re.I)
+                calculation = re.search(r"(?:Interest is calculated on the daily closing balance and is paid into your account monthly|Interest is calculated on the closing daily balance in an account and paid monthly)[.]", quote, re.I)
                 if calculation:
                     values["interest_calculation_method"] = calculation[0]
                     values["interest_payment_frequency"] = "monthly"
-        if own and c.anchor_type == "owned_account_assertion" and c.anchor_value == identity:
+        if own and c.anchor_type == "owned_account_assertion" and _normalize_text(str(c.anchor_value or "")) == identity:
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
             for currency, pattern in CURRENCY_PATTERNS.items():
                 if re.search(pattern, quote, re.I) and quote_supports_value("currency", currency, quote):
@@ -896,11 +897,11 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if excess: values['additional_transaction_fee']=float(excess[1])
             if quote_supports_value('unlimited_transactions_flag',True,quote): values['unlimited_transactions_flag']=True
             if _infer_product_type(context)=='gic' and quote_supports_value('non_redeemable_flag',True,quote): values['non_redeemable_flag']=True
-        if own and c.anchor_type == "labelled_financial_record" and c.anchor_value == identity:
+        if own and c.anchor_type == "labelled_financial_record" and _normalize_text(str(c.anchor_value or "")) == identity:
             for name, pattern in (("monthly_fee", r"(?mi)^Monthly fee\s*\n\$(\d+(?:\.\d+)?)"),
                                   ("annual_fee", r"(?mi)^Annual fee\s*\n(?:\(for primary cardholder and up to \d+ additional cards\)\s*\n)?\$(\d+(?:\.\d+)?)"),
-                                  ("purchase_interest_rate", r"(?mi)^(?:Interest rate on purchases|Purchase interest rate)\s*\n(\d+(?:\.\d+)?)%"),
-                                  ("cash_advance_rate", r"(?mi)^Interest rate on cash advances\s*\n(\d+(?:\.\d+)?)%")):
+                                  ("purchase_interest_rate", r"(?mi)^(?:Interest rate on purchases|Purchase interest rate|Interest: Purchases)\s*\n(\d+(?:\.\d+)?)%"),
+                                  ("cash_advance_rate", r"(?mi)^(?:Interest rate on cash advances|Interest: Cash Advances)\s*\n(\d+(?:\.\d+)?)%")):
                 m = re.search(pattern, quote)
                 if m:
                     values[name] = float(m[1])
@@ -1028,24 +1029,24 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 values["monthly_fee"] = 0.0
                 if quote_supports_value("minimum_balance", 0, quote): values["minimum_balance"] = 0.0
         rate_basis = None
-        if own and c.anchor_type == "owned_base_fee" and c.anchor_value == identity:
+        if own and c.anchor_type == "owned_base_fee" and _normalize_text(str(c.anchor_value or "")) == identity:
             if quote_supports_value("monthly_fee", 0, quote):
                 values["monthly_fee"] = 0.0
-        if own and c.anchor_type == "contract_rate_row" and c.anchor_value == identity and len(basis_records) == 1:
+        if own and c.anchor_type == "contract_rate_row" and _normalize_text(str(c.anchor_value or "")) == identity and len(basis_records) == 1:
             term = re.search(r"(?m)^Term\n(\d+ months?)$", quote)
             rate = re.search(r"(?m)^Rate\n(\d+(?:\.\d+)?)%$", quote)
             if term and rate:
                 values["term_length_text"] = term[1]
                 values["standard_rate"] = float(rate[1])
                 rate_basis = basis_records[0]
-        if own and c.anchor_type == "named_product_interest_terms" and c.anchor_value == identity and _infer_product_type(context) in {"savings", "chequing"}:
+        if own and c.anchor_type == "named_product_interest_terms" and _normalize_text(str(c.anchor_value or "")) == identity and _infer_product_type(context) in {"savings", "chequing"}:
             calculation = re.search(r"Interest is calculated daily and paid monthly on our Savings and Chequing Accounts[.]", quote, re.I)
             if calculation:
                 values["interest_calculation_method"] = calculation[0]
                 values["interest_payment_frequency"] = "monthly"
-        if companion and c.anchor_type == "named_product_interest_terms" and c.anchor_value == identity:
+        if companion and c.anchor_type == "named_product_interest_terms" and _normalize_text(str(c.anchor_value or "")) == identity:
             values["interest_calculation_method"] = _normalize_text(quote)
-        if own and c.anchor_type == "owned_withdrawal_terms" and _infer_product_type(context) == "gic" and c.anchor_value == identity:
+        if own and c.anchor_type == "owned_withdrawal_terms" and _infer_product_type(context) == "gic" and _normalize_text(str(c.anchor_value or "")) == identity:
             for name in ("redeemable_flag", "non_redeemable_flag"):
                 for value in (True, False):
                     if quote_supports_value(name, value, quote):
@@ -1103,8 +1104,9 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             field_quote = field_quotes.get(name, quote)
             # These registered optional facts are obtained from the SAME
             # complete record. They add no research, model call or target budget.
-            optional_same_record = (_infer_product_type(context) == "credit-card"
-                and name in {"cash_advance_rate", "purchase_interest_rate_summary", "eligibility_text"})
+            optional_same_record = (name in (profile.supplemental_fields if profile else ())
+                or (_infer_product_type(context) == "credit-card"
+                    and name in {"cash_advance_rate", "purchase_interest_rate_summary", "eligibility_text"}))
             if (name not in {*requested_fields, "currency"} and not optional_same_record) or not quote_supports_value(name,value,field_quote):
                 continue
             source_url=url if own else _canonical_official_source_url(c.retrieval_metadata.get('source_url'))

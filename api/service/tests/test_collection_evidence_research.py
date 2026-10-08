@@ -191,6 +191,42 @@ class EvidenceResearchTests(unittest.TestCase):
         self.assertEqual(result['sources'], [])
         self.assertEqual(result['diagnostics'][0]['stop_reason'], 'research_budget_exhausted')
 
+    def test_owned_missing_required_note_selects_one_bounded_render(self):
+        from api_service.collection_evidence_research import _has_required_dynamic_lead
+        html='<main><h1>Everyday Chequing Account</h1><p><b>Unlimited transactions<a href="#transaction-note"><sup>3</sup></a></b> No transaction fees.</p></main>'
+        result=self.plan(html=html)
+        self.assertEqual([a['kind'] for a in result['actions']],['render_html'])
+        self.assertEqual(result['sources'],[])
+        repeated=self.plan(html=html,attempted_actions=[result['actions'][0]['action_id']])
+        self.assertEqual(repeated['actions'],[])
+        self.assertFalse(_has_required_dynamic_lead(html,['minimum_balance']))
+        self.assertFalse(_has_required_dynamic_lead(html.replace('</main>','<p id="transaction-note">Transactions include debit purchases and withdrawals.</p></main>'),['unlimited_transactions_flag']))
+        self.assertFalse(_has_required_dynamic_lead(html.replace('<p><b>','<p data-product-name="Unrelated Savings Account"><b>'),['unlimited_transactions_flag']))
+        self.assertFalse(_has_required_dynamic_lead(html.replace('<main>','<nav>').replace('</main>','</nav>'),['unlimited_transactions_flag']))
+
+    def test_regulatory_and_capital_disclosures_are_not_product_essential_leads(self):
+        s=source(url='https://examplebank.com/ca/savings',product='savings',name='Example Savings')
+        html='<a href="/legal/basel-iii-pillar-3-disclosures">Basel III Pillar 3 Disclosures</a><a href="/capital-adequacy/interest-rates">Capital adequacy rates</a><a href="/account-terms-and-conditions">Account terms and conditions</a>'
+        result=self.plan(s,html=html)
+        self.assertEqual([x['url'] for x in result['sources']],['https://examplebank.com/account-terms-and-conditions'])
+
+    def test_registry_identity_variants_cannot_be_reacquired(self):
+        from worker.discovery.fpds_discovery.url_utils import normalize_source_url
+        detail = source(product='savings', name='Example Savings', url='https://examplebank.com/ca/savings')
+        rates = source(product='savings', name='Current rates', url='https://examplebank.com/rates#prime', source_id='rates', role='supporting_html')
+        rates = replace(rates, normalized_url=normalize_source_url(rates.url))
+        item, page = evidence(detail, html='<a href="https://EXAMPLEBANK.com:443/rates/?utm_source=menu#accounts">Current rates</a>')
+        result = EvidenceResearchPlanner().plan(run_id='run', registry=registry([detail, rates]),
+            inputs=[item], captures=[page], attempted_urls={detail.url, rates.url}, parent_counts={})
+        self.assertEqual(result['sources'], [], result['diagnostics'])
+        self.assertEqual(result['diagnostics'][0]['stop_reason'], 'no_unvisited_official_lead')
+        # Priced disclosure query identity remains distinct and collectible.
+        item, page = evidence(detail, html='<a href="/rates?productid=two">Current rates</a>')
+        distinct = replace(rates, url='https://examplebank.com/rates?productid=one', normalized_url='https://examplebank.com/rates?productid=one')
+        result = EvidenceResearchPlanner().plan(run_id='run', registry=registry([detail, distinct]),
+            inputs=[item], captures=[page], attempted_urls={detail.url, distinct.url}, parent_counts={})
+        self.assertEqual([x['url'] for x in result['sources']], ['https://examplebank.com/rates?productid=two'])
+
     def test_attempted_or_failed_url_is_not_requested_again(self):
         result = self.plan(attempted={source().url, 'https://examplebank.com/ca/account-fee-schedule'})
         self.assertEqual(result['sources'], [])

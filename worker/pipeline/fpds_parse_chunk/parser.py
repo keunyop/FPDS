@@ -235,7 +235,7 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
     if heading is None:
         return []
     identity = heading.get_text(" ", strip=True)
-    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Annual fee|Monthly fee)$", re.I)
+    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Interest: Purchases|Interest: Cash Advances|Annual fee|Monthly fee)$", re.I)
     basis = []
     for node in root.find_all(True):
         value = node.get_text(" ", strip=True)
@@ -244,6 +244,17 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                 and not re.search(r"%|\b(?:introductory|promotional|eligible|only|if)\b", value, re.I)):
             basis.append(value)
     basis = list(dict.fromkeys(basis))
+    # A literal page-wide annual-unit statement may be repeated with different
+    # effective dates. It proves units, never prices or a promotional condition.
+    general_basis = []
+    for node in (soup.body or soup).find_all("p"):
+        value = " ".join(node.get_text(" ", strip=True).split())
+        if (not node.find_parent(["nav", "aside", "table"]) and owns_label(node, soup.body or soup, identity) and re.fullmatch(
+                r"Annual interest rates, fees and features are current as of [A-Za-z]+ \d{1,2}, \d{4},? unless otherwise indicated and subject to change[.]", value)):
+            references = local_notes(soup, node)
+            if references is not None:
+                general_basis.append("\n".join([value, *references]))
+    general_basis = list(dict.fromkeys(general_basis))
     result, seen = [], set()
     for leaf in root.find_all(string=lambda t: t and labels.fullmatch(t.strip())):
         if not owns_label(leaf.parent, root, identity):
@@ -289,6 +300,8 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                     parts.append(scope)
                 if "interest" in leaf.lower() and len(basis) == 1:
                     parts.append(basis[0])
+                elif str(leaf).strip().casefold() in {"interest: purchases", "interest: cash advances"}:
+                    parts.extend(general_basis)
                 parts.extend(dict.fromkeys(refs))
                 record = _normalize_text("\n".join(parts))
                 if len(record) <= 6400 and record not in seen:

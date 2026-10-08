@@ -4341,7 +4341,8 @@ def _looks_like_wrong_frequency_context(*, field_name: str, value: str, context:
         "monthly": r"\bmonthly\b",
         "quarterly": r"\bquarterly\b",
         "semi-annually": r"\bsemi[- ]annually\b",
-        "annually": r"\bannually\b|\bannual interest\b",
+        # Annual rate units do not describe interest payment/compounding options.
+        "annually": r"\bannually\b|\bannual interest\b(?!\s+rates?\b)",
         "at_maturity": r"\bat maturity\b",
     }
     stated_options = {
