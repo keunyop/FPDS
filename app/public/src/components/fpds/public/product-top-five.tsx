@@ -1,3 +1,4 @@
+import { ProductMetricValue } from './product-metric-value';
 import { buildPublicProductMetrics, formatPublicCurrency, formatPublicRate } from "@/lib/public-product-presentation";
 import { publicFactCopy } from "@/lib/public-fact-copy";
 import { getComparablePublicRate } from "@/lib/public-rate";
@@ -13,6 +14,8 @@ import { buildPublicHref, type DashboardPageFilters } from "@/lib/public-query";
 
 export function ProductTopFive({
   controls,
+  browsing = false,
+  rankingNote,
   values,
   metric = "interest_rate",
   termLabel,
@@ -29,6 +32,8 @@ export function ProductTopFive({
   unavailableText
 }: {
   controls?: ReactNode;
+  browsing?: boolean;
+  rankingNote?: string;
   values?: Record<string, number>;
   metric?: "monthly_fee" | "interest_rate";
   termLabel?: string | null;
@@ -53,6 +58,7 @@ export function ProductTopFive({
   const iconClass = accent === "loan" ? "bg-loan/10 text-loan" : "bg-primary/10 text-primary";
   const metricClass = accent === "loan" ? "border-loan" : "border-primary";
   const rowClass = accent === "loan" ? "divide-loan/15" : "divide-primary/15";
+  const ProductList = browsing ? "ul" : "ol";
   const FamilyIcon = accent === "loan" ? Landmark : PiggyBank;
 
   return (
@@ -69,20 +75,20 @@ export function ProductTopFive({
         </div>
       </div>
       {controls}
-      <p className="px-4 py-3 text-xs leading-5 text-muted-foreground md:px-5">{metric === "monthly_fee" ? publicFactCopy(filters.locale).feeRanking : publicFactCopy(filters.locale).ranking}</p>
+      <p className="px-4 py-3 text-xs leading-5 text-muted-foreground md:px-5">{rankingNote ?? (metric === "monthly_fee" ? publicFactCopy(filters.locale).feeRanking : publicFactCopy(filters.locale).ranking)}</p>
       {unavailable ? (
         <div className="p-4 md:p-5">
           <EmptyPanel text={unavailableText} />
         </div>
       ) : products.length ? (
-        <ol className={`grid divide-y ${rowClass}`}>
+        <ProductList className={`grid divide-y ${rowClass}`}>
           {products.map((product, index) => {
             const value = values?.[product.product_id] ?? (metric === "monthly_fee" ? product.public_display_fee : getComparablePublicRate(product));
             const formattedValue = metric === "monthly_fee" ? formatPublicCurrency(value, product.currency, filters.locale) : formatPublicRate(value, filters.locale);
             const metricLabel = metric === "monthly_fee" ? copy.grid.metricMonthlyFee : copy.grid.metricDisplayRate;
             return (
               <li className="grid min-w-0 grid-cols-[1.25rem_auto_minmax(0,1fr)] items-center gap-x-3 px-4 py-4 sm:grid-cols-[1.25rem_auto_minmax(0,1fr)_auto_auto] md:px-5" key={product.product_id}>
-                <span className="text-sm font-semibold text-muted-foreground tabular-nums">{index + 1}</span>
+                <span className="text-sm font-semibold text-muted-foreground tabular-nums">{browsing ? "–" : index + 1}</span>
                 <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
                 <div className="min-w-0">
                   <TrackedProductLink
@@ -96,11 +102,11 @@ export function ProductTopFive({
                   <p className="truncate text-xs text-muted-foreground">{product.bank_name} · {product.product_type_label}</p>
                   <ProductVerification product={product} locale={filters.locale} />
                 </div>
-                <div className="col-start-3 mt-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-2 sm:col-start-4 sm:mt-0 sm:flex-nowrap">
-                  <span className={`border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={`${metricLabel} ${formattedValue}`}>
+                <div className="col-start-3 mt-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:col-span-full sm:col-start-3 sm:mt-2">
+                  <div className={`min-w-0 border-b-2 px-2 py-1 text-base font-semibold text-foreground tabular-nums ${metricClass}`} aria-label={browsing ? undefined : `${metricLabel} ${formattedValue}`}>
                     {metric === "monthly_fee" ? <span className="block text-xs font-normal text-muted-foreground">{metricLabel}</span> : null}
-                    {formattedValue}
-                  </span>
+                    {browsing ? <ProductMetricValue metric={buildPublicProductMetrics(product, filters.locale, "card")[0]} locale={filters.locale} /> : formattedValue}
+                  </div>
                   {product.product_url ? (
                     <TrackedOfficialBankLink
                       className="inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium text-primary hover:text-primary/80"
@@ -122,7 +128,7 @@ export function ProductTopFive({
               </li>
             );
           })}
-        </ol>
+        </ProductList>
       ) : (
         <div className="p-4 md:p-5">
           <EmptyPanel text={emptyText} />

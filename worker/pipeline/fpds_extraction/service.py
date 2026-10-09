@@ -476,7 +476,7 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                     and names_match(c.anchor_value, identity)]
                 named.extend(c for c in named_native if c not in named)
                 parents = metadata.get("parent_detail_urls") or [] if isinstance(metadata, dict) else []
-                named.extend(c for c in companion.candidates if c.anchor_type in {"financial_table_cell", "named_card_rate_table", "named_balance_rate"}
+                named.extend(c for c in companion.candidates if c.anchor_type in {"financial_table_cell", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
                     and own_url in {_canonical_official_source_url(urljoin(url, u)) for u in re.findall(r"(?m)^(?:https?://|/)[^\s]+$", c.evidence_excerpt)}
                     and c not in named)
                 if own_url in {_canonical_official_source_url(u) for u in parents}:
@@ -566,7 +566,20 @@ def _captured_native_product_title(context, candidates):
                 and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
                 and c.country_code == context.country_code and c.source_language == context.source_language
                 for c in candidates))
-        title_corroborates = (native_tokens <= (title_tokens | url_tokens) or
+        # A literal brand prefix can be corroborated by the verified official
+        # hostname, while the complete remaining product name must match the
+        # captured SEO title/route and have its own owned account price record.
+        host_labels = (urlsplit(url).hostname or "").removeprefix("www.").split(".")
+        brand_tokens = set()
+        words = re.findall(r"[a-z0-9]+", literal.casefold())
+        for count in range(1, min(4, len(words)) + 1):
+            if "".join(words[:count]) in host_labels[:-1]:
+                brand_tokens = route_tokens(" ".join(words[:count]))
+        product_tokens = native_tokens - brand_tokens
+        branded_account = (owned_account and brand_tokens and len(product_tokens) >= 2
+            and product_tokens <= (title_tokens | url_tokens)
+            and len((product_tokens - {"savings", "interest", "checking", "chequing"}) & url_tokens) >= 2)
+        title_corroborates = (branded_account or native_tokens <= (title_tokens | url_tokens) or
             (owned_account and native_tokens - {"daily", "everyday"} <= title_tokens
              and bool(native_tokens & url_tokens)))
         if (card_price and not family and route_identity and bool((route_identity - {"credit", "mastercard", "visa", "savings", "interest", "gic"}) & url_tokens) and len(native_tokens) >= 2 and len(literal.split()) <= 10
@@ -795,6 +808,15 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if pair and (names_match(c.anchor_value, identity) or linked):
                 values.update(purchase_interest_rate=float(pair[0]), cash_advance_rate=float(pair[1]),
                               purchase_interest_rate_summary=_normalize_text(quote))
+        if c.anchor_type == "named_deposit_apy" and _infer_product_type(context) == "savings":
+            from worker.native_apy_records import apy_value
+            from urllib.parse import urljoin
+            from worker.native_information_records import names_match
+            from worker.discovery.fpds_discovery.url_utils import normalize_source_url
+            linked = normalize_source_url(urljoin(c.retrieval_metadata.get("source_url", url), quote.splitlines()[-1])) == normalize_source_url(url)
+            apy = apy_value(quote)
+            if apy is not None and linked:
+                values.update(standard_rate=float(apy), interest_rate_summary=_normalize_text(quote))
         if c.anchor_type == "named_balance_rate" and _infer_product_type(context) == "savings":
             from worker.native_named_rate_records import balance_rate_value
             from worker.native_information_records import names_match
@@ -805,6 +827,14 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 if calculation:
                     values["interest_calculation_method"] = calculation[0]
                     values["interest_payment_frequency"] = "monthly"
+        if own and _normalize_text(str(c.anchor_value or "")) == identity:
+            if c.anchor_type == "owned_referenced_apy" and _infer_product_type(context) == "savings":
+                from worker.native_offer_records import referenced_apy_value
+                apy = referenced_apy_value(quote)
+                if apy is not None:
+                    values.update(standard_rate=float(apy), interest_rate_summary=_normalize_text(quote))
+            if c.anchor_type == "owned_card_apr_offer" and _infer_product_type(context) == "credit-card":
+                values["purchase_interest_rate_summary"] = _normalize_text(quote)
         if own and c.anchor_type == "owned_account_assertion" and _normalize_text(str(c.anchor_value or "")) == identity:
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
             for currency, pattern in CURRENCY_PATTERNS.items():
@@ -812,7 +842,10 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                     values["currency"] = currency
             if quote_supports_value("monthly_fee", 0, quote):
                 values["monthly_fee"] = 0.0
-            fee = re.search(r"Monthly Fee:\s*\$(\d+(?:\.\d+)?)", quote, re.I)
+            for name in ("minimum_deposit", "minimum_balance"):
+                if quote_supports_value(name, 0, quote):
+                    values[name] = 0.0
+            fee = re.search(r"Monthly (?:(?:account|maintenance) )?Fees?\s*[:\n]\s*\$(\d+(?:\.\d+)?)", quote, re.I)
             if fee:
                 values["monthly_fee"] = float(fee[1])
             counts = re.findall(r"(\d+) (?:debit )?transactions each month", quote, re.I)
@@ -5534,7 +5567,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"owned_account_assertion", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)

@@ -1,5 +1,31 @@
 # Admin pre-handover review and fixes
 
+## Admin deployed domain and persistent collection hosting - 2026-10-08
+
+Status: Complete for local configuration and hosting guidance; remote settings remain unapplied. Preserve all earlier ownership and unfinished work.
+Scope: Align applicable configuration with https://fpds-three.vercel.app;
+inspect hosted connectivity and document current API/Worker persistent hosting.
+Acceptance:
+- [x] Production Admin origin examples and deployment instructions use the actual domain.
+- [x] Inspect authorized hosted settings where credentials are available; record actual results and limits.
+- [x] Provide source-grounded server setup, dependencies, secrets, HTTPS, lifecycle and verification steps.
+- [x] Verify references, UTF-8, configuration consistency and git diff --check; journal and review final diff/goal.
+Limits: No new paid host, provider calls, collection, database/account writes,
+unrelated deployment or local collection restart. Keep local development origins.
+
+Outcome: production Admin web/allowlist examples use the actual domain; local dev
+origins remain intact. Login, proxied countries and existing API health return 200.
+Existing API CORS rejects the new Admin origin (400); no Vercel management
+credentials are available, so Dashboard changes/redeployment remain for the owner.
+Added source-grounded persistent API/Worker guide with two Python environments,
+uv/browser/AWS CLI dependencies, private evidence, systemd/HTTPS, safe switching
+and explicit interruption/no-automatic-resume limits. No runtime/data changes.
+Verification: affected Markdown references, strict UTF-8, config/source consistency
+and full git diff --check pass. Linux service setup and authenticated/collection
+smoke are documented, not executed. No application build needed for docs/config.
+Next: apply the two API Production Admin origin settings and redeploy that API;
+select/provision an approved always-on host, then follow the guide and switch Admin.
+
 ## Admin Vercel pnpm bootstrap correction - 2026-10-08
 
 Status: Complete for local configuration correction; preserve all prior ownership.
@@ -2078,3 +2104,62 @@ full workspace retains the unrelated developer-guide line-120 trailing space.
 Deployment: no API/Worker deployment or restart performed. Observed serving API
 is v6; original collection Runs used v7. Shared local v8 requires its normal
 runtime release separately; the nine-product Public data publication is complete.
+
+## Ally, American Express and Bank of America direct collection - 2026-10-08
+
+Status: Complete for local corrections and direct publication; preserve all previous ownership and unfinished work.
+Scope: latest ordinary Runs, independently collected official evidence without
+Admin API, demonstrated generic fixes and ordinary automatic publication in the
+existing shared development DB. No paid provider calls or runtime deployment.
+Acceptance:
+- [x] Account for latest targets, outcomes, current proof and first lost evidence.
+- [x] Reproduce and fix shared defects with source-backed cross-product/bank
+      success, boundary and failure regressions; align gates/prompts/versions.
+- [x] Recheck identical current captures through stored-origin ordinary services,
+      rehearse rollback, publish proven facts and verify actual Public readback.
+- [x] Preserve unrelated/history/private data; journal, report, final diff/checks.
+Outcome: Four current products passed ordinary stored-origin gates and normal
+automatic promotion (Ally Savings, Amex HYSA, two BOAN Travel Rewards cards).
+Public US 5->9; CA 120 and original history/unrelated data are preserved. Ten
+direct Runs/23 candidates: four approved, nineteen excluded, zero manual reviews
+or paid/provider/Admin collection API calls. Rollback rehearsal and live API/site
+readback pass with nineteen current field-evidence checks. Local parser v19/process
+v10; serving remains v9, with no runtime deployment/restart performed. Final API
+647 and affected Worker 38 plus three decoder/planner tests pass; full Worker
+910 retains only two existing National/Oaken fixture-hash failures. Foundation,
+task references/encoding/syntax/fixture hashes and git diff checks pass; global
+repo-doctor has an unrelated ignored-clone broken link. See the dated US report.
+
+## SwitchaBank customer presentation and blog - 2026-10-08
+
+Status: Complete for local Public code/content; serving deployment is separate. Preserve all earlier ownership and unfinished work.
+Scope: Public detail/catalog readability, truthful compact lending rates, Home
+Deposit/Loan Top 5 diagnosis and correction, missing official bank logos, and
+one sourced Canadian comparison article with EN/KO/JA SEO integration.
+Acceptance:
+- [x] Detail optional information is readable and responsive; core facts remain prominent.
+- [x] Home shows eligible current products with financial comparison boundaries intact.
+- [x] Lending rates separate concise numeric/formula summaries from complete conditions.
+- [x] Missing published-bank logos use verified local official assets and provenance.
+- [x] Original sourced blog content has localized metadata, internal links and discovery.
+- [x] Relevant behavior tests, lint/typecheck/build and 390/768/1440 UI checks pass;
+      journal, final diff and acceptance review record actual limits.
+Limits: Preserve unrelated changes, approved financial facts and private evidence;
+no invented rates, weaker gates, paid collection, DB mutation or runtime deployment.
+Outcome: optional details use 16px/28px text and full-width rows; lending cards,
+comparison and detail show literal rates/ranges/formulas and term/amount tables
+with explicit APR plus original conditions. Long secondary facts use full width.
+Deposit live read confirms five rows. With no comparable full-rate loan group,
+Home shows five mortgage records (plus personal-loan/LOC choices) as an explicit
+alphabetic comparison list, preserving all numeric-ranking gates. Six official
+local logos cover all 26 banks in the 129-product CA/US public read. New sourced
+GIC article is authored in EN/KO/JA with twelve blog sitemap URLs.
+Verification: Public 107 tests, lint, isolated typecheck and final production build;
+45 baseline + 44 final surface/state/source/asset assertions, eight focused
+comparison/optional/loading/blog-handoff checks, three final width checks and
+six rendered-logo checks. Blog audit completed 80 UI/SEO/no-JavaScript checks;
+its last existing-article handoff timed out, then all three handoffs passed in
+isolation. Screenshots manually reviewed; foundation, UTF-8/JSON/Python/task
+references, existing article preservation and git diff --check pass.
+Limits: no runtime deployment, collection/provider call or canonical/DB write.
+Next: normal Public review/release. Earlier unrelated goal sections remain intact.

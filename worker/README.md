@@ -1,5 +1,18 @@
 # Worker Boundary
 
+## Accessible headings and qualified owned offers - 2026-10-08
+
+Parser v19/process `2026-10-08-accessible-qualified-source-proof-v10` share literal
+accessible heading identity with discovery and retain complete component/numeric
+notes, monthly maintenance costs, named current APYs and qualified card APR prose.
+Owned product audiences are separate from actual price-waiver conditions. Literal
+JSON pricing placeholders in data attributes and literal hydration-state headers
+trigger existing-budget essential rendering only. Encoded JSON/Transit maps are
+read with strict bounded decoding; scripts are never executed or used as facts.
+Conflicting/foreign origins, sibling products, unresolved notes, tiers, promotions
+and truncated qualifiers stay excluded; no bank-specific acceptance exception.
+[Diagnosis, regression evidence and publication/release verification](../docs/00-governance/us-three-bank-generic-collection-corrections-2026-10-08.md).
+
 ## Independent native identity and annual units - 2026-10-08
 
 Parser v18/process `2026-10-08-owned-source-identity-proof-v9` preserve independently

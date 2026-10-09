@@ -1,5 +1,41 @@
 # Product collection accuracy and automatic acceptance
 
+## Accessible identity and complete qualified offers - 2026-10-08
+
+Parser v19/process `2026-10-08-accessible-qualified-source-proof-v10` preserve unique
+literal accessible SVG titles within semantic headings only, requiring matching
+aria-labels when present. Hidden, decorative, conflicting or ambiguous SVG labels
+and empty headings cannot prove identity. Discovery and snapshot parsing share
+this contract. An exact native brand prefix can be corroborated by the verified
+official hostname only with the complete remaining SEO/route name and an owned
+account price record; metadata/confidence alone remains insufficient.
+
+Monthly maintenance fees retain monthly base-price meaning, their own local and
+table-wide notes, numeric references and actual heading conditions. Separate
+transaction conditions do not replace or qualify a different owned fee row.
+Audience words in an independently owned card-name line are distinct from price
+waiver/eligibility language; every actual condition after the price remains.
+
+A named APY component requires its observed exact detail link, literal percentage
+and one complete applicable annual-yield/no-minimum-to-earn disclosure. Component
+references and local qualifications stay intact. A referenced hero APY needs a
+unique complete literal numbered note naming its account family and current date.
+Tiers, bonuses, competing notes, missing references and qualified values cannot
+become an unqualified scalar. Full card intro/current-variable-range offers remain
+purchase_interest_rate_summary with every billing-cycle, transfer-window, fee
+and disclosure condition; zero promotions/range endpoints cannot become scalars.
+
+Bounded JSON label/value pricing placeholders in data attributes and literal
+hydration-state financial headers are acquisition leads only. Strict JSON and
+encoded JSON/Transit map decoding rejects duplicate/nonfinite/nonliteral input;
+calculator, graph and navigation branches cannot request rendering. These leads
+never supply values, annual units, executed code or URLs. Only missing essentials
+may use the unchanged per-detail/run render budget; attempted and optional-only
+cases cannot. Shared prompts, stored-origin gates and source regressions enforce
+the same rules. No manual review, ranking penalty for missing optional facts or
+bank-specific acceptance exception is added.
+[Diagnosis, regression evidence and publication/release verification](../00-governance/us-three-bank-generic-collection-corrections-2026-10-08.md).
+
 ## Independent owned proof and annual units - 2026-10-08
 
 Parser v18/process `2026-10-08-owned-source-identity-proof-v9` accept independently

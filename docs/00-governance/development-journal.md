@@ -1,5 +1,54 @@
 # FPDS Development Journal
 
+## 2026-10-08 - Deployed Admin domain and persistent collection host guidance
+
+- Production Admin web origin and explicit Admin allowlist examples now use
+  https://fpds-three.vercel.app; local dev/Preview and existing Public settings
+  are preserved. Updated Admin README/VERCEL.md and API README.
+- Read-only hosted smoke: login page, proxied countries and existing API health
+  return HTTP 200; existing API process is v9. New-origin CORS preflight returns
+  400 Disallowed CORS origin. Same-origin proxy retrieval still works.
+- No Vercel management token/CLI authentication is available. Remote environment
+  changes and redeployment were not performed; the guide gives the exact API
+  Production origin values and distinguishes API versus Admin redeployment.
+- api/service/PERSISTENT_HOST.md documents one persistent API/Worker server,
+  separate Python environments, required uv/browser/AWS CLI, approved DB/private
+  evidence, systemd/HTTPS and Admin target switching. Existing subprocess code
+  provides no durable restart/resume; drain before restart and preserve plans/logs.
+- Verification: affected Markdown references, UTF-8 and source/config consistency,
+  local-origin preservation and full git diff --check pass. First reference-check
+  attempt was blocked by PowerShell execution policy; process-only Bypass retry
+  ran the actual repository check successfully. No app behavior change/build.
+- Limits: no host provisioning, Linux service execution, authenticated/collection
+  smoke, data/provider/account writes, runtime restart, push or deployment.
+  Next: owner applies API Production settings/redeploy, selects an approved host
+  and follows documented setup before switching Admin's upstream API.
+
+## 2026-10-08 - US official product evidence corrections and publication
+
+- Diagnosed eleven latest Ally/Amex/BOAN Runs and twenty rejected candidates;
+  independently captured 51 official URLs without Admin collection API/providers.
+- Shared parser v19/process v10 preserve accessible identity, essential JSON
+  attribute/hydration-state render leads, owned maintenance fees/notes, exact
+  linked/referenced APYs and full qualified card offers. Audience names and
+  separate cash rewards cannot qualify regular fees. No bank-specific exception,
+  weaker essential, manual review or permanent recovery feature was added.
+- Key files: source_catalog.py, collection_evidence_research.py, dynamic_pricing.py,
+  pricing_state_leads.py, native APY/offer/account helpers, parse/extraction/accuracy
+  gates and prompts, immutable US fixtures and the dated US governance report.
+- Normal stored-origin verification, rollback rehearsal and automatic promotion
+  published four products (two Savings/two cards); nineteen candidates remain
+  excluded. Actual Public API/site readback and nineteen field-evidence checks
+  pass. US 5->9; CA 120, original history and unrelated financial data unchanged.
+- Verification: final API 647 tests and final affected Worker 38 plus three
+  decoder/planner tests pass. Full Worker 910 has only two existing National/Oaken
+  hash failures; all 27 relevant source/manifest files are unchanged from HEAD.
+  Foundation, task references, UTF-8/syntax/fixture hashes and git diff checks pass.
+  Global doctor retains an unrelated broken link in an ignored operational clone.
+- Runtime: no deployment or restart. Serving remains v9; local v10 API/Worker
+  changes require their coordinated runtime release. Product data publication is
+  complete independently; no paid calls or private evidence exposure.
+
 ## 2026-10-08 - Admin Vercel pnpm bootstrap correction
 
 - User's main/f9c923c deployment log shows failed Corepack packageManager
@@ -4047,3 +4096,48 @@ above describe their original period; they do not impose a current MVP stage.
 - No restart, duplicate collection, provider retry or canonical mutation.
   tmp/run-stall-check.json is the private diagnostic receipt. Queued scopes remain
   with the existing sequential runner; this check does not establish final results.
+
+
+## 2026-10-08 — SwitchaBank customer readability, loan discovery and GIC article
+
+- Outcome: detail optional facts now use 16px body/28px line height with full-width
+  rows. Lending cards, comparison and detail share literal range/formula and
+  term/amount rate presentation, retain explicit APR and complete original
+  conditions, and expand long secondary facts across the card. No extracted
+  display number is used for arithmetic or ranking. Conditions still contribute
+  to comparison difference highlighting when headline text is identical.
+- Home diagnosis: current Public API has CA 120 / US 9. The serving Deposit Top 5
+  already displays five Chequing products; none of seven CA loans has an eligible
+  scalar full rate. Local Home now uses an explicitly unranked, bank-name-ordered
+  Loans to compare fallback (up to five per type/currency) when no numeric group
+  exists. Required term/type/security and complete-snapshot checks remain.
+- Added unchanged official local assets for FAIRSTONE/FNBC/HAVENTREE and
+  AE/CNB/WAB with source URLs and SHA-256 provenance. All 26 currently published
+  bank codes have local assets; all six additions decode on actual detail pages.
+- Added the third original EN/KO/JA article, cashable-vs-non-cashable-gic-canada,
+  sourced to CIBC/RBC/TD/FCAC on October 8. Preserves the 29/30-day interest
+  boundary, prohibited early withdrawal, fictional CAD 300/350/50 arithmetic,
+  explicit assumptions and GIC catalog handoff. Topic-specific headings, social
+  preview, canonical/hreflang/BlogPosting and twelve localized blog sitemap URLs;
+  previous articles and their source dates remain unchanged.
+- Key files: Public product-detail/compare-workspace/metric-value/top-five UI;
+  public-rate-presentation.ts, public-loan-ranking.ts and regressions with seven
+  current public-only loan fixtures; bank-logo registry/assets/SOURCES;
+  public-blog-gic.ts, article registry/routes and blog-audit.py. Only affected
+  Public README, product-grid IA and blog policy were updated.
+- Verification: Public 107 tests, lint, isolated typecheck/final production build,
+  foundation baseline, task references/UTF-8/JSON/Python, original savings article
+  body preservation and git diff --check pass. Chrome EN/KO/JA at 390/768/1440:
+  45 baseline and 44 final surface/state/source/asset assertions, eight focused
+  comparison/optional/loading/catalog-handoff passes, three final long-term-width
+  checks and six rendered-logo passes. Screenshots manually inspected under
+  ignored tmp/switchabank-ui-20261008. Blog audit passed 80 checks including
+  metadata, twelve sitemap URLs, distinct PNGs and no-JavaScript reading; its
+  last existing savings article handoff timed out under combined runs, then all
+  three article handoffs passed in isolation with country lookup unavailable.
+  Temporary driver issues (hidden dock, full reload and optional-empty state)
+  were corrected to exercise actual visible links and source text content.
+- Limits/next: local code/content only. Browser writes/external calls were stubbed;
+  no collection/model call, DB/canonical write, runtime deployment or live content
+  publication. Existing serving processes and unrelated edits were preserved;
+  only task-created QA servers are stopped. Next is the normal Public release.

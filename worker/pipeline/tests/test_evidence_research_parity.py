@@ -32,17 +32,17 @@ from worker.pipeline.fpds_validation_routing.storage import ValidationRoutingSto
 FIXTURES = Path(__file__).parent/'fixtures/golden'
 
 
-def input_from_segments(*, bank, url, product, name, segments, role='detail', parent=None, ident='detail'):
+def input_from_segments(*, bank, url, product, name, segments, role='detail', parent=None, ident='detail', country='CA'):
     metadata = {'normalized_source_url': url, 'official_domain_allowlist': [url.split('/')[2].removeprefix('www.')],
         'product_type': product, 'product_family': 'card' if product == 'credit-card' else 'deposit',
         'discovery_role': role, 'expected_fields': [], 'discovery_metadata': {
             'primary_heading': name, 'page_title': name, 'product_identity_match': True,
             'parent_detail_url': parent, 'parent_detail_urls': [parent] if parent else []}}
     ctx = ExtractionDocumentContext('parsed-' + ident, 'doc-' + ident, 'snapshot-' + ident,
-        bank, 'CA', 'pdf' if url.endswith('.pdf') else 'html', 'en', metadata, ident)
+        bank, country, 'pdf' if url.endswith('.pdf') else 'html', 'en', metadata, ident)
     chunks = [EvidenceChunkCandidate(ident+'-'+str(i), ctx.parsed_document_id, i, segment.anchor_type,
         segment.anchor_value, segment.page_no, 'en', segment.text, {}, ctx.source_document_id,
-        ctx.snapshot_id, bank, 'CA', ctx.source_type) for i, segment in enumerate(segments)]
+        ctx.snapshot_id, bank, country, ctx.source_type) for i, segment in enumerate(segments)]
     return ExtractionInput(ctx, chunks)
 
 
@@ -70,7 +70,7 @@ def run_services(inputs, *, provider=False):
         from worker.pipeline.fpds_normalization.persistence import PsqlNormalizationRepository, NormalizationDatabaseConfig
         artifact = json.loads(build_object_store(ecfg).get_object_bytes(object_key=extraction.extracted_storage_key))
         lookup = NormalizationArtifactLookup(ctx.source_document_id, ctx.snapshot_id, ctx.parsed_document_id,
-            extraction.model_execution_id, extraction.extracted_storage_key, None, ctx.bank_code, 'CA',
+            extraction.model_execution_id, extraction.extracted_storage_key, None, ctx.bank_code, ctx.country_code,
             ctx.source_type, 'en', ctx.source_metadata, ctx.source_metadata['normalized_source_url'])
         item = _build_normalization_input(source_id=ctx.source_id, lookup=lookup, artifact=artifact)
         repo = PsqlNormalizationRepository(NormalizationDatabaseConfig('postgresql://fixture', 'public'))
@@ -95,7 +95,7 @@ def run_services(inputs, *, provider=False):
         evidence_links = [ValidationEvidenceLink(**row) for row in normalization.field_evidence_link_records]
         vi = ValidationInput(ctx.source_id, ctx.source_document_id, ctx.snapshot_id, ctx.parsed_document_id,
             record['candidate_id'], 'run', normalization.normalization_model_execution_id,
-            normalization.normalized_storage_key, None, ctx.bank_code, 'CA', ctx.source_type, 'en',
+            normalization.normalized_storage_key, None, ctx.bank_code, ctx.country_code, ctx.source_type, 'en',
             ctx.source_metadata, record, evidence_links, [])
         vcfg = ValidationRoutingStorageConfig('filesystem', 'test', 'validated', 'hot', filesystem_root=tmp)
         validation = ValidationRoutingService(storage_config=vcfg, object_store=build_object_store(vcfg)).validate_and_route_inputs(

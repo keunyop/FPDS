@@ -45,3 +45,27 @@ export function loanRankingGroups(products: PublicProduct[], country: string, lo
       || a.product_id.localeCompare(b.product_id)).slice(0, 5)
   }));
 }
+
+/** Browsing is separate from ranking: never manufacture a comparable rate. */
+export function loanBrowseGroups(products: PublicProduct[], country: string): LoanRankingGroup[] {
+  const currency = HOME_CURRENCIES[country];
+  if (!currency) return [];
+  return TYPES.flatMap(type => {
+    const items = [...new Map(products.filter(product => product.country_code === country
+      && product.currency === currency && product.product_type === type && hasRankingEssentials(product)
+      && product.rate && product.rate.kind !== 'unknown' && product.rate.source_text?.trim()
+      && (product.rate.kind !== 'absolute' || getComparablePublicRate(product) !== null))
+      .map(product => [product.product_id, product])).values()]
+      .sort((a, b) => (a.bank_name ?? '').localeCompare(b.bank_name ?? '', 'en')
+        || (a.product_name ?? '').localeCompare(b.product_name ?? '', 'en') || a.product_id.localeCompare(b.product_id))
+      .slice(0, 5);
+    return items.length ? [{ key: `${country}|${type}|browse`, label: items[0].product_type_label, currency, items, rates: {} }] : [];
+  });
+}
+export function loanBrowseCopy(locale: string) {
+  return ({
+    en: { title: 'Loans to compare', subtitle: 'Explore published rates and terms by loan type.', note: 'Up to five products, ordered by bank name. Rates depend on term, amount or eligibility; this is not a lowest-rate ranking.' },
+    ko: { title: '비교할 대출상품', subtitle: '대출 종류별 공개 금리와 조건을 확인하세요.', note: '은행 이름순으로 최대 5개 상품을 표시합니다. 금리는 기간·금액·자격에 따라 달라지며 최저금리 순위가 아닙니다.' },
+    ja: { title: '比較するローン商品', subtitle: 'ローンの種類ごとに公開金利と条件を確認できます。', note: '銀行名順に最大5商品を表示します。金利は期間・金額・対象条件によって異なり、最低金利のランキングではありません。' }
+  })[locale === 'ko' || locale === 'ja' ? locale : 'en'];
+}

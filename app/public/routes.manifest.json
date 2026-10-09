@@ -150,7 +150,8 @@
       "resource_key": "public_blog.article",
       "allowed_slugs": [
         "eq-bank-vs-tangerine-vs-td-savings",
-        "tangerine-vs-simplii-vs-cibc-chequing-fees"
+        "tangerine-vs-simplii-vs-cibc-chequing-fees",
+        "cashable-vs-non-cashable-gic-canada"
       ]
     }
   ]

@@ -138,6 +138,10 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 
 ## Vercel Deployment
 
+Current deployed Admin: https://fpds-three.vercel.app. Production API Admin
+origin settings must use that exact origin. Server hosting instructions are in
+the [persistent API/Worker guide](../../api/service/PERSISTENT_HOST.md).
+
 Use a separate Next.js Vercel project with Root Directory `app/admin`, Node 24
 and the package's frozen pnpm lockfile. Install/build explicitly run
 `npx --yes pnpm@10.33.0`; no repository-root Corepack discovery is required.

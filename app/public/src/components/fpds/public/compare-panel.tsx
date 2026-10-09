@@ -1,4 +1,6 @@
 "use client";
+import { ProductMetricValue } from './product-metric-value';
+import type { PublicProductMetric } from '@/lib/public-product-presentation';
 import { X } from 'lucide-react';
 import { ProductVerification } from '@/components/fpds/public/product-verification';
 import { BankLogo } from '@/components/fpds/public/bank-logo';
@@ -34,7 +36,7 @@ export function ComparePanel({
   const differingKeys = new Set(
     rowsByProduct[0]
       ?.filter((row) => {
-        const values = new Set(rowsByProduct.map((rows) => rows.find((candidate) => candidate.key === row.key)?.value ?? copy.common.notDisclosed));
+        const values = new Set(rowsByProduct.map((rows) => JSON.stringify(rows.find((candidate) => candidate.key === row.key) ?? { value: copy.common.notDisclosed })));
         return values.size > 1;
       })
       .map((row) => row.key) ?? []
@@ -67,7 +69,7 @@ export function ComparePanel({
             <ProductVerification product={product} locale={locale} />
             <dl className="mt-4 divide-y divide-border border-y border-border">
               {rowsByProduct[productIndex].map((row) => (
-                <CompareFact different={!boundary && differingKeys.has(row.key)} key={row.key} label={row.label} value={row.value} />
+                <CompareFact different={!boundary && differingKeys.has(row.key)} key={row.key} metric={row} locale={locale} />
               ))}
             </dl>
             <BankHandoffPanel product={product} locale={locale} compact />
@@ -79,11 +81,11 @@ export function ComparePanel({
   );
 }
 
-function CompareFact({ different, label, value }: { different: boolean; label: string; value: string }) {
+function CompareFact({ different, metric, locale }: { different: boolean; metric: PublicProductMetric; locale: string }) {
   return (
     <div className={cn("px-2 py-3", different && "bg-accent/45")}>
-      <dt className="text-[11px] font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-semibold text-foreground tabular-nums">{value}</dd>
+      <dt className="text-[11px] font-medium text-muted-foreground">{metric.label}</dt>
+      <dd className="mt-1 break-words text-sm font-semibold text-foreground tabular-nums"><ProductMetricValue metric={metric} locale={locale} /></dd>
     </div>
   );
 }
@@ -96,8 +98,7 @@ function buildCompareRows(product: PublicProduct, locale: string) {
     { key: "currency", label: comparisonCopy(locale).currency, value: product.currency || copy.common.notDisclosed },
     ...typeAware.map((metric) => ({
       key: `${product.product_type}:${metric.label}`,
-      label: metric.label,
-      value: metric.value
+      ...metric
     }))
   ];
 }

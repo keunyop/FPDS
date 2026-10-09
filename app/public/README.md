@@ -1,5 +1,28 @@
 # FPDS Public
 
+## Customer readability and loan browsing - 2026-10-08
+
+Detail optional facts use 16px body text, 28px line height and full-width rows.
+Lending cards, comparison and detail separate a compact rate/range/formula or
+term/amount table from a keyboard-accessible disclosure of the complete original
+conditions. Explicit APR units stay attached; extracted display spans never
+become comparison, sorting or calculator inputs. Unknown shapes retain their
+source disclosure without guessed numbers.
+
+Home retains eligible Deposit Top 5 and comparable full-rate Loan Top 5. When
+no loan rate ranking exists, the loan panel becomes **Loans to compare**, showing
+up to five eligible published products per exact type/home currency in bank-name
+order. It has no rank numbers or lowest-rate claim; essential term/type/security
+checks and snapshot completeness still apply. This is a presentation fallback,
+not publication or a relaxed financial ranking gate.
+
+Official local assets now cover the six newly observed missing CA/US bank marks;
+see `public/bank-logos/SOURCES.md`. The third EN/KO/JA blog article is
+`/blog/cashable-vs-non-cashable-gic-canada`, with four official sources,
+article-specific social artwork, a fictional CAD 10,000 example and GIC catalog
+handoff. The blog registry now generates twelve localized sitemap URLs.
+
+
 ## Home Top 5 by required comparison facts - 2026-10-04
 
 Deposit Top 5 now includes Chequing/Checking ordered by the verified base monthly

@@ -46,7 +46,8 @@ test('conditional essentials and source qualifications remain visible', () => {
     early_withdrawal_penalty: 'Early withdrawal costs 90 days of interest.'});
   assert.match(buildPublicProductMetrics(cashable, 'en', 'card')[2].value, /90 days of interest/);
   const range = product('personal-loan', {rate: {kind: 'range', comparable_rate: null, source_text: 'APR 5% to 10%, depending on credit.'}});
-  assert.equal(buildPublicProductMetrics(range, 'en', 'card')[0].value, range.rate!.source_text);
+  assert.equal(buildPublicProductMetrics(range, 'en', 'card')[0].value, '5% to 10%');
+  assert.equal(buildPublicProductMetrics(range, 'en', 'card')[0].details, range.rate!.source_text);
   const checking = product('chequing', {unlimited_transactions_flag: null, included_transactions: 0, additional_transaction_fee: 0});
   assert.match(buildPublicProductMetrics(checking, 'en')[1].value, /0 included/);
 });

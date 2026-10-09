@@ -1,4 +1,10 @@
 const LOCAL_BANK_LOGO_ASSETS: Record<string, string> = {
+  WAB: "/bank-logos/western-alliance.ico",
+  CNB: "/bank-logos/city-national.png",
+  AE: "/bank-logos/american-express.svg",
+  HAVENTREE: "/bank-logos/haventree.png",
+  FNBC: "/bank-logos/first-nations.png",
+  FAIRSTONE: "/bank-logos/fairstone.png",
   ALTERNA: "/bank-logos/alterna.svg",
   B2B: "/bank-logos/b2b.svg",
   EQBANK: "/bank-logos/eq-bank.svg",

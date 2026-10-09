@@ -1,5 +1,22 @@
 # FPDS Product Grid Information Architecture
 
+## Customer readability and honest loan discovery - 2026-10-08
+
+Lending metrics show the exact disclosed range, benchmark formula, explicitly
+paired rate/APR, or term/amount rows before the full original conditions in an
+accessible disclosure. The display parser supplies no numeric ranking field.
+Cards and comparison use the same rendering. Detail optional facts have 16px
+body text, 28px line height and full-width label/value rows; absent facts stay
+absent. Existing currency and required/optional contracts remain unchanged.
+
+When comparable full-rate loan groups are absent, Home shows **Loans to compare**
+with at most five products for the selected type/currency, ordered by bank name.
+The panel explicitly disclaims a lowest-rate ranking and omits rank numbers.
+Required comparison facts are still checked. When a numeric group exists, the
+ordinary Loan Top 5 remains. Deposit ranking is unchanged; the October 8 read
+confirmed five live Chequing records and no comparable full-rate loan group.
+This fallback is separate from financial ranking eligibility and publication.
+
 
 ## Required and optional facts on SwitchaBank - 2026-10-01
 

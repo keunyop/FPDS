@@ -1,6 +1,10 @@
 import type { PublicLocale } from './public-locale.ts';
 
 export const BLOG_POSTS = [{
+  slug: 'cashable-vs-non-cashable-gic-canada',
+  publishedAt: '2026-10-08', modifiedAt: '2026-10-08', sourcesCheckedAt: '2026-10-08',
+  country: 'CA', productType: 'gic', minutes: 6, issue: '03'
+}, {
   slug: 'tangerine-vs-simplii-vs-cibc-chequing-fees',
   publishedAt: '2026-10-05',
   modifiedAt: '2026-10-05',

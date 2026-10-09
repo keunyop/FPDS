@@ -1,5 +1,17 @@
 # FPDS API Service
 
+## Accessible discovery and essential template acquisition - 2026-10-08
+
+Process `2026-10-08-accessible-qualified-source-proof-v10` shares accessible SVG
+heading semantics with snapshot parsing: decorative/ambiguous SVG titles cannot
+become document titles or product identities. Bounded literal JSON label/value
+pricing placeholders in data attributes or literal hydration-state headers can
+request an existing-budget render for missing essentials. Bounded strict JSON and
+encoded JSON/Transit map decoding executes no scripts and supplies no facts. Keep canonical URL identities, all origin and financial gates
+and current research budgets. Release API/Worker together; data publication is
+separate from serving code deployment.
+[Diagnosis, regression evidence and publication/release verification](../../docs/00-governance/us-three-bank-generic-collection-corrections-2026-10-08.md).
+
 ## Canonical research identities and owned notes - 2026-10-08
 
 Process `2026-10-08-owned-source-identity-proof-v9` compares essential research
@@ -407,6 +419,10 @@ The catalog collection launcher still writes local plan/log files and starts a
 detached subprocess. Its completion is not guaranteed by a serverless web/API
 deployment. A persistent collection-capable API/Worker host or separately
 requested durable execution design is required for full hosted collection.
+Current Admin domain: https://fpds-three.vercel.app. Set the API production
+Admin web origin and explicit Admin allowlist to that origin; keep local dev
+origins. Follow the [persistent API/Worker host guide](PERSISTENT_HOST.md) for
+the current subprocess architecture, environment, HTTPS and lifecycle checks.
 
 ## Vercel API Deployment
 

@@ -6698,13 +6698,24 @@ class _PageSignalParser(HTMLParser):
         self._secondary_heading_groups: list[list[str]] = []
         self.body_chunks: list[str] = []
 
+    def feed(self, data: str) -> None:
+        # Use the same literal accessible-heading contract as snapshot parsing.
+        # SVG titles elsewhere never become document titles or product names.
+        if re.search(r"<h[1-6]\b[^>]*>[\s\S]{0,4096}?<svg\b", data, re.I):
+            from bs4 import BeautifulSoup
+            from worker.native_apy_records import preserve_accessible_headings
+            soup = BeautifulSoup(data, "html.parser")
+            preserve_accessible_headings(soup)
+            data = str(soup)
+        super().feed(data)
+
     @property
     def title_text(self) -> str:
         return _collapse_whitespace(" ".join(self._title_parts))
 
     @property
     def primary_heading(self) -> str:
-        return _collapse_whitespace(" ".join(self._h1_groups[0])) if self._h1_groups else ""
+        return next((_collapse_whitespace(" ".join(parts)) for parts in self._h1_groups if any(parts)), "")
 
     @property
     def secondary_headings(self) -> list[str]:
@@ -6740,6 +6751,8 @@ class _PageSignalParser(HTMLParser):
             return
         text = _collapse_whitespace(data)
         if not text:
+            return
+        if "svg" in self._tag_stack:
             return
         if "title" in self._tag_stack:
             self._title_parts.append(text)

@@ -1,0 +1,65 @@
+[
+  {
+    "fixture": "ally-savings.html.bin",
+    "url": "https://www.ally.com/bank/online-savings-account/",
+    "sha256": "566067aa843c4399f07a5106aceb1c96d71d43ec8d6857d879d6f117ea7d8e0b",
+    "capture_operation": "us-three-bank-direct-20261008",
+    "original_parse_error": null
+  },
+  {
+    "fixture": "ally-rates.html.bin",
+    "url": "https://www.ally.com/bank/savings-account-rates",
+    "sha256": "4eb6daa2b3b04a945997fc591fba621cd7ef0d6ee890b39488bcbf965082a826",
+    "capture_operation": "us-three-bank-direct-20261008",
+    "original_parse_error": null
+  },
+  {
+    "fixture": "amex-hysa.html.bin",
+    "url": "https://www.americanexpress.com/en-us/banking/online-savings/high-yield-savings-account/?inav=en_us_menu_banking_personal_banking_high_yield_savings_hysa",
+    "sha256": "2288d5793cce3a74ec87fd8e59796df9aaddc8202efb01d1b0a9f7730e996d07",
+    "capture_operation": "us-three-bank-direct-20261008",
+    "original_parse_error": "list index out of range"
+  },
+  {
+    "fixture": "amex-cd.html.bin",
+    "url": "https://www.americanexpress.com/en-us/banking/online-savings/cd-account/?inav=en_us_menu_banking_personal_banking_certificates_of_deposit_cd",
+    "sha256": "49d2013411c33916084971c61a9878b06867b86656000eadfa6f70ddece882ea",
+    "capture_operation": "us-three-bank-direct-20261008",
+    "original_parse_error": "list index out of range"
+  },
+  {
+    "fixture": "bofa-card.html.bin",
+    "url": "https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
+    "sha256": "7df7c1a34d543e9aea957726970e1b7bf0450acd0553f55227f7575f92c675dd",
+    "capture_operation": "us-three-bank-direct-20261008",
+    "original_parse_error": null
+  },
+  {
+    "fixture": "amex-hysa-rendered.html.bin",
+    "url": "https://www.americanexpress.com/en-us/banking/online-savings/high-yield-savings-account/?inav=en_us_menu_banking_personal_banking_high_yield_savings_hysa",
+    "sha256": "89085d46fe75c8ed2cfea0047346c5f015eb5702b4d721535ec7e8ce212d45eb",
+    "fetched_at": "2026-10-09T02:39:49.124448+00:00",
+    "fetch_method": "browser_html_fallback"
+  },
+  {
+    "fixture": "amex-cd-rendered.html.bin",
+    "url": "https://www.americanexpress.com/en-us/banking/online-savings/cd-account/?inav=en_us_menu_banking_personal_banking_certificates_of_deposit_cd",
+    "sha256": "ac26ed7c292668d6c8aa310ec5dc3ab8e0df0c9aef6c252e1624236e734c97b8",
+    "fetched_at": "2026-10-09T02:40:04.584600+00:00",
+    "fetch_method": "browser_html_fallback"
+  },
+  {
+    "fixture": "bofa-card-rendered.html.bin",
+    "url": "https://www.bankofamerica.com/credit-cards/products/travel-rewards-credit-card/",
+    "sha256": "d2d7c077130d1aad5b196cf9495e187ee8eaa285a4935e60b9b592782cee92ce",
+    "fetched_at": "2026-10-09T02:39:05.682541+00:00",
+    "fetch_method": "browser_html_fallback"
+  },
+  {
+    "fixture": "bofa-student-rendered.html.bin",
+    "url": "https://www.bankofamerica.com/credit-cards/products/student-rewards-credit-card/",
+    "sha256": "ade441a56ab6df62e9b09d0681171ef470df9f8228229cd25b8c94893df23dee",
+    "fetched_at": "2026-10-09T02:39:15.099934+00:00",
+    "fetch_method": "browser_html_fallback"
+  }
+]

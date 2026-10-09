@@ -5,7 +5,7 @@ from bs4 import Tag
 
 def unique_heading(root):
     headings = root.find_all("h1")
-    names = {" ".join(h.get_text(" ", strip=True).split()): h for h in headings}
+    names = {" ".join(h.get_text(" ", strip=True).split()): h for h in headings if h.get_text(" ", strip=True).strip()}
     return next(iter(names.values())) if len(names) == 1 else None
 
 

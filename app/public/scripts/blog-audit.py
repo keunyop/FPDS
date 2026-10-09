@@ -14,6 +14,12 @@ ORIGIN = os.environ.get('FPDS_UI_TEST_ORIGIN', 'http://localhost:3000').rstrip('
 assert urlparse(ORIGIN).hostname in {'localhost', '127.0.0.1', '::1'}
 PROD = 'https://www.switchabank.com'
 POSTS = {
+    'cashable-vs-non-cashable-gic-canada': {
+        'date': '2026-10-08', 'citations': 4,
+        'catalog': '/products?product_type=gic', 'tail': '',
+        'related': 'eq-bank-vs-tangerine-vs-td-savings',
+        'amounts': ['CAD 300', 'CAD 350', 'CAD 50'],
+    },
     'tangerine-vs-simplii-vs-cibc-chequing-fees': {
         'date': '2026-10-05', 'citations': 8,
         'catalog': '/products?product_type=chequing',
@@ -101,11 +107,11 @@ with sync_playwright() as pw:
                     assert page.locator('#worked-example').bounding_box()['y'] >= 64
                     page.locator('main h1').scroll_into_view_if_needed()
                 else:
-                    assert page.locator('main article').count() == 2
+                    assert page.locator('main article').count() == len(POSTS)
                     expect(page.locator('main article h3 a').first).to_have_attribute('href', '/blog/' + next(iter(POSTS)) + suffix)
                     graph = [json.loads(text) for text in page.locator('script[type="application/ld+json"]').all_text_contents()]
                     listing = next(node for node in graph if node.get('@type') == 'CollectionPage')
-                    assert len(listing['mainEntity']['itemListElement']) == 2
+                    assert len(listing['mainEntity']['itemListElement']) == len(POSTS)
                 if width < 1024:
                     menu = page.locator('header button[aria-haspopup=menu]:visible')
                     menu.click()
@@ -118,7 +124,7 @@ with sync_playwright() as pw:
                     assert page.get_by_role('banner').evaluate('(el) => el.scrollWidth <= innerWidth')
                 page.evaluate('window.scrollTo(0, 0)')
                 if locale == 'ko':
-                    name = 'index' if path == '/blog' else ('chequing' if 'chequing' in path else 'savings')
+                    name = 'index' if path == '/blog' else ('gic' if 'gic-canada' in path else 'chequing' if 'chequing' in path else 'savings')
                     page.screenshot(path=str(screens / (name + '-' + str(width) + '.png')), full_page=True)
                     if name == 'chequing' and width in [390, 1440]:
                         page.screenshot(path=str(screens / (name + '-hero-' + str(width) + '.png')))
@@ -137,7 +143,7 @@ with sync_playwright() as pw:
     for path in PATHS:
         response = context.request.get(ORIGIN + path + '?country_code=US&locale=ko', max_redirects=0)
         assert response.status == 308
-        product_type = 'chequing' if 'chequing' in path else 'savings'
+        product_type = 'gic' if 'gic-canada' in path else 'chequing' if 'chequing' in path else 'savings'
         assert response.headers['location'].endswith('/products?country_code=US&product_type=' + product_type + '&locale=ko')
         passed('country ' + path)
     previews = []
@@ -149,7 +155,7 @@ with sync_playwright() as pw:
         assert struct.unpack('>II', body[16:24]) == (1200, 630)
         previews.append(body)
         passed('social preview PNG ' + path)
-    assert len(set(previews)) == 3
+    assert len(set(previews)) == len(PATHS)
     sitemap = ET.fromstring(context.request.get(ORIGIN + '/sitemap.xml').text())
     ns = {'s': 'http://www.sitemaps.org/schemas/sitemap/0.9', 'x': 'http://www.w3.org/1999/xhtml'}
     entries = [entry for entry in sitemap.findall('s:url', ns) if '/blog' in entry.find('s:loc', ns).text]
@@ -158,9 +164,9 @@ with sync_playwright() as pw:
     for entry in entries:
         url = entry.find('s:loc', ns).text
         old = 'eq-bank-vs-tangerine-vs-td-savings' in url
-        assert entry.find('s:lastmod', ns).text == ('2026-09-30' if old else '2026-10-05')
+        assert entry.find('s:lastmod', ns).text == ('2026-09-30' if old else '2026-10-05' if 'chequing-fees' in url else '2026-10-08')
         assert len(entry.findall('x:link', ns)) == 4
-    passed('nine sitemap URLs, explicit dates and reciprocal alternates')
+    passed('twelve sitemap URLs, explicit dates and reciprocal alternates')
 
     plain = browser.new_context(java_script_enabled=False)
     plain.route('**/*', intercept)

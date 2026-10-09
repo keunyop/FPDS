@@ -21,7 +21,7 @@ export function DepositTopFive({ products, filters, unavailable }: { products: P
     controls={group ? <label className="grid min-w-0 gap-1.5 border-b border-border px-4 py-3 text-xs font-medium md:px-5">
       <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <span>{labels.scope}</span>
-        <span className="font-normal text-muted-foreground">{group.currency} · {group.basis}</span>
+        <span className="font-normal text-muted-foreground">{group.currency}{group.basis ? ` · ${group.basis}` : ""}</span>
       </span>
       <select aria-label={labels.scope} className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" value={group.key} onChange={event => setSelected(event.target.value)}>
         {groups.map(entry => <option key={entry.key} value={entry.key}>{entry.label}</option>)}

@@ -1,3 +1,5 @@
+import { ProductMetricValue } from './product-metric-value';
+import type { PublicProductMetric } from '@/lib/public-product-presentation';
 import { publicFactCopy } from "@/lib/public-fact-copy";
 import { BankHandoffPanel } from "@/components/fpds/public/bank-handoff-panel";
 import { BankHandoffDock } from "@/components/fpds/public/bank-handoff-dock";
@@ -37,10 +39,7 @@ type ProductDetailSurfaceProps = {
   otherBanksHref?: string | null;
 };
 
-type DetailFact = {
-  label: string;
-  value: string;
-};
+type DetailFact = PublicProductMetric;
 
 export function ProductDetailSurface({
   apiUnavailable,
@@ -162,16 +161,16 @@ export function ProductDetailSurface({
             </div>
           </div>
 
-          <h2 className="mt-7 text-sm font-semibold">{factCopy.core}</h2>
+          <h2 className="mt-7 text-lg font-semibold">{factCopy.core}</h2>
           <dl className={cn("mt-3 grid gap-px border border-border bg-border", metricCards.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3")}>
             {metricCards.map((metric, index) => (
-              <MetricTile highlight={index === 0} key={metric.label} label={metric.label} value={metric.value} />
+              <MetricTile highlight={index === 0} key={metric.label} metric={metric} locale={filters.locale} />
             ))}
           </dl>
           <BankHandoffPanel product={product} locale={filters.locale} compact />
         </section>
 
-        <section className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_23rem] lg:items-start">
+        <section className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
           <div className="grid gap-4">
             {termRateRows.length ? <TermRateTable currency={product.currency} locale={filters.locale} rows={termRateRows} /> : null}
             <section aria-labelledby="product-facts-title">
@@ -179,9 +178,9 @@ export function ProductDetailSurface({
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-verification">{designCopy.verified}</p>
                 <h2 id="product-facts-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{factCopy.additional}</h2>
               </div>
-              {detailFacts.length ? <dl className="grid sm:grid-cols-2">
-                {detailFacts.map((fact, index) => (
-                  <div className={cn("border-b border-border py-4", index % 2 === 0 ? "sm:pr-5" : "sm:pl-5")} key={fact.label}>
+              {detailFacts.length ? <dl className="grid">
+                {detailFacts.map((fact) => (
+                  <div className="border-b border-border py-5" key={fact.label}>
                     <Fact label={fact.label} value={fact.value} />
                   </div>
                 ))}
@@ -295,11 +294,12 @@ function relatedTitle(bankName: string, locale: string) {
   return "Related products from " + bankName;
 }
 
-function MetricTile({ highlight, label, value }: { highlight?: boolean; label: string; value: string }) {
+function MetricTile({ highlight, metric, locale }: { highlight?: boolean; metric: PublicProductMetric; locale: string }) {
+  const { label, value } = metric;
   return (
     <div className={cn("min-w-0 bg-card px-4 py-5 sm:px-5", highlight && "bg-verification-soft")}>
       <dt className={cn("text-xs font-semibold", highlight ? "text-verification" : "text-muted-foreground")}>{label}</dt>
-      <dd className={cn("mt-2 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums", value.length > 24 ? "text-lg leading-relaxed tracking-normal" : highlight ? "text-4xl" : "text-3xl")}>{value}</dd>
+      <dd className={cn("mt-2 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums", value.length > 24 ? "text-lg leading-relaxed tracking-normal" : highlight ? "text-4xl" : "text-3xl")}><ProductMetricValue metric={metric} locale={locale} /></dd>
     </div>
   );
 }
@@ -314,9 +314,9 @@ function Badge({ children, muted = false }: { children: string; muted?: boolean 
 
 function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div>
-      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-medium leading-6 text-foreground">{value}</dd>
+    <div className="grid gap-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:gap-6">
+      <dt className="text-sm font-semibold leading-7 text-muted-foreground">{label}</dt>
+      <dd className="break-words text-base leading-7 text-foreground">{value}</dd>
     </div>
   );
 }

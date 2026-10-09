@@ -156,8 +156,12 @@ def _link_relevance(*, product_type, url, label, missing):
 def _has_required_dynamic_lead(html, missing):
     """A dynamic financial value can fill an essential gap; login links cannot."""
     from bs4 import BeautifulSoup
-    from worker.dynamic_pricing import has_empty_dynamic_rate_slot
-    if any(re.search(r"rate|apr|apy", name, re.I) for name in missing) and has_empty_dynamic_rate_slot(html):
+    from worker.dynamic_pricing import has_empty_dynamic_rate_slot, has_literal_financial_template
+    from worker.pricing_state_leads import has_literal_state_rate_template
+    if any(re.search(r"rate|apr|apy", name, re.I) for name in missing) and (
+            has_empty_dynamic_rate_slot(html) or has_literal_state_rate_template(html)):
+        return True
+    if any("fee" in name for name in missing) and has_literal_financial_template(html, kind="fee"):
         return True
     hints = [pattern for key, pattern in _FIELD_HINTS.items() if any(key in name for name in missing)]
     if not hints:
@@ -171,7 +175,7 @@ def _has_required_dynamic_lead(html, missing):
     root = soup.find('main') or soup.body or soup
     heading = unique_heading(root)
     required_labels = []
-    if 'monthly_fee' in missing: required_labels.append(r'monthly (?:account )?fee')
+    if 'monthly_fee' in missing: required_labels.append(r'monthly (?:(?:account|maintenance) )?fee')
     if any('transaction' in name for name in missing): required_labels.append(r'transactions? (?:included|per month)|included transactions|unlimited transactions|additional transactions?')
     if any('rate' in name for name in missing): required_labels.append(r'interest(?::| rate)|purchase interest|annual percentage')
     if heading is not None and required_labels:

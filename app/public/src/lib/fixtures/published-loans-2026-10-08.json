@@ -1,0 +1,156 @@
+[
+  {
+    "product_id": "prod_KqDejRM7YA6PPcc7",
+    "bank_code": "BMO",
+    "bank_name": "BMO",
+    "product_name": "The Smart Fixed Mortgage",
+    "product_type": "mortgage",
+    "product_type_label": "Mortgage",
+    "product_family": "lending",
+    "country_code": "CA",
+    "currency": "CAD",
+    "rate": {
+      "kind": "conditional",
+      "comparable_rate": null,
+      "source_text": "5-year Smart fixed\n4.94%\n4.96% APR 6\n4.96%\n6"
+    },
+    "rate_type": "fixed",
+    "term_length_text": "5-year",
+    "secured_flag": null,
+    "security_requirement": null,
+    "collateral_text": null,
+    "product_url": "https://www.bmo.com/en-ca/main/personal/mortgages/special-offers/smart-fixed/"
+  },
+  {
+    "product_id": "prod_r3ZLaVQWp608iQac",
+    "bank_code": "FAIRSTONE",
+    "bank_name": "Fairstone Bank of Canada",
+    "product_name": "unsecured personal loans",
+    "product_type": "personal-loan",
+    "product_type_label": "Personal Loan",
+    "product_family": "lending",
+    "country_code": "CA",
+    "currency": "CAD",
+    "rate": {
+      "kind": "range",
+      "comparable_rate": null,
+      "source_text": "Interest Rates on unsecured personal loans range from 29.99%-34.99%, with a minimum loan term of 6 months and maximum term of 60 months. Your actual Annual Percentage Rate (APR) will vary based on province of residence and individual factors like the details of your credit report and loan amount."
+    },
+    "rate_type": null,
+    "term_length_text": "minimum loan term of 6 months and maximum term of 60 months",
+    "secured_flag": null,
+    "security_requirement": null,
+    "collateral_text": null,
+    "product_url": "https://www.fairstone.ca/en/loans/unsecured-loans"
+  },
+  {
+    "product_id": "prod_0EiD7hIF3RR5U4Fd",
+    "bank_code": "LAURENTIAN",
+    "bank_name": "Laurentian Bank of Canada",
+    "product_name": "FIXED-RATE MORTGAGE",
+    "product_type": "mortgage",
+    "product_type_label": "Mortgage",
+    "product_family": "lending",
+    "country_code": "CA",
+    "currency": "CAD",
+    "rate": {
+      "kind": "promotional",
+      "comparable_rate": null,
+      "source_text": "Fixed-rate mortgage.\nRates guaranteed for 120 days. Subject to credit approval. Certain conditions apply. Subject to change without notice.\nOpen (1 to 4 units)\nTerm\nFixed rate (%)\n6 months\nFixed rate (%)\n9.150\n1 year\nFixed rate (%)\n9.150\nConvertible (1 to 4 units)\nTerm\nFixed rate (%)\n6 months\nFixed rate (%)\n8.250\nClosed (1 to 4 units)\nTerm\nFixed rate (%)\n6 months\nFixed rate (%)\n7.840\n1 year\nFixed rate (%)\n5.640\n18 months\nFixed rate (%)\n5.640\n2 years\nFixed rate (%)\n5.940\n3 years\nFixed rate (%)\n6.090\n4 years\nFixed rate (%)\n6.190\n5 years\nFixed rate (%)\n6.290\nPromotional rate - 5 years\nFixed rate (%)\n5.190\n6 years\nFixed rate (%)\n6.690\n7 years\nFixed rate (%)\n6.690\n8 years\nFixed rate (%)\n7.140\n9 years\nFixed rate (%)\n7.140\n10 years\nFixed rate (%)\n7.140"
+    },
+    "rate_type": "fixed",
+    "term_length_text": "Closed: 6 months to 10 years Open: 6 months and 1 year",
+    "secured_flag": null,
+    "security_requirement": null,
+    "collateral_text": null,
+    "product_url": "https://www.laurentianbank.ca/en/personal/mortgages/fixed-rate"
+  },
+  {
+    "product_id": "prod_TRzFYIeqdMEX7n4b",
+    "bank_code": "LAURENTIAN",
+    "bank_name": "Laurentian Bank of Canada",
+    "product_name": "VARIABLE-RATE MORTGAGE",
+    "product_type": "mortgage",
+    "product_type_label": "Mortgage",
+    "product_family": "lending",
+    "country_code": "CA",
+    "currency": "CAD",
+    "rate": {
+      "kind": "reference",
+      "comparable_rate": null,
+      "source_text": "Variable-rate mortgage.\nRate adjustment factor guaranteed for 60 days. Subject to credit approval. Certain conditions apply. Subject to change without notice.\nType\nDetails\nConvertible closed term\nVariable rate (%)\nVariable-rate mortgage - 1 to 4 units\n1\n• Prime rate +0.00%\n• Can be converted at any time\n3\n• Variable payments\n3 years\n4.450\nThe APR for a $100,000 loan amortized over 25 years with a 3-year term is 4.45%. The APR assumes a prime rate of 4.45% (in effect as of June 30, 2026) + 0.00% applicable for the duration of the loan. The applicable interest rate will fluctuate with Laurentian Bank’s prime rate for the duration of the loan.\nConvertible at any time for a fixed-rate closed term equal to or greater than the remaining term."
+    },
+    "rate_type": "variable",
+    "term_length_text": "3 years",
+    "secured_flag": null,
+    "security_requirement": null,
+    "collateral_text": null,
+    "product_url": "https://www.laurentianbank.ca/en/personal/mortgages/variable-rate"
+  },
+  {
+    "product_id": "prod_H2H0zIU2jgks36-a",
+    "bank_code": "MANULIFE",
+    "bank_name": "Manulife Bank of Canada",
+    "product_name": "Lines of Credit – Loans",
+    "product_type": "line-of-credit",
+    "product_type_label": "Line of Credit",
+    "product_family": "lending",
+    "country_code": "CA",
+    "currency": "CAD",
+    "rate": {
+      "kind": "reference",
+      "comparable_rate": null,
+      "source_text": "Credit Limit Interest ALOC+ Quick $25,000 to $99,999 (Prime +1.50%) 5.95% ALOC+ Quick $100,000 to $249,999 (Prime +1.25%) 5.70% ALOC+ Quick $250,000 to $1,000,000 5.45% ALOC+ Max $1,000,000 and greater (Prime +0.50%) 4.95% 1 Interest is calculated on the closing daily balance and paid monthly. The applicable tier rate is paid on every dollar. All rates are annual rates unless otherwise stated and are subject to change without notice."
+    },
+    "rate_type": null,
+    "term_length_text": null,
+    "secured_flag": true,
+    "security_requirement": null,
+    "collateral_text": "Enjoy favorable interest rates by securing your line of credit with assets such as Manulife funds, GIAs, Manulife Bank deposit accounts and GICs, or life insurance with cash surrender value from approved carriers * .",
+    "product_url": "https://www.manulifebank.ca/personal-banking/loans/line-of-credit.html"
+  },
+  {
+    "product_id": "prod_6SxplEExzSou8jjE",
+    "bank_code": "MANULIFE",
+    "bank_name": "Manulife Bank of Canada",
+    "product_name": "Manulife Bank Select ®",
+    "product_type": "mortgage",
+    "product_type_label": "Mortgage",
+    "product_family": "lending",
+    "country_code": "CA",
+    "currency": "CAD",
+    "rate": {
+      "kind": "reference",
+      "comparable_rate": null,
+      "source_text": "Manulife Bank Select Variable-rate terms 5 APR (%) 1 5 Variable-rate interest is compounded monthly, not in advance. Variable Rates change with Manulife Bank Prime rate and is subject to change without notice. This variable rate is tied to the Manulife Bank Prime Rate. If that rate increases or decreases, your mortgage interest rate will increase or decrease with it. 1 APR is the effective, or total, interest rate you pay on your mortgage. It takes into account both the advertised interest rate and any fee you need to pay to set up the mortgage. 5-year closed (Manulife Bank prime + 0.00%) 4.45% 5-year open (Manulife Bank prime + 1.00%) 5.45% Fixed-rate terms 6 APR (%) 1 6 Fixed-rate interest is compounded semi-annually, not in advance. This fixed rate is a guaranteed interest rate that won’t change for the term of the mortgage. 1 APR is the effective, or total, interest rate you pay on your mortgage. It takes into account both the advertised interest rate and any fee you need to pay to set up the mortgage. 1-year closed 6.89% 2-year closed 6.34% 3-year closed 5.19% 4-year closed 5.49% 5-year closed 5.39% 7-year closed 6.35% 10-year closed 6.69%"
+    },
+    "rate_type": "fixed or variable interest rate",
+    "term_length_text": "5-year closed (Manulife Bank prime + 0.00%) 5-year open (Manulife Bank prime + 1.00%) 1-year closed 2-year closed 3-year closed 4-year closed 5-year closed 7-year closed 10-year closed",
+    "secured_flag": null,
+    "security_requirement": null,
+    "collateral_text": null,
+    "product_url": "https://www.manulifebank.ca/personal-banking/mortgages/manulife-select.html"
+  },
+  {
+    "product_id": "prod_jh96nmfVMnfNmlhQ",
+    "bank_code": "MANULIFE",
+    "bank_name": "Manulife Bank of Canada",
+    "product_name": "Manulife One",
+    "product_type": "mortgage",
+    "product_type_label": "Mortgage",
+    "product_family": "lending",
+    "country_code": "CA",
+    "currency": "CAD",
+    "rate": {
+      "kind": "reference",
+      "comparable_rate": null,
+      "source_text": "Manulife One Variable-rate sub-account terms 2 APR (%) 1 2 Variable-rate sub-account interest is compounded monthly, not in advance. Interest is calculated on the daily closing balance and posted to your account monthly. Variable Rates change with Manulife One Base Rate and is subject to change without notice. This variable rate is tied to the Manulife One Base Rate. If that rate increases or decreases, your mortgage or sub-account interest rate will increase or decrease with it. 1 APR is the effective, or total, interest rate you pay on your mortgage. It takes into account both the advertised interest rate and any fee you need to pay to set up the mortgage. 5-year open (Base Rate plus 0%) 4.95% Fixed-rate sub-account terms 3 APR (%) 1 3 Fixed-rate sub-account interest is compounded semi-annually, not in advance. Interest is calculated on the daily closing balance and posted to your account monthly. This fixed rate is a guaranteed interest rate that won’t change for the term of the mortgage or sub-account. 1 APR is the effective, or total, interest rate you pay on your mortgage. It takes into account both the advertised interest rate and any fee you need to pay to set up the mortgage. 1-year closed 6.89% 2-year closed 6.34% 3-year closed 5.19% 4-year closed 5.49% 5-year closed 5.39% 7-year closed 6.35% 10-year closed 6.69%"
+    },
+    "rate_type": "variable or fixed interest rate",
+    "term_length_text": "5-year open (Base Rate plus 0%) 1-year closed 2-year closed 3-year closed 4-year closed 5-year closed 7-year closed 10-year closed",
+    "secured_flag": null,
+    "security_requirement": null,
+    "collateral_text": null,
+    "product_url": "https://www.manulifebank.ca/personal-banking/mortgages/manulife-one.html"
+  }
+]

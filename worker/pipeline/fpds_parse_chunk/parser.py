@@ -42,6 +42,8 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     soup = BeautifulSoup(html, "html.parser")
     from worker.native_component_values import resolve_component_values
     resolved_component_values = resolve_component_values(soup, html)
+    from worker.native_apy_records import preserve_accessible_headings
+    preserve_accessible_headings(soup)
     for tag in soup(["script", "style", "noscript", "svg"]):
         tag.decompose()
     # Site navigation can be nested inside <main>. It is neither product
@@ -142,6 +144,10 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     from worker.native_owned_account_records import account_records
     from worker.native_named_rate_records import named_rate_records
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in [*account_records(soup), *named_rate_records(soup)])
+    from worker.native_apy_records import apy_records
+    sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in apy_records(soup))
+    from worker.native_offer_records import owned_offer_records
+    sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in owned_offer_records(soup))
     sections.extend(_rate_table_evidence_sections(soup))
     sections.extend(_linked_financial_table_cells(soup))
     full_text, segments = _finalize_segments(sections)
@@ -281,7 +287,7 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                     break
                 # A linked sibling product cannot inherit the page's main identity.
                 named = block.find_all(["h1", "h2", "h3"])
-                if named and any(h.get_text(" ", strip=True) != identity for h in named):
+                if named and any(h.get_text(" ", strip=True).casefold() not in {identity.casefold(), str(leaf).strip().casefold()} for h in named):
                     break
                 preceding = block.find_previous(["h1", "h2", "h3"])
                 scope = preceding.get_text(" ", strip=True) if preceding is not None else ""

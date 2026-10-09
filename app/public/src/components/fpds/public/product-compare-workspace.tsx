@@ -1,4 +1,5 @@
 "use client";
+import { ProductMetricValue } from "./product-metric-value";
 
 import { Check, ExternalLink, GitCompareArrows, LoaderCircle, Plus, RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -246,6 +247,7 @@ function ProductCompareListItem({
 }: ProductPresentationProps) {
   const copy = getPublicMessages(locale);
   const [primaryMetric, ...secondaryMetrics] = buildPublicProductMetrics(product, locale, "card");
+  const stackSecondary = secondaryMetrics.some(metric => metric.value.length > 100);
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
   return (
@@ -263,7 +265,7 @@ function ProductCompareListItem({
           <div className="min-w-0">
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
               <span className="truncate text-xs font-medium text-muted-foreground">{product.bank_name}</span>
-              <span className="whitespace-nowrap rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <span className="whitespace-nowrap rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                 {product.product_type_label} · {product.currency}
               </span>
             </div>
@@ -281,13 +283,13 @@ function ProductCompareListItem({
           product.product_family === "lending" ? "border-loan" : "border-primary",
           selected && "border-maple"
         )}>
-          <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{primaryMetric.label}</dt>
+          <dt className="text-xs font-semibold text-muted-foreground">{primaryMetric.label}</dt>
           <dd className={cn(
             "mt-1 max-w-64 break-words font-display text-xl font-semibold leading-tight tracking-[-0.03em] text-primary tabular-nums",
             product.product_family === "lending" && "text-loan",
             selected && "text-maple"
           )}>
-            {primaryMetric.value}
+            <ProductMetricValue metric={primaryMetric} locale={locale} />
           </dd>
         </dl>
 
@@ -304,7 +306,7 @@ function ProductCompareListItem({
           ) : null}
         </div>
       </div>
-      <dl className="grid gap-4 border-t border-border px-4 py-3 text-sm sm:grid-cols-2 sm:px-5">
+      <dl className={cn("grid gap-4 border-t border-border px-4 py-3 text-sm sm:px-5", !stackSecondary && "sm:grid-cols-2")}>
         {secondaryMetrics.map(metric => <div className="min-w-0" key={metric.label}>
           <dt className="text-xs text-muted-foreground">{metric.label}</dt>
           <dd className="mt-1 break-words leading-6 text-foreground">{metric.value}</dd>
@@ -326,6 +328,7 @@ function ProductCompareCard({
   const copy = getPublicMessages(locale);
   const metrics = buildPublicProductMetrics(product, locale, "card");
   const [primaryMetric, ...secondaryMetrics] = metrics;
+  const stackSecondary = secondaryMetrics.some(metric => metric.value.length > 100);
   const detailHref = buildProductDetailHref(filters, product.product_id);
 
   return (
@@ -344,7 +347,7 @@ function ProductCompareCard({
               <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />
               <span className="truncate text-xs font-medium text-muted-foreground">{product.bank_name}</span>
             </div>
-            <span className="inline-flex whitespace-nowrap rounded-full bg-muted px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{product.product_type_label} · {product.currency}</span>
+            <span className="inline-flex whitespace-nowrap rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">{product.product_type_label} · {product.currency}</span>
           </div>
           <div className="min-w-0">
             <h2 className="text-lg font-semibold leading-snug tracking-[-0.02em]">
@@ -359,17 +362,17 @@ function ProductCompareCard({
       <div className="px-5 pb-5">
         <dl className="border-y border-border">
           <div className="py-4">
-            <dt className="font-mono text-[10px] font-semibold uppercase tracking-wide text-verification">{primaryMetric.label}</dt>
+            <dt className="text-xs font-semibold text-verification">{primaryMetric.label}</dt>
             <dd className={cn(
               "mt-1 break-words font-display font-semibold leading-tight tracking-[-0.04em] text-foreground tabular-nums",
               primaryMetric.value.length > 24 ? "text-lg" : "text-3xl"
-            )}>{primaryMetric.value}</dd>
+            )}><ProductMetricValue metric={primaryMetric} locale={locale} /></dd>
           </div>
-          <div className={cn("grid border-t border-border", secondaryMetrics.length > 1 && "grid-cols-2 divide-x divide-border")}>
+          <div className={cn("grid border-t border-border", stackSecondary ? "divide-y divide-border" : secondaryMetrics.length > 1 && "grid-cols-2 divide-x divide-border")}>
             {secondaryMetrics.map((metric) => (
-              <div className={cn("min-w-0 py-3", secondaryMetrics.length > 1 && "first:pr-3 last:pl-3")} key={metric.label}>
+              <div className={cn("min-w-0 py-3", !stackSecondary && secondaryMetrics.length > 1 && "first:pr-3 last:pl-3")} key={metric.label}>
                 <dt className="text-[11px] font-medium text-muted-foreground">{metric.label}</dt>
-                <dd className="mt-1 break-words text-sm font-semibold leading-snug text-foreground tabular-nums">{metric.value}</dd>
+                <dd className="mt-1 break-words text-sm font-medium leading-6 text-foreground tabular-nums">{metric.value}</dd>
               </div>
             ))}
           </div>

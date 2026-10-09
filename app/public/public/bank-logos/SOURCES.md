@@ -56,3 +56,17 @@ Coast Capital, Desjardins and Servus. All 34 have mappings; the previously
 registered Regions logo is also retained. Unknown future codes keep the
 accessible fallback until an official asset is verified and registered. No product or bank records
 were changed.
+
+
+## Public catalog additions — 2026-10-08
+
+Official header marks or official site icons; downloaded unchanged. Local serving only.
+
+| Bank | Asset | Provenance | SHA-256 |
+|---|---|---|---|
+| FAIRSTONE | `fairstone.png` | [Official page](https://www.fairstone.ca/en) / [asset](https://www.fairstone.ca/etc.clientlibs/fs/clientlibs/clientlib-base/resources/icons/favicon.png) | `bbbd1edce502aa3d2b53440a78e15c1849c55df0f912b768820c81ef0f05c073` |
+| FNBC | `first-nations.png` | [Official page](https://www.fnbc.ca/) / [asset](https://www.fnbc.ca/assets/img/logos/FNBC_Logo_Short.png) | `408f92c3034d6b862953ecb4edf45b7ebbcbf477fbb93cd18dc5e081512adb09` |
+| HAVENTREE | `haventree.png` | [Official page](https://www.haventreebank.com/en-CA) / [asset](https://images.ctfassets.net/hw93zeuesbqv/2KM8tvJXRifNUcZUOJRa4c/f69db98d25b1601edbe96c820f7fbdcd/HT_Symbol__2_.png) | `dcd6165d3fb9bb57a174dcd7d1402d0201d04c1977e5a54f737560d3a3ca1a51` |
+| AE | `american-express.svg` | [Official page](https://www.americanexpress.com/en-us/banking/online-savings/) / [asset](https://www.aexp-static.com/cdaas/one/statics/axp-static-assets/1.8.0/package/dist/img/logos/dls-logo-bluebox-solid.svg) | `028f643755987211bf2f3add6c62ae1870a888cf2f4fe3040a4fac7dce2543ab` |
+| CNB | `city-national.png` | [Official page](https://www.cnb.com/) / [asset](https://www.cnb.com/etc.clientlibs/cnb/clientlibs/clientlib-site/resources/images/favicons/android-chrome-192x192.png) | `57126c7c9de7855f3a4ff5973f507f4e30a24dff4dab2a955de15c23ef2028fb` |
+| WAB | `western-alliance.ico` | [Official page](https://www.westernalliancebancorporation.com/) / [asset](https://www.westernalliancebancorporation.com/themes/custom/cohesion-theme-child/favicon.ico) | `60ea072497934e531625e6e94a5b97c6b9f8ea412b70861722080f4b2dc18c68` |

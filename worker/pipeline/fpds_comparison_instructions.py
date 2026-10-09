@@ -7,6 +7,7 @@ FEE_CHANGE_NOTICE_INSTRUCTIONS = (
 )
 
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    "A financial label rendered as a heading is still a label, not a sibling product. Preserve an owned complete purchase Intro APR declaration, its billing-cycle/transfer boundaries and current variable APR range as purchase_interest_rate_summary, including every literal note. Never turn its zero promotion or range endpoint into a scalar. "
     "Owned Interest: Purchases and Interest: Cash Advances labels keep their exact percentages and literal "
     "page-wide Annual interest rates disclosure, including every captured effective-date statement. "
     "The annual disclosure proves units only, never prices or removal of a condition. "
@@ -40,6 +41,9 @@ CARD_RATE_CONTEXT_INSTRUCTIONS = (
 )
 
 ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
+    "Audience words in an independently owned card name are not annual-fee waivers. Price eligibility, duration and "
+    "promotion qualifiers remain binding. Plain numeric fee markers need one literal matching complete note. "
+    "Monthly maintenance fees have the same monthly base-price meaning as monthly account fees. Preserve the owned row and its complete local/table-wide notes; unrelated excess-transaction conditions do not qualify that price. Competitor panels, conditional waivers and unresolved references remain excluded. "
     "An unconditional unlimited number of daily transactions means ordinary coverage; preserve adjacent restrictions. "
     "Calculator input/example prices do not describe this account and cannot replace or suppress its independently verified fee. "
     "An owned one-row Annual rate table is annual deposit evidence only with its complete local disclosure; preserve the literal percent and account name, and reject dynamic placeholders, competing tables, unresolved references or added eligibility conditions. "
@@ -75,6 +79,12 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 )
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "An owned native brand prefix may be corroborated by its verified official hostname only when the complete "
+    "remaining name matches the captured SEO/route and its own account price. Preserve or reject adjacent qualifiers "
+    "and component/header references; a general annual note cannot override them. "
+    "An owned APY heading with a literal numeric superscript needs one complete matching note explicitly naming that account type and current annual yield/date. Other named panels, benchmarks, calculators, tiers, missing/ambiguous notes and qualified scalars stay excluded. "
+    "Literal JSON label/value pricing placeholders in data attributes or bounded literal hydration-state financial headers request one existing-budget render for missing essentials only. Strict JSON/encoded JSON/Transit maps never execute scripts or supply a fact, price, annual unit, URL or permission. Calculator, graph and navigation state is not a render lead. "
+    "An accessible SVG heading preserves only its unique literal image title and any matching aria-label. A named APY component binds through its observed detail link, exact percent/date, complete local rate notes and one explicit account-wide no-minimum-to-earn-APY disclosure. Preserve annual-yield semantics; tiers, conditional offers, competing notes and unresolved references stay excluded. "
     "Annual interest rate units are independent of payment or compounding frequency. Preserve a same-record paid-monthly fact; actual multiple payout options remain distinct. "
     "A typographic reference needs one exact matching note explicitly covering the same product family and annual rate basis; "
     "retain the complete note and reject unresolved, competing or unrelated declarations. Percent units may be explicit in every "

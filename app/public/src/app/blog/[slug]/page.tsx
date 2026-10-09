@@ -78,13 +78,13 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
             <p className="mt-2 text-xs leading-6 text-muted-foreground">{copy.checked}: {post.sourcesCheckedAt} · CAD</p>
             <table className="mt-4 block w-full border-y border-border text-left text-sm md:table">
               <caption className="sr-only">{presentation.comparison}</caption>
-              <thead className="sr-only md:not-sr-only md:table-header-group"><tr>{copy.tableHeaders.map(label => <th key={label} scope="col" className="border-b border-border bg-muted/60 px-3 py-3 text-xs font-semibold">{label}</th>)}</tr></thead>
+              <thead className="sr-only md:not-sr-only md:table-header-group"><tr>{(content.tableHeaders ?? copy.tableHeaders).map(label => <th key={label} scope="col" className="border-b border-border bg-muted/60 px-3 py-3 text-xs font-semibold">{label}</th>)}</tr></thead>
               <tbody className="block md:table-row-group">{content.rows.map(row => <tr key={row.code} className="grid gap-3 border-b border-border py-5 last:border-0 md:table-row md:py-0">
                 <th scope="row" className="flex items-center gap-3 text-left md:table-cell md:w-44 md:px-3 md:py-5 md:align-top">
                   <BankLogo bankCode={row.code} bankName={row.bank} size="sm" />
                   <span className="block text-sm font-semibold leading-6">{row.bank}<span lang="en" className="block text-xs font-normal text-muted-foreground">{row.name}</span></span>
                 </th>
-                <td className="md:px-3 md:py-5 md:align-top"><span className="mr-3 text-xs text-muted-foreground md:hidden">{copy.tableHeaders[1]}</span><span className="whitespace-nowrap font-mono font-semibold">{row.fee}</span></td>
+                <td className="md:px-3 md:py-5 md:align-top"><span className="mr-3 text-xs text-muted-foreground md:hidden">{(content.tableHeaders ?? copy.tableHeaders)[1]}</span><span className="whitespace-nowrap font-mono font-semibold">{row.fee}</span></td>
                 <td className="leading-7 md:px-3 md:py-5 md:align-top">{row.detail} <SourceLink id={row.source} sources={sources} /></td>
               </tr>)}</tbody>
             </table>

@@ -163,3 +163,26 @@ JavaScript-free article HTML and the catalog handoff. Browser writes and
 third-party calls are stubbed. Screenshots are local under ignored
 `tmp/blog-audit/`. Public unit tests cover allowlists, query policy, country
 handoff, citation/anchor integrity, financial example arithmetic and analytics.
+
+
+## Third article — 2026-10-08
+
+`/blog/cashable-vs-non-cashable-gic-canada` adds an original EN/KO/JA comparison
+of cashable and non-cashable access, with source-check date October 8. The CIBC
+Flexible non-registered option and RBC One-Year Cashable examples preserve the
+first-29-days/no-interest versus at-least-30-days boundary and partial-withdrawal
+qualifications. TD Non-Cashable is explicitly inaccessible before maturity;
+no invented early-exit fee or current numeric rate is supplied. FCAC supports
+the disclosure checklist. Exact official URLs are in `public-blog-gic.ts`.
+
+The fictional example holds CAD 10,000 for twelve months at annual simple 3%
+and 3.5%: CAD 300 versus CAD 350, a CAD 50 difference. It excludes compounding,
+tax, fees and early withdrawal and claims neither current offers nor APYs.
+All three versions preserve these assumptions. The article targets the existing
+GIC catalog and maturity guide, with no promise of catalog coverage.
+
+The article uses topic-specific access column labels, four citations, its own
+social preview, canonical/hreflang/BlogPosting and explicit dates. The three
+articles plus index generate twelve localized sitemap URLs. Prior article
+content/source dates remain unchanged. `blog-audit.py` now covers all three
+articles and derives expected counts from its registry.

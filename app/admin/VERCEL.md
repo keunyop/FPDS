@@ -1,15 +1,16 @@
 # FPDS Admin Vercel 배포 가이드
 
-2026-10-08 · 이 변경은 배포 준비이며 프로젝트 생성·환경변수 등록·실제 배포는 수행하지 않았다.
+2026-10-08 · Product Owner가 Admin 배포 완료를 알렸다. 현재 Admin 주소는
+https://fpds-three.vercel.app 이다. 이번 작업의 원격 설정·검증 결과는 아래에 구분한다.
 
 ## 프로젝트 설정
 
-같은 Git 저장소 `keunyop/FPDS`를 새 Vercel 프로젝트로 Import한다.
-Admin 설정은 다음과 같다. `fpds-admin`은 제안 이름이며 실제 도메인은 생성 후 확인한다.
+같은 Git 저장소 `keunyop/FPDS`를 사용하는 기존 Admin 프로젝트를 유지한다.
+프로젝트 설정은 다음과 같다. 새 프로젝트를 다시 만들 필요는 없다.
 
 | 항목 | 값 |
 |---|---|
-| Project Name | `fpds-admin` (제안) |
+| Production domain | `https://fpds-three.vercel.app` |
 | Root Directory | `app/admin` |
 | Framework Preset | Next.js |
 | Node.js Version | 24.x |
@@ -77,12 +78,37 @@ API의 session·role·국가·CSRF 검증이 계속 최종 권한을 결정한�
 기존 감사 입력인 User-Agent와 X-Forwarded-For도 전달한다. 최종 감사 IP는 API의
 ingress 및 기존 전달 IP 해석을 따르므로 실제 환경의 기록을 smoke에서 확인한다.
 
-같은 호스트에서 브라우저 요청이 끝나므로 이 인증 경로를 위해 API의 CORS
-allowlist를 넓힐 필요는 없다. 기존 API/Public CORS 설정을 보존한다.
-API의 `FPDS_ADMIN_WEB_ORIGIN`은 실제 Admin HTTPS origin으로 맞추고,
+같은 호스트에서 브라우저 요청이 끝나므로 인증 프록시는 API의 브라우저 CORS 허용에
+의존하지 않는다. API의 명시적 Admin origin 목록은 새 주소와 일치시키되 기존에
+승인된 다른 Admin origin과 Public CORS 설정을 보존한다.
+API의 `FPDS_ADMIN_WEB_ORIGIN=https://fpds-three.vercel.app` 및
+`FPDS_ALLOWED_ADMIN_ORIGINS=https://fpds-three.vercel.app`로 맞추고,
 `FPDS_COOKIE_SECURE=true`, `FPDS_COOKIE_SAMESITE=Lax` 및 기존 환경별 secrets를
 유지한다. 이는 API 프로젝트 설정이며 Admin에 secret을 복사하지 않는다.
 현재 계정은 API가 연결한 DB에 있어야 하며 새 계정 bootstrap/승인은 별도 작업이다.
+
+기존에 명시적으로 허용한 다른 Admin origin이 있으면 해당 항목을 보존하고 새 origin을
+쉼표로 추가한다. localhost 개발 설정은 로컬 파일에서 유지한다. origin 값에는 끝 `/`를
+붙이지 않는다. `.env.prod.example` 변경은 실제 Vercel 환경변수를 변경하지 않는다.
+API 프로젝트의 Production 환경변수를 변경한 뒤 해당 API를 재배포해야 반영된다.
+Admin 주소를 `FPDS_ADMIN_API_ORIGIN`에 넣지 않는다. 이 변수는 FastAPI 주소다.
+Admin의 API 대상 주소를 바꾼 경우에는 Admin도 재배포한다.
+
+이번 작업 환경에는 Vercel 관리 인증이 없어 Dashboard 값 조회·수정과 원격 재배포를
+수행하지 못했다. API 프로젝트의 위 두 origin과 Secure/Lax 설정은 Dashboard에서
+확인해야 한다. Preview 설정은 별도 격리 API의 실제 origin을 유지한다.
+
+## 현재 호스팅 읽기 전용 확인 - 2026-10-08
+
+- 새 Admin `/admin/login`: HTTP 200.
+- 새 Admin `/api/admin/auth/countries`: HTTP 200, JSON 응답.
+- 기존 API `/healthz`: HTTP 200, status ok, collection process v9.
+- 기존 API에 `Origin: https://fpds-three.vercel.app`로 보낸 CORS preflight:
+  HTTP 400 / Disallowed CORS origin. 새 주소의 API CORS 허용이 아직 반영되지 않았다.
+
+프록시의 국가 조회가 정상이라는 결과와 API의 CORS 거부는 별개의 결과다.
+로그인 계정·세션·권한·실제 수집은 이번 확인에서 검증하지 않았다.
+Dashboard 환경변수와 serving runtime 변경 완료로 간주하지 않는다.
 
 ## 수집 운영 경계
 
@@ -104,6 +130,7 @@ API 응답 이후에도 계속 실행되는 수집 프로세스를 시작한다.
 전에는 Vercel API를 대상으로 실제 수집 버튼을 테스트하지 않는다. 이 준비에서는
 Worker host/queue/integration을 새로 만들거나 수집을 시작하지 않는다.
 API/Worker 현행 코드·migration 상태도 별도 확인하며 Admin 배포로 갱신되지 않는다.
+서버 준비와 연결 순서는 [지속 실행 수집 서버 가이드](../../api/service/PERSISTENT_HOST.md)를 따른다.
 
 ## 검증과 실제 배포 순서
 

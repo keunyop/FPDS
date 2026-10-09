@@ -1,3 +1,4 @@
+import { GIC_CONTENT, GIC_PRESENTATION, GIC_SOURCES } from './public-blog-gic.ts';
 import type { PublicLocale } from './public-locale.ts';
 import type { BlogSlug } from './public-blog.ts';
 import { blogCopy } from './public-blog.ts';
@@ -12,9 +13,10 @@ export const BLOG_SOURCES = [
   { id: 'fcac', title: 'FCAC — Savings accounts', href: 'https://www.canada.ca/en/financial-consumer-agency/services/banking/bank-accounts/savings-account.html' }
 ] as const;
 export type BlogSource = { id: string; title: string; href: string };
-type SourceId = typeof BLOG_SOURCES[number]['id'] | typeof CHEQUING_SOURCES[number]['id'];
+type SourceId = typeof BLOG_SOURCES[number]['id'] | typeof CHEQUING_SOURCES[number]['id'] | typeof GIC_SOURCES[number]['id'];
 export type BlogSection = { id: string; title: string; paragraphs: string[]; sources?: SourceId[] };
 export type BlogContent = {
+  tableHeaders?: [string, string, string];
   title: string; description: string; intro: string; takeaway: string;
   rows: { bank: string; code: string; name: string; fee: string; detail: string; source: SourceId }[];
   sections: BlogSection[];
@@ -217,13 +219,20 @@ const content: Record<PublicLocale, BlogContent> = {
   }
 };
 const articles: Record<BlogSlug, Record<PublicLocale, BlogContent>> = {
+  'cashable-vs-non-cashable-gic-canada': GIC_CONTENT,
   'eq-bank-vs-tangerine-vs-td-savings': content,
   'tangerine-vs-simplii-vs-cibc-chequing-fees': CHEQUING_CONTENT
 };
 export function blogSources(slug: BlogSlug): readonly BlogSource[] {
+  if (slug === 'cashable-vs-non-cashable-gic-canada') return GIC_SOURCES;
   return slug === 'tangerine-vs-simplii-vs-cibc-chequing-fees' ? CHEQUING_SOURCES : BLOG_SOURCES;
 }
 export function blogPresentation(slug: BlogSlug, locale: string) {
+  if (slug === 'cashable-vs-non-cashable-gic-canada') return {
+    ...GIC_PRESENTATION[locale === 'ko' || locale === 'ja' ? locale : 'en'],
+    catalog: '1-year-gic' as CuratedSlug, guides: ['gic-maturity-and-withdrawals', 'base-and-promotional-rates'] as GuideSlug[],
+    relatedArticle: { slug: 'eq-bank-vs-tangerine-vs-td-savings' as BlogSlug, label: content[locale === 'ko' || locale === 'ja' ? locale : 'en'].title }
+  };
   const copy = blogCopy(locale);
   const chequing = slug === 'tangerine-vs-simplii-vs-cibc-chequing-fees';
   const localized = CHEQUING_PRESENTATION[locale === 'ko' || locale === 'ja' ? locale : 'en'];

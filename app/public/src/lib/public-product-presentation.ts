@@ -1,3 +1,4 @@
+import { presentPublicRate } from './public-rate-presentation.ts';
 import { publicFactCopy } from "./public-fact-copy.ts";
 import { accessCopy, transactionCosts, withdrawalConditions } from "./public-access.ts";
 import { getPublicRateMetric } from "./public-rate.ts";
@@ -7,6 +8,8 @@ import { getIntlLocale, getPublicMessages, normalizePublicLocale } from "./publi
 export type PublicProductMetric = {
   label: string;
   value: string;
+  details?: string;
+  entries?: { label: string; value: string }[];
 };
 
 type CardLabelKey = "annualFee" | "back" | "purchaseRate";
@@ -44,8 +47,9 @@ export function buildPublicProductMetrics(
   presentation: "card" | "comparison" = "comparison"
 ): PublicProductMetric[] {
   const copy = getPublicMessages(locale);
-  const rateMetric = getPublicRateMetric(product, locale);
-  if (presentation === "comparison" && product.rate?.source_text && !/^\s*[\d.]+\s*%?\s*$/.test(product.rate.source_text)) {
+  const rateMetric = product.product_family === "lending" && product.product_type !== "credit-card"
+    ? presentPublicRate(product, locale) : getPublicRateMetric(product, locale);
+  if (presentation === "comparison" && (product.product_family !== "lending" || product.product_type === "credit-card") && product.rate?.source_text && !/^\s*[\d.]+\s*%?\s*$/.test(product.rate.source_text)) {
     rateMetric.value = product.rate.source_text;
   }
 
