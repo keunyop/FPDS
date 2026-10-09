@@ -1,5 +1,16 @@
 # FPDS API Service
 
+## Snapshot-pinned ordinary transaction proof - 2026-10-09
+
+Process `2026-10-09-owned-list-disclosure-proof-v11` checks the private field
+mapping of the exact approved version pinned by each Public snapshot, with bank
+and country joins. Direct ATM-network limitations cannot stand in for ordinary
+transactions even in an older accepted receipt. Independent ordinary coverage,
+monthly-fee waivers and separately labelled ATM prices remain distinct. Mapping
+metadata is removed before returning Public rows. Deploy API/Worker together;
+verified product publication is separate from serving deployment.
+[Diagnosis and publication/runtime verification](../../docs/00-governance/bmo-generic-collection-corrections-2026-10-09.md).
+
 ## Accessible discovery and essential template acquisition - 2026-10-08
 
 Process `2026-10-08-accessible-qualified-source-proof-v10` shares accessible SVG

@@ -412,11 +412,7 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
                 match[0], re.I) else "Transaction definition.", q, flags=re.I)
         if field_name == "unlimited_transactions_flag" and re.search(r"\b(?:if|when|provided|qualify|qualifying)\b", condition_context, re.I):
             return False
-        if field_name == "unlimited_transactions_flag" and re.search(
-            r"\b(?:public transit|ATM|ABM|wire|e[- ]?transfer)(?: transactions?)?\s*[:–-]?\s*unlimited\b"
-            r"|" + _ORDINARY_UNLIMITED + r"\s+(?:\d+\s+)?"
-            r"(?:only\s+)?(?:for|on|at)\s+(?:public transit|ATMs?|ABMs?|wire|e[- ]?transfer)\b", q, re.I,
-        ):
+        if field_name == "unlimited_transactions_flag" and _unlimited_is_channel_only(q):
             return False
         if field_name == "unlimited_transactions_flag" and (
             re.search(r"\b(?:not|no)\s+unlimited\b", q, re.I)
@@ -664,6 +660,16 @@ def payload_digest(record: Mapping, payload: Mapping) -> str:
         return ""
 
 
+def _unlimited_is_channel_only(quote: str) -> bool:
+    """A directly qualified ATM/transfer claim cannot cover ordinary debits."""
+    return bool(re.search(
+        r"\b(?:public transit|ATM|ABM|wire|e[- ]?transfer)(?: transactions?)?\s*[:\u2013-]?\s*unlimited\b"
+        r"|" + _ORDINARY_UNLIMITED + r"\s+(?:\d+\s+)?(?:only\s+)?(?:for|on|at)\s+"
+        r"(?:[\d,]+\+?\s+)?(?:fee[- ]free\s+)?"
+        r"(?:(?:non[- ]\s*)?[A-Za-z][A-Za-z0-9&-]{0,35}\s+){0,3}"
+        r"(?:public transit|ATM(?:\s+s)?s?|ABMs?|wire|e[- ]?transfer)\b", text(quote), re.I))
+
+
 def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) -> bool:
     p = payload if payload is not None else record.get("candidate_payload", {})
     receipt = p.get(RECEIPT_KEY, {}) if isinstance(p, Mapping) else {}
@@ -676,6 +682,12 @@ def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) ->
     if not isinstance(required, list) or any(not isinstance(f, str) or not field_contract(f)
             or p.get(f) in (None, "", [], {}) or not value_matches_contract(f, p.get(f)) for f in required):
         return False
+    mappings = record.get("field_mapping_metadata")
+    if isinstance(mappings, Mapping) and p.get("unlimited_transactions_flag") is True:
+        mapping = mappings.get("unlimited_transactions_flag", {})
+        quote = mapping.get("official_evidence_quote") if isinstance(mapping, Mapping) else None
+        if quote and _unlimited_is_channel_only(str(quote)):
+            return False
     digest = payload_digest(record, p)
     return bool(digest and receipt.get("accepted") is True and receipt.get("digest") == digest
                 and all(value_matches_contract(k, v) for k, v in p.items() if k != RECEIPT_KEY))
@@ -820,7 +832,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             reason = "evidence_source_mismatch"
         elif not exact_quote(quote, e.get("evidence_excerpt")):
             reason = "exact_evidence_missing"
-        elif (e.get("anchor_type") in {"owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
                 and not _native_record_belongs(record, e, source_metadata)):
             reason = "native_product_mismatch"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
@@ -841,9 +853,9 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             # A balance that waives transaction charges is not an opening or
             # general minimum balance, nor a monthly-account-fee threshold.
             reason = "transaction_waiver_balance_not_minimum"
-        elif (e.get("anchor_type") == "owned_account_assertion" and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
+        elif (e.get("anchor_type") in {"owned_account_assertion", "owned_lending_terms"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
             reason = "native_account_conditions_incomplete"
-        elif (e.get("anchor_type") in {"card_information_rate", "owned_referenced_apy", "owned_card_apr_offer", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"card_information_rate", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
                 and name in {"standard_rate", "interest_rate_summary", "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
                 and (not exact_quote(e.get("evidence_excerpt"), quote)
                      or (name in {"interest_rate_summary", "purchase_interest_rate_summary"}

@@ -73,7 +73,7 @@ class AggregateRefreshService:
             if RECEIPT_KEY in item.canonical_payload and not acceptance_receipt_valid(
                 {"country_code": item.country_code, "bank_code": item.bank_code,
                  "product_type": item.product_type, "product_name": item.product_name,
-                 "currency": item.currency}, item.canonical_payload)]
+                 "currency": item.currency, "field_mapping_metadata": item.field_mapping_metadata}, item.canonical_payload)]
         eligible_rows = [item for item in canonical_rows
                          if item not in excluded_incomplete_rows and item not in excluded_accuracy_rows]
         projection_rows = [

@@ -1,5 +1,33 @@
 # FPDS Development Journal
 
+## 2026-10-09 - BMO generic collection correction and current publication
+
+- Diagnosed latest US/BB five Runs: sixteen candidates, one old automatic
+  approval. Same original captured bytes reproduce five recovered approvals
+  after generic owned-list/PDF-column/lending-security corrections.
+- Parser v20/process v11 preserve list references, full qualified APR/intro-loss
+  and grace conditions, collateral declarations and verified long security prose.
+  Shared prompts, origin gates and cache fingerprints move together. ATM-only
+  allowances cannot prove ordinary transactions or bypass an old receipt.
+- Direct current operation: five normal automatic promotions, ten exclusions,
+  zero manual reviews/providers/Admin collection API calls. Four new Public
+  listings and one Cash Back update verified; invalid Smart Advantage omitted.
+  Normal aggregate snapshot `agg_GtPzyOYNGT_6vj8t`; all five API/site details pass,
+  complete lending/card conditions visible and sixteen current field links exact.
+- Original five Runs/sixteen candidates/51 stages/54 documents/seventy snapshots
+  and 1,529 financial version facts preserved; two versions normally superseded.
+  460 unrelated canonical rows and unrelated Public facts unchanged by BMO.
+  Concurrent Capital One's nine approvals were preserved after a guard stop and
+  explicit rebaseline. Final Public CA 120 / US 22 separates those results.
+- Verification: full Worker 929 with only two existing hash-test failures;
+  23 underlying old mismatches are HEAD-identical. API 649 and final affected
+  tests 52 pass. Rollback, actual persisted origins, Public privacy/readback,
+  foundation, references, strict UTF-8/Python/JSON and diff checks pass.
+- Limits/next: serving health remains v10; no API/Worker deployment or restart.
+  Coordinated v11 release is needed for consistent future Admin collection.
+  No schema, financial-essential relaxation, manual review or permanent recovery
+  feature. [Diagnosis and publication receipts](bmo-generic-collection-corrections-2026-10-09.md).
+
 ## 2026-10-08 - Deployed Admin domain and persistent collection host guidance
 
 - Production Admin web origin and explicit Admin allowlist examples now use

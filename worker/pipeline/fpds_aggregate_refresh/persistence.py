@@ -143,6 +143,7 @@ FROM (
         cp.last_verified_at,
         cp.last_changed_at,
         pv.product_version_id,
+        nc.field_mapping_metadata,
         CASE
             WHEN pv.normalized_payload IS NOT NULL AND pv.normalized_payload <> '{{}}'::jsonb THEN pv.normalized_payload
             WHEN cp.current_snapshot_payload IS NOT NULL THEN cp.current_snapshot_payload
@@ -154,6 +155,10 @@ FROM (
     LEFT JOIN product_version AS pv
       ON pv.product_id = cp.product_id
      AND pv.version_no = cp.current_version_no
+    LEFT JOIN normalized_candidate AS nc
+      ON nc.candidate_id = pv.approved_candidate_id
+     AND nc.country_code = cp.country_code
+     AND nc.bank_code = cp.bank_code
     WHERE cp.country_code = :'country_code'
       AND (
             cp.product_family = 'deposit'

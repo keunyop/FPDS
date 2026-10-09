@@ -2163,3 +2163,26 @@ isolation. Screenshots manually reviewed; foundation, UTF-8/JSON/Python/task
 references, existing article preservation and git diff --check pass.
 Limits: no runtime deployment, collection/provider call or canonical/DB write.
 Next: normal Public review/release. Earlier unrelated goal sections remain intact.
+
+## BMO direct diagnosis, generic correction and publication - 2026-10-09
+
+Status: Complete for local generic code and current product publication. Preserve prior ownership.
+Scope: Inspect latest BMO Runs and retained evidence; directly collect current
+official targets without FPDS Admin API; correct demonstrated shared defects;
+publish only automatically valid current products in the existing environment.
+Acceptance:
+- [x] Account for latest scopes, candidates, exclusions and first evidence losses.
+- [x] Add source-backed cross-bank/type regressions and align shared gates/prompts.
+- [x] Run affected behavior checks, including boundary/failure and stored origins.
+- [x] Rehearse rollback; publish through ordinary gates; verify Public readback.
+- [x] Record actual results/limits, journal, final diff and goal checks.
+Limits: no weaker financial essentials, manual product review, bank exceptions,
+historical restoration, permanent recovery feature or unrelated data changes.
+Runtime deployment is distinct from code and publication results.
+Outcome: five latest-Run candidates automatically approved; four new Public
+listings plus one Cash Back current-version update; invalid ATM-only checking
+omitted. Original histories and concurrent Capital One results preserved.
+Verification: API 649 and affected 52 pass; Worker 929 with two HEAD-identical
+legacy hash-test failures. Actual source links 16, rollback and five API/site
+readbacks pass; Public CA 120 / US 22. Serving health still v10; no deployment.
+Next: coordinated API/Worker v11 release. Earlier goal sections remain intact.

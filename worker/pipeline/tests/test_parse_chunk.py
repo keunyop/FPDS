@@ -30,7 +30,7 @@ class ParseChunkServiceTests(unittest.TestCase):
             content_type="text/html",
         )
 
-        self.assertEqual(PARSER_VERSION, "fpds-parse-chunk-v19")
+        self.assertEqual(PARSER_VERSION, "fpds-parse-chunk-v20")
         self.assertIn("Advantage Savings", artifact.full_text)
         self.assertIn("$8 monthly maintenance fee", artifact.full_text)
         self.assertEqual(artifact.parser_metadata["structured_component_section_count"], 2)

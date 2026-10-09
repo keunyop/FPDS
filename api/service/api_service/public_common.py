@@ -319,6 +319,7 @@ def load_public_projection_rows(
             p.last_verified_at,
             p.last_changed_at,
             COALESCE(p.refresh_metadata, '{}'::jsonb) AS refresh_metadata,
+            approved_candidate.field_mapping_metadata AS approved_field_mapping_metadata,
             CASE WHEN p.product_type IN ('savings', 'gic') THEN
                 jsonb_strip_nulls(jsonb_build_object(
                     'interest_calculation_method', approved_version.normalized_payload -> 'interest_calculation_method',
@@ -336,6 +337,10 @@ def load_public_projection_rows(
         LEFT JOIN product_version AS approved_version
           ON approved_version.product_version_id = NULLIF(p.refresh_metadata ->> 'product_version_id', '')
          AND approved_version.product_id = p.product_id
+        LEFT JOIN normalized_candidate AS approved_candidate
+          ON approved_candidate.candidate_id = approved_version.approved_candidate_id
+         AND approved_candidate.country_code = p.country_code
+         AND approved_candidate.bank_code = p.bank_code
         LEFT JOIN LATERAL (
             SELECT source.normalized_source_url
             FROM (
@@ -376,12 +381,13 @@ def load_public_projection_rows(
     for row in rows:
         item = dict(row)
         payload = item.pop("approved_collection_payload", None)
+        mappings = item.pop("approved_field_mapping_metadata", None)
         configured_receipt = (payload.get("_collection_accuracy", {}) if isinstance(payload, dict) else {})
         if (item.get("product_type") in {"chequing", "gic", "line-of-credit"}
                 or (isinstance(configured_receipt, dict) and configured_receipt.get("additional_required_fields"))):
             # Check the exact snapshot-pinned version; an old snapshot/receipt
             # must not bypass the current cost/access/security prerequisites.
-            if not isinstance(payload, dict) or not acceptance_receipt_valid(item, payload):
+            if not isinstance(payload, dict) or not acceptance_receipt_valid({**item, "field_mapping_metadata": mappings}, payload):
                 continue
             metadata = dict(item.get("refresh_metadata") or {})
             for field in (

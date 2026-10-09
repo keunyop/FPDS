@@ -146,6 +146,8 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in [*account_records(soup), *named_rate_records(soup)])
     from worker.native_apy_records import apy_records
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in apy_records(soup))
+    from worker.native_owned_lending_records import lending_records
+    sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in lending_records(soup))
     from worker.native_offer_records import owned_offer_records
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in owned_offer_records(soup))
     sections.extend(_rate_table_evidence_sections(soup))
@@ -241,7 +243,7 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
     if heading is None:
         return []
     identity = heading.get_text(" ", strip=True)
-    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Interest: Purchases|Interest: Cash Advances|Annual fee|Monthly fee)$", re.I)
+    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Interest: Purchases|Interest: Cash Advances|Annual fee|Monthly fee|(?:Variable )?Purchase APR)$", re.I)
     basis = []
     for node in root.find_all(True):
         value = node.get_text(" ", strip=True)
@@ -262,7 +264,8 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                 general_basis.append("\n".join([value, *references]))
     general_basis = list(dict.fromkeys(general_basis))
     result, seen = [], set()
-    for leaf in root.find_all(string=lambda t: t and labels.fullmatch(t.strip())):
+    from worker.native_labelled_lists import financial_label_text, linked_list_notes
+    for leaf in root.find_all(string=lambda t: t and labels.fullmatch(financial_label_text(t))):
         if not owns_label(leaf.parent, root, identity):
             continue
         block = leaf.parent
@@ -279,7 +282,7 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
             value = block.get_text("\n", strip=True)
             if len(value) > 900 or block is root:
                 break
-            if sum(bool(labels.fullmatch(line.strip())) for line in value.splitlines()) > 1:
+            if sum(bool(labels.fullmatch(financial_label_text(line))) for line in value.splitlines()) > 1:
                 break
             if re.search(r"\d+(?:\.\d+)?%|\$\d|\b(?:None|Free)\b", value, re.I):
                 if block.select('input:not([type="hidden"]), textarea, select, [role="slider"]'):
@@ -300,6 +303,11 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                 if refs is None:
                     result.append(_RawSegment("unresolved_financial_reference", identity, None, "\n".join([identity, value])))
                     break
+                list_refs = linked_list_notes(soup, block, str(leaf), identity)
+                if list_refs is None:
+                    result.append(_RawSegment("unresolved_financial_reference", identity, None, "\n".join([identity, value])))
+                    break
+                refs.extend(list_refs)
                 value = without_reference_markers(block)
                 parts = [identity, value]
                 if re.search(r"\b(?:first year|first month|eligible|until|if you|provided|maintain|introductory|promotional)\b", scope, re.I):
@@ -312,7 +320,8 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                 record = _normalize_text("\n".join(parts))
                 if len(record) <= 6400 and record not in seen:
                     seen.add(record)
-                    result.append(_RawSegment("labelled_financial_record", identity, None, record))
+                    kind = "owned_card_apr_offer" if re.fullmatch(r"(?:Variable )?Purchase APR", financial_label_text(leaf), re.I) else "labelled_financial_record"
+                    result.append(_RawSegment(kind, identity, None, record))
                 break
             block = block.parent
             if block is None:
@@ -690,6 +699,9 @@ def _parse_pdf(body: bytes) -> ParsedArtifact:
 
     for page_index, page in enumerate(reader.pages, start=1):
         layout = page.extract_text(extraction_mode="layout") or ""
+        from worker.native_labelled_lists import pdf_purchase_terms
+        raw_segments.extend(_RawSegment(kind, owner, page_index, record)
+                            for kind, owner, record in pdf_purchase_terms(layout, page.extract_text() or ""))
         raw_segments.extend(_pdf_purchase_rate_cells(layout, page_no=page_index))
         from worker.native_information_records import pdf_summary_records
         raw_segments.extend(_RawSegment(kind, owner, page_index, record)

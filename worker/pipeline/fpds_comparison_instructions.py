@@ -7,6 +7,8 @@ FEE_CHANGE_NOTICE_INSTRUCTIONS = (
 )
 
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    "Native labelled list rows retain their literal reference markers and uniquely observed legal links. Accessibility text or zero-width formatting does not change label meaning; unresolved or competing references still block. "
+    "A named PDF purchase column must retain its complete introductory period, current variable APR range, creditworthiness/Prime Rate basis, loss-of-introductory-APR trigger and promotional grace conditions. Prefer it over an owned display only when the purchase percentages and introductory account-opening periods corroborate exactly; never borrow neighbouring card columns. "
     "A financial label rendered as a heading is still a label, not a sibling product. Preserve an owned complete purchase Intro APR declaration, its billing-cycle/transfer boundaries and current variable APR range as purchase_interest_rate_summary, including every literal note. Never turn its zero promotion or range endpoint into a scalar. "
     "Owned Interest: Purchases and Interest: Cash Advances labels keep their exact percentages and literal "
     "page-wide Annual interest rates disclosure, including every captured effective-date statement. "
@@ -41,6 +43,7 @@ CARD_RATE_CONTEXT_INSTRUCTIONS = (
 )
 
 ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
+    "Unlimited transactions at a numbered ATM network, including fee-free ATMs, proves only that channel. It never proves ordinary account transaction coverage, even when followed by another ATM benefit. "
     "Audience words in an independently owned card name are not annual-fee waivers. Price eligibility, duration and "
     "promotion qualifiers remain binding. Plain numeric fee markers need one literal matching complete note. "
     "Monthly maintenance fees have the same monthly base-price meaning as monthly account fees. Preserve the owned row and its complete local/table-wide notes; unrelated excess-transaction conditions do not qualify that price. Competitor panels, conditional waivers and unresolved references remain excluded. "
@@ -79,6 +82,7 @@ WITHDRAWAL_CONTEXT_INSTRUCTIONS = (
 )
 
 NATIVE_RATE_CONTEXT_INSTRUCTIONS = (
+    "An explicit using-equity-as-collateral declaration proves secured lending. A separate statement that repayment payments may be higher does not make that collateral optional; preserve the entire declaration. Other uncertain, optional or conflicting security language remains blocking. Keep every APR range, geographic/LTV/credit-score/autopay condition, floor, ceiling and date; never use a range endpoint as a scalar. Preserve verified registered alternatives from the same complete record without extra research. "
     "An owned native brand prefix may be corroborated by its verified official hostname only when the complete "
     "remaining name matches the captured SEO/route and its own account price. Preserve or reject adjacent qualifiers "
     "and component/header references; a general annual note cannot override them. "

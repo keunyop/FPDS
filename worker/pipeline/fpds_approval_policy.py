@@ -306,11 +306,16 @@ def dynamic_repair_fields(
 
 def security_meaning(value: object) -> bool | None:
     """Require an explicit security statement, never a generic approval clause."""
-    if not isinstance(value, str) or re.search(r"\b(?:may|might|could|optional|depending)\b|not unsecured", value, re.I):
+    if not isinstance(value, str):
+        return None
+    # A later repayment amount may vary independently of a definite collateral
+    # requirement. No security qualification or alternative is removed.
+    value = re.sub(r"your payments will include both principal and interest, and may be higher than during the first phase[.]", "Repayment amount consequence.", value, flags=re.I)
+    if re.search(r"\b(?:may|might|could|optional|depending)\b|not unsecured", value, re.I):
         return None
     unsecured = bool(re.search(r"\bunsecured\b|no collateral (?:is )?required|\bnot secured\b", value, re.I))
     positive_context = re.sub(r"\bnot secured\b|\bno collateral (?:is )?required\b", "", value, flags=re.I)
-    secured = bool(re.search(r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b|\bby securing your line of credit with assets\b", positive_context, re.I))
+    secured = bool(re.search(r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b|\bby securing your line of credit with assets\b|\bby using (?:that|your|the) equity as collateral\b", positive_context, re.I))
     return None if secured == unsecured else secured
 
 

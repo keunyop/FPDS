@@ -20,6 +20,7 @@ class CanonicalAggregateRow:
     last_changed_at: str | None
     product_version_id: str | None
     canonical_payload: dict[str, object]
+    field_mapping_metadata: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)

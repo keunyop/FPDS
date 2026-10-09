@@ -1,5 +1,18 @@
 # Worker Boundary
 
+## Owned list disclosures and complete lending proof - 2026-10-09
+
+Parser v20/process `2026-10-09-owned-list-disclosure-proof-v11` preserve owned
+labelled list prices with literal legal references, exact named PDF purchase
+columns with introductory-loss/grace conditions, and complete owned lending
+collateral/APR declarations. Verified long security prose and same-record typed
+alternatives survive normalization. ATM-network-only allowances cannot prove
+ordinary account transactions; snapshot-pinned private evidence checks prevent
+older acceptance receipts from bypassing that distinction. Shared instructions,
+cache fingerprints and source-backed cross-bank/type regressions change together.
+No weaker essentials, extra optional research or manual review is introduced.
+[Diagnosis and separate publication/runtime verification](../docs/00-governance/bmo-generic-collection-corrections-2026-10-09.md).
+
 ## Accessible headings and qualified owned offers - 2026-10-08
 
 Parser v19/process `2026-10-08-accessible-qualified-source-proof-v10` share literal

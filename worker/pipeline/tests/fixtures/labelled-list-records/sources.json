@@ -1,0 +1,38 @@
+[
+  {
+    "fixture": "bmo-cash-back-credit-card.html.bin",
+    "url": "https://www.bmo.com/en-us/main/personal/credit-cards/bmo-cash-back-credit-card/",
+    "sha256": "b6b5dbcb025ecc4c80a63899d0d23eb77c5185eeddafd207e5a2a134bb2a4bf1",
+    "captured_at": "2026-10-09T13:50:31.763858+00:00"
+  },
+  {
+    "fixture": "bmo-platinum-credit-card.html.bin",
+    "url": "https://www.bmo.com/en-us/main/personal/credit-cards/bmo-platinum-credit-card/",
+    "sha256": "89e2860f4c200109360bfd63ac10edde9c0d7c020b07309e4140a18d84d4d835",
+    "captured_at": "2026-10-09T13:48:48.341609+00:00"
+  },
+  {
+    "fixture": "bmo-platinum-rewards-credit-card.html.bin",
+    "url": "https://www.bmo.com/en-us/main/personal/credit-cards/bmo-platinum-rewards-credit-card/",
+    "sha256": "d7536f601a2ea05450af6b83b48b79e471b796e3f00e89809a0276b63f18718f",
+    "captured_at": "2026-10-09T13:50:13.693203+00:00"
+  },
+  {
+    "fixture": "bmo-premium-rewards-credit-card.html.bin",
+    "url": "https://www.bmo.com/en-us/main/personal/credit-cards/bmo-premium-rewards-credit-card/",
+    "sha256": "c7d24190781547038612f4c5a6a53d97a6070228b65f90adfd4394465444336f",
+    "captured_at": "2026-10-09T13:50:58.159242+00:00"
+  },
+  {
+    "fixture": "card-terms.pdf.bin",
+    "url": "https://www.bmo.com/en-us/pdf/credit/standardcreditcards.pdf",
+    "sha256": "e2f2f8cff338b0ddeb32d89f96b84995c459981dd385eeaa0d3506e2a00949b8",
+    "captured_at": "2026-10-09T13:50:49.128402+00:00"
+  },
+  {
+    "fixture": "secured-line.html.bin",
+    "url": "https://www.bmo.com/en-us/main/personal/loans-and-lines-of-credit/home-equity-line-of-credit/",
+    "sha256": "1bd0fb83dad03bfe181be68eef68c93733961bbcfb25fc51cdc5a39d2ab55f58",
+    "captured_at": "2026-10-09T13:46:27.530592+00:00"
+  }
+]

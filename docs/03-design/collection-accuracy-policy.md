@@ -1,5 +1,35 @@
 # Product collection accuracy and automatic acceptance
 
+## Owned lists, named APR columns and lending declarations - 2026-10-09
+
+Parser v20/process `2026-10-09-owned-list-disclosure-proof-v11` recognize literal
+financial list labels despite accessibility/reference formatting. Retain original
+text, local notes and one uniquely observed bounded legal link; unresolved,
+ambiguous or foreign references cannot donate prices. Conditional zeros remain
+conditional. No bank-name or product-specific acceptance exception is permitted.
+
+A complete named PDF purchase column retains its introductory period, current
+variable APR range, creditworthiness/Prime Rate basis, loss-of-introductory-APR
+trigger and promotional grace conditions. It may replace an owned display only
+when purchase percentages and introductory account-opening periods corroborate exactly. Preserve column ownership and
+complete text; never flatten promotions or endpoints into ordinary scalar rates.
+
+An explicit using-equity-as-collateral declaration proves security. A separate
+literal repayment sentence saying payments may be higher does not make collateral
+optional; other uncertain or conflicting security language still blocks. Keep
+full geographic, LTV, credit-score, autopay, floor/ceiling and date conditions in
+qualified APR summaries. A complete verified security quote is not navigation
+merely because it exceeds a short-copy limit. Same-record registered typed
+alternatives survive normalization without extra research or review.
+
+Unlimited transactions directly limited to a numbered/fee-free/non-bank ATM
+network prove only that channel. General transaction essentials remain required.
+Aggregate and Public gates check that limitation using the exact approved
+version's private mapping; separate ordinary coverage, fee waivers and ATM-price
+rows do not become channel limitations. Mapping/evidence stay private. Shared
+prompts, fingerprints and real-source boundary regressions enforce these rules.
+[Diagnosis and verified operational results](../00-governance/bmo-generic-collection-corrections-2026-10-09.md).
+
 ## Accessible identity and complete qualified offers - 2026-10-08
 
 Parser v19/process `2026-10-08-accessible-qualified-source-proof-v10` preserve unique

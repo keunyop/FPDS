@@ -3184,7 +3184,10 @@ def _clean_product_context_fields(
                     value=value,
                     product_type_family=product_type_family,
                 )
-                or _looks_like_broad_page_copy(field_name=field_name, value=value)
+                or _looks_like_broad_page_copy(
+                    field_name=field_name, value=value,
+                    grounding_metadata=(field_mapping_metadata or {}).get(field_name),
+                )
                 or _looks_like_gic_field_context_mismatch(
                     field_name=field_name,
                     value=value,
@@ -4550,7 +4553,7 @@ def _looks_like_non_value_lending_field(
     return False
 
 
-def _looks_like_broad_page_copy(*, field_name: str, value: str) -> bool:
+def _looks_like_broad_page_copy(*, field_name: str, value: str, grounding_metadata: dict | None = None) -> bool:
     normalized = " ".join(value.split())
     lowered = normalized.lower()
     if field_name == "application_method" and normalized.lower().startswith("how do i apply"):
@@ -4617,6 +4620,16 @@ def _looks_like_broad_page_copy(*, field_name: str, value: str) -> bool:
         )
     ) >= 2:
         return True
+    if field_name in {"security_requirement", "collateral_text"}:
+        metadata = grounding_metadata or {}
+        quote = " ".join(str(metadata.get("official_evidence_quote") or "").split())
+        from worker.pipeline.fpds_approval_policy import security_meaning
+        # Preserve a complete, verified security declaration, including its
+        # qualifications. Final origin/ownership validation still applies.
+        if (metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+                and metadata.get("official_verification_status") == "match"
+                and quote == normalized and security_meaning(quote) is not None):
+            return False
     return len(normalized) >= 240 and field_name in concise_fields
 
 

@@ -827,6 +827,18 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 if calculation:
                     values["interest_calculation_method"] = calculation[0]
                     values["interest_payment_frequency"] = "monthly"
+        if own and c.anchor_type == "owned_lending_terms" and _normalize_text(str(c.anchor_value or "")) == identity and _infer_product_type(context) == "line-of-credit":
+            from worker.pipeline.fpds_approval_policy import security_meaning
+            security = security_meaning(quote)
+            if security is not None:
+                values["secured_flag"] = security
+                values["security_requirement"] = quote
+            if re.search(r"Rates vary from \d+(?:\.\d+)?% APR to \d+(?:\.\d+)?% APR", quote):
+                values["interest_rate_summary"] = quote
+        if c.anchor_type == "named_card_apr_terms" and _infer_product_type(context) == "credit-card":
+            from worker.native_information_records import names_match
+            if names_match(c.anchor_value, identity):
+                values["purchase_interest_rate_summary"] = _normalize_text(quote)
         if own and _normalize_text(str(c.anchor_value or "")) == identity:
             if c.anchor_type == "owned_referenced_apy" and _infer_product_type(context) == "savings":
                 from worker.native_offer_records import referenced_apy_value
@@ -932,7 +944,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if _infer_product_type(context)=='gic' and quote_supports_value('non_redeemable_flag',True,quote): values['non_redeemable_flag']=True
         if own and c.anchor_type == "labelled_financial_record" and _normalize_text(str(c.anchor_value or "")) == identity:
             for name, pattern in (("monthly_fee", r"(?mi)^Monthly fee\s*\n\$(\d+(?:\.\d+)?)"),
-                                  ("annual_fee", r"(?mi)^Annual fee\s*\n(?:\(for primary cardholder and up to \d+ additional cards\)\s*\n)?\$(\d+(?:\.\d+)?)"),
+                                  ("annual_fee", r"(?mi)^Annual fee(?:\s|[*\u2020\u2021\u200b]|Footnote star)*(?:\(for primary cardholder and up to \d+ additional cards\)\s*\n)?\$(\d+(?:\.\d+)?)"),
                                   ("purchase_interest_rate", r"(?mi)^(?:Interest rate on purchases|Purchase interest rate|Interest: Purchases)\s*\n(\d+(?:\.\d+)?)%"),
                                   ("cash_advance_rate", r"(?mi)^(?:Interest rate on cash advances|Interest: Cash Advances)\s*\n(\d+(?:\.\d+)?)%")):
                 m = re.search(pattern, quote)
@@ -1138,6 +1150,10 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             # These registered optional facts are obtained from the SAME
             # complete record. They add no research, model call or target budget.
             optional_same_record = (name in (profile.supplemental_fields if profile else ())
+                or (profile is not None and canonical_value_type(name) == "string"
+                    and any(name in requirement.alternatives
+                        and set(requirement.alternatives).intersection(requested_fields)
+                        for requirement in profile.requirements))
                 or (_infer_product_type(context) == "credit-card"
                     and name in {"cash_advance_rate", "purchase_interest_rate_summary", "eligibility_text"}))
             if (name not in {*requested_fields, "currency"} and not optional_same_record) or not quote_supports_value(name,value,field_quote):
@@ -1164,6 +1180,22 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             r"(?:variable or fixed|fixed or variable) interest rate", str(f.candidate_value), re.I)
             for f in proposals["rate_type"]):
         proposals["rate_type"] = proposals["rate_type"][:1]
+    # Prefer the actual explicitly named full governing purchase column only
+    # when its purchase percentages exactly corroborate the displayed offer.
+    summaries = proposals.get("purchase_interest_rate_summary", [])
+    complete = [f for f in summaries if f.anchor_type == "named_card_apr_terms"]
+    displayed = [f for f in summaries if f.anchor_type == "owned_card_apr_offer"]
+    def purchase_signature(f):
+        purchase = " ".join(str(f.evidence_text_excerpt).split("Loss of Introductory APR:")[0].split())
+        percentages = set(re.findall(r"(?<![\d.])\d+(?:\.\d+)?%", purchase))
+        intro = bool(re.search(r"intro(?:ductory)? APR", purchase, re.I))
+        periods = set(re.findall(r"\b(\d+) months from account opening date\b", purchase, re.I))
+        if intro and len(periods) != 1:
+            return None
+        return (percentages, periods if intro else set())
+    signature = purchase_signature(complete[0]) if len(complete) == 1 else None
+    if signature is not None and displayed and all(purchase_signature(f) == signature for f in displayed):
+        proposals["purchase_interest_rate_summary"] = complete
     conflicts = {name for name, rows in proposals.items()
                  if len({str(f.candidate_value) for f in rows}) != 1}
     if 'included_transactions' in proposals and 'unlimited_transactions_flag' in proposals:
@@ -5567,7 +5599,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)
