@@ -123,6 +123,8 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     sections.extend(_named_rate_basis_sections(soup))
     sections.extend(_product_terms_sections(soup))
     sections.extend(_labelled_disclosure_sections(soup))
+    from worker.native_card_declarations import card_declarations
+    sections.extend(_RawSegment(kind, owner, None, literal) for kind, owner, literal in card_declarations(soup))
     sections.extend(_linked_rate_records(soup))
     from worker.native_application_disclosures import application_disclosure_records
     sections.extend(_RawSegment(kind, owner, None, literal) for kind, owner, literal in application_disclosure_records(soup))
@@ -239,11 +241,12 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
     """
     root = soup.find("main") or soup.body or soup
     from worker.native_dom_ownership import unique_heading, owns_label, local_notes, without_reference_markers
-    heading = unique_heading(root)
+    from worker.native_card_declarations import card_owner
+    heading = card_owner(soup) or unique_heading(root)
     if heading is None:
         return []
     identity = heading.get_text(" ", strip=True)
-    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Interest: Purchases|Interest: Cash Advances|Annual fee|Monthly fee|(?:Variable )?Purchase APR)$", re.I)
+    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Interest: Purchases|Interest: Cash Advances|Annual fee|Monthly fee|(?:Variable )?Purchase APR|Purchase rate)$", re.I)
     basis = []
     for node in root.find_all(True):
         value = node.get_text(" ", strip=True)
@@ -309,6 +312,8 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                     break
                 refs.extend(list_refs)
                 value = without_reference_markers(block)
+                if re.fullmatch(r"Purchase rate", financial_label_text(leaf), re.I) and not re.search(r"\bAPR\b", value, re.I):
+                    break
                 parts = [identity, value]
                 if re.search(r"\b(?:first year|first month|eligible|until|if you|provided|maintain|introductory|promotional)\b", scope, re.I):
                     parts.append(scope)
@@ -320,7 +325,7 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                 record = _normalize_text("\n".join(parts))
                 if len(record) <= 6400 and record not in seen:
                     seen.add(record)
-                    kind = "owned_card_apr_offer" if re.fullmatch(r"(?:Variable )?Purchase APR", financial_label_text(leaf), re.I) else "labelled_financial_record"
+                    kind = "owned_card_apr_offer" if re.fullmatch(r"(?:Variable )?Purchase APR|Purchase rate", financial_label_text(leaf), re.I) else "labelled_financial_record"
                     result.append(_RawSegment(kind, identity, None, record))
                 break
             block = block.parent

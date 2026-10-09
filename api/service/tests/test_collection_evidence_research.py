@@ -439,6 +439,19 @@ class EvidenceAcquisitionActionTests(unittest.TestCase):
         self.assertEqual(action['observed_snapshot_id'], 'snap-detail')
         self.assertNotIn('monthly_fee', action)
 
+    def test_native_fee_binding_is_required_only_and_budgeted(self):
+        from api_service.collection_evidence_research import _has_required_dynamic_lead
+        html = '<main><h1>Everyday Chequing Account</h1><p>Monthly fee <span data-id="monthlyFeeAmount-123"></span></p></main>'
+        self.assertTrue(_has_required_dynamic_lead(html, ['monthly_fee']))
+        self.assertFalse(_has_required_dynamic_lead(html, ['minimum_balance']))
+        s = source()
+        item, page = evidence(s, texts=[('Everyday Chequing Account', 'document_heading')], html=html)
+        result = self.plan(s=s, inputs=[item], pages=[page])
+        self.assertEqual([a['kind'] for a in result['actions']], ['render_html'])
+        self.assertEqual(self.plan(s=s, inputs=[item], pages=[page], remaining_renders=0)['actions'], [])
+        self.assertEqual(self.plan(s=s, inputs=[item], pages=[page], attempted_actions={result['actions'][0]['action_id']})['actions'], [])
+        self.assertEqual(self.plan(html=html.replace('</span>', '$5</span>'))['actions'], [])
+
     def test_same_page_action_does_not_repeat_or_exceed_budget(self):
         result = self.plan(html='<p>Monthly fee ${product.monthlyFee}</p>')
         self.assertEqual(self.plan(html='<p>Monthly fee ${product.monthlyFee}</p>',

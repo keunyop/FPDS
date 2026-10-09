@@ -47,8 +47,8 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
         # Audience words in an owned product-name line are not a fee waiver.
         # Scope this exception to a complete label/value record; conditions
         # after the price and promotional words in the title stay intact.
-        owned = re.match(r"([^\n]*\b(?:credit card|visa|mastercard)\b[^\n]*)\nAnnual fee\s*\n(?:None|\$\d+(?:\.\d+)?)(?:\n|$)", context, re.I)
-        if owned:
+        owned = re.match(r"([^\n]*\b(?:credit card|visa|mastercard|rewards)\b[^\n]*)\nAnnual fee\s*\n(?:None|\$\d+(?:\.\d+)?)(?:\n|$)", context, re.I)
+        if owned and not re.search(r"\b(?:if|when|only|eligible|qualif\w*|introductory|promotional|first)\b", owned[1], re.I):
             name = re.sub(r"\bfor (?:students?|seniors?|youth)\b", "Audience", owned[1], flags=re.I)
             context = name + context[len(owned[1]):]
         context = re.sub(r"(?mi)^\(for primary cardholder and up to \d+ additional cards\)[ \t]*$", "Cardholder scope", context)
@@ -590,6 +590,11 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if ordinary:
             return len(ordinary) == 1 and Decimal(ordinary[0]) == number and not _money_has_condition(quote,field_name)
     if contract.unit == "currency_amount":
+        if field_name == "annual_fee":
+            from worker.native_card_declarations import declaration_fee_value
+            declared_fee = declaration_fee_value(quote)
+            if declared_fee is not None:
+                return declared_fee == number
         if field_name == "annual_fee":
             from worker.native_information_records import shared_card_fee
             fee = shared_card_fee(quote)

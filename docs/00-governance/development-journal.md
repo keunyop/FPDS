@@ -1,5 +1,64 @@
 # FPDS Development Journal
 
+## 2026-10-09 - Citibank generic collection correction and current publication
+
+- Latest six CN/US scopes approved zero of 23 candidates. Direct inspection of
+  34 original/current targets isolated missed dynamic price bindings, incomplete
+  owned purchase disclosures and omitted full qualified lending notes.
+- Shared detector, native DOM/card/lending records, parser v22, extraction and
+  instructions/cache/process v13 now preserve literal product ownership, complete
+  APR ranges/conditions, independent unconditional fees and reciprocal notes.
+  No bank exceptions, weaker essentials, invented values or review overrides.
+- Current operation `citibank-direct-20261009`: eight automatic approvals (seven
+  cards/one personal loan), fifteen exclusions; no paid providers or Admin API.
+  Stored-origin checks and rollback rehearsal pass. Normal refresh
+  `agg_cY2GcCw9cCDisYh_` published all eight; API/site readback and 25 field-origin
+  links pass. US28→36/CA120; original histories and unrelated data preserved,
+  private evidence remains private. Sixteen bounded renders, one timeout, no retry.
+- Verification: API 650, affected Worker 59, final render/source boundary 18 pass;
+  fixture hashes, syntax/UTF-8/JSON/references, foundation and diff checks pass.
+  Initial full Worker 956 had three failures: one newly exposed detector boundary
+  fixed/reverified, two pre-existing HEAD-identical National/Oaken hash failures.
+- Key files: dynamic_pricing.py, native_dom_ownership.py, native_card_declarations.py,
+  native_owned_lending_records.py, extraction/service.py, API research planner,
+  source-backed owned-pricing-disclosures fixtures/tests and
+  [case report](citibank-generic-collection-corrections-2026-10-09.md).
+- Limit/next: publication is complete; serving health remains v11. Coordinated
+  v13 API/Worker release is still needed for future Admin collection. No runtime
+  restart/deployment or schema migration was performed. Prior work is preserved.
+
+## 2026-10-09 - BNY/Capital One generic collection correction and current publication
+
+- Latest US/CONA four Runs had 27 candidates, nine approvals; US/BNY checking
+  skipped with no eligible detail. Replaying six originally rejected cards on
+  identical retained bytes validates all six after shared corrections.
+- Parser v21/process v12 retain owned literal price/explicit APR blocks,
+  uniquely resolved scroll-target notes, independently corroborated hero labels
+  and meaningful audience names. Full qualified terms remain; conditional or
+  conflicting fees (including typographic apostrophes), missing origins/notes,
+  foreign panels and nonannual percentages stay excluded. Prompts/cache/gates
+  move together. No bank exceptions, weaker essentials or manual review.
+- Current direct operation: 27 candidates, fifteen normal automatic promotions,
+  twelve exclusions; zero providers/Admin API/reviews. Six new cards and nine
+  version updates published in `agg_ehR8w3tXsz54HJOw`; US28/CA120 and all fifteen
+  API/site details with full APR conditions verified. BNY remains unproven.
+- Actual DB origin reassessment and rollback rehearsal pass. Forty-five exact
+  current field links, original five Runs/27 candidates/45 stages/46 documents/
+  95 snapshots, all 1,534 previous financial version facts and other 456 canonical
+  rows are preserved; nine old versions normally superseded. Private evidence
+  remains private; final operation receipts retained separately.
+- Final affected boundary 44 and independent API 649 tests pass. Full Worker
+  before final quote-punctuation tightening: 944/946 pass, two existing legacy
+  hash failures; all 23 affected fixture bytes/manifests equal HEAD, unchanged.
+  New six official fixture hashes, syntax/UTF-8/JSON/introduced links, foundation
+  and diff checks pass. No UI/schema change or runtime deployment.
+- Key files: native_card_declarations, shared DOM ownership, parse/extraction/
+  financial gates/cache/instructions/versions, source-backed card regressions,
+  accuracy policy and API/Worker READMEs.
+- Next: coordinated API/Worker v12 deployment for future Admin collection;
+  final serving health remains v11 / ok. Data publication is complete.
+- [Diagnosis, exact verification and published product links](bny-capital-one-generic-collection-corrections-2026-10-09.md).
+
 ## 2026-10-09 - BMO generic collection correction and current publication
 
 - Diagnosed latest US/BB five Runs: sixteen candidates, one old automatic

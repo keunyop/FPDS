@@ -1,5 +1,29 @@
 # FPDS API Service
 
+## Owned dynamic pricing and complete disclosures - 2026-10-09
+
+Parser v22/process `2026-10-09-owned-pricing-disclosure-proof-v13` detect owned
+empty DOM price bindings within existing required-only render limits and retain
+complete named purchase-APR and lending-range disclosures. Independent annual
+prices, full qualifications, exact identities and current stored origins remain
+mandatory. Reciprocal numeric return links do not import another note. No weaker
+essentials, bank exceptions, manual review or new recovery workflow are added.
+Deploy API/Worker together for future ordinary Admin collection; direct Public
+data publication is verified separately.
+[Diagnosis and verified results](../../docs/00-governance/citibank-generic-collection-corrections-2026-10-09.md).
+
+## Shared card declarations and current origins - 2026-10-09
+
+Parser v21/process `2026-10-09-owned-card-declaration-proof-v12` preserve literal
+annual-fee declarations, explicit Purchase rate APRs and complete uniquely resolved
+scroll-target notes. Actual owned product labels/SEO/routes establish identity;
+audience words in a product name remain distinct from fee-waiver conditions.
+Conflicts, unknown notes, other panels, calculators and bare nonannual rates exclude.
+Shared prompts, financial/origin gates and cache identity move together. Deploy
+API/Worker together; current data publication is separately verified. See the
+[accuracy policy](../../docs/03-design/collection-accuracy-policy.md).
+[Diagnosis and publication/runtime verification](../../docs/00-governance/bny-capital-one-generic-collection-corrections-2026-10-09.md).
+
 ## Snapshot-pinned ordinary transaction proof - 2026-10-09
 
 Process `2026-10-09-owned-list-disclosure-proof-v11` checks the private field

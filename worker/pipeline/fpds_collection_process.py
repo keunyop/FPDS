@@ -1,5 +1,5 @@
 """Versioned acquisition contract shared by health and the collection runner."""
-COLLECTION_PROCESS_VERSION = "2026-10-09-owned-list-disclosure-proof-v11"
+COLLECTION_PROCESS_VERSION = "2026-10-09-owned-pricing-disclosure-proof-v13"
 MAX_RESEARCH_ROUNDS = 2
 MAX_ADDITIONAL_PER_DETAIL = 2
 MAX_ADDITIONAL_PER_RUN = 48

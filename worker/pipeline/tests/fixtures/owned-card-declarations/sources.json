@@ -1,0 +1,44 @@
+[
+  {
+    "url": "https://www.capitalone.com/credit-cards/potterybarn/",
+    "fetched_at": "2026-10-09T16:19:49.956087+00:00",
+    "sha256": "2f0045d57671e8d461be932fc4f104cd44c4509125484b3cc22737ce9ad63207",
+    "content_type": "text/html",
+    "fixture": "partner.html.gz"
+  },
+  {
+    "url": "https://www.capitalone.com/credit-cards/savor/",
+    "fetched_at": "2026-10-09T16:19:58.621902+00:00",
+    "sha256": "778719670af711a32b4a69ee9e4bced4cc5c4191ca950457526b3889bc749569",
+    "content_type": "text/html",
+    "fixture": "intro.html.gz"
+  },
+  {
+    "url": "https://www.capitalone.com/credit-cards/venture/",
+    "fetched_at": "2026-10-09T16:19:24.080314+00:00",
+    "sha256": "32337964be27242394d010904bf947d1dc6ff17f5c10f9cbd38fdc1e420545e0",
+    "content_type": "text/html",
+    "fixture": "label.html.gz"
+  },
+  {
+    "url": "https://www.capitalone.com/credit-cards/quicksilver/",
+    "fetched_at": "2026-10-09T16:19:27.816319+00:00",
+    "sha256": "ad3381283f579ead6850fc2a310af45519241509b3c45fb09dfda631a6292995",
+    "content_type": "text/html",
+    "fixture": "cashback.html.gz"
+  },
+  {
+    "url": "https://www.capitalone.com/credit-cards/savor-student/",
+    "fetched_at": "2026-10-09T16:19:03.401637+00:00",
+    "sha256": "eb90ee91bb3555f389129a7faae1cff0ca8192dc155ba14b8b7914ad01611c6f",
+    "content_type": "text/html",
+    "fixture": "student.html.gz"
+  },
+  {
+    "url": "https://www.capitalone.com/credit-cards/quicksilver-good-credit/",
+    "fetched_at": "2026-10-09T16:18:54.678973+00:00",
+    "sha256": "3df0b915b5c758adaa495991807cbf45b402bc8f39efe3fda2797574fcc837fa",
+    "content_type": "text/html",
+    "fixture": "good-credit.html.gz"
+  }
+]

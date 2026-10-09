@@ -1,0 +1,62 @@
+[
+  {
+    "fixture": "loan.html.gz",
+    "url": "https://www.citi.com/personal-loans",
+    "sha256": "fe42e47b3031c848fbdac81cd699c19c1c712d0691efab61d7b099b0ea1a96bb",
+    "fetched_at": "2026-10-09T17:37:18.226034+00:00"
+  },
+  {
+    "fixture": "card-static.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-double-cash-credit-card?category=view-all-credit-cards&intc=hp_aafam~old_filt_citi&afc=161",
+    "sha256": "c46c0c53d8bd9940902dfa7274921fadb2678792291afce9be8203e034047436",
+    "fetched_at": "2026-10-09T17:38:11.702964+00:00"
+  },
+  {
+    "fixture": "card-rendered.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-double-cash-credit-card?category=view-all-credit-cards&intc=hp_aafam~old_filt_citi&afc=161",
+    "sha256": "820e4dcf4b2a48b25965acae4bb782403fbc7d56b36b65b557c0154b3a509c8d",
+    "fetched_at": "2026-10-09T17:40:18.251838+00:00"
+  },
+  {
+    "fixture": "card-sibling-label.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-strata-premier-credit-card?category=view-all-credit-cards&intc=hp_aafam~old_filt_citi&afc=161",
+    "sha256": "52a78530ef9e3add5d38d04083653bbc7e96dc8e2c5baee12c92d4012f10c901",
+    "fetched_at": "2026-10-09T17:37:58.480341+00:00"
+  },
+  {
+    "fixture": "card-markup-label.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-home-depot-consumer-credit-card?category=view-all-credit-cards&intc=hp_aafam~old_filt_citi&afc=161",
+    "sha256": "3fd1a01f2b5ec0c1746921de97a8e33cb9543cdfd5732b2f4a3a460fd2d2fd17",
+    "fetched_at": "2026-10-09T17:37:28.924413+00:00"
+  },
+  {
+    "fixture": "card-combined.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-strata-elite-credit-card?category=view-all-credit-cards&intc=hp_aafam~old_filt_citi&afc=161",
+    "sha256": "89c7008cb529984aa8ac31c6318d264164a452ee948da23b4fe0d265972e4c6f",
+    "fetched_at": "2026-10-09T17:43:31.656633+00:00"
+  },
+  {
+    "fixture": "card-intro.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-simplicity-credit-card?category=view-all-credit-cards&intc=hp_aafam~old_filt_citi&afc=161",
+    "sha256": "0af87ce2b1336d79ea93dc748c5660ff65823d3e21536a84c0e452011582085c",
+    "fetched_at": "2026-10-09T17:44:38.410043+00:00"
+  },
+  {
+    "fixture": "card-after-periods.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-diamond-preferred-credit-card?category=view-all-credit-cards&intc=hp_aafam~old_filt_citi&afc=161",
+    "sha256": "2a926222473e6bc7641c19f29fa86881b8c6afc926bb3f466ce00c6eda4c0150",
+    "fetched_at": "2026-10-09T17:46:36.024837+00:00"
+  },
+  {
+    "fixture": "card-colon.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-aadvantage-globe-mastercard",
+    "sha256": "4ecf25c3901fbe76e01b181a1754ccd07cc98a9179897bcc224c436f158aa294",
+    "fetched_at": "2026-10-09T17:49:03.565113+00:00"
+  },
+  {
+    "fixture": "card-applies.html.gz",
+    "url": "https://www.citi.com/credit-cards/citi-att-pointsplus-credit-card?category=view-all-credit-cards&intc=hp_aafam~old_filt_citi&afc=161",
+    "sha256": "f2aa93c8847dbffbdb9667f97ceaa548c2d71d75f0703c7357b3804c9f3781f6",
+    "fetched_at": "2026-10-09T17:43:59.690632+00:00"
+  }
+]

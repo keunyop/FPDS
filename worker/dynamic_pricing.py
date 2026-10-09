@@ -3,7 +3,7 @@ import re
 
 
 def has_empty_dynamic_rate_slot(html: str) -> bool:
-    if has_literal_financial_template(html):
+    if has_literal_financial_template(html) or has_empty_native_price_slot(html):
         return True
     # Literal rate-loader markup plus an empty slot is stronger than a stray
     # percentage in legal notes. No scripts are evaluated here.
@@ -76,3 +76,36 @@ def has_literal_financial_template(html: str, *, kind: str = 'rate') -> bool:
     try:observer.feed(html)
     except (ValueError,RecursionError):return False
     return observer.found
+
+def has_empty_native_price_slot(html: str, *, kind: str = "rate") -> bool:
+    """Empty literal DOM price bindings are render leads, never financial facts."""
+    from bs4 import BeautifulSoup
+    from worker.native_dom_ownership import unique_heading, owns_label
+    if not html or len(html) > 16000000:
+        return False
+    soup = BeautifulSoup(html, "html.parser")
+    root = soup.find("main") or soup.body or soup
+    heading = unique_heading(root)
+    if heading is None:
+        return False
+    owner = heading.get_text(" ", strip=True)
+    meaning = r"rate|apr|apy|yield" if kind == "rate" else r"fee|charge"
+    for node in root.find_all(["span", "div", "td"])[:8192]:
+        if node.get_text(strip=True) or node.find_parent(["nav", "aside", "footer", "header", "form", "script"]):
+            continue
+        if any(re.search(r"calculator|graph", " ".join(a.get("class", [])), re.I) for a in list(node.parents)[:4]):
+            continue
+        bindings = [str(node.get(key, "")) for key in ("data-id", "data-field", "data-bind")]
+        if not any(re.fullmatch(r"[A-Za-z][A-Za-z0-9_.:-]{1,120}", value) and re.search(meaning, value, re.I) for value in bindings):
+            continue
+        label = r"\b(?:APR|APY|rate|yield|interest)\b" if kind == "rate" else r"\b(?:fee|charge)\b"
+        for block in list(node.parents)[:4]:
+            if block is root or len(block.get_text()) > 2400:
+                break
+            if (block.select('input:not([type="hidden"]), select, textarea, [role="slider"]')
+                    or re.search(r"calculator|graph", " ".join(block.get("class", [])), re.I)
+                    or not owns_label(block, root, owner)):
+                break
+            if re.search(label, block.get_text(" ", strip=True), re.I):
+                return True
+    return False

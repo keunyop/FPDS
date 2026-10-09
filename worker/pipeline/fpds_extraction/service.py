@@ -593,6 +593,27 @@ def _captured_native_product_title(context, candidates):
                     and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
                     and c.bank_code == context.bank_code and c.country_code == context.country_code)):
             return literal
+    # Parser-observed literal hero labels require their own native price and
+    # exact current origin. A discovery name/score cannot manufacture them.
+    labels = [c for c in candidates if c.anchor_type == "owned_product_label"
+        and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+        and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
+        and c.country_code == context.country_code and c.source_language == context.source_language]
+    if len({c.evidence_excerpt for c in labels}) == 1:
+        literal = labels[0].evidence_excerpt
+        distinctive = route_tokens(re.split(r"\s+from\s+", literal, flags=re.I)[0]) - route_tokens("credit card rewards account savings for")
+        captured_titles = [c.evidence_excerpt for c in candidates if c.anchor_type == "document_title"
+            and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+            and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
+            and c.country_code == context.country_code and c.source_language == context.source_language]
+        core = route_tokens(re.split(r"\s+from\s+", literal, flags=re.I)[0])
+        if distinctive and distinctive <= route_tokens(urlsplit(url).path) and core - route_tokens("rewards for") <= route_tokens(" ".join(captured_titles)) and any(
+                c.anchor_type in {"labelled_financial_record", "owned_card_apr_offer"}
+                and c.anchor_value == literal and c.source_document_id == context.source_document_id
+                and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
+                and c.bank_code == context.bank_code and c.country_code == context.country_code
+                and c.source_language == context.source_language for c in candidates):
+            return literal
     # A marketing/action SEO title can disagree with an exact native H1.
     # Require the owned main section AND its own labelled price record AND a
     # distinctive product URL; metadata/confidence alone never proves identity.
@@ -733,6 +754,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
     changed number can enter here; all output retains a complete native record.
     """
     from worker.pipeline.fpds_collection_accuracy import quote_supports_value
+    from worker.native_information_records import names_match
     metadata=context.source_metadata
     discovery=metadata.get("discovery_metadata") or {}
     identity=_authoritative_discovery_product_title(context)
@@ -790,7 +812,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
         field_quotes = {}
         heading = _normalize_text(str(discovery.get("primary_heading") or ""))
         first_line = next((_normalize_text(line) for line in quote.splitlines() if line.strip()), "")
-        if own and ((c.anchor_type == "document_heading" and first_line == identity) or first_line == heading or (c.anchor_type == "document_title" and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(quote).casefold()) == re.sub(r"[^a-z0-9]", "", identity.casefold()))):
+        if own and ((c.anchor_type in {"document_heading", "owned_product_label"} and first_line == identity) or first_line == heading or (c.anchor_type == "document_title" and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(quote).casefold()) == re.sub(r"[^a-z0-9]", "", identity.casefold()))):
             values["product_name"] = identity
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
             for currency, pattern in CURRENCY_PATTERNS.items():
@@ -827,19 +849,22 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 if calculation:
                     values["interest_calculation_method"] = calculation[0]
                     values["interest_payment_frequency"] = "monthly"
-        if own and c.anchor_type == "owned_lending_terms" and _normalize_text(str(c.anchor_value or "")) == identity and _infer_product_type(context) == "line-of-credit":
+        if own and c.anchor_type == "owned_lending_terms" and _normalize_text(str(c.anchor_value or "")) == identity and _infer_product_type(context) in {"line-of-credit", "personal-loan", "mortgage"}:
             from worker.pipeline.fpds_approval_policy import security_meaning
             security = security_meaning(quote)
             if security is not None:
                 values["secured_flag"] = security
                 values["security_requirement"] = quote
-            if re.search(r"Rates vary from \d+(?:\.\d+)?% APR to \d+(?:\.\d+)?% APR", quote):
+            if re.search(r"Rates vary from \d+(?:\.\d+)?% APR to \d+(?:\.\d+)?% APR|Your APR may be as low as \d+(?:\.\d+)?% or as high as \d+(?:\.\d+)?%", quote):
                 values["interest_rate_summary"] = quote
+                term = re.search(r"[^.!?\n]{0,120}\boffers personal loans with a period of repayment between \d+ and \d+-month terms[.]", quote, re.I)
+                if term and _infer_product_type(context) == "personal-loan":
+                    values["term_length_text"] = term[0].strip()
         if c.anchor_type == "named_card_apr_terms" and _infer_product_type(context) == "credit-card":
             from worker.native_information_records import names_match
             if names_match(c.anchor_value, identity):
                 values["purchase_interest_rate_summary"] = _normalize_text(quote)
-        if own and _normalize_text(str(c.anchor_value or "")) == identity:
+        if own and names_match(str(c.anchor_value or ""), identity):
             if c.anchor_type == "owned_referenced_apy" and _infer_product_type(context) == "savings":
                 from worker.native_offer_records import referenced_apy_value
                 apy = referenced_apy_value(quote)
@@ -942,7 +967,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if excess: values['additional_transaction_fee']=float(excess[1])
             if quote_supports_value('unlimited_transactions_flag',True,quote): values['unlimited_transactions_flag']=True
             if _infer_product_type(context)=='gic' and quote_supports_value('non_redeemable_flag',True,quote): values['non_redeemable_flag']=True
-        if own and c.anchor_type == "labelled_financial_record" and _normalize_text(str(c.anchor_value or "")) == identity:
+        if own and c.anchor_type == "labelled_financial_record" and names_match(str(c.anchor_value or ""), identity):
             for name, pattern in (("monthly_fee", r"(?mi)^Monthly fee\s*\n\$(\d+(?:\.\d+)?)"),
                                   ("annual_fee", r"(?mi)^Annual fee(?:\s|[*\u2020\u2021\u200b]|Footnote star)*(?:\(for primary cardholder and up to \d+ additional cards\)\s*\n)?\$(\d+(?:\.\d+)?)"),
                                   ("purchase_interest_rate", r"(?mi)^(?:Interest rate on purchases|Purchase interest rate|Interest: Purchases)\s*\n(\d+(?:\.\d+)?)%"),
@@ -950,6 +975,10 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 m = re.search(pattern, quote)
                 if m:
                     values[name] = float(m[1])
+            from worker.native_card_declarations import declaration_fee_value
+            declared_fee = declaration_fee_value(quote)
+            if declared_fee is not None:
+                values["annual_fee"] = float(declared_fee)
             # An owned amount-first Fees card preserves the literal label;
             # the shared money gate still rejects waiver/duration zeroes.
             for name, label in (("annual_fee", "Annual fee"), ("monthly_fee", "Monthly fee")):
@@ -958,6 +987,8 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                     values[name] = float(amount_first[1])
             if quote_supports_value("monthly_fee", 0, quote):
                 values["monthly_fee"] = 0.0
+            if quote_supports_value("annual_fee", 0, quote):
+                values["annual_fee"] = 0.0
             if re.search(r"(?mi)^Annual fee\s*\nNone(?:\n|$)", quote):
                 values["annual_fee"] = 0.0
         if own and c.anchor_type == "section" and _infer_product_type(context) == "credit-card":

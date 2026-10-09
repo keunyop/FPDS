@@ -1,5 +1,36 @@
 # Admin pre-handover review and fixes
 
+## BNY and Capital One direct diagnosis and publication - 2026-10-09
+
+Status: Complete for shared code, current data publication and Public readback. Preserve all prior ownership and unfinished sections.
+Scope: latest retained Runs, current official evidence without Admin API, shared
+source-backed fixes and ordinary automatic validation/Public publication in the
+existing authorized environment. Runtime deployment is separately reported.
+Acceptance:
+- [x] Reconcile latest targets/results and first actual evidence losses.
+- [x] Fix generic defects with cross-bank/type success/boundary/failure regressions.
+- [x] Verify affected behavior and actual stored-origin automatic gates.
+- [x] Rehearse rollback, publish current passes and verify Public readback.
+- [x] Record outcome/limits, journal, final diff and acceptance review.
+Limits: no weaker essentials, manual review, bank exceptions, historical
+restoration, permanent recovery feature, paid loops or unrelated data changes.
+
+Outcome: latest original Capital One 27/9 becomes 27/15 under current official
+capture and actual stored-origin gates; six new cards and nine version updates
+are published and all fifteen API/site details pass. BNY has no proven eligible
+addition. Shared parser v21/process v12 fixes owned literal prices, scroll-note
+references and independently corroborated product labels; no weaker essentials.
+Verification: final affected 44 and independent API 649 tests pass; full Worker
+944/946 pass before final quote-punctuation tightening, with only two HEAD-
+identical legacy hash failures. Rollback rehearsal, 45 current field links,
+original history/1,534 version facts, unrelated data, privacy, US28/CA120 Public,
+source hashes/syntax/UTF-8/references/foundation/diff checks pass.
+Next: deploy API/Worker together at v12 for future Admin runs; final serving
+health remains v11. This task completed data publication without runtime deploy.
+Report: docs/00-governance/bny-capital-one-generic-collection-corrections-2026-10-09.md
+
+
+
 ## Admin deployed domain and persistent collection hosting - 2026-10-08
 
 Status: Complete for local configuration and hosting guidance; remote settings remain unapplied. Preserve all earlier ownership and unfinished work.
@@ -2186,3 +2217,31 @@ Verification: API 649 and affected 52 pass; Worker 929 with two HEAD-identical
 legacy hash-test failures. Actual source links 16, rollback and five API/site
 readbacks pass; Public CA 120 / US 22. Serving health still v10; no deployment.
 Next: coordinated API/Worker v11 release. Earlier goal sections remain intact.
+
+
+## Citibank direct collection and generic corrections - 2026-10-09
+
+Status: Complete for local generic code and current product publication. Preserve all previous ownership and sections.
+Scope: latest Citibank CN/US Runs, direct current official evidence without Admin API, generic source-backed corrections and ordinary automatic publication in the existing authorized environment.
+Acceptance:
+- [x] Diagnose targets and first evidence losses.
+- [x] Add source-backed cross-bank/type boundary regressions and shared corrections.
+- [x] Verify actual stored-origin gates and rehearse rollback.
+- [x] Publish current passes and verify Public, history, privacy and unrelated data.
+- [x] Complete journal, report, final diff and acceptance review.
+Limits: no weaker essentials, manual approval, bank exceptions, paid loops, permanent recovery or unrelated data writes. Runtime deployment is separately reported.
+
+Outcome: 23 current candidates / eight ordinary automatic approvals and Public
+listings (seven cards, one personal loan); fifteen exclusions. Exact original
+loan replay now passes, but only current captures were published. No providers,
+Admin API calls or manual reviews. Source-backed cross-bank/type boundaries
+cover empty native price slots, complete qualified pricing and reciprocal notes.
+Verification: API 650; affected Worker 59; final render/source boundary 18 pass.
+Full Worker initial 956 had one newly exposed empty-container failure, now fixed,
+and two HEAD-identical legacy fixture-hash failures. Actual 25 field-origin
+links, rollback, eight API/site readbacks and full APR/repayment text pass.
+Public CA120/US36; originals and unrelated data preserved. Fixture hashes,
+foundation, syntax/encoding/references and git diff --check pass.
+Limit/next: serving health remains v11; local v13 API/Worker require coordinated
+release for future Admin collection. No runtime deployment or migration performed.
+Earlier unrelated goal sections remain intact.

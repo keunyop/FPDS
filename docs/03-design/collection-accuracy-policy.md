@@ -1,5 +1,50 @@
 # Product collection accuracy and automatic acceptance
 
+## Owned dynamic prices and complete APR disclosures - 2026-10-09
+
+Parser v22/process `2026-10-09-owned-pricing-disclosure-proof-v13` recognize
+empty literal data-bound rate/fee slots with a bounded owned financial label.
+Inline-only product-name markup preserves the actual name; unknown markup,
+foreign panels, calculators and plain empty containers remain ineligible.
+These are acquisition leads only. Same-page rendering retains all existing
+required-only, once-per-URL and per-detail/Run limits; it never supplies a fact.
+
+A uniquely named Pricing Details block retains every paragraph, including
+purchase/transfer periods, current variable ranges, creditworthiness, fees,
+default consequences and application conditions. Only a separately labelled
+unconditional annual price can be a scalar; conflicts and waivers exclude.
+Exact named boundaries and actual current snapshot/parse origins still apply.
+An owned full lending APR interval retains discounts, repayment terms, examples
+and default increases together. Examples/discounts/endpoints never become rates.
+A numeric reciprocal note-return link is navigation only when every caller
+points to that uniquely identified complete note. Other unresolved notes reject.
+
+Existing essentials, currency/types, optional-fact preservation and automatic
+publication gates are unchanged. No bank exception, manual review or permanent
+recovery feature is added. Serving deployment and data publication are separate.
+[Diagnosis and verification](../00-governance/citibank-generic-collection-corrections-2026-10-09.md).
+
+## Owned card declarations and literal scroll references - 2026-10-09
+
+Parser v21/process `2026-10-09-owned-card-declaration-proof-v12` retain owned
+literal amount-first/no-annual-fee declarations and Purchase rate labels only
+with an explicit APR. Local `data-scroll-target` references must resolve to one
+complete same-document note; missing, duplicated or conflicting targets exclude.
+Full note, rate ranges, intro periods, transfer-price conditions and source origins
+remain intact. Bare purchase percentages cannot displace complete annual terms.
+
+A literal hero product label and an audience-bearing native name need independent
+captured SEO/route corroboration and their own price record. Rewards/for formatting
+does not remove Students, Good Credit, Plus or other meaningful product qualifiers.
+Discovery confidence and marketing H1s cannot prove identity. Separate labelled
+APR/transfer prices and credit-approval terms do not condition a corroborated
+annual fee; unknown fee conditions or conflicting restatements still exclude.
+
+Shared source regressions, money/summary gates, prompts and cache fingerprints
+change together. Existing checking costs, withdrawal/access consequences, currency,
+optional-fact and security contracts remain. Public data publication and serving
+API/Worker deployment are distinct operations.
+
 ## Owned lists, named APR columns and lending declarations - 2026-10-09
 
 Parser v20/process `2026-10-09-owned-list-disclosure-proof-v11` recognize literal

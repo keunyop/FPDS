@@ -11,6 +11,9 @@ def _account_notes(soup, block):
     for marker in block.find_all("sup"):
         if marker.find("a") is not None:
             continue
+        parent_ref = marker.find_parent("a")
+        if parent_ref is not None and (parent_ref.get("data-scroll-target") or str(parent_ref.get("href", "")).startswith("#") or parent_ref.get("aria-describedby")):
+            continue
         symbol = marker.get_text("", strip=True)
         if not re.fullmatch(r"[0-9]+|[\u2020\u2021*]", symbol):
             continue

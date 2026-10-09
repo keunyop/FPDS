@@ -6,7 +6,17 @@ FEE_CHANGE_NOTICE_INSTRUCTIONS = (
     "Retain their complete conditions; a conditional zero does not replace the regular base fee. "
 )
 
+QUALIFIED_LENDING_DISCLOSURE_INSTRUCTIONS = (
+    "A full owned APR interval with explicit lower and upper bounds retains the complete original disclosure, including discounts, eligibility, terms, default consequences and separately labelled repayment examples. Never use an example, discount or range endpoint as a scalar rate. Reciprocal numeric note-return links are navigation only when every caller points to that exact uniquely identified note. Missing or conflicting disclosures still reject. "
+)
+
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    "A named literal Pricing Details block retains every paragraph, including purchase APR range, variable/creditworthiness basis, default triggers, transfer terms and new-cardmember approval conditions. Unpopulated DOM price bindings are acquisition leads only. An independently labelled unconditional annual fee remains separate; conflicting/qualified fee restatements still reject. "
+    "Owned literal $0 annual fee and No annual fee declarations retain the complete local record and uniquely resolved data-scroll-target notes. "
+    "Separate explicitly labelled APR/transfer prices from the independently stated annual fee; unknown fee conditions, conflicts and missing notes still exclude. "
+    "Purchase rate with literal APR is a purchase summary, retaining all introductory periods, ranges, variable basis, fees and qualifications; never use endpoints or promotions as scalars. "
+    "A literal hero product label requires its exact captured SEO/route corroboration and its own price record; marketing H1s and discovery confidence alone prove no identity. "
+
     "Native labelled list rows retain their literal reference markers and uniquely observed legal links. Accessibility text or zero-width formatting does not change label meaning; unresolved or competing references still block. "
     "A named PDF purchase column must retain its complete introductory period, current variable APR range, creditworthiness/Prime Rate basis, loss-of-introductory-APR trigger and promotional grace conditions. Prefer it over an owned display only when the purchase percentages and introductory account-opening periods corroborate exactly; never borrow neighbouring card columns. "
     "A financial label rendered as a heading is still a label, not a sibling product. Preserve an owned complete purchase Intro APR declaration, its billing-cycle/transfer boundaries and current variable APR range as purchase_interest_rate_summary, including every literal note. Never turn its zero promotion or range endpoint into a scalar. "
@@ -158,6 +168,7 @@ COMPARISON_INSTRUCTIONS = (
     + ACCOUNT_COST_CONTEXT_INSTRUCTIONS
     + WITHDRAWAL_CONTEXT_INSTRUCTIONS
     + NATIVE_RATE_CONTEXT_INSTRUCTIONS
+    + QUALIFIED_LENDING_DISCLOSURE_INSTRUCTIONS
     + "Bind each value to its own label, complete quote and exact source URL. Never pair a "
     "term with an adjacent row's rate. Preserve explicit currency and rate basis; a country "
     "default is allowed only when the source has no explicit currency: CA uses CAD and US "

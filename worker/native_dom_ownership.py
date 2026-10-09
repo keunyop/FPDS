@@ -1,6 +1,19 @@
 """Bounded native product ownership and literal local disclosure references."""
 import re
-from bs4 import Tag
+from functools import lru_cache
+from bs4 import BeautifulSoup, Tag
+
+
+@lru_cache(maxsize=1024)
+def _literal_attribute_name(value):
+    if len(value) > 1000:
+        return None
+    if "<" not in value:
+        return value
+    label = BeautifulSoup(value, "html.parser")
+    if any(tag.name not in {"sup", "span", "b", "strong"} for tag in label.find_all(True)):
+        return None
+    return label.get_text(" ", strip=True)
 
 
 def unique_heading(root):
@@ -20,8 +33,11 @@ def owns_label(node, root, owner):
         names = []
         for named in [ancestor, *ancestor.find_all(True)]:
             for key, value in named.attrs.items():
-                if re.fullmatch(r"data-(?:card|product|account)[_-]name", key, re.I):
-                    names.append(str(value))
+                if re.fullmatch(r"data-(?:card|product|account)[_-]?name", key, re.I):
+                    literal = _literal_attribute_name(str(value))
+                    if literal is None:
+                        return False
+                    names.append(literal)
             classes = " ".join(named.get("class", []))
             if re.search(r"(?:card|product|account)[_-](?:name|title)(?:\s|$)", classes, re.I):
                 names.append(named.get_text(" ", strip=True))
@@ -40,6 +56,10 @@ def local_notes(soup, block):
             target = href[1:]
         elif str(ref.get("data-target", "")).startswith("#"):
             target = str(ref["data-target"])[1:]
+        elif ref.get("data-scroll-target"):
+            target = str(ref["data-scroll-target"]).removeprefix("#")
+            if not re.fullmatch(r"[A-Za-z][\w:.-]{0,199}", target):
+                return None
         elif ref.get("aria-describedby"):
             ids = str(ref["aria-describedby"]).split()
             if len(ids) != 1:
@@ -51,7 +71,26 @@ def local_notes(soup, block):
             if href == "#":
                 return None
             continue
+        hints = []
+        for key in ("href", "data-target"):
+            value = str(ref.get(key, ""))
+            if value.startswith("#") and len(value) > 1:
+                hints.append(value[1:])
+        for key in ("data-scroll-target", "aria-describedby"):
+            if ref.get(key):
+                hints.append(str(ref[key]).removeprefix("#"))
+        if any(hint != target for hint in hints):
+            return None
         targets = soup.find_all(id=target)
+        # A reciprocal note return is navigation, not another disclosure.
+        # Responsive copies may repeat the same numeric caller. Every caller
+        # must point back to this uniquely identified complete note.
+        note_id = block.get("id")
+        if (note_id and len(soup.find_all(id=note_id)) == 1
+                and re.fullmatch(r"[\s←]*Go back", ref.get_text(" ", strip=True), re.I)
+                and targets and all(t.name == "a" and t.get("href") == "#" + note_id
+                    and re.fullmatch(r"\d+", t.get_text("", strip=True)) for t in targets)):
+            continue
         if len(targets) != 1:
             return None
         note = targets[0].get_text(" ", strip=True)
