@@ -1,5 +1,31 @@
 # Admin pre-handover review and fixes
 
+## SwitchaBank country-scoped blog and US article - 2026-10-09
+
+Status: Complete for local Public code/content; serving deployment is separate. Preserve all prior goals and ownership.
+Scope: Public blog follows the header country across navigation, list/detail,
+locale changes and SEO; add one concise officially sourced US savings comparison
+in EN/KO/JA with accessible responsive infographics.
+Acceptance:
+- [x] CA/US lists and links stay country-scoped; cross-market articles return to
+      the selected blog index; unsupported markets have a localized empty state.
+- [x] US article preserves verified USD/APY conditions, official citations,
+      hypothetical example assumptions and country-correct comparison actions.
+- [x] Canonical/hreflang, structured data, sitemap and social artwork agree.
+- [x] Behavior tests, lint/typecheck/build, 390/768/1440 browser checks and
+      no-JavaScript/404/error checks pass; journal and final diff review complete.
+Limits: local code/content only; no deployment, collection or canonical data writes.
+Outcome: country-preserving navigation and CA/US lists; one original concise
+US savings article in EN/KO/JA with four official sources, access boundaries,
+USD/APY assumptions, two accessible infographics and market-correct SEO.
+Verification: Public 108 tests, final lint/typecheck and isolated production build;
+119 browser checks with zero errors, including 390/768/1440 widths, actual country/
+locale controls, 18 sitemap URLs, no-JavaScript and API-failure handoffs. Final
+three-width US screenshot/social review, foundation, references/JSON/UTF-8/Python,
+original Canadian content/dates and unrelated-goal preservation, diff checks pass.
+Next: normal Public review/release; no deployment, DB mutation or collection.
+
+
 ## BNY and Capital One direct diagnosis and publication - 2026-10-09
 
 Status: Complete for shared code, current data publication and Public readback. Preserve all prior ownership and unfinished sections.
@@ -2245,3 +2271,24 @@ foundation, syntax/encoding/references and git diff --check pass.
 Limit/next: serving health remains v11; local v13 API/Worker require coordinated
 release for future Admin collection. No runtime deployment or migration performed.
 Earlier unrelated goal sections remain intact.
+
+## Interrupted Huntington batch resumption - 2026-10-09
+
+Status: Complete for recovery launch and sequential dispatch; actual collection
+continues in background. Preserve all prior sections and ownership.
+Scope: existing development environment, one interrupted credit-card Run and
+five queued Huntington US Runs in collection_JN1FIMw7ko6G5l1k. User authorizes
+resumption and sequential execution. No permanent recovery feature or scheduler.
+Acceptance: verify no live duplicate runner, current-Run snapshot/parse origins,
+resume extraction without repeated discovery/research, run five pending groups
+once in original order, verify background process/log/DB progress, record outcome.
+Verification: retained plan and original logs, ordinary current-Run context loader,
+private before-image/receipt, one-off syntax/preflight and git diff checks.
+Outcome: preflight verified all six existing Runs and 17 current-Run parsed
+sources; detached recovery launched and actual extraction subprocess/log/DB
+state verified. Remaining five original groups execute once sequentially, with
+normal failure recording and automatic validation gates. Original IDs/evidence/
+research receipts preserved; private before-image and progress receipt saved.
+Checks: Python syntax and current-origin preflight pass, empty stderr at readback,
+process/log/DB verification and git diff --check pass. No app restart/deployment,
+new scheduler or permanent recovery feature. Collection/Public results pending.

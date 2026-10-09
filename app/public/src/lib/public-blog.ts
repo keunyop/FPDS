@@ -1,6 +1,10 @@
 import type { PublicLocale } from './public-locale.ts';
 
 export const BLOG_POSTS = [{
+  slug: 'ally-vs-capital-one-vs-amex-high-yield-savings',
+  publishedAt: '2026-10-09', modifiedAt: '2026-10-09', sourcesCheckedAt: '2026-10-09',
+  country: 'US', productType: 'savings', minutes: 4, issue: '04'
+}, {
   slug: 'cashable-vs-non-cashable-gic-canada',
   publishedAt: '2026-10-08', modifiedAt: '2026-10-08', sourcesCheckedAt: '2026-10-08',
   country: 'CA', productType: 'gic', minutes: 6, issue: '03'
@@ -28,20 +32,33 @@ export type BlogPath = '/blog' | `/blog/${BlogSlug}`;
 export function isBlogSlug(slug: string): slug is BlogSlug {
   return BLOG_POSTS.some(post => post.slug === slug);
 }
-export function blogHref(slug: BlogSlug | null, locale: string) {
-  return `${slug ? `/blog/${slug}` : '/blog'}${locale === 'ko' || locale === 'ja' ? `?locale=${locale}` : ''}`;
+export function blogPostsForCountry(country: string) {
+  return BLOG_POSTS.filter(post => post.country === country);
 }
-export function isBlogIndexableQuery(query: Record<string, string | string[] | undefined>) {
-  return Object.entries(query).every(([key, value]) => key === 'locale' && typeof value === 'string' && ['en', 'ko', 'ja'].includes(value));
-}
-// Editorial coverage is explicitly Canadian. Country changes leave the article.
-export function blogCountryDestination(path: string, locale: string, country: string) {
-  if (country === 'CA' || (path !== '/blog' && !path.startsWith('/blog/'))) return null;
-  const post = BLOG_POSTS.find(item => path === '/blog/' + item.slug);
-  const params = new URLSearchParams({ country_code: country, product_type: post?.productType ?? 'savings' });
+export function blogHref(slug: BlogSlug | null, locale: string, country?: string) {
+  const market = country ?? BLOG_POSTS.find(post => post.slug === slug)?.country ?? 'CA';
+  const params = new URLSearchParams();
   if (locale === 'ko' || locale === 'ja') params.set('locale', locale);
-  return `/products?${params}`;
+  if (market !== 'CA') params.set('country_code', market);
+  const query = params.toString();
+  return `${slug ? `/blog/${slug}` : '/blog'}${query ? `?${query}` : ''}`;
 }
+export function isBlogIndexableQuery(query: Record<string, string | string[] | undefined>, country = 'CA') {
+  return blogPostsForCountry(country).length > 0 && Object.entries(query).every(([key, value]) =>
+    (key === 'locale' && typeof value === 'string' && ['en', 'ko', 'ja'].includes(value)) ||
+    (key === 'country_code' && country !== 'CA' && value === country));
+}
+// Country switches stay in the blog and never display another market's article.
+export function blogCountryDestination(path: string, locale: string, country: string) {
+  const post = BLOG_POSTS.find(item => path === '/blog/' + item.slug);
+  return post && country !== post.country ? blogHref(null, locale, country) : null;
+}
+export const BLOG_MARKET_COPY = {
+  en: { empty: 'No articles for this country yet.', emptyBody: 'Choose another country to explore its banking articles.', example: 'Illustrative example · USD' },
+  ko: { empty: '아직 이 국가의 글이 없습니다.', emptyBody: '다른 국가를 선택해 해당 국가의 은행 글을 확인하세요.', example: '이해를 위한 가상 예시 · USD' },
+  ja: { empty: 'この国の記事はまだありません。', emptyBody: '別の国を選ぶと、その国の銀行に関する記事を読めます。', example: '仮定に基づく計算例 · USD' }
+} satisfies Record<PublicLocale, object>;
+export function blogMarketCopy(locale: string) { return BLOG_MARKET_COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
 export const BLOG_COPY = {
   en: {
     nav: 'Blog', heading: 'A clearer view of your banking.',

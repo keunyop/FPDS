@@ -60,7 +60,7 @@ function FooterContent() {
             <FooterLink href={loansHref}>{copy.nav.loan}</FooterLink>
             <FooterLink href={comparisonHref([], { countryCode, locale })}>{comparisonCopy(locale).title}</FooterLink>
             {countryCode === "CA" ? <FooterLink href={guideHref(null, locale)}>{guideCopy(locale).nav}</FooterLink> : null}
-            <FooterLink href={blogHref(null, locale)}>{blogCopy(locale).nav}</FooterLink>
+            <FooterLink href={blogHref(null, locale, countryCode)}>{blogCopy(locale).nav}</FooterLink>
             <FooterLink href={methodologyHref}>{copy.nav.methodology}</FooterLink>
             <PublicFeedbackDialog countryCode={countryCode} locale={locale} mode="site_feedback" triggerStyle="footer" />
           </nav>

@@ -12,15 +12,16 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   if (!isBlogSlug(slug)) notFound();
   const post = BLOG_POSTS.find(item => item.slug === slug)!;
   const content = blogContent(slug, 'en');
+  const us = post.country === 'US';
   const chequing = post.productType === 'chequing';
   return new ImageResponse(<div style={{ display: 'flex', width: '100%', height: '100%', flexDirection: 'column', justifyContent: 'space-between', padding: 70, background: '#f4f1e9', color: '#1c2723' }}>
     <div style={{ display: 'flex', fontSize: 27, color: '#176b55' }}>SwitchaBank / Blog / {post.issue}</div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'flex', fontSize: 66, fontWeight: 700, lineHeight: 1.1 }}>{post.productType === 'gic' ? 'When can you access your money?' : chequing ? 'What does “free banking” cost?' : 'Read beyond the headline rate.'}</div>
+      <div style={{ display: 'flex', fontSize: 66, fontWeight: 700, lineHeight: 1.1 }}>{us ? 'High-yield savings. Clear choices.' : post.productType === 'gic' ? 'When can you access your money?' : chequing ? 'What does “free banking” cost?' : 'Read beyond the headline rate.'}</div>
       <div style={{ display: 'flex', fontSize: 34 }}>{content.rows.map(row => row.bank).join(' · ')}</div>
     </div>
     <div style={{ display: 'flex', borderTop: '2px solid #d8d4ca', paddingTop: 25, fontSize: 24 }}>
-      {post.productType === 'gic' ? 'Canadian GICs / Cashable, non-cashable and early access' : chequing ? 'Canadian chequing / Monthly fees, balance rebates and ATM costs' : 'Canadian savings / Rates, conditions and transaction costs'}
+      {us ? 'US savings / APY, fees and access to your money' : post.productType === 'gic' ? 'Canadian GICs / Cashable, non-cashable and early access' : chequing ? 'Canadian chequing / Monthly fees, balance rebates and ATM costs' : 'Canadian savings / Rates, conditions and transaction costs'}
     </div>
   </div>, size);
 }

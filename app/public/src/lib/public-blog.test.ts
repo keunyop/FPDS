@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { BLOG_POSTS, blogHref, isBlogSlug, isBlogIndexableQuery, blogCountryDestination } from './public-blog.ts';
+import { BLOG_POSTS, blogHref, isBlogSlug, isBlogIndexableQuery, blogCountryDestination, blogPostsForCountry } from './public-blog.ts';
 import { blogSources, blogContent } from './public-blog-content.ts';
 import { getAnalyticsPage } from './google-analytics.ts';
 
@@ -9,26 +9,36 @@ test('only published blog slugs and clean language variants are discoverable', (
   for (const query of [{}, { locale: 'en' }, { locale: 'ko' }, { locale: 'ja' }]) assert.equal(isBlogIndexableQuery(query), true);
   for (const query of [{ locale: ['en', 'ko'] }, { locale: 'fr' }, { q: 'bank' }, { country_code: 'CA' }, { country_code: 'US' }, { utm_source: 'campaign' }]) assert.equal(isBlogIndexableQuery(query), false);
   assert.equal(blogHref(null, 'invalid'), '/blog');
+  assert.equal(blogHref(null, 'ko', 'US'), '/blog?locale=ko&country_code=US');
   for (const post of BLOG_POSTS) {
     assert.ok(isBlogSlug(post.slug));
     for (const locale of ['en', 'ko', 'ja']) {
       const url = new URL(blogHref(post.slug, locale), 'https://www.switchabank.com');
       assert.equal(url.pathname, '/blog/' + post.slug);
+      assert.equal(url.searchParams.get('country_code'), post.country === 'CA' ? null : post.country);
       assert.equal(url.searchParams.get('locale'), locale === 'en' ? null : locale);
     }
   }
 });
 
-test('Canadian article country changes go to the requested market and preserve locale', () => {
-  for (const path of ['/blog', ...BLOG_POSTS.map(post => '/blog/' + post.slug)]) {
-    assert.equal(blogCountryDestination(path, 'ko', 'CA'), null);
-    const url = new URL(blogCountryDestination(path, 'ja', 'US')!, 'https://www.switchabank.com');
-    assert.equal(url.pathname, '/products');
-    assert.equal(url.searchParams.get('country_code'), 'US');
-    assert.equal(url.searchParams.get('product_type'), BLOG_POSTS.find(post => path.endsWith(post.slug))?.productType ?? 'savings');
-    assert.equal(url.searchParams.get('locale'), 'ja');
+test('country selection filters lists and keeps article switches inside the requested blog', () => {
+  assert.equal(blogPostsForCountry('CA').length, 3);
+  assert.equal(blogPostsForCountry('US').length, 1);
+  assert.deepEqual(blogPostsForCountry('JP'), []);
+  assert.deepEqual(blogPostsForCountry('us'), []);
+  for (const country of ['CA', 'US', 'JP']) {
+    assert.equal(blogCountryDestination('/blog', 'ko', country), null);
+    assert.equal(blogCountryDestination('/products', 'en', country), null);
+    for (const post of BLOG_POSTS) {
+      assert.equal(blogCountryDestination('/blog/' + post.slug, 'ja', country),
+        post.country === country ? null : blogHref(null, 'ja', country));
+    }
   }
-  assert.equal(blogCountryDestination('/products', 'en', 'US'), null);
+  assert.equal(isBlogIndexableQuery({ country_code: 'US', locale: 'ko' }, 'US'), true);
+  for (const query of [{ country_code: ['US', 'CA'] }, { country_code: 'CA' }, { country_code: 'us' }, { country_code: 'US', locale: ['en', 'ko'] }, { q: 'bank' }]) {
+    assert.equal(isBlogIndexableQuery(query, 'US'), false);
+  }
+  assert.equal(isBlogIndexableQuery({ country_code: 'JP' }, 'JP'), false);
 });
 
 test('article citations resolve, anchors are unique, all locales retain financial examples', () => {
@@ -46,7 +56,7 @@ test('article citations resolve, anchors are unique, all locales retain financia
         for (const source of section.sources ?? []) assert.ok(sources.has(source));
       }
       for (const row of article.rows) assert.ok(sources.has(row.source));
-      if (post.productType !== 'savings') continue;
+      if (post.productType !== 'savings' || post.country !== 'CA') continue;
       const a = 10000 * 0.05 * 3 / 12 + 10000 * 0.01 * 9 / 12;
       const b = 10000 * 0.03;
       assert.equal(article.example.rows[0][2], `CAD ${a}`);

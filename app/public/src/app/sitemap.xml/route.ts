@@ -1,4 +1,5 @@
-import { BLOG_POSTS } from "@/lib/public-blog";
+import { blogLanguageAlternates } from '@/lib/public-blog-seo';
+import { BLOG_POSTS, blogPostsForCountry } from "@/lib/public-blog";
 import { GUIDE_SLUGS, GUIDE_REVIEWED_AT } from "@/lib/public-guides";
 import { buildCuratedComparison, CURATED_PAGES, type CuratedSlug } from "@/lib/public-curated";
 import { fetchCuratedProducts } from "@/lib/public-curated-data";
@@ -91,13 +92,16 @@ async function buildSitemapEntries(): Promise<SitemapEntry[]> {
       alternates: buildPublicLanguageAlternates(path, "CA")
     })));
   const blogPages = [
-    { path: '/blog' as const, modifiedAt: BLOG_POSTS.reduce((latest, post) => post.modifiedAt > latest ? post.modifiedAt : latest, '') },
-    ...BLOG_POSTS.map(post => ({ path: `/blog/${post.slug}` as const, modifiedAt: post.modifiedAt }))
+    ...[...new Set(BLOG_POSTS.map(post => post.country))].map(country => ({
+      path: '/blog' as const, country,
+      modifiedAt: blogPostsForCountry(country).reduce((latest, post) => post.modifiedAt > latest ? post.modifiedAt : latest, '')
+    })),
+    ...BLOG_POSTS.map(post => ({ path: `/blog/${post.slug}` as const, country: post.country, modifiedAt: post.modifiedAt }))
   ];
-  const blogEntries: SitemapEntry[] = blogPages.flatMap(({ path, modifiedAt }) => (['en', 'ko', 'ja'] as const).map(locale => ({
-    url: buildPublicSeoUrl(path, locale, 'CA'), lastModified: modifiedAt,
+  const blogEntries: SitemapEntry[] = blogPages.flatMap(({ path, country, modifiedAt }) => (['en', 'ko', 'ja'] as const).map(locale => ({
+    url: buildPublicSeoUrl(path, locale, country), lastModified: modifiedAt,
     changeFrequency: 'monthly' as const, priority: 0.7,
-    alternates: buildPublicLanguageAlternates(path, 'CA')
+    alternates: blogLanguageAlternates(path, country)
   })));
   return deduplicateEntries([...staticEntries, ...curatedEntries, ...guideEntries, ...blogEntries, ...productEntries]);
 }

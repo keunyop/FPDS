@@ -149,6 +149,7 @@
       "implementation_path": "src/app/blog/[slug]/page.tsx",
       "resource_key": "public_blog.article",
       "allowed_slugs": [
+        "ally-vs-capital-one-vs-amex-high-yield-savings",
         "eq-bank-vs-tangerine-vs-td-savings",
         "tangerine-vs-simplii-vs-cibc-chequing-fees",
         "cashable-vs-non-cashable-gic-canada"

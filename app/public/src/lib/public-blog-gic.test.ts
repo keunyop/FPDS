@@ -13,7 +13,7 @@ test('GIC article preserves access, 29/30-day boundary and fictional arithmetic 
     assert.equal(article.example.rows[1][2], `CAD ${Math.round(10000 * .035)}`);
     assert.ok(article.example.note.includes('CAD 50'));
     assert.equal(blogPresentation(slug, locale).catalog, '1-year-gic');
-    assert.equal(new URL(blogCountryDestination('/blog/' + slug, locale, 'US')!, 'https://example.test').searchParams.get('product_type'), 'gic');
+    assert.equal(new URL(blogCountryDestination('/blog/' + slug, locale, 'US')!, 'https://example.test').pathname, '/blog');
   }
   assert.equal(blogSources(slug).length, 4);
 });

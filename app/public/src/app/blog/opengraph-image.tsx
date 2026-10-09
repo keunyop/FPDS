@@ -11,6 +11,6 @@ export default function Image() {
       <div style={{ display: 'flex', fontSize: 66, fontWeight: 700, lineHeight: 1.1 }}>A clearer view of your banking.</div>
       <div style={{ display: 'flex', fontSize: 34 }}>Bank comparisons · Practical examples · Clear conditions</div>
     </div>
-    <div style={{ display: 'flex', borderTop: '2px solid #d8d4ca', paddingTop: 25, fontSize: 24 }}>Canadian bank accounts / Read, compare and check the details</div>
+    <div style={{ display: 'flex', borderTop: '2px solid #d8d4ca', paddingTop: 25, fontSize: 24 }}>Canada & United States / Read, compare and check the details</div>
   </div>, size);
 }

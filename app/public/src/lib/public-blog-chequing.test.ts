@@ -47,5 +47,5 @@ test('registry, route allowlist and dates remain consistent without resetting th
   assert.deepEqual(new Set(route.allowed_slugs), new Set(BLOG_POSTS.map(post => post.slug)));
   assert.equal(BLOG_POSTS.find(post => post.slug === slug)?.publishedAt, '2026-10-05');
   assert.deepEqual(BLOG_POSTS.map(post => post.publishedAt), BLOG_POSTS.map(post => post.publishedAt).sort().reverse());
-  assert.equal(BLOG_POSTS.find(post => post.productType === 'savings')?.sourcesCheckedAt, '2026-09-30');
+  assert.equal(BLOG_POSTS.find(post => post.productType === 'savings' && post.country === 'CA')?.sourcesCheckedAt, '2026-09-30');
 });

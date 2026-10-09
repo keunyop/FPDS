@@ -1,5 +1,22 @@
 # FPDS Public
 
+## Country-scoped blog and US savings article - 2026-10-09
+
+Blog navigation, lists, breadcrumbs, comparison actions and feedback preserve the
+selected country and locale. Canada lists its three existing articles; the US
+lists the new `ally-vs-capital-one-vs-amex-high-yield-savings` article. Changing
+country from an article opens the selected country’s blog index. Markets without
+authored articles show a localized empty state and remain noindex.
+
+The new EN/KO/JA article has four official sources, a three-step infographic and
+a fictional USD 10,000 APY chart. It preserves variable rates, withdrawal limits
+and access differences without asserting current numeric bank yields. US URLs
+carry `country_code=US`; bare US article requests resolve to that native scope.
+Canonical/hreflang (US English: `en-US`), structured data, social preview and
+eighteen blog sitemap entries match the market. Blog rendering is independent
+of product API availability. No collection, DB write or deployment is included.
+
+
 ## Customer readability and loan browsing - 2026-10-08
 
 Detail optional facts use 16px body text, 28px line height and full-width rows.

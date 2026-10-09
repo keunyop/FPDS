@@ -1,17 +1,17 @@
 # SwitchaBank Blog
 
 Status: Implemented locally; Production deployment remains separately scoped.
-Authority: Product Owner's 2026-09-30 blog request and 2026-10-05 additional
-article request, FR-PUB-028, D-088, WBS 5.74.
+Authority: Product Owner's 2026-10-09 country-scoped blog/US article request;
+earlier blog requests, FR-PUB-028, D-088 and WBS 5.74 remain historical context.
 
 ## Reader experience
 
-`/blog` lists two allowlisted original comparison articles in EN/KO/JA:
-`/blog/eq-bank-vs-tangerine-vs-td-savings` and
-`/blog/tangerine-vs-simplii-vs-cibc-chequing-fees`. A ruled feature section,
+`/blog` lists the selected country’s allowlisted original articles in EN/KO/JA:
+three Canadian comparisons and one US high-yield savings comparison. US index
+and article URLs include `country_code=US`; Canada retains its existing URLs. A ruled feature section,
 existing official bank logos, an article contents list, mobile-stacked comparison
 table, hypothetical interest example, checklist and related guides lead to the
-existing Canadian savings or chequing catalog, according to the article.
+matching country’s savings, chequing or GIC catalog, according to the article.
 Desktop/mobile navigation and the footer expose Blog. No account ownership is required.
 
 The blog is implemented in the existing Next.js Public package.
@@ -23,11 +23,15 @@ versioned typed content avoids a separate CMS account, database, publishing API,
 dependency or runtime Markdown execution. Existing Button, feedback, logo and
 semantic tokens are reused; no vendor primitive is edited.
 
-Coverage is explicitly Canadian. Blog links from another market enter the
-Canadian editorial surface with its scope visible. Switching country while
-reading, or requesting a non-CA country query, redirects to that country's
-matching product-type catalog with locale preserved (the index uses Savings).
-Article content does not depend on the product API. Comparison links target the catalog, which already handles empty
+Header/mobile/footer Blog links retain the selected country. The list and its
+structured data include only that country’s articles. Changing country from an
+article, or explicitly requesting another country for that article, redirects
+to the selected country’s blog index with locale preserved. A bare US article
+URL resolves to its native US query, keeping the header and article consistent.
+Markets without authored articles show localized empty text and remain noindex;
+this does not activate a new market. Related editorial links stay in the same
+market. Product catalog actions and feedback use the article’s country.
+Article content and country-scoped listing do not depend on the product API. Comparison links target the catalog, which already handles empty
 and unavailable data; they do not imply all three named accounts are published.
 
 ## Editorial contract and initial verification
@@ -103,13 +107,14 @@ other; the older article's content and source dates remain September 30.
 ## Search and measurement
 
 Clean index/article URLs receive localized canonicals, reciprocal EN/KO/JA and
-x-default alternates, descriptions, social metadata and nine sitemap entries.
+x-default alternates, descriptions, social metadata and eighteen country-scoped sitemap entries.
 BlogPosting and BreadcrumbList describe the visible article; CollectionPage/
 ItemList describe the index. The index has a generic PNG preview; each article has a distinct locally served
 `/blog/[slug]/opengraph-image` preview. Only allowlisted article image paths
 bypass the article check; unknown image paths still return 404.
 Unknown slugs return HTTP 404 before streaming. Extra, repeated and invalid
-query parameters are noindex/follow and canonicalize to a clean locale URL.
+query parameters are noindex/follow and canonicalize to a clean locale/market URL.
+The single native US country query is indexable; a redundant CA query is not.
 The blog does not create arbitrary SEO filter pages or alter product KO/JA
 noindex and curated readiness gates.
 
@@ -157,8 +162,9 @@ uv run --with playwright python app/public/scripts/blog-audit.py
 ```
 
 The audit covers 390/768/1440px EN/KO/JA index/detail, exact financial example,
-source links, metadata/JSON-LD, nine sitemap entries, PNG preview, real 404,
-query noindex, country redirect, source-independent rendering, menu focus,
+source links, metadata/JSON-LD, eighteen sitemap entries, PNG preview, real 404,
+query noindex, country-scoped lists/redirects/empty states, source-independent
+rendering, menu focus and country/locale controls,
 JavaScript-free article HTML and the catalog handoff. Browser writes and
 third-party calls are stubbed. Screenshots are local under ignored
 `tmp/blog-audit/`. Public unit tests cover allowlists, query policy, country
@@ -186,3 +192,27 @@ social preview, canonical/hreflang/BlogPosting and explicit dates. The three
 articles plus index generate twelve localized sitemap URLs. Prior article
 content/source dates remain unchanged. `blog-audit.py` now covers all three
 articles and derives expected counts from its registry.
+
+
+## US article and country-scoped discovery — 2026-10-09
+
+`/blog/ally-vs-capital-one-vs-amex-high-yield-savings?country_code=US` adds a
+concise EN/KO/JA comparison with four official sources checked October 9. Ally,
+Capital One 360 Performance Savings and American Express HYSA each disclose no
+monthly maintenance fee/minimum balance. Ally’s certain-transaction limit is ten
+per statement cycle with no excess fee but potential closure for repeated excess
+use. Capital One has no direct savings ATM withdrawal; Amex HYSA supplies no ATM
+card, debit card or checks. All three rates remain variable. No current numeric
+bank APY, rate winner or guaranteed annual return is asserted.
+
+A semantic HTML infographic shows APY → fees → access. A proportional, labelled
+bar chart compares fictional 3%/4% APYs on USD 10,000 for one year: USD 300/400,
+a USD 100 difference. APY already includes compounding. Every locale states the
+unchanged APY, retained interest, no deposits/withdrawals/fees/tax assumptions.
+Text alternatives remain readable without JavaScript and do not rely on color.
+US catalog links preserve locale and country; Canadian-only guides are omitted.
+
+Only authored market/locale variants enter the sitemap: two country indexes and
+four articles in three languages = eighteen URLs. US English uses `en-US`;
+Canada retains `en-CA`. Unknown slugs/image slugs remain HTTP 404 before streaming.
+Registry/source dates of the three existing Canadian articles are preserved.

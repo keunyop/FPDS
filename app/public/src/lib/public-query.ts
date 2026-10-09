@@ -172,7 +172,7 @@ export function buildScopedFilterSearchParams(filters: PublicScopeFilters) {
 }
 
 export function buildPublicHref(path: PublicRoutePath, state: PublicHrefState) {
-  if (path === "/blog") return blogHref(null, state.locale);
+  if (path === "/blog") return blogHref(null, state.locale, state.countryCode);
   if (path.startsWith("/products/")) {
     return buildProductDetailPath(path, state.locale, state.countryCode);
   }

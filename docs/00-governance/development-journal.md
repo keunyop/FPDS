@@ -1,5 +1,39 @@
 # FPDS Development Journal
 
+## 2026-10-09 - SwitchaBank country-scoped blog and US savings article
+
+- Header/mobile/footer Blog links, lists, breadcrumbs, catalog actions and
+  feedback preserve the selected market/locale. Canada retains three original
+  articles; the US lists one new article. Cross-market article requests return
+  to the selected blog index; unsupported editorial markets have localized,
+  noindex empty states. Bare US article URLs resolve their native US scope.
+- Added concise EN/KO/JA Ally/Capital One/Amex high-yield savings comparison,
+  checked against four current official sources. Preserved variable APY,
+  monthly-fee/minimum-balance and withdrawal/access conditions, including Ally
+  repeat-limit closure consequences. No numeric current bank yield or winner.
+  A three-step infographic and proportional USD 10,000 chart retain fictional
+  3%/4% APY, USD 300/400 and complete one-year assumptions in each locale.
+- Canonical/hreflang (US `en-US`), BlogPosting/breadcrumb/list data, native market
+  query, distinct social image and eighteen localized blog sitemap URLs agree.
+  Prior Canadian content/source dates and unrelated goals are preserved.
+- Key files: public-blog.ts, public-blog-us-savings.ts, public-blog-seo.ts,
+  blog index/detail/image routes, blog-infographic.tsx, public-query.ts, proxy.ts,
+  sitemap, source/financial/country regressions and blog-audit.py. Updated only
+  Public README and [blog policy](../03-design/public-blog-policy.md).
+- Verification: 108 Public tests; final lint/typecheck and isolated production
+  build pass. Full final browser audit: 119 checks, zero errors, EN/KO/JA at
+  390/768/1440px, real country/locale controls, 404/noindex, 18 sitemap URLs,
+  PNG images, JavaScript-free article/infographic and unavailable-country-API
+  catalog handoffs. Three-width final US visuals and social PNG manually read.
+  Initial audit expected an absolute Location header; actual 308 was correct,
+  comparison now normalizes relative/absolute forms and full rerun passes.
+- Foundation, affected Markdown references/JSON/Python/strict UTF-8, original
+  article and unrelated-goal preservation, final acceptance/diff checks pass.
+  Browser writes/third parties are stubbed; product API reads remain read-only.
+  Limit/next: local code/content only; normal Public review/release remains.
+  No deployment, account/security change, collection or canonical/DB write.
+
+
 ## 2026-10-09 - Citibank generic collection correction and current publication
 
 - Latest six CN/US scopes approved zero of 23 candidates. Direct inspection of
@@ -4228,3 +4262,31 @@ above describe their original period; they do not impose a current MVP stage.
   no collection/model call, DB/canonical write, runtime deployment or live content
   publication. Existing serving processes and unrelated edits were preserved;
   only task-created QA servers are stopped. Next is the normal Public release.
+
+## 2026-10-09 - Interrupted Huntington batch resumed
+
+- User authorized resuming interrupted Admin product collection and processing
+  existing queued Runs sequentially in the current development environment.
+- Confirmed API/Admin serving, no surviving collection runner, and exactly six
+  unfinished US Huntington Runs in collection_JN1FIMw7ko6G5l1k: credit card at
+  extraction plus queued GIC, line of credit, mortgage, personal loan and savings.
+- Preserved the original batch plan/logs and all six Run IDs. Private one-off
+  tmp/resume-huntington-20261009.py resumes credit-card extraction through the
+  ordinary current-Run context loader using 17 already selected parsed sources,
+  including all four targets. No rediscovery, recapture, parse or evidence-research
+  replay for this Run; retained research budget/receipt stays intact. Normal
+  normalization, validation, promotion and projection helpers remain authoritative.
+- One detached hidden process executes the five original queued groups once in
+  original order after the resumed Run, advancing after a recorded group failure.
+  A PostgreSQL advisory lock prevents duplicate launches of this one-off operation.
+  Private before-images/order/results: tmp/huntington-resume-20261009-receipt.json;
+  stdout/stderr: tmp/huntington-resume-20261009[.err].log.
+- Verification: read-only current-Run source/parse preflight passes (6 groups,
+  17 sources); Python syntax passes; actual background parent and extraction
+  subprocess observed; log enters extraction with existing 1800s watchdog;
+  DB confirms credit-card collecting/extraction and five queued groups;
+  stderr empty at observation; git diff --check passes (line-ending warnings only).
+- Result is recovery launch and sequential dispatch, not completed collection or
+  verified new Public listings. Background work remains in progress. No API/Admin
+  restart, runtime deployment, migration, permanent feature or scheduler added.
+  Next: monitor this batch's ordinary terminal outcomes in Admin Runs/private log.

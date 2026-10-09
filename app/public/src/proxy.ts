@@ -1,4 +1,4 @@
-import { blogCountryDestination, isBlogSlug } from "@/lib/public-blog";
+import { BLOG_POSTS, blogCountryDestination, isBlogSlug } from "@/lib/public-blog";
 import { guideCountryDestination, isGuideSlug } from "@/lib/public-guides";
 import { curatedCatalogHref, isCuratedSlug } from "@/lib/public-curated";
 import type { NextRequest } from "next/server";
@@ -51,6 +51,12 @@ export async function proxy(request: NextRequest) {
     }
     if (path !== "/blog" && !isBlogSlug(path.slice("/blog/".length))) {
       return NextResponse.rewrite(new URL("/_not-found", request.url), { status: 404 });
+    }
+    const post = BLOG_POSTS.find(item => path === '/blog/' + item.slug);
+    if (post && post.country !== 'CA' && !request.nextUrl.searchParams.has('country_code')) {
+      const destination = request.nextUrl.clone();
+      destination.searchParams.set('country_code', post.country);
+      return NextResponse.redirect(destination, 308);
     }
     const destination = blogCountryDestination(path,
       normalizePublicProductLocale(request.nextUrl.searchParams.get("locale") ?? ""),

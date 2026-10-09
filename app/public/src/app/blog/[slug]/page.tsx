@@ -3,15 +3,17 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BlogInfographic, BlogYieldChart } from '@/components/fpds/public/blog-infographic';
 import { BankLogo } from '@/components/fpds/public/bank-logo';
 import { PublicFeedbackDialog } from '@/components/fpds/public/public-feedback-dialog';
 import { PublicStructuredData } from '@/components/fpds/public/public-structured-data';
-import { BLOG_POSTS, blogCopy, blogHref, isBlogSlug, isBlogIndexableQuery } from '@/lib/public-blog';
+import { BLOG_POSTS, blogCopy, blogMarketCopy, blogHref, isBlogSlug, isBlogIndexableQuery } from '@/lib/public-blog';
 import { blogSources, blogContent, blogPresentation, type BlogSource } from '@/lib/public-blog-content';
 import { curatedCatalogHref } from '@/lib/public-curated';
 import { guideCopy, guideHref } from '@/lib/public-guides';
 import { normalizePublicLocale } from '@/lib/public-locale';
-import { buildPublicPageMetadata, buildPublicSeoUrl, PUBLIC_SITE_ORIGIN } from '@/lib/public-seo';
+import { buildPublicSeoUrl, PUBLIC_SITE_ORIGIN } from '@/lib/public-seo';
+import { buildBlogMetadata } from '@/lib/public-blog-seo';
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
@@ -21,9 +23,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const locale = normalizePublicLocale(typeof query.locale === 'string' ? query.locale : '');
   const content = blogContent(slug, locale);
   const post = BLOG_POSTS.find(item => item.slug === slug)!;
-  const metadata = buildPublicPageMetadata({ title: content.title, description: content.description, path: `/blog/${slug}`, countryCode: 'CA', locale, index: isBlogIndexableQuery(query) });
+  const metadata = buildBlogMetadata({ title: content.title, description: content.description, path: `/blog/${slug}`, countryCode: post.country, locale, index: isBlogIndexableQuery(query, post.country) });
   const images = [{ url: `${PUBLIC_SITE_ORIGIN}/blog/${slug}/opengraph-image`, width: 1200, height: 630, alt: content.title }];
-  return { ...metadata, authors: [{ name: 'SwitchaBank', url: `${PUBLIC_SITE_ORIGIN}/blog` }],
+  return { ...metadata, authors: [{ name: 'SwitchaBank', url: buildPublicSeoUrl('/blog', locale, post.country) }],
     openGraph: { ...metadata.openGraph, type: 'article', publishedTime: post.publishedAt, modifiedTime: post.modifiedAt, authors: ['SwitchaBank'], images },
     twitter: { ...metadata.twitter, images: images.map(image => image.url) }
   };
@@ -38,11 +40,11 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
   const sources = blogSources(slug);
   const presentation = blogPresentation(slug, locale);
   const post = BLOG_POSTS.find(item => item.slug === slug)!;
-  const url = buildPublicSeoUrl(`/blog/${slug}`, locale, 'CA');
+  const url = buildPublicSeoUrl(`/blog/${slug}`, locale, post.country);
   return <main className="mx-auto w-full min-w-0 max-w-6xl px-4 py-6 md:px-6 md:py-9">
     <nav aria-label={copy.nav} className="mb-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-      <Link className="inline-flex min-h-11 items-center hover:underline" href={locale === 'en' ? '/' : `/?locale=${locale}`}>{copy.home}</Link>
-      <span aria-hidden="true">/</span><Link className="inline-flex min-h-11 items-center hover:underline" href={blogHref(null, locale)}>{copy.nav}</Link>
+      <Link className="inline-flex min-h-11 items-center hover:underline" href={buildPublicSeoUrl('/', locale, post.country).slice(PUBLIC_SITE_ORIGIN.length)}>{copy.home}</Link>
+      <span aria-hidden="true">/</span><Link className="inline-flex min-h-11 items-center hover:underline" href={blogHref(null, locale, post.country)}>{copy.nav}</Link>
       <span aria-hidden="true">/</span><span>{presentation.scope}</span>
     </nav>
     <article>
@@ -73,9 +75,10 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
             <h2 id="article-takeaway" className="text-xs font-semibold uppercase tracking-wider text-primary">{copy.takeaway}</h2>
             <p className="mt-2 text-base font-medium leading-8">{content.takeaway}</p>
           </section>
+          {content.infographic ? <BlogInfographic infographic={content.infographic} /> : null}
           <section id="account-comparison" className="mt-9 scroll-mt-24" aria-labelledby="account-comparison-title">
             <h2 id="account-comparison-title" className="text-xl font-semibold tracking-tight">{presentation.comparison}</h2>
-            <p className="mt-2 text-xs leading-6 text-muted-foreground">{copy.checked}: {post.sourcesCheckedAt} · CAD</p>
+            <p className="mt-2 text-xs leading-6 text-muted-foreground">{copy.checked}: {post.sourcesCheckedAt} · {post.country === 'US' ? 'USD' : 'CAD'}</p>
             <table className="mt-4 block w-full border-y border-border text-left text-sm md:table">
               <caption className="sr-only">{presentation.comparison}</caption>
               <thead className="sr-only md:not-sr-only md:table-header-group"><tr>{(content.tableHeaders ?? copy.tableHeaders).map(label => <th key={label} scope="col" className="border-b border-border bg-muted/60 px-3 py-3 text-xs font-semibold">{label}</th>)}</tr></thead>
@@ -95,16 +98,16 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
               <div className="mt-4 grid gap-4 text-base leading-8">{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
               {section.sources ? <p className="mt-2 text-xs text-muted-foreground">{copy.sources}: {section.sources.map(id => <SourceLink key={id} id={id} sources={sources} />)}</p> : null}
               {section.id === 'compare-on-switchabank' ? <Button asChild className="mt-4 h-auto min-h-11 whitespace-normal py-3">
-                <Link data-blog-shortlist href={curatedCatalogHref(presentation.catalog, locale)}>{presentation.action}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link>
+                <Link data-blog-shortlist href={curatedCatalogHref(presentation.catalog, locale, post.country)}>{presentation.action}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link>
               </Button> : null}
               {section.id === 'worked-example' ? <figure className="mt-5 border-y border-border bg-card px-4 py-5 md:px-6">
-                <p className="text-xs font-medium text-primary">{copy.example}</p>
+                <p className="text-xs font-medium text-primary">{post.country === 'US' ? blogMarketCopy(locale).example : copy.example}</p>
                 <figcaption className="mt-2 text-base font-semibold leading-7">{content.example.title}</figcaption>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">{content.example.intro}</p>
-                <dl className="mt-4 divide-y divide-border">{content.example.rows.map(row => <div key={row[0]} className="grid gap-2 py-4">
+                {content.example.chart ? <BlogYieldChart example={content.example} /> : <dl className="mt-4 divide-y divide-border">{content.example.rows.map(row => <div key={row[0]} className="grid gap-2 py-4">
                   <dt className="text-sm font-semibold">{row[0]}</dt><dd className="break-words font-mono text-xs leading-6 text-muted-foreground">{row[1]}</dd>
                   <dd className="text-lg font-semibold text-primary">{content.example.headers[2]}: {row[2]}</dd>
-                </div>)}</dl>
+                </div>)}</dl>}
                 <p className="mt-3 text-xs leading-6 text-muted-foreground">{content.example.note}</p>
               </figure> : null}
             </section>)}
@@ -116,7 +119,7 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
           <section className="mt-9 bg-secondary/60 px-5 py-6 md:px-7" aria-labelledby="blog-compare">
             <h2 id="blog-compare" className="text-xl font-semibold leading-8">{presentation.compare}</h2>
             <p className="mt-3 text-sm leading-7">{presentation.compareBody}</p>
-            <Button asChild className="mt-5 h-auto min-h-11 whitespace-normal py-3"><Link data-blog-comparison href={curatedCatalogHref(presentation.catalog, locale)}>{presentation.action}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link></Button>
+            <Button asChild className="mt-5 h-auto min-h-11 whitespace-normal py-3"><Link data-blog-comparison href={curatedCatalogHref(presentation.catalog, locale, post.country)}>{presentation.action}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link></Button>
           </section>
           <section className="mt-10" aria-labelledby="blog-faq">
             <h2 id="blog-faq" className="text-xl font-semibold">{copy.faq}</h2>
@@ -124,7 +127,7 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
               <h3 className="text-base font-semibold leading-7">{item.question}</h3><p className="mt-2 text-sm leading-7">{item.answer}</p>
             </div>)}</div>
           </section>
-          <section className="mt-8 border-t border-border pt-6" aria-labelledby="blog-related">
+          {presentation.guides.length || presentation.relatedArticle ? <section className="mt-8 border-t border-border pt-6" aria-labelledby="blog-related">
             <h2 id="blog-related" className="text-lg font-semibold">{copy.related}</h2>
             <ul className="mt-2">{presentation.guides.map(guide => <li key={guide}>
               <Link href={guideHref(guide, locale)} className="inline-flex min-h-11 items-center gap-2 py-2 text-sm text-primary hover:underline">{guideCopy(locale).topics[guide]}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link>
@@ -132,7 +135,7 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
             {presentation.relatedArticle ? <Link data-blog-related href={blogHref(presentation.relatedArticle.slug, locale)} className="mt-3 inline-flex min-h-11 items-center gap-2 py-2 text-sm text-primary hover:underline">
               {presentation.relatedArticle.label}<ArrowRight className="size-4 shrink-0" aria-hidden="true" />
             </Link> : null}
-          </section>
+          </section> : null}
           <section id="article-sources" className="mt-8 scroll-mt-24 border-t border-border pt-6">
             <h2 className="text-lg font-semibold">{copy.sources}</h2>
             <p className="mt-2 text-xs leading-6 text-muted-foreground">{copy.sourcesNote}</p>
@@ -144,20 +147,20 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
             <h2 id="blog-editorial" className="text-sm font-semibold text-foreground">{copy.editorial}</h2>
             <p className="mt-2">{copy.method}</p><p className="mt-2">{copy.disclosure}</p>
             <p className="mt-2">{copy.correction}</p>
-            <div className="mt-3"><PublicFeedbackDialog countryCode="CA" locale={locale} mode="site_feedback" /></div>
+            <div className="mt-3"><PublicFeedbackDialog countryCode={post.country} locale={locale} mode="site_feedback" /></div>
           </section>
-          <Link href={blogHref(null, locale)} className="mt-6 inline-flex min-h-11 items-center text-sm font-medium text-primary hover:underline">{copy.all}</Link>
+          <Link href={blogHref(null, locale, post.country)} className="mt-6 inline-flex min-h-11 items-center text-sm font-medium text-primary hover:underline">{copy.all}</Link>
         </div>
       </div>
     </article>
     <PublicStructuredData data={{ '@context': 'https://schema.org', '@graph': [
       { '@type': 'BlogPosting', '@id': `${url}#article`, headline: content.title, description: content.description, inLanguage: locale, url, mainEntityOfPage: url,
         datePublished: post.publishedAt, dateModified: post.modifiedAt, image: [`${PUBLIC_SITE_ORIGIN}/blog/${slug}/opengraph-image`],
-        author: { '@type': 'Organization', name: 'SwitchaBank', url: `${buildPublicSeoUrl('/blog', locale, 'CA')}` },
+        author: { '@type': 'Organization', name: 'SwitchaBank', url: `${buildPublicSeoUrl('/blog', locale, post.country)}` },
         publisher: { '@id': `${PUBLIC_SITE_ORIGIN}/#organization` }, citation: sources.map(source => source.href), about: presentation.about },
       { '@type': 'BreadcrumbList', itemListElement: [
-        { '@type': 'ListItem', position: 1, name: copy.home, item: buildPublicSeoUrl('/', locale, 'CA') },
-        { '@type': 'ListItem', position: 2, name: copy.nav, item: buildPublicSeoUrl('/blog', locale, 'CA') },
+        { '@type': 'ListItem', position: 1, name: copy.home, item: buildPublicSeoUrl('/', locale, post.country) },
+        { '@type': 'ListItem', position: 2, name: copy.nav, item: buildPublicSeoUrl('/blog', locale, post.country) },
         { '@type': 'ListItem', position: 3, name: content.title, item: url }
       ] }
     ] }} />
