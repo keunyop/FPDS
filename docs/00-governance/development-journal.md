@@ -1,5 +1,30 @@
 # FPDS Development Journal
 
+## 2026-10-10 - TD US: complete pricing proof and three published cards
+
+- Latest six TBNA Runs: 17 rejected candidates, 58 successful source joins;
+  fifty selected original checksums verified. Directly captured fifty current
+  official URLs without Admin collection API/providers; seventeen candidates,
+  three passes and fourteen exclusions through ordinary automatic gates.
+- Shared parser26/process17 retains named multi-page APR alternatives, complete
+  variable/index/grace continuation and independent literal no-fee proof.
+  Shared account path retains amount-first monthly fees and linked waivers
+  across checking/savings. Prompts/cache identities agree; no bank exceptions,
+  weaker essentials, manual review or permanent recovery feature.
+- Worker78/API650 pass; official/cross-type regression9, foundation and final
+  reference/UTF-8/syntax/JSON/diff checks pass. Broader89 had one existing legacy
+  fixture hash-test failure; all affected bytes match Git HEAD, unchanged.
+- Actual selected origins, twenty stored raw/parse pairs and nine published
+  field origins pass; real promotion rollback succeeded. TD Cash, Double Up,
+  FlexPay now appear on anonymous Public API and actual complete-detail pages.
+  US68 ->71; CA120. Original six Runs/17 candidates/58 joins/86 documents/137
+  snapshots/1,591 version facts and 479 prior products preserved; unrelated TB
+  collection untouched. Zero manual/provider/Admin collection API calls.
+- [Report](td-us-generic-collection-corrections-2026-10-10.md) explains supported
+  proof, remaining exclusions and actual limits. Serving remains v16; normal
+  coordinated API/Worker v17 release and bounded smoke remain separate.
+
+
 ## 2026-10-09 - Seven US banks: generic disclosure fix and one published product
 
 - Latest seven-bank diagnosis: 29 per-type Runs, 61 candidates, one prior

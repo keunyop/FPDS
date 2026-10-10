@@ -1,6 +1,7 @@
 """Financial semantics shared by the existing collection and Review AI passes."""
 
 FEE_CHANGE_NOTICE_INSTRUCTIONS = (
+    "Owned amount-first monthly account or maintenance fee declarations retain their literal order and every linked waiver note. An exact repeated account heading may match the full prefix before a colon in the H1, without discarding the original H1 or supplying publication identity. Multiple prices, unresolved notes, conditional zeros and unrelated panels remain excluded by the common financial and source gates. "
     "Future subject-to-change notices do not themselves qualify a current fee; "
     "first-year, fixed-duration, age/graduation-limited and average-balance-qualified zero-fee waivers remain conditional. "
     "Retain their complete conditions; a conditional zero does not replace the regular base fee. "
@@ -14,6 +15,7 @@ QUALIFIED_LENDING_DISCLOSURE_INSTRUCTIONS = (
 )
 
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    "Named multi-page Important Credit Card Terms and Conditions require repeated agreeing native card identity, complete purchase APR alternatives, introductory periods, fees, grace rules and the whole variable-index/margin/eligibility/balance-transfer continuation before the explicit administrative Credit Reports boundary. Preserve every disclosed APR alternative and qualified condition in the original language; never flatten an enumerated set to a range or scalar. Missing boundaries, dated index, pages or conflicting later price tables exclude. Literal Annual Fee None proves zero only in its independent unconditional fee record; first-year and other waivers remain conditional. "
     "A numeric superscript linking to a grouped disclosure container selects only its unique explicitly numbered sibling note; retain all unnumbered shared copy and every own condition. Missing, duplicate or empty numbered notes are unresolved, never permission to discard conditions. Generic nonnumeric links retain the whole disclosure. "
     "Regular Purchase APR is an explicit purchase APR label; preserve its full range, variable basis and complete referenced notes as qualified prose, never a scalar endpoint. A separate exact All credit products are subject to credit approval sentence is product-application approval, not an independently labelled annual-fee waiver; every actual fee condition remains binding. "
     "A unique native card H1 keeps its complete literal Visa Signature/Infinite or World/Elite Mastercard descriptors when SEO abbreviates those network words, only if the entire remaining name agrees with both captured SEO and route and the detail actually links to its current captured pricing table. Preserve the full H1; a missing link, foreign panel, ambiguous family or missing non-network qualifier cannot supply identity. "

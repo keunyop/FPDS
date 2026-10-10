@@ -1,5 +1,28 @@
 # Admin pre-handover review and fixes
 
+## TD Bank National Association direct collection - 2026-10-10
+
+Status: Complete for local generic fixes and verified Public publication. Preserve all previous sections and ownership.
+Scope: latest US TBNA Runs, retained and current official evidence without Admin
+collection API, generic corrections and ordinary automatic publication.
+Acceptance:
+- [x] Diagnose first losses against current official sources.
+- [x] Correct shared defects with cross-bank/type boundary regressions.
+- [x] Verify stored origins and rollback rehearsal; publish automatic passes.
+- [x] Verify Public/history/privacy; record journal, results and final diff.
+Limits: no weaker essentials, manual review, bank exceptions, historical filling,
+paid loops, permanent recovery feature or unrelated data/runtime changes.
+
+
+Outcome: 50 current captures; 17 candidates / three automatic approvals / fourteen
+exclusions. TD Cash, Double Up and FlexPay published; US68 ->71, CA120.
+Actual selected origins, twenty stored-byte/parse pairs, nine field origins,
+rollback and three anonymous API/site details pass; original history and
+479 unrelated canonical products preserved. Worker78/API650 and foundation pass;
+one known broader legacy hash-test failure is HEAD-byte-identical.
+Serving v16 remains distinct from local parser26/process17; no runtime deployment.
+Report: docs/00-governance/td-us-generic-collection-corrections-2026-10-10.md
+
 ## Seven US banks direct diagnosis and publication - 2026-10-09
 
 Status: Complete for local generic corrections and verified Public publication.

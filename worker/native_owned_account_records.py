@@ -37,7 +37,7 @@ def account_records(soup):
         if not owns_label(node, root, owner):
             continue
         value = node.get_text(" ", strip=True)
-        if not re.search(r"no monthly (?:(?:account|maintenance) )?fee|monthly (?:(?:account|maintenance) )?fee\s*:\s*\$|\b(?:unlimited|\d+)\s+(?:number of )?(?:daily |debit )?(?:transactions|purchases)|(?:U\.?S\.?|Canadian) dollars?|\b(?:CAD|USD|EUR|GBP)\b", value, re.I):
+        if not re.search(r"no monthly (?:(?:account|maintenance) )?fee|monthly (?:(?:account|maintenance) )?fee\s*:\s*\$|\$\d+(?:\.\d+)?\s+monthly (?:(?:account|maintenance) )?fees?|\b(?:unlimited|\d+)\s+(?:number of )?(?:daily |debit )?(?:transactions|purchases)|(?:U\.?S\.?|Canadian) dollars?|\b(?:CAD|USD|EUR|GBP)\b", value, re.I):
             continue
         if re.search(r"exchange rate|currency conversion|benchmark rate|reference rate", value, re.I):
             continue
@@ -46,7 +46,7 @@ def account_records(soup):
         previous = node.find_previous(["h1", "h2", "h3", "h4", "h5", "h6"])
         scope = previous.get_text(" ", strip=True) if previous else ""
         if previous is not None and previous.name != "h1":
-            if re.match(re.escape(owner.split()[0]) + r"\b", scope, re.I) and not scope.casefold() == owner.casefold():
+            if re.match(re.escape(owner.split()[0]) + r"\b", scope, re.I) and not scope.casefold() == owner.casefold() and not owner.casefold().startswith(scope.casefold() + ":"):
                 continue
             if re.search(r"ideal|if:|not be ideal|consider|you want", scope, re.I):
                 continue

@@ -1,0 +1,17 @@
+[
+  {
+    "file": "tdflex-personal-terms-en.pdf.zlib",
+    "url": "https://www.td.com/content/dam/tdb/document/pdf/personal-banking/tdflex-personal-terms-en.pdf",
+    "sha256": "a57eb8bdc6d089661d60e529c622a16c8695a9fb8715dca1dcb257f475bf7a93"
+  },
+  {
+    "file": "tddoubleup-personal-terms-en.pdf.zlib",
+    "url": "https://www.td.com/content/dam/tdb/document/pdf/personal-banking/tddoubleup-personal-terms-en.pdf",
+    "sha256": "8cc4f5452d54e4729e25796f565265c9cda02f875a470cbd670b53bdac6d56b5"
+  },
+  {
+    "file": "tdcash-personal-terms-en.pdf.zlib",
+    "url": "https://www.td.com/content/dam/tdb/document/pdf/personal-banking/tdcash-personal-terms-en.pdf",
+    "sha256": "f9057f3b41ebe2ce0ebad9877651834712c2ef68e30bdfae50a6c6515fd8f16d"
+  }
+]

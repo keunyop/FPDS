@@ -1,5 +1,28 @@
 # Product collection accuracy and automatic acceptance
 
+## Complete named PDF pricing and amount-first account costs - 2026-10-10
+
+Parser v26/process `2026-10-10-complete-named-pdf-pricing-v17` preserve named
+multi-page application pricing as atomic original-language records. Repeated
+agreeing card identity, purchase APR alternatives, introductory terms, fees,
+grace rules and the complete variable-index/margin/eligibility/transfer
+continuation are mandatory. An explicit administrative boundary is required;
+later APR/interest-price/annual-fee restatements, missing notes/pages, conflicts
+and records beyond 8,000 characters exclude. Alternatives never become scalar
+rates or invented intervals. Literal unconditional Annual Fee None proves zero
+only in its independent owned fee record. Conditional waivers remain excluded.
+
+Shared account parsing also retains amount-first monthly maintenance/account
+fees with every linked waiver note. An exact repeated heading can own the full
+H1 prefix before a colon; the H1 and separate publication identity gate remain
+intact. Checking and savings use the same proof path. Unknown transaction costs,
+missing current rates, conditional zeros and foreign panels still exclude.
+Existing evidence-origin, budget, security and automatic-approval gates apply.
+Prompts, parser/process identities and the existing source-code cache fingerprint
+move together. Deploy API/Worker together for future Admin runs; direct data
+publication is a separately verified operation.
+
+
 ## Numbered disclosure scope - 2026-10-09
 
 Parser v25/process `2026-10-09-numbered-disclosure-scope-v16` resolve numeric

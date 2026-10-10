@@ -973,6 +973,9 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             fee = re.search(r"Monthly (?:(?:account|maintenance) )?Fees?\s*[:\n]\s*\$(\d+(?:\.\d+)?)", quote, re.I)
             if fee:
                 values["monthly_fee"] = float(fee[1])
+            amount_first = re.search(r"(?mi)^\$(\d+(?:\.\d+)?)\s+Monthly (?:(?:account|maintenance) )?Fees?(?:\s*$)", quote)
+            if amount_first and quote_supports_value("monthly_fee", float(amount_first[1]), quote):
+                values["monthly_fee"] = float(amount_first[1])
             counts = re.findall(r"(\d+) (?:debit )?transactions each month", quote, re.I)
             if counts and len(set(counts)) == 1:
                 values["included_transactions"] = int(counts[0])
