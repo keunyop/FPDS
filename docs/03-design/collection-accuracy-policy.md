@@ -1,5 +1,70 @@
 # Product collection accuracy and automatic acceptance
 
+## Numbered disclosure scope - 2026-10-09
+
+Parser v25/process `2026-10-09-numbered-disclosure-scope-v16` resolve numeric
+superscript links into grouped disclosure containers only through unique,
+nonempty explicitly numbered sibling notes. All unnumbered shared text remains;
+missing, duplicated or malformed numbered notes are unresolved. Generic links
+retain the complete container. This avoids importing another numbered reward
+condition into a base fee without discarding an actual own/shared qualification.
+Regular Purchase APR is an explicit purchase APR label; its full range, variable
+basis and resolved disclosures remain an atomic qualified summary, never scalar
+endpoints. The exact separate sentence "All credit products are subject to credit
+approval." describes application approval rather than an independently labelled
+annual-price waiver. Actual fee approval/eligibility/duration conditions remain
+blocking. Shared prompts, financial gate, parser/process/cache identity agree.
+No bank exception, weaker essential, extra research budget or manual review.
+Runtime release and current product publication are verified separately.
+
+
+## Current detail-linked pricing and safe parsed text - 2026-10-09
+
+Parser v24/process `2026-10-09-linked-pricing-source-proof-v15` retain anonymous
+card pricing only through a captured current native detail-to-disclosure link.
+The link is separate field evidence, survives normalization, and resolves through
+successful same-Run selected snapshot/parse joins; model URLs, parent metadata,
+foreign origins and named sibling-card panels cannot supply applicability.
+A unique H1 retains literal card-network descriptors omitted by SEO only with
+matching remaining SEO/route identity and the actual current linked price proof.
+No missing non-network qualifier, family page or model label supplies identity.
+Complete rate tables retain purchase ranges or single variable APRs, introductory
+periods/loss rules, penalties, grace rules, dated Prime Rate and all calculation
+and promotional-financing notes. Qualified summaries never become scalars.
+These atomic records allow 8,000 characters within the unchanged 43,200-character
+total grounding budget; missing or conflicting notes and oversized records exclude.
+
+Independent literal annual-fee paragraphs retain their actual price and complete
+conditions despite linked reference/accessibility markers. HELOC collateral
+statements stay distinct from application eligibility; current displayed offers
+retain the whole adjacent geographic/amount/term/credit/CLTV/index/ceiling scenario.
+Calculators, unknown prices and uncertain security still exclude. Parsed NUL
+characters become visible replacement characters before text/spans are finalized,
+including anchors, without altering original capture bytes or fusing digits.
+Shared instructions, normalization, accuracy gates and cache identity agree.
+No weaker essentials, manual product approval or bank-specific exception.
+
+
+## CMS account/source proof and single-card PDFs - 2026-10-09
+
+Parser v23/process `2026-10-09-cms-account-source-proof-v14` distinguish typed
+CMS content-item paths from public links, reject prominent adjacent soft-404
+messages, and resolve literal tooltip keys only inside an owned block with
+agreeing responsive copies. Named account APY panels require captured title,
+route, complete current dated disclosures and unchanged stored-origin proof.
+Single-card pricing PDFs retain purchase ranges, grace rules and every complete
+continuation page; issuer prefixes require the exact official hostname and full
+remaining card identity. A captured current detail-to-PDF link and exact native
+H1/name/SEO proof can resolve an alias route; metadata cannot supply that link.
+Unconditional annual-fee rows remain separate from
+introductory waivers. Mandatory property-security declarations preserve all cost
+conditions; uncertainty and conflict still exclude. Shared prompts and gates
+move together. No weaker essentials, bank exceptions or review queue.
+Deploy API/Worker together for future Admin collections. Direct data publication
+is verified separately.
+[Diagnosis and publication verification](../00-governance/us-five-bank-generic-collection-corrections-2026-10-09.md).
+
+
 ## Owned dynamic prices and complete APR disclosures - 2026-10-09
 
 Parser v22/process `2026-10-09-owned-pricing-disclosure-proof-v13` recognize

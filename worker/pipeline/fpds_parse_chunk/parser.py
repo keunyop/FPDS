@@ -120,6 +120,8 @@ def _parse_html(body: bytes) -> ParsedArtifact:
                         stack.append(value)
             elif isinstance(item, list):
                 stack.extend(reversed(item))
+    from worker.native_linked_card_pricing import pricing_records
+    sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in pricing_records(soup))
     sections.extend(_named_rate_basis_sections(soup))
     sections.extend(_product_terms_sections(soup))
     sections.extend(_labelled_disclosure_sections(soup))
@@ -146,6 +148,21 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     from worker.native_owned_account_records import account_records
     from worker.native_named_rate_records import named_rate_records
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in [*account_records(soup), *named_rate_records(soup)])
+    from worker.native_card_declarations import card_owner
+    from worker.native_dom_ownership import owns_label
+    disclosure_root = soup.find("main") or soup.body or soup
+    owner_node = card_owner(soup)
+    disclosure_owner = owner_node.get_text(" ", strip=True) if owner_node else None
+    for link in disclosure_root.find_all("a", href=True)[:2048]:
+        href = str(link["href"])
+        label = link.get_text(" ", strip=True) + " " + str(link.get("aria-label", ""))
+        if ((not disclosure_owner or owns_label(link, disclosure_root, disclosure_owner))
+                and not link.find_parent(["nav", "header", "footer", "aside"])
+                and re.match(r"https://|/", href) and not href.startswith("//")
+                and re.search(r"pricing|disclosure|credit terms|rates? and fees|terms and conditions", label, re.I)):
+            sections.append(_RawSegment("captured_disclosure_link", label[:200], None, href))
+    from worker.native_account_apy import account_apy_records
+    sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in account_apy_records(soup))
     from worker.native_apy_records import apy_records
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in apy_records(soup))
     from worker.native_owned_lending_records import lending_records
@@ -246,7 +263,7 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
     if heading is None:
         return []
     identity = heading.get_text(" ", strip=True)
-    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Interest: Purchases|Interest: Cash Advances|Annual fee|Monthly fee|(?:Variable )?Purchase APR|Purchase rate)$", re.I)
+    labels = re.compile(r"^(?:Interest rate on purchases|Purchase interest rate|Interest rate on cash advances|Interest: Purchases|Interest: Cash Advances|Annual fee|Monthly fee|(?:(?:Variable|Regular) )?Purchase APR|Purchase rate)$", re.I)
     basis = []
     for node in root.find_all(True):
         value = node.get_text(" ", strip=True)
@@ -325,7 +342,7 @@ def _labelled_disclosure_sections(soup: BeautifulSoup) -> list[_RawSegment]:
                 record = _normalize_text("\n".join(parts))
                 if len(record) <= 6400 and record not in seen:
                     seen.add(record)
-                    kind = "owned_card_apr_offer" if re.fullmatch(r"(?:Variable )?Purchase APR|Purchase rate", financial_label_text(leaf), re.I) else "labelled_financial_record"
+                    kind = "owned_card_apr_offer" if re.fullmatch(r"(?:(?:Variable|Regular) )?Purchase APR|Purchase rate", financial_label_text(leaf), re.I) else "labelled_financial_record"
                     result.append(_RawSegment(kind, identity, None, record))
                 break
             block = block.parent
@@ -712,6 +729,12 @@ def _parse_pdf(body: bytes) -> ParsedArtifact:
         raw_segments.extend(_RawSegment(kind, owner, page_index, record)
                             for kind, owner, record in pdf_summary_records(layout))
 
+    from worker.native_single_card_pdf import single_card_purchase_records
+    pages = [s.text for s in raw_segments if s.anchor_type == "page"]
+    if len(pages) == len(reader.pages):
+        raw_segments.extend(_RawSegment(kind, owner, 1, record)
+                            for kind, owner, record in single_card_purchase_records(pages))
+
     full_text, segments = _finalize_segments(raw_segments)
     if not full_text.strip():
         raise ValueError("PDF parser produced no usable text.")
@@ -745,7 +768,7 @@ def _finalize_segments(raw_segments: list[_RawSegment]) -> tuple[str, list[Parse
     delimiter = "\n\n"
 
     for raw_segment in raw_segments:
-        text = raw_segment.text.strip()
+        text = raw_segment.text.replace("\x00", "\ufffd").strip()
         if not text:
             continue
         if parts:
@@ -757,7 +780,7 @@ def _finalize_segments(raw_segments: list[_RawSegment]) -> tuple[str, list[Parse
         segments.append(
             ParsedSegment(
                 anchor_type=raw_segment.anchor_type,
-                anchor_value=raw_segment.anchor_value,
+                anchor_value=raw_segment.anchor_value.replace("\x00", "\ufffd") if raw_segment.anchor_value is not None else None,
                 page_no=raw_segment.page_no,
                 text=text,
                 char_start=start,

@@ -311,11 +311,16 @@ def security_meaning(value: object) -> bool | None:
     # A later repayment amount may vary independently of a definite collateral
     # requirement. No security qualification or alternative is removed.
     value = re.sub(r"your payments will include both principal and interest, and may be higher than during the first phase[.]", "Repayment amount consequence.", value, flags=re.I)
+    # A separately stated title-insurance cost does not make explicitly
+    # identified property collateral uncertain. The full quote remains stored.
+    value = re.sub(r"Borrower-paid title insurance may be required on loan amounts greater than \$[\d,]+[.]", "Separate title-insurance cost condition.", value, flags=re.I)
+    if re.search(r'A home equity line of credit \(HELOC\) is a form of credit that allows you to use the equity in your home as collateral[.]', value, re.I):
+        value = re.sub(r'You may qualify for our HELOC if:', 'Application eligibility requirements:', value, flags=re.I)
     if re.search(r"\b(?:may|might|could|optional|depending)\b|not unsecured", value, re.I):
         return None
     unsecured = bool(re.search(r"\bunsecured\b|no collateral (?:is )?required|\bnot secured\b", value, re.I))
     positive_context = re.sub(r"\bnot secured\b|\bno collateral (?:is )?required\b", "", value, flags=re.I)
-    secured = bool(re.search(r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b|\bby securing your line of credit with assets\b|\bby using (?:that|your|the) equity as collateral\b", positive_context, re.I))
+    secured = bool(re.search(r"\bInsurance must be carried on the real property securing (?:the|your) account[,\.]|(?<!un)\bsecured\b|\bcollateral (?:is )?required\b|\bby securing your line of credit with assets\b|\bby using (?:that|your|the) equity as collateral\b|\ballows you to use the equity in your home as collateral[.]", positive_context, re.I))
     return None if secured == unsecured else secured
 
 

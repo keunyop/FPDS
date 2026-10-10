@@ -1,5 +1,77 @@
 # Admin pre-handover review and fixes
 
+## Seven US banks direct diagnosis and publication - 2026-10-09
+
+Status: Complete for local generic corrections and verified Public publication.
+Serving deployment is separate; preserve prior goals, changes and active work.
+Scope: latest KeyBank, M&T, Morgan Stanley Private Bank, PNC, Regions, Santander
+and Schwab Runs; direct current official evidence without Admin collection API;
+generic corrections and ordinary automatic publication in the existing environment.
+Acceptance:
+- [x] Reconcile latest targets, retained evidence and first actual losses.
+- [x] Fix shared defects with cross-bank/type success/boundary/failure regressions.
+- [x] Verify affected behavior and actual stored-origin automatic gates.
+- [x] Rehearse rollback, publish current passes and verify anonymous Public.
+- [x] Record results, limits, journal and final diff/acceptance checks.
+Limits: no weaker essentials, manual review, bank exceptions, historical filling,
+permanent recovery feature, paid loops or unrelated data/runtime changes.
+
+Outcome: 60 current candidates, one newly published Key Cashback card, 59
+exclusions; zero review/provider/Admin API calls. US Public 67 -> 68, CA 120.
+Verification: affected Worker 69, discovery 85, API 650; 60 actual stored-byte
+pairs, four field origins, valid receipt, real rollback and anonymous API/page
+readback pass. Full pipeline initially 911/five failures; version assertion fixed
+and rechecked, leaving only the four previously reproduced baseline failures.
+Foundation, delivery references/JSON/PowerShell, UTF-8/syntax and diff pass.
+Original history/version financial facts/unrelated products and TD preserved;
+one existing Cashback identity receives a new current version (old superseded).
+Next: separate coordinated parser v25/process v16 API/Worker release and smoke.
+
+
+## JPMorgan Chase direct diagnosis and publication - 2026-10-09
+
+Status: Complete for local generic fixes and verified Public publication.
+Serving deployment remains separate; preserve all other goals and pre-existing changes.
+Scope: latest Chase Runs and retained evidence, direct current official sources
+without Admin collection API, generic fixes and existing-environment publication.
+Acceptance:
+- [x] Diagnose current targets, first stage losses and official essentials.
+- [x] Fix shared defects with cross-bank/type and adversarial regressions.
+- [x] Verify Worker/API behavior and real stored-origin automatic gates.
+- [x] Rehearse rollback, publish current passes and verify anonymous Public.
+- [x] Record actual results, limits, journal and final diff/acceptance review.
+Limits: no weaker essentials, manual review, bank exceptions, historical filling,
+permanent recovery feature, optional-only paid calls or runtime deployment.
+Outcome: 39 current candidates; 25 automatic approvals (24 cards/one HELOC),
+14 exclusions, no review/provider/Admin API calls. US Public 41 -> 66, CA 120.
+Verification: Worker focused 219, API 650; full Worker 989/985 pass with only
+four previously reproduced exact-HEAD failures. Actual 65 stored byte/parse
+checks, 101 field/link origins, 25 receipts/detail APIs/pages, rollback and
+original history/financial version preservation pass. Foundation, Git-visible
+reference/JSON/PowerShell, UTF-8/syntax and diff checks pass. Case report/journal
+record the ignored temporary repo-doctor finding and serving v13 limit.
+Next: separate coordinated API/Worker parser v24/process v15 release and smoke.
+
+
+## Five US banks direct diagnosis and publication - 2026-10-09
+
+Status: Complete for scoped diagnosis, local generic fixes and verified Public data.
+Serving API/Worker deployment is separate; preserve all prior ownership.
+Scope: latest Fifth Third, First Citizens, Goldman Sachs Bank USA, HSBC USA and
+Huntington Runs; current official evidence without Admin collection API;
+generic source-backed fixes and ordinary automatic publication/readback.
+Acceptance:
+
+- [x] Account for latest targets, retained evidence and first actual losses.
+- [x] Compare official facts; add cross-bank/type boundary regressions and fix
+      shared paths, prompts and cache/version identity where warranted.
+- [x] Verify affected behavior and actual stored-origin automatic gates.
+- [x] Rehearse rollback, publish current passes and verify Public readback.
+- [x] Record results, limits, journal and final diff/acceptance review.
+Limits: no weaker essentials, manual review, bank exceptions, historical filling,
+permanent recovery feature, paid loops or unrelated data/runtime changes.
+
+
 ## SwitchaBank country-scoped blog and US article - 2026-10-09
 
 Status: Complete for local Public code/content; serving deployment is separate. Preserve all prior goals and ownership.
@@ -2292,3 +2364,20 @@ research receipts preserved; private before-image and progress receipt saved.
 Checks: Python syntax and current-origin preflight pass, empty stderr at readback,
 process/log/DB verification and git diff --check pass. No app restart/deployment,
 new scheduler or permanent recovery feature. Collection/Public results pending.
+
+## Server interruption collection continuation - 2026-10-09
+
+Status: Handoff verified; existing batch active, one-off retry waiting in background.
+Actual Regions retry and collection outcome remain pending.
+Scope: existing dev environment, current Santander queued Runs and the Regions
+Bank savings Run proven failed by server connection termination. Preserve all
+unrelated work and previous run evidence.
+Acceptance:
+- [x] Inspect actual DB, active processes, retained plans and server health.
+- [x] Identify one outage failure and verify existing sequential pending batch.
+- [x] Start and verify a bounded one-off handoff to standard retry after the queue.
+- [x] Record actual execution state, limitations and diff checks.
+- [ ] Confirm Regions replacement Run and final background collection outcome.
+Limits: no server restart/deploy, schema/code changes, unrelated failed/partial
+retries, permanent scheduler, historical fact filling or repeated paid retries.
+Operational completion of the background collection remains distinct from handoff.

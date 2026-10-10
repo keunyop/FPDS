@@ -1,5 +1,134 @@
 # FPDS Development Journal
 
+## 2026-10-09 - Seven US banks: generic disclosure fix and one published product
+
+- Latest seven-bank diagnosis: 29 per-type Runs, 61 candidates, one prior
+  approval. Verified 103 preserved original checksums. Direct current capture:
+  102 unique URLs, 93 successes; 60 candidates, one pass, 59 exclusions.
+- Fixed numeric grouped-footer ownership, explicit Regular Purchase APR and
+  independent annual-fee/application-approval meaning in shared parser/gate and
+  prompts; retain own/shared conditions and reject contradictory fees.
+  Parser v25/process v16; no bank exceptions or weaker financial essentials.
+- Final affected Worker 69, discovery 85 and API 650 pass. Full pipeline 911
+  first reported four known exact-HEAD-reproduced failures plus a version
+  assertion; corrected assertion and affected behavior pass on recheck. No
+  fixture hash expectation was changed. Foundation, Git-visible references/
+  JSON/PowerShell, strict UTF-8/Python syntax and diff checks pass.
+- Operation `us-seven-direct-20261009`: actual stored origins, promotion rollback,
+  60 stored raw/parse pairs and four published field origins pass. Ordinary
+  automatic approval/Public refresh published Key Cashback; anonymous API and
+  real page show the complete qualified APR. US Public 67 -> 68; CA 120.
+  Original Runs/candidates, version financial facts and unrelated canonical
+  products are preserved; one prior Cashback version normally superseded. Zero
+  manual review/provider/Admin API calls. Active TD work intact.
+- [Case report](us-seven-bank-generic-collection-corrections-2026-10-09.md)
+  records per-bank limits, preserved private artifacts and rollout smoke/rollback.
+  Local execution sandbox setup error was worked around through the reviewed
+  execution path. Serving API remains v13; coordinated API/Worker release is
+  separate. Preserve earlier changes and unrelated goals.
+
+## 2026-10-09 - Server interruption: sequential collection continuation
+
+- Read actual dev DB, retained batch plan/logs, API health and Windows process
+  tree. Existing Santander checking collection was active; CD and savings were
+  queued in the same sequential runner. No orphaned started Run was found.
+- Regions Bank savings `run_20261010_005255_rb_savings_collect_q9VQAfDt`
+  failed with explicit server-connection termination. Other failures/partial
+  completions have different evidence and were not included.
+- Started ignored one-off `tmp/resume-interrupted-collection-20261009.py`
+  (PID 10372) with log/receipt files of the same basename. It waits for pinned
+  original runner processes AND no started Runs, then calls the existing
+  `api_service.run_retry` CLI once. It refuses changed outage evidence or an
+  existing retry; twelve-hour wait bound, no automatic repeat or permanent
+  scheduler. Original run, source and automatic publication contracts remain.
+- Verified script syntax, process survival, waiting receipt, DB pending scope,
+  serving health (process v15), and git diff --check. Existing runner PID
+  19916 and wrapper 16532 remain responsible for the Santander queue. Run state
+  alone is insufficient during stage transitions; process handles guard that.
+- Limit: Regions retry has not launched yet; all final data outcomes remain
+  pending. No application deployment/restart or source-code changes. Next:
+  inspect one-off receipt/log after the current batch ends; confirm replacement
+  Run and final outcome. Preserve all unrelated changes and goal ownership.
+
+
+
+## 2026-10-09 - JPMorgan Chase: generic linked-price and parser corrections
+
+- Diagnosed six latest Chase Runs: 33 candidates, zero approvals; mortgage
+  failed on an actual HTML NUL. Original snapshots reproduced the losses.
+- Parser v24/process v15 bind anonymous current pricing tables through separately
+  stored native detail links; preserve complete range/single-variable APR tables,
+  default/grace/Prime/financing notes, independent annual fees, full native H1
+  network descriptors and complete HELOC rate/collateral scenarios. Shared
+  normalization, gates, prompts and cache identity agree. NUL text/anchors use
+  visible replacement without changing original bytes or fusing digits.
+- Official-byte, cross-bank/market/type and adversarial boundary regressions
+  pass: final focused Worker 219, independent API 650. The broad Worker check
+  found a missing-optional-metadata error; it was fixed and the existing
+  cross-product regression now passes. Final Worker: 989 tests, 985 pass, the
+  same four exact-HEAD baseline failures, zero errors; hashes preserved.
+- Direct current capture used zero provider/Admin API calls. Six one-off Runs:
+  39 candidates, 25 automatic approvals (24 cards, one HELOC), 14 exclusions,
+  zero review tasks. Actual 65 stored SHA256/parse byte checks, 101 field/link
+  origin/span/meaning checks and all 25 acceptance receipts pass. Automatic
+  promotion rollback rehearsal restored canonical/versions/refresh state.
+- Public snapshot agg_ON0d_aJjk5v-BD1A: US 41 -> 66, CA 120 unchanged.
+  All 25 anonymous detail APIs and actual pages return 200 with complete
+  conditions and no private evidence exposure. Preserved original six Runs,
+  33 candidates, 108 joins, 174 documents, 720 snapshots and 1,564 old financial
+  versions; 22 versions were ordinarily superseded; 454 other canonical rows
+  and unrelated Public products unchanged.
+- Foundation and Git-visible reference/PowerShell/JSON checks pass. Unfiltered
+  repo-doctor finds an unrelated ignored temporary checkout's broken README
+  link; it is preserved. UTF-8/Python/manifest and diff checks pass.
+- Key files: native_linked_card_pricing.py, native_card_declarations.py,
+  native_owned_lending_records.py, parser.py, extraction/service.py,
+  normalization/service.py, collection_accuracy/approval_policy/instructions,
+  test_linked_pricing_sources.py, official owned-apr-source fixtures and
+  chase-generic-collection-corrections-2026-10-09.md.
+- Local code and requested Public data work complete. Serving remains process
+  v13; next is separate coordinated API/Worker v24/v15 release and bounded
+  health/cache smoke. No runtime deployment, paid collection, migration,
+  weaker essential, bank exception or permanent recovery workflow.
+
+
+## 2026-10-09 - Five US banks: generic source/price proof correction
+
+- Diagnosed latest Fifth Third, First Citizens, Goldman Sachs Bank USA, HSBC
+  USA and Huntington executions without Admin collection API. Four current
+  banks used v13: 46 candidates, two approvals; Fifth Third's latest records
+  were older discovery failures. Preserved original runs and private evidence.
+- Parser v23/process v14 add structural CMS-link/error-page boundaries, owned
+  APY panels with agreeing literal tooltip notes, complete single-card PDF
+  continuation/annual-fee proof, current-link/native-name SEO alias proof and
+  mandatory property-security semantics. Atomic chunks, shared prompts, gates
+  and new-module grounding-cache fingerprints preserve full conditions.
+- Actual official-byte and cross-bank/type failure/boundary regressions pass;
+  focused 128 and independent API 650 tests pass. Four failures also reproduce
+  under isolated exact HEAD code (two pre-existing fixture-hash checks, two
+  pre-existing named annual-card checks); expected hashes were not changed.
+- Final Worker 973: 969 pass, the same four exact-HEAD failures remain. Direct
+  current evidence: 47 stored SHA256/parse byte checks and 18 current field
+  origins pass; rollback rehearsal passes. Seventeen one-off Runs completed,
+  43 candidates yielded five automatic approvals and 38 exclusions, no reviews.
+- Published three additional products (Marcus Online Savings; First Citizens
+  Rewards/Cash Rewards) and updated Smart Option/Travel Rewards. US 38 -> 41,
+  CA 120 unchanged. Five detail APIs and actual pages return 200 with full
+  conditions and no private-evidence exposure. Original 27 Runs/46 candidates/
+  129 joins/134 documents/241 snapshots and prior version facts preserved.
+- Per-file CLI overhead was handled only in the ignored operation folder with
+  same-permission SDK connection reuse. Preserved the partial-upload/17-started-
+  Run/one-source checkpoint; identical input/scope/state checks gated resume.
+  No paid collection retries or permanent storage/recovery feature were added.
+- Local code and published data are complete; serving process remains v13.
+  Next action is separate API/Worker v23/v14 deployment and bounded health/smoke.
+  No paid provider calls, manual review, bank exceptions or runtime deployment.
+- Key files: discovery.py, source_content_validity.py, native_account_apy.py,
+  native_single_card_pdf.py, native_dom_ownership.py, native_owned_lending_records.py,
+  shared extraction/accuracy/approval/parser/chunk/cache/process/instructions,
+  official CMS-boundary fixtures and tests.
+- [Diagnosis and publication verification](us-five-bank-generic-collection-corrections-2026-10-09.md).
+
 ## 2026-10-09 - SwitchaBank country-scoped blog and US savings article
 
 - Header/mobile/footer Blog links, lists, breadcrumbs, catalog actions and

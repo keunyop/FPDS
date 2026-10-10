@@ -1,6 +1,6 @@
 """Literal card price declarations, owned hero labels and complete local notes."""
 import re
-from worker.native_dom_ownership import unique_heading, owns_label, local_notes
+from worker.native_dom_ownership import unique_heading, owns_label, local_notes, without_reference_markers
 from worker.native_owned_account_records import _account_notes
 
 
@@ -42,21 +42,21 @@ def card_declarations(soup):
     output = []
     output.append(("owned_product_label", owner, owner))
     for node in root.find_all(["h2", "h3", "h4", "h5", "p"])[:2048]:
-        text = " ".join(node.get_text(" ", strip=True).split())
+        text = " ".join(without_reference_markers(node).split())
         fee = re.fullmatch(r"(?:No|\$\d+(?:\.\d+)?) annual fee", text, re.I)
         apr_label = re.fullmatch(r"(?:Purchase rate|Purchase APR|Low intro APR)", text, re.I)
         if not (fee or apr_label) or node.find_parent(["aside", "nav", "form", "table", "footer"]):
             continue
         block = node.parent
         if (block is root or len(block.get_text()) > 1600
-                or len(block.find_all(["h1", "h2", "h3", "h4", "h5"])) != 1
+                or len(block.find_all(["h1", "h2", "h3", "h4", "h5"])) not in ({0, 1} if fee else {1})
                 or block.select('input:not([type="hidden"]), select, textarea, [role="slider"]')
                 or not owns_label(block, root, owner)):
             continue
         notes = _account_notes(soup, block)
         if notes is None:
             continue
-        literal = block.get_text("\n", strip=True)
+        literal = without_reference_markers(block)
         # Price conditions in the owned block and every uniquely referenced
         # note stay intact. References are not interpreted as source code.
         quote = "\n".join([owner, literal, *notes])

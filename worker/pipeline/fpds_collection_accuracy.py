@@ -52,6 +52,10 @@ def _money_has_condition(quote: str, field_name: str) -> bool:
             name = re.sub(r"\bfor (?:students?|seniors?|youth)\b", "Audience", owned[1], flags=re.I)
             context = name + context[len(owned[1]):]
         context = re.sub(r"(?mi)^\(for primary cardholder and up to \d+ additional cards\)[ \t]*$", "Cardholder scope", context)
+    if field_name == "annual_fee" and re.search(r"(?mi)^Annual fee\s*\n(?:None|\$\d+(?:\.\d+)?)(?:\n|$)", context):
+        # A separate product-application approval sentence does not change an
+        # independently labelled annual price. All fee conditions remain.
+        context = re.sub(r"(?<!\w)All credit products are subject to credit approval[.]", "Separate application approval.", context)
     if field_name in {"monthly_fee", "public_display_fee"}:
         if re.search(r"little to no monthly fees|through.{0,40}rebates|offers for eligible", context, re.I):
             return True
@@ -381,6 +385,16 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name in {"interest_rate_summary", "purchase_interest_rate_summary", "fee_waiver_condition", "early_withdrawal_penalty"}:
             return text(value).casefold() == q.casefold()
         return bool(text(value)) and text(value).casefold() in q.casefold()
+    if field_name == "annual_fee":
+        # Complete same-record restatements must agree with the native price.
+        # Another labelled charge cannot overwrite a contradictory annual fee.
+        fees = re.findall(r"\bannual fees?\s*(?:(?:is|:)\s*)?\$(\d+(?:\.\d+)?)|\$(\d+(?:\.\d+)?)\s+annual fees?\b", q, re.I)
+        if any(Decimal(a or b) != Decimal(str(value)) for a, b in fees):
+            return False
+        from worker.native_single_card_pdf import single_card_fee_value
+        fee = single_card_fee_value(quote)
+        if fee is not None:
+            return Decimal(str(value)) == fee
     named_row = _named_account_row_value(field_name, value, quote)
     if named_row is not None:
         return named_row
@@ -508,6 +522,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         referenced_apy = referenced_apy_value(quote)
         if referenced_apy is not None and field_name in {"standard_rate", "public_display_rate"}:
             return number == referenced_apy
+        from worker.native_account_apy import account_apy_value
+        own_apy = account_apy_value(quote)
+        if own_apy is not None and field_name in {"standard_rate", "public_display_rate"}:
+            return number == own_apy
         from worker.native_apy_records import apy_value
         apy = apy_value(quote)
         if apy is not None and field_name in {"standard_rate", "public_display_rate"}:
@@ -551,6 +569,9 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return False
         return number < 100 and number in {Decimal(v) for v in rates} and bool(re.search(r"\b(?:rate|interest|apr|apy|yield)\b", q, re.I))
     if number == 0 and field_name in {"monthly_fee", "public_display_fee"}:
+        from worker.native_account_apy import account_wide_fee_value
+        if account_wide_fee_value(quote) == 0:
+            return True
         if re.search(r"(?mi)^Monthly fee\s*\nFree\s*$", quote) and not _money_has_condition(quote, field_name):
             return True
         from worker.native_deposit_records import BLANKET_FEE
@@ -780,6 +801,9 @@ def country_currency_fallback(record: Mapping, evidence: list[dict]) -> str | No
 def _native_record_belongs(record, chunk, source_metadata):
     from worker.native_information_records import names_match
     owner = str(chunk.get("anchor_value") or "")
+    if chunk.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee"}:
+        from worker.native_single_card_pdf import issuer_product_match
+        return issuer_product_match(owner,record.get("product_name"),chunk.get("source_url", ""))
     if chunk.get("anchor_type") != "named_deposit_apy" and owner and names_match(owner, record.get("product_name")):
         return True
     if chunk.get("anchor_type") not in {"named_card_rate_table", "named_deposit_apy"}:
@@ -798,6 +822,8 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     Evidence must come from current-run extraction or DB joins, never model text.
     The returned exclusions contain field names/reasons only, not rejected values.
     """
+    from worker.native_linked_card_pricing import stored_link_belongs
+
     result = dict(record)
     payload = dict(record.get("candidate_payload") or {})
     mappings = dict(record.get("field_mapping_metadata") or {})
@@ -837,7 +863,10 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             reason = "evidence_source_mismatch"
         elif not exact_quote(quote, e.get("evidence_excerpt")):
             reason = "exact_evidence_missing"
-        elif (e.get("anchor_type") in {"owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
+        elif (e.get("anchor_type") == "linked_card_pricing_terms" and not stored_link_belongs(
+                    record, m, evidence, source_metadata, origin)):
+            reason = "current_detail_pricing_link_unproven"
+        elif (e.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_assertion", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
                 and not _native_record_belongs(record, e, source_metadata)):
             reason = "native_product_mismatch"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
@@ -858,9 +887,9 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             # A balance that waives transaction charges is not an opening or
             # general minimum balance, nor a monthly-account-fee threshold.
             reason = "transaction_waiver_balance_not_minimum"
-        elif (e.get("anchor_type") in {"owned_account_assertion", "owned_lending_terms"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
+        elif (e.get("anchor_type") in {"single_card_annual_fee", "owned_account_assertion", "owned_lending_terms"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
             reason = "native_account_conditions_incomplete"
-        elif (e.get("anchor_type") in {"card_information_rate", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"linked_card_pricing_terms", "single_card_purchase_terms", "card_information_rate", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
                 and name in {"standard_rate", "interest_rate_summary", "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
                 and (not exact_quote(e.get("evidence_excerpt"), quote)
                      or (name in {"interest_rate_summary", "purchase_interest_rate_summary"}

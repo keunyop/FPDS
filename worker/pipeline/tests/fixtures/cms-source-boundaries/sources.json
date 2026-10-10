@@ -1,0 +1,41 @@
+[
+  {
+    "fixture": "heloc.html.gz",
+    "url": "https://www.huntington.com/Personal/Lending-comparison/home-equity-comparison/home-equity-lines-of-credit",
+    "sha256": "d88d295cc6f807062b578c7673eb1a3b6512139b3352abcd4d6feeac7337628b",
+    "capture_role": "preserved diagnostic original; never publication input"
+  },
+  {
+    "fixture": "soft404.html.gz",
+    "url": "https://www.huntington.com/Personal/Lending-comparison/home-equity-comparison/home-equity-lines-of-credit/page-data/heloc-states/Illinois",
+    "sha256": "8ae0a482c8c5fb4e3c0ac25a6ad75c1f8859ddf9843bdf5f86ccffa2107463d1",
+    "capture_role": "preserved diagnostic original; never publication input"
+  },
+  {
+    "fixture": "savings.html.gz",
+    "url": "https://www.marcus.com/us/en/savings/high-yield-savings",
+    "sha256": "1eacd592a5638e5bcf6642a156ea5dd13349463c0af7acb8881bd26252ad9694",
+    "captured_at": "2026-10-09T23:00:50.659791+00:00"
+  },
+  {
+    "fixture": "single-card.pdf.gz",
+    "url": "https://www.firstcitizens.com/content/dam/firstcitizens/pdfs/personal/credit-cards/cash-rewards-pricing.pdf",
+    "sha256": "f15baa27b92cca209ac28aa43a87375be49e027085adff83877435c5763824dc",
+    "fetched_at": "2026-10-09T23:01:37.788719+00:00",
+    "purpose": "Current official single-card pricing disclosure regression; not a fixture publication source."
+  },
+  {
+    "fixture": "alias-card.html.gz",
+    "url": "https://www.firstcitizens.com/personal/credit-cards/low-interest",
+    "sha256": "738aedce369b3872246a540a5b2cba8efe05663e0efcd56fb77bf6d175925808",
+    "fetched_at": "2026-10-09T23:01:32.175731+00:00",
+    "purpose": "Current official SEO alias/current-link proof regression only."
+  },
+  {
+    "fixture": "alias-card.pdf.gz",
+    "url": "https://www.firstcitizens.com/content/dam/firstcitizens/pdfs/personal/credit-cards/smart-option-pricing.pdf",
+    "sha256": "db5d76aaf11da1e7002debd9ed9ab89961a69714e59c2a5d681a2388b0d4d820",
+    "fetched_at": "2026-10-09T23:01:37.885458+00:00",
+    "purpose": "Current official SEO alias/current-link proof regression only."
+  }
+]

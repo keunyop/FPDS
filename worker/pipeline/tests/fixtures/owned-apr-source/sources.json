@@ -1,0 +1,44 @@
+[
+  {
+    "fixture": "freedom-unlimited.html.gz",
+    "url": "https://creditcards.chase.com/cash-back-credit-cards/freedom/unlimited?iCELL=61FY",
+    "sha256": "4d5962daa52931ec9f6c222570cc4b2a2a885512f9670f3e040208cbb38658bd",
+    "captured_at": "2026-10-10T00:54:24.567230+00:00"
+  },
+  {
+    "fixture": "heloc.html.gz",
+    "url": "https://www.chase.com/personal/mortgage/home-equity/home-equity-line-of-credit",
+    "sha256": "d6a215ca90b187c8a9a486f15f53f605b700ff82b2f17053677a5cb7b6466423",
+    "captured_at": "2026-10-10T00:54:12.740198+00:00"
+  },
+  {
+    "fixture": "sapphire-preferred.html.gz",
+    "url": "https://creditcards.chase.com/rewards-credit-cards/sapphire/preferred?iCELL=61FY",
+    "sha256": "afba22cabfaf6299d19878947a7595363bf41c2f89d8eeed4071afa3560fb050",
+    "captured_at": "2026-10-10T00:54:33.901368+00:00"
+  },
+  {
+    "fixture": "affordable.html.gz",
+    "url": "https://www.chase.com/personal/mortgage/affordablelending",
+    "sha256": "5c99b715a5fae5d1c3beaded86d07d9b423794cb91bd51f4d39708235ae58aaf",
+    "captured_at": "2026-10-10T00:54:05.009080+00:00"
+  },
+  {
+    "fixture": "linked-pricing.html.gz",
+    "url": "https://sites.chase.com/services/creatives/pricingandterms.html/content/dam/pricingandterms/LGC61498.html",
+    "sha256": "1ed3c636a2f1fb7b4e926f2888022be333e0f27329af88b888e8fa8def1f2abe",
+    "captured_at": "2026-10-10T00:54:57.044175+00:00"
+  },
+  {
+    "fixture": "long-pricing.html.gz",
+    "url": "https://sites.chase.com/services/creatives/pricingandterms.html/content/dam/pricingandterms/LGC59329.html",
+    "sha256": "af60507ea4a64c18809a819f3503d5ae7b86edc0409a1190450cca5b1ca38463",
+    "captured_at": "2026-10-10T00:54:57.729345+00:00"
+  },
+  {
+    "fixture": "single-apr.html.gz",
+    "url": "https://sites.chase.com/services/creatives/pricingandterms.html/content/dam/pricingandterms/LGC64148.html",
+    "sha256": "a16832fb4ffe06d1c3b734fdb7221e605d1395cfd6e4d866219c0cd57da12681",
+    "captured_at": "2026-10-10T00:54:57.931804+00:00"
+  }
+]

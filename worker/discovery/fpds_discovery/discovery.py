@@ -639,7 +639,13 @@ class _LinkExtractor(HTMLParser):
                         normalized_key in _STRUCTURED_LINK_KEYS
                         or (normalized_key == "path" and str(parent_key or "").lower() == "learnmore")
                     ):
-                        if normalized_key == "url" and "href" in normalized_node_keys:
+                        content_item = (
+                            isinstance(node.get("fields"), dict)
+                            and bool(node.get("fields"))
+                            and "displayname" in normalized_node_keys
+                            and re.fullmatch(r"\{?[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\}?", str(node.get("id", "")), re.I)
+                        )
+                        if normalized_key == "url" and ("href" in normalized_node_keys or content_item):
                             # Headless CMS link envelopes often expose both a
                             # public href and an internal content-tree URL.
                             # Prefer the public route and never score the CMS

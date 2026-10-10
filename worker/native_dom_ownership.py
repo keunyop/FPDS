@@ -46,6 +46,39 @@ def owns_label(node, root, owner):
     return True
 
 
+def _numbered_container_note(target, ref):
+    """A numeric superscript can select one explicitly numbered sibling note.
+
+    Preserve all unnumbered shared copy. Missing/duplicate/empty numbered blocks
+    are unresolved; a generic link or ordinary single note keeps full context.
+    """
+    whole = target.get_text(" ", strip=True)
+    symbol = ref.get_text("", strip=True)
+    if not re.fullmatch(r"[0-9]{1,3}", symbol) or ref.find_parent("sup") is None:
+        return whole
+    markers = target.find_all(["span", "sup"], class_="footnote")
+    if len(markers) < 2:
+        return whole
+    if len(markers) > 128 or len(whole) > 24000:
+        return None
+    labels = [m.get_text("", strip=True) for m in markers]
+    if (any(not re.fullmatch(r"[0-9]{1,3}", value) for value in labels)
+            or len(set(labels)) != len(labels) or symbol not in labels):
+        return None
+    groups = [m.parent for m in markers]
+    parent = groups[0].parent
+    if (any(group is target or group.parent is not parent for group in groups)
+            or len({id(group) for group in groups}) != len(groups)
+            or any(next(iter(group.stripped_strings), "") != label
+                or not group.find(["p", "li"])
+                or not any(p.get_text(strip=True) for p in group.find_all(["p", "li"]))
+                for group, label in zip(groups, labels))):
+        return None
+    excluded = {id(group) for group, label in zip(groups, labels) if label != symbol}
+    return " ".join(str(t).strip() for t in target.find_all(string=True)
+        if str(t).strip() and not any(id(a) in excluded for a in t.parents))
+
+
 def local_notes(soup, block):
     """Resolve only unique same-document literal references; never evaluate JS."""
     notes = []
@@ -82,6 +115,14 @@ def local_notes(soup, block):
         if any(hint != target for hint in hints):
             return None
         targets = soup.find_all(id=target)
+        if not targets:
+            # CMS tooltip keys are literal references, scoped to the owned
+            # block. Responsive copies must agree before one can support facts.
+            components = soup.find_all(attrs={"tooltip-data-id": target})
+            local = block.find_all(attrs={"tooltip-data-id": target})
+            literals = {c.get_text(" ", strip=True) for c in components}
+            if len(local) == 1 and len(literals) == 1 and components:
+                targets = local
         # A reciprocal note return is navigation, not another disclosure.
         # Responsive copies may repeat the same numeric caller. Every caller
         # must point back to this uniquely identified complete note.
@@ -93,7 +134,7 @@ def local_notes(soup, block):
             continue
         if len(targets) != 1:
             return None
-        note = targets[0].get_text(" ", strip=True)
+        note = _numbered_container_note(targets[0], ref)
         if not note or len(note) > 6000:
             return None
         notes.append(note)

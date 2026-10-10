@@ -439,7 +439,8 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
     single official grounding call and keeps its real document/snapshot origin.
     """
     from worker.native_information_records import names_match
-    named_pdf_anchors = {"card_information_rate", "card_information_fee",
+    from worker.native_single_card_pdf import issuer_product_match
+    named_pdf_anchors = {"single_card_purchase_terms", "single_card_annual_fee", "card_information_rate", "card_information_fee",
         "named_card_regular_rates", "named_card_fee_row",
         "named_product_rate_basis", "named_product_interest_terms", "named_card_rate_table", "named_balance_rate"}
     output = []
@@ -473,7 +474,21 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                 # from another product. Retain each record's current origin.
                 named_native = [c for c in companion.candidates
                     if (ctx.source_type == "pdf" or c.anchor_type in {"named_card_rate_table", "named_balance_rate", "named_card_regular_rates"}) and c.anchor_type in named_pdf_anchors
-                    and names_match(c.anchor_value, identity)]
+                    and (names_match(c.anchor_value, identity) or (c.anchor_type in {"single_card_purchase_terms", "single_card_annual_fee"} and issuer_product_match(c.anchor_value,identity,url)))]
+                # A captured current detail link plus exact native H1/PDF name
+                # can resolve an SEO qualifier or an alias route. Metadata alone
+                # cannot supply this relationship or a different product name.
+                heads = {c.evidence_excerpt for c in own if c.anchor_type == "document_heading"}
+                title_tokens = set(re.findall(r"[a-z0-9]+", " ".join(c.evidence_excerpt for c in own if c.anchor_type == "document_title").casefold()))
+                direct_link = any(c.anchor_type in {"captured_product_link", "captured_disclosure_link"}
+                    and _canonical_official_source_url(urljoin(own_url,c.evidence_excerpt)) == url for c in own)
+                alias_native = []
+                if _infer_product_type(context) == "credit-card" and ctx.source_type == "pdf" and direct_link and len(heads) == 1:
+                    head = next(iter(heads))
+                    if set(re.findall(r"[a-z0-9]+",head.casefold())) <= title_tokens:
+                        alias_native = [c for c in companion.candidates if c.anchor_type in {"single_card_purchase_terms", "single_card_annual_fee"}
+                            and issuer_product_match(c.anchor_value,head,url)]
+                        named_native.extend(c for c in alias_native if c not in named_native)
                 named.extend(c for c in named_native if c not in named)
                 parents = metadata.get("parent_detail_urls") or [] if isinstance(metadata, dict) else []
                 named.extend(c for c in companion.candidates if c.anchor_type in {"financial_table_cell", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
@@ -489,6 +504,12 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                     for c in companion.candidates)
                 deposit_anchors = ({"named_deposit_rate", "named_deposit_fee"} if _infer_product_type(context) == "savings"
                     else {"named_deposit_schedule"} if _infer_product_type(context) == "gic" else set())
+                from worker.native_linked_card_pricing import detail_link, TERMS_ANCHOR
+                pricing_link = detail_link(own, url, own_url) if _infer_product_type(context) == "credit-card" else None
+                linked_pricing = [c for c in companion.candidates if pricing_link and c.anchor_type == TERMS_ANCHOR]
+                if linked_pricing:
+                    parent = own_url
+                    named.extend(c for c in linked_pricing if c not in named)
                 linked_native = [c for c in companion.candidates if linked_detail and c.anchor_type in deposit_anchors]
                 if linked_native:
                     parent = own_url
@@ -507,7 +528,7 @@ def _bind_grounding_evidence(inputs: list[ExtractionInput]) -> list[ExtractionIn
                     selected.append(replace(c, retrieval_metadata={**c.retrieval_metadata,
                         "source_url": url, "captured_companion": True,
                         "parent_detail_url": own_url if c in named_native else parent,
-                        **({"companion_binding": "exact_named_native_record"} if c in named_native else {})}))
+                        **({"companion_binding": "current_detail_link_exact_named_native_record" if c in alias_native else "exact_named_native_record"} if c in named_native else {})}))
         output.append(replace(item, grounding_candidates=list({c.evidence_chunk_id:c for c in selected}.values())))
     return output
 
@@ -560,6 +581,15 @@ def _captured_native_product_title(context, candidates):
                     and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url))
             and c.bank_code == context.bank_code and c.country_code == context.country_code
             and c.source_language == context.source_language for c in candidates))
+        from worker.native_single_card_pdf import issuer_product_match
+        linked_named_card = (_infer_product_type(context) == "credit-card" and any(
+            c.anchor_type == "single_card_purchase_terms"
+            and c.retrieval_metadata.get("companion_binding") == "current_detail_link_exact_named_native_record"
+            and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url
+            and issuer_product_match(c.anchor_value,literal,c.retrieval_metadata.get("source_url", ""))
+            and c.bank_code == context.bank_code and c.country_code == context.country_code
+            and c.source_language == context.source_language for c in candidates))
+        card_price = card_price or linked_named_card
         owned_account = (_infer_product_type(context) in {"savings", "chequing"}
             and any(c.anchor_type == "owned_account_assertion" and names_match(c.anchor_value, literal)
                 and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
@@ -575,14 +605,33 @@ def _captured_native_product_title(context, candidates):
         for count in range(1, min(4, len(words)) + 1):
             if "".join(words[:count]) in host_labels[:-1]:
                 brand_tokens = route_tokens(" ".join(words[:count]))
+        # SEO may abbreviate card-network descriptors. The literal unique H1
+        # still owns them only with its actual current linked pricing record;
+        # preserve the complete name, not a synthesized or shortened identity.
+        from worker.native_linked_card_pricing import detail_link
+        current_own = [c for c in candidates if c.source_document_id == context.source_document_id
+            and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
+            and c.bank_code == context.bank_code and c.country_code == context.country_code
+            and c.source_language == context.source_language]
+        linked_prices = any(c.anchor_type == "linked_card_pricing_terms"
+            and c.retrieval_metadata.get("captured_companion") is True
+            and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url
+            and c.bank_code == context.bank_code and c.country_code == context.country_code
+            and c.source_language == context.source_language
+            and detail_link(current_own,c.retrieval_metadata.get("source_url", ""),url)
+            for c in candidates)
+        card_core = native_tokens - brand_tokens - {"visa", "signature", "infinite", "mastercard", "world", "elite", "credit"}
+        linked_card_identity = (_infer_product_type(context) == "credit-card" and linked_prices
+            and bool(card_core) and card_core <= title_tokens and card_core <= url_tokens)
+        card_price = card_price or linked_card_identity
         product_tokens = native_tokens - brand_tokens
         branded_account = (owned_account and brand_tokens and len(product_tokens) >= 2
             and product_tokens <= (title_tokens | url_tokens)
             and len((product_tokens - {"savings", "interest", "checking", "chequing"}) & url_tokens) >= 2)
-        title_corroborates = (branded_account or native_tokens <= (title_tokens | url_tokens) or
+        title_corroborates = (linked_card_identity or branded_account or native_tokens <= (title_tokens | url_tokens) or
             (owned_account and native_tokens - {"daily", "everyday"} <= title_tokens
              and bool(native_tokens & url_tokens)))
-        if (card_price and not family and route_identity and bool((route_identity - {"credit", "mastercard", "visa", "savings", "interest", "gic"}) & url_tokens) and len(native_tokens) >= 2 and len(literal.split()) <= 10
+        if (card_price and not family and route_identity and (linked_named_card or bool((route_identity - {"credit", "mastercard", "visa", "savings", "interest", "gic"}) & url_tokens)) and len(native_tokens) >= 2 and len(literal.split()) <= 10
                 and title_corroborates
                 and not re.search(r"^(?:get|benefit|plan|choose|compare|discover|find|open)\b", literal, re.I)
                 and not re.search(r"/(?:apply|application|login|calculator|insurance)(?:/|[.-]|$)",urlsplit(url).path,re.I)
@@ -607,6 +656,20 @@ def _captured_native_product_title(context, candidates):
             and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
             and c.country_code == context.country_code and c.source_language == context.source_language]
         core = route_tokens(re.split(r"\s+from\s+", literal, flags=re.I)[0])
+        # An explicitly labelled standalone account APY panel owns its literal
+        # account name even when several unrelated marketing H1s exist.
+        route = route_tokens(urlsplit(url).path)
+        if (_infer_product_type(context) in {"savings", "chequing"}
+                and core <= route_tokens(" ".join(captured_titles))
+                and len(route) >= 2 and route & {"saving", "checking", "chequing"}
+                and not route & {"apply", "application", "login", "calculator", "compare"}
+                and not discovery.get("multi_product_family_overview")
+                and "multi_product_family_overview" not in discovery.get("page_evidence_reason_codes", [])
+                and any(c.anchor_type == "owned_account_apy" and c.anchor_value == literal
+                    and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+                    and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
+                    and c.country_code == context.country_code and c.source_language == context.source_language for c in candidates)):
+            return literal
         if distinctive and distinctive <= route_tokens(urlsplit(url).path) and core - route_tokens("rewards for") <= route_tokens(" ".join(captured_titles)) and any(
                 c.anchor_type in {"labelled_financial_record", "owned_card_apr_offer"}
                 and c.anchor_value == literal and c.source_document_id == context.source_document_id
@@ -855,11 +918,31 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if security is not None:
                 values["secured_flag"] = security
                 values["security_requirement"] = quote
+            if re.search(r"Variable rate of \d+(?:\.\d+)?% in ZIP code \d{5} as of", quote) and 'Sample variable APR assumes ' in quote:
+                values["interest_rate_summary"] = quote
             if re.search(r"Rates vary from \d+(?:\.\d+)?% APR to \d+(?:\.\d+)?% APR|Your APR may be as low as \d+(?:\.\d+)?% or as high as \d+(?:\.\d+)?%", quote):
                 values["interest_rate_summary"] = quote
                 term = re.search(r"[^.!?\n]{0,120}\boffers personal loans with a period of repayment between \d+ and \d+-month terms[.]", quote, re.I)
                 if term and _infer_product_type(context) == "personal-loan":
                     values["term_length_text"] = term[0].strip()
+        if c.anchor_type == "single_card_annual_fee" and _infer_product_type(context) == "credit-card":
+            from worker.native_single_card_pdf import issuer_product_match, single_card_fee_value
+            fee = single_card_fee_value(quote)
+            if fee is not None and companion and issuer_product_match(c.anchor_value, identity, c.retrieval_metadata.get("source_url", "")):
+                values["annual_fee"] = float(fee)
+        pricing_link = None
+        if c.anchor_type == "linked_card_pricing_terms" and companion and _infer_product_type(context) == "credit-card":
+            from worker.native_linked_card_pricing import detail_link
+            current_own = [x for x in candidates if x.source_document_id == context.source_document_id
+                and x.source_snapshot_id == context.snapshot_id and x.parsed_document_id == context.parsed_document_id
+                and x.bank_code == context.bank_code and x.country_code == context.country_code]
+            pricing_link = detail_link(current_own, c.retrieval_metadata.get("source_url", ""), url)
+            if pricing_link and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url:
+                values["purchase_interest_rate_summary"] = _normalize_text(quote)
+        if c.anchor_type == "single_card_purchase_terms" and _infer_product_type(context) == "credit-card":
+            from worker.native_single_card_pdf import issuer_product_match
+            if companion and issuer_product_match(c.anchor_value, identity, c.retrieval_metadata.get("source_url", "")):
+                values["purchase_interest_rate_summary"] = _normalize_text(quote)
         if c.anchor_type == "named_card_apr_terms" and _infer_product_type(context) == "credit-card":
             from worker.native_information_records import names_match
             if names_match(c.anchor_value, identity):
@@ -872,6 +955,11 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                     values.update(standard_rate=float(apy), interest_rate_summary=_normalize_text(quote))
             if c.anchor_type == "owned_card_apr_offer" and _infer_product_type(context) == "credit-card":
                 values["purchase_interest_rate_summary"] = _normalize_text(quote)
+        if own and c.anchor_type == "owned_account_apy" and names_match(str(c.anchor_value or ""), identity) and _infer_product_type(context) in {"savings", "chequing"}:
+            from worker.native_account_apy import account_apy_value
+            apy = account_apy_value(quote)
+            if apy is not None:
+                values.update(standard_rate=float(apy), interest_rate_summary=quote)
         if own and c.anchor_type == "owned_account_assertion" and _normalize_text(str(c.anchor_value or "")) == identity:
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
             for currency, pattern in CURRENCY_PATTERNS.items():
@@ -1201,6 +1289,9 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 field_metadata={'official_grounding_contract_version':'collection-official-grounding-v2',
                     'official_verification_status':'match','official_grounding_method':'deterministic_captured_financial_record',
                     'official_web_sources':[{'url':source_url,'title':identity}], 'evidence_quote':field_quote,
+                    **({'applicability_evidence_chunk_id':pricing_link.evidence_chunk_id,
+                        'applicability_evidence_quote':pricing_link.evidence_excerpt,
+                        'applicability_product_name':identity} if name == 'purchase_interest_rate_summary' and pricing_link else {}),
                     **({'annual_basis_evidence_chunk_id':rate_basis.evidence_chunk_id,
                         'annual_basis_evidence_quote':rate_basis.evidence_excerpt,
                         'annual_basis_product_name':identity} if name == 'standard_rate' and rate_basis else {})})
@@ -1603,6 +1694,22 @@ class ExtractionService:
                     citation_confidence=field.confidence, model_execution_id=model_execution_id,
                     anchor_type=basis.anchor_type, anchor_value=basis.anchor_value,
                     page_no=basis.page_no, chunk_index=basis.chunk_index))
+
+            for field in extracted_fields:
+                link = bound_chunks.get(field.field_metadata.get("applicability_evidence_chunk_id"))
+                if (link is None or link.anchor_type != "captured_disclosure_link"
+                        or link.source_document_id != context.source_document_id
+                        or link.source_snapshot_id != context.snapshot_id
+                        or link.parsed_document_id != context.parsed_document_id
+                        or link.bank_code != context.bank_code or link.country_code != context.country_code):
+                    continue
+                evidence_links.append(EvidenceLinkDraft(
+                    field_name=field.field_name, candidate_value=_stringify_candidate_value(field.candidate_value),
+                    evidence_chunk_id=link.evidence_chunk_id, evidence_text_excerpt=link.evidence_excerpt,
+                    source_document_id=link.source_document_id, source_snapshot_id=link.source_snapshot_id,
+                    citation_confidence=field.confidence, model_execution_id=model_execution_id,
+                    anchor_type=link.anchor_type, anchor_value=link.anchor_value,
+                    page_no=link.page_no, chunk_index=link.chunk_index))
 
             extracted_storage_key = self.storage_config.build_extracted_object_key(
                 country_code=context.country_code,
@@ -5630,7 +5737,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_apy", "owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)
@@ -5661,13 +5768,23 @@ def _select_official_grounding_chunks(
     if detail_docs and companions:
         companion_ids = {c.evidence_chunk_id for c in companions[:8]}
         selected = [c for c in selected if c.evidence_chunk_id not in companion_ids][:16] + companions[:8]
+    # The financial record and its actual current applicability link are one
+    # proof. Keep both ahead of broad companion context within the same caps.
+    linked_ids = list(dict.fromkeys(chunk_id for field in collected_fields
+        if (getattr(field, "field_metadata", None) or {}).get("applicability_evidence_chunk_id")
+        for chunk_id in (field.evidence_chunk_id, field.field_metadata["applicability_evidence_chunk_id"])))
+    linked_proof = [candidate_by_id[chunk_id] for chunk_id in linked_ids if chunk_id in candidate_by_id]
+    if linked_proof:
+        selected = linked_proof + [c for c in selected if c.evidence_chunk_id not in linked_ids]
     # Preserve the previous 24 x 1800 character payload ceiling. Atomic rows
     # can be larger, but no note is truncated to fit the remaining budget.
     bounded = []
     remaining = 43_200
     for candidate in selected[:24]:
         size = len(candidate.evidence_excerpt)
-        if size > 6400 or size > remaining:
+        from worker.native_linked_card_pricing import MAX_PRICING_RECORD_CHARS, TERMS_ANCHOR
+        limit = MAX_PRICING_RECORD_CHARS if candidate.anchor_type == TERMS_ANCHOR else 6400
+        if size > limit or size > remaining:
             continue
         bounded.append(candidate)
         remaining -= size

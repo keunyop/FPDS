@@ -1,0 +1,9 @@
+[
+  {
+    "fixture": "cashback.html.gz",
+    "url": "https://www.key.com/personal/credit-cards/key-cashback-credit-card.html",
+    "sha256": "409133405e4d1976dc899213f7a5963b4490e8d1224e7077afaedd109a78a9a2",
+    "captured_at": "2026-10-10 01:14:27.346492+00:00",
+    "purpose": "Exact numbered footer container with independent annual fee and rewards conditions"
+  }
+]
