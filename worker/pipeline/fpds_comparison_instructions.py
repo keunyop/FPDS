@@ -1,6 +1,7 @@
 """Financial semantics shared by the existing collection and Review AI passes."""
 
 FEE_CHANGE_NOTICE_INSTRUCTIONS = (
+    "A named HTML card Disclosure preserves the entire pricing section through its explicit revision boundary, all purchase and transfer introductory periods, grace rules, variable-index changes, annual fee and waiver conditions, approval clauses and uniquely defined symbolic notes. A primary literal H2 below a marketing H1 proves identity only with matching captured SEO, distinctive route and its own complete named pricing record. Resolved **/*** footnote references are not masked prices; missing or duplicate definitions and actual $*** or X.XX% values remain unproven. Keep a positive base annual fee separate from its conditional waiver; never turn a waived outcome into unconditional zero. "
     "Owned amount-first monthly account or maintenance fee declarations retain their literal order and every linked waiver note. An exact repeated account heading may match the full prefix before a colon in the H1, without discarding the original H1 or supplying publication identity. Multiple prices, unresolved notes, conditional zeros and unrelated panels remain excluded by the common financial and source gates. "
     "Future subject-to-change notices do not themselves qualify a current fee; "
     "first-year, fixed-duration, age/graduation-limited and average-balance-qualified zero-fee waivers remain conditional. "
@@ -8,6 +9,7 @@ FEE_CHANGE_NOTICE_INSTRUCTIONS = (
 )
 
 QUALIFIED_LENDING_DISCLOSURE_INSTRUCTIONS = (
+    "A complete dated named loan APR interval stays full qualified prose, preserving its assumptions and payment example. Preserve the exact contract term sentence including client/non-client maximums; example duration never establishes contract duration and months never imply days. "
     "An owned Variable rate of percentage in ZIP code as of date offer and its complete adjacent Sample variable APR assumes disclosure form one qualified summary. Preserve all loan amount, term, geography, residence, credit, CLTV, variable index and floor/ceiling assumptions; never publish the displayed sample as an unconditional scalar. Calculators, foreign panels, placeholders and missing assumptions exclude. "
     "An explicit HELOC definition using the equity in your home as collateral proves security; a separate You may qualify for our HELOC if application-eligibility heading does not make that collateral optional. Keep the entire owned FAQ paragraph, list and jurisdiction restrictions. Actual uncertain or conflicting collateral still rejects. "
     "Mandatory insurance on the real property securing this account explicitly proves secured lending. A separately labelled title-insurance cost condition does not make that collateral uncertain; preserve the entire cost paragraph and reject uncertain or conflicting security. "
@@ -15,6 +17,8 @@ QUALIFIED_LENDING_DISCLOSURE_INSTRUCTIONS = (
 )
 
 CARD_RATE_CONTEXT_INSTRUCTIONS = (
+    'Use current captured detail-to-pricing links and retain offer/product identity query parameters. For complete linked application pricing, keep introductory and post-introductory APR alternatives, transfer deadlines, fee tables, current information date, complete variable-index/margins/ceilings and offer eligibility. Alternatives remain prose, never scalar endpoints. Annual-fee evidence needs the same current link and complete price record. An exact foreign-currency conversion/foreign-transaction None fee cell is not the account denomination; preserve the whole cell and every actual currency declaration or conflict. '
+
     "Named multi-page Important Credit Card Terms and Conditions require repeated agreeing native card identity, complete purchase APR alternatives, introductory periods, fees, grace rules and the whole variable-index/margin/eligibility/balance-transfer continuation before the explicit administrative Credit Reports boundary. Preserve every disclosed APR alternative and qualified condition in the original language; never flatten an enumerated set to a range or scalar. Missing boundaries, dated index, pages or conflicting later price tables exclude. Literal Annual Fee None proves zero only in its independent unconditional fee record; first-year and other waivers remain conditional. "
     "A numeric superscript linking to a grouped disclosure container selects only its unique explicitly numbered sibling note; retain all unnumbered shared copy and every own condition. Missing, duplicate or empty numbered notes are unresolved, never permission to discard conditions. Generic nonnumeric links retain the whole disclosure. "
     "Regular Purchase APR is an explicit purchase APR label; preserve its full range, variable basis and complete referenced notes as qualified prose, never a scalar endpoint. A separate exact All credit products are subject to credit approval sentence is product-application approval, not an independently labelled annual-fee waiver; every actual fee condition remains binding. "
@@ -65,6 +69,7 @@ CARD_RATE_CONTEXT_INSTRUCTIONS = (
 )
 
 ACCOUNT_COST_CONTEXT_INSTRUCTIONS = (
+    "A complete monthly service charge states a positive base monthly price; retain its entire direct-deposit or balance waiver separately. Never use the waiver balance as a fee/minimum balance, or its conditional zero as the base. "
     "Numeric superscript links to grouped disclosure containers require unique complete numbered notes and preserve all unnumbered common conditions. Never import a different numbered rewards condition into the base account fee, or omit an own fee waiver or shared qualification. "
     "A literal named account APY panel may establish identity with its captured SEO title and account route despite marketing H1s. Preserve the complete current annual-yield disclosure, date, variable basis and every local note. Exact tooltip-data-id references require one owned local copy and globally agreeing responsive copies. Missing, conflicting or unresolved notes exclude. No fees proves a zero base fee only as an unconditional account-wide statement. "
     "Unlimited transactions at a numbered ATM network, including fee-free ATMs, proves only that channel. It never proves ordinary account transaction coverage, even when followed by another ATM benefit. "

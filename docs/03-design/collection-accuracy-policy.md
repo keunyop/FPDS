@@ -1,5 +1,61 @@
 # Product collection accuracy and automatic acceptance
 
+## Linked application prices, owned service costs and qualified loan terms - 2026-10-10
+
+Parser v28/process `2026-10-10-linked-application-cost-proof-v19` preserve
+complete named application HTML prices: APR alternatives and intro periods,
+transfer deadlines, fee tables, dated disclosures, eligibility, balance method
+and the entire variable-index/margin/ceiling continuation. Native H1/H2 names
+must agree; an observed current detail link must match the exact offer query
+and the named product. Missing sections, masked facts, foreign origins and
+Plus/Select conflicts exclude. No scalar APR or invented interval is produced.
+
+`Important credit terms` is an essential discovery lead under existing safe-fetch
+and two-per-detail/48-per-run budgets. URL identity retains `fpid`, `product_code`
+and `subproduct_code`; tracking remains discarded. Stored-origin applicability
+is mandatory for both linked annual fees and APR summaries. A unique literal
+H1 may use one distinctive token only with independently agreeing title/route
+and full named linked prices. Only hidden spoken duplicates immediately followed
+by their matching visible trademark symbol are removed from parsed headings.
+
+Exact owned monthly service charge/fee declarations preserve the positive base
+cost and full waiver, including recurring direct deposits; waiver balances never
+become costs or minimum balances. Complete dated personal-loan APR ranges retain
+all qualifications and literal month terms, including separate customer limits.
+An exact labelled `Foreign Currency Conversion/Foreign Transaction None` cell
+in named card pricing is a transaction-fee description, not denomination proof.
+All actual currency declarations/conflicts remain; only the approved CA/CAD and
+US/USD undisclosed defaults apply. Evidence is retained without redaction.
+
+Shared extraction, normalization, automatic validation, prompts and the grounding
+cache move together. Required essentials, typed optional facts, original evidence,
+private boundaries and automatic publication gates remain enforced. API/Worker
+runtime deployment is separate from direct data publication; no permanent
+recovery path or manual approval is added.
+
+## Complete named HTML pricing and corroborated native identity - 2026-10-10
+
+Parser v27/process `2026-10-10-named-html-disclosure-proof-v18` preserve a
+uniquely named HTML pricing section as one bounded record, including purchase
+APR alternatives, introductory/reset terms, all fee and variable-index notes,
+calculation, credit approval and explicit revision boundary. Missing, duplicated,
+masked or unresolved conditions exclude. A literal product H2 can identify a
+marketing-H1 detail only when the same captured document's SEO title, route,
+issuer domain and complete named pricing record uniquely corroborate it.
+Identity never comes from metadata alone or a companion snapshot.
+
+Uniquely defined symbolic footnotes are formatting; their entire definitions
+remain evidence. Actual masked prices and unresolved templates remain rejected
+by shared normalization and rate gates. Independent literal Annual Fee None
+proves zero only without conditional qualification. Positive base annual fees
+retain their full waiver conditions; typed optional waiver facts survive.
+Public projection also preserves an explicitly verified fee-waiver qualifier
+across product types even when absent from the collection minimum. Unverified
+qualifiers and private evidence remain excluded. Existing field units, origins,
+ceilings, essential costs, security and automatic promotion gates remain unchanged. No bank-specific branches or review queue.
+API/Worker release v18 is separate from this verified direct publication.
+
+
 ## Complete named PDF pricing and amount-first account costs - 2026-10-10
 
 Parser v26/process `2026-10-10-complete-named-pdf-pricing-v17` preserve named

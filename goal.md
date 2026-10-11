@@ -1,5 +1,21 @@
 # Admin pre-handover review and fixes
 
+## US savings versus CD blog article - 2026-10-10
+
+Status: Complete for local Public editorial implementation and verification. Preserve all other sections, ownership and unfinished work.
+Scope: one concise US article in EN/KO/JA with two accessible infographics,
+verified official conditions and native-country SEO/discovery.
+Acceptance:
+- [x] Verify official access, fixed/variable rate and penalty conditions.
+- [x] Add article, localized copy, visuals, metadata and US-only discovery.
+- [x] Verify financial examples, routing, SEO, no-JS and 390/768/1440 layouts.
+- [x] Inspect final diff, preserve unrelated changes and record actual checks.
+Limits: local Public editorial work only; no collection, DB writes or deployment.
+Outcome: US-only EN/KO/JA article, two accessible infographics, four checked
+sources, unique social preview and 21 localized sitemap entries. Public111,
+browser141/zero errors, lint/typecheck, isolated build and foundation pass.
+Original article dates and other owners' changes preserved; no deployment.
+
 ## TD Bank National Association direct collection - 2026-10-10
 
 Status: Complete for local generic fixes and verified Public publication. Preserve all previous sections and ownership.
@@ -2404,3 +2420,34 @@ Acceptance:
 Limits: no server restart/deploy, schema/code changes, unrelated failed/partial
 retries, permanent scheduler, historical fact filling or repeated paid retries.
 Operational completion of the background collection remains distinct from handoff.
+
+## Truist direct collection and generic correction - 2026-10-10
+
+Status: Complete. Two additional automatic passes published and Public readback verified; runtime deployment remains separate. Preserve all earlier ownership and unfinished sections.
+Scope: Diagnose latest Truist Runs without Admin API; directly acquire current
+registered official targets; fix demonstrated shared evidence defects; verify
+cross-bank/type success, boundary and failure behavior; publish automatic passes
+in the existing development environment and verify Public readback.
+Acceptance:
+- [x] Reconcile latest Runs, actual evidence losses and current proof.
+- [x] Add source-backed regression evidence and generic coordinated fixes.
+- [x] Verify normal stored-origin normalization/validation/promotion and rollback.
+- [x] Publish current automatic passes and verify Public/unrelated/history state.
+- [x] Record actual tests, limitations, journal and final diff/goal review.
+Limits: no Admin API, paid retry loops, weaker essentials, manual overrides,
+bank-specific acceptance branches or permanent recovery; deployment is separate.
+
+## U.S. Bank, Wells Fargo and Western Alliance direct collection - 2026-10-10
+
+Status: Complete. Ten additional automatic passes published and Public readback verified; runtime deployment remains separate. Preserve earlier ownership, unfinished sections and existing changes.
+Scope: latest US USBN/WFBN/WAB Runs, retained evidence and current official sources
+without Admin collection API; generic corrections and ordinary automatic publication
+in the existing environment. Runtime deployment is separate.
+Acceptance:
+- [x] Diagnose latest results and first actual evidence losses.
+- [x] Add source-backed cross-bank/type regressions and generic fixes.
+- [x] Verify current selected origins, normal gates and rollback rehearsal.
+- [x] Publish current automatic passes and verify Public/history/privacy.
+- [x] Record actual tests, limits, journal and final diff/acceptance review.
+Limits: no weaker essentials, manual approval, bank exceptions, paid loops,
+historical fact restoration, permanent recovery feature or unrelated mutations.

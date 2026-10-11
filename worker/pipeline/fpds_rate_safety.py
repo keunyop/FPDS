@@ -207,7 +207,8 @@ _EXPLICIT_RATE_PERCENTAGE_PATTERNS = (
 def contains_unresolved_financial_placeholder(value: object) -> bool:
     """Return true for masked/template values that must never be public facts."""
 
-    return bool(_UNRESOLVED_FINANCIAL_PLACEHOLDER_RE.search(str(value or "")))
+    from worker.financial_symbol_notes import resolved_symbol_text
+    return bool(_UNRESOLVED_FINANCIAL_PLACEHOLDER_RE.search(resolved_symbol_text(value)))
 
 
 def rate_component_only(*, value: object, context: str) -> bool:

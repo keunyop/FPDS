@@ -4212,6 +4212,9 @@ def _money_value_is_non_fee_context(*, field_name: str, value: object, context: 
     normalized = _normalize_text(context).lower()
     if not normalized:
         return False
+    from worker.native_owned_account_records import service_monthly_fee
+    if service_monthly_fee(context) == expected:
+        return False
     for match in re.finditer(r"\$\s*([0-9][0-9,]*(?:\.\d{1,2})?)", normalized):
         try:
             observed = Decimal(match.group(1).replace(",", ""))
@@ -4326,7 +4329,8 @@ def _looks_like_invalid_tax_benefit(*, field_name: str, value: str) -> bool:
 
 
 def _looks_like_unresolved_placeholder(value: str) -> bool:
-    normalized = value.lower()
+    from worker.financial_symbol_notes import resolved_symbol_text
+    normalized = resolved_symbol_text(value).lower()
     return bool(
         re.search(
             r"(?:\{\{|\}\}|\$\{|rds%|%rate\b|\[object object\]"

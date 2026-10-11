@@ -1,5 +1,13 @@
 # Discovery Worker Area
 
+## Offer identity queries - 2026-10-10
+
+Source identity preserves `fpid`, `product_code` and `subproduct_code` alongside
+existing product/market query keys. Different official application offers must
+not collapse into a single source; tracking keys are still discarded. Captured
+link and stored-origin checks use the same normalized identity without accepting
+credentials, unsafe schemes, conflicting products or foreign issuers.
+
 Use this area for source discovery, seed registry handling, URL normalization, and fetch planning.
 
 Prototype-first target:

@@ -1,5 +1,38 @@
 # FPDS API Service
 
+## Linked application prices, owned service costs and qualified loan terms - 2026-10-10
+
+Parser v28/process `2026-10-10-linked-application-cost-proof-v19` preserve
+complete named application HTML prices: APR alternatives and intro periods,
+transfer deadlines, fee tables, dated disclosures, eligibility, balance method
+and the entire variable-index/margin/ceiling continuation. Native H1/H2 names
+must agree; an observed current detail link must match the exact offer query
+and the named product. Missing sections, masked facts, foreign origins and
+Plus/Select conflicts exclude. No scalar APR or invented interval is produced.
+
+`Important credit terms` is an essential discovery lead under existing safe-fetch
+and two-per-detail/48-per-run budgets. URL identity retains `fpid`, `product_code`
+and `subproduct_code`; tracking remains discarded. Stored-origin applicability
+is mandatory for both linked annual fees and APR summaries. A unique literal
+H1 may use one distinctive token only with independently agreeing title/route
+and full named linked prices. Only hidden spoken duplicates immediately followed
+by their matching visible trademark symbol are removed from parsed headings.
+
+Exact owned monthly service charge/fee declarations preserve the positive base
+cost and full waiver, including recurring direct deposits; waiver balances never
+become costs or minimum balances. Complete dated personal-loan APR ranges retain
+all qualifications and literal month terms, including separate customer limits.
+An exact labelled `Foreign Currency Conversion/Foreign Transaction None` cell
+in named card pricing is a transaction-fee description, not denomination proof.
+All actual currency declarations/conflicts remain; only the approved CA/CAD and
+US/USD undisclosed defaults apply. Evidence is retained without redaction.
+
+Shared extraction, normalization, automatic validation, prompts and the grounding
+cache move together. Required essentials, typed optional facts, original evidence,
+private boundaries and automatic publication gates remain enforced. API/Worker
+runtime deployment is separate from direct data publication; no permanent
+recovery path or manual approval is added.
+
 ## Complete named PDF pricing and amount-first account costs - 2026-10-10
 
 Parser v26/process `2026-10-10-complete-named-pdf-pricing-v17` preserve named

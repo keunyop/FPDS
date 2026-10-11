@@ -1,5 +1,17 @@
 # FPDS Public
 
+## US savings versus CDs article - 2026-10-10
+
+`/blog/high-yield-savings-vs-cds-us?country_code=US` adds a concise EN/KO/JA
+article with four official sources, a three-part access infographic and a
+hypothetical early-withdrawal penalty chart. Fixed/variable rates, minimums,
+Ally's six-day waiting/full-balance conditions and Marcus's one-year penalty
+boundary remain explicit; the example annual interest rate is not a live APY.
+US discovery now contains two articles; Canada retains three. Localized native
+canonicals, hreflang, BlogPosting, unique social images and 21 sitemap URLs keep
+all older article dates. Existing country switches and US catalog/related links
+apply. No collection, DB write or deployment is included.
+
 ## Country-scoped blog and US savings article - 2026-10-09
 
 Blog navigation, lists, breadcrumbs, comparison actions and feedback preserve the

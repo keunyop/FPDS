@@ -15,7 +15,8 @@ LINK_KEYS = ('applicability_evidence_chunk_id', 'applicability_evidence_quote', 
 def pricing_records(soup):
     tables = [t for t in soup.find_all('table') if re.search(r'Purchase Annual Percentage Rate \(APR\)', t.get_text(' ', strip=True), re.I)]
     if len(tables) != 1:
-        return []
+        from worker.native_linked_application_pricing import application_pricing_records
+        return application_pricing_records(soup)
     table = tables[0]
     rows = {}
     for tr in table.find_all('tr'):
@@ -74,8 +75,9 @@ def pricing_records(soup):
 def detail_link(candidates, target_url, detail_url):
     from urllib.parse import urljoin
     from worker.pipeline.fpds_collection_accuracy import canonical_url
+    from worker.discovery.fpds_discovery.url_utils import normalize_source_url
     matches = [c for c in candidates if c.anchor_type == 'captured_disclosure_link'
-        and canonical_url(urljoin(detail_url, c.evidence_excerpt)) == canonical_url(target_url)]
+        and normalized_link_url(urljoin(detail_url, c.evidence_excerpt)) == normalized_link_url(target_url) and bool(normalized_link_url(target_url))]
     return min(matches, key=lambda c: c.chunk_index) if matches else None
 
 
@@ -85,8 +87,12 @@ def stored_link_belongs(record, mapping, evidence, source_metadata, origin):
     from worker.pipeline.fpds_collection_accuracy import canonical_url, exact_quote
     from worker.native_information_records import names_match
     link = next((e for e in evidence if e.get('evidence_chunk_id') == mapping.get(LINK_KEYS[0])), None)
+    from worker.discovery.fpds_discovery.url_utils import normalize_source_url
     detail = canonical_url(source_metadata.get('normalized_source_url') or source_metadata.get('source_url'))
     if not link or not detail or not names_match(mapping.get(LINK_KEYS[2]), record.get('product_name')):
+        return False
+    from worker.native_linked_application_pricing import application_owner_matches
+    if not application_owner_matches(mapping.get('official_evidence_quote',''),record.get('product_name'),origin):
         return False
     return bool(link.get('anchor_type') == 'captured_disclosure_link'
         and canonical_url(link.get('source_url')) == detail
@@ -94,4 +100,15 @@ def stored_link_belongs(record, mapping, evidence, source_metadata, origin):
         and link.get('country_code') == record.get('country_code')
         and exact_quote(mapping.get(LINK_KEYS[1]), link.get('evidence_excerpt'))
         and exact_quote(link.get('evidence_excerpt'), mapping.get(LINK_KEYS[1]))
-        and canonical_url(urljoin(detail, link['evidence_excerpt'])) == canonical_url(origin))
+        and normalized_link_url(urljoin(detail, link['evidence_excerpt'])) == normalized_link_url(origin) and bool(normalized_link_url(origin)))
+
+
+def normalized_link_url(value):
+    from worker.discovery.fpds_discovery.url_utils import normalize_source_url
+    from worker.pipeline.fpds_collection_accuracy import canonical_url
+    try:
+        if not canonical_url(value):
+            return ""
+        return canonical_url(normalize_source_url(str(value)))
+    except (ValueError,TypeError):
+        return ""

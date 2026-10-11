@@ -1,6 +1,10 @@
 import type { PublicLocale } from './public-locale.ts';
 
 export const BLOG_POSTS = [{
+  slug: 'high-yield-savings-vs-cds-us',
+  publishedAt: '2026-10-10', modifiedAt: '2026-10-10', sourcesCheckedAt: '2026-10-10',
+  country: 'US', productType: 'gic', minutes: 4, issue: '05'
+}, {
   slug: 'ally-vs-capital-one-vs-amex-high-yield-savings',
   publishedAt: '2026-10-09', modifiedAt: '2026-10-09', sourcesCheckedAt: '2026-10-09',
   country: 'US', productType: 'savings', minutes: 4, issue: '04'

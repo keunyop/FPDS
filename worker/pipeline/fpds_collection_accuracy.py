@@ -599,6 +599,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         return _transaction_count_supported(int(number), q)
     if field_name == "term_length_days":
         return bool(re.search(rf"(?<![\d.]){int(number)}\s*days?\b", q, re.I))
+    if field_name in {"monthly_fee", "public_display_fee"} and re.search(r"(?mi)^Monthly service (?:fees?|charges?) (?:of )?\$", quote):
+        from worker.native_owned_account_records import service_monthly_fee
+        fee = service_monthly_fee(quote)
+        return fee is not None and fee == number
     if field_name in {"monthly_fee", "public_display_fee"} and number > 0:
         # A complete amount-first Fees card may be followed by a separately
         # labelled reward bundle. Its bonus amount is not the monthly fee.
@@ -611,6 +615,16 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if ordinary:
             return len(ordinary) == 1 and Decimal(ordinary[0]) == number and not _money_has_condition(quote,field_name)
     if contract.unit == "currency_amount":
+        if field_name == "annual_fee":
+            from worker.native_linked_application_pricing import application_fee_value
+            application_fee = application_fee_value(quote)
+            if application_fee is not None:
+                return application_fee == number
+        if field_name == "annual_fee":
+            from worker.native_named_html_pricing import named_html_fee_value
+            named_fee = named_html_fee_value(quote)
+            if named_fee is not None:
+                return named_fee == number
         if field_name == "annual_fee":
             from worker.native_card_declarations import declaration_fee_value
             declared_fee = declaration_fee_value(quote)
@@ -728,6 +742,11 @@ def product_currency_context(record: Mapping, excerpt: str) -> str:
     Price, lead-account denomination and unresolved foreign cues still block.
     """
     identity = str(record.get("product_name") or "")
+    if record.get("product_type") == "credit-card" and excerpt.startswith("Pricing Information\nNamed card: "):
+        # This exact labelled no-fee cell is not the account denomination.
+        # Keep actual currency names, amounts and every financial condition.
+        excerpt = re.sub(r"Foreign Currency Conversion/\s*Foreign Transaction None(?= Penalty Fees|[\r\n]|$)",
+            "Foreign transaction fee None", excerpt)
     if record.get("product_type") != "chequing" and not re.search(r"\bche(?:ck|qu)ing\b", identity, re.I):
         return excerpt
     context = excerpt
@@ -866,7 +885,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         elif (e.get("anchor_type") == "linked_card_pricing_terms" and not stored_link_belongs(
                     record, m, evidence, source_metadata, origin)):
             reason = "current_detail_pricing_link_unproven"
-        elif (e.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_assertion", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_assertion", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
                 and not _native_record_belongs(record, e, source_metadata)):
             reason = "native_product_mismatch"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
@@ -887,9 +906,9 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             # A balance that waives transaction charges is not an opening or
             # general minimum balance, nor a monthly-account-fee threshold.
             reason = "transaction_waiver_balance_not_minimum"
-        elif (e.get("anchor_type") in {"single_card_annual_fee", "owned_account_assertion", "owned_lending_terms"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
+        elif (e.get("anchor_type") in {"single_card_annual_fee", "named_html_annual_fee", "owned_account_assertion", "owned_lending_terms"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
             reason = "native_account_conditions_incomplete"
-        elif (e.get("anchor_type") in {"linked_card_pricing_terms", "single_card_purchase_terms", "card_information_rate", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"linked_card_pricing_terms", "single_card_purchase_terms", "card_information_rate", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
                 and name in {"standard_rate", "interest_rate_summary", "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
                 and (not exact_quote(e.get("evidence_excerpt"), quote)
                      or (name in {"interest_rate_summary", "purchase_interest_rate_summary"}

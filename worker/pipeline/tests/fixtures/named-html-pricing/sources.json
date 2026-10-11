@@ -1,0 +1,54 @@
+[
+  {
+    "url": "https://www.truist.com/credit-cards/enjoy-beyond/enjoy-beyond-disclosure",
+    "final_url": "https://www.truist.com/credit-cards/enjoy-beyond/enjoy-beyond-disclosure",
+    "fetched_at": "2026-10-10T20:16:00.623884+00:00",
+    "content_type": "text/html",
+    "sha256": "0ff1c19c5b8c13bcea02b8bd6324d1dad58a9e1334a307799dd4993c9b1b5929",
+    "file": "current-1820e089ce04.html",
+    "text_file": "current-1820e089ce04.txt",
+    "parsed_file": "current-1820e089ce04.parsed.txt",
+    "status": 200,
+    "fetch_method": null,
+    "fixture": "enjoy-beyond-disclosure.html.gz"
+  },
+  {
+    "url": "https://www.truist.com/credit-cards/future/future-disclosure",
+    "final_url": "https://www.truist.com/credit-cards/future/future-disclosure",
+    "fetched_at": "2026-10-10T20:16:05.832950+00:00",
+    "content_type": "text/html",
+    "sha256": "2fd38637a03a1d8cc5249ae81d87abe4b1311ef844ad73a4225d129a674f18cc",
+    "file": "current-2e901dc96c51.html",
+    "text_file": "current-2e901dc96c51.txt",
+    "parsed_file": "current-2e901dc96c51.parsed.txt",
+    "status": 200,
+    "fetch_method": null,
+    "fixture": "future-disclosure.html.gz"
+  },
+  {
+    "url": "https://www.truist.com/credit-cards/enjoy-beyond",
+    "final_url": "https://www.truist.com/credit-cards/enjoy-beyond",
+    "fetched_at": "2026-10-10T20:15:18.699524+00:00",
+    "content_type": "text/html",
+    "sha256": "8fb8f7d1090f09663ec57f65e56620959cba442821a68d9e0e357d276f676110",
+    "file": "current-673a0e3ca17c.html",
+    "text_file": "current-673a0e3ca17c.txt",
+    "parsed_file": "current-673a0e3ca17c.parsed.txt",
+    "status": 200,
+    "fetch_method": null,
+    "fixture": "enjoy-beyond.html.gz"
+  },
+  {
+    "url": "https://www.truist.com/credit-cards/future",
+    "final_url": "https://www.truist.com/credit-cards/future",
+    "fetched_at": "2026-10-10T20:15:20.445857+00:00",
+    "content_type": "text/html",
+    "sha256": "3769b1f6ce0373abe2ba33ef26cad413f165c26dd8a9a2dc7df789ef9ffed244",
+    "file": "current-78a0f62889b1.html",
+    "text_file": "current-78a0f62889b1.txt",
+    "parsed_file": "current-78a0f62889b1.parsed.txt",
+    "status": 200,
+    "fetch_method": null,
+    "fixture": "future.html.gz"
+  }
+]

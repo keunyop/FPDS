@@ -551,6 +551,36 @@ def _captured_native_product_title(context, candidates):
             if match[2].removesuffix('s') == initials.upper():
                 value = match[1]
         return {t.removesuffix('s') if len(t) > 4 else t for t in name_key(value).split()}
+    # A literal named H2 below a marketing H1 needs independent captured SEO,
+    # route and a complete same-document named pricing declaration. Neither a
+    # sibling recommendation nor metadata can establish this identity.
+    if _infer_product_type(context) == "credit-card":
+        own_records = [c for c in candidates if c.source_document_id == context.source_document_id
+            and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
+            and c.bank_code == context.bank_code and c.country_code == context.country_code
+            and c.source_language == context.source_language]
+        captured_seo = route_tokens(" ".join(c.evidence_excerpt for c in own_records if c.anchor_type == "document_title"))
+        route = route_tokens(urlsplit(url).path)
+        host_labels = (urlsplit(url).hostname or "").removeprefix("www.").split(".")[:-1]
+        eligible_names = set()
+        for c in own_records:
+            if c.anchor_type != "primary_product_heading":
+                continue
+            literal = c.evidence_excerpt
+            words = name_key(literal).split()
+            brand = set()
+            for count in range(1, min(4, len(words)) + 1):
+                if "".join(words[:count]) in host_labels:
+                    brand = route_tokens(" ".join(words[:count]))
+            core = route_tokens(literal) - brand - {"credit", "card", "r", "tm"}
+            if (core and core <= route and route_tokens(literal) - {"r", "tm"} <= captured_seo
+                    and not route & {"compare", "apply", "login", "calculator"}
+                    and discovery.get("multi_product_family_overview") is not True
+                    and any(p.anchor_type == "named_card_apr_terms" and names_match(p.anchor_value, literal)
+                        for p in own_records)):
+                eligible_names.add(literal)
+        if len(eligible_names) == 1:
+            return next(iter(eligible_names))
     native_heads = [c for c in candidates if c.anchor_type == "document_heading"
         and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
         and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
@@ -623,6 +653,17 @@ def _captured_native_product_title(context, candidates):
         card_core = native_tokens - brand_tokens - {"visa", "signature", "infinite", "mastercard", "world", "elite", "credit"}
         linked_card_identity = (_infer_product_type(context) == "credit-card" and linked_prices
             and bool(card_core) and card_core <= title_tokens and card_core <= url_tokens)
+        from worker.native_linked_application_pricing import application_owner_matches
+        named_linked_identity = linked_card_identity and any(
+            c.anchor_type == "linked_card_pricing_terms"
+            and c.evidence_excerpt.startswith("Pricing Information\nNamed card: ")
+            and c.retrieval_metadata.get("captured_companion") is True
+            and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url
+            and c.bank_code == context.bank_code and c.country_code == context.country_code
+            and c.source_language == context.source_language
+            and detail_link(current_own,c.retrieval_metadata.get("source_url", ""),url)
+            and application_owner_matches(c.evidence_excerpt,literal,c.retrieval_metadata.get("source_url", ""))
+            for c in candidates)
         card_price = card_price or linked_card_identity
         product_tokens = native_tokens - brand_tokens
         branded_account = (owned_account and brand_tokens and len(product_tokens) >= 2
@@ -631,7 +672,7 @@ def _captured_native_product_title(context, candidates):
         title_corroborates = (linked_card_identity or branded_account or native_tokens <= (title_tokens | url_tokens) or
             (owned_account and native_tokens - {"daily", "everyday"} <= title_tokens
              and bool(native_tokens & url_tokens)))
-        if (card_price and not family and route_identity and (linked_named_card or bool((route_identity - {"credit", "mastercard", "visa", "savings", "interest", "gic"}) & url_tokens)) and len(native_tokens) >= 2 and len(literal.split()) <= 10
+        if (card_price and not family and route_identity and (linked_named_card or bool((route_identity - {"credit", "mastercard", "visa", "savings", "interest", "gic"}) & url_tokens)) and (len(native_tokens) >= 2 or named_linked_identity) and len(literal.split()) <= 10
                 and title_corroborates
                 and not re.search(r"^(?:get|benefit|plan|choose|compare|discover|find|open)\b", literal, re.I)
                 and not re.search(r"/(?:apply|application|login|calculator|insurance)(?:/|[.-]|$)",urlsplit(url).path,re.I)
@@ -875,7 +916,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
         field_quotes = {}
         heading = _normalize_text(str(discovery.get("primary_heading") or ""))
         first_line = next((_normalize_text(line) for line in quote.splitlines() if line.strip()), "")
-        if own and ((c.anchor_type in {"document_heading", "owned_product_label"} and first_line == identity) or first_line == heading or (c.anchor_type == "document_title" and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(quote).casefold()) == re.sub(r"[^a-z0-9]", "", identity.casefold()))):
+        if own and ((c.anchor_type in {"document_heading", "owned_product_label", "primary_product_heading"} and first_line == identity) or first_line == heading or (c.anchor_type == "document_title" and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(quote).casefold()) == re.sub(r"[^a-z0-9]", "", identity.casefold()))):
             values["product_name"] = identity
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
             for currency, pattern in CURRENCY_PATTERNS.items():
@@ -918,6 +959,12 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             if security is not None:
                 values["secured_flag"] = security
                 values["security_requirement"] = quote
+            from worker.native_owned_lending_records import dated_loan_range
+            dated = dated_loan_range(quote, c.anchor_value)
+            if dated is not None:
+                values["interest_rate_summary"] = quote
+                values["term_length_text"] = dated
+                field_quotes["term_length_text"] = dated
             if re.search(r"Variable rate of \d+(?:\.\d+)?% in ZIP code \d{5} as of", quote) and 'Sample variable APR assumes ' in quote:
                 values["interest_rate_summary"] = quote
             if re.search(r"Rates vary from \d+(?:\.\d+)?% APR to \d+(?:\.\d+)?% APR|Your APR may be as low as \d+(?:\.\d+)?% or as high as \d+(?:\.\d+)?%", quote):
@@ -938,11 +985,26 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 and x.bank_code == context.bank_code and x.country_code == context.country_code]
             pricing_link = detail_link(current_own, c.retrieval_metadata.get("source_url", ""), url)
             if pricing_link and _canonical_official_source_url(c.retrieval_metadata.get("parent_detail_url")) == url:
+                from worker.native_linked_application_pricing import application_owner_matches, application_fee_value
+                if not application_owner_matches(quote,identity,c.retrieval_metadata.get("source_url", "")):
+                    continue
+                fee=application_fee_value(quote)
+                if fee is not None:
+                    values["annual_fee"]=float(fee)
                 values["purchase_interest_rate_summary"] = _normalize_text(quote)
         if c.anchor_type == "single_card_purchase_terms" and _infer_product_type(context) == "credit-card":
             from worker.native_single_card_pdf import issuer_product_match
             if companion and issuer_product_match(c.anchor_value, identity, c.retrieval_metadata.get("source_url", "")):
                 values["purchase_interest_rate_summary"] = _normalize_text(quote)
+        if c.anchor_type == "named_html_annual_fee" and _infer_product_type(context) == "credit-card" and names_match(c.anchor_value, identity):
+            from worker.native_named_html_pricing import named_html_fee_value
+            fee = named_html_fee_value(quote)
+            if fee is not None:
+                values["annual_fee"] = float(fee)
+                waiver = re.search(r"We charge the initial Annual Fee[^\n]+", quote)
+                if waiver and re.search(r"waiv", waiver[0], re.I):
+                    values["fee_waiver_condition"] = waiver[0]
+                    field_quotes["fee_waiver_condition"] = waiver[0]
         if c.anchor_type == "named_card_apr_terms" and _infer_product_type(context) == "credit-card":
             from worker.native_information_records import names_match
             if names_match(c.anchor_value, identity):
@@ -976,6 +1038,12 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             amount_first = re.search(r"(?mi)^\$(\d+(?:\.\d+)?)\s+Monthly (?:(?:account|maintenance) )?Fees?(?:\s*$)", quote)
             if amount_first and quote_supports_value("monthly_fee", float(amount_first[1]), quote):
                 values["monthly_fee"] = float(amount_first[1])
+            from worker.native_owned_account_records import service_monthly_fee
+            service_fee = service_monthly_fee(quote)
+            if service_fee is not None and quote_supports_value("monthly_fee", float(service_fee), quote):
+                values["monthly_fee"] = float(service_fee)
+                if re.search(r"waived", quote, re.I):
+                    values["fee_waiver_condition"] = quote
             counts = re.findall(r"(\d+) (?:debit )?transactions each month", quote, re.I)
             if counts and len(set(counts)) == 1:
                 values["included_transactions"] = int(counts[0])
@@ -1271,7 +1339,8 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
             field_quote = field_quotes.get(name, quote)
             # These registered optional facts are obtained from the SAME
             # complete record. They add no research, model call or target budget.
-            optional_same_record = (name in (profile.supplemental_fields if profile else ())
+            optional_same_record = (name == "fee_waiver_condition"
+                or name in (profile.supplemental_fields if profile else ())
                 or (profile is not None and canonical_value_type(name) == "string"
                     and any(name in requirement.alternatives
                         and set(requirement.alternatives).intersection(requested_fields)
@@ -1294,7 +1363,7 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                     'official_web_sources':[{'url':source_url,'title':identity}], 'evidence_quote':field_quote,
                     **({'applicability_evidence_chunk_id':pricing_link.evidence_chunk_id,
                         'applicability_evidence_quote':pricing_link.evidence_excerpt,
-                        'applicability_product_name':identity} if name == 'purchase_interest_rate_summary' and pricing_link else {}),
+                        'applicability_product_name':identity} if name in {'purchase_interest_rate_summary', 'annual_fee'} and pricing_link else {}),
                     **({'annual_basis_evidence_chunk_id':rate_basis.evidence_chunk_id,
                         'annual_basis_evidence_quote':rate_basis.evidence_excerpt,
                         'annual_basis_product_name':identity} if name == 'standard_rate' and rate_basis else {})})
@@ -5740,7 +5809,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_apy", "owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "owned_lending_terms", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_apy", "owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "primary_product_heading", "owned_lending_terms", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)

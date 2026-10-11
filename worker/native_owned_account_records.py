@@ -37,7 +37,7 @@ def account_records(soup):
         if not owns_label(node, root, owner):
             continue
         value = node.get_text(" ", strip=True)
-        if not re.search(r"no monthly (?:(?:account|maintenance) )?fee|monthly (?:(?:account|maintenance) )?fee\s*:\s*\$|\$\d+(?:\.\d+)?\s+monthly (?:(?:account|maintenance) )?fees?|\b(?:unlimited|\d+)\s+(?:number of )?(?:daily |debit )?(?:transactions|purchases)|(?:U\.?S\.?|Canadian) dollars?|\b(?:CAD|USD|EUR|GBP)\b", value, re.I):
+        if not re.search(r"monthly service (?:fees?|charges?) (?:of )?\$|no monthly (?:(?:account|maintenance) )?fee|monthly (?:(?:account|maintenance) )?fee\s*:\s*\$|\$\d+(?:\.\d+)?\s+monthly (?:(?:account|maintenance) )?fees?|\b(?:unlimited|\d+)\s+(?:number of )?(?:daily |debit )?(?:transactions|purchases)|(?:U\.?S\.?|Canadian) dollars?|\b(?:CAD|USD|EUR|GBP)\b", value, re.I):
             continue
         if re.search(r"exchange rate|currency conversion|benchmark rate|reference rate", value, re.I):
             continue
@@ -116,3 +116,13 @@ def account_records(soup):
                 notes.append(scope)
             output.append(("owned_account_assertion", owner, "\n".join([owner, label, value, *dict.fromkeys(notes)])))
     return list(dict.fromkeys(output))
+
+
+def service_monthly_fee(quote):
+    """One explicit recurring base price, with the entire following waiver."""
+    from decimal import Decimal
+    lines=[line.strip() for line in str(quote).splitlines() if line.strip()]
+    if len(lines)!=2 or len(re.findall(r"Monthly service (?:fees?|charges?)",str(quote),re.I)) != 1:return None
+    m=re.fullmatch(r"Monthly service (?:fees?|charges?) (?:of )?\$(\d+(?:\.\d+)?)(?:[.]| waived with [^\n]+[.])",lines[1],re.I)
+    if not m or Decimal(m[1])<=0:return None
+    return Decimal(m[1])

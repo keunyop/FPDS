@@ -44,6 +44,8 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     resolved_component_values = resolve_component_values(soup, html)
     from worker.native_apy_records import preserve_accessible_headings
     preserve_accessible_headings(soup)
+    from worker.native_linked_application_pricing import remove_duplicate_trademark_labels
+    remove_duplicate_trademark_labels(soup)
     for tag in soup(["script", "style", "noscript", "svg"]):
         tag.decompose()
     # Site navigation can be nested inside <main>. It is neither product
@@ -127,6 +129,12 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     sections.extend(_labelled_disclosure_sections(soup))
     from worker.native_card_declarations import card_declarations
     sections.extend(_RawSegment(kind, owner, None, literal) for kind, owner, literal in card_declarations(soup))
+    from worker.native_named_html_pricing import named_html_pricing
+    sections.extend(_RawSegment(kind, owner, None, literal) for kind, owner, literal in named_html_pricing(soup))
+    for heading in (soup.find('main') or soup).find_all('h2'):
+        literal = heading.get_text(' ', strip=True)
+        if re.fullmatch(r'.{4,140} credit card', literal, re.I) and not heading.find_parent(['nav', 'aside', 'footer', 'form']):
+            sections.append(_RawSegment('primary_product_heading', literal, None, literal))
     sections.extend(_linked_rate_records(soup))
     from worker.native_application_disclosures import application_disclosure_records
     sections.extend(_RawSegment(kind, owner, None, literal) for kind, owner, literal in application_disclosure_records(soup))

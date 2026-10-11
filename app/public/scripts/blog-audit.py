@@ -14,6 +14,12 @@ ORIGIN = os.environ.get('FPDS_UI_TEST_ORIGIN', 'http://localhost:3000').rstrip('
 assert urlparse(ORIGIN).hostname in {'localhost', '127.0.0.1', '::1'}
 PROD = 'https://www.switchabank.com'
 POSTS = {
+    'high-yield-savings-vs-cds-us': {
+        'country': 'US', 'date': '2026-10-10', 'citations': 4,
+        'catalog': '/products?product_type=gic', 'tail': '&country_code=US',
+        'related': 'ally-vs-capital-one-vs-amex-high-yield-savings',
+        'amounts': ['USD 98.63', 'USD 197.26', 'USD 10,000'],
+    },
     'ally-vs-capital-one-vs-amex-high-yield-savings': {
         'country': 'US', 'date': '2026-10-09', 'citations': 4,
         'catalog': '/products?product_type=savings', 'tail': '&country_code=US',
@@ -49,7 +55,7 @@ def suffix_for(locale, country):
         params.append('country_code=' + country)
     return '?' + '&'.join(params) if params else ''
 checks, errors = [], []
-screens = Path('tmp/blog-audit')
+screens = Path(os.environ.get('FPDS_BLOG_AUDIT_OUTPUT', 'tmp/blog-audit'))
 screens.mkdir(parents=True, exist_ok=True)
 
 def passed(name):
@@ -152,8 +158,12 @@ with sync_playwright() as pw:
                     assert page.get_by_role('banner').evaluate('(el) => el.scrollWidth <= innerWidth')
                 page.evaluate('window.scrollTo(0, 0)')
                 if locale == 'ko':
-                    name = ('index-' + country) if path == '/blog' else 'us-savings' if country == 'US' else ('gic' if 'gic-canada' in path else 'chequing' if 'chequing' in path else 'savings')
+                    name = ('index-' + country) if path == '/blog' else ('us-cd' if 'savings-vs-cds-us' in path else 'us-savings') if country == 'US' else ('gic' if 'gic-canada' in path else 'chequing' if 'chequing' in path else 'savings')
                     page.screenshot(path=str(screens / (name + '-' + str(width) + '.png')), full_page=True)
+                    if name == 'us-cd':
+                        page.screenshot(path=str(screens / (name + '-hero-' + str(width) + '.png')))
+                        page.locator('[data-blog-infographic]').screenshot(path=str(screens / (name + '-infographic-' + str(width) + '.png')))
+                        page.locator('#worked-example figure').screenshot(path=str(screens / (name + '-penalty-' + str(width) + '.png')))
                     if name == 'chequing' and width in [390, 1440]:
                         page.screenshot(path=str(screens / (name + '-hero-' + str(width) + '.png')))
                         page.locator('#account-comparison').screenshot(path=str(screens / (name + '-table-' + str(width) + '.png')))
@@ -198,7 +208,7 @@ with sync_playwright() as pw:
         page.locator('header button[aria-haspopup=menu]:visible').click()
         page.get_by_role('menu').locator('a[href="/blog?locale=ko&country_code=US"]').click()
         expect(page).to_have_url(ORIGIN + '/blog?locale=ko&country_code=US')
-        expect(page.locator('main article')).to_have_count(1)
+        expect(page.locator('main article')).to_have_count(2)
         page.locator('footer button[aria-haspopup=menu]').click()
         page.get_by_role('menu').locator('a[href="/blog?country_code=US"]').click()
         expect(page).to_have_url(ORIGIN + '/blog?country_code=US')
@@ -212,6 +222,8 @@ with sync_playwright() as pw:
         assert body[:8] == bytes([137, 80, 78, 71, 13, 10, 26, 10])
         assert struct.unpack('>II', body[16:24]) == (1200, 630)
         previews.append(body)
+        if path == '/blog/high-yield-savings-vs-cds-us':
+            (screens / 'us-cd-social.png').write_bytes(body)
         passed('social preview PNG ' + path)
     assert len(set(previews)) == len(PATHS)
     sitemap = ET.fromstring(context.request.get(ORIGIN + '/sitemap.xml').text())
@@ -221,10 +233,12 @@ with sync_playwright() as pw:
     assert {entry.find('s:loc', ns).text for entry in entries} == expected
     for entry in entries:
         url = entry.find('s:loc', ns).text
-        old = 'eq-bank-vs-tangerine-vs-td-savings' in url
-        assert entry.find('s:lastmod', ns).text == ('2026-09-30' if old else '2026-10-05' if 'chequing-fees' in url else '2026-10-09' if 'country_code=US' in url else '2026-10-08')
+        country = 'US' if 'country_code=US' in url else 'CA'
+        path = urlparse(url).path
+        expected_date = max(post['date'] for post in POSTS.values() if post.get('country', 'CA') == country) if path == '/blog' else POSTS[path.rsplit('/', 1)[1]]['date']
+        assert entry.find('s:lastmod', ns).text == expected_date
         assert len(entry.findall('x:link', ns)) == 4
-    passed('eighteen country-scoped sitemap URLs, explicit dates and reciprocal alternates')
+    passed(str(len(expected)) + ' country-scoped sitemap URLs, explicit dates and reciprocal alternates')
 
     plain = browser.new_context(java_script_enabled=False)
     plain.route('**/*', intercept)

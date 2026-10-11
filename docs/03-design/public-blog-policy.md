@@ -1,16 +1,17 @@
 # SwitchaBank Blog
 
 Status: Implemented locally; Production deployment remains separately scoped.
-Authority: Product Owner's 2026-10-09 country-scoped blog/US article request;
+Authority: Product Owner's 2026-10-10 additional US article request and
+2026-10-09 country-scoped blog/US article request;
 earlier blog requests, FR-PUB-028, D-088 and WBS 5.74 remain historical context.
 
 ## Reader experience
 
 `/blog` lists the selected country’s allowlisted original articles in EN/KO/JA:
-three Canadian comparisons and one US high-yield savings comparison. US index
-and article URLs include `country_code=US`; Canada retains its existing URLs. A ruled feature section,
+three Canadian comparisons and two US articles (high-yield savings and savings
+versus CDs). US index and article URLs include `country_code=US`; Canada retains its existing URLs. A ruled feature section,
 existing official bank logos, an article contents list, mobile-stacked comparison
-table, hypothetical interest example, checklist and related guides lead to the
+table, hypothetical interest or penalty example, checklist and related guides lead to the
 matching country’s savings, chequing or GIC catalog, according to the article.
 Desktop/mobile navigation and the footer expose Blog. No account ownership is required.
 
@@ -107,7 +108,7 @@ other; the older article's content and source dates remain September 30.
 ## Search and measurement
 
 Clean index/article URLs receive localized canonicals, reciprocal EN/KO/JA and
-x-default alternates, descriptions, social metadata and eighteen country-scoped sitemap entries.
+x-default alternates, descriptions, social metadata and twenty-one country-scoped sitemap entries.
 BlogPosting and BreadcrumbList describe the visible article; CollectionPage/
 ItemList describe the index. The index has a generic PNG preview; each article has a distinct locally served
 `/blog/[slug]/opengraph-image` preview. Only allowlisted article image paths
@@ -162,12 +163,13 @@ uv run --with playwright python app/public/scripts/blog-audit.py
 ```
 
 The audit covers 390/768/1440px EN/KO/JA index/detail, exact financial example,
-source links, metadata/JSON-LD, eighteen sitemap entries, PNG preview, real 404,
+source links, metadata/JSON-LD, twenty-one sitemap entries, PNG preview, real 404,
 query noindex, country-scoped lists/redirects/empty states, source-independent
 rendering, menu focus and country/locale controls,
 JavaScript-free article HTML and the catalog handoff. Browser writes and
 third-party calls are stubbed. Screenshots are local under ignored
-`tmp/blog-audit/`. Public unit tests cover allowlists, query policy, country
+`tmp/blog-audit/` (override with `FPDS_BLOG_AUDIT_OUTPUT`). Public unit tests cover
+allowlists, query policy, country
 handoff, citation/anchor integrity, financial example arithmetic and analytics.
 
 
@@ -216,3 +218,28 @@ Only authored market/locale variants enter the sitemap: two country indexes and
 four articles in three languages = eighteen URLs. US English uses `en-US`;
 Canada retains `en-CA`. Unknown slugs/image slugs remain HTTP 404 before streaming.
 Registry/source dates of the three existing Canadian articles are preserved.
+
+
+## US savings versus CDs — 2026-10-10
+
+`/blog/high-yield-savings-vs-cds-us?country_code=US` adds a concise EN/KO/JA
+comparison. Four official sources checked October 10: Capital One 360
+Performance Savings, Marcus CD guide, Ally No Penalty CD and CFPB's CD overview.
+It preserves Capital One's variable APY/no direct ATM withdrawal, Marcus's
+USD 500 minimum and early-exit penalty, and Ally's fixed 11-month term,
+full-balance-plus-interest withdrawal after the first six days following funding.
+It does not claim immediate access or invent a current numerical bank APY.
+
+An accessible three-part infographic explains account structures. The second
+visual shows a hypothetical penalty comparison on USD 10,000 original principal
+at a 4.00% annual interest rate, explicitly not APY or a current bank quote.
+Marcus's 12-month boundary is 90 days of interest (USD 98.63); an 18-month term
+uses 180 days (USD 197.26), assuming a 365-day year. The note discloses rounding,
+366 days in a leap year and that these are penalties, not earnings.
+
+The closing link opens the US CD catalog; the related article stays in the US.
+US-only list/schema discovery, localized canonicals/hreflang, BlogPosting,
+article-specific social preview and explicit October 10 dates follow the existing
+contract. Two country indexes plus five articles in three languages now produce
+21 sitemap URLs; older article dates remain unchanged. No collection, database
+publication or runtime deployment is part of this editorial slice.

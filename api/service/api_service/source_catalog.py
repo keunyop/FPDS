@@ -122,6 +122,7 @@ _DETAIL_COMPANION_ANCHOR_MARKERS = (
     "details of rate",
     "fee schedule",
     "important rates",
+    "important credit terms",
     "interest rates and interest charges",
     "pricing & terms",
     "pricing and terms",
@@ -5572,7 +5573,7 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
     score = anchor_hits * 5 + url_hits * 3 + (3 if shared_product_pricing else 0)
     # Core pricing must survive the two-per-detail cap ahead of general
     # cardholder/privacy terms, even when their labels match more markers.
-    if re.search(r"annual interest rates and fees|fees and details|schedule of fees|pricing disclosure|rates and fees", anchor):
+    if re.search(r"annual interest rates and fees|fees and details|schedule of fees|pricing disclosure|rates and fees|important credit terms", anchor):
         score += 20
     if parsed.query:
         score += 2

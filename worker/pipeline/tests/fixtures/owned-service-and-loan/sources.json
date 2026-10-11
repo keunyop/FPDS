@@ -1,0 +1,157 @@
+[
+  {
+    "url": "https://creditcards.wellsfargo.com/active-cash-credit-card/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00013_CSMPD_BT_RV&FPID=0126D7I6F40000&product_code=CC&subproduct_code=AC&cx_nm=RVAA00013_CSMPD_BT_RV",
+    "sha256": "1d526a666f61e47bad01729faaa0ad023a674b9928931a83728bdf2fd7fdbe0d",
+    "fetched_at": "2026-10-10T23:08:59.670022+00:00",
+    "fixture": "wf-card.html.gz",
+    "name": "wf-card"
+  },
+  {
+    "url": "https://www.usbank.com/loans-credit-lines/personal-loans-and-lines-of-credit/personal-loan.html",
+    "sha256": "7bb41f706b322d2ac5998b04d26fc1ecbf4604285276973ef5026175d1dbcb12",
+    "fetched_at": "2026-10-10T23:10:22.011934+00:00",
+    "fixture": "us-personal-loan.html.gz",
+    "name": "us-personal-loan"
+  },
+  {
+    "url": "https://www.westernalliancebancorporation.com/personal/checking/personal-checking",
+    "sha256": "9fabc885598bec732348b0985746a68eb7f4b534f6bf6371078117e810492c7b",
+    "fetched_at": "2026-10-10T23:08:06.871543+00:00",
+    "fixture": "wab-checking.html.gz",
+    "name": "wab-checking"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/active-cash/terms",
+    "sha256": "b9be5b9fece5e9d1a747b297b50f37568238d180c0201fc461413fa33c8f5f52",
+    "fetched_at": "2026-10-10T23:13:11.248518+00:00",
+    "fixture": "wf-card-terms-unscoped.html.gz",
+    "name": "wf-card-terms-unscoped"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/active-cash/terms?fpid=012686I6F40000&product_code=CC&subproduct_code=AC",
+    "sha256": "05ae6e56d29bec9173e1bd63d764fc67898dc0e3b98242b647ec08bf3ef78b5a",
+    "fetched_at": "2026-10-10T23:18:28.855770+00:00",
+    "fixture": "wf-terms-active-cash-0.html.gz",
+    "name": "wf-terms-active-cash-0"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/terms/onekey?fpid=21231TIXE50000&product_code=CC&subproduct_code=OW",
+    "sha256": "581fc1a1c45241c9bed5707d8682042270579d5db47021c55699565179273757",
+    "fetched_at": "2026-10-10T23:18:30.772998+00:00",
+    "fixture": "wf-terms-terms-2.html.gz",
+    "name": "wf-terms-terms-2"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/autograph-visa/terms?fpid=012988I6P10000&product_code=CC&subproduct_code=AU",
+    "sha256": "527a567104144fce93100929d823cfde4dbc1b5660192a9e80532cb21c5b2bef",
+    "fetched_at": "2026-10-10T23:18:33.329966+00:00",
+    "fixture": "wf-terms-autograph-visa-3.html.gz",
+    "name": "wf-terms-autograph-visa-3"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/reflect-visa/terms?fpid=013000IGF80000&product_code=CC&subproduct_code=VV",
+    "sha256": "7a809205b1305050eb87ae659bdbab4b8fbfd2103e8944a61af00a782d172837",
+    "fetched_at": "2026-10-10T23:18:34.762133+00:00",
+    "fixture": "wf-terms-reflect-visa-4.html.gz",
+    "name": "wf-terms-reflect-visa-4"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/autograph-journey-visa/terms?fpid=0127E1I0P10000&product_code=CC&subproduct_code=MT",
+    "sha256": "ee6487beef93a2c6d8b3b884a61b6d47d77b4f7d54714ff1cad34e254f82c7f6",
+    "fetched_at": "2026-10-10T23:18:34.109919+00:00",
+    "fixture": "wf-terms-autograph-journey-visa-5.html.gz",
+    "name": "wf-terms-autograph-journey-visa-5"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/choice-select/terms?fpid=0123CBIXP10000&product_code=CC&subproduct_code=CE",
+    "sha256": "11f787b1ea5fdeb3ac19815626074ef458691ba0c572cb4366fbd91ae8f82e89",
+    "fetched_at": "2026-10-10T23:18:37.189646+00:00",
+    "fixture": "wf-terms-choice-select-6.html.gz",
+    "name": "wf-terms-choice-select-6"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/choice/terms?fpid=0124CEIXP10000&product_code=CC&subproduct_code=CP",
+    "sha256": "6fe83757e7c4419ae59963ef3be676baf5b97f36b5b719d3a90acf70d1616965",
+    "fetched_at": "2026-10-10T23:18:38.064249+00:00",
+    "fixture": "wf-terms-choice-7.html.gz",
+    "name": "wf-terms-choice-7"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/terms/onekeyplus?fpid=21271KIXE50000&product_code=CC&subproduct_code=OF",
+    "sha256": "34a01d9523c08c46ac9c78e1229290c9bc8c37b046dce6191fe3801ac30daa83",
+    "fetched_at": "2026-10-10T23:18:38.206866+00:00",
+    "fixture": "wf-terms-terms-8.html.gz",
+    "name": "wf-terms-terms-8"
+  },
+  {
+    "url": "https://www.wellsfargo.com/credit-cards/active-cash/terms?fpid=012686I6F40000&product_code=CC&subproduct_code=AC",
+    "sha256": "05ae6e56d29bec9173e1bd63d764fc67898dc0e3b98242b647ec08bf3ef78b5a",
+    "fetched_at": "2026-10-10T23:18:28.855770+00:00",
+    "fixture": "wf-card-terms.html.gz",
+    "name": "wf-card-terms"
+  },
+  {
+    "name": "wf-detail-one-key-plus-credit-card",
+    "file": "wf-detail-one-key-plus-credit-card.html.gz",
+    "url": "https://creditcards.wellsfargo.com/one-key-plus-credit-card/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00001_CSMPD_MC&FPID=21271KIXE50000&product_code=CC&subproduct_code=OF&cx_nm=RVAA00001_CSMPD_MC",
+    "sha256": "7be10384e7f602a86c28c991f8fb7c21ad069e07d67831b75a0ef84758472a6f",
+    "fetched_at": "2026-10-10T23:08:50.233266+00:00",
+    "fixture": "wf-detail-one-key-plus-credit-card.html.gz"
+  },
+  {
+    "name": "wf-detail-choice-hotel-privileges-mastercard",
+    "file": "wf-detail-choice-hotel-privileges-mastercard.html.gz",
+    "url": "https://creditcards.wellsfargo.com/choice-hotel-privileges-mastercard/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00001_CSMPD_MC&FPID=0124CEIXP10000&product_code=CC&subproduct_code=CP&cx_nm=RVAA00001_CSMPD_MC",
+    "sha256": "8d32e68e81758b221ea51a1d0b30335e1795e66cc6bb4cae3fc8550f9e43f6ce",
+    "fetched_at": "2026-10-10T23:08:56.648105+00:00",
+    "fixture": "wf-detail-choice-hotel-privileges-mastercard.html.gz"
+  },
+  {
+    "name": "wf-detail-reflect-visa-credit-card",
+    "file": "wf-detail-reflect-visa-credit-card.html.gz",
+    "url": "https://creditcards.wellsfargo.com/reflect-visa-credit-card/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00001_CSMPD_MC_RV&FPID=013000IGF80000&product_code=CC&subproduct_code=VV&cx_nm=RVAA00001_CSMPD_MC_RV",
+    "sha256": "99e5cd6abddd3451afaeae29b8b8eae702707662c586de917194901a0e19a971",
+    "fetched_at": "2026-10-10T23:08:59.099547+00:00",
+    "fixture": "wf-detail-reflect-visa-credit-card.html.gz"
+  },
+  {
+    "name": "wf-detail-active-cash-credit-card",
+    "file": "wf-detail-active-cash-credit-card.html.gz",
+    "url": "https://creditcards.wellsfargo.com/active-cash-credit-card/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00013_CSMPD_BT_RV&FPID=0126D7I6F40000&product_code=CC&subproduct_code=AC&cx_nm=RVAA00013_CSMPD_BT_RV",
+    "sha256": "1d526a666f61e47bad01729faaa0ad023a674b9928931a83728bdf2fd7fdbe0d",
+    "fetched_at": "2026-10-10T23:08:59.670022+00:00",
+    "fixture": "wf-detail-active-cash-credit-card.html.gz"
+  },
+  {
+    "name": "wf-detail-choice-hotels-privileges-select-mastercard",
+    "file": "wf-detail-choice-hotels-privileges-select-mastercard.html.gz",
+    "url": "https://creditcards.wellsfargo.com/choice-hotels-privileges-select-mastercard/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00001_CSMPD_MC&FPID=0123CBIXP10000&product_code=CC&subproduct_code=CE&cx_nm=RVAA00001_CSMPD_MC",
+    "sha256": "bbbe2a8a9bf715e0b95f612eebab48b8cf4d1509d5110acb16664998dc61881e",
+    "fetched_at": "2026-10-10T23:09:01.248798+00:00",
+    "fixture": "wf-detail-choice-hotels-privileges-select-mastercard.html.gz"
+  },
+  {
+    "name": "wf-detail-autograph-visa-credit-card",
+    "file": "wf-detail-autograph-visa-credit-card.html.gz",
+    "url": "https://creditcards.wellsfargo.com/autograph-visa-credit-card/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00010_CSMPD_RW_RV&FPID=012988I6P10000&product_code=CC&subproduct_code=AU&cx_nm=RVAA00010_CSMPD_RW_RV",
+    "sha256": "4057ca21122384113de18f3f5c7573168e610a5b3936c2c9f94578b82d8b5447",
+    "fetched_at": "2026-10-10T23:09:03.115872+00:00",
+    "fixture": "wf-detail-autograph-visa-credit-card.html.gz"
+  },
+  {
+    "name": "wf-detail-one-key-credit-card",
+    "file": "wf-detail-one-key-credit-card.html.gz",
+    "url": "https://creditcards.wellsfargo.com/one-key-credit-card/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00001_CSMPD_MC&FPID=21231TIXE50000&product_code=CC&subproduct_code=OW&cx_nm=RVAA00001_CSMPD_MC",
+    "sha256": "38b646a94ebd2c41809df86aaa6bc1109eec053097748761cdd9b8b05f744aa7",
+    "fetched_at": "2026-10-10T23:09:02.728252+00:00",
+    "fixture": "wf-detail-one-key-credit-card.html.gz"
+  },
+  {
+    "name": "wf-detail-autograph-journey-visa-credit-card",
+    "file": "wf-detail-autograph-journey-visa-credit-card.html.gz",
+    "url": "https://creditcards.wellsfargo.com/autograph-journey-visa-credit-card/?sub_channel=WEB&vendor_code=WF&lp_cx_nm=RVAA00010_CSMPD_RW_RV&FPID=0127E1I0P10000&product_code=CC&subproduct_code=MT&cx_nm=RVAA00010_CSMPD_RW_RV",
+    "sha256": "85f6d8e9dc9630d570586df37fafb8f5c3500a2c5440ce90202b5f13ee45a01e",
+    "fetched_at": "2026-10-10T23:09:17.131381+00:00",
+    "fixture": "wf-detail-autograph-journey-visa-credit-card.html.gz"
+  }
+]

@@ -489,7 +489,12 @@ def _build_product_refresh_metadata(
         "early_withdrawal_penalty",
     ):
         if allowed_field_names is not None and field_name not in allowed_field_names:
-            continue
+            # A verified price qualifier is shared across product types. The
+            # collection minimum must not erase its actual fee conditions.
+            accuracy = payload.get("_collection_accuracy")
+            verified = accuracy.get("verified_fields", []) if isinstance(accuracy, dict) else []
+            if field_name != "fee_waiver_condition" or field_name not in verified:
+                continue
         value = _coerce_string(payload.get(field_name))
         if value is not None:
             metadata[field_name] = value

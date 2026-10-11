@@ -1,5 +1,79 @@
 # FPDS Development Journal
 
+## 2026-10-10 - US savings versus CDs: concise article and accessible infographics
+
+- Added `high-yield-savings-vs-cds-us` in EN/KO/JA with four official sources
+  checked October 10. Reused the three-part infographic and chart for a clearly
+  hypothetical annual-interest penalty example; fixed/variable rates, full-balance
+  waiting conditions and the exact one-year penalty boundary remain explicit.
+- Registry/content/source dispatch, route allowlist and article-specific social
+  preview integrate with native US discovery, localized SEO and related/catalog
+  links. Two US/three CA articles now produce 21 localized blog sitemap URLs;
+  all older article dates and the country-isolation contract are preserved.
+- Actual verification: Public111, lint/typecheck and isolated production build
+  pass; full blog browser audit141 passes with zero browser errors. Includes
+  EN/KO/JA at 390/768/1440, country/locale controls, noindex/404, sources/JSON-LD,
+  sitemap/social PNGs, no-JS HTML and catalog handoff with country API503.
+  Visually reviewed mobile/tablet/desktop infographic/chart and social preview.
+- Key files: Public `public-blog-us-cd.ts`, its regression tests, blog registry/
+  dispatch, image route and `app/public/scripts/blog-audit.py`; README/blog policy updated.
+  Evidence stays under ignored `tmp/blog-us-cd-20261010/`.
+- Existing unrelated API/Worker changes and prior goal/journal content preserved.
+  No collection, canonical data publication or runtime deployment. Local checks
+  verify presentation/metadata; search indexing and traffic are not measured.
+  Next: normal coordinated Public release outside this local editorial task.
+
+## 2026-10-10 - USBN/WFBN/WAB: generic source corrections and ten published products
+
+- Latest 13 current/4 older zero-target scoped Runs: 50 candidates, one approval.
+  Independently checked 142 stored originals and 152 current official URL attempts
+  (151 successful, one 404); no Admin API/providers. Final 58 candidates produced
+  10 ordinary automatic passes (USBN loan1/WFBN card8/WAB checking1), 48 exclusions.
+- Parser28/process19 repairs essential disclosure discovery, offer-query identity,
+  complete named application prices and actual stored applicability; preserves
+  owned base monthly fees/waivers, dated qualified loan ranges and term limits.
+  Exact hidden trademark duplicates and no-foreign-transaction fee labels are
+  distinguished from product identity/denomination. Shared gates/prompts/cache,
+  Worker/API/Discovery READMEs and collection accuracy policy move together.
+- Final affected Worker346/API650/Discovery85 pass. Earlier full Worker938 has
+  four failures, all reproduced in isolated HEAD; no expected facts were changed.
+  Actual stored-origin assessment and normal promotion rollback pass. Verified
+  66 stored raw/parse pairs and 52 published field origins; actual API/site readback
+  preserves complete conditions and private boundaries. US75 ->85, CA120 unchanged.
+- Original Runs/candidates/source joins/documents/snapshots/versions and unrelated
+  canonical/Public facts remain unchanged. No weaker essentials, bank exception,
+  manual approval, schema change or permanent recovery. Local v19 is separate
+  from serving v17; coordinated runtime deployment remains a separate next step.
+- [Report](us-last-three-generic-collection-corrections-2026-10-10.md) records
+  causes, published products, exact checks and limits. Final UTF-8/syntax/reference/
+  diff and goal acceptance reviewed; earlier ownership and unfinished work preserved.
+
+## 2026-10-10 - Truist: generic HTML proof correction and two additional published cards
+
+- Latest five TB Runs: 22 candidates, one approval, 54 successful source joins.
+  Verified 52 original checksums and captured 52 current registered official URLs
+  without Admin API/providers. Ordinary direct processing: two passes, twenty
+  exclusions; preserved the existing Travel card. Truist Public 1 ->3, US72 ->74,
+  CA120 unchanged. Beyond and Future pass actual anonymous API/site readback.
+- Parser27/process18 retains complete named HTML pricing, corroborates native
+  H2 identity under marketing H1 and resolves uniquely defined symbolic notes.
+  Shared normalization/rate gates still reject masked prices. Shared extraction
+  retains verified optional fee qualifiers. Readback found Public minimum-field
+  filtering discarded the qualifier; corrected shared projection, republished
+  normally and verified full conditions, including Beyond's USD95 wealth waiver.
+- Final affected Worker474/API650 pass; final projection API20 pass. Full Worker
+  927 had four failures, all four reproduced in isolated Git HEAD; no fixture
+  expectation/fact changed. Foundation baseline and syntax/JSON/UTF-8/reference/
+  diff checks pass. Actual stored-origin gates and promotion rollback pass;
+  22 stored raw/parse pairs and seven published field origins pass.
+- Preserved original 5 Runs/22 candidates/54 joins/80 documents/158 snapshots,
+  1,595 version facts and 483 prior canonical products. No manual product review,
+  weaker essentials, bank exception, migration or permanent recovery feature.
+- [Report](truist-generic-collection-corrections-2026-10-10.md) documents exact
+  exclusions and checks. Local v18 is separate from serving v17; next coordinated
+  API/Worker release and bounded smoke remain deployment work.
+
+
 ## 2026-10-10 - TD US: complete pricing proof and three published cards
 
 - Latest six TBNA Runs: 17 rejected candidates, 58 successful source joins;

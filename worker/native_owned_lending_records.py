@@ -25,7 +25,7 @@ def lending_records(soup):
         qualified = bool(re.search(r"Your APR may be as low as \d+(?:\.\d+)?% or as high as \d+(?:\.\d+)?% for the term of your loan[.]", literal, re.I)
                          and re.search(r"Your APR will depend on", literal, re.I)
                          and re.search(r"Rates subject to change without notice[.]", literal, re.I))
-        if not (security or rate or qualified):
+        if not (security or rate or qualified or dated_loan_range(literal, owner) is not None):
             continue
         notes=local_notes(soup,p)
         if notes is None:
@@ -69,3 +69,24 @@ def lending_records(soup):
         quote = '\n'.join([owner, block.get_text(' ', strip=True), *notes])
         output.append(('owned_lending_terms', owner, quote))
     return list(dict.fromkeys(output))
+
+
+def dated_loan_range(literal, owner):
+    """One complete owned dated APR interval; keep all customer term limits."""
+    from worker.pipeline.fpds_rate_safety import contains_unresolved_financial_placeholder
+    from decimal import Decimal
+    body = " ".join(str(literal).split())
+    # Atomic records have a separate literal owner line; raw DOM paragraphs do not.
+    body = re.sub(r"^" + re.escape(str(owner)) + r"\s+(?=" + re.escape(str(owner)) + r"\s*:)", "", body, flags=re.I)
+    pattern = (re.escape(str(owner)) + r"\s*:\s*As of [A-Za-z]+ \d{1,2}, \d{4} the (?:fixed|variable) "
+               r"Annual Percentage Rate \(APR\) ranged from (\d+(?:\.\d+)?)% APR to (\d+(?:\.\d+)?)% APR,")
+    rate = re.match(pattern, body, re.I)
+    if (not rate or not 0 <= Decimal(rate[1]) <= Decimal(rate[2]) < 100
+            or contains_unresolved_financial_placeholder(body)
+            or not body.endswith("Interest rates and program terms are subject to change without notice.")
+            or len(re.findall(r"Annual Percentage Rate \(APR\) ranged from", body, re.I)) != 1):
+        return None
+    terms = re.findall(r"[^.!?]*\bloan terms range from \d+ to \d+ months(?: \([^()]+\))?[.]", body, re.I)
+    if len(terms) != 1 or not re.search(r"varies based on|lowest APR in the range", body, re.I):
+        return None
+    return terms[0].strip()
