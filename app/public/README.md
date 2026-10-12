@@ -219,8 +219,10 @@ evergreen verification states, maple selection emphasis, and ochre Loan cues.
 The code-native SwitchaBank mark is a simple pair of opposing horizontal
 arrows. It communicates comparing the current option with another and making a
 switch without introducing a literal bank, toggle, or decorative illustration.
-The wordmark is one uninterrupted same-color name. The shell mark and
-white-on-evergreen app icon share the same geometry so the identity remains
+The header reads Switcha, opposing arrows, Bank, with the existing evergreen
+mark centered between same-color text and sized for mobile and desktop. The
+footer retains its leading mark and uninterrupted wordmark. Shell marks and
+the white-on-evergreen app icon share the same geometry so the identity remains
 clear at small sizes.
 Generic dashboard-card repetition, decorative gradients, and synthetic scores
 are avoided. Recommendation language is reserved for the bounded Home finder

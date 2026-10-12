@@ -6,7 +6,7 @@ import { Suspense, useEffect } from "react";
 
 import { ComparisonHeaderLink } from "@/components/fpds/public/comparison-controls";
 import { PublicCountryMenu } from "@/components/fpds/public/public-country-menu";
-import { PublicMark, PublicWordmark } from "@/components/fpds/public/public-mark";
+import { PublicMark } from "@/components/fpds/public/public-mark";
 import { PublicMobileMenu } from "@/components/fpds/public/public-mobile-menu";
 import { PublicNav } from "@/components/fpds/public/public-nav";
 import { getPublicMessages, normalizePublicLocale } from "@/lib/public-locale";
@@ -32,10 +32,11 @@ function HeaderContent() {
             <Link
               aria-label={`${copy.shell.brand} ${copy.nav.dashboard}`}
               href={buildScopedPublicHrefFromSearchParams("/", searchParams)}
-              className="flex min-h-11 min-w-0 items-center justify-start gap-1"
+              className="inline-flex min-h-11 shrink-0 items-center justify-start gap-1 whitespace-nowrap text-lg font-semibold tracking-[-0.04em] text-foreground sm:text-[1.375rem]"
             >
-              <PublicMark />
-              <PublicWordmark className="text-lg font-semibold tracking-[-0.04em] text-foreground sm:text-[1.375rem]" />
+              <span>Switcha</span>
+              <PublicMark className="size-7 [&_svg]:size-6 sm:size-8 sm:[&_svg]:size-7" />
+              <span>Bank</span>
             </Link>
           </div>
           <div className="hidden min-w-0 items-center gap-2 lg:flex">

@@ -1,5 +1,20 @@
 # FPDS Development Journal
 
+## 2026-10-11 - SwitchaBank header logo between the name segments
+
+- Header now reads Switcha, the existing opposing-arrow mark, Bank. Reused
+  PublicMark geometry and semantic colors; adjusted mark size for mobile/desktop.
+  Preserved the accessible Home name, scoped href, 44px target and shared focus.
+- Key files: Public public-header.tsx and README. Footer and app icons keep
+  their existing composition; no vendor primitives or dependencies changed.
+- Actual verification: lint/typecheck pass; Chrome EN/KO/JA x CA/US at
+  390/768/1440px (18 cases), keyboard focus/scoped Home activation, 320px
+  boundary/mobile menu, country loading/empty/503 states and three-width visual
+  inspection. Isolated preview/receipts are under tmp/header-logo-20261011/.
+- Limits: local presentation and development-server checks only. No production
+  build, deployment, collection or data writes. Existing goals/ownership remain.
+  Next: normal Public release; no release performed in this task.
+
 ## 2026-10-10 - US savings versus CDs: concise article and accessible infographics
 
 - Added `high-yield-savings-vs-cds-us` in EN/KO/JA with four official sources

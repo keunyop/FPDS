@@ -1,5 +1,17 @@
 # Admin pre-handover review and fixes
 
+## SwitchaBank header logo placement - 2026-10-11
+
+Status: Complete for local header presentation; preserve all unrelated goals and unfinished ownership.
+Scope: Public header reads Switcha, existing opposing-arrow mark, Bank.
+Acceptance:
+- [x] Keep existing geometry, semantic colors, accessible Home link and country/locale scope.
+- [x] Verify EN/KO/JA and 390/768/1440px layouts, keyboard focus and navigation.
+- [x] Complete affected lint/typecheck, final diff/encoding checks and journal.
+Verification: Lint/typecheck; 18 Chrome locale/country/width cases, keyboard/Home,
+320px menu, country loading/empty/error and three-width visual review pass.
+Limits: Local dev preview only; no production build, deployment, data writes or collection.
+
 ## US savings versus CD blog article - 2026-10-10
 
 Status: Complete for local Public editorial implementation and verification. Preserve all other sections, ownership and unfinished work.
