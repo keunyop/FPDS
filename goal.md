@@ -1,5 +1,22 @@
 # Admin pre-handover review and fixes
 
+## US checking fees blog article - 2026-10-13
+
+Status: Complete for local Public editorial implementation and verification. Preserve all existing goals, ownership and unfinished work.
+Scope: one concise US checking-fee comparison in EN/KO/JA with two accessible
+infographics, official fee/waiver/ATM evidence and native-country SEO/discovery.
+Acceptance:
+- [x] Verify current official monthly fees, deposit-waiver boundaries and ATM costs.
+- [x] Add localized article, visuals, sources, country links and SEO metadata.
+- [x] Verify financial examples, routing/fallback, SEO/no-JS and 390/768/1440px UI.
+- [x] Review final diff, preserve prior work and record actual checks in journal.
+Limits: Local Public editorial code only; no collection, data writes or deployment.
+Outcome: Five checked official sources, concise EN/KO/JA copy, two accessible
+infographics, US-only discovery, localized SEO/social image and 24 sitemap URLs.
+Public120/browser169 with zero browser errors, lint/typecheck, isolated production
+build and foundation pass. Earlier article dates, Filipino fallback and prior
+ownership preserved. Local editorial code only; no collection/data/deployment.
+
 ## SwitchaBank Philippines and Filipino - 2026-10-13
 
 Status: Complete for local implementation and verification. Preserve all existing goals and ownership.

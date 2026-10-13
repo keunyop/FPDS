@@ -14,6 +14,13 @@ ORIGIN = os.environ.get('FPDS_UI_TEST_ORIGIN', 'http://localhost:3000').rstrip('
 assert urlparse(ORIGIN).hostname in {'localhost', '127.0.0.1', '::1'}
 PROD = 'https://www.switchabank.com'
 POSTS = {
+    'chase-vs-bank-of-america-vs-wells-fargo-checking-fees': {
+        'country': 'US', 'date': '2026-10-13', 'citations': 5,
+        'catalog': '/products?product_type=chequing',
+        'tail': '&country_code=US&sort_by=monthly_fee&sort_order=asc',
+        'related': 'ally-vs-capital-one-vs-amex-high-yield-savings',
+        'amounts': ['USD 180', 'USD 144', 'USD 36'],
+    },
     'high-yield-savings-vs-cds-us': {
         'country': 'US', 'date': '2026-10-10', 'citations': 4,
         'catalog': '/products?product_type=gic', 'tail': '&country_code=US',
@@ -158,12 +165,14 @@ with sync_playwright() as pw:
                     assert page.get_by_role('banner').evaluate('(el) => el.scrollWidth <= innerWidth')
                 page.evaluate('window.scrollTo(0, 0)')
                 if locale == 'ko':
-                    name = ('index-' + country) if path == '/blog' else ('us-cd' if 'savings-vs-cds-us' in path else 'us-savings') if country == 'US' else ('gic' if 'gic-canada' in path else 'chequing' if 'chequing' in path else 'savings')
+                    name = ('index-' + country) if path == '/blog' else ('us-checking' if 'checking-fees' in path else 'us-cd' if 'savings-vs-cds-us' in path else 'us-savings') if country == 'US' else ('gic' if 'gic-canada' in path else 'chequing' if 'chequing' in path else 'savings')
                     page.screenshot(path=str(screens / (name + '-' + str(width) + '.png')), full_page=True)
-                    if name == 'us-cd':
+                    if name in ['us-cd', 'us-checking']:
                         page.screenshot(path=str(screens / (name + '-hero-' + str(width) + '.png')))
                         page.locator('[data-blog-infographic]').screenshot(path=str(screens / (name + '-infographic-' + str(width) + '.png')))
-                        page.locator('#worked-example figure').screenshot(path=str(screens / (name + '-penalty-' + str(width) + '.png')))
+                        page.locator('#worked-example figure').screenshot(path=str(screens / (name + '-chart-' + str(width) + '.png')))
+                        if name == 'us-checking':
+                            page.locator('#account-comparison').screenshot(path=str(screens / (name + '-table-' + str(width) + '.png')))
                     if name == 'chequing' and width in [390, 1440]:
                         page.screenshot(path=str(screens / (name + '-hero-' + str(width) + '.png')))
                         page.locator('#account-comparison').screenshot(path=str(screens / (name + '-table-' + str(width) + '.png')))
@@ -208,12 +217,19 @@ with sync_playwright() as pw:
         page.locator('header button[aria-haspopup=menu]:visible').click()
         page.get_by_role('menu').locator('a[href="/blog?locale=ko&country_code=US"]').click()
         expect(page).to_have_url(ORIGIN + '/blog?locale=ko&country_code=US')
-        expect(page.locator('main article')).to_have_count(2)
+        expect(page.locator('main article')).to_have_count(3)
         page.locator('footer button[aria-haspopup=menu]').click()
         page.get_by_role('menu').locator('a[href="/blog?country_code=US"]').click()
         expect(page).to_have_url(ORIGIN + '/blog?country_code=US')
         expect(page.locator('html')).to_have_attribute('lang', 'en')
         passed('country and locale controls ' + str(width))
+    for slug, post in POSTS.items():
+        country = post.get('country', 'CA')
+        page.goto(ORIGIN + '/blog/' + slug + '?locale=fil&country_code=' + country, wait_until='networkidle')
+        expect(page).to_have_url(ORIGIN + '/blog/' + slug + suffix_for('en', country))
+        expect(page.locator('html')).to_have_attribute('lang', 'en')
+        expect(page.locator('link[rel=alternate][hreflang=fil]')).to_have_count(0)
+        passed('Filipino article fallback preserves country ' + slug)
     previews = []
     for path in PATHS:
         response = context.request.get(ORIGIN + path + '/opengraph-image')
@@ -224,6 +240,8 @@ with sync_playwright() as pw:
         previews.append(body)
         if path == '/blog/high-yield-savings-vs-cds-us':
             (screens / 'us-cd-social.png').write_bytes(body)
+        if path == '/blog/chase-vs-bank-of-america-vs-wells-fargo-checking-fees':
+            (screens / 'us-checking-social.png').write_bytes(body)
         passed('social preview PNG ' + path)
     assert len(set(previews)) == len(PATHS)
     sitemap = ET.fromstring(context.request.get(ORIGIN + '/sitemap.xml').text())

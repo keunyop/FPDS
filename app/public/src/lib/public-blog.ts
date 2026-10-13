@@ -1,6 +1,10 @@
 import type { PublicLocale } from './public-locale.ts';
 
 export const BLOG_POSTS = [{
+  slug: 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees',
+  publishedAt: '2026-10-13', modifiedAt: '2026-10-13', sourcesCheckedAt: '2026-10-13',
+  country: 'US', productType: 'chequing', minutes: 4, issue: '06'
+}, {
   slug: 'high-yield-savings-vs-cds-us',
   publishedAt: '2026-10-10', modifiedAt: '2026-10-10', sourcesCheckedAt: '2026-10-10',
   country: 'US', productType: 'gic', minutes: 4, issue: '05'

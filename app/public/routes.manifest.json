@@ -149,6 +149,7 @@
       "implementation_path": "src/app/blog/[slug]/page.tsx",
       "resource_key": "public_blog.article",
       "allowed_slugs": [
+        "chase-vs-bank-of-america-vs-wells-fargo-checking-fees",
         "high-yield-savings-vs-cds-us",
         "ally-vs-capital-one-vs-amex-high-yield-savings",
         "eq-bank-vs-tangerine-vs-td-savings",

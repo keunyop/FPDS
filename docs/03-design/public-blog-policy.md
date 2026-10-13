@@ -1,17 +1,20 @@
 # SwitchaBank Blog
 
 Status: Implemented locally; Production deployment remains separately scoped.
-Authority: Product Owner's 2026-10-10 additional US article request and
+Authority: Product Owner's 2026-10-13 US checking article request,
+2026-10-10 additional US article request and
 2026-10-09 country-scoped blog/US article request;
 earlier blog requests, FR-PUB-028, D-088 and WBS 5.74 remain historical context.
 
 ## Reader experience
 
 `/blog` lists the selected country’s allowlisted original articles in EN/KO/JA:
-three Canadian comparisons and two US articles (high-yield savings and savings
-versus CDs). US index and article URLs include `country_code=US`; Canada retains its existing URLs. A ruled feature section,
+three Canadian comparisons and three US articles (checking fees, high-yield
+savings and savings versus CDs). US index and article URLs include
+`country_code=US`; Canada retains its existing URLs. A ruled feature section,
 existing official bank logos, an article contents list, mobile-stacked comparison
-table, hypothetical interest or penalty example, checklist and related guides lead to the
+table, illustrative interest, penalty or fee example, checklist and related guides
+lead to the
 matching country’s savings, chequing or GIC catalog, according to the article.
 Desktop/mobile navigation and the footer expose Blog. No account ownership is required.
 
@@ -108,7 +111,7 @@ other; the older article's content and source dates remain September 30.
 ## Search and measurement
 
 Clean index/article URLs receive localized canonicals, reciprocal EN/KO/JA and
-x-default alternates, descriptions, social metadata and twenty-one country-scoped sitemap entries.
+x-default alternates, descriptions, social metadata and twenty-four country-scoped sitemap entries.
 BlogPosting and BreadcrumbList describe the visible article; CollectionPage/
 ItemList describe the index. The index has a generic PNG preview; each article has a distinct locally served
 `/blog/[slug]/opengraph-image` preview. Only allowlisted article image paths
@@ -163,7 +166,7 @@ uv run --with playwright python app/public/scripts/blog-audit.py
 ```
 
 The audit covers 390/768/1440px EN/KO/JA index/detail, exact financial example,
-source links, metadata/JSON-LD, twenty-one sitemap entries, PNG preview, real 404,
+source links, metadata/JSON-LD, twenty-four sitemap entries, PNG preview, real 404,
 query noindex, country-scoped lists/redirects/empty states, source-independent
 rendering, menu focus and country/locale controls,
 JavaScript-free article HTML and the catalog handoff. Browser writes and
@@ -243,3 +246,31 @@ article-specific social preview and explicit October 10 dates follow the existin
 contract. Two country indexes plus five articles in three languages now produce
 21 sitemap URLs; older article dates remain unchanged. No collection, database
 publication or runtime deployment is part of this editorial slice.
+
+
+## US checking fees comparison — 2026-10-13
+
+`/blog/chase-vs-bank-of-america-vs-wells-fargo-checking-fees?country_code=US`
+adds a concise EN/KO/JA article with five official sources checked October 13:
+Chase's fee schedule, BofA Advantage Plus clarity statement, Wells Fargo's
+Everyday fee summary/waiver page and CFPB maintenance-fee guidance.
+
+Base monthly fees remain USD 15/12/15. The table explicitly shows only one
+waiver route: Chase USD 500 in qualifying electronic deposits per statement
+period; BofA at least one qualifying direct deposit of USD 250 per cycle;
+Wells Fargo total qualifying electronic deposits of USD 500 per fee period.
+Other waiver routes exist. Two USD 125 deposits do not meet BofA's single-deposit
+route. Chase/Wells Zelle exclusions remain separate from their deposit thresholds.
+Domestic cash withdrawals outside each bank’s ATM network cost USD 3/2.50/3
+before operator fees;
+overdraft and other services are not implied free or included in the example.
+
+Reused accessible three-step infographic and cost bars show USD 180/144/180
+for twelve charged periods at unchanged base fees, without waivers/initial fee
+relief. Every locale distinguishes this from a first-year quote or total account
+cost. Native US checking catalog and related links preserve country/locale.
+Registry, allowlist, localized metadata, distinct PNG preview and 24 sitemap
+URLs integrate with existing routing. Filipino article requests keep the English
+fallback and native market; no untranslated Filipino article hreflang is added.
+Existing article dates and CA/PH behavior are unchanged. Local editorial code
+only; no collection, data publication or runtime deployment.

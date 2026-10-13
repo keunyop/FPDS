@@ -42,7 +42,7 @@ test('penalty infographic uses annual interest, original principal and explicit 
 
 test('US CD article is discoverable only in its native market with matching localized catalog links', () => {
   assert.equal(BLOG_POSTS.find(post => post.slug === slug)?.country, 'US');
-  assert.equal(blogPostsForCountry('US')[0].slug, slug);
+  assert.equal(blogPostsForCountry('US').some(post => post.slug === slug), true);
   assert.equal(blogPostsForCountry('CA').some(post => post.slug === slug), false);
   assert.equal(blogSources(slug).length, 4);
   for (const locale of locales) {

@@ -1,3 +1,4 @@
+import { US_CHECKING_CONTENT, US_CHECKING_PRESENTATION, US_CHECKING_SOURCES } from './public-blog-us-checking.ts';
 import { US_CD_CONTENT, US_CD_PRESENTATION, US_CD_SOURCES } from './public-blog-us-cd.ts';
 import { US_SAVINGS_CONTENT, US_SAVINGS_PRESENTATION, US_SAVINGS_SOURCES } from './public-blog-us-savings.ts';
 import { GIC_CONTENT, GIC_PRESENTATION, GIC_SOURCES } from './public-blog-gic.ts';
@@ -15,7 +16,7 @@ export const BLOG_SOURCES = [
   { id: 'fcac', title: 'FCAC — Savings accounts', href: 'https://www.canada.ca/en/financial-consumer-agency/services/banking/bank-accounts/savings-account.html' }
 ] as const;
 export type BlogSource = { id: string; title: string; href: string };
-type SourceId = typeof BLOG_SOURCES[number]['id'] | typeof CHEQUING_SOURCES[number]['id'] | typeof GIC_SOURCES[number]['id'] | typeof US_SAVINGS_SOURCES[number]['id'] | typeof US_CD_SOURCES[number]['id'];
+type SourceId = typeof BLOG_SOURCES[number]['id'] | typeof CHEQUING_SOURCES[number]['id'] | typeof GIC_SOURCES[number]['id'] | typeof US_SAVINGS_SOURCES[number]['id'] | typeof US_CD_SOURCES[number]['id'] | typeof US_CHECKING_SOURCES[number]['id'];
 export type BlogSection = { id: string; title: string; paragraphs: string[]; sources?: SourceId[] };
 export type BlogContent = {
   infographic?: { title: string; steps: { title: string; text: string }[] };
@@ -222,6 +223,7 @@ const content: Record<EditorialLocale, BlogContent> = {
   }
 };
 const articles: Record<BlogSlug, Record<EditorialLocale, BlogContent>> = {
+  'chase-vs-bank-of-america-vs-wells-fargo-checking-fees': US_CHECKING_CONTENT,
   'high-yield-savings-vs-cds-us': US_CD_CONTENT,
   'ally-vs-capital-one-vs-amex-high-yield-savings': US_SAVINGS_CONTENT,
   'cashable-vs-non-cashable-gic-canada': GIC_CONTENT,
@@ -229,12 +231,18 @@ const articles: Record<BlogSlug, Record<EditorialLocale, BlogContent>> = {
   'tangerine-vs-simplii-vs-cibc-chequing-fees': CHEQUING_CONTENT
 };
 export function blogSources(slug: BlogSlug): readonly BlogSource[] {
+  if (slug === 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees') return US_CHECKING_SOURCES;
   if (slug === 'high-yield-savings-vs-cds-us') return US_CD_SOURCES;
   if (slug === 'ally-vs-capital-one-vs-amex-high-yield-savings') return US_SAVINGS_SOURCES;
   if (slug === 'cashable-vs-non-cashable-gic-canada') return GIC_SOURCES;
   return slug === 'tangerine-vs-simplii-vs-cibc-chequing-fees' ? CHEQUING_SOURCES : BLOG_SOURCES;
 }
 export function blogPresentation(slug: BlogSlug, locale: string) {
+  if (slug === 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees') return {
+    ...US_CHECKING_PRESENTATION[locale === 'ko' || locale === 'ja' ? locale : 'en'],
+    catalog: 'no-monthly-fee-chequing' as CuratedSlug, guides: [] as GuideSlug[],
+    relatedArticle: { slug: 'ally-vs-capital-one-vs-amex-high-yield-savings' as BlogSlug, label: US_SAVINGS_CONTENT[locale === 'ko' || locale === 'ja' ? locale : 'en'].title }
+  };
   if (slug === 'high-yield-savings-vs-cds-us') return {
     ...US_CD_PRESENTATION[locale === 'ko' || locale === 'ja' ? locale : 'en'],
     catalog: '1-year-gic' as CuratedSlug, guides: [] as GuideSlug[],

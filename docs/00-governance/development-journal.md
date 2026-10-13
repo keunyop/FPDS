@@ -1,5 +1,30 @@
 # FPDS Development Journal
 
+## 2026-10-13 - US checking fee comparison with concise copy and infographics
+
+- Added EN/KO/JA Chase Total Checking/BofA Advantage Plus/Wells Fargo Everyday
+  comparison with five official sources checked October 13. Kept base fees,
+  deposit qualification/periods, BofA's single-deposit boundary and domestic ATM
+  operator surcharges distinct. Two accessible visuals reuse existing components;
+  the twelve-charge example explicitly excludes waivers/initial relief/other fees.
+- New typed article/source module, registry/dispatch, route allowlist and distinct
+  social PNG integrate with US-only discovery, localized SEO and US catalog links.
+  Three US/three CA articles produce 24 sitemap URLs; older dates and the existing
+  Filipino-to-English/native-country fallback remain intact.
+- Actual checks: Public120, lint/typecheck, isolated production build and foundation
+  pass; full blog browser audit169 passes with zero errors. Covers EN/KO/JA at
+  390/768/1440, keyboard/country controls, noindex/404, metadata/JSON-LD, citations,
+  24 sitemap URLs, unique PNGs, Filipino fallback, no-JS and country API503 handoff.
+  Manually reviewed hero/table/infographics at three widths and the social PNG.
+- Key files: `app/public/src/lib/public-blog-us-checking.ts`, its regression tests,
+  blog registry/dispatch/image route and `app/public/scripts/blog-audit.py`.
+  Public README/blog policy updated; evidence is ignored under
+  `tmp/blog-us-checking-20261013/`. Prior goal/journal ownership is preserved.
+- Local editorial code only: no collection, data publication, schema or deployment.
+  Existing Admin/API processes were preserved. Search indexing/traffic are not
+  measured by local checks. Next: normal Public release with read-only blog smoke;
+  no migration or API/Worker release is required for this article.
+
 
 ## 2026-10-13 - SwitchaBank Philippines selection and Filipino UI
 

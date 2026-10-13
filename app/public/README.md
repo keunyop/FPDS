@@ -1,5 +1,18 @@
 # FPDS Public
 
+## US checking fees article - 2026-10-13
+
+`/blog/chase-vs-bank-of-america-vs-wells-fargo-checking-fees?country_code=US`
+compares Chase Total Checking, BofA Advantage Plus and Wells Fargo Everyday
+Checking in EN/KO/JA. Five official sources support base fees, one explicitly
+scoped deposit-waiver route and domestic ATM costs. Two accessible infographics
+explain the comparison and twelve charged periods; initial relief, other fees
+and the single-deposit/total-deposit distinction remain explicit.
+US discovery now has three articles; CA retains three. Native localized SEO,
+article PNG and 24 sitemap URLs preserve older dates and Filipino-to-English
+article fallback. Existing bank logos/components are reused. No collection,
+data write or deployment is included.
+
 
 ## Philippines and Filipino UI - 2026-10-13
 
