@@ -1,5 +1,40 @@
 # FPDS API Service
 
+## Public database egress reduction - 2026-10-12
+
+Public GET routes open explicitly read-only database connections. Validated,
+locale-neutral projection rows are reused for 60 seconds in a process-local
+LRU of at most 64 entries, scoped by database host/port/name, database role and
+connection options, country, exact snapshot, and accuracy/market policy versions.
+New publication snapshots use a new key immediately. Same-key concurrent misses
+share one load and its result/error; another country's hits are not blocked.
+No failed load or expired fallback is cached. Writer connections bypass reuse.
+The cache is per serving process; cold starts/other instances still perform reads.
+
+Only validated rows enter the cache, after private approved payloads/mappings
+have been removed. Each caller receives an independent copy. Freshness and
+localized API responses are evaluated per request. Current receipt, digest,
+conditional cost/access/security, original values and optional-fact checks remain
+unchanged. The SQL reads the complete `unlimited_transactions_flag` evidence
+quote needed by receipt validation instead of the entire private field mapping.
+The full approved payload is retained for digest/financial validation.
+
+Cold product-detail reads include a parameterized exact product ID alongside
+country/snapshot/active filters; warm details reuse the validated country rows.
+Country counts, filters, list pages and dashboards reuse the same validated
+snapshot rows, preserving eligibility before counts, ranking and pagination.
+List filtering/pagination remains over those bounded shared rows; it does not
+page unvalidated database rows or change totals after excluding invalid products.
+
+Read-only same-snapshot comparison: CA120 products, 1,386,029 -> 388,909 JSON
+bytes (71.94% reduction); US85, 1,576,114 -> 574,188 (63.57%). All 205 validated
+rows were identical; sampled cold detail queries returned one row / 2,600-2,796
+bytes. Eleven repeated loads issued one full query; warm country counts issued
+none. These are local query-size/cache measurements, not deployed or billed-byte
+results. No schema, data, collection, billing or Worker change is required.
+Release the API through the existing release workflow and check serving query
+patterns/Shared Pooler Egress; the existing Public fetch caches may expire normally.
+
 ## Linked application prices, owned service costs and qualified loan terms - 2026-10-10
 
 Parser v28/process `2026-10-10-linked-application-cost-proof-v19` preserve

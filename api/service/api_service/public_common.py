@@ -287,9 +287,40 @@ def load_public_projection_rows(
     *,
     snapshot_id: str,
     country_code: str,
+    product_id: str | None = None,
 ) -> list[dict[str, Any]]:
+    from api_service.public_projection_cache import connection_scope, projection_cache
+    from worker.pipeline.fpds_collection_accuracy import ACCURACY_VERSION
+    from worker.pipeline.fpds_market_profile import MARKET_PROFILE_VERSION
+
+    scope = connection_scope(connection)
+    if scope is None:
+        return _query_public_projection_rows(connection, snapshot_id=snapshot_id,
+            country_code=country_code, product_id=product_id)
+    # Publication selects a new snapshot key immediately. TTL also bounds
+    # in-place source corrections; policy/runtime changes cannot share entries.
+    key = (scope, ACCURACY_VERSION, MARKET_PROFILE_VERSION, country_code, snapshot_id)
+    if product_id is not None:
+        full_rows = projection_cache.get((*key, None))
+        if full_rows is not None:
+            return [row for row in full_rows if str(row.get("product_id")) == product_id]
+    return projection_cache.load((*key, product_id), lambda: _query_public_projection_rows(
+        connection, snapshot_id=snapshot_id, country_code=country_code, product_id=product_id))
+
+
+def _query_public_projection_rows(
+    connection: Connection,
+    *,
+    snapshot_id: str,
+    country_code: str,
+    product_id: str | None = None,
+) -> list[dict[str, Any]]:
+    product_clause = "AND p.product_id = %(product_id)s" if product_id is not None else ""
+    params = {"snapshot_id": snapshot_id, "country_code": country_code}
+    if product_id is not None:
+        params["product_id"] = product_id
     rows = connection.execute(
-        """
+        f"""
         SELECT
             approved_version.normalized_payload AS approved_collection_payload,
             p.product_id,
@@ -318,8 +349,14 @@ def load_public_projection_rows(
             p.term_bucket,
             p.last_verified_at,
             p.last_changed_at,
-            COALESCE(p.refresh_metadata, '{}'::jsonb) AS refresh_metadata,
-            approved_candidate.field_mapping_metadata AS approved_field_mapping_metadata,
+            COALESCE(p.refresh_metadata, '{{}}'::jsonb) AS refresh_metadata,
+            -- Receipt validation only consumes this channel-scope quote. Keep
+            -- its full JSON value/type; the remaining private mappings stay in DB.
+            jsonb_build_object('unlimited_transactions_flag',
+                jsonb_build_object('official_evidence_quote',
+                    approved_candidate.field_mapping_metadata
+                        -> 'unlimited_transactions_flag' -> 'official_evidence_quote'))
+                AS approved_field_mapping_metadata,
             CASE WHEN p.product_type IN ('savings', 'gic') THEN
                 jsonb_strip_nulls(jsonb_build_object(
                     'interest_calculation_method', approved_version.normalized_payload -> 'interest_calculation_method',
@@ -331,7 +368,7 @@ def load_public_projection_rows(
                     'promotional_rate', approved_version.normalized_payload -> 'promotional_rate',
                     'promotional_period_text', approved_version.normalized_payload -> 'promotional_period_text',
                     'introductory_rate_flag', approved_version.normalized_payload -> 'introductory_rate_flag'
-                )) ELSE '{}'::jsonb END AS approved_deposit_conditions,
+                )) ELSE '{{}}'::jsonb END AS approved_deposit_conditions,
             COALESCE(p.refresh_metadata ->> 'product_url', official_source.normalized_source_url) AS product_url
         FROM public_product_projection AS p
         LEFT JOIN product_version AS approved_version
@@ -372,9 +409,10 @@ def load_public_projection_rows(
         WHERE p.snapshot_id = %(snapshot_id)s
           AND p.country_code = %(country_code)s
           AND p.status = 'active'
+          {product_clause}
         ORDER BY p.bank_name ASC, p.product_name ASC, p.product_id ASC
         """,
-        {"snapshot_id": snapshot_id, "country_code": country_code},
+        params,
     ).fetchall()
     from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid
     result = []

@@ -1,5 +1,92 @@
 # FPDS Development Journal
 
+## 2026-10-12 - Public egress fixes with preserved financial validation
+
+- Reduced projection SQL to the complete unlimited-transaction evidence quote
+  consumed by receipt validation, keeping the full approved payload/digest and
+  exact snapshot/country/bank origins. Original private evidence remains in DB;
+  accepted/excluded logic and all public optional facts remain unchanged.
+- Cold detail reads now use a parameterized exact product ID. Public GETs use
+  explicit read-only connections. A 60s/64-entry process cache shares validated
+  locale-neutral rows across countries/counts/filters/pages/dashboard consumers,
+  separated by DB identity/role/options, country, snapshot and policy versions.
+  New snapshots miss immediately; writers bypass cache; expiry revalidates.
+  Same-key concurrent misses share results/errors without blocking other keys;
+  failures/stale fallbacks are not stored and caller mutation cannot alter cache.
+- Actual read-only repeatable-read comparison against the original HEAD query:
+  CA120 unchanged rows, 1,386,029 -> 388,909 JSON bytes (-71.94%); US85 unchanged,
+  1,576,114 -> 574,188 (-63.57%). All 205 validated rows compare exactly, including
+  types/units/optional fields. Cold detail samples are 2,600/2,796 bytes, one row;
+  missing IDs return none. Eleven repeated loads issue one full query; warmed
+  country counts issue zero, retaining CA120/19 banks and US85/16 banks.
+- Verification: independent API full unittest suite 661 pass; standalone auth
+  regression command 11 pass; new egress suite 11 pass, including six concurrent
+  callers sharing a real pending load/error, independent-country access, expiry,
+  tampered essentials, DB/role/options/country/snapshot/policy isolation,
+  read-only connection behavior, missing/injection-like IDs and private fields.
+  Foundation baseline, Python syntax, strict UTF-8, added Markdown references,
+  final diff and goal acceptance checks pass. Initial focused-test invocations
+  used wrong discovery/import roots; corrected to package README working dir
+  and shared-source test setup. No test failures remain.
+- Key files: API public_common.py, public_projection_cache.py, public_products.py,
+  db.py/main.py, test_public_egress.py/detail route regression and API README.
+  Evidence: ignored tmp/egress-diagnosis-20261012/reduction-verification.json
+  and its bounded read-only comparison script. Prior diagnosis/goals preserved.
+- Limits: local API implementation/tests and existing-DB read-only comparison;
+  no deployment, schema/data/financial writes, collection, paid research, billing
+  setting or frontend/layout change. Cache is per process; cold starts and other
+  instances still read DB, and byte reductions are JSON estimates, not invoices.
+  Next: release the API through the existing authorized deployment workflow and
+  compare serving query counts and Shared Pooler Egress after normal cache expiry.
+
+## 2026-10-12 - Supabase egress warning and read-only diagnosis
+
+- Supplied organization screenshot: current Oct 9-Nov 9 cycle, 752.47GB used
+  against 250GB, 502.47GB over; separate notice concerns the previous cycle
+  with grace through Nov 11. Official Supabase egress/billing/cost-control docs
+  verified; $45.22 is only the excess-price arithmetic if billable, not an invoice.
+- Existing configured Supabase DB statistics reset Sep 6, not the billing start.
+  Two full-payload Public query variants accumulated 1,253,493 calls and
+  95,614,014 returned rows at the second observation. Other earlier Public
+  variants also returned many rows; no monthly byte attribution is claimed.
+- Actual DB-side aggregate of the current exact projection SQL: CA120 rows /
+  1,386,029 serialized JSON bytes, US85 / 1,576,114. Full private field mappings
+  contribute 1,012,891 / 1,008,137 bytes (73.08% / 63.96%). Only aggregate sizes
+  downloaded. Git f76822d (Oct 9) added the full field mapping column; live
+  statistics prove that query variant is currently executing, but deployment
+  timing and its contribution to the previous billing cycle remain unverified.
+- Over 99.075126 seconds, the mapping-bearing query added 176 calls / 19,580
+  rows; country-list SQL +44 calls, latest-snapshot SQL +88 calls. At unchanged
+  CA120/US85 sizes, the unique inferred split is CA132/US44 calls, equivalent
+  to about 220.03GB/day of current JSON data. This is a short-window size/rate
+  estimate, not PostgreSQL wire bytes or Supabase billed bytes.
+- Code findings: public_common.py loads full approved payload and field mappings;
+  public_products.py filters/pages/selects detail after loading all country rows,
+  and computes country counts by loading every country. main.py Public reads
+  have no response cache headers or backend read cache; Public Next fetches
+  already request 300/900s revalidation, so cache existence is not disputed.
+  Direct API traffic bypasses that application fetch cache. Admin has 15s
+  visible-tab refresh but is not established as the dominant source. Local
+  process inspection found no running Node/Python application at observation.
+- Remedies for later implementation: reduce proof columns while retaining
+  acceptance_receipt_valid and unlimited-transaction evidence; scope detail reads
+  by ID, paginate only after eligibility is established; cache reusable validated
+  snapshot reads/counts with country/policy/version-aware invalidation. Inspect
+  hosted request logs and organization project/service breakdown before assigning
+  bots, visitors, backups, or another project as the request origin.
+- Verification: SQL-only initial observation, then explicit BEGIN READ ONLY
+  transactions and 12s statement timeouts; server read-only state confirmed on.
+  Bounded pg_stat_statements/table/activity reads, two count snapshots and
+  DB-side payload-size aggregates; Git history/source inspection, official docs,
+  UTF-8 and final diff checks. Evidence: ignored tmp/egress-diagnosis-20261012/.
+  No application changes, deployment, billing changes, DB data writes, collection
+  or statistics resets; no application builds/tests needed for this diagnosis.
+- Limits: Supabase management connection is unconfirmed and no management token
+  or Vercel CLI auth was found. Organization billing breakdown, hosted access
+  logs, requester identity and exact monthly billed contribution remain open.
+  Next: correlate Shared Pooler Egress and hosted access logs, implement scoped
+  read/cache fixes, then separately verify serving usage declines after release.
+
 ## 2026-10-11 - SwitchaBank header logo between the name segments
 
 - Header now reads Switcha, the existing opposing-arrow mark, Bank. Reused

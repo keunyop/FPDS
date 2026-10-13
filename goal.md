@@ -1,5 +1,39 @@
 # Admin pre-handover review and fixes
 
+## Supabase egress reduction - 2026-10-12
+
+Status: Complete for local implementation and read-only verification. Preserve prior diagnosis and all unrelated ownership.
+Scope: Authorized code fixes for Public DB egress amplification; no billing/data changes.
+Acceptance:
+- [x] Keep current financial eligibility, optional facts, privacy and country isolation.
+- [x] Reduce proof transfer, constrain detail reads, reuse bounded validated snapshot rows.
+- [x] Cover success/boundary/failure, cache isolation/expiry/concurrency and unchanged results.
+- [x] Compare exact before/after query sizes and eligible outputs using bounded read-only checks.
+- [x] Run affected suites, final diff/docs/UTF-8 checks and journal; distinguish serving deployment.
+Limits: No schema/data mutations, collection, paid research or billing changes.
+Runtime deployment remains separately authorized; prepare reviewable local implementation.
+
+Outcome: CA/US full query sizes reduced 71.94%/63.57%; all 205 validated rows
+are byte-value equivalent. Exact-ID details and 60s bounded read-only cache
+pass isolation/expiry/error/concurrency checks. API661/auth regression11 pass;
+foundation, syntax/UTF-8/references/diff reviewed. No runtime deployment or writes.
+
+## Supabase egress diagnosis - 2026-10-12
+
+Status: Complete for bounded diagnosis; request-origin attribution remains unverified. Preserve all other goals and ownership.
+Scope: Explain quota warning; inspect code and bounded read-only database statistics.
+Acceptance:
+- [x] Verify official egress, pricing and restriction semantics.
+- [x] Quantify large reads; distinguish measurements from hypotheses.
+- [x] Report prioritized remedies, evidence limits and actual verification; journal.
+Limits: No application/deployment/billing changes, collection, database mutations
+or statistics resets. Never disclose credentials.
+
+Outcome: Live full-country reads and oversized proof columns identified; a 99s
+window implies about 220GB/day at current JSON sizes, not billed wire bytes.
+Official policy, code/history, SQL counters/sizes and final diff/UTF-8 checked.
+Hosted request logs and organization billing breakdown were not accessible.
+
 ## SwitchaBank header logo placement - 2026-10-11
 
 Status: Complete for local header presentation; preserve all unrelated goals and unfinished ownership.

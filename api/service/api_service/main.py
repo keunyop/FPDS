@@ -1188,7 +1188,7 @@ async def public_products(
         page_size=page_size,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
+    with open_connection(settings, read_only=True) as connection:
         payload = load_public_products(connection, query=query)
     return _success(
         payload,
@@ -1367,7 +1367,7 @@ async def public_product_detail(
         page_size=1,
     ).filters
     settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
+    with open_connection(settings, read_only=True) as connection:
         payload = load_public_product_detail(connection, product_id=product_id, filters=filters)
     if payload is None:
         return _error(
@@ -1412,7 +1412,7 @@ async def public_filters(
         page_size=20,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
+    with open_connection(settings, read_only=True) as connection:
         payload = load_public_filters(
             connection,
             filters=query.filters,
@@ -1424,7 +1424,7 @@ async def public_filters(
 @app.get("/api/public/countries")
 async def public_countries(request: Request) -> JSONResponse:
     settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
+    with open_connection(settings, read_only=True) as connection:
         countries = load_available_public_countries(connection)
     return _success({"countries": countries}, request)
 
@@ -1457,7 +1457,7 @@ async def public_dashboard_summary(
         axis_preset=None,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
+    with open_connection(settings, read_only=True) as connection:
         payload = load_public_dashboard_summary(connection, query=query)
     return _success(payload, request, meta_extra={"locale": query.filters.locale})
 
@@ -1490,7 +1490,7 @@ async def public_dashboard_rankings(
         axis_preset=None,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
+    with open_connection(settings, read_only=True) as connection:
         payload = load_public_dashboard_rankings(connection, query=query)
     return _success(payload, request, meta_extra={"locale": query.filters.locale})
 
@@ -1524,7 +1524,7 @@ async def public_dashboard_scatter(
         axis_preset=axis_preset,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
+    with open_connection(settings, read_only=True) as connection:
         payload = load_public_dashboard_scatter(connection, query=query)
     return _success(payload, request, meta_extra={"locale": query.filters.locale})
 

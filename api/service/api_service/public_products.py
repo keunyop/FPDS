@@ -159,12 +159,13 @@ def load_public_product_detail(connection, *, product_id: str, filters: PublicQu
     if not snapshot:
         return None
 
+    normalized_product_id = product_id.strip()
     rows = load_public_projection_rows(
         connection,
         snapshot_id=str(snapshot["snapshot_id"]),
         country_code=filters.country_code,
+        product_id=normalized_product_id,
     )
-    normalized_product_id = product_id.strip()
     product_row = next(
         (row for row in rows if str(row.get("product_id")) == normalized_product_id),
         None,

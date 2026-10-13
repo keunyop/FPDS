@@ -39,6 +39,7 @@ class PublicProductDetailRouteTests(unittest.TestCase):
                 )
             )
 
+        mocked_open_connection.assert_called_once_with(main.app.state.settings, read_only=True)
         payload = json.loads(response.body)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(payload["error"]["code"], "not_found")
