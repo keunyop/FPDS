@@ -31,7 +31,7 @@ export const PUBLIC_SITE_STRUCTURED_DATA: JsonLd = {
       name: PUBLIC_SITE_NAME,
       description:
         "Compare reviewed deposit, credit card, and loan facts across banks.",
-      inLanguage: ["en-CA", "ko", "ja"],
+      inLanguage: ["en-CA", "ko", "ja", "fil"],
       publisher: {
         "@id": PUBLIC_SITE_ORIGIN + "/#organization"
       }

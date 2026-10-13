@@ -493,17 +493,17 @@ function formatCount(value: number, locale: string) {
 }
 
 function breadcrumbLabel(locale: string) {
-  return locale === "ko" ? "경로" : locale === "ja" ? "パンくず" : "Breadcrumb";
+  return locale === 'fil' ? "Lokasyon sa site" : (locale === "ko" ? "경로" : locale === "ja" ? "パンくず" : "Breadcrumb");
 }
 
 function paginationLabel(locale: string) {
-  return locale === "ko" ? "상품 결과 페이지" : locale === "ja" ? "商品結果ページ" : "Product result pages";
+  return locale === 'fil' ? "Mga pahina ng resulta" : (locale === "ko" ? "상품 결과 페이지" : locale === "ja" ? "商品結果ページ" : "Product result pages");
 }
 
 function previousPageLabel(locale: string) {
-  return locale === "ko" ? "이전 상품" : locale === "ja" ? "前の商品" : "Previous products";
+  return locale === 'fil' ? "Mga naunang produkto" : (locale === "ko" ? "이전 상품" : locale === "ja" ? "前の商品" : "Previous products");
 }
 
 function nextPageLabel(locale: string) {
-  return locale === "ko" ? "다음 상품" : locale === "ja" ? "次の商品" : "Next products";
+  return locale === 'fil' ? "Mga susunod na produkto" : (locale === "ko" ? "다음 상품" : locale === "ja" ? "次の商品" : "Next products");
 }

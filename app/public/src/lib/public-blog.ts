@@ -42,7 +42,7 @@ export function blogPostsForCountry(country: string) {
 export function blogHref(slug: BlogSlug | null, locale: string, country?: string) {
   const market = country ?? BLOG_POSTS.find(post => post.slug === slug)?.country ?? 'CA';
   const params = new URLSearchParams();
-  if (locale === 'ko' || locale === 'ja') params.set('locale', locale);
+  if (locale === 'ko' || locale === 'ja' || locale === 'fil') params.set('locale', locale);
   if (market !== 'CA') params.set('country_code', market);
   const query = params.toString();
   return `${slug ? `/blog/${slug}` : '/blog'}${query ? `?${query}` : ''}`;
@@ -58,12 +58,29 @@ export function blogCountryDestination(path: string, locale: string, country: st
   return post && country !== post.country ? blogHref(null, locale, country) : null;
 }
 export const BLOG_MARKET_COPY = {
+  fil: { empty: "Wala pang artikulo para sa bansang ito.", emptyBody: "Pumili ng ibang bansa para basahin ang mga artikulo tungkol sa mga bangko roon.", example: "Halimbawang pagkalkula · USD" },
   en: { empty: 'No articles for this country yet.', emptyBody: 'Choose another country to explore its banking articles.', example: 'Illustrative example · USD' },
   ko: { empty: '아직 이 국가의 글이 없습니다.', emptyBody: '다른 국가를 선택해 해당 국가의 은행 글을 확인하세요.', example: '이해를 위한 가상 예시 · USD' },
   ja: { empty: 'この国の記事はまだありません。', emptyBody: '別の国を選ぶと、その国の銀行に関する記事を読めます。', example: '仮定に基づく計算例 · USD' }
 } satisfies Record<PublicLocale, object>;
-export function blogMarketCopy(locale: string) { return BLOG_MARKET_COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
+export function blogMarketCopy(locale: string) { return BLOG_MARKET_COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en']; }
 export const BLOG_COPY = {
+  fil: {
+    nav: "Blog", heading: "Mas malinaw na pag-unawa sa iyong mga pagpipilian sa bangko.",
+    intro: "Paghahambing ng mga bangko, praktikal na halimbawa, at mahahalagang kondisyon na dapat basahin.",
+    scope: "Canada · Savings", latest: "Pinakabagong artikulo", read: "Basahin ang paghahambing",
+    minutes: "minutong pagbasa", by: "Mula sa SwitchaBank", published: "Inilathala", checked: "Sinuri ang mga sanggunian",
+    contents: "Sa artikulong ito", takeaway: "Mga pangunahing punto", comparison: "Tatlong account, tatlong bagay na dapat suriin",
+    compare: "Susunod na hakbang: ihambing ang aktuwal na kondisyon ng mga produkto", compareBody: "Tingnan ang mga savings account sa Canada, pumili ng mga available na produkto, at ihambing ang mga nakalathalang kondisyon. Suriin kung kailan huling na-verify ang bawat produkto at kumpirmahin ang detalye sa bangko.",
+    action: "Ihambing ang mga savings account", related: "Magbasa pa", sources: "Mga opisyal na sanggunian",
+    sourcesNote: "Sinuri sa petsang nakasaad sa itaas. Maaaring magbago ang mga bayad, alok, at kondisyon.",
+    editorial: "Paano ginawa ang artikulong ito", method: "Inilathala ng SwitchaBank. Gumamit ng AI sa pagsulat at pagsasalin, at sinuri ang nilalaman gamit ang mga naka-link na opisyal na sanggunian. Hindi ito sinuri ng isang independiyenteng eksperto sa pananalapi. Pangkalahatang impormasyon ito, hindi personal na payong pinansyal.",
+    correction: "May kailangang itama? Ipadala sa feedback ang pamagat ng artikulo at ang bahaging kailangang baguhin.",
+    disclosure: "Walang natatanggap na kabayaran ang SwitchaBank mula sa mga institusyong tinatalakay sa artikulong ito.",
+    faq: "Mga karaniwang tanong", checklist: "Bago mo ilipat ang iyong pera",
+    tableHeaders: ["Account", "Buwanang bayad", "Mga kondisyong nakaaapekto sa paghahambing"],
+    home: "Home", all: "Lahat ng artikulo", example: "Halimbawang pagkalkula · CAD"
+  },
   en: {
     nav: 'Blog', heading: 'A clearer view of your banking.',
     intro: 'Bank comparisons, practical examples, and the small print that makes a difference.',
@@ -113,4 +130,4 @@ export const BLOG_COPY = {
     home: 'ホーム', all: '記事一覧', example: '仮定に基づく計算例 · CAD'
   }
 } satisfies Record<PublicLocale, object>;
-export function blogCopy(locale: string) { return BLOG_COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
+export function blogCopy(locale: string) { return BLOG_COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en']; }

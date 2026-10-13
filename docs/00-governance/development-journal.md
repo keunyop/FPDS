@@ -1,5 +1,40 @@
 # FPDS Development Journal
 
+
+## 2026-10-13 - SwitchaBank Philippines selection and Filipino UI
+
+- Prepared PH in the shared desktop/mobile country option builder even before
+  first publication; zero-product labels stay explicit and published coverage
+  counts/maps remain factual. Added Public-only `fil`/`fil-PH` navigation, catalog,
+  detail, comparison/calculator, freshness, feedback and loading/error/empty copy.
+  Home PHP grouping requires explicit product PHP; no collection default/profile
+  or financial gate changed. Admin remains EN/KO/JA.
+- Public API reads/taxonomy/dashboard and feedback preserve `fil`. New migration
+  `0048_public_feedback_filipino.sql` expands only the feedback locale constraint,
+  preserving existing rows, active-country/product checks and retention. Release
+  migration, then API and Public. Keep the expanded constraint on a code rollback.
+- Source-derived names/conditions remain original; all 42 original EN/KO/JA copy
+  maps compare unchanged. Authored blog/guide detail falls back to English and
+  excludes Filipino editorial hreflang. Product-detail English canonical and
+  translated-UI noindex remain. Fixed a reproduced 390px long-action/comparison
+  overflow with wrapping buttons and shrinking cards, retaining 44px targets.
+- Verification: Public 117 and full independent API 666 tests pass; final lint,
+  typecheck and isolated production build pass. Browser core 116 completed checks,
+  then 50 focused checks after the overflow fix cover EN/KO/JA/fil at exact
+  390/768/1440px, detail/comparison/calculator, device save/delete, country/locale
+  controls, failed/empty country catalog, keyboard, error/404, feedback BFF/UI
+  retry and editorial metadata/fallback. Final focused run has zero browser
+  errors; three-width Home and 390px fixed comparison visually reviewed. A separate
+  streamed Filipino loading/reduced-motion browser check passes.
+- Disposable PostgreSQL 18 verifies pre-upgrade exclusion, upgrade, four accepted
+  and four rejected locales, original feedback, country/product constraints,
+  repeat application and failed-DDL transaction rollback; cluster stopped.
+  Strict UTF-8/JSON/changed-document references, foundation and diff checks pass.
+  Content-identical files retain original bytes. No shared/production DB write,
+  country activation, collection, publication or deployment. Next: normal review
+  and coordinated migration/API/Public release; Admin collection rules are outside
+  the confirmed request.
+
 ## 2026-10-12 - Public egress fixes with preserved financial validation
 
 - Reduced projection SQL to the complete unlimited-transaction evidence quote

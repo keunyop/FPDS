@@ -43,7 +43,7 @@ class PublicFeedbackRequest(BaseModel):
         "usability_issue",
     ]
     details: str | None = Field(default=None, max_length=2000)
-    locale: Literal["en", "ko", "ja"] = "en"
+    locale: Literal["en", "ko", "ja", "fil"] = "en"
     product_id: str | None = Field(default=None, min_length=1, max_length=120)
 
 

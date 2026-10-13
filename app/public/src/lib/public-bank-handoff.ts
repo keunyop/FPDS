@@ -1,11 +1,12 @@
 import type { PublicProduct } from './public-api.ts';
 
 const COPY = {
+  fil: { title: "Bago ka pumunta sa bangko", action: "Tingnan ang pinakabagong kondisyon sa bangko", external: "Ibang website · bagong tab", bank: "Kumpirmahin sa bangko", unavailable: "Walang opisyal na link", currency: "Pera", domain: "Opisyal na domain", minimumDeposit: "Minimum na deposito", minimumBalance: "Minimum na balanse", minimum: "Minimum na halaga", waiver: "Pag-waive ng bayad", withdrawal: "Mga limitasyon sa pag-withdraw", penalty: "Multa sa maagang pag-withdraw", redeemable: "Maaaring i-withdraw bago mag-mature", nonRedeemable: "Hindi maaaring i-withdraw bago mag-mature", term: "Tagal", days: "araw", monthlyFee: "Buwanang bayad", annualFee: "Taunang bayad" },
   en: { title: 'Before you visit the bank', action: 'Check latest terms at bank', external: 'External site · new tab', bank: 'Check with the bank', unavailable: 'Official link unavailable', currency: 'Currency', domain: 'Official domain', minimumDeposit: 'Minimum deposit', minimumBalance: 'Minimum balance', minimum: 'Minimum amount', waiver: 'Fee waiver', withdrawal: 'Withdrawal restrictions', penalty: 'Early withdrawal penalty', redeemable: 'Redeemable', nonRedeemable: 'Non-redeemable', term: 'Term', days: 'days', monthlyFee: 'Monthly fee', annualFee: 'Annual fee' },
   ko: { title: '은행 방문 전 확인', action: '은행에서 최신 조건 확인', external: '외부 사이트 · 새 탭', bank: '은행에서 확인', unavailable: '공식 링크 미확인', currency: '통화', domain: '공식 도메인', minimumDeposit: '최소 예치금', minimumBalance: '최소 잔액', minimum: '최소 금액', waiver: '수수료 면제 조건', withdrawal: '인출 제한', penalty: '중도 인출 위약금', redeemable: '중도해지 가능', nonRedeemable: '중도해지 불가', term: '만기', days: '일', monthlyFee: '월 수수료', annualFee: '연회비' },
   ja: { title: '銀行へ進む前に確認', action: '銀行で最新条件を確認', external: '外部サイト・新しいタブ', bank: '銀行で確認', unavailable: '公式リンク未確認', currency: '通貨', domain: '公式ドメイン', minimumDeposit: '最低預入額', minimumBalance: '最低残高', minimum: '最低金額', waiver: '手数料免除条件', withdrawal: '引出制限', penalty: '中途解約ペナルティ', redeemable: '中途解約可', nonRedeemable: '中途解約不可', term: '期間', days: '日', monthlyFee: '月額手数料', annualFee: '年会費' }
 } as const;
-export function bankHandoffCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
+export function bankHandoffCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en']; }
 
 /** Only approved Public destinations enter this helper; syntax is not bank verification. */
 export function officialDestination(value: string | null | undefined) {
@@ -23,7 +24,7 @@ export function officialDestination(value: string | null | undefined) {
 export type HandoffFact = { key: string; label: string; value: string };
 function amount(value: number | null | undefined, currency: string, locale: string) {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || !/^[A-Z]{3}$/.test(currency)) return null;
-  return currency + ' ' + new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : 'en-CA',
+  return currency + ' ' + new Intl.NumberFormat(locale === 'fil' ? "fil-PH" : (locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : 'en-CA'),
     { maximumFractionDigits: 2 }).format(value);
 }
 export function handoffConditions(product: PublicProduct, locale: string): HandoffFact[] {

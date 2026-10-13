@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { GuideEditorial } from '@/components/fpds/public/guide-editorial';
@@ -19,13 +19,14 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (!isGuideSlug(slug)) return { robots: { index: false, follow: true } };
   const query = await searchParams;
   const locale = normalizePublicLocale(typeof query.locale === 'string' ? query.locale : '');
-  return buildPublicPageMetadata({ title: guideCopy(locale).topics[slug], description: guideContent(slug, locale).intro, path: `/guides/${slug}`, countryCode: 'CA', locale, index: isGuideIndexableQuery(query) });
+  return buildPublicPageMetadata({ title: guideCopy(locale).topics[slug], description: guideContent(slug, locale).intro, path: `/guides/${slug}`, countryCode: 'CA', locale, index: locale !== "fil" && isGuideIndexableQuery(query) });
 }
 export default async function GuidePage({ params, searchParams }: Props) {
   const { slug } = await params;
   if (!isGuideSlug(slug)) notFound();
   const query = await searchParams;
   const locale = normalizePublicLocale(typeof query.locale === 'string' ? query.locale : '');
+  if (locale === "fil") redirect(guideHref(slug, "en"));
   const copy = guideCopy(locale);
   const content = guideContent(slug, locale);
   return <main className="mx-auto w-full min-w-0 max-w-4xl px-4 py-7 md:px-6 md:py-10">

@@ -1,4 +1,37 @@
 const COPY = {
+  fil: {
+    "title": "Iyong paghahambing",
+    "view": "Tingnan ang paghahambing",
+    "add": "Idagdag sa paghahambing",
+    "selected": "Naidagdag sa paghahambing",
+    "otherBanks": "Kaparehong uri sa ibang bangko",
+    "share": "Kopyahin ang link",
+    "copied": "Nakopya na ang link",
+    "copyFailed": "Kopyahin ang link na ito",
+    "save": "I-save sa device na ito",
+    "saved": "Naka-save sa device na ito",
+    "openSaved": "Buksan ang naka-save na paghahambing",
+    "deleteSaved": "Burahin ang naka-save na paghahambing",
+    "deleted": "Nabura na ang naka-save na paghahambing",
+    "local": "Sa device na ito lamang naka-save, hanggang burahin mo ito.",
+    "storageError": "Hindi available ang storage ng device. Maaari mo pa ring kopyahin ang link.",
+    "changed": "Nagbago ang mga kondisyon",
+    "missing": "Hindi na available",
+    "error": "Hindi masuri ang produktong ito",
+    "loading": "Sinusuri ang pinakabagong kondisyon…",
+    "retry": "Subukan muli",
+    "empty": "Pumili ng hanggang apat na produkto para ihambing.",
+    "browse": "Tingnan ang mga produkto",
+    "clear": "Alisin",
+    "remove": "Alisin",
+    "count": "{count} ang napili",
+    "mixed": "Magkaiba ang uri o pera. Mga indibidwal na detalye lamang ang maaaring ihambing; hindi maaaring pagsamahin sa isang pagkalkula.",
+    "conditions": "Magkaiba o hindi pa kumpirmado ang batayan ng rate o tagal. Hindi maaaring ihambing o kalkulahin ang mga rate na parang magkapareho ang kondisyon.",
+    "invalid": "Hindi balido ang link ng paghahambing. Pumili ng hanggang apat na produkto.",
+    "currency": "Pera",
+    "refresh": "Suriin ang pinakabago",
+    "limit": "Hanggang apat na produkto."
+  },
   "en": {
     "title": "Your comparison",
     "view": "View comparison",
@@ -99,4 +132,4 @@ const COPY = {
     "limit": "選択できるのは4件までです。"
   }
 } as const;
-export function comparisonCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
+export function comparisonCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en']; }

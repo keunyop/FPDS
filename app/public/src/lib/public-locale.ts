@@ -1,4 +1,6 @@
-export type PublicLocale = "en" | "ko" | "ja";
+export const PUBLIC_LOCALES = ["en", "ko", "ja", "fil"] as const;
+export type PublicLocale = typeof PUBLIC_LOCALES[number];
+export type EditorialLocale = Exclude<PublicLocale, "fil">;
 
 type PublicDesignCopy = {
   asOf: string;
@@ -227,6 +229,221 @@ type PublicMessages = {
 };
 
 const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
+  fil: {
+    localeName: "Filipino",
+    shell: {
+      brand: "SwitchaBank",
+      tagline: "Mas malinaw na paghahambing. Mas maingat na pagpili ng bangko."
+    },
+    nav: {
+      dashboard: "Home",
+      products: "Mga deposito",
+      methodology: "Paano namin sinusuri ang datos",
+      loan: "Mga loan",
+      card: "Mga credit card",
+      localeLabel: "Wika",
+      primaryLabel: "Pangunahing menu",
+      footerLabel: "Menu sa ibaba ng pahina"
+    },
+    common: {
+      active: "Aktibo",
+      all: "Lahat",
+      applyFilters: "Ilapat",
+      clearAllFilters: "Alisin lahat",
+      clearFilters: "Alisin",
+      changedOn: "Binago",
+      noDate: "Walang petsa",
+      noOptions: "Walang pagpipilian",
+      noRecentChange: "Walang kamakailang pagbabago",
+      noSuccessfulSnapshot: "Wala pang available na nakalathalang buod ng datos.",
+      notDisclosed: "Walang impormasyon",
+      bankPage: "Tingnan sa bangko",
+      more: "Higit pa",
+      open: "Buksan",
+      pageLabel: "Pahina",
+      previous: "Nakaraan",
+      next: "Susunod",
+      verifiedOn: "Na-verify"
+    },
+    grid: {
+      pageTitle: "Ihambing ang mga bank account at GIC",
+      pageDescription: "Ihambing ang mga na-verify na rate, bayad, at minimum na kailangan sa mga checking account, savings account, at GIC ng iba't ibang bangko.",
+      title: "Ihambing ang mga deposito ng iba't ibang bangko",
+      description: "Ihambing ang mga rate, bayad, at minimum na kailangan gamit ang pinakabagong nakalathalang datos.",
+      currentScope: "Kasalukuyang saklaw",
+      productCount: "{count} produkto",
+      snapshotUpdated: "Buod ng datos: {date}",
+      primaryFilter: "Pangunahin",
+      banks: "Mga bangko",
+      productTypes: "Mga uri ng produkto",
+      targetTags: "Mga kategorya ng customer",
+      feeBucket: "Bayad",
+      minimumBalance: "Min. na balanse",
+      minimumDeposit: "Min. na deposito",
+      termBucket: "Tagal",
+      sortBy: "Ayusin ayon sa",
+      direction: "Pagkakasunod",
+      resultSummary: "Mga resulta",
+      searchConditions: "Mga kondisyon ng paghahanap",
+      noActiveFilters: "Lahat ng available na produkto",
+      noResultTitle: "Walang produktong tumugma sa mga kondisyon.",
+      noResultBody: "Alisin ang mga filter o bumalik sa Home para makakita ng mas maraming produkto.",
+      retryTitle: "Hindi ma-load ang mga produkto.",
+      retryBody: "Hindi makakonekta sa serbisyo ng datos.",
+      retryButton: "I-load muli ang mga produkto",
+      openDashboard: "Home",
+      metricMonthlyFee: "Buwanang bayad",
+      metricMinBalance: "Min. na balanse",
+      metricMinDeposit: "Min. na deposito",
+      metricDisplayRate: "Rate ng interes",
+      metricTerm: "Tagal",
+      metricKeyDetail: "Pangunahing detalye",
+      metricLastChange: "Huling pagbabago",
+      metricRateNote: "Paliwanag sa rate",
+      ascending: "Pataas",
+      descending: "Pababa",
+      viewMode: "Tingnan",
+      gridView: "Grid",
+      listView: "Listahan",
+      sortDisplayRate: "Rate ng interes",
+      sortAnnualFee: "Taunang bayad",
+      sortMonthlyFee: "Buwanang bayad",
+      sortMinimumBalance: "Minimum na balanse",
+      sortMinimumDeposit: "Minimum na deposito",
+      sortLastChange: "Huling pagbabago",
+      sortBankName: "Bangko",
+      sortProductName: "Produkto",
+    },
+    detail: {
+      backToList: "Bumalik sa listahan ng mga deposito",
+      compareAtGlance: "Mabilis na paghahambing",
+      decisionSummary: "Buod ng mahahalagang detalye",
+      disclosureTitle: "Mahalagang paalala",
+      keyConditions: "Mga pangunahing kondisyon",
+      officialPage: "Buksan ang opisyal na website ng bangko",
+      productFacts: "Mga detalye ng produkto",
+      similarProducts: "Iba pang produkto ng bangkong ito",
+      sourceLanguage: "Wika ng sanggunian",
+      termRates: "Mga rate ayon sa tagal",
+      whatToCheck: "Mga dapat suriin"
+    },
+    dashboard: {
+      pageTitle: "Ihambing ang mga bangko at produktong pinansyal",
+      pageDescription: "Ihambing ang mga na-verify na deposito, credit card, at loan gamit ang pinakabagong nakalathalang datos ng SwitchaBank.",
+      title: "Ihambing ang mga bangko at produkto. Pumili nang mas maingat.",
+      description: "",
+      marketGreeting: "Ihambing ang {products} deposito mula sa {banks} bangko gamit ang pinakabagong nakalathalang datos.",
+      kpiSubtitle: "Buod ng mga deposito sa merkado",
+      composition: "Komposisyon ng merkado",
+      compositionSubtitle: "Bahagi ng bawat uri ng deposito sa kasalukuyang datos.",
+      productsByType: "Mga produkto ayon sa uri",
+      comparisonMap: "Tsart ng paghahambing",
+      comparisonSubtitle: "Pumili ng isang uri ng produkto para maghambing ng magkakatulad na kondisyon.",
+      coverageTable: "Talahanayan ng saklaw",
+      coverageSubtitle: "Mga nakalathalang produktong kasama sa kasalukuyang datos.",
+      dataNotes: "Mga paalala tungkol sa datos",
+      dataNotesBody: "Mga nakalathalang pinagsama-samang datos ang ginagamit sa mga sukatan. Hindi isinasama sa kaugnay na paghahambing ang mga produktong kulang sa kinakailangang numerong halaga.",
+      freshness: "Pagiging napapanahon",
+      openProducts: "Tingnan ang mga deposito",
+      noActiveFilters: "Walang napiling filter.",
+      noRankingWidgets: "Walang produktong maaaring iranggo sa saklaw na ito.",
+      chartUnavailable: "Kulang ang mga produktong pumasa sa mga kondisyon para sa tsart na ito.",
+      chartSingleTypeHint: "Pumili ng isang uri ng produkto para makita ang tsart ng paghahambing.",
+      visibleProducts: "Mga ipinapakitang produkto",
+      activeProducts: "aktibong produkto",
+      banksInScope: "Mga bangko",
+      peakRate: "Pinakamataas na rate ng interes",
+      topInterestRateTitle: "5 pinakamataas na rate ng interes",
+      rateSnapshotsLabel: "Buod ng mga rate ng deposito at loan",
+      depositTopTitle: "Nangungunang 5 deposito",
+      depositTopSubtitle: "Mga buwanang bayad o maihahambing na rate sa napiling uri ng produkto.",
+      depositTopEmpty: "Wala pang depositong may nakalathalang numerong rate sa saklaw na ito.",
+      depositTopUnavailable: "Hindi ma-load ang mga deposito sa ngayon.",
+      moreDeposits: "Iba pang deposito",
+      loanTopTitle: "Nangungunang 5 loan",
+      loanTopSubtitle: "Mas mababang maihahambing na rate para sa napiling mga kondisyon.",
+      loanTopEmpty: "Walang maihahambing na rate ng loan para sa mga kondisyong ito.",
+      loanTopUnavailable: "Hindi ma-load ang mga rate ng loan sa ngayon.",
+      moreLoans: "Iba pang loan",
+      openInProducts: "Tingnan sa listahan ng mga produkto",
+      apiUnavailableTitle: "Hindi ma-load ang Home.",
+      apiUnavailableBody: "Pansamantalang hindi available ang pinakabagong nakalathalang datos.",
+      retryDashboard: "Subukan muli",
+      mixedMarket: "Lahat ng produkto"
+    },
+    purpose: {
+      eyebrow: "Magsimula sa iyong layunin",
+      title: "Ano ang gusto mong ihambing?",
+      everydayTitle: "Bawasan ang gastos sa pang-araw-araw na banking",
+      everydayBody: "Magsimula sa mga checking account, nakaayos mula sa pinakamababang buwanang bayad.",
+      everydayAction: "Ihambing ang mga account na mababa ang bayad",
+      savingsTitle: "Palaguin ang ipon gamit ang malinaw na rate",
+      savingsBody: "Magsimula sa mga savings account, nakaayos ayon sa nakalathalang rate.",
+      savingsAction: "Ihambing ang mga savings rate",
+      termTitle: "Pumili ng depositong may takdang tagal",
+      termBody: "Magsimula sa mga GIC at time deposit, nakaayos ayon sa nakalathalang rate.",
+      termAction: "Ihambing ang mga rate ayon sa tagal",
+      lowEntryTitle: "Magsimula sa mas mababang minimum na halaga",
+      lowEntryBody: "Tingnan ang mga produkto ayon sa minimum na balanse o deposito na kailangan.",
+      lowEntryAction: "Ihambing ang mga minimum na halaga"
+    },
+    compare: {
+      eyebrow: "Magkatabing paghahambing",
+      title: "Maghambing ng hanggang 4 na produkto",
+      subtitle: "Pumili ng mga produkto para ihambing ang mga available na nakalathalang detalye.",
+      select: "Ihambing",
+      selected: "Napili",
+      selectedCount: "{count}/{limit} ang napili",
+      limit: "Hanggang 4 na produkto ang puwedeng ihambing nang sabay.",
+      clear: "Alisin",
+      remove: "Alisin",
+      emptyTitle: "Wala ka pang napiling produkto.",
+      emptyBody: "Pindutin ang Ihambing sa isang produkto para makita nang magkatabi ang mga nakalathalang detalye. Hindi tinataya ng SwitchaBank kung kwalipikado ka at hindi ito nagsusumite ng aplikasyon.",
+      tableProduct: "Produkto",
+      tableWhy: "Bakit ihambing",
+      entryAmount: "Minimum na halagang kailangan",
+      application: "Pag-apply",
+      officialPage: "Opisyal na website",
+      reasonNoMonthlyFee: "Nakalathalang walang buwanang bayad.",
+      reasonFeeKnown: "Available ang buwanang bayad para sa direktang paghahambing ng gastos.",
+      reasonRateKnown: "May nakalathalang rate na puwedeng ihambing.",
+      reasonTermRate: "Parehong available ang tagal at nakalathalang rate.",
+      reasonLowEntry: "Available ang minimum na balanse o deposito para ihambing ang halagang kailangan.",
+      reasonFallback: "May mga nakalathalang detalyeng maaaring ihambing."
+    },
+    methodology: {
+      pageTitle: "Paraan ng pagsusuri ng datos",
+      pageDescription: "Paano sinusuri, ina-update, at inihahambing ng SwitchaBank ang mga nakalathalang detalye ng produkto ng bangko.",
+      title: "Paano namin sinusuri ang datos",
+      description: "Ano ang kasama, hindi kasama, at maaaring wala sa nakalathalang buod ng datos.",
+      sections: [
+        {
+          title: "Pinagmulan ng datos",
+          body: "Ginagamit ng mga pahina ang pinakahuling matagumpay na buod ng nakalathalang datos, hindi ang live na website ng bangko."
+        },
+        {
+          title: "Mga kondisyong kailangan para sa paghahambing",
+          body: "Ipinapakita lamang ang rate, bayad, halaga, o tagal kapag available ang na-verify na impormasyon para rito."
+        },
+        {
+          title: "Teksto ng produkto",
+          body: "Nananatili sa orihinal na wika ang mga pangalan ng produkto at mga kondisyong mula sa sanggunian."
+        },
+        {
+          title: "Saklaw ng impormasyong ipinapakita",
+          body: "Hindi inilalantad sa SwitchaBank ang orihinal na ebidensya, mga sipi mula sa sanggunian, at panloob na tala ng pagsusuri."
+        },
+        {
+          title: "Paghahambing at pagraranggo",
+          body: "Na-verify at maihahambing na mga numerong halaga lamang ang ginagamit sa pagraranggo. Hindi isinasama o tinatantya ang mga halagang wala."
+        },
+        {
+          title: "Pagiging napapanahon at pag-verify",
+          body: "Magkahiwalay ang pagbuo ng buod ng datos at ang huling pagsusuri ng bawat produkto. Hindi muling sinusuri ang impormasyon ng bangko kapag binuo muli ang buod. Kailangang muling suriin ang savings, GIC/CD, at mga loan pagkalipas ng 7 araw, at nag-e-expire ang pag-verify pagkalipas ng 30 araw. Para sa checking account at mga credit card, 30 at 90 araw ang ginagamit. Mga takdang panahon ito ng pagsusuri, hindi garantiya kung gaano katagal balido ang rate. Hindi ibig sabihin ng babala na itinigil na ang produkto. Kumpirmahin ang kasalukuyang kondisyon sa bangko."
+        }
+      ]
+    }
+  },
   en: {
     localeName: "English",
     shell: {
@@ -875,6 +1092,42 @@ const PUBLIC_MESSAGES: Record<PublicLocale, PublicMessages> = {
 };
 
 const PUBLIC_DESIGN_COPY: Record<PublicLocale, PublicDesignCopy> = {
+  fil: {
+    asOf: "Batay sa datos noong",
+    availableFacts: "Mga available na detalye ng produkto",
+    compareBoundary: "Naghahambing ang SwitchaBank ng mga nakalathalang detalye. Ikaw pa rin ang pipili ng produkto.",
+    compareDifferences: "Binibigyang-diin lamang ang pagkakaiba kapag may nakalathalang impormasyon para rito.",
+    coverage: "Kasalukuyang saklaw",
+    cardCoverage: "Mga credit card",
+    depositCoverage: "Mga checking account, savings account, at GIC",
+    evidenceBoundary: "Nananatiling pribado ang orihinal na ebidensya at panloob na tala ng pagsusuri.",
+    fresh: "Available ang buod ng datos",
+    freshness: "Pagiging napapanahon ng datos",
+    homeBody: "Ihambing nang magkatabi ang mga rate, bayad, at pangunahing kondisyon. Bago lumipat, kumpirmahin ang pinakabagong detalye sa bangko.",
+    homeKicker: "Na-verify na nakalathalang datos ng produkto",
+    homeTitle: "Ihambing ang mga bangko at produkto. Pumili nang mas maingat.",
+    loanCoverage: "Mga housing loan, personal loan, at line of credit",
+    methodologyIntro: "Paano nagiging maihahambing na detalye ang opisyal na impormasyon ng produkto, at ano ang saklaw ng SwitchaBank.",
+    methodologySteps: [
+      { label: "01", title: "Opisyal na sanggunian", body: "Nagsisimula ang impormasyon sa mga opisyal na pampublikong sanggunian ng institusyon." },
+      { label: "02", title: "Na-verify na tala", body: "Na-verify na nakalathalang impormasyon lamang ang isinasama sa tala para sa paghahambing." },
+      { label: "03", title: "Buod ng nakalathalang datos", body: "Ginagamit sa lahat ng pahina ang pinakahuling matagumpay na buod ng nakalathalang datos." },
+      { label: "04", title: "Sarili mong pagsusuri", body: "Maaaring magbago ang mga rate at kondisyon. Kumpirmahin muna sa opisyal na website ng institusyon bago magpasya." }
+    ],
+    monthlyPayment: "Buwanang hulog",
+    officialRecord: "Opisyal na detalye ng produkto",
+    publicSnapshot: "Buod ng nakalathalang datos",
+    recordPath: "Mula sa sanggunian hanggang sa iyong pagpipilian",
+    recordPathBody: "Iisang proseso ng pagsusuri ang sinusunod sa bawat paghahambing.",
+    reviewedRecord: "Mga na-verify na detalye",
+    securityRequirement: "Kailangang collateral",
+    snapshotCoverage: "produkto mula sa",
+    sourceChecked: "Available ang opisyal na website",
+    sourceLanguage: "Wika ng sanggunian",
+    stale: "Kailangang i-update ang buod ng datos",
+    unavailable: "Walang available na buod ng datos",
+    verified: "Na-verify na tala"
+  },
   en: {
     asOf: "As of",
     availableFacts: "Available product facts",
@@ -1005,6 +1258,21 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
       coverage: designCopy.depositCoverage,
     };
   }
+  if (normalizePublicLocale(locale) === "fil") {
+    return catalog === "card" ? {
+      pageTitle: "Ihambing ang mga credit card",
+      pageDescription: "Ihambing ang mga na-verify na taunang bayad at rate ng interes sa pagbili ng mga credit card ng iba't ibang bangko.",
+      title: "Ihambing ang mga credit card ng iba't ibang bangko",
+      description: "Ihambing ang taunang bayad at rate ng interes sa pagbili gamit ang pinakabagong nakalathalang datos.",
+      coverage: designCopy.cardCoverage
+    } : {
+      pageTitle: "Ihambing ang mga loan at line of credit",
+      pageDescription: "Ihambing ang mga na-verify na rate at pangunahing kondisyon ng housing loan, personal loan, at line of credit ng iba't ibang bangko.",
+      title: "Ihambing ang mga loan ng iba't ibang bangko",
+      description: "Ihambing ang mga rate ng interes at pangunahing kondisyon ng loan gamit ang pinakabagong nakalathalang datos.",
+      coverage: designCopy.loanCoverage
+    };
+  }
   if (catalog === "card") {
     if (normalizePublicLocale(locale) === "ko") {
       return {
@@ -1060,7 +1328,7 @@ export function getPublicCatalogCopy(locale: string, catalog: "deposit" | "card"
 }
 
 export function normalizePublicLocale(locale: string): PublicLocale {
-  return locale === "ko" || locale === "ja" ? locale : "en";
+  return locale === "ko" || locale === "ja" || locale === "fil" ? locale : "en";
 }
 
 type PublicDiscoveryCopy = {
@@ -1080,6 +1348,16 @@ type PublicInformationNoticeCopy = {
 };
 
 const PUBLIC_DISCOVERY_COPY: Record<PublicLocale, PublicDiscoveryCopy> = {
+  fil: {
+    allProductsLoaded: "Na-load na ang lahat ng {count} produkto.",
+    loadMoreError: "Hindi ma-load ang mga karagdagang produkto.",
+    loadingMore: "Nilo-load ang mga karagdagang produkto…",
+    retryLoadMore: "Subukan muli",
+    searchChip: "Paghahanap: {query}",
+    searchLabel: "Maghanap ng bangko o produkto",
+    searchPlaceholder: "Pangalan ng bangko o produkto",
+    updatingResults: "Ina-update ang mga resulta…"
+  },
   en: {
     allProductsLoaded: "All {count} products are loaded.",
     loadMoreError: "More products could not be loaded.",
@@ -1113,6 +1391,14 @@ const PUBLIC_DISCOVERY_COPY: Record<PublicLocale, PublicDiscoveryCopy> = {
 };
 
 const PUBLIC_INFORMATION_NOTICE_COPY: Record<PublicLocale, PublicInformationNoticeCopy> = {
+  fil: {
+    title: "Paalala sa paggamit ng impormasyon",
+    paragraphs: [
+      "Kinokolekta at inaayos ang impormasyon sa pahinang ito mula sa mga pampublikong sanggunian sa tulong ng AI. Hindi ito patalastas ng produktong pinansyal.",
+      "Malayang ginawa ng SwitchaBank ang nilalamang ito para magbigay ng impormasyon, nang walang kabayaran mula sa mga institusyong ipinapakita. Sinisikap naming panatilihin itong napapanahon.",
+      "Maaaring magbago ang mga rate, bayad, kwalipikasyon, at iba pang kondisyon sa oras ng pag-apply mo. Bago mag-apply, kumpirmahin ang impormasyon at kondisyon ng produkto sa opisyal na website ng institusyon."
+    ]
+  },
   en: {
     title: "Information notice",
     paragraphs: [
@@ -1156,6 +1442,13 @@ type PublicCoverageCopy = {
 };
 
 const PUBLIC_COVERAGE_COPY: Record<PublicLocale, PublicCoverageCopy> = {
+  fil: {
+    title: "Kasalukuyang saklaw ng pangongolekta",
+    description: "Mga nakalathalang produkto at bangko ayon sa bansa",
+    products: "{count} produkto",
+    banks: "{count} bangko",
+    unavailable: "Pansamantalang hindi available ang saklaw ng datos ayon sa bansa."
+  },
   en: {
     title: "Current collection coverage",
     description: "Published products and banks by country",
@@ -1216,6 +1509,37 @@ type PublicRecommendationCopy = {
 };
 
 const PUBLIC_RECOMMENDATION_COPY: Record<PublicLocale, PublicRecommendationCopy> = {
+  fil: {
+    title: "Humanap ng mas magandang produkto",
+    description: "Piliin muna ang produktong mayroon ka na.",
+    bankLabel: "Bangko",
+    bankPlaceholder: "Lahat ng bangko",
+    productTypeLabel: "Uri ng produkto",
+    productTypePlaceholder: "Lahat ng uri ng produkto",
+    productSearchLabel: "Pangalan ng produkto",
+    productSearchPlaceholder: "Maghanap ayon sa pangalan ng produkto",
+    loadingProducts: "Nilo-load ang mga produkto…",
+    loadingMoreProducts: "Nilo-load ang mga karagdagang produkto…",
+    loadProductsError: "Hindi ma-load ang mga produkto.",
+    noProducts: "Walang nahanap na produkto.",
+    noProductMatches: "Walang tumugmang produkto.",
+    submit: "Humanap ng mas magandang produkto",
+    reset: "I-reset",
+    retryProducts: "Subukan muli",
+    loadingRecommendations: "Inihahambing…",
+    currentProduct: "Aking produkto",
+    metricUnavailable: "Walang available na halagang puwedeng ihambing. Hindi kasama sa paghahambing ng rate ang mga saklaw ng rate, dagdag o bawas sa reference rate, rate na may kondisyon, at mga promo.",
+    recommendationsError: "Hindi maihambing ang mga produkto. Subukan muli.",
+    resultTitle: "Mas maganda sa sukatang ito",
+    resultBasis: "{type} · {basis}",
+    noImprovement: "Walang kaparehong uri ng produkto na mas maganda batay sa {basis}.",
+    viewDetails: "Tingnan ang detalye",
+    metricLabels: { annualFee: "mas mababang taunang bayad", higherRate: "mas mataas na rate ng interes", lowerRate: "mas mababang rate ng interes", monthlyFee: "mas mababang buwanang bayad" },
+    rateHigher: "+{value} percentage point",
+    rateLower: "mas mababa ng {value} percentage point",
+    monthlyFeeLower: "mas mababa ng {value} bawat buwan",
+    annualFeeLower: "mas mababa ng {value} bawat taon"
+  },
   en: {
     title: 'Find a better product',
     description: 'Start with a product you already have.',
@@ -1353,6 +1677,41 @@ type PublicFeedbackCopy = {
 };
 
 const PUBLIC_FEEDBACK_COPY: Record<PublicLocale, PublicFeedbackCopy> = {
+  fil: {
+    cancel: "Kanselahin",
+    categoryLabel: "Ano ang gusto mong iulat?",
+    categoryPlaceholder: "Pumili ng dahilan",
+    categoryLabels: {
+      accessibility_issue: "Problema sa accessibility",
+      broken_link: "Hindi gumagana ang opisyal na link",
+      content_issue: "Problema sa nilalaman",
+      feature_suggestion: "Mungkahi para sa isang feature",
+      incorrect_product_details: "Mali ang detalye o kwalipikasyon ng produkto",
+      incorrect_rate_or_fee: "Mali ang rate o bayad",
+      missing_information: "May kulang na mahalagang impormasyon",
+      other: "Iba pa",
+      outdated_information: "Luma na ang impormasyon",
+      usability_issue: "Problema sa paggamit ng site",
+    },
+    close: "Isara",
+    detailsCount: "{count}/2000",
+    detailsLabel: "Mga detalye (opsyonal)",
+    detailsPlaceholder: "Magdagdag ng impormasyong makatutulong para maunawaan namin ang problema.",
+    error: "Hindi naipadala ang iyong feedback. Subukan muli.",
+    noDetails: "Walang karagdagang detalye",
+    privacyNote: "Hindi kasama ang iyong pagkakakilanlan sa ulat. Huwag maglagay ng personal na impormasyon o detalye ng account. Hindi kami makasasagot sa bawat ulat.",
+    productLabel: "Produkto",
+    productTitle: "Mag-ulat ng mali sa produkto",
+    siteTitle: "Magpadala ng feedback",
+    submit: "Ipadala",
+    submittedCategory: "Kategorya",
+    submittedDetails: "Mga detalye",
+    submitting: "Ipinapadala…",
+    successBody: "Natanggap namin ang sumusunod na feedback.",
+    successTitle: "Salamat",
+    triggerProduct: "Mag-ulat ng mali",
+    triggerSite: "Feedback",
+  },
   en: {
     cancel: "Cancel",
     categoryLabel: "What would you like to report?",
@@ -1467,6 +1826,8 @@ export function getPublicFeedbackCopy(locale: string): PublicFeedbackCopy {
 
 export function getIntlLocale(locale: string) {
   switch (normalizePublicLocale(locale)) {
+    case "fil":
+      return "fil-PH";
     case "ko":
       return "ko-KR";
     case "ja":

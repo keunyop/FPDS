@@ -16,6 +16,11 @@ type RateProduct = {
 };
 
 const COPY = {
+  fil: {
+    absolute: "Rate ng interes", range: "Saklaw / talaan ng mga rate", reference: "Reference rate + / − margin",
+    conditional: "Rate na may kondisyon / diskwento", promotional: "Rate ng promo", unknown: "Mga detalye ng rate",
+    unavailable: "Walang maihahambing na buong rate", notDisclosed: "Hindi nakasaad"
+  },
   en: {
     absolute: 'Interest rate', range: 'Rate range / schedule', reference: 'Reference rate + / − margin',
     conditional: 'Conditional rate / discount', promotional: 'Promotional rate', unknown: 'Rate details',
@@ -34,7 +39,7 @@ const COPY = {
 } as const;
 
 function copyFor(locale: string) {
-  return COPY[locale === 'ko' || locale === 'ja' ? locale : 'en'];
+  return COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en'];
 }
 
 export function getComparablePublicRate(product: RateProduct): number | null {

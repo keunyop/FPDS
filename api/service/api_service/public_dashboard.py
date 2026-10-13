@@ -34,6 +34,13 @@ RANKING_PRIORITY_BY_SCOPE = {
 }
 
 SUMMARY_LABELS = {
+    "fil": {
+        "total_active_products": "Kabuuang aktibong produkto", "banks_in_scope": "Mga bangkong kasama",
+        "highest_display_rate": "Pinakamataas na rate ng interes", "recently_changed_products_30d": "Kamakailang binago (30 araw)",
+        "products_by_bank": "Mga produkto ayon sa bangko", "products_by_product_type": "Mga produkto ayon sa uri",
+        "rate_scope_note": "Hindi kasama ang mga produktong walang datos ng rate ng interes.",
+        "recent_scope_note": "Saklaw nito ang 30 araw bago ang pinakahuling pag-update ng buod ng datos."
+    },
     "en": {
         "total_active_products": "Total Active Products",
         "banks_in_scope": "Banks In Scope",
@@ -67,6 +74,13 @@ SUMMARY_LABELS = {
 }
 
 RANKING_LABELS = {
+    "fil": {
+        "highest_display_rate": ("Pinakamataas na rate ng interes", "Rate ng interes"),
+        "lowest_monthly_fee": ("Pinakamababang buwanang bayad", "Buwanang bayad"),
+        "lowest_minimum_deposit": ("Pinakamababang minimum na deposito", "Minimum na deposito"),
+        "recently_changed_30d": ("Kamakailang binago", "Mga araw mula sa pagbabago"),
+        "insufficient": "Kulang ang mga produktong pumasa sa mga kondisyon para sa paghahambing na ito."
+    },
     "en": {
         "highest_display_rate": ("Highest Interest Rate", "Interest Rate"),
         "lowest_monthly_fee": ("Lowest Monthly Fee", "Monthly Fee"),
@@ -91,6 +105,15 @@ RANKING_LABELS = {
 }
 
 SCATTER_LABELS = {
+    "fil": {
+        "chequing_fee_vs_minimum_balance": ("Bayad ng checking account at minimum na balanse", "Buwanang bayad", "Minimum na balanse"),
+        "savings_rate_vs_minimum_balance": ("Savings rate at minimum na balanse", "Minimum na balanse", "Rate ng interes"),
+        "gic_rate_vs_minimum_deposit": ("GIC rate at minimum na deposito", "Minimum na deposito", "Rate ng interes"),
+        "gic_term_vs_rate": ("Tagal at rate ng GIC", "Tagal", "Rate ng interes"),
+        "mixed_scope_note": "Pumili ng isang uri ng produkto para makita ang tsart ng paghahambing.",
+        "insufficient": "Kailangan ng hindi bababa sa tatlong produktong pumasa sa mga kondisyon para sa tsart.",
+        "methodology": "Batay ang mga sukatan sa pinakahuling matagumpay na buod ng datos. Hindi kasama ang mga produktong kulang sa kinakailangang numerong halaga."
+    },
     "en": {
         "chequing_fee_vs_minimum_balance": ("Chequing Fee vs Minimum Balance", "Monthly Fee", "Minimum Balance"),
         "savings_rate_vs_minimum_balance": ("Savings Rate vs Minimum Balance", "Minimum Balance", "Interest Rate"),
@@ -347,6 +370,15 @@ def _resolve_scope_key(rows: list[dict[str, Any]], *, filters: PublicQueryFilter
 
 
 def build_dashboard_methodology_note(locale: str) -> str:
+    if locale == "fil":
+        return (
+            "Batay ang mga sukatan at ranggo sa pinakahuling matagumpay na buod ng nakalathalang datos. "
+            "Buong rate na walang kondisyon lamang ang ginagamit sa paghahambing; hindi kasama ang saklaw ng rate, dagdag o bawas sa reference rate, rate na may kondisyon, at mga promo. "
+            "Ginagamit muna ang nakalathalang bayad sa paghahambing; kung wala ito, ginagamit ang buwanang bayad. "
+            "Ang mga kamakailang pagbabago ay mula sa 30 araw bago ang pag-update ng buod. "
+            "Hindi kasama sa ranggo at tsart ang mga produktong kulang sa kinakailangang numerong halaga. "
+            "Buod lamang ng merkado ang pahinang ito; hindi ipinapakita ang pribadong ebidensya o mga sipi mula sa sanggunian."
+        )
     if locale == "ko":
         return (
             "지표와 ranking은 현재 공개 범위의 최신 성공 aggregate snapshot을 기준으로 계산됩니다. "

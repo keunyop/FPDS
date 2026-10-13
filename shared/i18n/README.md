@@ -3,10 +3,10 @@
 Use this area for shared locale resources, glossary seed data, and fallback policy scaffolds.
 
 Current scaffold:
-- `locale-config.json` defines the supported locales and fallback chains.
-- `locales/` contains starter EN/KO/JA UI resource files.
+- `locale-config.json` defines locale fallback chains and surface-specific support (Public EN/KO/JA/Filipino; Admin EN/KO/JA).
+- `locales/` contains starter EN/KO/JA/Filipino UI resource files.
 - `glossary.seed.json` contains the first shared taxonomy and admin-term glossary entries.
-- public and admin runtime helpers now consume the same EN/KO/JA baseline and preserve `locale` through route transitions.
+- Public and Admin preserve `locale` through route transitions. Filipino (`fil`) is Public-only; original financial conditions and authored EN/KO/JA editorial bodies retain their source language.
 
 Rules:
 - `en` is the default resource locale.

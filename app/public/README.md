@@ -1,5 +1,25 @@
 # FPDS Public
 
+
+## Philippines and Filipino UI - 2026-10-13
+
+The desktop and mobile country selectors include Philippines (PH) before its
+first publication and show a localized no-products label until eligible products
+exist. Public counts/maps still describe actual published coverage. Filipino
+(`fil`, formatting `fil-PH`) is available in the language menu and retained in
+catalog, detail, comparison, calculator, feedback and country-switch URLs.
+UI labels are translated; institution/product names and financial conditions
+remain in their source language. Home PHP groups require explicit product PHP;
+this presentation mapping never supplies missing collection currency or rate facts.
+
+Existing article/guide bodies remain authored in EN/KO/JA; Filipino detail
+requests redirect to English with the native country retained. They do not claim
+Filipino article hreflang. Product details keep the existing English canonical
+and translated-UI noindex policy. Admin locales and market collection profiles
+are unchanged. Apply `0048_public_feedback_filipino.sql`, then release the API
+and Public app for end-to-end Filipino feedback support. This is local preparation,
+not a live country activation, collection, publication or deployment.
+
 ## US savings versus CDs article - 2026-10-10
 
 `/blog/high-yield-savings-vs-cds-us?country_code=US` adds a concise EN/KO/JA

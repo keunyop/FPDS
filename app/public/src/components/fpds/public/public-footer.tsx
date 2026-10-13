@@ -16,6 +16,9 @@ import { comparisonHref } from '@/lib/public-comparison';
 import { comparisonCopy } from '@/lib/public-comparison-copy';
 
 const FOOTER_COPY: Record<PublicLocale, { legalNote: string }> = {
+  fil: {
+    legalNote: "Maaaring magbago ang impormasyon. Kumpirmahin ang mga rate at kondisyon sa opisyal na website ng bangko."
+  },
   en: {
     legalNote: "Information may change. Confirm rates and conditions on the bank's official page."
   },

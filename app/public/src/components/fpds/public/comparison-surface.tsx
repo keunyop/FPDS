@@ -42,21 +42,21 @@ export function ComparisonSurface() {
     {!scope.valid ? <p role="alert" className="mb-4 text-destructive">{copy.invalid}</p> : null}
     <div className="mb-4 flex flex-wrap gap-2">
       {entries.length ? <>
-        {entries.length >= 2 ? <Button asChild><Link href={comparisonHref(entries.map(item => item.id), scope).replace('/compare?', '/calculator?')}>{scenarioCopy(scope.locale).entry}</Link></Button> : null}
-        <Button onClick={copyLink} variant="outline"><Link2 className="size-4" aria-hidden="true" />{copy.share}</Button>
-        <Button onClick={saveHere} variant="outline" disabled={saving || entries.some(item => item.status !== 'ready')}><Bookmark className="size-4" aria-hidden="true" />{copy.save}</Button>
-        <Button onClick={refresh} variant="ghost" disabled={loading}><RefreshCw className="size-4" aria-hidden="true" />{copy.refresh}</Button>
-        <Button onClick={() => { clear(); setMessage(''); setShareUrl(''); }} variant="ghost">{copy.clear}</Button>
+        {entries.length >= 2 ? <Button className="h-auto min-h-11 max-w-full whitespace-normal py-2" asChild><Link href={comparisonHref(entries.map(item => item.id), scope).replace('/compare?', '/calculator?')}>{scenarioCopy(scope.locale).entry}</Link></Button> : null}
+        <Button className="h-auto min-h-11 max-w-full whitespace-normal py-2" onClick={copyLink} variant="outline"><Link2 className="size-4" aria-hidden="true" />{copy.share}</Button>
+        <Button className="h-auto min-h-11 max-w-full whitespace-normal py-2" onClick={saveHere} variant="outline" disabled={saving || entries.some(item => item.status !== 'ready')}><Bookmark className="size-4" aria-hidden="true" />{copy.save}</Button>
+        <Button className="h-auto min-h-11 max-w-full whitespace-normal py-2" onClick={refresh} variant="ghost" disabled={loading}><RefreshCw className="size-4" aria-hidden="true" />{copy.refresh}</Button>
+        <Button className="h-auto min-h-11 max-w-full whitespace-normal py-2" onClick={() => { clear(); setMessage(''); setShareUrl(''); }} variant="ghost">{copy.clear}</Button>
       </> : null}
       {savedList ? <>
-        <Button variant="outline" onClick={() => { restoreSaved(); setMessage(''); }}>{copy.openSaved}</Button>
-        <Button variant="ghost" onClick={() => { try { forget(scope.countryCode); setMessage(copy.deleted); } catch { setMessage(copy.storageError); } }}><Trash2 className="size-4" aria-hidden="true" />{copy.deleteSaved}</Button>
+        <Button className="h-auto min-h-11 max-w-full whitespace-normal py-2" variant="outline" onClick={() => { restoreSaved(); setMessage(''); }}>{copy.openSaved}</Button>
+        <Button className="h-auto min-h-11 max-w-full whitespace-normal py-2" variant="ghost" onClick={() => { try { forget(scope.countryCode); setMessage(copy.deleted); } catch { setMessage(copy.storageError); } }}><Trash2 className="size-4" aria-hidden="true" />{copy.deleteSaved}</Button>
       </> : null}
     </div>
     {savedList ? <p className="mb-4 text-xs text-muted-foreground">{copy.local}</p> : null}
     <p role="status" className="mb-3 text-sm text-primary">{message}</p>
     {shareUrl ? <input aria-label={copy.copyFailed} className="mb-4 min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm" readOnly value={shareUrl} onFocus={event => event.target.select()} /> : null}
     {!ready ? <p role="status">{copy.loading}</p> : !entries.length ? <p className="py-8 text-muted-foreground">{copy.empty}</p> : <ComparisonSelection filters={filters} locale={scope.locale} />}
-    <Button asChild variant="outline" className="mt-6"><Link href={buildPublicHref('/products', filters)}>{copy.browse}</Link></Button>
+    <Button asChild variant="outline" className="mt-6 h-auto min-h-11 max-w-full whitespace-normal py-2"><Link href={buildPublicHref('/products', filters)}>{copy.browse}</Link></Button>
   </main>;
 }

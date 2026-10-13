@@ -15,7 +15,7 @@ export function isGuideSlug(value: string): value is GuideSlug {
   return (GUIDE_SLUGS as readonly string[]).includes(value);
 }
 export function guideHref(slug: GuideSlug | null, locale: string) {
-  return `${slug ? `/guides/${slug}` : '/guides'}${locale === 'ko' || locale === 'ja' ? `?locale=${locale}` : ''}`;
+  return `${slug ? `/guides/${slug}` : '/guides'}${locale === 'ko' || locale === 'ja' || locale === 'fil' ? `?locale=${locale}` : ''}`;
 }
 export function isGuideIndexableQuery(query: Record<string, string | string[] | undefined>) {
   return Object.entries(query).every(([key, value]) => key === 'locale' && typeof value === 'string' && ['en', 'ko', 'ja'].includes(value));
@@ -25,10 +25,27 @@ export function guideCountryDestination(path: string, locale: string, country: s
   const slug = path.slice('/guides/'.length);
   if (isGuideSlug(slug)) return curatedCatalogHref(GUIDE_COMPARISONS[slug], locale, country);
   const params = new URLSearchParams({ country_code: country });
-  if (locale === 'ko' || locale === 'ja') params.set('locale', locale);
+  if (locale === 'ko' || locale === 'ja' || locale === 'fil') params.set('locale', locale);
   return `/products?${params}`;
 }
 export const GUIDE_COPY = {
+  fil: {
+    nav: "Mga gabay sa paghahambing", scope: "Canada · Mga gabay sa paghahambing", title: "Unawain ang mga kondisyon. Saka maghambing.",
+    intro: "Magsimula sa isang tanong. Hindi mo kailangang magkaroon muna ng produkto para maghambing.", newcomer: "Unang beses maghambing? Magsimula rito",
+    read: "Basahin ang gabay", compare: "Gamitin sa aktuwal na paghahambing", table: "Buksan ang talahanayan ng paghahambing", browse: "Tingnan ang mga kaugnay na produkto",
+    next: "Pumili ng mga produkto sa talahanayan o listahan, buksan ang iyong paghahambing, at kumpirmahin ang pinakabagong kondisyon sa bangko. Kung may napili kang dalawang deposito, maaari mo ring subukan ang calculator.",
+    sources: "Mga sanggunian", sourceLanguage: "Opisyal na gabay sa English", checked: "Sinuri ang mga sanggunian ng gabay",
+    editorial: "Tungkol sa mga gabay na ito", publisher: "Inilathala ng SwitchaBank, ang serbisyo sa paghahambing sa site na ito.",
+    method: "Gumamit ng AI sa pagsulat at pagsasalin ng mga gabay, at sinuri ang mga ito gamit ang mga naka-link na opisyal na sanggunian. Hindi pa nasuri ang mga ito ng isang independiyenteng eksperto sa pananalapi. Gabay ang mga ito sa paghahambing, hindi personal na payong pinansyal.",
+    language: "Nananatili sa orihinal na wika ang mga pangalan ng bangko at kondisyon ng produkto. Hiwalay ang petsa ng gabay sa petsa ng pag-verify ng bawat produkto.",
+    corrections: "Iulat sa feedback ang kailangang itama, kasama ang pamagat at bahagi ng gabay. Sinusuri ang ulat gamit ang sanggunian; ina-update ang teksto at petsa ng pagsusuri kapag nakumpirma ang pagwawasto.",
+    topics: {
+      'base-and-promotional-rates': "Karaniwang rate at mga promo",
+      'monthly-fee-waivers': "Pag-unawa sa mga kondisyon para ma-waive ang buwanang bayad",
+      'gic-maturity-and-withdrawals': "GIC: maturity at maagang pag-withdraw",
+      'switching-bank-accounts': "Paglipat ng bank account sa Canada"
+    }
+  },
   en: {
     nav: 'Comparison guides', scope: 'Canada · Comparison guides', title: 'Understand the terms. Then compare.',
     intro: 'Start with a question. You do not need to own a product to compare.', newcomer: 'New to comparing? Start here',
@@ -81,4 +98,4 @@ export const GUIDE_COPY = {
     }
   }
 } satisfies Record<PublicLocale, object>;
-export function guideCopy(locale: string) { return GUIDE_COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
+export function guideCopy(locale: string) { return GUIDE_COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en']; }

@@ -1,6 +1,26 @@
 import type { CuratedSlug } from './public-curated.ts';
 
 const COPY = {
+  fil: {
+    shortcuts: "Ihambing ayon sa layunin", feeLink: "Ihambing ang buwanang bayad", savingsLink: "Ihambing ang mga savings account", gicLink: "Ihambing ang mga tagal ng GIC",
+    scopeLabel: "Saklaw ng paghahambing", scope: "Canada · CAD", coverage: "{products} produkto · {banks} bangko", product: "Produkto", actions: "Mga aksyon",
+    baseRate: "Karaniwang rate", offer: "Mga promo / kondisyon", transactions: "Mga kasamang transaksyon", withdrawals: "Mga kondisyon sa pag-withdraw",
+    minimumBalance: "Minimum na balanse", monthlyFee: "Karaniwang buwanang bayad", conditions: "Mga kondisyon", minimum: "Minimum na deposito", termRate: "Rate para sa 1 taon",
+    annual: "Mga taunang rate", apy: "APY", zero: "Walang karaniwang buwanang bayad", waiver: "Buwanang bayad na maaaring ma-waive", qualified: "Mga rate na may promo o kondisyon",
+    redeemable: "Maaaring i-withdraw bago mag-mature", non_redeemable: "Hindi maaaring i-withdraw bago mag-mature", checkBank: "Kumpirmahin sa bangko",
+    compare: "Idagdag sa paghahambing", selected: "Naidagdag na", viewCompare: "Tingnan ang paghahambing",
+    loading: "Nilo-load ang paghahambing…", pending: "Hindi pa handa ang paghahambing na ito.", unavailable: "Pansamantalang hindi available ang datos para sa paghahambing.",
+    pendingBody: "Tingnan muna ang mga available na produkto habang bine-verify namin ang sapat na magkakatulad na account.", browse: "Tingnan ang mga produkto", retry: "Subukan muli",
+    boundary: "Mga nakalathalang account sa CAD; hindi nito saklaw ang buong merkado. Kumpirmahin sa bangko ang mga kwalipikasyon at pinakabagong kondisyon.",
+    savingsNote: "Hindi kasama sa karaniwang rate ang mga promo at bonus. Ipinapakita lamang ang mga limitasyon at bayad sa pag-withdraw kapag may opisyal na impormasyon.",
+    feeNote: "Magkaiba ang karaniwang buwanang bayad na $0 at ang bayad na na-waive kapag natugunan ang mga kondisyon. Maaaring may bayad pa rin sa transaksyon at mga kailangang kwalipikasyon.",
+    gicNote: "Pinagsasama lamang ang mga na-verify na rate para sa 12 buwan na magkapareho ang batayan ng rate at mga kondisyon sa pag-withdraw.",
+    pages: {
+      'savings-accounts': { title: "Ihambing ang mga savings account sa Canada", description: "Ihambing ang mga savings account sa CAD ayon sa karaniwang rate, mga kondisyon ng promo, at pag-withdraw. Kasama ang petsa ng pagsusuri at opisyal na link ng bangko." },
+      'no-monthly-fee-chequing': { title: "Ihambing ang mga checking account na walang buwanang bayad", description: "Ihambing nang hiwalay ang mga checking account sa Canada na may karaniwang buwanang bayad na CAD $0 at ang mga account na may kondisyon para ma-waive ang bayad." },
+      '1-year-gic': { title: "Ihambing ang mga 1-taong GIC sa Canada", description: "Ihambing ang mga na-verify na CAD GIC rate para sa 12 buwan ayon sa mga kondisyon sa pag-withdraw, batayan ng rate, at minimum na deposito." }
+    }
+  },
   en: {
     shortcuts: 'Compare by purpose', feeLink: 'Compare monthly fees', savingsLink: 'Compare savings', gicLink: 'Compare GIC terms',
     scopeLabel: 'Comparison scope', scope: 'Canada · CAD', coverage: '{products} products · {banks} banks', product: 'Product', actions: 'Actions',
@@ -62,7 +82,7 @@ const COPY = {
     }
   }
 } as const;
-export function curatedCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
+export function curatedCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en']; }
 export function curatedNote(slug: CuratedSlug, locale: string) {
   const copy = curatedCopy(locale);
   return slug === 'savings-accounts' ? copy.savingsNote : slug === '1-year-gic' ? copy.gicNote : copy.feeNote;

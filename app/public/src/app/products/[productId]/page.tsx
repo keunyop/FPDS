@@ -139,6 +139,7 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
 }
 
 function unavailableProductTitle(locale: string) {
+  if (locale === "fil") return "Pansamantalang hindi available ang detalye ng produkto";
   if (locale === "ko") {
     return "상품 정보를 일시적으로 사용할 수 없음";
   }

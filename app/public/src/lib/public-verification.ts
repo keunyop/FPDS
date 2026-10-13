@@ -9,6 +9,13 @@ export type ProductVerification = {
 };
 
 const COPY = {
+  fil: {
+    checked: "Huling pagsusuri ng produkto", unknownDate: "Hindi alam", snapshot: "Nabuo ang buod ng datos",
+    completed: "Available ang buod ng datos", stale: "Naantala ang pag-update ng buod ng datos", unavailable: "Walang available na buod ng datos",
+    within_window: "Nasa loob ng panahon ng pagsusuri", review_due: "Kailangan nang suriin muli", expired: "Nag-expire na ang pag-verify", unknown: "Hindi alam ang estado ng pag-verify",
+    notice: "Hindi muling sinusuri ang impormasyon ng bangko kapag binuo ang buod ng datos. Kumpirmahin ang kasalukuyang kondisyon sa bangko.",
+    summary: "Mga produktong kailangang suriin o i-verify muli", due: "Suriin muli bago ang", expiry: "Pag-expire ng pag-verify",
+  },
   en: {
     checked: "Product last checked", unknownDate: "Unknown", snapshot: "Snapshot generated",
     completed: "Snapshot available", stale: "Snapshot refresh delayed", unavailable: "Snapshot unavailable",

@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   if (
     !/^[A-Z]{2}$/.test(countryCode)
     || !allowedCategories?.has(category)
-    || !["en", "ko", "ja"].includes(locale)
+    || !["en", "ko", "ja", "fil"].includes(locale)
     || details.length > 2000
     || (submissionType === "product_error" && (!productId || productId.length > 120))
     || (submissionType === "site_feedback" && productId.length > 0)

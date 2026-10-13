@@ -1,6 +1,15 @@
+import { publicMarketCurrency } from './public-country.ts';
 import type { PublicProduct } from './public-api.ts';
 
 const COPY = {
+  fil: {
+    deposits: "Wala pang nakalathalang deposito.",
+    loans: "Wala pang nakalathalang loan.",
+    currency: "Walang maihahambing na produkto sa pera ng merkadong ito.",
+    basis: "Kailangan ng na-verify na batayan ng taunang rate o APY ang mga nakalathalang savings account o GIC/CD bago maisama sa ranggo.",
+    depositsUnclear: "Wala pang na-verify na bayad at gastos sa transaksyon, o maihahambing na rate, tagal, at kondisyon sa pag-withdraw ang mga nakalathalang deposito.",
+    loansUnclear: "Wala pang maihahambing na buong rate ang mga nakalathalang loan."
+  },
   en: {
     deposits: 'No published deposit products yet.',
     loans: 'No published loans yet.',
@@ -29,11 +38,11 @@ const COPY = {
 
 /** Used only after the complete snapshot loaded successfully and no group exists. */
 export function rankingEmptyMessage(products: PublicProduct[], family: 'deposit' | 'loan', country: string, locale: string) {
-  const copy = COPY[locale === 'ko' || locale === 'ja' ? locale : 'en'];
+  const copy = COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en'];
   const types = family === 'deposit' ? ['chequing', 'savings', 'gic'] : ['mortgage', 'personal-loan', 'line-of-credit'];
   const candidates = products.filter(p => p.country_code === country && types.includes(p.product_type));
   if (!candidates.length) return family === 'deposit' ? copy.deposits : copy.loans;
-  const currency = ({ CA: 'CAD', US: 'USD' } as Record<string, string>)[country];
+  const currency = publicMarketCurrency(country);
   const domestic = candidates.filter(p => p.currency === currency);
   if (!domestic.length) return copy.currency;
   if (family === 'loan') return copy.loansUnclear;

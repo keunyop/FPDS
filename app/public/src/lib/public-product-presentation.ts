@@ -18,24 +18,28 @@ type LoanLabelKey = "amortization" | "back" | "loanAmount" | "payment" | "prepay
 type MarketLabelKey = "earlyWithdrawalPenalty" | "feeWaiver";
 
 const CARD_LABELS = {
+  fil: { annualFee: "Taunang bayad", back: "Bumalik sa listahan ng mga credit card", purchaseRate: "Rate ng interes sa pagbili" },
   en: { annualFee: "Annual fee", back: "Back to credit card list", purchaseRate: "Purchase interest rate" },
   ko: { annualFee: "연회비", back: "신용카드 목록으로", purchaseRate: "구매 금리" },
   ja: { annualFee: "年会費", back: "クレジットカード一覧に戻る", purchaseRate: "ショッピング金利" }
 } as const;
 
 const ESSENTIAL_LABELS = {
+  fil: { creditLimit: "Credit limit", loanAmount: "Halaga ng loan", redeemability: "Mga kondisyon sa maagang pag-withdraw", security: "Collateral", transactions: "Mga kasamang transaksyon" },
   en: { creditLimit: "Credit limit", loanAmount: "Loan amount", redeemability: "Redeemability", security: "Security", transactions: "Included transactions" },
   ko: { creditLimit: "신용 한도", loanAmount: "대출 금액", redeemability: "중도해지 가능 여부", security: "담보 여부", transactions: "포함 거래 횟수" },
   ja: { creditLimit: "利用限度額", loanAmount: "借入額", redeemability: "中途解約可否", security: "担保", transactions: "無料取引回数" }
 } as const;
 
 const LOAN_LABELS = {
+  fil: { amortization: "Amortization", back: "Bumalik sa listahan ng mga loan", loanAmount: "Halaga ng loan / credit limit", payment: "Dalas ng hulog", prepayment: "Maagang pagbabayad", rate: "Rate ng interes", rateType: "Uri ng rate", term: "Tagal" },
   en: { amortization: "Amortization", back: "Back to loan list", loanAmount: "Loan amount / credit limit", payment: "Payment frequency", prepayment: "Prepayment", rate: "Interest rate", rateType: "Rate type", term: "Term" },
   ko: { amortization: "상환 기간", back: "대출 목록으로", loanAmount: "대출 금액 / 한도", payment: "상환 주기", prepayment: "중도상환", rate: "금리", rateType: "금리 유형", term: "기간" },
   ja: { amortization: "償却期間", back: "ローン一覧に戻る", loanAmount: "借入額 / 利用限度額", payment: "返済頻度", prepayment: "繰上返済", rate: "金利", rateType: "金利タイプ", term: "期間" }
 } as const;
 
 const MARKET_LABELS = {
+  fil: { earlyWithdrawalPenalty: "Multa sa maagang pag-withdraw", feeWaiver: "Pag-waive ng bayad / kinakailangang aktibidad" },
   en: { earlyWithdrawalPenalty: "Early withdrawal penalty", feeWaiver: "Fee waiver / qualifying activity" },
   ko: { earlyWithdrawalPenalty: "중도 인출 위약금", feeWaiver: "수수료 면제 조건" },
   ja: { earlyWithdrawalPenalty: "中途解約ペナルティ", feeWaiver: "手数料免除条件" }
@@ -211,11 +215,11 @@ export function formatPublicProductTerm(product: PublicProduct, locale: string) 
     return firstRow.term_label ?? formatPublicTerm(firstRow.term_length_days, locale);
   }
   if (rows.length > 1) {
-    return locale === "ko"
+    return locale === 'fil' ? `${rows.length} pagpipilian sa tagal` : (locale === "ko"
       ? `${rows.length}개 기간`
       : locale === "ja"
         ? `${rows.length}期間`
-        : `${rows.length} terms`;
+        : `${rows.length} terms`);
   }
   return getPublicMessages(locale).common.notDisclosed;
 }
@@ -238,9 +242,9 @@ export function formatPublicRedeemability(product: PublicProduct, locale: string
     return getPublicMessages(locale).common.notDisclosed;
   }
   if (redeemable) {
-    return locale === "ko" ? "중도해지 가능" : locale === "ja" ? "中途解約可能" : "Redeemable";
+    return locale === 'fil' ? "Maaaring i-withdraw bago mag-mature" : (locale === "ko" ? "중도해지 가능" : locale === "ja" ? "中途解約可能" : "Redeemable");
   }
-  return locale === "ko" ? "중도해지 불가" : locale === "ja" ? "中途解約不可" : "Non-redeemable";
+  return locale === 'fil' ? "Hindi maaaring i-withdraw bago mag-mature" : (locale === "ko" ? "중도해지 불가" : locale === "ja" ? "中途解約不可" : "Non-redeemable");
 }
 
 export function formatPublicSecurity(product: PublicProduct, locale: string) {
@@ -252,18 +256,18 @@ export function formatPublicSecurity(product: PublicProduct, locale: string) {
     return getPublicMessages(locale).common.notDisclosed;
   }
   if (product.secured_flag) {
-    return locale === "ko" ? "담보 필요" : locale === "ja" ? "担保あり" : "Secured";
+    return locale === 'fil' ? "May collateral" : (locale === "ko" ? "담보 필요" : locale === "ja" ? "担保あり" : "Secured");
   }
-  return locale === "ko" ? "무담보" : locale === "ja" ? "無担保" : "Unsecured";
+  return locale === 'fil' ? "Walang collateral" : (locale === "ko" ? "무담보" : locale === "ja" ? "無担保" : "Unsecured");
 }
 
 export function formatPublicTransactions(product: PublicProduct, locale: string) {
   if (product.unlimited_transactions_flag === true) {
-    return locale === "ko" ? "무제한" : locale === "ja" ? "無制限" : "Unlimited";
+    return locale === 'fil' ? "Walang limitasyon" : (locale === "ko" ? "무제한" : locale === "ja" ? "無制限" : "Unlimited");
   }
   if (product.included_transactions !== null) {
     const count = new Intl.NumberFormat(getIntlLocale(locale)).format(product.included_transactions);
-    return locale === "ko" ? `월 ${count}회` : locale === "ja" ? `月${count}回` : `${count} / month`;
+    return locale === 'fil' ? `${count} bawat buwan` : (locale === "ko" ? `월 ${count}회` : locale === "ja" ? `月${count}回` : `${count} / month`);
   }
   return getPublicMessages(locale).common.notDisclosed;
 }
@@ -294,7 +298,7 @@ export function formatPublicTerm(termLengthDays: number | null, locale: string) 
   if (locale === "ja") {
     return `${termLengthDays}日`;
   }
-  return `${termLengthDays} days`;
+  return locale === "fil" ? `${termLengthDays} araw` : `${termLengthDays} days`;
 }
 
 function normalizeCurrency(currency: string) {

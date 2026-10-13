@@ -1,15 +1,17 @@
+import { publicMarketCurrency } from './public-country.ts';
 import type { PublicProduct } from './public-api.ts';
 import { getComparablePublicRate } from './public-rate.ts';
 import { hasRankingEssentials } from './public-ranking-essentials.ts';
 
-const HOME_CURRENCIES: Record<string, string> = { CA: 'CAD', US: 'USD' };
+
 const TYPES = ['mortgage', 'personal-loan', 'line-of-credit'];
 const COPY = {
+  fil: { scope: "Mga kondisyon sa paghahambing", all: "Lahat", secured: "May collateral", unsecured: "Walang collateral" },
   en: { scope: 'Comparison conditions', all: 'All', secured: 'Secured', unsecured: 'Unsecured' },
   ko: { scope: '비교 조건', all: '전체', secured: '담보', unsecured: '무담보' },
   ja: { scope: '比較条件', all: 'すべて', secured: '担保あり', unsecured: '担保なし' }
 } as const;
-export function loanRankingCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
+export function loanRankingCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en']; }
 
 type LoanRankingGroup = {
   key: string; label: string; currency: string; items: PublicProduct[]; rates: Record<string, number>;
@@ -17,7 +19,7 @@ type LoanRankingGroup = {
 
 /** Home presets use only disclosed public facts, within one type and currency. */
 export function loanRankingGroups(products: PublicProduct[], country: string, locale: string): LoanRankingGroup[] {
-  const currency = HOME_CURRENCIES[country];
+  const currency = publicMarketCurrency(country);
   if (!currency) return [];
   const copy = loanRankingCopy(locale);
   const groups = new Map<string, LoanRankingGroup>();
@@ -48,7 +50,7 @@ export function loanRankingGroups(products: PublicProduct[], country: string, lo
 
 /** Browsing is separate from ranking: never manufacture a comparable rate. */
 export function loanBrowseGroups(products: PublicProduct[], country: string): LoanRankingGroup[] {
-  const currency = HOME_CURRENCIES[country];
+  const currency = publicMarketCurrency(country);
   if (!currency) return [];
   return TYPES.flatMap(type => {
     const items = [...new Map(products.filter(product => product.country_code === country
@@ -64,8 +66,9 @@ export function loanBrowseGroups(products: PublicProduct[], country: string): Lo
 }
 export function loanBrowseCopy(locale: string) {
   return ({
+  fil: { title: "Mga loan na puwedeng ihambing", subtitle: "Tingnan ang mga nakalathalang rate at kondisyon ayon sa uri ng loan.", note: "Hanggang limang produkto, nakaayos ayon sa pangalan ng bangko. Nakadepende ang rate sa tagal, halaga, o kwalipikasyon; hindi ito ranggo ng pinakamababang rate." },
     en: { title: 'Loans to compare', subtitle: 'Explore published rates and terms by loan type.', note: 'Up to five products, ordered by bank name. Rates depend on term, amount or eligibility; this is not a lowest-rate ranking.' },
     ko: { title: '비교할 대출상품', subtitle: '대출 종류별 공개 금리와 조건을 확인하세요.', note: '은행 이름순으로 최대 5개 상품을 표시합니다. 금리는 기간·금액·자격에 따라 달라지며 최저금리 순위가 아닙니다.' },
     ja: { title: '比較するローン商品', subtitle: 'ローンの種類ごとに公開金利と条件を確認できます。', note: '銀行名順に最大5商品を表示します。金利は期間・金額・対象条件によって異なり、最低金利のランキングではありません。' }
-  })[locale === 'ko' || locale === 'ja' ? locale : 'en'];
+  })[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en'];
 }

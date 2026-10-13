@@ -43,15 +43,15 @@ export function ComparePanel({
   );
 
   return (
-    <section className="scroll-mt-32 border-y border-maple/30 bg-card/70 px-3 py-4 md:px-4" aria-label={copy.compare.title}>
+    <section className="min-w-0 scroll-mt-32 border-y border-maple/30 bg-card/70 px-3 py-4 md:px-4" aria-label={copy.compare.title}>
       <div className="mb-4 flex flex-col gap-1 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-maple">{copy.compare.title}</p>
         <p className="text-xs leading-5 text-muted-foreground">{designCopy.compareBoundary}</p>
       </div>
       {boundary ? <p className="mb-4 text-sm text-muted-foreground" role="note">{compareCopy[boundary]}</p> : null}
-      <div className={cn("grid gap-3 md:grid-cols-2", products.length === 3 ? "xl:grid-cols-3" : products.length >= 4 ? "xl:grid-cols-4" : "")}>
+      <div className={cn("grid min-w-0 gap-3 md:grid-cols-2", products.length === 3 ? "xl:grid-cols-3" : products.length >= 4 ? "xl:grid-cols-4" : "")}>
         {products.map((product, productIndex) => (
-          <article data-handoff-product={product.product_id} className="border border-border bg-background/75 p-4" key={product.product_id}>
+          <article data-handoff-product={product.product_id} className="min-w-0 border border-border bg-background/75 p-4" key={product.product_id}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
                 <BankLogo bankCode={product.bank_code} bankName={product.bank_name} size="sm" />

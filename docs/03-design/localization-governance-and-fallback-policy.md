@@ -1,5 +1,26 @@
 # FPDS Localization Governance and Fallback Policy
 
+
+## Public Filipino extension - 2026-10-13
+
+The Product Owner requested Public Philippines country selection and natural
+Filipino UI localization only. Public supports `en`, `ko`, `ja`, `fil`; Admin
+retains `en`, `ko`, `ja`, recorded in shared `surface_locales`. Filipino UI falls
+back to English; `fil-PH` is formatting, independent of product currency/country.
+Use familiar banking terms (savings account, credit card, loan, collateral), and
+preserve APY/annual-rate, fee waiver/zero, unknown/absent and withdrawal boundaries.
+Bank/product names and official conditions remain in the source language.
+
+PH is a selectable prepared Public market with a zero published-product count
+until actual publication. It is not a claim of collected coverage or supported
+collection profiles. Home PHP selection uses only products explicitly carrying
+PHP. Existing long-form blog/guide bodies retain their authored languages and
+Filipino detail requests resolve to English; do not emit Filipino article
+hreflang or index untranslated bodies as Filipino. Product detail UI retains
+English canonical/noindex policy. Feedback stores the actual `fil` UI locale
+under migration 0048, without changing authentication, active-country or product
+checks. These rules supersede the three-locale Public baseline below.
+
 Version: 1.0
 Date: 2026-04-06
 Status: Approved Baseline for WBS 1.7.5 - 1.7.7

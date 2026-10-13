@@ -18,11 +18,11 @@ export function isCuratedSlug(value: string): value is CuratedSlug {
   return Object.hasOwn(CURATED_PAGES, value);
 }
 export function curatedHref(slug: CuratedSlug, locale: string) {
-  return `/ca/${slug}${locale === 'ko' || locale === 'ja' ? `?locale=${locale}` : ''}`;
+  return `/ca/${slug}${locale === 'ko' || locale === 'ja' || locale === 'fil' ? `?locale=${locale}` : ''}`;
 }
 export function curatedCatalogHref(slug: CuratedSlug, locale: string, country = 'CA') {
   const params = new URLSearchParams({ product_type: CURATED_PAGES[slug].productType });
-  if (locale === 'ko' || locale === 'ja') params.set('locale', locale);
+  if (locale === 'ko' || locale === 'ja' || locale === 'fil') params.set('locale', locale);
   if (country !== 'CA') params.set('country_code', country);
   if (slug === 'no-monthly-fee-chequing') { params.set('sort_by', 'monthly_fee'); params.set('sort_order', 'asc'); }
   return `/products?${params}`;

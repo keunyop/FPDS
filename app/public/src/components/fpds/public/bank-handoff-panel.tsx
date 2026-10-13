@@ -28,7 +28,7 @@ export function BankHandoffPanel({ product, locale, compact = false }: { product
     {!compact ? <ProductVerification product={product} locale={locale} /> : null}
     <div className={compact ? 'mt-4 grid gap-2' : 'mt-4 flex flex-wrap items-center gap-x-5 gap-y-2'}>
       {destination ? <>
-        <Button asChild variant={compact ? 'outline' : 'default'} className="min-h-11">
+        <Button asChild variant={compact ? 'outline' : 'default'} className="h-auto min-h-11 max-w-full whitespace-normal py-3 text-center">
           <TrackedOfficialBankLink countryCode={product.country_code} productId={product.product_id} href={destination.href}>
             {copy.action}<ExternalLink className="size-4 shrink-0" aria-hidden="true" />
             <span className="sr-only">({copy.external})</span>

@@ -13,7 +13,7 @@ export function parseComparison(params: URLSearchParams) {
   const countryCode = (params.get('country_code') || 'CA').toUpperCase();
   const locale = (params.get('locale') || 'en').toLowerCase();
   return { ids, countryCode: /^[A-Z]{2}$/.test(countryCode) ? countryCode : 'CA',
-    locale: ['en', 'ko', 'ja'].includes(locale) ? locale : 'en',
+    locale: ['en', 'ko', 'ja', 'fil'].includes(locale) ? locale : 'en',
     valid: ids.length <= MAX_COMPARE_PRODUCTS && ids.every(validComparisonId) };
 }
 
@@ -21,7 +21,7 @@ export function comparisonHref(ids: string[], scope: ComparisonScope) {
   const params = new URLSearchParams();
   for (const id of [...new Set(ids)].filter(validComparisonId).slice(0, MAX_COMPARE_PRODUCTS)) params.append('product_id', id);
   params.set('country_code', /^[A-Z]{2}$/.test(scope.countryCode) ? scope.countryCode : 'CA');
-  params.set('locale', ['en', 'ko', 'ja'].includes(scope.locale) ? scope.locale : 'en');
+  params.set('locale', ['en', 'ko', 'ja', 'fil'].includes(scope.locale) ? scope.locale : 'en');
   return `/compare?${params}`;
 }
 

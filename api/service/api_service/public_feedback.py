@@ -37,7 +37,7 @@ SITE_FEEDBACK_CATEGORIES = {
     "usability_issue",
 }
 PUBLIC_FEEDBACK_TYPES = {"product_error", "site_feedback"}
-PUBLIC_FEEDBACK_LOCALES = {"en", "ko", "ja"}
+PUBLIC_FEEDBACK_LOCALES = {"en", "ko", "ja", "fil"}
 
 
 class PublicFeedbackRateLimiter:

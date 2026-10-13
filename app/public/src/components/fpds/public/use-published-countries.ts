@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { formatPublicCountryName } from '@/lib/public-country';
+import { publicCountryOptions } from '@/lib/public-country';
 import type { PublicCountryOption } from '@/lib/public-api';
 import type { PublicLocale } from '@/lib/public-locale';
 
@@ -44,16 +44,6 @@ export function usePublishedCountries({
     return () => controller.abort();
   }, [active]);
 
-  return useMemo(() => {
-    const options = new Map(publishedCountries.map((country) => [country.code, country]));
-    if (!options.has(countryCode)) {
-      options.set(countryCode, { code: countryCode, count: 0 });
-    }
-    return [...options.values()].sort((left, right) =>
-      formatPublicCountryName(left.code, locale).localeCompare(
-        formatPublicCountryName(right.code, locale),
-        locale
-      )
-    );
-  }, [countryCode, locale, publishedCountries]);
+  return useMemo(() => publicCountryOptions(publishedCountries, countryCode, locale),
+    [countryCode, locale, publishedCountries]);
 }

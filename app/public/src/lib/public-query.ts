@@ -1,7 +1,7 @@
 import { blogCountryDestination, blogHref } from "./public-blog.ts";
 import { guideCountryDestination } from "./public-guides.ts";
-import { curatedCountryPath } from "@/lib/public-curated";
-import { buildProductDetailPath } from "@/lib/public-url-policy";
+import { curatedCountryPath } from "./public-curated.ts";
+import { buildProductDetailPath } from "./public-url-policy.ts";
 
 export type PublicScopeFilters = {
   locale: string;
@@ -48,7 +48,7 @@ const SORT_OPTIONS = new Set([
 ]);
 
 const VIEW_MODES = new Set(["grid", "list"]);
-const SUPPORTED_LOCALES = new Set(["en", "ko", "ja"]);
+const SUPPORTED_LOCALES = new Set(["en", "ko", "ja", "fil"]);
 export const DEFAULT_PUBLIC_COUNTRY_CODE = "CA";
 
 type PageSearchParams = Record<string, string | string[] | undefined>;

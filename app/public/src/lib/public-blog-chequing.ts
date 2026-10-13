@@ -1,5 +1,5 @@
 import type { BlogContent } from './public-blog-content.ts';
-import type { PublicLocale } from './public-locale.ts';
+import type { EditorialLocale } from './public-locale.ts';
 
 export const CHEQUING_SOURCES = [
   { id: 'tangerine-chequing', title: 'Tangerine — No-fee daily Chequing Account', href: 'https://www.tangerine.ca/en/personal/spend/chequing-account-benefits' },
@@ -37,9 +37,9 @@ export const CHEQUING_PRESENTATION = {
     relatedArticle: '次に読む：EQ Bank・Tangerine・TDの貯蓄口座比較',
     about: 'カナダの当座口座手数料と免除条件'
   }
-} satisfies Record<PublicLocale, object>;
+} satisfies Record<EditorialLocale, object>;
 
-export const CHEQUING_CONTENT: Record<PublicLocale, BlogContent> = {
+export const CHEQUING_CONTENT: Record<EditorialLocale, BlogContent> = {
   en: {
     title: 'Tangerine vs Simplii vs CIBC: Canadian chequing fees compared',
     description: 'Compare Canadian chequing accounts from Tangerine, Simplii and CIBC: monthly fees, minimum-balance rebates, ATM costs and a worked annual-cost example.',

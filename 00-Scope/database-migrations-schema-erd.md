@@ -1,5 +1,14 @@
 # FPDS Admin DB migration, schema, ERD 인수인계
 
+## 추가 로컬 target - 2026-10-13
+
+`0048_public_feedback_filipino.sql`은 Public 피드백의 locale 제약에 `fil`을
+추가한다. 기존 행·국가/상품 제약·보존 정책은 유지한다. 저장소 SQL은 48개,
+전체 실행 시 migration_history는 45개이다. 격리 로컬 PostgreSQL 18에서
+upgrade/제약/기존 행/재적용/실패 transaction rollback을 검증했다.
+shared dev/production DB에 적용하지 않았으며 아래 날짜별 실측은 보존한다.
+
+
 상태: 저장소 migration 전수 목록 + shared dev 실측 schema
 
 기준일: 2026-08-31 실측 / 2026-10-04 저장소 target 갱신

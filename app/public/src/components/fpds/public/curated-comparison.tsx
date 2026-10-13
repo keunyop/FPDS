@@ -28,7 +28,7 @@ function facts(product: PublicProduct, slug: CuratedSlug, locale: string) {
   const option = depositOptions(product).find(o => o.key === 'm12');
   return metrics.map((metric, index) => index === 0
     ? { ...metric, value: formatPublicRate(option?.rate ?? null, locale) }
-    : index === 1 ? { ...metric, value: locale === 'ko' ? '1년' : locale === 'ja' ? '1年' : '1 year' } : metric);
+    : index === 1 ? { ...metric, value: locale === 'fil' ? "1 taon" : (locale === 'ko' ? '1년' : locale === 'ja' ? '1年' : '1 year') } : metric);
 }
 
 export function CuratedComparisonTable({ comparison, locale }: { comparison: CuratedComparison; locale: string }) {

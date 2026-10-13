@@ -1,5 +1,31 @@
 # Admin pre-handover review and fixes
 
+## SwitchaBank Philippines and Filipino - 2026-10-13
+
+Status: Complete for local implementation and verification. Preserve all existing goals and ownership.
+Scope: Prepare Public country selection for PH before its first publication,
+and add natural Filipino UI copy (fil) with country/locale-safe navigation.
+Admin already catalogs PH; retain its activation/security and collection gates.
+Acceptance:
+- [x] PH appears in desktop/mobile selection even with no published products.
+- [x] Filipino navigation, catalog/detail/comparison/calculator, feedback,
+      loading/empty/error states and formatting preserve actual financial facts.
+- [x] Locale URLs, metadata/fallback and existing EN/KO/JA behave correctly.
+- [x] Behavior tests, lint/typecheck/build and 390/768/1440px keyboard/layout checks.
+- [x] Review diff/encoding, journal actual outcomes and re-read goal.
+Limits: Local code preparation only; no live activation, collection, publication,
+shared/production database writes, paid research or runtime deployment.
+Disposable local DB fixtures are allowed for migration verification.
+
+Outcome: PH is selectable before publication; Filipino Public UI/API and feedback
+locale migration are prepared. Public117/API666, final lint/typecheck/isolated
+build, 116 core + 50 focused browser checks and streamed loading/reduced-motion,
+three-width visual review, disposable PostgreSQL upgrade/constraints/rollback,
+original-locale preservation and foundation/UTF-8/references/diff checks pass.
+No live activation, collection, publication, migration or deployment. Release
+0048, then API and Public; preserve all unrelated goals and unfinished ownership.
+
+
 ## Supabase egress reduction - 2026-10-12
 
 Status: Complete for local implementation and read-only verification. Preserve prior diagnosis and all unrelated ownership.

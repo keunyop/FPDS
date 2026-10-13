@@ -1,10 +1,11 @@
 {
-  "config_version": "2026-04-07",
+  "config_version": "2026-10-13",
   "default_locale": "en",
   "supported_locales": [
     "en",
     "ko",
-    "ja"
+    "ja",
+    "fil"
   ],
   "fallback_chains": {
     "en": [
@@ -16,6 +17,10 @@
     ],
     "ja": [
       "ja",
+      "en"
+    ],
+    "fil": [
+      "fil",
       "en"
     ]
   },
@@ -40,5 +45,18 @@
     "selected-locale",
     "en-CA",
     "machine-readable-value"
-  ]
+  ],
+  "surface_locales": {
+    "public": [
+      "en",
+      "ko",
+      "ja",
+      "fil"
+    ],
+    "admin": [
+      "en",
+      "ko",
+      "ja"
+    ]
+  }
 }

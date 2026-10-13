@@ -9,7 +9,7 @@ from typing import Any, Iterable, TYPE_CHECKING
 if TYPE_CHECKING:
     from psycopg import Connection
 
-SUPPORTED_LOCALES = ("en", "ko", "ja")
+SUPPORTED_LOCALES = ("en", "ko", "ja", "fil")
 SUPPORTED_PRODUCT_TYPES = (
     "chequing",
     "savings",
@@ -25,6 +25,15 @@ SUPPORTED_MINIMUM_DEPOSIT_BUCKETS = ("none", "under_500", "from_500_to_4999", "5
 SUPPORTED_TERM_BUCKETS = ("under_1y", "from_1y_to_3y", "over_3y")
 
 PRODUCT_TYPE_LABELS = {
+    "fil": {
+        "chequing": "Checking account",
+        "savings": "Savings account",
+        "gic": "GIC",
+        "credit-card": "Credit card",
+        "mortgage": "Housing loan",
+        "personal-loan": "Personal loan",
+        "line-of-credit": "Line of credit"
+    },
     "en": {
         "chequing": "Chequing",
         "savings": "Savings",
@@ -55,6 +64,16 @@ PRODUCT_TYPE_LABELS = {
 }
 
 SUBTYPE_LABELS = {
+    "fil": {
+        "standard": "Karaniwan",
+        "package": "Package",
+        "interest_bearing": "May interes",
+        "premium": "Premium",
+        "other": "Iba pa",
+        "high_interest": "Mataas na interes",
+        "redeemable": "Maaaring i-withdraw bago mag-mature",
+        "non_redeemable": "Hindi maaaring i-withdraw bago mag-mature"
+    },
     "en": {
         "standard": "Standard",
         "package": "Package",
@@ -88,6 +107,13 @@ SUBTYPE_LABELS = {
 }
 
 TARGET_CUSTOMER_TAG_LABELS = {
+    "fil": {
+        "student": "Estudyante",
+        "newcomer": "Bagong residente",
+        "youth": "Kabataan",
+        "senior": "Senior citizen",
+        "business": "Negosyo"
+    },
     "en": {
         "student": "Student",
         "newcomer": "Newcomer",
@@ -112,6 +138,12 @@ TARGET_CUSTOMER_TAG_LABELS = {
 }
 
 BADGE_LABELS = {
+    "fil": {
+        "high_rate": "Mataas na rate",
+        "no_monthly_fee": "Walang buwanang bayad",
+        "low_minimum_deposit": "Mababang minimum na deposito",
+        "recently_changed": "Kamakailang binago"
+    },
     "en": {
         "high_rate": "High Rate",
         "no_monthly_fee": "No Monthly Fee",
@@ -133,6 +165,20 @@ BADGE_LABELS = {
 }
 
 BUCKET_LABELS = {
+    "fil": {
+        "free": "Libre",
+        "low_fee": "Mababang bayad",
+        "high_fee": "Mataas na bayad",
+        "none": "Wala",
+        "under_1000": "Mas mababa sa 1,000 CAD",
+        "from_1000_to_4999": "1,000 hanggang 4,999 CAD",
+        "5000_plus": "5,000 CAD pataas",
+        "under_500": "Mas mababa sa 500 CAD",
+        "from_500_to_4999": "500 hanggang 4,999 CAD",
+        "under_1y": "Wala pang 1 taon",
+        "from_1y_to_3y": "1 hanggang 3 taon",
+        "over_3y": "Mahigit 3 taon"
+    },
     "en": {
         "free": "Free",
         "low_fee": "Low Fee",

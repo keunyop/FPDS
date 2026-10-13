@@ -42,6 +42,7 @@ type PublicPageMetadataInput = {
 };
 
 const OPEN_GRAPH_LOCALES: Record<PublicLocale, string> = {
+  fil: "fil_PH",
   en: "en_CA",
   ko: "ko_KR",
   ja: "ja_JP"
@@ -69,7 +70,7 @@ export function buildPublicPageMetadata({
     : title + " | " + countryName;
   const scopedDescription = normalizedCountryCode === DEFAULT_PUBLIC_COUNTRY_CODE
     ? description
-    : description + " Current scope: " + countryName + ".";
+    : description + (normalizedLocale === "fil" ? " Saklaw: " : " Current scope: ") + countryName + ".";
   const canonical = isProductDetail
     ? buildCanonicalProductUrl(path, normalizedCountryCode)
     : buildPublicSeoUrl(path, normalizedLocale, normalizedCountryCode);
@@ -153,10 +154,12 @@ export function buildPublicLanguageAlternates(
   path: PublicSeoPath,
   countryCode: string
 ) {
+  const authoredEditorial = path === "/blog" || path.startsWith("/blog/") || path === "/guides" || path.startsWith("/guides/");
   return {
     "en-CA": buildPublicSeoUrl(path, "en", countryCode),
     ko: buildPublicSeoUrl(path, "ko", countryCode),
     ja: buildPublicSeoUrl(path, "ja", countryCode),
+    ...(!authoredEditorial ? { fil: buildPublicSeoUrl(path, "fil", countryCode) } : {}),
     "x-default": buildPublicSeoUrl(path, "en", countryCode)
   };
 }

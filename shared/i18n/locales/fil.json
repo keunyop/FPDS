@@ -1,0 +1,31 @@
+{
+  "locale": "fil",
+  "resource_status": "approved",
+  "domains": {
+    "public_navigation": {
+      "home": "Home",
+      "products": "Mga produkto",
+      "dashboard": "Buod ng merkado"
+    },
+    "public_filters": {
+      "bank": "Bangko",
+      "product_type": "Uri ng produkto",
+      "target_customer_tag": "Mga kategorya ng customer",
+      "clear_filters": "Alisin ang mga filter"
+    },
+    "public_metrics": {
+      "freshness": "Pagiging napapanahon",
+      "recent_changes": "Mga kamakailang pagbabago",
+      "methodology": "Paano namin sinusuri ang datos"
+    },
+    "shared_taxonomy": {
+      "product_type.chequing": "Checking account",
+      "product_type.savings": "Savings account",
+      "product_type.gic": "GIC"
+    },
+    "system_messages": {
+      "fallback_to_en": "Ipinapakita sa English.",
+      "translation_pending": "Hindi pa available ang salin."
+    }
+  }
+}

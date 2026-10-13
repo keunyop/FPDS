@@ -1,7 +1,7 @@
 export const PUBLIC_SITE_ORIGIN = "https://www.switchabank.com";
 export const DEFAULT_PUBLIC_COUNTRY_CODE = "CA";
 
-const PUBLIC_LOCALES = new Set(["en", "ko", "ja"]);
+const PUBLIC_LOCALES = new Set(["en", "ko", "ja", "fil"]);
 const CANONICAL_PRODUCT_ID_BY_DUPLICATE = new Map([
   ["prod_LuH-Kei2S8uFFOyY", "prod_SNcPg2yBYt4rgyAt"]
 ]);
@@ -9,7 +9,7 @@ const CANONICAL_PRODUCT_ID_BY_DUPLICATE = new Map([
 export type ProductDetailUrlPolicy = {
   countryCode: string;
   indexable: boolean;
-  locale: "en" | "ko" | "ja";
+  locale: "en" | "ko" | "ja" | "fil";
   normalizedPath: string;
 };
 

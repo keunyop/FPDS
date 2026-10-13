@@ -1,5 +1,5 @@
 import type { BlogContent } from './public-blog-content.ts';
-import type { PublicLocale } from './public-locale.ts';
+import type { EditorialLocale } from './public-locale.ts';
 
 export const US_CD_SOURCES = [
   { id: 'capital-one-us-cd-guide', title: 'Capital One — 360 Performance Savings', href: 'https://www.capitalone.com/bank/savings-accounts/online-performance-savings-account/' },
@@ -8,7 +8,7 @@ export const US_CD_SOURCES = [
   { id: 'cfpb-cd', title: 'CFPB — What is a certificate of deposit (CD)?', href: 'https://www.consumerfinance.gov/ask-cfpb/what-is-a-certificate-of-deposit-cd-en-917/' }
 ] as const;
 
-export const US_CD_CONTENT: Record<PublicLocale, BlogContent> = {
+export const US_CD_CONTENT: Record<EditorialLocale, BlogContent> = {
   en: {
     title: 'High-yield savings vs CDs: rates, access and penalties',
     description: 'Compare US high-yield savings, standard CDs and no-penalty CDs. See fixed vs variable rates, withdrawal rules and a USD 10,000 early-exit cost example.',
@@ -111,4 +111,4 @@ export const US_CD_PRESENTATION = {
   en: { scope: 'United States · Savings & CDs', comparison: 'Savings, a standard CD and a no-penalty CD', compare: 'Compare US CDs', compareBody: 'Browse published US CDs and compare their terms. Check verification dates and confirm current rates and withdrawal rules with the bank. The examples above may not all appear in the catalog.', action: 'Explore US CDs', about: 'US high-yield savings and certificate of deposit comparisons' },
   ko: { scope: '미국 · 저축계좌와 CD', comparison: '저축계좌·일반 CD·무위약금 CD 비교', compare: '미국 CD를 비교하세요', compareBody: '공개된 미국 CD의 조건을 비교하세요. 확인일을 살펴보고 최신 금리와 출금 규정은 은행에서 확인하세요. 위 예시 상품이 모두 목록에 있는 것은 아닙니다.', action: '미국 CD 살펴보기', about: '미국 고금리 저축계좌와 정기예금 CD 비교' },
   ja: { scope: '米国 · 貯蓄口座とCD', comparison: '貯蓄口座・通常のCD・違約金なしCDを比較', compare: '米国のCDを比較する', compareBody: '公開中の米国CDの条件を比較できます。確認日を読み、最新金利と出金条件は銀行で確認してください。上記の商品がすべて掲載されているとは限りません。', action: '米国のCDを見る', about: '米国の高金利貯蓄口座と定期預金CDの比較' }
-} satisfies Record<PublicLocale, object>;
+} satisfies Record<EditorialLocale, object>;

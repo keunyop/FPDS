@@ -18,8 +18,8 @@ export function buildBlogMetadata(input: { title: string; description: string; p
     alternates: { ...metadata.alternates, languages: blogLanguageAlternates(input.path, input.countryCode) },
     openGraph: { ...metadata.openGraph, title: `${input.title} — SwitchaBank`, description: input.description,
       ...(input.countryCode === 'US' ? {
-        locale: input.locale === 'ko' ? 'ko_KR' : input.locale === 'ja' ? 'ja_JP' : 'en_US',
-        alternateLocale: ['en_US', 'ko_KR', 'ja_JP'].filter(locale => locale !== (input.locale === 'ko' ? 'ko_KR' : input.locale === 'ja' ? 'ja_JP' : 'en_US'))
+        locale: input.locale === 'fil' ? "fil_PH" : (input.locale === 'ko' ? 'ko_KR' : input.locale === 'ja' ? 'ja_JP' : 'en_US'),
+        alternateLocale: ['en_US', 'ko_KR', 'ja_JP'].filter(locale => locale !== (input.locale === 'fil' ? "fil_PH" : (input.locale === 'ko' ? 'ko_KR' : input.locale === 'ja' ? 'ja_JP' : 'en_US')))
       } : {}) },
     twitter: { ...metadata.twitter, title: `${input.title} — SwitchaBank`, description: input.description }
   };

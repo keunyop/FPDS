@@ -2,11 +2,12 @@ import { getPublicRateMetric, type PublicRate } from './public-rate.ts';
 
 export type RatePresentation = { label: string; value: string; details?: string; entries?: { label: string; value: string }[] };
 const COPY = {
+  fil: { schedule: "Mga rate ayon sa tagal / halaga", conditions: "Mga detalye at kondisyon ng rate" },
   en: { schedule: 'Rates by term / amount', conditions: 'Rate details & conditions' },
   ko: { schedule: '기간·금액별 금리', conditions: '금리 상세 및 적용 조건' },
   ja: { schedule: '期間・金額別の金利', conditions: '金利の詳細・適用条件' }
 };
-export function ratePresentationCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' ? locale : 'en']; }
+export function ratePresentationCopy(locale: string) { return COPY[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en']; }
 
 /** Presentation only: exact source spans never become comparison or calculator rates. */
 export function presentPublicRate(product: Parameters<typeof getPublicRateMetric>[0], locale: string): RatePresentation {

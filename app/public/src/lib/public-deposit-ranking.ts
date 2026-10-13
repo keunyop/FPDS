@@ -1,11 +1,13 @@
+import { publicMarketCurrency } from './public-country.ts';
 import type { PublicProduct } from './public-api.ts';
 import { depositCopy, depositGroupKey, depositOptions, depositPeriod } from './public-deposit.ts';
 import { hasRankingEssentials } from './public-ranking-essentials.ts';
 import { getPublicMessages } from './public-locale.ts';
 
-const HOME_CURRENCIES: Record<string, string> = { CA: 'CAD', US: 'USD' };
+
 const TYPES = ['chequing', 'savings', 'gic'];
 const CONDITIONS = {
+  fil: { all: "Lahat", noMonthlyFee: "Walang buwanang bayad" },
   en: { all: 'All', noMonthlyFee: 'No monthly fee' },
   ko: { all: '전체', noMonthlyFee: '월 수수료 없음' },
   ja: { all: 'すべて', noMonthlyFee: '月額手数料なし' }
@@ -24,9 +26,9 @@ type DepositRankingGroup = {
 
 /** Home-only comparisons. Never widen a comparison to fill five places. */
 export function depositRankingGroups(products: PublicProduct[], country: string, locale: string): DepositRankingGroup[] {
-  const currency = HOME_CURRENCIES[country];
+  const currency = publicMarketCurrency(country);
   if (!currency) return [];
-  const copy = CONDITIONS[locale === 'ko' || locale === 'ja' ? locale : 'en'];
+  const copy = CONDITIONS[locale === 'ko' || locale === 'ja' || locale === 'fil' ? locale : 'en'];
   const labels = depositCopy(locale);
   const groups = new Map<string, DepositRankingGroup>();
   for (const product of products) {

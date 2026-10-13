@@ -1,4 +1,4 @@
-import type { PublicLocale } from './public-locale.ts';
+import type { EditorialLocale } from './public-locale.ts';
 import type { GuideSlug } from './public-guides.ts';
 
 type GuideText = { intro: string; sections: { title: string; body: string }[]; comparison: string };
@@ -8,7 +8,7 @@ export const GUIDE_SOURCES: Record<GuideSlug, { title: string; href: string }[]>
   'gic-maturity-and-withdrawals': [{ title: 'FCAC · Guaranteed investment certificates and term deposits', href: 'https://www.canada.ca/en/financial-consumer-agency/services/rights-responsibilities/rights-investing/rights-guaranteed-investment-certificates.html' }],
   'switching-bank-accounts': [{ title: 'FCAC · Transferring your products or services', href: 'https://www.canada.ca/en/financial-consumer-agency/services/banking/transferring-products-services.html' }]
 };
-const CONTENT: Record<PublicLocale, Record<GuideSlug, GuideText>> = {
+const CONTENT: Record<EditorialLocale, Record<GuideSlug, GuideText>> = {
   en: {
     'base-and-promotional-rates': {
       intro: 'A headline rate needs a time period and conditions to be useful.',

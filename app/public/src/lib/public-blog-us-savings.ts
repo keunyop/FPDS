@@ -1,5 +1,5 @@
 import type { BlogContent } from './public-blog-content.ts';
-import type { PublicLocale } from './public-locale.ts';
+import type { EditorialLocale } from './public-locale.ts';
 
 export const US_SAVINGS_SOURCES = [
   { id: 'ally-us', title: 'Ally Bank — Savings Account', href: 'https://www.ally.com/bank/online-savings-account/' },
@@ -8,7 +8,7 @@ export const US_SAVINGS_SOURCES = [
   { id: 'cfpb-apy', title: 'CFPB — Annual Percentage Yield Calculation', href: 'https://www.consumerfinance.gov/rules-policy/regulations/1030/a/' }
 ] as const;
 
-export const US_SAVINGS_CONTENT: Record<PublicLocale, BlogContent> = {
+export const US_SAVINGS_CONTENT: Record<EditorialLocale, BlogContent> = {
   en: {
     title: 'Ally vs Capital One vs Amex: high-yield savings compared',
     description: 'Compare US high-yield savings accounts from Ally, Capital One and American Express: monthly fees, variable APY, withdrawal access and a USD 10,000 example.',
@@ -113,4 +113,4 @@ export const US_SAVINGS_PRESENTATION = {
   en: { scope: 'United States · High-yield savings', comparison: 'Three accounts at a glance', compare: 'Compare US savings accounts', compareBody: 'Use SwitchaBank’s published US savings details to build your shortlist.', action: 'Explore US savings', about: 'US high-yield savings account comparisons' },
   ko: { scope: '미국 · 고금리 저축계좌', comparison: '세 계좌 한눈에 비교', compare: '미국 저축계좌 비교하기', compareBody: 'SwitchaBank에 공개된 미국 저축상품 조건으로 후보를 좁혀 보세요.', action: '미국 저축상품 보기', about: '미국 고금리 저축계좌 비교' },
   ja: { scope: '米国 · 高金利貯蓄口座', comparison: '3口座をひと目で比較', compare: '米国の貯蓄口座を比較', compareBody: 'SwitchaBankで公開中の米国貯蓄商品の条件から候補を絞れます。', action: '米国の貯蓄商品を見る', about: '米国高金利貯蓄口座の比較' }
-} satisfies Record<PublicLocale, object>;
+} satisfies Record<EditorialLocale, object>;

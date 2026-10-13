@@ -1,5 +1,17 @@
 # FPDS API Service
 
+
+## Public Filipino locale - 2026-10-13
+
+Public queries, taxonomy, dashboard labels and feedback accept `fil`; unsupported
+locales still fall back to English for reads and fail validation for feedback.
+Source-derived product names, financial conditions and evidence remain unchanged.
+Apply `0048_public_feedback_filipino.sql` before releasing API and Public together.
+The additive locale constraint preserves existing feedback, product/country scope,
+retention and private boundaries. A code rollback can leave the expanded constraint
+in place; do not delete Filipino feedback to shrink it. Admin language/country
+activation and collection profiles are unchanged. No live migration is applied here.
+
 ## Public database egress reduction - 2026-10-12
 
 Public GET routes open explicitly read-only database connections. Validated,

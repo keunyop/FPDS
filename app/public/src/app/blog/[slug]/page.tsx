@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BlogInfographic, BlogYieldChart } from '@/components/fpds/public/blog-infographic';
@@ -35,6 +35,7 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
   if (!isBlogSlug(slug)) notFound();
   const query = await searchParams;
   const locale = normalizePublicLocale(typeof query.locale === 'string' ? query.locale : '');
+  if (locale === "fil") redirect(blogHref(slug, "en", typeof query.country_code === "string" ? query.country_code : undefined));
   const copy = blogCopy(locale);
   const content = blogContent(slug, locale);
   const sources = blogSources(slug);

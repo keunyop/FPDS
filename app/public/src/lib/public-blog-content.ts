@@ -1,7 +1,7 @@
 import { US_CD_CONTENT, US_CD_PRESENTATION, US_CD_SOURCES } from './public-blog-us-cd.ts';
 import { US_SAVINGS_CONTENT, US_SAVINGS_PRESENTATION, US_SAVINGS_SOURCES } from './public-blog-us-savings.ts';
 import { GIC_CONTENT, GIC_PRESENTATION, GIC_SOURCES } from './public-blog-gic.ts';
-import type { PublicLocale } from './public-locale.ts';
+import type { EditorialLocale } from './public-locale.ts';
 import type { BlogSlug } from './public-blog.ts';
 import { blogCopy } from './public-blog.ts';
 import { CHEQUING_CONTENT, CHEQUING_PRESENTATION, CHEQUING_SOURCES } from './public-blog-chequing.ts';
@@ -27,7 +27,7 @@ export type BlogContent = {
   checklist: string[];
   faq: { question: string; answer: string }[];
 };
-const content: Record<PublicLocale, BlogContent> = {
+const content: Record<EditorialLocale, BlogContent> = {
   en: {
     title: 'EQ Bank vs Tangerine vs TD: how to compare savings accounts',
     description: 'Compare EQ Bank, Tangerine and TD savings account conditions: monthly fees, bonus requirements, promotional rates and transaction costs, with a worked example.',
@@ -221,7 +221,7 @@ const content: Record<PublicLocale, BlogContent> = {
     ]
   }
 };
-const articles: Record<BlogSlug, Record<PublicLocale, BlogContent>> = {
+const articles: Record<BlogSlug, Record<EditorialLocale, BlogContent>> = {
   'high-yield-savings-vs-cds-us': US_CD_CONTENT,
   'ally-vs-capital-one-vs-amex-high-yield-savings': US_SAVINGS_CONTENT,
   'cashable-vs-non-cashable-gic-canada': GIC_CONTENT,

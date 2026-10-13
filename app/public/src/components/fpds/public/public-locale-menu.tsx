@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { getPublicMessages, normalizePublicLocale, type PublicLocale } from "@/lib/public-locale";
+import { getPublicMessages, normalizePublicLocale, PUBLIC_LOCALES } from "@/lib/public-locale";
 import { cn } from "@/lib/utils";
 
 export function buildLocaleHref(pathname: string, searchParams: ReadonlyURLSearchParams, locale: string) {
@@ -41,7 +41,7 @@ export function PublicLocaleMenu({
   const searchParams = useSearchParams();
   const locale = normalizePublicLocale(searchParams.get("locale") ?? "");
   const copy = getPublicMessages(locale);
-  const options: PublicLocale[] = ["en", "ko", "ja"];
+  const options = PUBLIC_LOCALES;
 
   return (
     <div className={className}>
@@ -68,7 +68,7 @@ export function PublicLocaleMenu({
               <DropdownMenuItem asChild className="min-h-11 cursor-pointer px-2.5" key={option}>
                 <Link href={buildLocaleHref(pathname, searchParams, option)}>
                   <span className="flex min-w-0 flex-1 items-center gap-2">
-                    <span className="w-7 text-xs font-semibold uppercase text-muted-foreground">{option}</span>
+                    <span className="w-8 text-xs font-semibold uppercase text-muted-foreground">{option}</span>
                     <span className="truncate">{getPublicMessages(option).localeName}</span>
                   </span>
                   {active ? <Check className="size-4 text-primary" aria-hidden="true" /> : null}

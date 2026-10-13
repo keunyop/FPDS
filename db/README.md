@@ -26,7 +26,7 @@ psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT current_database(
 ## 2. 전체 migration 적용
 
 [migrations](migrations)의 SQL 파일을 이름의 번호순으로 모두 적용한다.
-현재 순서는 `0001`부터 `0047`까지이며, 중간 파일도 생략하지 않는다.
+현재 순서는 `0001`부터 `0048`까지이며, 중간 파일도 생략하지 않는다.
 SQL 파일에 정의된 transaction 범위대로 적용하며 오류가 발생하면 다음 파일로 진행하지 않는다.
 
 ```powershell
@@ -61,8 +61,8 @@ psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -c '\dt'
 psql -X "$env:FPDS_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT country_code, status FROM country_registry ORDER BY country_code;'
 ```
 
-적용 기록을 확인한다. 현재 47개 SQL 파일을 모두 적용하면
-44개 기록과 마지막 `0047_product_type_collection_fields.sql`이 남는다.
+적용 기록을 확인한다. 현재 48개 SQL 파일을 모두 적용하면
+45개 기록과 마지막 `0048_public_feedback_filipino.sql`이 남는다.
 `0009`, `0014`, `0015`는 적용 기록을 추가하지 않으므로 SQL 실행 결과도 함께 확인한다.
 테이블과 국가 기준 데이터도 확인한다.
 

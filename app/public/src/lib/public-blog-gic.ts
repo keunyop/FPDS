@@ -1,5 +1,5 @@
 import type { BlogContent } from './public-blog-content.ts';
-import type { PublicLocale } from './public-locale.ts';
+import type { EditorialLocale } from './public-locale.ts';
 
 export const GIC_SOURCES = [
   {
@@ -23,7 +23,7 @@ export const GIC_SOURCES = [
     "href": "https://www.canada.ca/en/financial-consumer-agency/services/rights-responsibilities/rights-investing/rights-guaranteed-investment-certificates.html"
   }
 ] as const;
-export const GIC_CONTENT: Record<PublicLocale, BlogContent> = {
+export const GIC_CONTENT: Record<EditorialLocale, BlogContent> = {
   "en": {
     "title": "Cashable vs non-cashable GICs in Canada: compare access before rates",
     "description": "Compare Canadian cashable and non-cashable GICs using CIBC, RBC and TD examples. Understand the 30-day interest condition, maturity dates and a CAD 10,000 example.",

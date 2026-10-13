@@ -267,6 +267,7 @@ export function ProductDetailSurface({
 }
 
 function breadcrumbLabel(locale: string) {
+  if (locale === "fil") return "Lokasyon sa site";
   if (locale === "ko") {
     return "경로";
   }
@@ -285,6 +286,7 @@ function catalogLabel(product: PublicProduct, locale: string) {
 }
 
 function relatedTitle(bankName: string, locale: string) {
+  if (locale === "fil") return "Mga kaugnay na produkto ng " + bankName;
   if (locale === "ko") {
     return bankName + "의 관련 상품";
   }
@@ -382,6 +384,15 @@ function detailLabel(key: string, locale: string) {
     taxBenefits: "Tax benefits",
     term: "Term",
   };
+  if (locale === "fil") {
+    const filLabels: Record<string, string> = {
+      applicationMethod: "Paraan ng pag-apply", base12MonthRate: "Karaniwang rate para sa 12 buwan",
+      customerTags: "Mga kategorya ng customer", depositAmount: "Halagang idedeposito",
+      depositInsurance: "Deposit insurance", eligibility: "Mga kwalipikasyon", minimumDeposit: "Minimum na deposito",
+      notes: "Mga paalala", postMaturityRate: "Rate pagkatapos mag-mature", rate: "Rate", taxBenefits: "Mga benepisyo sa buwis", term: "Tagal"
+    };
+    return filLabels[key] ?? labels[key] ?? key;
+  }
   if (locale === "ko") {
     const koLabels: Record<string, string> = {
       applicationMethod: "가입 방법",

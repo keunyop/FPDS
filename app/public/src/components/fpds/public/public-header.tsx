@@ -21,7 +21,7 @@ function HeaderContent() {
     document.documentElement.lang = locale;
   }, [locale]);
 
-  const skipLabel = locale === "ko" ? "본문으로 건너뛰기" : locale === "ja" ? "本文へ移動" : "Skip to content";
+  const skipLabel = locale === 'fil' ? "Lumaktaw sa nilalaman" : (locale === "ko" ? "본문으로 건너뛰기" : locale === "ja" ? "本文へ移動" : "Skip to content");
 
   return (
     <>

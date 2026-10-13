@@ -101,7 +101,8 @@ export function PublicMobileMenu() {
                   {country.code}
                 </span>
                 <span className="min-w-0 flex-1 truncate">
-                  {formatPublicCountryName(country.code, locale)}
+                  <span className="block truncate">{formatPublicCountryName(country.code, locale)}</span>
+                  {country.count === 0 ? <span className="block text-[11px] font-normal text-muted-foreground">{countryCopy.unavailable}</span> : null}
                 </span>
                 {active ? <Check className="size-4 text-primary" aria-hidden="true" /> : null}
               </Link>
