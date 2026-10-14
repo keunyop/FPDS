@@ -461,6 +461,19 @@ def _should_try_browser_rendered_rate_fallback(response: FetchedResponse, policy
     if not hostname or not host_matches_allowed_domains(hostname, policy.allowed_domains):
         return False
     decoded = response.body.decode(_get_charset(response.headers.get("content-type", "")), errors="replace")
+    # A selected official SPA can return a successful empty application root
+    # rather than its product/menu DOM. Script text (including cached rates)
+    # is not visible evidence. Render once under the existing shared budget;
+    # populated pages, soft 404s and ordinary empty HTML do not qualify here.
+    from bs4 import BeautifulSoup
+    shell = BeautifulSoup(decoded, "html.parser")
+    scripts = bool(shell.find("script", src=True))
+    app = shell.select_one('[data-page], #app, #__nuxt, #root')
+    if app is not None and scripts:
+        for hidden in app.find_all(["script", "style", "noscript"]):
+            hidden.decompose()
+        if not app.get_text(" ", strip=True) and not app.find(["h1", "h2", "a", "table", "input"]):
+            return True
     visible_text = re.sub(r"<[^>]+>", " ", decoded)
     lowered = visible_text.lower()
     unresolved_rate_placeholder = bool(

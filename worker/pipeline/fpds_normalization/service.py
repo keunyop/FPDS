@@ -4642,6 +4642,22 @@ def _looks_like_broad_page_copy(*, field_name: str, value: str, grounding_metada
                 and metadata.get("official_verification_status") == "match"
                 and quote == normalized and security_meaning(quote) is not None):
             return False
+    if field_name == "fee_waiver_condition":
+        from worker.native_compact_account import category_fee_value
+        metadata = grounding_metadata or {}
+        quote = " ".join(str(metadata.get("official_evidence_quote") or "").split())
+        if (metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+                and metadata.get("official_verification_status") == "match"
+                and quote == normalized and category_fee_value(metadata.get("official_evidence_quote")) is not None):
+            return False
+    if field_name == "term_length_text":
+        from worker.native_lending_faq import purpose_repayment_terms
+        metadata = grounding_metadata or {}
+        quote = " ".join(str(metadata.get("official_evidence_quote") or "").split())
+        if (metadata.get("official_grounding_contract_version") == "collection-official-grounding-v2"
+                and metadata.get("official_verification_status") == "match"
+                and quote == normalized and purpose_repayment_terms(quote) is not None):
+            return False
     return len(normalized) >= 240 and field_name in concise_fields
 
 

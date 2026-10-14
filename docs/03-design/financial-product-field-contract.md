@@ -1,5 +1,15 @@
 # Financial Product Field Contract
 
+Native earning-balance and repayment clarification (2026-10-13): keep the whole
+owned annual-rate declaration, its exact source-stated interest-earning threshold and
+original quote. A deterministic summary may repeat only that printed amount and
+currency under `Minimum balance to earn interest` (daily only when explicit) so comparison gates
+retain its conditional meaning. Maintaining and earning balances remain separate.
+Preserve the full below-ADB fee trigger/monthly timing and independently proved
+purpose-dependent repayment text, even above the broad-copy length threshold.
+Fixing periods are not repayment terms; no scalar rate/day conversion, new field,
+unit, type or essential-policy change. See [policy](collection-accuracy-policy.md).
+
 Native price/rate clarification (2026-10-07): native percent-header annual card
 and all-balances deposit values retain their literal named row, complete notes
 and actual companion origin. Purchase/cash columns and baseline/excess account

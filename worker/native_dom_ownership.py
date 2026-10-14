@@ -16,10 +16,40 @@ def _literal_attribute_name(value):
     return label.get_text(" ", strip=True)
 
 
+def responsive_heading_owner(root):
+    """A literal full H1 can own its provably complementary truncated copy."""
+    headings=[h for h in root.find_all('h1') if h.get_text(' ',strip=True)]
+    names={h.get_text(' ',strip=True) for h in headings}
+    full=[h for h in headings if not re.search(r'(?:…|\.\.\.)$',h.get_text(' ',strip=True))]
+    if len(names)!=2 or len(full)!=1:return None
+    owner=full[0];literal=owner.get_text(' ',strip=True)
+    for short in [h for h in headings if h is not owner]:
+        text=short.get_text(' ',strip=True)
+        if not re.search(r'(?:…|\.\.\.)$',text):return None
+        prefix=re.sub(r'(?:…|\.\.\.)$','',text).strip()
+        if len(prefix)<16 or len(prefix.split())<3 or not literal.casefold().startswith(prefix.casefold()):return None
+        parents=list(short.parents)[:5];other=list(owner.parents)[:5]
+        common=next((p for p in parents if any(p is q for q in other)),None)
+        if common is None or common is root or len(common.find_all('h1'))!=2:return None
+        hidden=set()
+        for p in parents:
+            if p is common:break
+            for cls in p.get('class',[]):
+                m=re.fullmatch(r'(sm|md|lg|xl|2xl):hidden',cls)
+                if m:hidden.add(m[1])
+        complementary=False
+        for p in other:
+            if p is common:break
+            classes=set(p.get('class',[]))
+            if 'hidden' in classes and any(f'{b}:{mode}' in classes for b in hidden for mode in ['block','flex','grid']):complementary=True
+        if not complementary:return None
+    return owner
+
+
 def unique_heading(root):
     headings = root.find_all("h1")
     names = {" ".join(h.get_text(" ", strip=True).split()): h for h in headings if h.get_text(" ", strip=True).strip()}
-    return next(iter(names.values())) if len(names) == 1 else None
+    return next(iter(names.values())) if len(names) == 1 else responsive_heading_owner(root)
 
 
 def owns_label(node, root, owner):

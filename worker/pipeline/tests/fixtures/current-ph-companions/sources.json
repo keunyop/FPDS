@@ -1,0 +1,56 @@
+[
+  {
+    "url": "https://www.landbank.com/personal-regular-passbook-savings-account",
+    "sha256": "b5a6d9766e6885ff2db72edbf1ecf212e88e184be10cfad038e13d7004684629",
+    "fetched_at": "2026-10-14T03:53:09.375164+00:00",
+    "file": "personal-regular-passbook-savings-account.html.gz"
+  },
+  {
+    "url": "https://www.landbank.com/personal-us-dollar-savings-account",
+    "sha256": "a99e1902c9b9fff30ba1e91ffbfc63fa55a6806c049492b28da0f33a9dac4eef",
+    "fetched_at": "2026-10-14T03:53:28.980681+00:00",
+    "file": "personal-us-dollar-savings-account.html.gz"
+  },
+  {
+    "url": "https://www.landbank.com/personal-perang-inimpok-savings-options-piso-account",
+    "sha256": "624ee84d024871c19993a91bf437e52bf223a15ccf72da407810134f35b624f8",
+    "fetched_at": "2026-10-14T03:53:22.870039+00:00",
+    "file": "personal-perang-inimpok-savings-options-piso-account.html.gz"
+  },
+  {
+    "url": "https://www.landbank.com/personal-savings-account-with-atm",
+    "sha256": "e234e241f3d393dcf3935cee8e3bc1b6da52070b551c7b056beee2f3c2b779da",
+    "fetched_at": "2026-10-14T03:53:16.289634+00:00",
+    "file": "personal-savings-account-with-atm.html.gz"
+  },
+  {
+    "url": "https://www.chinabank.ph/loans-faqs-homeplus-application",
+    "sha256": "e321a3d94256e982d33cf0d3146afe1a2f5dbbfaaa58201a397f5084d7077258",
+    "fetched_at": "2026-10-14T03:44:37.698029+00:00",
+    "file": "loans-faqs-homeplus-application.html.gz"
+  },
+  {
+    "url": "https://www.chinabank.ph/loans-homeplus",
+    "sha256": "81fa05f71bcf93a729cfaf241293eaa7432272f560d8ade459c1532a16b75c98",
+    "fetched_at": "2026-10-14T03:46:14.028730+00:00",
+    "file": "loans-homeplus.html.gz"
+  },
+  {
+    "url": "https://www.chinabank.ph/loans-faqs",
+    "sha256": "9c3c985a566cb2883ce8bdadf67f3ed997ca5a8144f3cad6df2c4a63953313d9",
+    "fetched_at": "2026-10-14T03:49:33.394475+00:00",
+    "file": "loans-faqs.html.gz"
+  },
+  {
+    "url": "https://www.securitybank.com/personal/accounts/savings-checking/easy-savings",
+    "sha256": "ef59d97152b42d2bcb36e2b6a079a670bbfee14aa560f08cfbbdc88d84e7041f",
+    "fetched_at": "2026-10-14T02:03:02.663059+00:00",
+    "file": "easy-savings.html.gz"
+  },
+  {
+    "url": "https://www.securitybank.com/personal/accounts/fees-charges/",
+    "sha256": "04b04ecc55fb554ea7dd8d15a10d45d9162a9aee8e9fb4431979ca5b9e7d978b",
+    "fetched_at": "2026-10-14T03:44:56.237055+00:00",
+    "file": "account-fees-charges.html.gz"
+  }
+]

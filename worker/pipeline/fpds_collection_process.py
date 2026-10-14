@@ -1,5 +1,5 @@
 """Versioned acquisition contract shared by health and the collection runner."""
-COLLECTION_PROCESS_VERSION = "2026-10-13-explicit-market-essential-proof-v20"
+COLLECTION_PROCESS_VERSION = "2026-10-13-linked-account-cost-conditions-v23"
 MAX_RESEARCH_ROUNDS = 2
 MAX_ADDITIONAL_PER_DETAIL = 2
 MAX_ADDITIONAL_PER_RUN = 48

@@ -400,9 +400,35 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return text(value).casefold() == q.casefold() and security_meaning(value) is not None
         if field_name == "early_withdrawal_penalty":
             return text(value).casefold() == q.casefold() and withdrawal_consequences_usable(value)
+        if field_name == "interest_rate_summary":
+            from worker.native_compact_account import compact_rate_summary
+            compact_summary=compact_rate_summary(quote)
+            if compact_summary is not None and text(value)==text(compact_summary):return True
+            from worker.native_account_features import feature_rate_summary
+            canonical_summary = feature_rate_summary(quote)
+            if canonical_summary is not None and text(value) == text(canonical_summary):
+                return True
         if field_name in {"interest_rate_summary", "purchase_interest_rate_summary", "fee_waiver_condition", "early_withdrawal_penalty"}:
             return text(value).casefold() == q.casefold()
         return bool(text(value)) and text(value).casefold() in q.casefold()
+    if field_name in {"minimum_balance","minimum_deposit","standard_rate"}:
+        from worker.native_compact_account import compact_feature_parts
+        parts=compact_feature_parts(quote)
+        if parts is not None:return parts[field_name]==Decimal(str(value))
+    if field_name in {"monthly_fee","public_display_fee"}:
+        from worker.native_compact_account import category_fee_value
+        fee=category_fee_value(quote)
+        if fee is not None:return fee==Decimal(str(value))
+    if field_name == "minimum_balance":
+        from worker.native_account_features import feature_minimum_balance
+        minimum = feature_minimum_balance(quote)
+        if minimum is not None:
+            return minimum == Decimal(str(value))
+    if field_name in {"monthly_fee", "public_display_fee"}:
+        from worker.native_account_features import feature_fee_value
+        fee = feature_fee_value(quote)
+        if fee is not None:
+            return fee == Decimal(str(value))
     if field_name == "annual_fee":
         from worker.native_named_card_cost_table import table_parts, annual_fee_value
         if table_parts(quote):
@@ -843,6 +869,14 @@ def country_currency_fallback(record: Mapping, evidence: list[dict]) -> str | No
 def _native_record_belongs(record, chunk, source_metadata):
     from worker.native_information_records import names_match
     owner = str(chunk.get("anchor_value") or "")
+    if chunk.get("anchor_type") in {"named_lending_faq_terms", "named_account_category_fee"}:
+        from urllib.parse import urljoin
+        from worker.native_lending_faq import faq_values
+        from worker.native_compact_account import category_fee_value
+        detail = canonical_url(source_metadata.get("normalized_source_url") or source_metadata.get("source_url"))
+        source = canonical_url(chunk.get("source_url"))
+        links = {canonical_url(urljoin(source, u)) for u in re.findall(r"(?m)^(?:https?://|/)[^\s]+$", str(chunk.get("evidence_excerpt") or ""))}
+        return bool(detail and source and detail in links and names_match(owner, record.get("product_name")) and (category_fee_value(chunk.get("evidence_excerpt")) is not None if chunk.get("anchor_type")=="named_account_category_fee" else faq_values(chunk.get("evidence_excerpt")) is not None))
     if chunk.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee"}:
         from worker.native_single_card_pdf import issuer_product_match
         return issuer_product_match(owner,record.get("product_name"),chunk.get("source_url", ""))
@@ -908,7 +942,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         elif (e.get("anchor_type") == "linked_card_pricing_terms" and not stored_link_belongs(
                     record, m, evidence, source_metadata, origin)):
             reason = "current_detail_pricing_link_unproven"
-        elif (e.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_assertion", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_cost_table", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_assertion", "owned_referenced_apy", "owned_compact_account_features", "named_account_category_fee", "named_lending_faq_terms", "owned_account_feature_rate", "owned_account_feature_fee", "owned_account_feature_deposit", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_cost_table", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
                 and not _native_record_belongs(record, e, source_metadata)):
             reason = "native_product_mismatch"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
@@ -929,9 +963,9 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             # A balance that waives transaction charges is not an opening or
             # general minimum balance, nor a monthly-account-fee threshold.
             reason = "transaction_waiver_balance_not_minimum"
-        elif (e.get("anchor_type") in {"single_card_annual_fee", "named_html_annual_fee", "owned_account_assertion", "owned_lending_terms", "named_card_cost_table"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
+        elif (e.get("anchor_type") in {"owned_compact_account_features", "named_account_category_fee", "named_lending_faq_terms", "owned_account_feature_rate", "owned_account_feature_fee", "owned_account_feature_deposit", "single_card_annual_fee", "named_html_annual_fee", "owned_account_assertion", "owned_lending_terms", "named_card_cost_table"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
             reason = "native_account_conditions_incomplete"
-        elif (e.get("anchor_type") in {"linked_card_pricing_terms", "single_card_purchase_terms", "card_information_rate", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_cost_table", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"linked_card_pricing_terms", "single_card_purchase_terms", "card_information_rate", "owned_referenced_apy", "owned_compact_account_features", "named_account_category_fee", "named_lending_faq_terms", "owned_account_feature_rate", "owned_account_feature_fee", "owned_account_feature_deposit", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_cost_table", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
                 and name in {"standard_rate", "interest_rate_summary", "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
                 and (not exact_quote(e.get("evidence_excerpt"), quote)
                      or (name in {"interest_rate_summary", "purchase_interest_rate_summary"}

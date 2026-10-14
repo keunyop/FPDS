@@ -125,6 +125,17 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     from worker.native_linked_card_pricing import pricing_records
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in pricing_records(soup))
     sections.extend(_named_rate_basis_sections(soup))
+    from worker.native_dom_ownership import responsive_heading_owner
+    responsive_owner = responsive_heading_owner(soup.find('main') or soup.body or soup)
+    if responsive_owner is not None:
+        literal = responsive_owner.get_text(' ', strip=True)
+        sections.append(_RawSegment("responsive_product_heading", literal, None, literal))
+    from worker.native_lending_faq import lending_faq_records, primary_lending_headings
+    sections.extend(_RawSegment(kind, owner, None, quote) for kind, owner, quote in [*lending_faq_records(soup), *primary_lending_headings(soup)])
+    from worker.native_compact_account import compact_account_records, category_fee_records
+    sections.extend(_RawSegment(kind, owner, None, quote) for kind, owner, quote in [*compact_account_records(soup), *category_fee_records(soup)])
+    from worker.native_account_features import feature_records
+    sections.extend(_RawSegment(kind, owner, None, quote) for kind, owner, quote in feature_records(soup))
     from worker.native_currency_records import currency_records
     sections.extend(_RawSegment("owned_currency_declaration", owner, None, quote)
                     for owner, quote in currency_records(soup))

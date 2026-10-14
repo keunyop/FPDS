@@ -1,5 +1,39 @@
 # Worker Boundary
 
+## Current native features and linked essential FAQs - 2026-10-13
+
+Parser v31/process `2026-10-13-linked-account-cost-conditions-v23`, market v8,
+recognize bounded owned account feature rows and complete named lending FAQs.
+Keep the exact annual basis, earning balance, below-ADB fee trigger/monthly timing,
+fixing/repricing and purpose-dependent repayment terms. A long proved repayment
+condition is not discarded as broad page copy. Supporting facts require current
+independent origins, exact product ownership and a literal selected-detail link.
+
+A lossless deposit-rate summary retains the whole original source declaration
+and repeats only its explicit source-stated earning amount/currency under the canonical
+minimum-balance label. Exact deterministic validation protects the value; the
+original evidence quote remains unchanged. Public treats this rate as conditional,
+with no unconditional comparable/display rate. Waivers without monthly meaning
+cannot become zero; annualization, currency defaults and essential gates stay fixed.
+
+Official empty SPA roots reuse bounded safe rendering. Full and truncated headings
+are aliases only with proved complementary responsive CSS. Lending H2/H3 identities
+need visible/SEO/issuer/route corroboration. Missing-essential FAQ traversal reserves
+one existing follow-up slot within the same two-wave/two-URL limit; auth/servicing
+links stay excluded. No bank-specific acceptance rule or extra research budget.
+
+A compact source definition/table can prove account identity with its SEO and
+exact route. Linked shared costs need a matching named account row, currency,
+exact savings column and literal detail link. Preserve complete cost conditions;
+unrelated rate/card-benefit columns cannot donate facts or create false masks.
+Only source-stated earning periods are retained; no daily cadence is invented.
+
+Five additional automatic publications (LANDBANK3, Chinabank1, Security Bank1)
+bring PH to 12.
+Local v23 and external APIs/web details were verified; external runtime is v20/v8,
+so the follow-up code release remains separate from its completed data publication.
+See the [additional collection report](../docs/00-governance/ph-additional-collection-publication-2026-10-13.md).
+
 ## Explicit market, currency and complete decision records - 2026-10-13
 
 Parser v29/process `2026-10-13-explicit-market-essential-proof-v20` and market

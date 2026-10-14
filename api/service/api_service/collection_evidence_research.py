@@ -127,17 +127,25 @@ def assess_captured_essentials(item: ExtractionInput, *, run_id: str) -> dict:
 
 
 
-def _link_relevance(*, product_type, url, label, missing):
+def _link_relevance(*, product_type, url, label, missing, identity=""):
     # Prudential/capital disclosures do not state consumer product essentials.
     if re.search(r"basel|pillar[+ _-]*3|capital[+ _-]+adequacy", f'{urlparse(url).path} {label}', re.I):
         return 0
     if _source_scope_exclusion_reason(product_type=product_type, fingerprint=f'{url} {label}') == 'non_consumer_business_page':
         return 0
-    if _has_excluded_link_signal(normalized_url=url, anchor_text=label):
+    path = urlparse(url).path.casefold()
+    informational_faq = (bool(missing) and bool(re.search(r"(?:^|[-_/])faqs?(?:$|[-_/])", path))
+        and not re.search(r"(?:^|[-_/])(?:login|logout|signin|sign-in|register|auth|status|servicing|post-approval|client-servicing|security)(?:$|[-_/])", path))
+    if _has_excluded_link_signal(normalized_url=url, anchor_text=label) and not informational_faq:
         return 0
     if _is_non_product_supporting_document(product_type=product_type, normalized_url=url, anchor_text=label):
         return 0
     score = _detail_companion_link_score(product_type=product_type, normalized_url=url, anchor_text=label)
+    if informational_faq:
+        from worker.native_information_records import name_key
+        words = set(name_key(identity).split()) - {"bank", "loan", "mortgage", "account", "credit", "card", "savings"}
+        observed = set(name_key(path + " " + label).split())
+        score = max(score, 30 + 40 * len(words & observed))
     # A legal container is a lead only while required terms/rates remain missing.
     if score <= 0 and re.fullmatch(r'(?:account|product|deposit) terms(?: and conditions)?', label.strip(), re.I):
         score = 1
@@ -313,7 +321,9 @@ class EvidenceResearchPlanner:
                     if (url in attempted_urls or url == parent or _url_country_scope_conflicts(country_code=ctx.country_code, normalized_url=url)
                             or _url_locale_conflicts_source_language(normalized_url=url, source_language=ctx.source_language)):
                         continue
-                    score = _link_relevance(product_type=registry.product_type, url=url, label=link.anchor_text, missing=missing)
+                    from worker.pipeline.fpds_extraction.service import _captured_native_product_title
+                    identity = _captured_native_product_title(ctx, item.grounding_candidates) or ""
+                    score = _link_relevance(product_type=registry.product_type, url=url, label=link.anchor_text, missing=missing, identity=identity)
                     if score <= 0:
                         continue
                     candidate = {'link_id': sha256(url.encode()).hexdigest()[:16], 'url': url,
@@ -369,6 +379,15 @@ class EvidenceResearchPlanner:
                 lead = direct_rates[0]
                 selected = [lead, *[c for c in selected if c['url'] != lead['url']]][:budget]
                 diagnostic['required_rate_lead_reserved'] = lead['url']
+            if (not direct_rates and options and registry.product_type in {"mortgage", "personal-loan", "line-of-credit"}
+                    and any(re.search(r"rate|term", name, re.I) for name in missing)
+                    and re.search(r"(?:^|[-_/])faqs?/?$", urlparse(options[0]["url"]).path, re.I)
+                    and budget >= 2):
+                # Follow a literal FAQ index before spending the final slot on
+                # a generic companion. The second existing wave can capture
+                # its exact named application FAQ within the same two-URL cap.
+                selected = options[:1]
+                diagnostic["faq_followup_slot_reserved"] = True
             for candidate in selected:
                 url = candidate['url']
                 if url in sources:

@@ -1,5 +1,33 @@
 # FPDS Development Journal
 
+## 2026-10-13 - Additional PH bank audit, shared fixes and five publications
+
+- Bounded other-eight-bank audit: 35 new targets plus one reused detail, 31 direct
+  captures and nine retained renders; acquisition failures vs unproved financial essentials recorded
+  separately. No Admin collection API, paid/provider call or manual review.
+- Generic SPA rendering, corroborated responsive/H3 identity, two-wave named FAQ
+  research and atomic account/loan records fix actual acquisition/processing loss.
+  Parser31/process23 retain annual basis, native currency, complete fee triggers,
+  earning thresholds and purpose-dependent terms. Nine immutable source fixtures;
+  compact account identity and exact linked category costs.
+- Published LANDBANK's three savings products, Chinabank HomePlus and Security
+  Bank Easy Savings: PH12 across five banks. Final readback found/fixed unconditional comparison of an earning-
+  threshold rate; exact source-preserving canonical labels now yield conditional
+  rates and no comparable scalar. Three normal replacement versions retain history.
+- Actual rollback/storage checks pass (eight unique source pairs, three reused pairs);
+  42 final field origins/five receipts verified. External web/API and local detail
+  facts agree, ten country isolation404s; CA120/US85 and original PH7 preserved,
+  including 1,615 original version financial facts. Private evidence not exposed.
+- API671/Discovery86/final account-cost4/earlier focused33 pass. Broad Worker971
+  has the same four prior HEAD-reproduced failures; broad suite is not green. Foundation, syntax/UTF-8/JSON,
+  new-reference and diff checks pass. Full repo doctor has one unrelated ignored
+  temporary Admin README link error; changed references pass. Key files: shared native
+  helpers, parse/chunk,
+  extraction/accuracy/rate/normalization, API catalog and essential research.
+- Local4000 runs v23/v8; external health v20/v8. Data publication is complete;
+  this follow-up's hosted API/Worker release remains separate. Full results and
+  bounded exclusions: [additional collection report](ph-additional-collection-publication-2026-10-13.md).
+
 ## 2026-10-13 - PH zero-approval diagnosis, shared fixes and seven publications
 
 - Latest ten-bank batch: 28 Runs/75 candidates, zero approvals. Directly checked

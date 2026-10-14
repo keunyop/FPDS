@@ -584,6 +584,16 @@ def _captured_native_product_title(context, candidates):
     if _infer_product_type(context) in {"personal-loan", "mortgage", "line-of-credit"}:
         own = [c for c in candidates if c.source_document_id == context.source_document_id
             and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
+            and c.bank_code == context.bank_code and c.country_code == context.country_code and c.source_language == context.source_language]
+        from worker.native_lending_faq import corroborated_primary_lending_title
+        native = corroborated_primary_lending_title(url=url,
+            title=" ".join(c.evidence_excerpt for c in own if c.anchor_type == "document_title"),
+            headings=[c.evidence_excerpt for c in own if c.anchor_type == "primary_lending_heading"])
+        if native and discovery.get("multi_product_family_overview") is not True:
+            return native
+    if _infer_product_type(context) in {"personal-loan", "mortgage", "line-of-credit"}:
+        own = [c for c in candidates if c.source_document_id == context.source_document_id
+            and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id
             and c.bank_code == context.bank_code and c.country_code == context.country_code
             and c.source_language == context.source_language]
         seo = route_tokens(" ".join(c.evidence_excerpt for c in own if c.anchor_type == "document_title"))
@@ -638,6 +648,11 @@ def _captured_native_product_title(context, candidates):
                 names.add(literal)
         if len(names) == 1:
             return next(iter(names))
+    if _infer_product_type(context) == "savings":
+        own = [c for c in candidates if c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code and c.country_code == context.country_code and c.source_language == context.source_language]
+        from worker.native_compact_account import compact_primary_title
+        native = compact_primary_title(url=url,title=" ".join(c.evidence_excerpt for c in own if c.anchor_type == "document_title"),definitions=[c.anchor_value for c in own if c.anchor_type == "compact_account_definition"])
+        if native and not discovery.get("multi_product_family_overview"):return native
     native_heads = [c for c in candidates if c.anchor_type == "document_heading"
         and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
         and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
@@ -647,6 +662,13 @@ def _captured_native_product_title(context, candidates):
     native_heads = [c for c in native_heads if not re.fullmatch(
         r"(?:[$€£]\s*)?\d+(?:[,.]\d+)*\s*%?", _normalize_text(c.evidence_excerpt))]
     native_heads = list({_normalize_text(c.evidence_excerpt): c for c in native_heads}.values())
+    if _infer_product_type(context) in {"savings", "chequing"}:
+        responsive = [c for c in candidates if c.anchor_type == "responsive_product_heading"
+            and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+            and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
+            and c.country_code == context.country_code and c.source_language == context.source_language]
+        if len(responsive) == 1 and any(h.evidence_excerpt == responsive[0].evidence_excerpt for h in native_heads):
+            native_heads = responsive
     if len(native_heads) == 1:
         literal = _normalize_text(native_heads[0].evidence_excerpt)
         native_tokens = route_tokens(literal) - {"the", "bank", "card", "cards", "account", "accounts", "r", "tm"}
@@ -973,11 +995,53 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
         field_quotes = {}
         heading = _normalize_text(str(discovery.get("primary_heading") or ""))
         first_line = next((_normalize_text(line) for line in quote.splitlines() if line.strip()), "")
-        if own and ((c.anchor_type in {"document_heading", "owned_product_label", "primary_product_heading"} and first_line == identity) or first_line == heading or (c.anchor_type == "document_title" and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(quote).casefold()) == re.sub(r"[^a-z0-9]", "", identity.casefold()))):
+        if own and ((c.anchor_type in {"document_heading", "owned_product_label", "primary_product_heading", "primary_lending_heading", "responsive_product_heading", "compact_account_definition"} and first_line == identity) or first_line == heading or (c.anchor_type == "document_title" and re.sub(r"[^a-z0-9]", "", _clean_title_candidate(quote).casefold()) == re.sub(r"[^a-z0-9]", "", identity.casefold()))):
             values["product_name"] = identity
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
             for currency, pattern in CURRENCY_PATTERNS.items():
                 if re.search(pattern, identity, re.I):
+                    values["currency"] = currency
+        if own and c.anchor_type == "owned_compact_account_features" and names_match(c.anchor_value,identity) and _infer_product_type(context)=="savings":
+            from worker.native_compact_account import compact_feature_parts, compact_rate_summary
+            parts=compact_feature_parts(quote)
+            if parts:
+                values.update({name:float(parts[name]) for name in ["standard_rate","minimum_deposit","minimum_balance"]})
+                values.update(currency=parts["currency"],interest_rate_summary=compact_rate_summary(quote));field_quotes["interest_rate_summary"]=quote
+        if companion and c.anchor_type == "named_account_category_fee" and names_match(c.anchor_value,identity) and _infer_product_type(context)=="savings":
+            from worker.native_compact_account import category_fee_value
+            from urllib.parse import urljoin
+            from worker.pipeline.fpds_collection_accuracy import canonical_url
+            links={canonical_url(urljoin(c.retrieval_metadata.get("source_url", ""),u)) for u in re.findall(r"(?m)^(?:https?://|/)[^\s]+$",quote)}
+            if canonical_url(url) in links and category_fee_value(quote) is not None:values.update(monthly_fee=float(category_fee_value(quote)),fee_waiver_condition=quote)
+        if c.anchor_type == "named_lending_faq_terms" and companion and names_match(c.anchor_value, identity) and _infer_product_type(context) == "mortgage":
+            from urllib.parse import urljoin
+            from worker.native_lending_faq import faq_values
+            from worker.pipeline.fpds_collection_accuracy import canonical_url
+            named_links = {canonical_url(urljoin(c.retrieval_metadata.get("source_url", ""), u)) for u in re.findall(r"(?m)^(?:https?://|/)[^\s]+$", quote)}
+            facts = faq_values(quote)
+            if facts and canonical_url(url) in named_links:
+                values.update(interest_rate_summary=quote, rate_type=facts[0], term_length_text=facts[1])
+                field_quotes.update(rate_type=facts[0], term_length_text=facts[1])
+                from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
+                for currency, pattern in CURRENCY_PATTERNS.items():
+                    if re.search(pattern, quote, re.I) and quote_supports_value("currency", currency, quote):
+                        values["currency"] = currency
+        if own and c.anchor_type in {"compact_account_definition", "owned_compact_account_features", "named_account_category_fee", "named_lending_faq_terms", "primary_lending_heading", "owned_account_feature_rate", "owned_account_feature_fee", "owned_account_feature_deposit"} and names_match(c.anchor_value, identity) and _infer_product_type(context) in {"savings", "chequing"}:
+            from worker.native_account_features import feature_rate_value, feature_fee_value, feature_minimum_balance, feature_rate_summary
+            rate, fee = feature_rate_value(quote), feature_fee_value(quote)
+            if rate is not None:
+                values.update(standard_rate=float(rate), interest_rate_summary=feature_rate_summary(quote))
+                field_quotes["interest_rate_summary"] = quote
+            if fee is not None:
+                values.update(monthly_fee=float(fee), fee_waiver_condition=quote, minimum_balance=float(feature_minimum_balance(quote)))
+            if c.anchor_type == "owned_account_feature_deposit":
+                from worker.pipeline.fpds_collection_accuracy import _MONEY_AMOUNT
+                initial = re.fullmatch(_MONEY_AMOUNT, quote.splitlines()[-1], re.I)
+                if initial:
+                    values["minimum_deposit"] = float(initial[1].replace(",", ""))
+            from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
+            for currency, pattern in CURRENCY_PATTERNS.items():
+                if re.search(pattern, quote, re.I) and quote_supports_value("currency", currency, quote):
                     values["currency"] = currency
         if own and c.anchor_type == "owned_currency_declaration" and _normalize_text(str(c.anchor_value or "")) == identity:
             from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
@@ -5676,7 +5740,7 @@ def _extract_official_fields_with_ai(
                 "Transactions per month followed by a single Unlimited or integer is an ordinary monthly allowance. Header fee-waiver conditions concern the fee, not the separate transaction row. "
                 "A complete account-wide unlimited statement is distinct from a sentence defining when money leaving the account counts as a transaction. Keep actual balance, eligibility, channel or cost qualifiers binding. "
                 "Use verified_captured_fields as already-proven values with their exact source quotes, still checking all supplied conflicts. Concentrate on unresolved comparison facts; do not repeat searches. "
-                "Explicit currency codes/names and printed currency prefixes are denomination evidence only within the owned product; PHP/Php and Philippine pesos are explicit PHP, never a country default. Bare P or pesos are ambiguous. Monthly rates cannot be annualized; complete annual APR bounds must retain all fees, repayment bounds and payment-example assumptions. Illustrative amortization tables and average ACRs are not unconditional rates. Additional CAD/USD savings accounts and preferred foreign exchange benefits do not denominate the main chequing account. Explicit main-account or lead-account currency conditions remain binding. "
+                "Explicit currency codes/names and printed currency prefixes are denomination evidence only within the owned product; PHP/Php and Philippine pesos are explicit PHP, never a country default. Bare P or pesos are ambiguous. A compact account feature table must retain its explicit opening/maintaining/earning balances and annual rate; a shared category cost requires the same named account pricing row, exact savings/currency column and literal detail link, retaining its full monthly trigger. A native account feature rate must keep its required interest-earning balance; deterministic summaries retain the whole original declaration and its explicit daily threshold under the canonical minimum-balance label, with no guessed values; below-ADB service charges must keep the full consecutive-month trigger and explicit monthly collection timing. A waiver without proven monthly cost meaning cannot become zero. Monthly rates cannot be annualized; complete annual APR bounds must retain all fees, repayment bounds and payment-example assumptions. Illustrative amortization tables and average ACRs are not unconditional rates. Additional CAD/USD savings accounts and preferred foreign exchange benefits do not denominate the main chequing account. Explicit main-account or lead-account currency conditions remain binding. "
                 "An annual fee does not establish annual interest-rate units. A rate needs explicit annual, APR or APY evidence. "
                 "Return a match or mismatch only when the value is supported by both a supplied official source URL and "
                 "an exact quote copied from the selected evidence chunk. Copy its source_url exactly into sources. A summary or a different URL is not evidence. Otherwise return unverified. Preserve canonical units: "
@@ -5897,7 +5961,7 @@ def _select_official_grounding_chunks(
     # Explicit column identities precede broad mixed-product sections. This
     # retains the same 24-chunk ceiling and reserves the existing companion slots.
     cells.sort(key=lambda c: len(identity_tokens & set(re.findall(r"[a-z0-9]+", c.evidence_excerpt.split("\n", 1)[0].lower()))), reverse=True)
-    cells = [c for c in candidates if c.anchor_type in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_apy", "owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "primary_product_heading", "owned_lending_terms", "named_card_cost_table", "owned_currency_declaration", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
+    cells = [c for c in candidates if c.anchor_type in {"single_card_purchase_terms", "single_card_annual_fee", "compact_account_definition", "owned_compact_account_features", "named_account_category_fee", "named_lending_faq_terms", "primary_lending_heading", "owned_account_feature_rate", "owned_account_feature_fee", "owned_account_feature_deposit", "owned_account_apy", "owned_account_assertion", "owned_referenced_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "primary_product_heading", "owned_lending_terms", "named_card_cost_table", "owned_currency_declaration", "named_deposit_apy", "named_card_rate_table", "named_balance_rate", "named_deposit_rate", "named_deposit_schedule", "named_deposit_fee", "document_heading", "named_card_regular_rates", "named_card_fee_row", "named_product_interest_terms", "contract_rate_row", "owned_base_fee", "owned_withdrawal_terms", "card_information_rate", "card_information_fee", "named_mortgage_rate_schedule", "credit_limit_rate_schedule", "native_rate_table", "native_product_terms", "financial_declaration", "labelled_financial_record", "product_terms_declaration", "card_purchase_rate_cell"}] + cells
     for candidate in cells[:8]:
         selected.append(candidate)
         seen.add(candidate.evidence_chunk_id)

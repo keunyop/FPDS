@@ -1,5 +1,33 @@
 # Admin pre-handover review and fixes
 
+## Philippines additional official evidence and publication - 2026-10-13
+
+Status: Complete for shared local fixes, verification and actual data publication.
+Preserve unrelated goals and prior publication history.
+Scope: the other banks in the latest PH ten-bank scope; examine official detail,
+linked fees/rates/terms and safely bounded additional essential evidence without
+Admin collection API. Reuse current captures and improve generic source paths
+only when actual evidence proves a defect. Publish additional automatic passes.
+Acceptance:
+- [x] Audit other-bank targets and complete bounded official essential research.
+- [x] Record bank/type exclusions vs missing acquisition/processing separately.
+- [x] Add regression evidence and verify any generic corrections end to end.
+- [x] Verify stored origins/rollback, publish additional automatic passes if any.
+- [x] Verify local/external Public, original/unrelated data, diff and journal.
+Limits: no guessed annualization/currency/zeros, weaker essential, manual approval,
+permanent recovery feature or unrelated deployment; local runtime verification.
+
+Outcome: Published LANDBANK3, Chinabank HomePlus1 and Security Bank Easy Savings1;
+PH12 across five banks. Audited 35 additional targets plus one reused current detail.
+Eight unique stored source pairs/42 current field origins/five receipts, rollback,
+all five external/local details and all 12 external catalog entries verified;
+ten wrong-country404s, CA120/US85 and original PH7/history preserved. No Admin
+collection API, provider/model call or manual review. API671/Discovery86/account-
+cost4 pass; broad Worker971 has four unchanged prior HEAD-reproduced failures.
+Foundation, syntax/UTF-8/JSON, nine immutable hashes, new references and diff pass;
+full repo doctor flags an unrelated ignored temporary README link. Local v23/v8,
+external v20/v8; the follow-up runtime release remains separate. Report/journal done.
+
 ## Philippines direct collection diagnosis and publication - 2026-10-13
 
 Status: Complete for shared local fixes and actual Public data publication. Preserve all other goals, ownership and unfinished work.

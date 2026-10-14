@@ -6555,6 +6555,26 @@ def _score_page_evidence(
     )
     if section_identity:
         primary_heading = section_identity
+    native_lending_identity = None
+    if not primary_heading and product_type in {"mortgage", "personal-loan", "line-of-credit"}:
+        from bs4 import BeautifulSoup
+        from worker.native_lending_faq import primary_lending_headings, corroborated_primary_lending_title
+        native_soup = BeautifulSoup(html_text, "html.parser")
+        for excluded in native_soup.select('nav, [role="navigation"], footer, aside, script, style, noscript'):
+            excluded.decompose()
+        native_body = native_soup.get_text(" ", strip=True)
+        semantic = {"mortgage": r"\b(?:home loan|mortgage)\b", "personal-loan": r"\bpersonal loan\b", "line-of-credit": r"\bline of credit\b"}[product_type]
+        if re.search(semantic, native_body, re.I):
+            native_lending_identity = corroborated_primary_lending_title(url=raw_url, title=title_text,
+                headings=[literal for _, _, literal in primary_lending_headings(native_soup)])
+            if native_lending_identity:
+                primary_heading = native_lending_identity
+    if not primary_heading and product_type=="savings":
+        from bs4 import BeautifulSoup
+        from worker.native_compact_account import compact_account_records,compact_primary_title
+        compact_soup=BeautifulSoup(html_text,"html.parser")
+        native_account=compact_primary_title(url=raw_url,title=title_text,definitions=[owner for kind,owner,_ in compact_account_records(compact_soup) if kind=="compact_account_definition"])
+        if native_account:primary_heading=native_account
     heading_text = " ".join([primary_heading, *parser.secondary_headings]).strip()
     visible_body_text = " ".join(parser.body_chunks[:40]).strip()
     structured_sections = extract_structured_text_sections(html_text)
@@ -6580,6 +6600,9 @@ def _score_page_evidence(
             list(_DISCOVERY_PROFILE_TERMS.get(_canonical_product_type_code(product_type), ())),
         )
     primary_heading_match = _identity_term_hits(primary_heading, identity_terms)
+    if native_lending_identity:
+        title_match += 1
+        primary_heading_match += 1
     if product_type == "chequing":
         def named_checking(value: str) -> bool:
             return bool(re.fullmatch(r"(?:[a-z0-9'-]+\s+){0,5}(?:checking|chequing)", value.split("|", 1)[0].strip().lower()))
@@ -6634,6 +6657,8 @@ def _score_page_evidence(
     score = 0
     reason_codes: list[str] = []
     product_identity_match = bool(title_match or primary_heading_match or url_identity_match)
+    if native_lending_identity:
+        reason_codes.append("corroborated_native_lending_heading")
     if section_identity and not multi_product_family_overview and not scope_exclusion_reason and attribute_hits >= 2:
         reason_codes.append("single_product_section_identity")
     if product_identity_match:
