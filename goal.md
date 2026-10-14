@@ -1,5 +1,18 @@
 # Admin pre-handover review and fixes
 
+## Methodology Philippines map marker - 2026-10-13
+
+Status: Complete for local implementation and verification; preserve all prior goals and ownership.
+Scope: Add the missing PH coordinate to the existing Public coverage map.
+Acceptance:
+- [x] Match the existing Equal Earth projection and published-country gating.
+- [x] Verify PH active/inactive, empty/error, locales and 390/768/1440px layouts.
+- [x] Complete affected checks, final diff and journal.
+Limits: Local Public code only; no deployment, collection or data writes.
+Outcome: PH uses the existing Equal Earth projection and published-only gating.
+Public120, lint/typecheck and 27 Chrome cases pass; EN/KO/JA/fil, active/inactive,
+zero/empty/error and 390/768/1440px screenshots reviewed. No deployment or data write.
+
 ## Philippines additional official evidence and publication - 2026-10-13
 
 Status: Complete for shared local fixes, verification and actual data publication.

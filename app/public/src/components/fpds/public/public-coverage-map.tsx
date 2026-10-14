@@ -26,6 +26,7 @@ const COUNTRY_MARKERS: Record<
   KR: { x: 816.56, y: 147.92, labelDx: -17, labelDy: 19 },
   MX: { x: 231.43, y: 189.7 },
   NZ: { x: 920.57, y: 418.71 },
+  PH: { x: 828.3, y: 228.14 },
   SG: { x: 783.27, y: 270.31, labelDy: 19 },
   US: { x: 261.32, y: 135.25 }
 };

@@ -1,5 +1,18 @@
 # FPDS Development Journal
 
+## 2026-10-13 - Methodology Philippines map marker
+
+- Added PH to PublicCoverageMap's missing coordinate registry using the existing
+  Equal Earth projection (828.3, 228.14). Published-only gating, country totals,
+  active selection, semantic colors and localized accessible list remain intact.
+- Verification: Public120, lint/typecheck, 27 local Chrome cases with no browser
+  errors, EN/KO/JA/fil, PH active/inactive, zero-count exclusion and empty/error
+  states. Reviewed 390/768/1440px screenshots; no document overflow. The fixture
+  switches bypassed Next development fetch caching. UTF-8 and diff checks pass.
+- Key file: app/public/src/components/fpds/public/public-coverage-map.tsx.
+  Local code only; no production build, deployment, collection or data writes.
+  Next action: include the marker in the normal Public release.
+
 ## 2026-10-13 - Additional PH bank audit, shared fixes and five publications
 
 - Bounded other-eight-bank audit: 35 new targets plus one reused detail, 31 direct
