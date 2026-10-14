@@ -52,8 +52,6 @@ _SUBTYPE_REGISTRY = {
 }
 _RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
-_MAX_MONTHLY_ACCOUNT_FEE = Decimal("500")
-_MAX_ANNUAL_CARD_FEE = Decimal("2000")
 _NUMERIC_FIELDS = _RATE_FIELDS | _FEE_FIELDS | {"minimum_balance", "minimum_deposit"}
 _JSON_FIELDS = {"term_rate_table"}
 _DEPOSIT_GOLDEN_REQUIRED_PAYLOAD_FIELDS = (
@@ -718,6 +716,7 @@ def _normalize_candidate(
     )
     _align_public_display_fee(
         product_type_family=product_type_family,
+        currency=currency,
         candidate_payload=candidate_payload,
         field_mapping_metadata=field_mapping_metadata,
         normalized_values_for_links=normalized_values_for_links,
@@ -1029,8 +1028,9 @@ def _compute_validation_issue_codes(
             issues.append("invalid_numeric_range")
         if not is_rate and decimal_value < 0:
             issues.append("invalid_numeric_range")
-        fee_limit = _MAX_ANNUAL_CARD_FEE if field_name == "annual_fee" else _MAX_MONTHLY_ACCOUNT_FEE
-        if is_fee and decimal_value >= fee_limit:
+        from worker.pipeline.fpds_money_safety import fee_plausibility_limit
+        fee_limit = fee_plausibility_limit(field_name, currency)
+        if is_fee and fee_limit is not None and decimal_value >= fee_limit:
             issues.append("invalid_numeric_range")
 
     public_display_rate = _as_decimal(candidate_payload.get("public_display_rate"))
@@ -2298,6 +2298,7 @@ def _align_minimum_balance_to_fee_waiver(
 def _align_public_display_fee(
     *,
     product_type_family: str | None,
+    currency: str | None = None,
     candidate_payload: dict[str, object],
     field_mapping_metadata: dict[str, object],
     normalized_values_for_links: dict[str, object],
@@ -2310,7 +2311,10 @@ def _align_public_display_fee(
         return
     monthly_fee = _as_decimal(candidate_payload.get("monthly_fee"))
     public_fee = _as_decimal(candidate_payload.get("public_display_fee"))
-    if monthly_fee is None or monthly_fee >= _MAX_MONTHLY_ACCOUNT_FEE or monthly_fee == public_fee:
+    from worker.pipeline.fpds_money_safety import fee_plausibility_limit
+    fee_limit = fee_plausibility_limit("monthly_fee", currency)
+    if (monthly_fee is None or not monthly_fee.is_finite() or monthly_fee < 0
+            or (fee_limit is not None and monthly_fee >= fee_limit) or monthly_fee == public_fee):
         return
     source_link = next(
         (link for link in evidence_links_for_output if link.field_name == "monthly_fee"),
@@ -2357,28 +2361,31 @@ def _align_public_display_fee(
 
 
 def _is_direct_recurring_monthly_fee(*, value: Decimal, context: str) -> bool:
+    from worker.pipeline.fpds_collection_accuracy import _MONEY_PREFIX
     normalized = _normalize_text(context).lower()
+    if not value.is_finite() or value < 0:
+        return False
     if not normalized:
         return False
     if value == 0:
         if re.search(
             r"\b(?:if|when|with|maintain|balance|waiv(?:e|ed|er)|rebate)\b",
-            normalized,
+            normalized, re.I,
         ):
             return False
         return bool(
             re.search(r"\bno\s+monthly(?:\s+(?:plan|account))?\s+fees?\b", normalized)
-            or re.search(r"\bmonthly(?:\s+(?:plan|account))?\s+fees?\b\D{0,30}\$\s*0(?:\.00)?\b", normalized)
+            or re.search(rf"\bmonthly(?:\s+(?:plan|account))?\s+fees?\b\D{{0,30}}{_MONEY_PREFIX}0(?:\.00)?\b", normalized, re.I)
         )
-    token = re.escape(f"{value:f}".rstrip("0").rstrip("."))
+    token = re.escape(f"{value.normalize():f}")
     return bool(
         re.search(
-            rf"\bmonthly(?:\s+(?:plan|account))?\s+fees?\b[\s\S]{{0,80}}?\$\s*{token}(?![\d.])",
-            normalized,
+            rf"\bmonthly(?:\s+(?:plan|account))?\s+fees?\b[\s\S]{{0,80}}?{_MONEY_PREFIX}{token}(?!\d|\.\d)",
+            normalized, re.I,
         )
         or re.search(
-            rf"\$\s*{token}(?![\d.])\s*(?:per\s+month|/\s*month|monthly)\b",
-            normalized,
+            rf"{_MONEY_PREFIX}{token}(?!\d|\.\d)\s*(?:per\s+month|/\s*month|monthly)\b",
+            normalized, re.I,
         )
     )
 

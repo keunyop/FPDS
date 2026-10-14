@@ -1,5 +1,50 @@
 # Product collection accuracy and automatic acceptance
 
+## Explicit market, currency and complete decision records - 2026-10-13
+
+Parser v29/process `2026-10-13-explicit-market-essential-proof-v20` and market
+profile `2026-10-13-v8` register explicit PH decision contracts. Country
+activation alone never supplies a contract. An unregistered contract is diagnosed
+and stops acquisition; missing identity/currency are explicit required gaps rather
+than a misleading no-gap outcome. Only CA/CAD and US/USD have undisclosed defaults.
+
+Explicit PHP/Php, Philippine pesos and the peso sign are source currency evidence;
+bare P or ambiguous pesos are not. PHP URL/file tokens are not denomination.
+Superscript currency annotations survive HTML parsing. Bounded owned monetary declarations retain exact origins and reject
+sibling panels, calculators, mixed currencies and unresolved notes. Money remains
+in its printed currency. Historical CAD/USD fee plausibility bands apply to those
+currencies; other supported currencies retain native finite/nonnegative types and
+all exact official-source/identity/financial gates without invented FX conversion.
+Checking Public fee alignment shares those currency rules and preserves integer
+trailing zeros.
+
+Complete named card cost tables retain the primary annual fee, monthly and
+explicit annual interest wording, cash-advance costs, purchase denomination and
+payment trigger together. The literal name needs current H1/SEO/route and issuer
+corroboration; a second actual product heading or missing applicability excludes.
+Monthly-only rates are not annualized. First-year/spend waivers retain the positive
+base fee and verified qualifiers; distinct existing-customer principal prices are
+not flattened. A literal unconditional perpetual waiver can prove zero only in
+its own primary fee record. Atomic chunks preserve all conditions within existing
+source/grounding budgets, and extraction and final gates use the same records.
+
+Complete annual loan APR bounds preserve all fees, payment-example assumptions,
+monthly add-on wording and exact minimum/maximum repayment periods. Independently
+corroborated literal introductory names can identify a marketing-H1 page only
+with its complete owned price record and matching product leaf route. Uniquely
+defined symbolic notes remain original evidence; actual masks and missing notes
+exclude. Estimated repayment tables and average contractual rates cannot prove
+unconditional lending scalars. Rates, examples and term boundaries never become
+invented scalars.
+
+API/Worker release and data publication are separate. Local `localhost:4000` was
+restarted against the same repository after confirming no active collection.
+Seven current automatic passes were published and independently verified through
+local/external Public APIs and external web details. External hosting still needs
+the coordinated API/Worker code release for future collection; published data and
+serving runtime versions are distinct. See the [PH diagnosis and publication report](../00-governance/ph-generic-collection-corrections-2026-10-13.md).
+
+
 ## Linked application prices, owned service costs and qualified loan terms - 2026-10-10
 
 Parser v28/process `2026-10-10-linked-application-cost-proof-v19` preserve

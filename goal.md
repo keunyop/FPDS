@@ -1,5 +1,31 @@
 # Admin pre-handover review and fixes
 
+## Philippines direct collection diagnosis and publication - 2026-10-13
+
+Status: Complete for shared local fixes and actual Public data publication. Preserve all other goals, ownership and unfinished work.
+Scope: latest PH bank Runs, retained evidence and current official sources;
+direct collection without Admin collection API; generic corrections and ordinary
+automatic validation/publication in the existing configured environment.
+Acceptance:
+- [x] Reconcile latest targets/results and identify first actual evidence losses.
+- [x] Compare current official facts and reproduce shared defects before fixes.
+- [x] Fix shared paths with cross-bank/type success, boundary and failure evidence.
+- [x] Verify actual current stored origins, automatic gates and rollback rehearsal.
+- [x] Publish current automatic passes and verify anonymous Public readback.
+- [x] Review final diff, actual tests/limits and journal; re-read this goal.
+Limits: no weaker essentials, manual approval, bank-specific acceptance exceptions,
+historical filling, permanent recovery feature, unbounded paid loops or unrelated
+mutations. Runtime deployment remains distinct from data publication.
+
+
+Outcome: Current official evidence yields seven automatic publications (six
+EastWest cards and Metrobank Personal Loan), 68 exclusions and no manual review.
+Local/external API and all external web details verified; stored origins/bytes,
+rollback, privacy, country isolation and original/unrelated history preserved.
+API668/affected61/chunk22/account-fee220 pass; broad Worker956 has four prior
+HEAD-reproduced failures. External runtime code release remains separate; the
+owner selected localhost verification. Foundation/encoding/references/diff checked.
+
 ## US checking fees blog article - 2026-10-13
 
 Status: Complete for local Public editorial implementation and verification. Preserve all existing goals, ownership and unfinished work.

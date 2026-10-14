@@ -586,3 +586,23 @@ class CollectionOutcomeTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RequiredIdentityAcquisitionTests(unittest.TestCase):
+    def test_unregistered_country_contract_stops_without_paid_research(self):
+        s = source(country='ZZ', product='savings', name='Example Savings')
+        item, page = evidence(s, html='<a href="/fees">Account fee schedule</a>')
+        model = MagicMock()
+        result = EvidenceResearchPlanner(invoke_model=model).plan(run_id='run', registry=registry([s]), inputs=[item], captures=[page], attempted_urls={s.normalized_url}, parent_counts={})
+        self.assertEqual(result['diagnostics'][0]['stop_reason'], 'market_profile_not_registered')
+        self.assertEqual(result['sources'], [])
+        model.assert_not_called()
+
+    def test_missing_explicit_currency_reaches_required_research(self):
+        s = source(country='PH', product='personal-loan', name='Example Personal Loan')
+        item, page = evidence(s, texts=[('Example Personal Loan', 'section'), ('Annual interest rate 11%', 'financial_declaration'), ('Term 12 months', 'financial_declaration')], html='<a href="/personal-loan/fees">Account fee schedule</a>')
+        assessment = assess_captured_essentials(_bind_grounding_evidence([item])[0], run_id='run')
+        self.assertIn('currency', assessment['missing_fields'])
+        result = EvidenceResearchPlanner().plan(run_id='run', registry=registry([s]), inputs=[item], captures=[page], attempted_urls={s.normalized_url}, parent_counts={})
+        self.assertNotEqual(result['diagnostics'][0]['stop_reason'], 'no_essential_gap')
+        self.assertIn('currency', result['diagnostics'][0]['missing_fields'])

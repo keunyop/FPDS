@@ -192,7 +192,11 @@ def _comparison_value_is_usable(*, field_name: str, value: object) -> bool:
     if field_name in {"redeemable_flag", "non_redeemable_flag"}:
         return isinstance(value, bool)
     if field_name.endswith("rate_summary"):
-        return contains_explicit_rate_percentage(value)
+        # Monthly finance/add-on charges retain their unit; a monthly-only
+        # declaration cannot satisfy an annual comparison contract.
+        monthly = re.search(r"\b(?:per month|monthly (?:finance|interest|add-on)|interest rate per month)\b", str(value), re.I)
+        annual = re.search(r"\b(?:APR|APY|per annum|annual(?:ized)? (?:interest |percentage |contractual )?rate|(?:effective|nominal) rate annually)\b|\bp\.?a\.?(?!\w)", str(value), re.I)
+        return contains_explicit_rate_percentage(value) and not (monthly and not annual)
     if field_name == "annual_fee" or _looks_like_rate_field(field_name):
         if isinstance(value, bool):
             return False

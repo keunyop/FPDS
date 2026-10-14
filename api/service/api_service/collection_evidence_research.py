@@ -260,6 +260,9 @@ class EvidenceResearchPlanner:
             if assessment['unavailable'] or any(r.startswith('non_product') for r in assessment['reasons']):
                 diagnostic['stop_reason'] = 'ineligible_product'
                 continue
+            if 'market_profile_not_registered' in assessment['reasons']:
+                diagnostic['stop_reason'] = 'market_profile_not_registered'
+                continue
             if not missing:
                 diagnostic['stop_reason'] = 'no_essential_gap'
                 continue

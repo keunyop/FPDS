@@ -125,7 +125,12 @@ def _parse_html(body: bytes) -> ParsedArtifact:
     from worker.native_linked_card_pricing import pricing_records
     sections.extend(_RawSegment(kind, owner, None, record) for kind, owner, record in pricing_records(soup))
     sections.extend(_named_rate_basis_sections(soup))
+    from worker.native_currency_records import currency_records
+    sections.extend(_RawSegment("owned_currency_declaration", owner, None, quote)
+                    for owner, quote in currency_records(soup))
     sections.extend(_product_terms_sections(soup))
+    from worker.native_named_card_cost_table import named_card_cost_tables
+    sections.extend(_RawSegment(kind, owner, None, quote) for kind, owner, quote in named_card_cost_tables(soup))
     sections.extend(_labelled_disclosure_sections(soup))
     from worker.native_card_declarations import card_declarations
     sections.extend(_RawSegment(kind, owner, None, literal) for kind, owner, literal in card_declarations(soup))
@@ -681,7 +686,7 @@ def _extract_html_sections(container: BeautifulSoup) -> list[_RawSegment]:
         current_title = None
 
     semantic_tags = {"h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "td", "th"}
-    supplemental_tags = {"div", "span", "dt", "dd", "strong"}
+    supplemental_tags = {"div", "span", "dt", "dd", "strong", "sup"}
     all_tags = semantic_tags | supplemental_tags
     for tag in container.find_all(sorted(all_tags), recursive=True):
         # Preserve leaf values used by modern rate cards without repeating text
@@ -691,6 +696,13 @@ def _extract_html_sections(container: BeautifulSoup) -> list[_RawSegment]:
         text = _normalize_multiline_text(tag.get_text("\n", strip=True)) if tag.find("br") else _normalize_text(tag.get_text(" ", strip=True))
         if not text:
             continue
+        if tag.name == "sup":
+            # A currency prefix is content, not a numeric footnote marker.
+            # Preserve only an entire known currency token here. Ordinary
+            # superscript references retain their existing disclosure path.
+            from worker.pipeline.fpds_collection_accuracy import CURRENCY_PATTERNS
+            if not any(re.fullmatch(pattern, text, re.I) for pattern in CURRENCY_PATTERNS.values()):
+                continue
         if tag.name in {"h1", "h2", "h3", "h4", "h5", "h6"}:
             flush_section()
             current_title = text

@@ -50,8 +50,6 @@ _NUMERIC_RANGE_FIELDS = {
 _ANNUAL_RATE_FIELDS = {"standard_rate", "base_12_month_rate", "promotional_rate", "public_display_rate"}
 _RATE_FIELDS = _ANNUAL_RATE_FIELDS | {"highest_rate"}
 _FEE_FIELDS = {"monthly_fee", "public_display_fee"}
-_MAX_MONTHLY_OR_TRANSACTION_FEE = Decimal("500")
-_MAX_ANNUAL_CARD_FEE = Decimal("2000")
 _MAX_EXPLICIT_RATE_EVIDENCE_AGE_YEARS = 5
 _MORTGAGE_SCENARIO_MARKER_GROUPS = (
     ("down payment",),
@@ -580,8 +578,9 @@ def _compute_validation_issue_codes(
             issues.add("invalid_numeric_range")
         if not is_rate and decimal_value < 0:
             issues.add("invalid_numeric_range")
-        fee_limit = _MAX_ANNUAL_CARD_FEE if field_name == "annual_fee" else _MAX_MONTHLY_OR_TRANSACTION_FEE
-        if is_fee and decimal_value >= fee_limit:
+        from worker.pipeline.fpds_money_safety import fee_plausibility_limit
+        fee_limit = fee_plausibility_limit(field_name, candidate_record.get("currency"))
+        if is_fee and fee_limit is not None and decimal_value >= fee_limit:
             issues.add("invalid_numeric_range")
         if (
             dynamic_product_type

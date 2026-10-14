@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 
-MARKET_PROFILE_VERSION = "2026-10-01-v7"
+MARKET_PROFILE_VERSION = "2026-10-13-v8"
 
 
 @dataclass(frozen=True)
@@ -218,6 +218,39 @@ _COUNTRY_OVERRIDES: dict[tuple[str, str], tuple[ComparisonRequirement, ...]] = {
 }
 
 
+# Explicit Philippines ownership. Never use country activation or language to
+# infer a financial contract or currency. Rates retain annual percentage-point
+# semantics; monthly finance charges cannot become annual card rates. Conditional
+# transaction/access/security essentials are shared below, not waived here.
+_COUNTRY_OVERRIDES.update({
+    ("PH", "chequing"): (_requirement("monthly_fee", "monthly_fee", "public_display_fee"),),
+    ("PH", "savings"): (
+        _requirement("ongoing_rate", "standard_rate", "base_12_month_rate", "public_display_rate"),
+        _requirement("monthly_fee", "monthly_fee", "public_display_fee"),
+    ),
+    ("PH", "gic"): (
+        _requirement("rate", "standard_rate", "base_12_month_rate", "public_display_rate", "highest_rate", "interest_rate_summary", "term_rate_table"),
+        _requirement("term", "term_length_text", "term_length_days", "term_rate_table"),
+    ),
+    ("PH", "credit-card"): (
+        _requirement("annual_fee", "annual_fee"),
+        _requirement("purchase_rate", "purchase_interest_rate_summary", "purchase_interest_rate"),
+    ),
+    ("PH", "mortgage"): (
+        _requirement("rate", "interest_rate_summary", "mortgage_rate"),
+        _requirement("rate_type", "rate_type"),
+        _requirement("term", "term_length_text"),
+    ),
+    ("PH", "personal-loan"): (
+        _requirement("rate", "interest_rate_summary", "interest_rate"),
+        _requirement("term", "term_length_text"),
+    ),
+    ("PH", "line-of-credit"): (
+        _requirement("rate", "interest_rate_summary", "interest_rate"),
+    ),
+})
+
+
 # Opportunistic comparison qualifiers: extract from the same bounded evidence
 # pass, without making an undisclosed fact a new publication requirement.
 _DEPOSIT_COMPARISON_FIELDS = (
@@ -237,6 +270,13 @@ _TYPE_SUPPLEMENTAL_FIELDS = {
 }
 
 _COUNTRY_SUPPLEMENTAL_FIELDS: dict[tuple[str, str], tuple[str, ...]] = {
+    # Retain proved decision qualifiers from the same pass, without turning
+    # opening balances/amounts into PH publication prerequisites.
+    ("PH", "chequing"): ("minimum_balance", "minimum_deposit"),
+    ("PH", "savings"): ("minimum_balance",),
+    ("PH", "gic"): ("minimum_deposit",),
+    ("PH", "personal-loan"): ("loan_amount_text",),
+    ("PH", "line-of-credit"): ("credit_limit_text",),
     # A simple APY needs no prose, but a new-customer, balance-qualified, or
     # relationship APY must carry its material conditions into Public.
     ("US", "savings"): ("interest_rate_summary",),

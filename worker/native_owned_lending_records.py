@@ -9,7 +9,23 @@ def lending_records(soup):
     if heading is None:
         return []
     owner=heading.get_text(' ',strip=True)
-    if not re.search(r'line of credit|loan',owner,re.I):
+    literal_owner = None
+    if re.search(r'\bapply for\b', owner, re.I):
+        # A literal introductory name needs independently agreeing captured
+        # SEO/route plus its own complete price record at extraction time.
+        names = set()
+        for p in root.find_all('p')[:256]:
+            previous = p.find_previous(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+            if previous is not heading or p.find_parent(['nav', 'aside', 'form', 'table']):
+                continue
+            paragraph = p.get_text(' ', strip=True)
+            match = re.search(r'\bGet (?:a|an|the) ([A-Z][A-Za-z0-9 &-]{2,100} (?:Loan|Mortgage|Line of Credit)) (?:designed|that|to)\b', paragraph)
+            if match and len(paragraph) <= 400:
+                names.add(match[1])
+        if len(names) != 1:
+            return []
+        owner = literal_owner = next(iter(names))
+    if not re.search(r'line of credit|loan|mortgage',owner,re.I):
         return []
     output=[]
     for p in root.find_all('p'):
@@ -68,6 +84,32 @@ def lending_records(soup):
             continue
         quote = '\n'.join([owner, block.get_text(' ', strip=True), *notes])
         output.append(('owned_lending_terms', owner, quote))
+    # Keep explicitly published annual APR bounds, the payment example, fees,
+    # and repayment bounds in one literal record. No example becomes a scalar.
+    for p in root.find_all('p'):
+        if not re.search(r'\bMinimum APR is \d', p.get_text(' ', strip=True), re.I):
+            continue
+        for block in [p, *list(p.parents)[:4]]:
+            if block is root or block.name in {'form', 'table', 'nav', 'aside'}:
+                break
+            literal = block.get_text(' ', strip=True)
+            if len(literal) > 6000:
+                break
+            if (block.find(['input', 'select', 'textarea', 'table', 'h1', 'h2', 'h3'])
+                    or block.find_parent(['nav', 'aside', 'form', 'table'])
+                    or not owns_label(block, root, owner)):
+                continue
+            if complete_loan_cost_range(literal) is None:
+                continue
+            notes = local_notes(soup, block)
+            if notes is not None:
+                quote = '\n'.join([owner, literal, *notes])
+                if len(quote) <= 6400:
+                    output.append(('owned_lending_terms', owner, quote))
+            break
+    if literal_owner and any(kind == 'owned_lending_terms' and complete_loan_cost_range(quote) is not None
+                             for kind, _, quote in output):
+        output.append(('owned_product_label', literal_owner, literal_owner))
     return list(dict.fromkeys(output))
 
 
@@ -90,3 +132,22 @@ def dated_loan_range(literal, owner):
     if len(terms) != 1 or not re.search(r"varies based on|lowest APR in the range", body, re.I):
         return None
     return terms[0].strip()
+
+
+def complete_loan_cost_range(literal):
+    """Explicit annual APR/repayment bounds in a complete price declaration."""
+    from decimal import Decimal
+    from worker.pipeline.fpds_rate_safety import contains_unresolved_financial_placeholder
+    body = ' '.join(str(literal).split())
+    rates = list(re.finditer(r'\bMinimum APR is (\d+(?:\.\d+)?)% and maximum APR is (\d+(?:\.\d+)?)%[.]', body, re.I))
+    terms = list(re.finditer(r'\bMinimum repayment period is (\d+) months and maximum repayment period is (\d+) months[.]', body, re.I))
+    if (len(rates) != 1 or len(terms) != 1
+            or not 0 <= Decimal(rates[0][1]) <= Decimal(rates[0][2]) < 100
+            or not 0 < int(terms[0][1]) <= int(terms[0][2])
+            or contains_unresolved_financial_placeholder(body)
+            or not re.search(r'APR \(Annual Percentage Rate(?: or Effective Interest Rate)?\)', body, re.I)
+            or not re.search(r'Rates and applicable fees will depend on your loan amount and loan tenor[.] Applicable fees and charges:', body, re.I)
+            or not re.search(r'Example: For a .+? loan with a .+? repayment period of \d+ months', body, re.I)
+            or not body.endswith('Rates and fees are subject to change.')):
+        return None
+    return terms[0][0]

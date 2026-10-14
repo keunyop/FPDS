@@ -1,0 +1,50 @@
+[
+  {
+    "file": "card-dolce-vita-titanium-mastercard.html.gz",
+    "url": "https://www.eastwestbanker.com/cards/creditcards/dolce-vita-titanium-mastercard",
+    "sha256": "b05b451758749521cea9946c4685ca3dd697e50abf0d63d021fe656618b88a4b",
+    "captured_at": "2026-10-14T02:01:02.167876+00:00"
+  },
+  {
+    "file": "card-eastwest-jcb-gold.html.gz",
+    "url": "https://www.eastwestbanker.com/cards/creditcards/eastwest-jcb-gold",
+    "sha256": "f396f2979663fd7271051246c312f4d1395bce59e71a07c3a94ab09c3f6c8224",
+    "captured_at": "2026-10-14T02:01:03.891303+00:00"
+  },
+  {
+    "file": "card-eastwest-puregold-always-panalo-visa.html.gz",
+    "url": "https://www.eastwestbanker.com/cards/creditcards/eastwest-puregold-always-panalo-visa",
+    "sha256": "fd25a255b08040c23b6d9b9be6709ed5e84c04cf7712f7a3f8773957a380d337",
+    "captured_at": "2026-10-14T02:01:04.358014+00:00"
+  },
+  {
+    "file": "card-foodpanda-visa.html.gz",
+    "url": "https://www.eastwestbanker.com/cards/creditcards/foodpanda-visa",
+    "sha256": "f95a4c6c096319a79bf8b7f982c85e8040356f96dcc6e157c7c8ed58b0ee224d",
+    "captured_at": "2026-10-14T02:01:12.976732+00:00"
+  },
+  {
+    "file": "card-platinum-mastercard.html.gz",
+    "url": "https://www.eastwestbanker.com/cards/creditcards/platinum-mastercard",
+    "sha256": "2b60b32b5591cacf59c80eae19a71be71d363b70899ef3c59e970912b05db3d0",
+    "captured_at": "2026-10-14T02:01:16.996752+00:00"
+  },
+  {
+    "file": "card-priority-visa-infinite.html.gz",
+    "url": "https://www.eastwestbanker.com/cards/creditcards/priority-visa-infinite",
+    "sha256": "d39789ac84b220d0036fcb3f3864db3b6ad8dc780f58d6f2714f657f65bb6ef2",
+    "captured_at": "2026-10-14T02:01:17.271132+00:00"
+  },
+  {
+    "file": "card-visa-platinum.html.gz",
+    "url": "https://www.eastwestbanker.com/cards/creditcards/visa-platinum",
+    "sha256": "e6448321196994ef70b59b873387979be31a6c147c6584ce4f3de8893fbedfa8",
+    "captured_at": "2026-10-14T02:01:19.344972+00:00"
+  },
+  {
+    "file": "card-everyday-titanium-mastercard.html.gz",
+    "url": "https://www.eastwestbanker.com/creditcards/everyday-titanium-mastercard",
+    "sha256": "061dd55a4c9dbe4727c7081b28caad113d24db5ae60c32142fb61a7d55df4332",
+    "captured_at": "2026-10-14T02:01:30.686062+00:00"
+  }
+]

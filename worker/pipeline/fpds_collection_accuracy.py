@@ -28,7 +28,16 @@ CURRENCY_PATTERNS.update({
     "NZD": r"\bNZD\b|New Zealand dollars?|\bNZ\$",
     "CHF": r"\bCHF\b|Swiss francs?",
     "SGD": r"\bSGD\b|Singapore dollars?",
+    "PHP": r"(?<![\w./])PHP(?=\b|\d)|\bPhilippine pesos?(?![A-Za-z])|\u20b1",
 })
+# Known ISO codes may be printed directly against an amount (PHP10,000).
+# This does not authorize a market default, a bare P, or ambiguous "pesos".
+for _code in CURRENCY_PATTERNS:
+    CURRENCY_PATTERNS[_code] = CURRENCY_PATTERNS[_code].replace(
+        rf"\b{_code}\b", rf"\b{_code}(?=\b|\d)")
+_MONEY_PREFIX = r"(?:[$€£]|" + "|".join(CURRENCY_PATTERNS.values()) + r")\s*"
+_MONEY_AMOUNT = _MONEY_PREFIX + r"(\d[\d,]*(?:\.\d+)?)(?![\w%]|\.\d)"
+_MONEY_SUFFIX = r"(\d[\d,]*(?:\.\d+)?)\s*(?:dollars?|" + "|".join(CURRENCY_PATTERNS) + r"|Philippine pesos?)\b"
 IDENTITY_FIELDS = ("country_code", "bank_code", "product_type", "product_name", "currency")
 _NUMBER = r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\w|\.\d)"
 _COUNT_WORDS = dict(zip(("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"), range(11)))
@@ -278,6 +287,13 @@ def _explicit_labelled_card_rate(field_name: str, value: Decimal, quote: str) ->
 
 
 def _rate_context_has_condition(field_name: str, value: Decimal, quote: str) -> bool:
+    # A repayment/amortization scenario is not an unconditional payable rate,
+    # even when an excerpt ends before its estimated/average-rate footnote.
+    if (re.search(r"\bloan term\b", quote, re.I)
+            and re.search(r"\bmonthly (?:instal(?:l)?ments?|amortizations?)\b", quote, re.I)):
+        return True
+    if re.search(r"\bestimated amortizations?\b|\baverage Annual Contractual Rate\b", quote, re.I):
+        return True
     conditions = list(re.finditer(
         r"\b(?:up to|between|as low as|bonus|introductory|promotional|example|illustration|if|when|qualify|qualifying|depending)\b",
         quote, re.I,
@@ -371,6 +387,8 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if not contract or not q:
         return False
     if field_name == "currency":
+        # File extensions and URL query/path tokens are not denomination facts.
+        q = re.sub(r"https?://\S+", "", q, flags=re.I)
         return value in CURRENCY_PATTERNS and bool(re.search(CURRENCY_PATTERNS[value], q, re.I)) and not any(
             code != value and re.search(pattern, q, re.I) for code, pattern in CURRENCY_PATTERNS.items())
     if field_name == "term_length_text" and re.search(r"investment horizon|cash (?:in|out) after|redeem(?:able)? after|waiting period", q, re.I):
@@ -385,6 +403,11 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name in {"interest_rate_summary", "purchase_interest_rate_summary", "fee_waiver_condition", "early_withdrawal_penalty"}:
             return text(value).casefold() == q.casefold()
         return bool(text(value)) and text(value).casefold() in q.casefold()
+    if field_name == "annual_fee":
+        from worker.native_named_card_cost_table import table_parts, annual_fee_value
+        if table_parts(quote):
+            fee = annual_fee_value(quote)
+            return fee is not None and fee == Decimal(str(value))
     if field_name == "annual_fee":
         # Complete same-record restatements must agree with the native price.
         # Another labelled charge cannot overwrite a contradictory annual fee.
@@ -636,8 +659,8 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             if fee is not None:
                 return fee == number
         # A waiver balance or example must not stand in for a fee.
-        amounts = re.findall(r"(?:[$€£]|\b(?:CAD|USD|EUR|GBP)\s*)(\d[\d,]*(?:\.\d+)?)", q, re.I)
-        amounts += re.findall(r"(\d[\d,]*(?:\.\d+)?)\s*(?:dollars?|CAD|USD|EUR|GBP)\b", q, re.I)
+        amounts = re.findall(_MONEY_AMOUNT, q, re.I)
+        amounts += re.findall(_MONEY_SUFFIX, q, re.I)
         matching = {Decimal(v.replace(",", "")) for v in amounts}
         if number == 0 and _money_has_condition(quote, field_name):
             return False
@@ -656,12 +679,12 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
             return True
         if number == 0 and zero_label and re.search(rf"\b(?:no|zero)\s+(?:{zero_label})\b", q, re.I):
             return True
-        if number not in _numbers(q) or number not in matching:
+        if number not in matching:
             return False
         if field_name in {"monthly_fee", "public_display_fee", "annual_fee", "minimum_deposit", "minimum_balance", "transaction_fee", "additional_transaction_fee"}:
             label_match = re.search(label, q, re.I)
             local = q[label_match.end():label_match.end() + 90]
-            local_amount = re.search(r"(?:[$€£]|\b(?:CAD|USD|EUR|GBP)\s*)(\d[\d,]*(?:\.\d+)?)", local, re.I)
+            local_amount = re.search(_MONEY_AMOUNT, local, re.I)
             if local_amount:
                 return Decimal(local_amount.group(1).replace(",", "")) == number
             # Amount-first labels are accepted only in a short single-amount quote.
@@ -885,7 +908,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         elif (e.get("anchor_type") == "linked_card_pricing_terms" and not stored_link_belongs(
                     record, m, evidence, source_metadata, origin)):
             reason = "current_detail_pricing_link_unproven"
-        elif (e.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_assertion", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"single_card_purchase_terms", "single_card_annual_fee", "owned_account_assertion", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_cost_table", "named_card_rate_table", "named_balance_rate", "named_card_regular_rates", "named_deposit_apy"}
                 and not _native_record_belongs(record, e, source_metadata)):
             reason = "native_product_mismatch"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
@@ -906,9 +929,9 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             # A balance that waives transaction charges is not an opening or
             # general minimum balance, nor a monthly-account-fee threshold.
             reason = "transaction_waiver_balance_not_minimum"
-        elif (e.get("anchor_type") in {"single_card_annual_fee", "named_html_annual_fee", "owned_account_assertion", "owned_lending_terms"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
+        elif (e.get("anchor_type") in {"single_card_annual_fee", "named_html_annual_fee", "owned_account_assertion", "owned_lending_terms", "named_card_cost_table"} and field_contract(name).value_type in {"decimal", "integer", "boolean"} and not exact_quote(e.get("evidence_excerpt"), quote)):
             reason = "native_account_conditions_incomplete"
-        elif (e.get("anchor_type") in {"linked_card_pricing_terms", "single_card_purchase_terms", "card_information_rate", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
+        elif (e.get("anchor_type") in {"linked_card_pricing_terms", "single_card_purchase_terms", "card_information_rate", "owned_referenced_apy", "owned_account_apy", "owned_card_apr_offer", "named_card_apr_terms", "named_html_annual_fee", "owned_lending_terms", "named_card_cost_table", "named_card_regular_rates", "named_card_rate_table", "named_balance_rate", "named_deposit_apy"}
                 and name in {"standard_rate", "interest_rate_summary", "purchase_interest_rate", "cash_advance_rate", "balance_transfer_rate", "purchase_interest_rate_summary"}
                 and (not exact_quote(e.get("evidence_excerpt"), quote)
                      or (name in {"interest_rate_summary", "purchase_interest_rate_summary"}
@@ -980,6 +1003,8 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     else:
         verified.append("currency")
     quality = comparison_quality(product_type=record.get("product_type"), country_code=record.get("country_code"), expected_fields=source_metadata.get("expected_fields", []), candidate_payload=payload)
+    if not quality.contract_defined:
+        reasons.append("market_profile_not_registered")
     if not quality.applicable or not quality.contract_defined or not quality.complete:
         reasons.append("essential_fields_missing")
     from worker.pipeline.fpds_collection_fields import metadata_collection_fields, missing_additional_required_fields, additional_required_fields
@@ -988,7 +1013,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     additional_missing = missing_additional_required_fields(resolved_fields, payload)
     if additional_missing:
         reasons.append("required_collection_fields_missing")
-    receipt = {"version": ACCURACY_VERSION, "accepted": not reasons, "verified_fields": sorted(set(verified)), "omitted_fields": omitted, "reasons": reasons, "missing_fields": list(dict.fromkeys([*quality.missing_fields, *additional_missing]))}
+    receipt = {"version": ACCURACY_VERSION, "accepted": not reasons, "verified_fields": sorted(set(verified)), "omitted_fields": omitted, "reasons": reasons, "missing_fields": list(dict.fromkeys([*([] if identity_verified else ["product_name"]), *([] if currency_verified else ["currency"]), *quality.missing_fields, *additional_missing]))}
     if resolved_fields["configured"]:
         receipt["additional_required_fields"] = additional_required_fields(resolved_fields)
         receipt["collection_field_country"] = resolved_fields["country_code"]

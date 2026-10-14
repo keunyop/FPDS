@@ -1,5 +1,39 @@
 # FPDS Development Journal
 
+## 2026-10-13 - PH zero-approval diagnosis, shared fixes and seven publications
+
+- Latest ten-bank batch: 28 Runs/75 candidates, zero approvals. Directly checked
+  88 selected official URLs (87 valid current captures). Found absent PH executable
+  profiles, unsupported peso currency/superscripts, misleading no-gap research,
+  fragmented named card/loan conditions and dollar-only fee limits/alignment.
+- Shared parser v29/process v20/market v8 preserve complete owned source records,
+  native currency/amounts and defined notes; no monthly annualization, illustrative
+  loan scalar, missing essential, default PHP or manual review. Actual source and
+  generic issuer/type/currency/boundary regressions precede accepted extensions.
+- Ordinary final pipeline: seven automatic passes/68 exclusions. Stored current
+  raw/parsed bytes read back (75 pairs); 34 actual field-origin links and all seven
+  policy receipts verified. Promotion rollback passed; seven products published
+  by ordinary promotion/aggregate refresh, snapshot `agg_0cjML-5LdCUdYTQM`.
+- Local/external anonymous APIs return seven; all external web details HTTP 200
+  preserve complete conditions. Final local details equal external; 14 country
+  isolation requests return 404, with no private evidence exposed. CA120/US85,
+  original Runs/candidates/captures, 1,608 version facts and unrelated canonical
+  rows are preserved. No Admin collection API or model/provider calls used.
+- Actual checks: API668, affected Worker61, ordinary-chunk22 and final account-fee
+  normalization/validation220 pass; broad Worker956 has four prior failures,
+  reproduced with exact HEAD code/fixtures (25 tests/four failures). Original hash
+  and named-annual-record failures are documented, not hidden or weakened.
+  Foundation, syntax/UTF-8/JSON/new-reference/diff checks pass.
+- Key files: market/accuracy/approval rules, extraction/parse-chunk, native currency,
+  named-card and owned-loan records, money safety, normalization/validation and API
+  essential research; immutable official fixtures and relevant boundary contracts.
+  [Detailed diagnosis, publications and limits](ph-generic-collection-corrections-2026-10-13.md).
+- Runtime distinction: repository-connected localhost:4000 restarted after zero
+  active collection; external data publication verified, external runtime remains
+  process v19/market v7. No Vercel deployment performed. Next: normal coordinated
+  API/Worker release for future hosted collection; incomplete targets stay excluded.
+  Private operational evidence remains ignored under `tmp/ph-20261013`.
+
 ## 2026-10-13 - US checking fee comparison with concise copy and infographics
 
 - Added EN/KO/JA Chase Total Checking/BofA Advantage Plus/Wells Fargo Everyday
