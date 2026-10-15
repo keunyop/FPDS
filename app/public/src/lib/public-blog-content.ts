@@ -1,12 +1,13 @@
+import { CA_CARD_REWARDS_CONTENT, US_CARD_REWARDS_CONTENT, CA_CARD_REWARDS_SOURCES, US_CARD_REWARDS_SOURCES, CA_CARD_REWARDS_PRESENTATION, US_CARD_REWARDS_PRESENTATION } from './public-blog-card-rewards.ts';
 import { US_CHECKING_CONTENT, US_CHECKING_PRESENTATION, US_CHECKING_SOURCES } from './public-blog-us-checking.ts';
 import { US_CD_CONTENT, US_CD_PRESENTATION, US_CD_SOURCES } from './public-blog-us-cd.ts';
 import { US_SAVINGS_CONTENT, US_SAVINGS_PRESENTATION, US_SAVINGS_SOURCES } from './public-blog-us-savings.ts';
 import { GIC_CONTENT, GIC_PRESENTATION, GIC_SOURCES } from './public-blog-gic.ts';
 import type { EditorialLocale } from './public-locale.ts';
 import type { BlogSlug } from './public-blog.ts';
-import { blogCopy } from './public-blog.ts';
+import { BLOG_POSTS, blogCopy } from './public-blog.ts';
 import { CHEQUING_CONTENT, CHEQUING_PRESENTATION, CHEQUING_SOURCES } from './public-blog-chequing.ts';
-import type { CuratedSlug } from './public-curated.ts';
+import { curatedCatalogHref, type CuratedSlug } from './public-curated.ts';
 import type { GuideSlug } from './public-guides.ts';
 
 export const BLOG_SOURCES = [
@@ -16,9 +17,10 @@ export const BLOG_SOURCES = [
   { id: 'fcac', title: 'FCAC — Savings accounts', href: 'https://www.canada.ca/en/financial-consumer-agency/services/banking/bank-accounts/savings-account.html' }
 ] as const;
 export type BlogSource = { id: string; title: string; href: string };
-type SourceId = typeof BLOG_SOURCES[number]['id'] | typeof CHEQUING_SOURCES[number]['id'] | typeof GIC_SOURCES[number]['id'] | typeof US_SAVINGS_SOURCES[number]['id'] | typeof US_CD_SOURCES[number]['id'] | typeof US_CHECKING_SOURCES[number]['id'];
+type SourceId = typeof BLOG_SOURCES[number]['id'] | typeof CHEQUING_SOURCES[number]['id'] | typeof GIC_SOURCES[number]['id'] | typeof US_SAVINGS_SOURCES[number]['id'] | typeof US_CD_SOURCES[number]['id'] | typeof US_CHECKING_SOURCES[number]['id'] | typeof CA_CARD_REWARDS_SOURCES[number]['id'] | typeof US_CARD_REWARDS_SOURCES[number]['id'];
 export type BlogSection = { id: string; title: string; paragraphs: string[]; sources?: SourceId[] };
 export type BlogContent = {
+  inspiration?: { href: string; label: string };
   infographic?: { title: string; steps: { title: string; text: string }[] };
   tableHeaders?: [string, string, string];
   title: string; description: string; intro: string; takeaway: string;
@@ -223,6 +225,8 @@ const content: Record<EditorialLocale, BlogContent> = {
   }
 };
 const articles: Record<BlogSlug, Record<EditorialLocale, BlogContent>> = {
+  'credit-card-cashback-welcome-bonuses-us': US_CARD_REWARDS_CONTENT,
+  'credit-card-cashback-welcome-bonuses-canada': CA_CARD_REWARDS_CONTENT,
   'chase-vs-bank-of-america-vs-wells-fargo-checking-fees': US_CHECKING_CONTENT,
   'high-yield-savings-vs-cds-us': US_CD_CONTENT,
   'ally-vs-capital-one-vs-amex-high-yield-savings': US_SAVINGS_CONTENT,
@@ -231,6 +235,8 @@ const articles: Record<BlogSlug, Record<EditorialLocale, BlogContent>> = {
   'tangerine-vs-simplii-vs-cibc-chequing-fees': CHEQUING_CONTENT
 };
 export function blogSources(slug: BlogSlug): readonly BlogSource[] {
+  if (slug === 'credit-card-cashback-welcome-bonuses-us') return US_CARD_REWARDS_SOURCES;
+  if (slug === 'credit-card-cashback-welcome-bonuses-canada') return CA_CARD_REWARDS_SOURCES;
   if (slug === 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees') return US_CHECKING_SOURCES;
   if (slug === 'high-yield-savings-vs-cds-us') return US_CD_SOURCES;
   if (slug === 'ally-vs-capital-one-vs-amex-high-yield-savings') return US_SAVINGS_SOURCES;
@@ -238,6 +244,15 @@ export function blogSources(slug: BlogSlug): readonly BlogSource[] {
   return slug === 'tangerine-vs-simplii-vs-cibc-chequing-fees' ? CHEQUING_SOURCES : BLOG_SOURCES;
 }
 export function blogPresentation(slug: BlogSlug, locale: string) {
+  if (slug === 'credit-card-cashback-welcome-bonuses-canada' || slug === 'credit-card-cashback-welcome-bonuses-us') {
+    const us = slug === 'credit-card-cashback-welcome-bonuses-us';
+    const lang = locale === 'ko' || locale === 'ja' ? locale : 'en';
+    return {
+      ...(us ? US_CARD_REWARDS_PRESENTATION[lang] : CA_CARD_REWARDS_PRESENTATION[lang]),
+      catalog: 'credit-cards' as const, guides: [] as GuideSlug[],
+      relatedArticle: us ? { slug: 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees' as BlogSlug, label: US_CHECKING_CONTENT[lang].title } : { slug: 'tangerine-vs-simplii-vs-cibc-chequing-fees' as BlogSlug, label: CHEQUING_CONTENT[lang].title }
+    };
+  }
   if (slug === 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees') return {
     ...US_CHECKING_PRESENTATION[locale === 'ko' || locale === 'ja' ? locale : 'en'],
     catalog: 'no-monthly-fee-chequing' as CuratedSlug, guides: [] as GuideSlug[],
@@ -279,4 +294,15 @@ export function blogPresentation(slug: BlogSlug, locale: string) {
 }
 export function blogContent(slug: BlogSlug, locale: string): BlogContent {
   return articles[slug][locale === 'ko' || locale === 'ja' ? locale : 'en'];
+}
+
+// Article destinations follow the native market, regardless of the caller's UI state.
+export function blogCatalogHref(slug: BlogSlug, locale: string) {
+  const country = BLOG_POSTS.find(post => post.slug === slug)!.country;
+  const catalog = blogPresentation(slug, locale).catalog;
+  if (catalog !== 'credit-cards') return curatedCatalogHref(catalog, locale, country);
+  const params = new URLSearchParams();
+  if (locale === 'ko' || locale === 'ja' || locale === 'fil') params.set('locale', locale);
+  if (country !== 'CA') params.set('country_code', country);
+  return `/cards${params.size ? '?' + params : ''}`;
 }

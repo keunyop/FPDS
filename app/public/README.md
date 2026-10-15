@@ -1,5 +1,17 @@
 # FPDS Public
 
+## Canada and US credit-card rewards articles - 2026-10-15
+
+Added one original cashback/welcome-offer guide per country in EN/KO/JA, inspired
+by the requested Banksalad topic and independently verified with official issuer
+and regulator sources. Four accessible visuals distinguish planned spending,
+bonus eligibility and one-time versus ongoing value. Local offer deadlines,
+exclusions, interest and native CAD/USD semantics remain explicit.
+Card articles use the existing /cards catalog; deposit article CTAs keep their
+existing destinations. Each country now has four articles; localized SEO,
+article-specific PNGs and 30 blog sitemap URLs preserve older dates and Filipino
+editorial fallback. No collection, canonical data write or deployment is included.
+
 ## US checking fees article - 2026-10-13
 
 `/blog/chase-vs-bank-of-america-vs-wells-fargo-checking-fees?country_code=US`

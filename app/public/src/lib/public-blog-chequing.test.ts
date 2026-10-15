@@ -2,8 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { BLOG_POSTS } from './public-blog.ts';
-import { blogContent, blogPresentation, blogSources } from './public-blog-content.ts';
-import { curatedCatalogHref } from './public-curated.ts';
+import { blogContent, blogPresentation, blogSources, blogCatalogHref } from './public-blog-content.ts';
 
 const slug = 'tangerine-vs-simplii-vs-cibc-chequing-fees';
 
@@ -29,7 +28,7 @@ test('new chequing article retains base fee, complete balance condition and sepa
 test('chequing calls to action preserve language, the proper product type and related savings article', () => {
   for (const locale of ['en', 'ko', 'ja']) {
     const presentation = blogPresentation(slug, locale);
-    const url = new URL(curatedCatalogHref(presentation.catalog, locale), 'https://www.switchabank.com');
+    const url = new URL(blogCatalogHref(slug, locale), 'https://www.switchabank.com');
     assert.equal(url.searchParams.get('product_type'), 'chequing');
     assert.equal(url.searchParams.get('sort_by'), 'monthly_fee');
     assert.equal(url.searchParams.get('locale'), locale === 'en' ? null : locale);

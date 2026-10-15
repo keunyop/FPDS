@@ -4,7 +4,7 @@ import { BankLogo } from '@/components/fpds/public/bank-logo';
 export function BlogVisual({ banks, issue }: { banks: { code: string; bank: string }[]; issue: string }) {
   return <div className="flex h-full min-h-56 flex-col justify-between border border-border bg-secondary/60 p-6 md:p-8" aria-hidden="true">
     <div className="flex items-center justify-between gap-4 font-mono text-xs text-secondary-foreground"><span>SWITCHABANK / JOURNAL</span><span>{issue}</span></div>
-    <div className="grid grid-cols-3 divide-x divide-primary/20 py-9">
+    <div className={`grid ${banks.length === 1 ? "grid-cols-1" : banks.length === 2 ? "grid-cols-2" : "grid-cols-3"} divide-x divide-primary/20 py-9`}>
       {banks.map(({ code, bank }) =>
         <div key={code} className="flex min-w-0 flex-col items-center gap-3 px-2">
           <BankLogo bankCode={code} bankName={bank} size="sm" />

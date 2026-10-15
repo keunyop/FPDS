@@ -22,8 +22,8 @@ test('only published blog slugs and clean language variants are discoverable', (
 });
 
 test('country selection filters lists and keeps article switches inside the requested blog', () => {
-  assert.equal(blogPostsForCountry('CA').length, 3);
-  assert.equal(blogPostsForCountry('US').length, 3);
+  assert.equal(blogPostsForCountry('CA').length, 4);
+  assert.equal(blogPostsForCountry('US').length, 4);
   assert.deepEqual(blogPostsForCountry('JP'), []);
   assert.deepEqual(blogPostsForCountry('us'), []);
   for (const country of ['CA', 'US', 'JP']) {

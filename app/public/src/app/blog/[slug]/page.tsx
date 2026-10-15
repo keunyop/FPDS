@@ -8,8 +8,7 @@ import { BankLogo } from '@/components/fpds/public/bank-logo';
 import { PublicFeedbackDialog } from '@/components/fpds/public/public-feedback-dialog';
 import { PublicStructuredData } from '@/components/fpds/public/public-structured-data';
 import { BLOG_POSTS, blogCopy, blogMarketCopy, blogHref, isBlogSlug, isBlogIndexableQuery } from '@/lib/public-blog';
-import { blogSources, blogContent, blogPresentation, type BlogSource } from '@/lib/public-blog-content';
-import { curatedCatalogHref } from '@/lib/public-curated';
+import { blogSources, blogContent, blogPresentation, blogCatalogHref, type BlogSource } from '@/lib/public-blog-content';
 import { guideCopy, guideHref } from '@/lib/public-guides';
 import { normalizePublicLocale } from '@/lib/public-locale';
 import { buildPublicSeoUrl, PUBLIC_SITE_ORIGIN } from '@/lib/public-seo';
@@ -99,7 +98,7 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
               <div className="mt-4 grid gap-4 text-base leading-8">{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
               {section.sources ? <p className="mt-2 text-xs text-muted-foreground">{copy.sources}: {section.sources.map(id => <SourceLink key={id} id={id} sources={sources} />)}</p> : null}
               {section.id === 'compare-on-switchabank' ? <Button asChild className="mt-4 h-auto min-h-11 whitespace-normal py-3">
-                <Link data-blog-shortlist href={curatedCatalogHref(presentation.catalog, locale, post.country)}>{presentation.action}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link>
+                <Link data-blog-shortlist href={blogCatalogHref(slug, locale)}>{presentation.action}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link>
               </Button> : null}
               {section.id === 'worked-example' ? <figure className="mt-5 border-y border-border bg-card px-4 py-5 md:px-6">
                 <p className="text-xs font-medium text-primary">{post.country === 'US' ? blogMarketCopy(locale).example : copy.example}</p>
@@ -120,7 +119,7 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
           <section className="mt-9 bg-secondary/60 px-5 py-6 md:px-7" aria-labelledby="blog-compare">
             <h2 id="blog-compare" className="text-xl font-semibold leading-8">{presentation.compare}</h2>
             <p className="mt-3 text-sm leading-7">{presentation.compareBody}</p>
-            <Button asChild className="mt-5 h-auto min-h-11 whitespace-normal py-3"><Link data-blog-comparison href={curatedCatalogHref(presentation.catalog, locale, post.country)}>{presentation.action}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link></Button>
+            <Button asChild className="mt-5 h-auto min-h-11 whitespace-normal py-3"><Link data-blog-comparison href={blogCatalogHref(slug, locale)}>{presentation.action}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></Link></Button>
           </section>
           <section className="mt-10" aria-labelledby="blog-faq">
             <h2 id="blog-faq" className="text-xl font-semibold">{copy.faq}</h2>
@@ -147,6 +146,7 @@ export default async function BlogArticlePage({ params, searchParams }: Props) {
           <section className="mt-7 border-t border-border pt-5 text-xs leading-6 text-muted-foreground" aria-labelledby="blog-editorial">
             <h2 id="blog-editorial" className="text-sm font-semibold text-foreground">{copy.editorial}</h2>
             <p className="mt-2">{copy.method}</p><p className="mt-2">{copy.disclosure}</p>
+            {content.inspiration ? <p className="mt-2"><a href={content.inspiration.href} className="underline underline-offset-4">{content.inspiration.label}</a></p> : null}
             <p className="mt-2">{copy.correction}</p>
             <div className="mt-3"><PublicFeedbackDialog countryCode={post.country} locale={locale} mode="site_feedback" /></div>
           </section>

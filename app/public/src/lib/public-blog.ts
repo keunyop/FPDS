@@ -1,6 +1,14 @@
 import type { PublicLocale } from './public-locale.ts';
 
 export const BLOG_POSTS = [{
+  slug: 'credit-card-cashback-welcome-bonuses-us',
+  publishedAt: '2026-10-15', modifiedAt: '2026-10-15', sourcesCheckedAt: '2026-10-15',
+  country: 'US', productType: 'credit_card', minutes: 4, issue: '08'
+}, {
+  slug: 'credit-card-cashback-welcome-bonuses-canada',
+  publishedAt: '2026-10-15', modifiedAt: '2026-10-15', sourcesCheckedAt: '2026-10-15',
+  country: 'CA', productType: 'credit_card', minutes: 4, issue: '07'
+}, {
   slug: 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees',
   publishedAt: '2026-10-13', modifiedAt: '2026-10-13', sourcesCheckedAt: '2026-10-13',
   country: 'US', productType: 'chequing', minutes: 4, issue: '06'

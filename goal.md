@@ -1,5 +1,24 @@
 # Admin pre-handover review and fixes
 
+## Canada and US credit card rewards articles - 2026-10-14
+
+Status: Complete for local editorial implementation and verification on October 15. Preserve prior goals, ownership and unfinished work.
+Scope: One original CA and one US article inspired by the supplied Banksalad
+card-rewards topic; concise EN/KO/JA, official market terms, accessible infographics
+and country-specific discovery/SEO. Extend existing editorial links to /cards.
+Acceptance:
+- [x] Review reference and verify official rewards, welcome-offer and exclusion terms.
+- [x] Add two localized articles/visuals and native card catalog/SEO/social links.
+- [x] Verify arithmetic, market/locale boundaries, no-JS and 390/768/1440px UI.
+- [x] Review diff/encoding/references, preserve prior work and journal actual results.
+Limits: Local Public editorial work only; no collection, canonical data or deployment.
+Outcome: One original CA/US guide each in EN/KO/JA, four accessible infographics,
+five official sources, separate topic attribution, native /cards actions,
+localized SEO/social images and 30 sitemap URLs. Public124/browser214 with zero
+browser errors, lint/typecheck, isolated build and foundation pass. Previous dates,
+deposit links, locale/country boundaries and prior ownership preserved.
+No collection, canonical data writes or runtime deployment.
+
 ## Methodology Philippines map marker - 2026-10-13
 
 Status: Complete for local implementation and verification; preserve all prior goals and ownership.

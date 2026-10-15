@@ -14,6 +14,20 @@ ORIGIN = os.environ.get('FPDS_UI_TEST_ORIGIN', 'http://localhost:3000').rstrip('
 assert urlparse(ORIGIN).hostname in {'localhost', '127.0.0.1', '::1'}
 PROD = 'https://www.switchabank.com'
 POSTS = {
+    'credit-card-cashback-welcome-bonuses-us': {
+        'country': 'US', 'date': '2026-10-15', 'citations': 3,
+        'catalog': '/cards', 'tail': '', 'row_count': 2, 'has_visuals': True,
+        'screen': 'us-card-rewards',
+        'related': 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees',
+        'amounts': ['USD 440', 'USD 240', 'USD 200'],
+    },
+    'credit-card-cashback-welcome-bonuses-canada': {
+        'date': '2026-10-15', 'citations': 2,
+        'catalog': '/cards', 'tail': '', 'row_count': 1, 'has_visuals': True,
+        'screen': 'ca-card-rewards',
+        'related': 'tangerine-vs-simplii-vs-cibc-chequing-fees',
+        'amounts': ['CAD 340', 'CAD 240', 'CAD 100'],
+    },
     'chase-vs-bank-of-america-vs-wells-fargo-checking-fees': {
         'country': 'US', 'date': '2026-10-13', 'citations': 5,
         'catalog': '/products?product_type=chequing',
@@ -78,6 +92,8 @@ def intercept(route):
         route.continue_()
 
 def catalog(post, locale):
+    if post['catalog'] == '/cards':
+        return '/cards' + suffix_for(locale, post.get('country', 'CA'))
     return post['catalog'] + ('' if locale == 'en' else '&locale=' + locale) + post['tail']
 
 with sync_playwright() as pw:
@@ -122,7 +138,7 @@ with sync_playwright() as pw:
                         assert source.get_attribute('href') in article['citation']
                     expect(page.locator('meta[property="og:type"]')).to_have_attribute('content', 'article')
                     expect(page.locator('meta[property="og:image"]').first).to_have_attribute('content', PROD + path + '/opengraph-image')
-                    assert page.locator('table tbody tr').count() == 3
+                    assert page.locator('table tbody tr').count() == post.get('row_count', 3)
                     for amount in post['amounts']:
                         assert amount in page.locator('#worked-example').inner_text()
                     expect(page.locator('[data-blog-comparison]')).to_have_attribute('href', catalog(post, locale))
@@ -130,16 +146,20 @@ with sync_playwright() as pw:
                         expect(page.locator('[data-blog-related]')).to_have_attribute('href', '/blog/' + post['related'] + suffix)
                     else:
                         expect(page.locator('[data-blog-related]')).to_have_count(0)
-                    if country == 'US':
+                    if post.get('has_visuals') or country == 'US':
                         expect(page.locator('[data-blog-infographic]')).to_be_visible()
                         expect(page.locator('[data-blog-yield-chart]')).to_be_visible()
                         assert page.locator('[data-blog-infographic] li').count() == 3
+                    if country == 'US':
                         assert 'CAD' not in page.locator('main').inner_text()
                         assert 'en_CA' not in [item.get_attribute('content') for item in page.locator('meta[property="og:locale:alternate"]').all()]
                         expect(page.locator('meta[property="og:locale"]')).to_have_attribute('content', 'en_US' if locale == 'en' else 'ko_KR' if locale == 'ko' else 'ja_JP')
                     if 'chequing' in slug:
                         expect(page.locator('[data-blog-shortlist]')).to_have_attribute('href', catalog(post, locale))
                         assert 'Tier 1' in page.locator('table').inner_text()
+                    if post['catalog'] == '/cards':
+                        expect(page.locator('section[aria-labelledby="blog-editorial"] a[href^="https://www.banksalad.com/articles/"]')).to_have_count(1)
+                        assert 'USD' not in page.locator('main').inner_text() if country == 'CA' else 'CAD' not in page.locator('main').inner_text()
                     page.locator('a[href="#worked-example"]').click()
                     expect(page).to_have_url(ORIGIN + path + suffix + '#worked-example')
                     page.wait_for_timeout(200)
@@ -165,13 +185,13 @@ with sync_playwright() as pw:
                     assert page.get_by_role('banner').evaluate('(el) => el.scrollWidth <= innerWidth')
                 page.evaluate('window.scrollTo(0, 0)')
                 if locale == 'ko':
-                    name = ('index-' + country) if path == '/blog' else ('us-checking' if 'checking-fees' in path else 'us-cd' if 'savings-vs-cds-us' in path else 'us-savings') if country == 'US' else ('gic' if 'gic-canada' in path else 'chequing' if 'chequing' in path else 'savings')
+                    name = ('index-' + country) if path == '/blog' else POSTS[path.rsplit('/', 1)[1]].get('screen') or (('us-checking' if 'checking-fees' in path else 'us-cd' if 'savings-vs-cds-us' in path else 'us-savings') if country == 'US' else ('gic' if 'gic-canada' in path else 'chequing' if 'chequing' in path else 'savings'))
                     page.screenshot(path=str(screens / (name + '-' + str(width) + '.png')), full_page=True)
-                    if name in ['us-cd', 'us-checking']:
+                    if name in ['us-cd', 'us-checking', 'ca-card-rewards', 'us-card-rewards']:
                         page.screenshot(path=str(screens / (name + '-hero-' + str(width) + '.png')))
                         page.locator('[data-blog-infographic]').screenshot(path=str(screens / (name + '-infographic-' + str(width) + '.png')))
                         page.locator('#worked-example figure').screenshot(path=str(screens / (name + '-chart-' + str(width) + '.png')))
-                        if name == 'us-checking':
+                        if name in ['us-checking', 'ca-card-rewards', 'us-card-rewards']:
                             page.locator('#account-comparison').screenshot(path=str(screens / (name + '-table-' + str(width) + '.png')))
                     if name == 'chequing' and width in [390, 1440]:
                         page.screenshot(path=str(screens / (name + '-hero-' + str(width) + '.png')))
@@ -213,11 +233,11 @@ with sync_playwright() as pw:
         page.locator('header button[aria-haspopup=menu]:visible').click()
         page.get_by_role('menu').locator('a[href="/blog?locale=ko"]').click()
         expect(page).to_have_url(ORIGIN + '/blog?locale=ko')
-        expect(page.locator('main article')).to_have_count(3)
+        expect(page.locator('main article')).to_have_count(4)
         page.locator('header button[aria-haspopup=menu]:visible').click()
         page.get_by_role('menu').locator('a[href="/blog?locale=ko&country_code=US"]').click()
         expect(page).to_have_url(ORIGIN + '/blog?locale=ko&country_code=US')
-        expect(page.locator('main article')).to_have_count(3)
+        expect(page.locator('main article')).to_have_count(4)
         page.locator('footer button[aria-haspopup=menu]').click()
         page.get_by_role('menu').locator('a[href="/blog?country_code=US"]').click()
         expect(page).to_have_url(ORIGIN + '/blog?country_code=US')
@@ -238,6 +258,8 @@ with sync_playwright() as pw:
         assert body[:8] == bytes([137, 80, 78, 71, 13, 10, 26, 10])
         assert struct.unpack('>II', body[16:24]) == (1200, 630)
         previews.append(body)
+        if path.rsplit('/', 1)[-1] in POSTS and POSTS[path.rsplit('/', 1)[-1]].get('screen'):
+            (screens / (POSTS[path.rsplit('/', 1)[-1]]['screen'] + '-social.png')).write_bytes(body)
         if path == '/blog/high-yield-savings-vs-cds-us':
             (screens / 'us-cd-social.png').write_bytes(body)
         if path == '/blog/chase-vs-bank-of-america-vs-wells-fargo-checking-fees':
@@ -269,7 +291,7 @@ with sync_playwright() as pw:
                 expect(static_page.locator('#worked-example')).to_be_visible()
                 for amount in POSTS[path.rsplit('/', 1)[1]]['amounts']:
                     assert amount in static_page.locator('main').inner_text()
-            if country == 'US' and path != '/blog':
+            if path != '/blog' and (country == 'US' or POSTS[path.rsplit('/', 1)[1]].get('has_visuals')):
                 expect(static_page.locator('[data-blog-infographic]')).to_be_visible()
                 expect(static_page.locator('[data-blog-yield-chart]')).to_be_visible()
             passed('without JavaScript ' + path + ' ' + locale)

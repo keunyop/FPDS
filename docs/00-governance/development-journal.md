@@ -1,5 +1,36 @@
 # FPDS Development Journal
 
+## 2026-10-15 - Canada and US card-rewards guides with localized conditions
+
+- Added one original EN/KO/JA article per market, inspired by the requested
+  Banksalad topic. Kept attribution separate from five official issuer/regulator
+  citations. Canada preserves Tangerine's extra bonus/cap, two/conditional-three
+  categories, dated application/activation/purchase/payout rules. US preserves
+  Chase's purchase window/current-holder/24-month rules and Wells prepaid-card
+  exclusions. No Korean offer rules, profit guarantees or copied images/prose.
+- Four accessible visuals show the workflow and explicitly fictional first-year
+  versus ongoing rewards. Native CAD/USD, separate one-time bonuses and assumed
+  zero costs remain visible. Card CTAs now use `blogCatalogHref` to native /cards;
+  old deposit destinations/dates remain intact. One/two/three identity layouts,
+  article-specific social PNGs and 30 localized sitemap URLs support eight posts.
+- Actual checks: Public124, lint/typecheck, isolated production build and foundation
+  pass. Final full blog browser audit214 passes, zero errors: EN/KO/JA at
+  390/768/1440, sources/attribution, metadata/JSON-LD, native links, country/locale
+  controls, Filipino English fallback, noindex/404, 30 sitemap URLs, unique PNGs,
+  no-JS and API503 catalog handoff. Manually reviewed both markets' three-width
+  article/feature captures and both social images. Initial attribution selector
+  targeted the heading; corrected the audit section selector, then reran fully.
+- Key files: `app/public/src/lib/public-blog-card-rewards.ts` and regression tests,
+  blog registry/dispatch, article/image/visual routes and
+  `app/public/scripts/blog-audit.py`; Public README/blog policy updated.
+  Evidence remains ignored under `tmp/blog-card-rewards-20261014/` (work began
+  October 14; actual publication/source-check records are October 15).
+- Prior goals/journal ownership preserved. Local editorial implementation only;
+  no collection, schema, canonical data publication or deployment. Search traffic/
+  indexing are unmeasured. Next: authorized Public-only release and read-only
+  native-market/card/SEO smoke; restore prior Public artifact if that smoke fails.
+  No migration or API/Worker release is needed for these articles.
+
 ## 2026-10-13 - Methodology Philippines map marker
 
 - Added PH to PublicCoverageMap's missing coordinate registry using the existing

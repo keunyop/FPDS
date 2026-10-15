@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { blogContent, blogPresentation, blogSources } from './public-blog-content.ts';
+import { blogContent, blogPresentation, blogSources, blogCatalogHref } from './public-blog-content.ts';
 import { BLOG_POSTS, blogHref, blogPostsForCountry } from './public-blog.ts';
-import { curatedCatalogHref } from './public-curated.ts';
 
 const slug = 'high-yield-savings-vs-cds-us';
 const locales = ['en', 'ko', 'ja'] as const;
@@ -49,7 +48,7 @@ test('US CD article is discoverable only in its native market with matching loca
     const presentation = blogPresentation(slug, locale);
     const href = blogHref(slug, locale);
     assert.equal(new URL(href, 'https://example.test').searchParams.get('country_code'), 'US');
-    const catalog = new URL(curatedCatalogHref(presentation.catalog, locale, 'US'), 'https://example.test');
+    const catalog = new URL(blogCatalogHref(slug, locale), 'https://example.test');
     assert.equal(catalog.searchParams.get('product_type'), 'gic');
     assert.equal(catalog.searchParams.get('country_code'), 'US');
     assert.equal(presentation.guides.length, 0);

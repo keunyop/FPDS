@@ -1,7 +1,8 @@
 # SwitchaBank Blog
 
 Status: Implemented locally; Production deployment remains separately scoped.
-Authority: Product Owner's 2026-10-13 US checking article request,
+Authority: Product Owner's 2026-10-14 two-market card-rewards request,
+2026-10-13 US checking article request,
 2026-10-10 additional US article request and
 2026-10-09 country-scoped blog/US article request;
 earlier blog requests, FR-PUB-028, D-088 and WBS 5.74 remain historical context.
@@ -9,13 +10,13 @@ earlier blog requests, FR-PUB-028, D-088 and WBS 5.74 remain historical context.
 ## Reader experience
 
 `/blog` lists the selected country’s allowlisted original articles in EN/KO/JA:
-three Canadian comparisons and three US articles (checking fees, high-yield
-savings and savings versus CDs). US index and article URLs include
+four Canadian and four US articles, including market-specific credit-card
+cashback/welcome-bonus guides alongside the existing deposit comparisons. US index and article URLs include
 `country_code=US`; Canada retains its existing URLs. A ruled feature section,
 existing official bank logos, an article contents list, mobile-stacked comparison
 table, illustrative interest, penalty or fee example, checklist and related guides
 lead to the
-matching country’s savings, chequing or GIC catalog, according to the article.
+matching country’s deposit or credit-card catalog, according to the article.
 Desktop/mobile navigation and the footer expose Blog. No account ownership is required.
 
 The blog is implemented in the existing Next.js Public package.
@@ -111,7 +112,7 @@ other; the older article's content and source dates remain September 30.
 ## Search and measurement
 
 Clean index/article URLs receive localized canonicals, reciprocal EN/KO/JA and
-x-default alternates, descriptions, social metadata and twenty-four country-scoped sitemap entries.
+x-default alternates, descriptions, social metadata and thirty country-scoped sitemap entries.
 BlogPosting and BreadcrumbList describe the visible article; CollectionPage/
 ItemList describe the index. The index has a generic PNG preview; each article has a distinct locally served
 `/blog/[slug]/opengraph-image` preview. Only allowlisted article image paths
@@ -141,6 +142,8 @@ traffic increases are not guaranteed or measured by local verification.
    `public-blog-content.ts`. Keep the article-to-content mapping explicit.
    Keep source registries scoped per article via `blogSources`; update the
    content map and `blogPresentation` for its topic, catalog and related reading.
+   Use `blogCatalogHref` for article actions: credit-card guides open native
+   `/cards`; deposit guides retain their existing curated catalog destinations.
 3. Recheck any fee, condition or offer with the exact official product source.
    Preserve ambiguity; do not infer numbers from templates or calculator copy.
    Update all affected languages together. Advance only the dates actually
@@ -166,7 +169,7 @@ uv run --with playwright python app/public/scripts/blog-audit.py
 ```
 
 The audit covers 390/768/1440px EN/KO/JA index/detail, exact financial example,
-source links, metadata/JSON-LD, twenty-four sitemap entries, PNG preview, real 404,
+source links, metadata/JSON-LD, thirty sitemap entries, PNG preview, real 404,
 query noindex, country-scoped lists/redirects/empty states, source-independent
 rendering, menu focus and country/locale controls,
 JavaScript-free article HTML and the catalog handoff. Browser writes and
@@ -274,3 +277,29 @@ URLs integrate with existing routing. Filipino article requests keep the English
 fallback and native market; no untranslated Filipino article hreflang is added.
 Existing article dates and CA/PH behavior are unchanged. Local editorial code
 only; no collection, data publication or runtime deployment.
+
+
+## Canada and US credit-card rewards guides — 2026-10-15
+
+Two original EN/KO/JA articles use the requested Banksalad topic as inspiration,
+with attribution separate from the official financial sources. They explain
+planned-spending cashback and welcome offers. No source paragraphs, illustrations,
+Korean offer rules, gift-card profit claims or monthly bonus cycling are reused.
+Canada uses Tangerine's verified regular categories, conditional third category,
+extra 10%/CAD100 offer, CAD1000 cap, November 30 application cutoff, 45-day
+activation/60-day purchase windows and account/payout requirements. The US uses
+Chase and Wells Fargo examples; Chase's USD500/three-month/20,000-point USD200
+bonus preserves current-holder/24-month restrictions, fulfillment and posting rules.
+Wells Fargo's prepaid-gift-card exclusion is named without claiming all issuers
+have identical rules. FCAC/CFPB explain interest and purchase grace-period limits.
+
+Each article has a three-step infographic and a clearly fictional first-year/
+following-year chart: CAD340/240 or USD440/240 from annual eligible spending of
+12,000 at 2%, with a separate one-time CAD100/USD200 bonus. Notes disclose zero
+assumed fees/interest, unchanged spending and rates, and no quoted issuer return.
+One Canadian and two US card examples keep exact native currency/annual fees;
+responsive identities support one, two or three banks. Card article CTAs use
+native /cards URLs; existing deposit article destinations and dates are preserved.
+Filipino retains English editorial fallback. Four articles per country produce
+30 localized blog sitemap URLs, with distinct social images and authored dates.
+Local editorial code only; no collection, data publication, schema or deployment.

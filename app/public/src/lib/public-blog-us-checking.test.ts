@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { blogContent, blogPresentation, blogSources } from './public-blog-content.ts';
+import { blogContent, blogPresentation, blogSources, blogCatalogHref } from './public-blog-content.ts';
 import { BLOG_POSTS, blogHref, blogPostsForCountry } from './public-blog.ts';
-import { curatedCatalogHref } from './public-curated.ts';
 import { resolvePublicBankLogo } from './public-bank-logo.ts';
 
 const slug = 'chase-vs-bank-of-america-vs-wells-fargo-checking-fees';
@@ -41,13 +40,13 @@ test('checking fee infographic illustrates twelve charged periods and never prom
 
 test('US checking discovery and catalog preserve country, locale and Filipino editorial fallback', () => {
   assert.equal(BLOG_POSTS.find(post => post.slug === slug)?.country, 'US');
-  assert.equal(blogPostsForCountry('US')[0].slug, slug);
+  assert.equal(blogPostsForCountry('US').some(post => post.slug === slug), true);
   assert.equal(blogPostsForCountry('CA').some(post => post.slug === slug), false);
   assert.equal(blogSources(slug).length, 5);
   assert.equal(blogContent(slug, 'fil'), blogContent(slug, 'en'));
   for (const locale of [...locales, 'fil']) {
     const presentation = blogPresentation(slug, locale);
-    const url = new URL(curatedCatalogHref(presentation.catalog, locale, 'US'), 'https://example.test');
+    const url = new URL(blogCatalogHref(slug, locale), 'https://example.test');
     assert.equal(url.searchParams.get('product_type'), 'chequing');
     assert.equal(url.searchParams.get('country_code'), 'US');
     assert.equal(url.searchParams.get('locale'), locale === 'en' ? null : locale);
