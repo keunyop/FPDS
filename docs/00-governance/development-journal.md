@@ -45,3 +45,14 @@ remain in the repository; previous journal revisions remain in Git history.
   data publication or new scheduler was performed. Test servers are stopped.
   Evidence: ignored tmp/hosting-retention-applied.json, hosting-read-verification.json,
   hosting-browser-results.json, hosting-final-delivery-checks.json and hosting-screens/.
+
+## 2026-10-16 - English local startup guide
+
+- Replaced the root README with concise English PowerShell steps for clone,
+  frozen installs, local configuration, existing/new development DB prerequisites,
+  first-admin bootstrap and separate API4000/Admin3001 terminals.
+- Verified commands against package definitions, environment path resolution,
+  health response and bootstrap implementation; CLI help for bootstrap, uvicorn
+  and Next dev passed. Markdown links, PowerShell snippet syntax, strict UTF-8
+  and git diff --check passed. No fresh-clone install or server/login walkthrough
+  was performed; the owner will follow the guide. No DB/runtime changes.

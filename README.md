@@ -1,60 +1,90 @@
-# FPDS Workspace
+# FPDS Startup Guide
 
-FPDS collects official financial-product information, validates it automatically,
-and serves authenticated Admin operations and approved Public projections.
-The MVP is complete. Further development focuses on the recipient's countries,
-languages and requested features.
+FPDS collects and validates official financial-product information.
+This guide runs FPDS API and FPDS Admin locally.
 
-Start with the **[Admin development guide](descent/FPDS_Admin_개발_가이드.md)**.
-It contains setup, localization, feature changes, verification and the four AI
-skills in one Korean document. Read the affected package README and specific
-contracts only when needed.
+## 1. Prerequisites
 
-## Source map
+Install Git, Node.js 24, pnpm 10.33.0, Python 3.12 and uv.
+You also need access to a development PostgreSQL database with FPDS migrations applied.
+For a new database, follow the [database setup guide](db/README.md) first
+(PostgreSQL with pgvector and the `psql` client are required).
 
-| Boundary | Role and instructions |
-|---|---|
-| Admin | [app/admin](app/admin/README.md): Next.js UI and API proxies |
-| API | [api/service](api/service/README.md): FastAPI, sessions, country scope and services |
-| Worker | [worker](worker/README.md): discovery, capture, extraction and validation |
-| Database | [db](db/README.md): ordered SQL migrations and operations |
-| Private storage | [storage](storage/README.md): evidence access and object layout |
-| Shared | [shared](shared/README.md): contracts, security, design and localization |
-| Public | [app/public](app/public/README.md): separate anonymous application |
+## 2. Clone and install
 
-Use an isolated development clone for installs, builds and release verification
-while an existing workspace is collecting products. API and Worker use separate
-Python environments. Exact setup and test commands are in the development guide.
+Run these commands in PowerShell:
 
-## References when needed
+```powershell
+git clone https://github.com/keunyop/FPDS.git
+cd FPDS
+uv sync --frozen
+uv sync --directory api/service --frozen
+pnpm --dir app/admin install --frozen-lockfile
+```
 
-- [Operator manual](descent/FPDS_Admin_사용자_매뉴얼.md) and
-  [operations handbook](descent/05-operations-handbook.md): everyday work and incidents.
-- [Operational handover](descent/README.md): account ownership, environment transfer,
-  restore, UAT and cutover. MVP completion does not certify these external actions.
-- [Source inventory](00-Scope/scope.md),
-  [services/accounts](00-Scope/external-services-and-accounts.md) and
-  [database inventory](00-Scope/database-migrations-schema-erd.md).
-- [Technical contracts](docs/README.md) and
-  [repository checks](docs/00-governance/harness-engineering-baseline.md).
-- [Development journal](docs/00-governance/development-journal.md): investigate
-  relevant changes or deployment/data results; reading the entire history is
-  unnecessary.
+The root Python environment runs collection workers; the API has its own environment.
+Run all remaining commands from the repository root.
 
-## Data and access rules
+## 3. Configure
 
-Collection automatically accepts evidenced facts or excludes incomplete
-candidates. Review is read-only history. Keep account/security approvals,
-authentication, authorization, CSRF and country isolation intact.
+Create local configuration files if they do not already exist:
 
-Preserve exact currency, rates, terms and conditions under the
-[accuracy policy](docs/03-design/collection-accuracy-policy.md) and
-[field contract](docs/03-design/financial-product-field-contract.md). Verified
-optional facts survive; unknown facts stay absent. Public never exposes raw
-evidence, private storage access or secrets.
+```powershell
+if (-not (Test-Path .env.dev)) { Copy-Item .env.dev.example .env.dev }
+if (-not (Test-Path app/admin/.env.local)) { Copy-Item app/admin/.env.example app/admin/.env.local }
+```
 
-Source, tests, fixtures, migrations, lockfiles and environment examples are
-handover inputs. Local environments, generated output, secrets and private
-collection evidence are excluded from source delivery. Operational recovery
-records remain available; obsolete MVP plans, gate documents and duplicate
-manuals can be retrieved from Git history.
+Edit `.env.dev`:
+
+- Set `FPDS_DATABASE_URL` to your development database connection string.
+- Replace `FPDS_ADMIN_SESSION_SECRET` and `FPDS_ADMIN_CSRF_SECRET` with separate long random values.
+- Keep the example's `localhost` origins and `FPDS_COOKIE_SECURE=false` for local HTTP.
+
+In `app/admin/.env.local`, keep:
+
+```dotenv
+FPDS_ADMIN_API_ORIGIN=http://localhost:4000
+```
+
+Keep secrets out of Git. Storage and provider credentials are needed for actual
+collection; see the [Worker guide](worker/README.md) and [environment configuration](docs/03-design/dev-prod-environment-spec.md).
+
+## 4. Create the first admin
+
+Skip this step if you already have an operator account in the configured database.
+
+```powershell
+uv run --directory api/service python -m api_service.bootstrap_admin_user --env-file .env.dev --login-id admin --display-name "Admin Operator" --role admin
+```
+
+Enter a password of at least 8 characters when prompted.
+
+## 5. Start locally
+
+Open two PowerShell terminals at the repository root. Keep both running.
+
+**Terminal 1 - FPDS API**
+
+```powershell
+$env:FPDS_ENV_FILE = '.env.dev'
+uv run --directory api/service uvicorn api_service.main:app --reload --host localhost --port 4000
+```
+
+**Terminal 2 - FPDS Admin**
+
+```powershell
+pnpm --dir app/admin run dev
+```
+
+## 6. Check
+
+1. Open [API health](http://localhost:4000/healthz) and check for `"status":"ok"`.
+2. Open [Admin login](http://localhost:3001/admin/login), sign in and select an active country.
+3. Open Overview and Banks. A new database starts without collected products.
+
+Use `localhost` consistently rather than mixing it with `127.0.0.1`.
+Press `Ctrl+C` in each terminal to stop the servers.
+
+For further work: [development guide](descent/FPDS_Admin_개발_가이드.md),
+[Admin](app/admin/README.md), [API](api/service/README.md),
+[Public app](app/public/README.md).
