@@ -119,3 +119,28 @@ rankings, and scatter data are derived at request time from the latest retained
 Normal retention deletes make space reusable inside PostgreSQL. A scoped
 `VACUUM (FULL, ANALYZE)` may be run only when no ingestion or aggregate refresh
 is active and only against the explicitly inspected tables that were compacted.
+
+## 7. Routine maintenance
+
+Run the existing function explicitly during routine DB maintenance, including
+after a sustained collection period. A weekly operator check prevents the
+14-day diagnostic data from accumulating indefinitely; this is an operating
+cadence, not a new collection scheduler or recovery feature.
+
+Confirm the intended database and no active ingestion/aggregate work. Record
+latest snapshot IDs/active product counts and protected evidence before/after.
+Rehearse in a transaction and roll back first:
+
+```sql
+BEGIN;
+SET LOCAL lock_timeout = '3s';
+SET LOCAL statement_timeout = '60s';
+SELECT fpds_apply_data_retention();
+ROLLBACK;
+```
+
+Apply in a separate transaction only after the retention summary and permanent
+record/current Public/evidence invariants pass, then commit. Verify zero orphan
+field links and unchanged current snapshots/products. Normal deletes reclaim
+reusable DB space; they do not reverse billed egress. Hot-path query/request
+reduction and runtime rollout are separate from historical storage cleanup.

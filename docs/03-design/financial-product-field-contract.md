@@ -17,7 +17,7 @@ costs remain distinct typed fields. A literal Point of Sale description is not
 a number word; plus-sign identities are distinct. Verified optional facts persist,
 unknowns are omitted, explicit currency conflicts block defaults and conditional
 free fees remain unproven. No field/unit/type/schema change. See
-[diagnosis and policy](../00-governance/rbc-generic-collection-corrections-2026-10-07.md).
+diagnosis and policy (`e391c209d398:docs/00-governance/rbc-generic-collection-corrections-2026-10-07.md` in Git history).
 
 Native table clarification (2026-10-05): literal annual-percent headers bind
 native term/rate cells; complete conditions and exact typed rows must survive
@@ -374,7 +374,7 @@ Shared collection/Review instructions distinguish annual rates from APY,
 opening deposits from ongoing balances, base fees from waivers, exact maturities
 from funding/guarantee/grace/penalty periods, and full rates from discounts or
 capped bonuses. Rate-basis, tier and promotional prose requires an exact quote.
-See [the audit](../00-governance/public-collection-alignment-2026-09-29.md).
+See the audit (`e391c209d398:docs/00-governance/public-collection-alignment-2026-09-29.md` in Git history).
 
 ## Conditional essentials - 2026-10-01
 

@@ -285,47 +285,46 @@ def normalize_public_country_code(country_code: str | None) -> str:
 
 
 def load_latest_public_snapshot(connection: Connection, *, country_code: str) -> dict[str, Any] | None:
-    latest_success = connection.execute(
+    # Fetch the completed snapshot and latest attempt in one database round trip.
+    # Both retain their original ordering; a newer failed attempt cannot replace
+    # the successful snapshot or disappear from its freshness/error context.
+    row = connection.execute(
         """
-        SELECT
-            snapshot_id,
-            refresh_scope,
-            country_code,
-            refresh_status,
-            source_change_cutoff_at,
-            attempted_at,
-            refreshed_at,
-            stale_flag,
-            error_summary,
-            refresh_metadata
-        FROM aggregate_refresh_run
-        WHERE country_code = %(country_code)s
-          AND refresh_status = 'completed'
-        ORDER BY COALESCE(refreshed_at, attempted_at) DESC, attempted_at DESC, snapshot_id DESC
-        LIMIT 1
+        SELECT completed.*,
+            attempt.snapshot_id AS latest_attempt_snapshot_id,
+            attempt.refresh_status AS latest_attempt_refresh_status,
+            attempt.attempted_at AS latest_attempt_attempted_at,
+            attempt.refreshed_at AS latest_attempt_refreshed_at,
+            attempt.error_summary AS latest_attempt_error_summary
+        FROM (
+            SELECT
+                snapshot_id, refresh_scope, country_code, refresh_status,
+                source_change_cutoff_at, attempted_at, refreshed_at,
+                stale_flag, error_summary, refresh_metadata
+            FROM aggregate_refresh_run
+            WHERE country_code = %(country_code)s
+              AND refresh_status = 'completed'
+            ORDER BY COALESCE(refreshed_at, attempted_at) DESC, attempted_at DESC, snapshot_id DESC
+            LIMIT 1
+        ) AS completed
+        LEFT JOIN (
+            SELECT snapshot_id, refresh_status, attempted_at, refreshed_at, error_summary
+            FROM aggregate_refresh_run
+            WHERE country_code = %(country_code)s
+            ORDER BY COALESCE(attempted_at, refreshed_at) DESC, snapshot_id DESC
+            LIMIT 1
+        ) AS attempt ON true
         """,
         {"country_code": country_code},
     ).fetchone()
-    if not latest_success:
+    if not row:
         return None
-
-    latest_attempt = connection.execute(
-        """
-        SELECT
-            snapshot_id,
-            refresh_status,
-            attempted_at,
-            refreshed_at,
-            error_summary
-        FROM aggregate_refresh_run
-        WHERE country_code = %(country_code)s
-        ORDER BY COALESCE(attempted_at, refreshed_at) DESC, snapshot_id DESC
-        LIMIT 1
-        """,
-        {"country_code": country_code},
-    ).fetchone()
-    latest_success["latest_attempt"] = latest_attempt
-    return latest_success
+    snapshot = dict(row)
+    attempt = {field: snapshot.pop("latest_attempt_" + field) for field in (
+        "snapshot_id", "refresh_status", "attempted_at", "refreshed_at", "error_summary",
+    )}
+    snapshot["latest_attempt"] = attempt if attempt["snapshot_id"] is not None else None
+    return snapshot
 
 
 def load_public_projection_rows(

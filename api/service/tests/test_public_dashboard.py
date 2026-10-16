@@ -31,6 +31,13 @@ class _PublicConnection:
         self.rows = rows
 
     def execute(self, sql: str, params: dict[str, object]) -> _FakeResult:
+        if "latest_attempt_snapshot_id" in sql:
+            row = None if self.latest_success is None else {
+                **self.latest_success,
+                **{"latest_attempt_" + field: (self.latest_attempt or {}).get(field)
+                   for field in ("snapshot_id", "refresh_status", "attempted_at", "refreshed_at", "error_summary")},
+            }
+            return _FakeResult(one=row)
         if "AND refresh_status = 'completed'" in sql:
             return _FakeResult(one=self.latest_success)
         if "FROM aggregate_refresh_run" in sql:

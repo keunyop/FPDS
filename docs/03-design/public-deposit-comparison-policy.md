@@ -66,7 +66,7 @@ dates remain unchanged. Missing version records remain conservative omissions.
 
 The single reviewed Oaken legacy annual-basis clarification is bound to the
 exact product, country, bank, currency, approved version and matching 2.8%
-scalar/standard values in [the review](../00-governance/public-deposit-comparison-review-2026-09-24.md).
+scalar/standard values in the review (`e391c209d398:docs/00-governance/public-deposit-comparison-review-2026-09-24.md` in Git history).
 It adds no replacement rate or product verification date; a new version/value
 must supply a basis again. Existing public-rate classification also stops
 mistaking eligibility for CDIC/FDIC coverage for a rate qualification, and

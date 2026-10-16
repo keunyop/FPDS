@@ -15,9 +15,11 @@ for the area being changed.
 | Operations and environment transfer | [Operational handover](../descent/README.md) |
 | Incident/change investigation | [Journal](00-governance/development-journal.md), [decisions](00-governance/decision-log.md), [risks](00-governance/raid-log.md) |
 
-Dated collection, cutover and recovery reports remain in governance because they
-record real operational outcomes. Use the journal to find the relevant report;
-local implementation, deployment and publication are distinct results.
+Required September 30 cutover records and the unresolved Admin parity report
+remain in governance. The Product Owner requested removal of completed bank
+reports and past work notes; previous revisions remain in Git history. Current
+maintenance outcomes are recorded in the journal. Local implementation,
+deployment and publication remain distinct results.
 
 Completed MVP plans, initial requirements, stage gates, superseded drafts and
 prototype/manual archives were removed in the post-MVP cleanup. Historical

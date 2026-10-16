@@ -1,5 +1,17 @@
 # FPDS API and Interface Contracts
 
+## Anonymous Public read caching and detail HEAD
+
+The seven anonymous product/detail/filter/country/dashboard GET routes allow
+60-second Vercel CDN reuse of successful responses, separated by full URL.
+`fresh=1` bypasses this response cache for live comparisons. Errors, credentialed
+Admin/app endpoints and mutations remain `no-store`; browser caches revalidate.
+Product detail HEAD validates the same current snapshot, country and financial
+eligibility as GET, returning 200 or 404 with no product body. Cache generation
+and stored product verification remain separate timestamps. Existing Next and
+origin projection caches retain their own documented bounds.
+
+
 ## Product Type fields and Banks publication counts - 2026-10-04
 
 Authenticated Product Type GET returns `collection_fields` resolved for the

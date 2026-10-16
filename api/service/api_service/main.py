@@ -11,6 +11,7 @@ from fastapi import FastAPI, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 from api_service.auth import (
     LoginError,
@@ -149,6 +150,7 @@ def _success(
 def _error(*, status_code: int, code: str, message: str, request: Request) -> JSONResponse:
     return JSONResponse(
         status_code=status_code,
+        headers={"Cache-Control": "no-store"},
         content={
             "error": {"code": code, "message": message, "details": {}},
             "meta": _meta(request),
@@ -212,12 +214,40 @@ def _public_app_auth_error(request: Request) -> JSONResponse | None:
     return None
 
 
+PUBLIC_CACHE_ROUTES = frozenset({
+    "/api/public/products", "/api/public/products/{product_id}",
+    "/api/public/filters", "/api/public/countries",
+    "/api/public/dashboard-summary", "/api/public/dashboard-rankings",
+    "/api/public/dashboard-scatter",
+})
+
+
+async def _public_read(settings: Settings, loader, **kwargs):
+    # Own the connection and all blocking psycopg work in the same worker thread.
+    # This also allows simultaneous cache misses to coalesce across requests.
+    def read():
+        with open_connection(settings, read_only=True) as connection:
+            return loader(connection, **kwargs)
+    return await run_in_threadpool(read)
+
+
 @app.middleware("http")
 async def request_context_middleware(request: Request, call_next):
     request.state.request_id = request.headers.get("x-request-id", f"req_{uuid4().hex}")
     request.state.generated_at = datetime.now(UTC).isoformat()
     response = await call_next(request)
     response.headers["x-request-id"] = request.state.request_id
+    # Cache only anonymous, successful projection reads, keyed by full URL.
+    # Fresh comparison checks, errors and credentialed endpoints stay uncached.
+    route = request.scope.get("route")
+    response.headers["Cache-Control"] = "no-store"
+    if (request.method in {"GET", "HEAD"}
+            and getattr(route, "path", None) in PUBLIC_CACHE_ROUTES
+            and response.status_code == 200
+            and request.query_params.get("fresh") != "1"
+            and "set-cookie" not in response.headers):
+        response.headers["Cache-Control"] = "public, max-age=0, must-revalidate"
+        response.headers["Vercel-CDN-Cache-Control"] = "public, s-maxage=60"
 
     settings: Settings = request.app.state.settings
     if settings.security_headers_enabled:
@@ -1188,8 +1218,7 @@ async def public_products(
         page_size=page_size,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings, read_only=True) as connection:
-        payload = load_public_products(connection, query=query)
+    payload = await _public_read(settings, load_public_products, query=query)
     return _success(
         payload,
         request,
@@ -1343,6 +1372,7 @@ async def public_engagement_summary(
     return _success(summary, request)
 
 
+@app.head("/api/public/products/{product_id}")
 @app.get("/api/public/products/{product_id}")
 async def public_product_detail(
     request: Request,
@@ -1367,8 +1397,9 @@ async def public_product_detail(
         page_size=1,
     ).filters
     settings: Settings = request.app.state.settings
-    with open_connection(settings, read_only=True) as connection:
-        payload = load_public_product_detail(connection, product_id=product_id, filters=filters)
+    payload = await _public_read(settings, load_public_product_detail, product_id=product_id, filters=filters)
+    if request.method == "HEAD":
+        return Response(status_code=404 if payload is None else 200)
     if payload is None:
         return _error(
             status_code=404,
@@ -1412,20 +1443,16 @@ async def public_filters(
         page_size=20,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings, read_only=True) as connection:
-        payload = load_public_filters(
-            connection,
-            filters=query.filters,
-            search_query=query.search_query,
-        )
+    payload = await _public_read(settings, load_public_filters, filters=query.filters,
+        search_query=query.search_query,
+    )
     return _success(payload, request, meta_extra={"locale": query.filters.locale})
 
 
 @app.get("/api/public/countries")
 async def public_countries(request: Request) -> JSONResponse:
     settings: Settings = request.app.state.settings
-    with open_connection(settings, read_only=True) as connection:
-        countries = load_available_public_countries(connection)
+    countries = await _public_read(settings, load_available_public_countries)
     return _success({"countries": countries}, request)
 
 
@@ -1457,8 +1484,7 @@ async def public_dashboard_summary(
         axis_preset=None,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings, read_only=True) as connection:
-        payload = load_public_dashboard_summary(connection, query=query)
+    payload = await _public_read(settings, load_public_dashboard_summary, query=query)
     return _success(payload, request, meta_extra={"locale": query.filters.locale})
 
 
@@ -1490,8 +1516,7 @@ async def public_dashboard_rankings(
         axis_preset=None,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings, read_only=True) as connection:
-        payload = load_public_dashboard_rankings(connection, query=query)
+    payload = await _public_read(settings, load_public_dashboard_rankings, query=query)
     return _success(payload, request, meta_extra={"locale": query.filters.locale})
 
 
@@ -1524,8 +1549,7 @@ async def public_dashboard_scatter(
         axis_preset=axis_preset,
     )
     settings: Settings = request.app.state.settings
-    with open_connection(settings, read_only=True) as connection:
-        payload = load_public_dashboard_scatter(connection, query=query)
+    payload = await _public_read(settings, load_public_dashboard_scatter, query=query)
     return _success(payload, request, meta_extra={"locale": query.filters.locale})
 
 

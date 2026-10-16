@@ -10,7 +10,7 @@ reproduced in its actual virtualenv and corrected in project/lockfile; local
 port 4000 runs process v2 after bounded restart with no active Runs. Preserve
 coordinated production rollout and fresh ordinary paid-run yield as separate
 unverified outcomes; three direct publications do not prove every bank/type.
-[Evidence and result](laurentian-generic-collection-corrections-2026-10-05.md).
+Evidence and result (`e391c209d398:docs/00-governance/laurentian-generic-collection-corrections-2026-10-05.md` in Git history).
 
 ## Ordinary acquisition and evaluation risk - 2026-10-05
 
@@ -25,7 +25,7 @@ Admin publication. Unobserved links, ambiguous/current-inapplicable facts, model
 errors, parser patterns and exhausted budgets can still exclude valid bank
 products. Coordinate API/runner/Worker rollout and measure a bounded normal Run
 before claiming general direct-quality equivalence.
-[Evidence and limits](ordinary-collection-redesign-2026-10-05.md).
+Evidence and limits (`e391c209d398:docs/00-governance/ordinary-collection-redesign-2026-10-05.md` in Git history).
 
 ## Direct/Admin parity and rollout risk - 2026-10-03
 
@@ -37,7 +37,7 @@ and Worker together; distinguish that step from the separately audited CIBC data
 operation. Other product types still need exact rate/term/access/security binding;
 rendered rates alone do not justify approval or bank-nondisclosure claims. No
 optional-only calls, manual product review or unbounded retry is authorized.
-See [mitigation and practical limits](cibc-collection-redesign-2026-10-03.md).
+See mitigation and practical limits (`e391c209d398:docs/00-governance/cibc-collection-redesign-2026-10-03.md` in Git history).
 
 ## Current collection evidence risk - 2026-10-03
 
@@ -46,7 +46,7 @@ non-product selection; shared corrections pass saved and independent-bank tests.
 Deployment and fresh model behavior remain unverified, and missing current-input
 rate/term/security facts still require automatic exclusion. Do not interpret the
 27 rejected candidates as 27 verified products or as bank disclosure absence.
-See [evidence, mitigation and limits](bmo-generic-collection-root-cause-2026-10-03.md).
+See evidence, mitigation and limits (`e391c209d398:docs/00-governance/bmo-generic-collection-root-cause-2026-10-03.md` in Git history).
 
 Version: 2.0
 Date: 2026-04-22
@@ -107,7 +107,7 @@ Rules:
 | I-002 | Medium | Monitoring | Historical migrations still seed broad baseline catalog rows on a fresh database, but migration 0043 now immediately applies an evidence-qualified fail-closed gate. | Fresh and existing databases retain history while catalog scopes without a verified route, active detail source, or successful non-empty collection are inactive and cannot be selected for collection; false negatives remain possible until an operator re-verifies coverage. | D-089 holds new zero-detail catalog preparation before run creation without quarantine. Historical false-negative scopes still require audited route verification and governed restoration; no product-retirement inference. | AI/Data, Backend |
 | I-003 | Medium | Open | Several active governance docs outside this slice still contain old encoding or readability problems. | Some startup docs are harder to inspect from the shell than they should be. | Clean remaining active docs in later docs-hygiene slices. | Tech Lead |
 | I-004 | High | Open | Operator disable, all-session revocation, and password recovery lack a delivered operator lifecycle tool/runbook rehearsal. | Handover account-revocation and break-glass UAT cannot be signed off. | Approve the preview-first privileged CLI proposal in descent/02-release-readiness.md or provide and rehearse an approved client IAM/DBA process; implementation auto-review requested explicit authorization. | Product Owner; client System/Security owners to be named |
-| I-005 | High | Monitoring | Official-source review on 2026-09-24 confirmed BofA product `prod_QSCmmE97KOSfGp_c` carried a discount as a full rate. The authorized bounded correction removed the scalar and deactivated its incomplete Public projection, preserving versions and source evidence. | The known bad record no longer ranks; the generic discount/reduction classifier is now covered by WBS 5.72 extraction, approval and Public regressions. | Monitor recurrence after the separately scoped code release; see [CA/US alignment](public-collection-alignment-2026-09-29.md). No replacement full rate is inferred. | Product Owner, AI/Data, Backend |
+| I-005 | High | Monitoring | Official-source review on 2026-09-24 confirmed BofA product `prod_QSCmmE97KOSfGp_c` carried a discount as a full rate. The authorized bounded correction removed the scalar and deactivated its incomplete Public projection, preserving versions and source evidence. | The known bad record no longer ranks; the generic discount/reduction classifier is now covered by WBS 5.72 extraction, approval and Public regressions. | Monitor recurrence after the separately scoped code release; see CA/US alignment (`e391c209d398:docs/00-governance/public-collection-alignment-2026-09-29.md` in Git history). No replacement full rate is inferred. | Product Owner, AI/Data, Backend |
 
 ---
 

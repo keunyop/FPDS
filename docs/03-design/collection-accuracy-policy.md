@@ -32,7 +32,7 @@ Five additional automatic publications (LANDBANK3, Chinabank1, Security Bank1)
 bring PH to 12.
 Local v23 and external APIs/web details were verified; external runtime is v20/v8,
 so the follow-up code release remains separate from its completed data publication.
-See the [additional collection report](../00-governance/ph-additional-collection-publication-2026-10-13.md).
+See the additional collection report (`e391c209d398:docs/00-governance/ph-additional-collection-publication-2026-10-13.md` in Git history).
 
 ## Explicit market, currency and complete decision records - 2026-10-13
 
@@ -76,7 +76,7 @@ restarted against the same repository after confirming no active collection.
 Seven current automatic passes were published and independently verified through
 local/external Public APIs and external web details. External hosting still needs
 the coordinated API/Worker code release for future collection; published data and
-serving runtime versions are distinct. See the [PH diagnosis and publication report](../00-governance/ph-generic-collection-corrections-2026-10-13.md).
+serving runtime versions are distinct. See the PH diagnosis and publication report (`e391c209d398:docs/00-governance/ph-generic-collection-corrections-2026-10-13.md` in Git history).
 
 
 ## Linked application prices, owned service costs and qualified loan terms - 2026-10-10
@@ -220,7 +220,7 @@ conditions; uncertainty and conflict still exclude. Shared prompts and gates
 move together. No weaker essentials, bank exceptions or review queue.
 Deploy API/Worker together for future Admin collections. Direct data publication
 is verified separately.
-[Diagnosis and publication verification](../00-governance/us-five-bank-generic-collection-corrections-2026-10-09.md).
+Diagnosis and publication verification (`e391c209d398:docs/00-governance/us-five-bank-generic-collection-corrections-2026-10-09.md` in Git history).
 
 
 ## Owned dynamic prices and complete APR disclosures - 2026-10-09
@@ -245,7 +245,7 @@ points to that uniquely identified complete note. Other unresolved notes reject.
 Existing essentials, currency/types, optional-fact preservation and automatic
 publication gates are unchanged. No bank exception, manual review or permanent
 recovery feature is added. Serving deployment and data publication are separate.
-[Diagnosis and verification](../00-governance/citibank-generic-collection-corrections-2026-10-09.md).
+Diagnosis and verification (`e391c209d398:docs/00-governance/citibank-generic-collection-corrections-2026-10-09.md` in Git history).
 
 ## Owned card declarations and literal scroll references - 2026-10-09
 
@@ -296,7 +296,7 @@ Aggregate and Public gates check that limitation using the exact approved
 version's private mapping; separate ordinary coverage, fee waivers and ATM-price
 rows do not become channel limitations. Mapping/evidence stay private. Shared
 prompts, fingerprints and real-source boundary regressions enforce these rules.
-[Diagnosis and verified operational results](../00-governance/bmo-generic-collection-corrections-2026-10-09.md).
+Diagnosis and verified operational results (`e391c209d398:docs/00-governance/bmo-generic-collection-corrections-2026-10-09.md` in Git history).
 
 ## Accessible identity and complete qualified offers - 2026-10-08
 
@@ -332,7 +332,7 @@ may use the unchanged per-detail/run render budget; attempted and optional-only
 cases cannot. Shared prompts, stored-origin gates and source regressions enforce
 the same rules. No manual review, ranking penalty for missing optional facts or
 bank-specific acceptance exception is added.
-[Diagnosis, regression evidence and publication/release verification](../00-governance/us-three-bank-generic-collection-corrections-2026-10-08.md).
+Diagnosis, regression evidence and publication/release verification (`e391c209d398:docs/00-governance/us-three-bank-generic-collection-corrections-2026-10-08.md` in Git history).
 
 ## Independent owned proof and annual units - 2026-10-08
 
@@ -360,7 +360,7 @@ actual access challenges still fail closed. Prudential/capital-adequacy reports
 do not supply consumer product essentials. Existing budgets, exact financial units,
 conditional transaction/access/security essentials and automatic origin/acceptance
 gates remain; no manual review or bank-specific acceptance exception is added.
-[Source-backed diagnosis and verified data/release limits](../00-governance/td-vancity-wealthone-generic-collection-corrections-2026-10-08.md).
+Source-backed diagnosis and verified data/release limits (`e391c209d398:docs/00-governance/td-vancity-wealthone-generic-collection-corrections-2026-10-08.md` in Git history).
 
 ## Referenced annual disclosures and normalization parity - 2026-10-07
 
@@ -413,7 +413,7 @@ navigation label says Rates and fees. Observed current-rate hubs and own-family
 rate paths remain eligible within unchanged acquisition budgets. These are shared
 Admin/direct proof rules, with no bank-specific values, essential relaxation,
 manual review or added research budget. Serving deployment is a separate action.
-[Source-backed diagnosis and verification](../00-governance/simplii-generic-collection-corrections-2026-10-07.md).
+Source-backed diagnosis and verification (`e391c209d398:docs/00-governance/simplii-generic-collection-corrections-2026-10-07.md` in Git history).
 
 ## Owned price and rate proof clarification - 2026-10-07
 
@@ -431,7 +431,7 @@ denomination; explicit owned conflicts veto country defaults. Conditional free
 fees and channel-only transactions remain insufficient. Empty dynamic pricing
 slots can request bounded rendering despite percentages in unrelated notes.
 No essential, unit/type, country/type, security or approval-policy relaxation.
-[Source-backed diagnosis and verification](../00-governance/rbc-generic-collection-corrections-2026-10-07.md).
+Source-backed diagnosis and verification (`e391c209d398:docs/00-governance/rbc-generic-collection-corrections-2026-10-07.md` in Git history).
 
 ## Owned deposit tables and Oaken publication - 2026-10-07
 
@@ -446,7 +446,7 @@ Verified same-record optional facts survive; financial/security essentials and
 research budgets remain unchanged. Four directly collected Oaken products are
 verified on Public; serving still reports v4, so future Admin use needs the
 API/Worker release. No deployment/restart occurred in this operation.
-[Diagnosis, corrections, publication and verification limits](../00-governance/oaken-generic-collection-corrections-2026-10-07.md).
+Diagnosis, corrections, publication and verification limits (`e391c209d398:docs/00-governance/oaken-generic-collection-corrections-2026-10-07.md` in Git history).
 
 ## Native information records and Manulife publication - 2026-10-06
 
@@ -458,7 +458,7 @@ Same-capture registered optional facts and explicit typed security survive
 normalization and unchanged origin/financial essentials. Complete native
 conditions are checked at the final gate. Process version:
 `2026-10-06-native-information-proof-v2`.
-[Diagnosis, verified publication and deployment limits](../00-governance/manulife-generic-collection-corrections-2026-10-06.md).
+Diagnosis, verified publication and deployment limits (`e391c209d398:docs/00-governance/manulife-generic-collection-corrections-2026-10-06.md` in Git history).
 
 ## Native financial record correction - 2026-10-05
 
@@ -471,7 +471,7 @@ rows keep their own terms; conflicting rows cannot supply comparison facts.
 GIC cashability requires complete access proof. These are generic evidence
 representations, with unchanged essentials and no manual product review.
 Process version: `2026-10-05-native-rate-proof-v2`.
-[Diagnosis, regressions and publication](../00-governance/laurentian-generic-collection-corrections-2026-10-05.md).
+Diagnosis, regressions and publication (`e391c209d398:docs/00-governance/laurentian-generic-collection-corrections-2026-10-05.md` in Git history).
 
 ## Essential evidence research before final extraction - 2026-10-05
 
@@ -515,7 +515,7 @@ terms on its product URL. Action routes, family boundaries and foreign/missing
 snapshot/parse/language records remain insufficient. The source-backed current
 CIBC regression precedes this extension; extraction instructions and final proof
 are aligned. Localized legal-container leads remain retrieval only and never
-establish annual units themselves. [Evidence, outcome and deployment limits](../00-governance/ordinary-collection-redesign-2026-10-05.md).
+establish annual units themselves. Evidence, outcome and deployment limits (`e391c209d398:docs/00-governance/ordinary-collection-redesign-2026-10-05.md` in Git history).
 
 ## Native labelled disclosures and named transaction plans - 2026-10-04
 
@@ -541,7 +541,7 @@ Singular checking plans need corroborated title/H1, monthly price, ordinary
 transactions and checking services. Multiple plans under choose/compare form
 a family boundary. Proof is reapplied after the existing model pass; exact
 origins, types, automatic exclusion/privacy and financial essentials remain.
-No permanent review/recovery queue. [Diagnosis and operation](../00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+No permanent review/recovery queue. Diagnosis and operation (`e391c209d398:docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md` in Git history).
 
 ## Product Type-managed collection targets - 2026-10-04
 
@@ -592,7 +592,7 @@ safe-fetch gates. No issuer allowlist is inferred from a link or relaxed.
 The source-backed CCS replay proves three ordinary automatic passes; two use
 original captured inputs and Better-than-Cash needs additional current official
 catalogue terms. No live collection, publication or deployment is implied. See
-[correction, adversarial evidence and rollout limits](../00-governance/coast-collection-evidence-corrections-2026-10-03.md).
+correction, adversarial evidence and rollout limits (`e391c209d398:docs/00-governance/coast-collection-evidence-corrections-2026-10-03.md` in Git history).
 
 ## Product-owned captured facts and direct/Admin parity - 2026-10-03
 
@@ -624,7 +624,7 @@ shared insurance folders; common selected
 companions retain all actual parent-detail relationships within existing caps.
 Optional facts still use the same evidence only; no optional-only calls, manual
 product review or permanent recovery queue is added. Runtime rollout and the
-CIBC data result are separate. See [CIBC diagnosis and publication](../00-governance/cibc-collection-redesign-2026-10-03.md) and the source-backed regression tests.
+CIBC data result are separate. See CIBC diagnosis and publication (`e391c209d398:docs/00-governance/cibc-collection-redesign-2026-10-03.md` in Git history) and the source-backed regression tests.
 
 ## Direct Chequing evidence correction - 2026-10-03
 
@@ -647,7 +647,7 @@ definition prose does not itself qualify an explicit own-account unlimited fact;
 actual eligibility, special-channel and finite-count conflicts remain binding.
 Finite plans still need proved excess costs. No optional-only calls, human review,
 new financial fields or publication/deployment are added. See the
-[direct comparison and saved-input limits](../00-governance/bmo-chequing-direct-comparison-2026-10-03.md).
+direct comparison and saved-input limits (`e391c209d398:docs/00-governance/bmo-chequing-direct-comparison-2026-10-03.md` in Git history).
 
 ## Captured grounding and structural evidence correction - 2026-10-03
 
@@ -664,7 +664,7 @@ Missing resolved origins fail closed. Prominent insurance/service/search-tool an
 prepaid identities cannot become supported financial products; supporting evidence
 and named products with insurance benefits remain available. Existing units,
 conditional essentials, optional rules and automatic receipt gates are unchanged.
-See [diagnosis, verification and limits](../00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+See diagnosis, verification and limits (`e391c209d398:docs/00-governance/bmo-generic-collection-root-cause-2026-10-03.md` in Git history).
 
 ## Requested Run visibility - 2026-10-02
 
@@ -778,7 +778,7 @@ and contradictory-permission checks. Neither phrase authorizes guessed units or
 lost conditions. Grounded identities cannot change during formatting. Independently
 explicit deposit calculation/payment sentences are checked with their applicable
 heading while original compound overdraft context is retained; numerical rate
-ambiguity still uses the full context. See [verified implementation](../00-governance/generic-collection-evidence-improvements-2026-10-02.md).
+ambiguity still uses the full context. See verified implementation (`e391c209d398:docs/00-governance/generic-collection-evidence-improvements-2026-10-02.md` in Git history).
 
 ## Processing and enforcement
 
@@ -948,7 +948,7 @@ Normalization retains official origins for supporting evidence selected by the e
 
 The extraction artifact cannot populate the trusted origin map. The ordinary same-document path remains compatible, with matching snapshot required. Input expansion retains the map. Existing official-domain, actually-consulted URL, exact quote, product applicability, financial semantics and required-field checks remain binding. This change adds no requests to the collection model and does not broaden supporting-source selection. No accuracy/profile version or prompt change is needed because accepted financial patterns and extraction instructions are unchanged.
 
-The corrected local worker restored the two prepared Scotiabank accounts through normal automatic gates. Future Admin collection requires deployment of the collection runtime/API package. Public reads use the existing compatible receipts and continue to hide private provenance. See [the operation and tests](../00-governance/supporting-evidence-recovery-2026-10-01.md).
+The corrected local worker restored the two prepared Scotiabank accounts through normal automatic gates. Future Admin collection requires deployment of the collection runtime/API package. Public reads use the existing compatible receipts and continue to hide private provenance. See the operation and tests (`e391c209d398:docs/00-governance/supporting-evidence-recovery-2026-10-01.md` in Git history).
 
 
 ## Exact checking account-fee rows - 2026-10-01 correction
@@ -957,21 +957,21 @@ The shared gate accepts a single exact multiline ordinary Transactions included 
 
 Only explicit ordinary unlimited wording proves account-wide unlimited transactions. Public transit, ATM, wire or e-transfer scope, including preceding/following qualifiers, cannot prove it. Excess-only pricing retains its distinct field. Matching extraction instructions preserve row line breaks and these distinctions; deterministic checking normalization and validation share the corrected accuracy gate. No publication essential, field type/unit or receipt/profile version changed; new code/prompt fingerprints invalidate unchanged-input extraction cache reuse as applicable.
 
-The local corrected worker restored two hidden TD accounts through normal automatic gates. Public API is CA 11 / US 2; existing receipts remain compatible. Deploy the collection-runtime/API package to apply the shared correction to future Admin collection. See [operation and regression evidence](../00-governance/td-checking-recovery-2026-10-01.md).
+The local corrected worker restored two hidden TD accounts through normal automatic gates. Public API is CA 11 / US 2; existing receipts remain compatible. Deploy the collection-runtime/API package to apply the shared correction to future Admin collection. See operation and regression evidence (`e391c209d398:docs/00-governance/td-checking-recovery-2026-10-01.md` in Git history).
 
 
 ## Separated card-offer eligibility and current annual rates - 2026-10-01 correction
 
 A switch-from existing-card offer exclusion can be distinguished only when it precedes a separate Rates and Fees heading and an explicit current preferred annual Account-rate declaration. The bounded existing-card phrase and exclusion must match; any other from use remains conditional, including lower bounds and later periods. The rate section must also have no payment-provision, customer-only, conditional, default or penalty language for this exception. Entire original chunks and exact quotations remain; no qualifiers are removed. Unique scalar percentages, exact field labels, annual basis, currency, official origins and all other condition checks remain mandatory. Missing/ambiguous boundaries, conflicting or qualified rates fail closed.
 
-Extraction and requested card-rate dynamic normalization share the same short instruction. Other dynamic prompts receive no additional card text. Existing field registration and required/optional policies remain. Current receipts keep the same policy/profile versions and types; cache fingerprints include changed code/instructions. The local corrected worker restored the verified Platinum card through normal automatic gates, with no model calls or human review. Deploy collection-runtime/API for future Admin collection. See [operation and regressions](../00-governance/platinum-card-recovery-2026-10-01.md).
+Extraction and requested card-rate dynamic normalization share the same short instruction. Other dynamic prompts receive no additional card text. Existing field registration and required/optional policies remain. Current receipts keep the same policy/profile versions and types; cache fingerprints include changed code/instructions. The local corrected worker restored the verified Platinum card through normal automatic gates, with no model calls or human review. Deploy collection-runtime/API for future Admin collection. See operation and regressions (`e391c209d398:docs/00-governance/platinum-card-recovery-2026-10-01.md` in Git history).
 
 
 ## Bounded labelled current card rates — 2026-10-01
 
 A complete explicit current preferred annual Account-rate declaration may prove distinct purchase and cash-advance percentages when each has its own label. Every percentage in the retained context must belong to that single declaration; additional/repeated rates, scalar ranges, conditions and missing annual basis remain excluded. Balance-transfer applicability needs its explicit inclusion. Preserve the full source context and official field proof through all normal gates. Shared extraction and requested card normalization instructions match.
 
-The [14-card one-off batch](../00-governance/card-bulk-recovery-2026-10-01.md) produced two normal automatic passes and retained twelve exclusions, with no provider calls or weaker prerequisites. A direct evidence pass alone does not bypass subsequent normalization/validation. Code remains local; future runtime deployment is separate.
+The 14-card one-off batch (`e391c209d398:docs/00-governance/card-bulk-recovery-2026-10-01.md` in Git history) produced two normal automatic passes and retained twelve exclusions, with no provider calls or weaker prerequisites. A direct evidence pass alone does not bypass subsequent normalization/validation. Code remains local; future runtime deployment is separate.
 
 
 ## Bound numeric context and current zero fees — 2026-10-01
@@ -980,7 +980,7 @@ Unchanged extracted numeric fields with a real chunk and full excerpt retain tha
 
 Future subject-to-change notices alone do not qualify an explicitly current fee. Actual payment, balance, eligibility or waiver conditions remain binding. First-year/month and introductory/promotional zero-fee contexts cannot prove an unconditional zero; absent information is never zero. Matching instructions reach extraction and requested fee normalization only. Required/optional contracts, receipt/profile versions, privacy and automatic exclusion remain.
 
-The [remaining-card operation](../00-governance/remaining-card-recovery-2026-10-01.md) verified explicit personal Visa/Amex agreement family applicability for directly linked student variants and separate current Mastercard CAD settlement documents. Six of twelve cards passed normal current validation; six are retained exclusions. Future collection-runtime deployment remains separate from applied data.
+The remaining-card operation (`e391c209d398:docs/00-governance/remaining-card-recovery-2026-10-01.md` in Git history) verified explicit personal Visa/Amex agreement family applicability for directly linked student variants and separate current Mastercard CAD settlement documents. Six of twelve cards passed normal current validation; six are retained exclusions. Future collection-runtime deployment remains separate from applied data.
 
 
 ## Separate offer revocation and numbered transaction notes - 2026-10-01
@@ -993,7 +993,7 @@ One explicit `N Debits / Month` row proves its ordinary monthly included allowan
 
 Zero fees limited by fixed duration, age/graduation or average daily/monthly balance are conditional outcomes, not regular fees. Preserve a separately proven positive base fee and verified waiver conditions; never invent an unconditional zero. National/industry/market averages and competitor benchmark percentages are not the named product's own payable scalar rate. Full retained context and tightly selected quotations receive the same checks; borrowing examples remain insufficient current product-rate evidence. Shared instructions and adversarial/success regressions accompany all changes.
 
-The [staged recovery](../00-governance/staged-unpublished-recovery-2026-10-01.md) published ten current automatic passes and removed 394 unsupported targets from the one-off work list, preserving canonical/history and registry. Receipt/profile versions, conditional essentials and public privacy remain unchanged. No permanent queue or recovery feature; future shared runtime deployment is separate.
+The staged recovery (`e391c209d398:docs/00-governance/staged-unpublished-recovery-2026-10-01.md` in Git history) published ten current automatic passes and removed 394 unsupported targets from the one-off work list, preserving canonical/history and registry. Receipt/profile versions, conditional essentials and public privacy remain unchanged. No permanent queue or recovery feature; future shared runtime deployment is separate.
 
 
 ## Verified optional checking interest - 2026-10-02 correction
@@ -1018,7 +1018,7 @@ Saved Alterna detail evidence reproduces both the missing field request and
 unrelated insurance-condition false rejection. Cross-market and adversarial
 regressions verify the generic correction without bank exceptions. Worker/API
 runtime deployment remains separate; no live rate was rewritten. See the
-[diagnosis and verification](../00-governance/optional-checking-rates-2026-10-02.md).
+diagnosis and verification (`e391c209d398:docs/00-governance/optional-checking-rates-2026-10-02.md` in Git history).
 
 
 ## Native product sections and independently captured annual basis - 2026-10-05
@@ -1029,7 +1029,7 @@ A positive labelled base fee before a complete separately stated calendar-month 
 
 A directly linked legal container may be selected within existing companion caps only when a savings product's essential numeric interest lacks annual units. Optional checking interest must not trigger extra searches. A named account Terms and Conditions section can prove annual units through an explicit separate captured-basis reference for its own standard/display deposit rate. Preserve both exact source quotes; do not manufacture a composite quotation. The reference must resolve through actual successful current-run same-bank/country snapshot/parse joins, bind the exact named account and parser anchor, prove annual units in the complete original record, and contain no competing numeric rate. Missing, mismatched, unproven or foreign basis origins stay excluded. Numeric rates still pass unchanged meaning, conditions, uniqueness and currency checks.
 
-An explicit official loan range declaration remains a full qualified prose summary, including its repayment interval and actual APR qualifiers. Its endpoints and payment-example APRs never become scalar comparison rates. The shared prompts and source-backed/cross-bank regressions cover all extensions. See [diagnosis and bounded publication](../00-governance/three-bank-generic-collection-corrections-2026-10-05.md).
+An explicit official loan range declaration remains a full qualified prose summary, including its repayment interval and actual APR qualifiers. Its endpoints and payment-example APRs never become scalar comparison rates. The shared prompts and source-backed/cross-bank regressions cover all extensions. See diagnosis and bounded publication (`e391c209d398:docs/00-governance/three-bank-generic-collection-corrections-2026-10-05.md` in Git history).
 
 Final automatic promotion rechecks the same complete native account identity and general cost records. A historical containing-page family label cannot erase field-level independently proven boundaries; missing, foreign or conditional proof and hard coverage/service exclusions remain blocking. Receipts and current official grounding are still required.
 

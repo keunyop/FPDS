@@ -61,6 +61,7 @@ export function TrackedProductLink({
     <Link
       className={className}
       href={href}
+      prefetch={false}
       onClick={() => recordProductEngagement({
         countryCode,
         eventType: 'product_detail_click',

@@ -11,7 +11,7 @@ selected evidence, capture/parse failures and budget-stop reasons before retry.
 Never describe a preflight gap as bank nondisclosure. Optional gaps cause no retry.
 No recurring collection/recovery is added. Use a bounded normal Run after release;
 verify its final automatic outcome and ordinary Public projection separately.
-[Diagnosis and verification](../docs/00-governance/ordinary-collection-redesign-2026-10-05.md).
+Diagnosis and verification (`e391c209d398:docs/00-governance/ordinary-collection-redesign-2026-10-05.md` in Git history).
 
 상태: 2026-10-03 현행 상품수집 정책 반영. 의뢰자 환경·담당자·복구 증거 반영 전.
 실제 URL, release tag, 지원 연락망, 환경 소유권은

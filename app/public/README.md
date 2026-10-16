@@ -1,5 +1,22 @@
 # FPDS Public
 
+## Request cost controls
+
+Product-search BFF reads use the existing 300-second Next Data Cache without a
+force-dynamic override. Successful responses allow bounded CDN reuse; failures
+are `no-store`, with an eight-second upstream deadline. Fresh comparison detail
+reads bypass both Next and the API CDN with `fresh=1`.
+
+Detail pre-stream checks use body-free HEAD requests. Background prefetch skips
+the redundant check; the page still validates its product/country and receives
+locale headers. Tracked product links fetch detail on navigation rather than
+prefetching every visible card. Bank-logo/map assets bypass the page proxy.
+
+Financial eligibility, optional facts, original languages and keyboard links
+retain their current behavior. See [API cache boundaries](../../api/service/README.md#public-request-cost-controls).
+These code controls require API and Public deployment before serving traffic.
+
+
 ## Canada and US credit-card rewards articles - 2026-10-15
 
 Added one original cashback/welcome-offer guide per country in EN/KO/JA, inspired

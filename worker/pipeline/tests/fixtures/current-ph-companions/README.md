@@ -18,4 +18,4 @@ country/sibling/return links, missing annual basis/repricing/cadence/threshold,
 unproved responsive aliases, shortened conditions and guessed scalars/zeros fail
 closed. The actual FAQ index traversal uses the existing two-wave/two-URL cap.
 
-See [the collection report](../../../../../docs/00-governance/ph-additional-collection-publication-2026-10-13.md).
+See the collection report (`e391c209d398:docs/00-governance/ph-additional-collection-publication-2026-10-13.md` in Git history).

@@ -379,6 +379,10 @@ async function fetchPublicData<T>(path: string, searchParams: URLSearchParams | 
     url.search = searchParams.toString();
   }
 
+  // A no-store comparison must also bypass the API CDN, whose cache is
+  // independent of Next's Data Cache. The API still validates the latest snapshot.
+  if (revalidateSeconds === 0) url.searchParams.set("fresh", "1");
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), PUBLIC_DATA_FETCH_TIMEOUT_MS);
 

@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 import { getPublicApiOrigin } from "@/lib/public-api";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 const ALLOWED_QUERY_KEYS = new Set([
@@ -38,12 +37,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(apiUrl, { next: { revalidate } });
+    const response = await fetch(apiUrl, { next: { revalidate }, signal: AbortSignal.timeout(8_000) });
     const body = await response.text();
     return new NextResponse(body, {
       status: response.status,
       headers: {
-        "cache-control": "public, s-maxage=300, stale-while-revalidate=60",
+        "cache-control": response.ok ? "public, max-age=0, s-maxage=300" : "no-store",
         "content-type": response.headers.get("content-type") ?? "application/json"
       }
     });
@@ -55,7 +54,7 @@ export async function GET(request: NextRequest) {
           message: "Published products are temporarily unavailable."
         }
       },
-      { status: 503 }
+      { status: 503, headers: { "cache-control": "no-store" } }
     );
   }
 }

@@ -64,7 +64,7 @@ export async function proxy(request: NextRequest) {
     if (destination) return NextResponse.redirect(new URL(destination, request.url), 308);
   }
   const productId = readProductId(request.nextUrl.pathname);
-  if (!productId) {
+  if (!productId || request.headers.has("next-router-prefetch") || request.headers.get("purpose") === "prefetch") {
     return NextResponse.next({
       request: { headers: requestHeaders }
     });
@@ -81,6 +81,7 @@ export async function proxy(request: NextRequest) {
     apiUrl.searchParams.set("country_code", policy.countryCode);
 
     response = await fetch(apiUrl, {
+      method: "HEAD",
       headers: { accept: "application/json" },
       signal: AbortSignal.timeout(PUBLIC_API_TIMEOUT_MS)
     });
@@ -113,7 +114,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api/|_next/|icon.svg|manifest.webmanifest|robots.txt|sitemap.xml|opengraph-image).*)"
+    "/((?!api/|_next/|bank-logos/|world-map-equal-earth.svg|icon.svg|manifest.webmanifest|robots.txt|sitemap.xml|opengraph-image).*)"
   ]
 };
 

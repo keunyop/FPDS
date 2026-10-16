@@ -1,5 +1,35 @@
 # FPDS API Service
 
+## Public request cost controls
+
+Anonymous successful product, detail, filter, country and dashboard GET/HEAD
+responses allow a 60-second Vercel CDN cache keyed by full URL. Browser caches
+must revalidate. Errors, credential-bound endpoints, Admin routes, mutations and
+`fresh=1` reads remain `no-store`. CORS, security headers and country gates remain.
+
+Blocking read-only psycopg connection/query/close work runs together in worker
+threads. Completed-snapshot and latest-attempt context use one SQL round trip,
+retaining exact ordering and newer failed-attempt diagnostics. The existing
+60-second/64-entry validated projection cache still isolates DB role/options,
+country, snapshot and policy versions; new snapshots select a new origin key.
+
+The product detail HEAD route applies the same active-snapshot/financial gates
+as GET and returns no product body. Public pre-stream checks use HEAD; live
+comparison GETs send `fresh=1` to bypass the independent API CDN as well as Next
+Data Cache. Next's existing 300/900-second reads retain their separate bounds;
+cache generation dates never become new product verification dates.
+
+Release the API first so HEAD and fresh reads are ready, then release Public.
+If rolling back to an API without HEAD, roll back Public first. No data refresh
+or migration is required for these request controls.
+
+After rollout, verify a repeated anonymous URL becomes CDN HIT, the country/
+locale variants stay separate, fresh comparisons bypass it, and private/error
+responses remain uncached. Local tests do not establish serving deployment or
+billed savings. Retention maintenance is described in the
+[existing retention policy](../../docs/03-design/bounded-data-retention-policy.md).
+
+
 ## Current native features and linked essential FAQs - 2026-10-13
 
 Parser v31/process `2026-10-13-linked-account-cost-conditions-v23`, market v8,
@@ -32,7 +62,7 @@ Five additional automatic publications (LANDBANK3, Chinabank1, Security Bank1)
 bring PH to 12.
 Local v23 and external APIs/web details were verified; external runtime is v20/v8,
 so the follow-up code release remains separate from its completed data publication.
-See the [additional collection report](../../docs/00-governance/ph-additional-collection-publication-2026-10-13.md).
+See the additional collection report (`e391c209d398:docs/00-governance/ph-additional-collection-publication-2026-10-13.md` in Git history).
 
 ## Explicit market, currency and complete decision records - 2026-10-13
 
@@ -76,7 +106,7 @@ restarted against the same repository after confirming no active collection.
 Seven current automatic passes were published and independently verified through
 local/external Public APIs and external web details. External hosting still needs
 the coordinated API/Worker code release for future collection; published data and
-serving runtime versions are distinct. See the [PH diagnosis and publication report](../../docs/00-governance/ph-generic-collection-corrections-2026-10-13.md).
+serving runtime versions are distinct. See the PH diagnosis and publication report (`e391c209d398:docs/00-governance/ph-generic-collection-corrections-2026-10-13.md` in Git history).
 
 
 
@@ -244,7 +274,7 @@ conditions; uncertainty and conflict still exclude. Shared prompts and gates
 move together. No weaker essentials, bank exceptions or review queue.
 Deploy API/Worker together for future Admin collections. Direct data publication
 is verified separately.
-[Diagnosis and publication verification](../../docs/00-governance/us-five-bank-generic-collection-corrections-2026-10-09.md).
+Diagnosis and publication verification (`e391c209d398:docs/00-governance/us-five-bank-generic-collection-corrections-2026-10-09.md` in Git history).
 
 
 ## Owned dynamic pricing and complete disclosures - 2026-10-09
@@ -257,7 +287,7 @@ mandatory. Reciprocal numeric return links do not import another note. No weaker
 essentials, bank exceptions, manual review or new recovery workflow are added.
 Deploy API/Worker together for future ordinary Admin collection; direct Public
 data publication is verified separately.
-[Diagnosis and verified results](../../docs/00-governance/citibank-generic-collection-corrections-2026-10-09.md).
+Diagnosis and verified results (`e391c209d398:docs/00-governance/citibank-generic-collection-corrections-2026-10-09.md` in Git history).
 
 ## Shared card declarations and current origins - 2026-10-09
 
@@ -269,7 +299,7 @@ Conflicts, unknown notes, other panels, calculators and bare nonannual rates exc
 Shared prompts, financial/origin gates and cache identity move together. Deploy
 API/Worker together; current data publication is separately verified. See the
 [accuracy policy](../../docs/03-design/collection-accuracy-policy.md).
-[Diagnosis and publication/runtime verification](../../docs/00-governance/bny-capital-one-generic-collection-corrections-2026-10-09.md).
+Diagnosis and publication/runtime verification (`e391c209d398:docs/00-governance/bny-capital-one-generic-collection-corrections-2026-10-09.md` in Git history).
 
 ## Snapshot-pinned ordinary transaction proof - 2026-10-09
 
@@ -280,7 +310,7 @@ transactions even in an older accepted receipt. Independent ordinary coverage,
 monthly-fee waivers and separately labelled ATM prices remain distinct. Mapping
 metadata is removed before returning Public rows. Deploy API/Worker together;
 verified product publication is separate from serving deployment.
-[Diagnosis and publication/runtime verification](../../docs/00-governance/bmo-generic-collection-corrections-2026-10-09.md).
+Diagnosis and publication/runtime verification (`e391c209d398:docs/00-governance/bmo-generic-collection-corrections-2026-10-09.md` in Git history).
 
 ## Accessible discovery and essential template acquisition - 2026-10-08
 
@@ -292,7 +322,7 @@ request an existing-budget render for missing essentials. Bounded strict JSON an
 encoded JSON/Transit map decoding executes no scripts and supplies no facts. Keep canonical URL identities, all origin and financial gates
 and current research budgets. Release API/Worker together; data publication is
 separate from serving code deployment.
-[Diagnosis, regression evidence and publication/release verification](../../docs/00-governance/us-three-bank-generic-collection-corrections-2026-10-08.md).
+Diagnosis, regression evidence and publication/release verification (`e391c209d398:docs/00-governance/us-three-bank-generic-collection-corrections-2026-10-08.md` in Git history).
 
 ## Canonical research identities and owned notes - 2026-10-08
 
@@ -304,7 +334,7 @@ resolved and attempted actions do not. Prudential capital disclosures are not
 consumer product-essential leads. Successful static captures survive failed
 best-effort enhancement; access challenges still fail closed. Deploy API/Worker
 together; direct data publication and serving release remain separate.
-[Diagnosis, source regressions and publication verification](../../docs/00-governance/td-vancity-wealthone-generic-collection-corrections-2026-10-08.md).
+Diagnosis, source regressions and publication verification (`e391c209d398:docs/00-governance/td-vancity-wealthone-generic-collection-corrections-2026-10-08.md` in Git history).
 
 ## Essential research scope and native disclosure parity - 2026-10-07
 
@@ -325,7 +355,7 @@ Canonical name/source-cardinality SQL preserves meaningful plus variants.
 Five SQL behavior regressions and the full independent API suite (639 tests) pass.
 Fifteen RBC products pass the corrected local pipeline and normal publication;
 serving reports v5, so future Admin use requires the normal API/Worker release. Direct publication is a separate bounded operation with zero Admin
-collection API or provider calls. See [diagnosis and verification](../../docs/00-governance/rbc-generic-collection-corrections-2026-10-07.md).
+collection API or provider calls. See diagnosis and verification (`e391c209d398:docs/00-governance/rbc-generic-collection-corrections-2026-10-07.md` in Git history).
 
 ## Owned deposit tables and Oaken publication - 2026-10-07
 
@@ -340,7 +370,7 @@ Verified same-record optional facts survive; financial/security essentials and
 research budgets remain unchanged. Four directly collected Oaken products are
 verified on Public; serving still reports v4, so future Admin use needs the
 API/Worker release. No deployment/restart occurred in this operation.
-[Diagnosis, corrections, publication and verification limits](../../docs/00-governance/oaken-generic-collection-corrections-2026-10-07.md).
+Diagnosis, corrections, publication and verification limits (`e391c209d398:docs/00-governance/oaken-generic-collection-corrections-2026-10-07.md` in Git history).
 
 ## Ordinary Admin evidence parity - 2026-10-06
 
@@ -371,7 +401,7 @@ Same-capture registered optional facts and explicit typed security survive
 normalization and unchanged origin/financial essentials. Complete native
 conditions are checked at the final gate. Process version:
 `2026-10-06-native-information-proof-v2`.
-[Diagnosis, verified publication and deployment limits](../../docs/00-governance/manulife-generic-collection-corrections-2026-10-06.md).
+Diagnosis, verified publication and deployment limits (`e391c209d398:docs/00-governance/manulife-generic-collection-corrections-2026-10-06.md` in Git history).
 
 ## Native financial record correction - 2026-10-05
 
@@ -384,7 +414,7 @@ rows keep their own terms; conflicting rows cannot supply comparison facts.
 GIC cashability requires complete access proof. These are generic evidence
 representations, with unchanged essentials and no manual product review.
 Process version: `2026-10-05-native-rate-proof-v2`.
-[Diagnosis, regressions and publication](../../docs/00-governance/laurentian-generic-collection-corrections-2026-10-05.md).
+Diagnosis, regressions and publication (`e391c209d398:docs/00-governance/laurentian-generic-collection-corrections-2026-10-05.md` in Git history).
 
 ## Ordinary essential evidence research - 2026-10-05
 
@@ -409,11 +439,11 @@ rate field in the extracted artifact. Ordinary origin lookup and normalization
 retain their complete anchor, URL, document and snapshot; optional/currency
 links cannot be the only route to that required proof.
 `GET /healthz` adds non-secret `collection_process_version`; new Runs pin it.
-[Diagnosis, verification and coordinated rollout](../../docs/00-governance/ordinary-collection-redesign-2026-10-05.md).
+Diagnosis, verification and coordinated rollout (`e391c209d398:docs/00-governance/ordinary-collection-redesign-2026-10-05.md` in Git history).
 
-Native product evidence correction (2026-10-05): parser v10 decodes literal CMS content/links and retains independent named account panels with complete local conditions. Shared discovery/expansion preserves per-field origins; named captured account terms can prove annual units through a separate current-run reference. Only missing savings essentials trigger additional bounded legal companions; optional checking interest does not. Worker 750 / API 594 pass. API/catalog and Worker runtime rollout is separate from the authorized direct data operation. [Diagnosis, exclusions and publication](../../docs/00-governance/three-bank-generic-collection-corrections-2026-10-05.md).
+Native product evidence correction (2026-10-05): parser v10 decodes literal CMS content/links and retains independent named account panels with complete local conditions. Shared discovery/expansion preserves per-field origins; named captured account terms can prove annual units through a separate current-run reference. Only missing savings essentials trigger additional bounded legal companions; optional checking interest does not. Worker 750 / API 594 pass. API/catalog and Worker runtime rollout is separate from the authorized direct data operation. Diagnosis, exclusions and publication (`e391c209d398:docs/00-governance/three-bank-generic-collection-corrections-2026-10-05.md` in Git history).
 
-Collection correction (2026-10-04): named checking plans require corroborated identity and ordinary pricing; multi-plan pages remain evidence-only. Worker v9 keeps exact linked disclosures/titles/currencies through existing automatic gates. Worker 738 / API 588 regressions pass. Direct publication and future API/Worker rollout are separate. [Operation and limits](../../docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md).
+Collection correction (2026-10-04): named checking plans require corroborated identity and ordinary pricing; multi-plan pages remain evidence-only. Worker v9 keeps exact linked disclosures/titles/currencies through existing automatic gates. Worker 738 / API 588 regressions pass. Direct publication and future API/Worker rollout are separate. Operation and limits (`e391c209d398:docs/00-governance/desjardins-eqbank-collection-corrections-2026-10-04.md` in Git history).
 
 
 ## Product Type collection targets and Banks counts - 2026-10-04
@@ -438,13 +468,13 @@ snapshot yields zero; counts are not raw active canonical totals. No live data
 operation or deployment was performed for this local implementation.
 
 
-Coast Capital evidence correction (2026-10-03): shared fee classification and complete withdrawal consequences, parser v8 named legal panels, bounded GIC companions and static confirmation-dialog links are verified locally. Original input for two products plus current official companion terms for Better-than-Cash yield three ordinary automatic passes; missing terms and unverified issuer domains remain excluded. Worker 711 / API 580 pass. No live data writes or deployment; deploy API/source catalog and Worker together for future collection. [Evidence and limits](../../docs/00-governance/coast-collection-evidence-corrections-2026-10-03.md).
+Coast Capital evidence correction (2026-10-03): shared fee classification and complete withdrawal consequences, parser v8 named legal panels, bounded GIC companions and static confirmation-dialog links are verified locally. Original input for two products plus current official companion terms for Better-than-Cash yield three ordinary automatic passes; missing terms and unverified issuer domains remain excluded. Worker 711 / API 580 pass. No live data writes or deployment; deploy API/source catalog and Worker together for future collection. Evidence and limits (`e391c209d398:docs/00-governance/coast-collection-evidence-corrections-2026-10-03.md` in Git history).
 
-CIBC direct/Admin evidence parity (2026-10-03): common essential companions retain all selected parents; explicit unresolved official rate templates receive one bounded render; parser v7 preserves complete fee records and purchase columns/notes. Ordinary extraction proves native facts before its model pass and preserves them afterwards; normalization cannot rewrite grounded values. Same current captured input yields 14 additional automatic passes with unchanged financial/security gates. Worker 698 / API 578 pass. Data publication and serving-runtime deployment are verified separately. [Diagnosis, applied result and rollout](../../docs/00-governance/cibc-collection-redesign-2026-10-03.md).
+CIBC direct/Admin evidence parity (2026-10-03): common essential companions retain all selected parents; explicit unresolved official rate templates receive one bounded render; parser v7 preserves complete fee records and purchase columns/notes. Ordinary extraction proves native facts before its model pass and preserves them afterwards; normalization cannot rewrite grounded values. Same current captured input yields 14 additional automatic passes with unchanged financial/security gates. Worker 698 / API 578 pass. Data publication and serving-runtime deployment are verified separately. Diagnosis, applied result and rollout (`e391c209d398:docs/00-governance/cibc-collection-redesign-2026-10-03.md` in Git history).
 
-Direct BMO Chequing comparison (2026-10-03): official evidence supports five CAD plan comparisons; saved FPDS inputs locally improve from zero to two automatic passes with missing essential PDF/old currency-fragment exclusions preserved. Shared main-content disclosure priority, exact named-column proof, companion pricing selection and prompts corrected. Worker 685 / API 575 pass. No Admin API, live Run, data writes or deployment. [Comparison and limits](../../docs/00-governance/bmo-chequing-direct-comparison-2026-10-03.md).
+Direct BMO Chequing comparison (2026-10-03): official evidence supports five CAD plan comparisons; saved FPDS inputs locally improve from zero to two automatic passes with missing essential PDF/old currency-fragment exclusions preserved. Shared main-content disclosure priority, exact named-column proof, companion pricing selection and prompts corrected. Worker 685 / API 575 pass. No Admin API, live Run, data writes or deployment. Comparison and limits (`e391c209d398:docs/00-governance/bmo-chequing-direct-comparison-2026-10-03.md` in Git history).
 
-Generic collection correction (2026-10-03): owned captured-only grounding, default HTML DOM fallback, parser v6 explicit product/financial columns, full current-run chunk origins and prominent non-product screening. Worker 674 / API 574 pass. Deployment and live collection remain separate. [Diagnosis and verification](../../docs/00-governance/bmo-generic-collection-root-cause-2026-10-03.md).
+Generic collection correction (2026-10-03): owned captured-only grounding, default HTML DOM fallback, parser v6 explicit product/financial columns, full current-run chunk origins and prominent non-product screening. Worker 674 / API 574 pass. Deployment and live collection remain separate. Diagnosis and verification (`e391c209d398:docs/00-governance/bmo-generic-collection-root-cause-2026-10-03.md` in Git history).
 
 ## Collection Run visibility - 2026-10-02
 
@@ -460,9 +490,9 @@ failures finish the queued Run. Deploy API/runner and Admin together; no migrati
 live collection, canonical write or deployment is part of this code slice.
 
 
-Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. [Implementation and verification](../../docs/00-governance/generic-collection-evidence-improvements-2026-10-02.md).
+Generic collection improvements (2026-10-02): product-scoped current closure/service screening, query-identified PDF handling, captured companion evidence in the existing grounding call, parser v5 atomic rate rows/full notes, grounded identity and deposit/overdraft sentence preservation. Bank/market/origin/conditional-rate safeguards remain; Worker 659 / API 550 pass. Deployment and live collection remain separate. Implementation and verification (`e391c209d398:docs/00-governance/generic-collection-evidence-improvements-2026-10-02.md` in Git history).
 
-Latest optional-interest correction (2026-10-02): CA/US checking requests verified deposit rates and existing qualifiers as optional facts; retrieval uses current profile fields even with older registry lists. The shared gate distinguishes separate deposit-insurance limits from standalone annual rates and extraction rejects companion-account/overdraft interest. Worker 643 / API 539 pass. No live collection, data writes or deployment; deploy the collection runtime/API for future Admin collections. [Diagnosis and verification](../../docs/00-governance/optional-checking-rates-2026-10-02.md).
+Latest optional-interest correction (2026-10-02): CA/US checking requests verified deposit rates and existing qualifiers as optional facts; retrieval uses current profile fields even with older registry lists. The shared gate distinguishes separate deposit-insurance limits from standalone annual rates and extraction rejects companion-account/overdraft interest. Worker 643 / API 539 pass. No live collection, data writes or deployment; deploy the collection runtime/API for future Admin collections. Diagnosis and verification (`e391c209d398:docs/00-governance/optional-checking-rates-2026-10-02.md` in Git history).
 
 Alterna account validation fix (2026-10-01): shared accuracy gate distinguishes an explicitly absent minimum-balance requirement from a fee condition and recognizes unconditional ordinary day-to-day transactions. Existing required facts and automatic exclusion remain. Saved inputs still cannot publish both accounts; no data mutation or deployment. Deploy the API/collection runtime to apply the shared fix.
 
@@ -623,44 +653,9 @@ Current routes:
 
 ## Local Run
 
-Apply the DB baseline in order:
-
-```powershell
-psql $env:FPDS_DATABASE_URL -f db/migrations/0001_initial_baseline.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0002_admin_auth.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0003_aggregate_refresh.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0004_source_registry_admin.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0005_source_registry_unique_scope_fix.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0006_bank_catalog_management.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0007_dynamic_product_type_onboarding.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0008_discovery_metadata_persistence.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0009_backfill_review_edit_approved_candidate_product_name.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0010_aggregate_refresh_queue.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0011_admin_signup_requests.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0025_country_scoped_admin.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0026_country_registry_management.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0027_standalone_ai_operations.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0028_source_catalog_coverage_evidence.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0029_collection_ai_autopilot_policy.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0030_collection_approval_field_policy.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0031_catalog_coverage_route_evidence.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0032_comparison_grade_collection_quality.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0033_essential_field_low_touch_publication.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0034_country_product_market_profiles.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0035_collection_publication_automation.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0036_us_pricing_evidence_companions.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0037_us_pricing_companion_scope_cleanup.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0038_us_cross_product_support_cleanup.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0039_us_credit_card_apr_range_contract.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0040_bounded_operational_storage.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0041_vancity_official_product_routes.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0042_three_bank_partial_run_scope_hardening.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0043_generic_zero_detail_scope_quarantine.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0044_remove_admin_collection_scheduler.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0045_public_product_engagement.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0046_public_feedback_submission.sql
-psql $env:FPDS_DATABASE_URL -f db/migrations/0047_product_type_collection_fields.sql
-```
+Apply every migration in order using the [DB setup guide](../../db/README.md).
+That guide owns the complete migration sequence and verification; do not use an
+abbreviated historical migration list.
 
 Create the first operator account:
 
@@ -1171,7 +1166,7 @@ value; stored data and source summaries remain intact. The interpreter never
 loads a prime rate or combines a benchmark and margin. Run the Public rate and
 product regression tests together. The separately reviewed, rollback-by-default
 single-record correction is documented in
-[the rate correction audit](../../docs/00-governance/public-rate-correction-2026-09-16.md).
+the rate correction audit (`e391c209d398:docs/00-governance/public-rate-correction-2026-09-16.md` in Git history).
 
 ## Public verification freshness (2026-09-21)
 
@@ -1215,7 +1210,7 @@ and capped savings bonuses cannot supply full rates; CD rate-guarantee/funding,
 grace and penalty days cannot supply maturity. US projections retain these
 approved financial qualifiers while continuing to omit private evidence/copy.
 
-See the [bounded CA/US audit and correction report](../../docs/00-governance/public-collection-alignment-2026-09-29.md) for six applied
+See the bounded CA/US audit and correction report (`e391c209d398:docs/00-governance/public-collection-alignment-2026-09-29.md` in Git history) for six applied
 existing-product repairs, preserved verification dates, remaining gaps and the
 read-only `scripts/maintenance/public_collection_gap_report.py` command.
 

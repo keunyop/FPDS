@@ -92,5 +92,5 @@ DNS safety, bounded reads, stable snapshot pagination and report rendering.
 Browser checks cover EN/KO/JA at 390×844, 768 and 1440px, existing comparison/
 calculator flows, consent/input coexistence and published CA/US values.
 
-The dated [initial operator sample](../00-governance/public-bank-link-check-2026-09-26.md)
+The dated initial operator sample (`e391c209d398:docs/00-governance/public-bank-link-check-2026-09-26.md` in Git history)
 is a bounded observation, not an all-product link or financial-data certification.

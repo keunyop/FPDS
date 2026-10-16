@@ -9,7 +9,7 @@ own explicit units, term boundaries and complete unique footnotes through shared
 proof and normalization. Conflicting qualified rows remain excluded; GIC access,
 LOC security and conditional costs remain essentials. No review or coverage
 exception is added. Direct data publication and runtime rollout are verified
-separately. [Implementation](laurentian-generic-collection-corrections-2026-10-05.md).
+separately. Implementation (`e391c209d398:docs/00-governance/laurentian-generic-collection-corrections-2026-10-05.md` in Git history).
 
 ## D-090 amendment - ordinary evidence-driven acquisition - 2026-10-05
 
@@ -22,7 +22,7 @@ fact, field/unit, financial condition, security or automatic acceptance gate is
 relaxed. A planner selects server-provided IDs; only ordinary captured evidence
 and final gates prove facts. Optional gaps cause no research. Private receipts
 and health expose process version; rollout/live yield remain separately verified.
-[Source-backed diagnosis and result](ordinary-collection-redesign-2026-10-05.md).
+Source-backed diagnosis and result (`e391c209d398:docs/00-governance/ordinary-collection-redesign-2026-10-05.md` in Git history).
 
 ## Product Owner-directed Admin usability and collection settings - 2026-10-04
 
@@ -48,7 +48,7 @@ complete fee declarations and purchase-column notes preserve financial meaning.
 Confidence cannot prove a financial fact; conflicts and incomplete essentials
 still exclude automatically. Financial/security/supported-scope requirements and
 legacy cutover history remain. Data publication is distinct from runtime rollout.
-See [diagnosis, regressions and dated data outcome](cibc-collection-redesign-2026-10-03.md).
+See diagnosis, regressions and dated data outcome (`e391c209d398:docs/00-governance/cibc-collection-redesign-2026-10-03.md` in Git history).
 
 ## Collection evidence correction - 2026-10-03
 
@@ -58,7 +58,7 @@ columns, full current-run origin validation and non-product identity screening.
 This corrects evidence handling under D-090; financial publication prerequisites,
 optional collection, supported scope and human account/security controls remain.
 Deployment, paid recollection and canonical/public writes were not performed.
-See [root-cause analysis and regression evidence](bmo-generic-collection-root-cause-2026-10-03.md).
+See root-cause analysis and regression evidence (`e391c209d398:docs/00-governance/bmo-generic-collection-root-cause-2026-10-03.md` in Git history).
 
 
 ## Approved Public required/optional presentation - 2026-10-01
@@ -247,7 +247,7 @@ passes. Preserve annual/APY, term/minimum/fee/withdrawal/security meaning and
 reject component rates. Operator-invoked, versioned field corrections preserve
 product verification dates; incomplete corrected products remain non-public.
 No scheduler, country/type expansion, release or candidate approval bypass.
-See [the outcome and limits](public-collection-alignment-2026-09-29.md), WBS 5.72.
+See the outcome and limits (`e391c209d398:docs/00-governance/public-collection-alignment-2026-09-29.md` in Git history), WBS 5.72.
 
 ## 2026-09-30 - D-086 Prevent repeated ineligible collections
 
