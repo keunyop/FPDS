@@ -653,11 +653,14 @@ Current routes:
 
 ## Local Run
 
-Apply every migration in order using the [DB setup guide](../../db/README.md).
+For a new local development database, use the [DB setup guide](../../db/README.md).
+Its empty-DB initializer applies every migration atomically, removes optional bank/source
+seeds and creates only `admin / admin`. It rejects production settings and nonempty DBs.
+These credentials are for local development only; change the password before hosting.
 That guide owns the complete migration sequence and verification; do not use an
 abbreviated historical migration list.
 
-Create the first operator account:
+To create an operator with a unique password instead (minimum 8 characters):
 
 ```powershell
 cd api/service

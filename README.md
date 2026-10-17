@@ -6,9 +6,8 @@ This guide runs FPDS API and FPDS Admin locally.
 ## 1. Prerequisites
 
 Install Git, Node.js 24, pnpm 10.33.0, Python 3.12 and uv.
-You also need access to a development PostgreSQL database with FPDS migrations applied.
-For a new database, follow the [database setup guide](db/README.md) first
-(PostgreSQL with pgvector and the `psql` client are required).
+You also need a development PostgreSQL database with pgvector available on the server.
+For a new database, use the [database setup guide](db/README.md) or step 4 below.
 
 ## 2. Clone and install
 
@@ -49,15 +48,18 @@ FPDS_ADMIN_API_ORIGIN=http://localhost:4000
 Keep secrets out of Git. Storage and provider credentials are needed for actual
 collection; see the [Worker guide](worker/README.md) and [environment configuration](docs/03-design/dev-prod-environment-spec.md).
 
-## 4. Create the first admin
+## 4. Initialize a new database
 
-Skip this step if you already have an operator account in the configured database.
+For a new, empty development database, run once:
 
 ```powershell
-uv run --directory api/service python -m api_service.bootstrap_admin_user --env-file .env.dev --login-id admin --display-name "Admin Operator" --role admin
+uv run --directory api/service python -m api_service.init_local_db --env-file .env.dev
 ```
 
-Enter a password of at least 8 characters when prompted.
+This installs the schema and required reference data with one local account:
+**ID `admin` / password `admin`**. Banks and collected products start empty.
+Skip this step for an existing database and use its existing operator account.
+Default credentials are for local development only; change the password before hosting.
 
 ## 5. Start locally
 

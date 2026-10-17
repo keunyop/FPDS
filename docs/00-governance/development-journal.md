@@ -56,3 +56,22 @@ remain in the repository; previous journal revisions remain in Git history.
   and Next dev passed. Markdown links, PowerShell snippet syntax, strict UTF-8
   and git diff --check passed. No fresh-clone install or server/login walkthrough
   was performed; the owner will follow the guide. No DB/runtime changes.
+
+## 2026-10-16 - Minimal local DB installation
+
+- Rewrote db/README.md as a concise English first-install guide; aligned root/API
+  instructions with api_service.init_local_db. Existing migrations remain unchanged.
+- Added empty-development-DB-only atomic initialization: preserve country/type/
+  taxonomy/policy/migration references, remove historical bank/source catalog seeds,
+  and create exactly one active scrypt-hashed admin/admin account. Production or
+  nonlocal settings and pre-existing tables/views/sequences are rejected. Existing
+  accounts are never reset; the normal bootstrap minimum-password rule is unchanged.
+- API suite: 689 pass. Final initializer suite: 11 pass, including six disposable
+  PostgreSQL integration tests for minimal counts, actual login/model and wrong
+  password, re-entry/custom-schema preservation, seeded-user rejection and rollback.
+  All 48 migration wrappers validate. Local PostgreSQL lacks pgvector: successful
+  integration exercised the other 47 migrations; the full path's missing-vector
+  failure rolled back completely. Full 48-migration success needs a pgvector server.
+- Markdown references, seven PowerShell snippets, strict UTF-8, CLI help, unchanged
+  migration diff and git diff --check pass. No existing configured/production DB,
+  user account, financial data or serving runtime was changed. Test server stopped.
