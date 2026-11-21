@@ -1,5 +1,7 @@
 # FPDS Database Setup
 
+Migration 0049 registers the Admin-only retention function. It preserves every existing row and leaves historical tables in place. Deploy the migration before enabling routine Admin retention.
+
 Create a **new, empty development PostgreSQL database** with pgvector available
 on the server. The database user must be able to create tables and the `vector`
 extension. Run the following steps from the repository root in PowerShell.

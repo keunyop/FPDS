@@ -93,16 +93,6 @@
       }
     },
     {
-      "resource": "admin.dashboard_health",
-      "actions": {
-        "read": [
-          "admin",
-          "reviewer",
-          "read_only"
-        ]
-      }
-    },
-    {
       "resource": "security.config",
       "actions": {
         "read": [

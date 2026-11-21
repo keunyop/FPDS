@@ -4,8 +4,7 @@
   "supported_locales": [
     "en",
     "ko",
-    "ja",
-    "fil"
+    "ja"
   ],
   "fallback_chains": {
     "en": [
@@ -18,16 +17,9 @@
     "ja": [
       "ja",
       "en"
-    ],
-    "fil": [
-      "fil",
-      "en"
     ]
   },
   "resource_domains": [
-    "public_navigation",
-    "public_filters",
-    "public_metrics",
     "admin_operations",
     "shared_taxonomy",
     "system_messages"
@@ -47,12 +39,6 @@
     "machine-readable-value"
   ],
   "surface_locales": {
-    "public": [
-      "en",
-      "ko",
-      "ja",
-      "fil"
-    ],
     "admin": [
       "en",
       "ko",

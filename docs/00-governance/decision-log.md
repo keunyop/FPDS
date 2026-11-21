@@ -1,5 +1,7 @@
 # FPDS Decision Log
 
+From 2026-11-20 only Admin is supported. Earlier consumer-site decisions and risks are retained as history and impose no current delivery or collection requirements.
+
 ## D-090 clarification - native financial proof - 2026-10-05
 
 The Product Owner authorizes generic fixes and direct Laurentian publication.
@@ -60,15 +62,6 @@ optional collection, supported scope and human account/security controls remain.
 Deployment, paid recollection and canonical/public writes were not performed.
 See root-cause analysis and regression evidence (`e391c209d398:docs/00-governance/bmo-generic-collection-root-cause-2026-10-03.md` in Git history).
 
-
-## Approved Public required/optional presentation - 2026-10-01
-
-The Product Owner requests that lists and Home Top 5 use required product facts,
-with verified optional information in detail. Missing optional information is not
-zero/false and must not lower ranking. Required cost/access/security information
-stays visible; comparable-rate, currency and exact-term safeguards remain. This
-supersedes earlier optional-balance metrics and Home security/balance presets.
-See [Public presentation](../03-design/product-grid-information-architecture.md).
 
 ## Approved restoration of essential costs and restrictions - 2026-10-01
 
@@ -225,14 +218,7 @@ data and security decisions remain applicable unless explicitly superseded.
 | D-076 | 2026-09-03 | Public Home First-Paint and Runtime Boundary | The Public Home hero renders before summary and ranking data, while those reads begin concurrently and resolve through independent server Suspense boundaries. Comparison scatter output is server-rendered accessible SVG; client UI imports use only required Radix packages. Bank-logo browser requests are same-origin only with explicit dimensions and an accessible text fallback. The small global stylesheet is inlined to remove its render-blocking request, and one Header-owned client effect maintains document locale after navigation. | The supplied mobile PageSpeed runs identified the H1 as LCP with about 2.4 seconds of element render delay, roughly 183-186 KiB of unused JavaScript, a render-blocking stylesheet, short-cache and oversized remote logos, invalid logo ARIA, a mismatched locale-control name, low footer contrast, and an intermittent hydration console error. Keeping first paint independent from optional data and chart code reduces the critical path without changing product facts, rankings, finder behavior, or publication controls. | Product Owner PageSpeed optimization direction, WBS `5.61` |
 
 | D-077 | 2026-09-16 | Public Rate Semantics | Supersedes D-045 minimum-range/introductory scalar presentation and narrows D-070/D-071 rate comparisons. Classify full/range/reference/conditional/promotional/unknown rates from approved Public fields; only unambiguous full scalars drive rate sorting, rankings, finder deltas, dashboard metrics and calculators. Preserve source conditions and never add a current benchmark. Legacy ambiguous scalars fail closed. Existing-data corrections are separately self-reviewed under explicit Product Owner authorization, preserving version/change history and unrelated projections. | The BMO word-plus reproduction and full published-data audit proved that minimum-percentage extraction could rank spreads, qualification thresholds and promotions as full rates. | Product Owner correction, FR-PUB-004/021, WBS 5.63, Public rate correction audit |
-| D-078 | 2026-09-21 | Public Verification Freshness | Separate snapshot completion/generation from product verification age. Use initial warning-only 7/30-day review/expiry windows for savings, GIC/CD and loans, 30/90 for chequing/cards; missing/invalid/future checks are unknown. Regeneration preserves original product check dates. Expose a read-only operator overdue report and daily/weekly manual review procedure. No automatic collection, withdrawal, ranking change or live-data mutation. | Implements the selected freshness repair without reviving the D-069 scheduler. Windows are reversible initial operating defaults, not bank guarantees or an independently confirmed Product Owner numeric SLA. | Product Owner implementation request, FR-PUB-004, WBS 5.64, public-verification-freshness-policy.md |
 
-| D-079 | 2026-09-24 | Comparable Deposit Conditions | FR-PUB-021 adds same-country/currency and explicit annual/APY basis gates; GIC additionally matches an exact term row and known redemption category. Home groups deposits by those conditions. Simple scenarios use explicit periods, positive defaults and unavailable reasons; promotions, tiers, linked returns and unresolved facts fail closed. Read only bounded financial qualifiers from the projection-pinned approved version; future aggregates preserve them. The Oaken legacy annual-basis clarification is bound to one reviewed version/value; no canonical write. | Mixed types/currencies/terms and dropped conditions made headline-only comparisons and implicit one-year estimates misleading. INDEXED GIC self-review confirms that a fixed annual return is unsupported. | Product Owner section-C implementation request, FR-PUB-021, WBS 5.65, public-deposit-comparison-policy.md |
-| D-080 | 2026-09-25 | Curated Canadian Comparison Entry Pages | Only Savings, no-monthly-fee Chequing and exact 1-year GIC purposes may gain own SSR/canonical/locale/sitemap discovery. One shared gate requires active CA CAD records, known non-expired verification and three distinct banks per primary compatible group. Separate zero base fees from waivers and base rates from qualified offers. Hold insufficient routes noindex and point Home to existing catalogs until ready. Existing D-078 catalog freshness, arbitrary-filter noindex, analytics and canonical data are unchanged. | Implements the explicitly selected P1-1 growth slice without turning incomplete or stale comparisons into search landing pages or generating filter permutations. | Product Owner P1-1 implementation request, FR-PUB-020, WBS 5.66, public-curated-comparison-policy.md |
-| D-081 | 2026-09-25 | Persistent Public Comparison Lists | Keep four country-scoped selections in memory across catalog/detail navigation; share only public IDs/country/locale on noindex `/compare`. Save one bounded device-only list per country solely on explicit action, until deletion/browser clearing; retain identities and approved-term hashes only. Re-fetch uncached active projections, distinguish missing/error/changed conditions and reject mixed snapshots. No financial-input storage, composite score, arithmetic or new event. | Implements the selected P1-2 friction repair while preserving Public data, analytics and country boundaries. | Product Owner P1-2 request, FR-PUB-024, WBS 5.67, public-comparison-list-policy.md |
-| D-082 | 2026-09-26 | Same-Amount Public Scenarios | P1-3 adds a separate noindex calculator for two same-country/currency/type deposits. Use verified annual basis and exact GIC rows, whole-month unconditional fees, decimal half-up cents and separate signed differences. Financial inputs remain component-local; unknown costs, APY, promotions and unsupported models fail closed. | Makes the requested monetary differences reviewable without net-profit claims, personal scoring, new tracking or canonical writes. | Product Owner P1-3 request, FR-PUB-025, WBS 5.68, public-scenario-calculator-policy.md |
-| D-083 | 2026-09-26 | Official Bank Handoff | Detail/comparison reuse approved public terms, original product verification and approved URL hostname beside a direct external action. Mobile follows the viewed comparison product, reserves content space and yields to consent/input/dialogs. A bounded manual URL report flags failures and redirects without collection, repair, new events or data writes. | Implements selected P1-4 while preserving financial meaning and avoiding forced confirmation or application promises. | Product Owner P1-4 request, FR-PUB-026, WBS 5.69, public-bank-handoff-policy.md |
-| D-084 | 2026-09-26 | Authored Comparison Guides | P2-1 adds four Canadian explanations and a newcomer entry in EN/KO/JA. Disclose actual AI-assisted creation/source checks, publisher and correction path. Only authored guide URLs gain localized search discovery; product language/noindex, curated gates and existing events remain unchanged. | Answers comparison questions without invented expertise, recommendations or unverified priority-market claims. | Product Owner P2-1 request, FR-PUB-027, WBS 5.70, public-comparison-guides-policy.md |
 
 ---
 
@@ -289,22 +275,6 @@ approval policy, search budgets and timeouts remain unchanged.
 Verification covers mocked Responses payloads and API/worker regression suites.
 Deployment, live collection and paid quality/latency evaluation are separate;
 no measured model-quality improvement is claimed by this configuration change.
-
-## 2026-09-30 - D-088 SwitchaBank blog and sourced comparison
-
-The Product Owner authorizes a Public blog and one professional-quality
-bank/product comparison article. Implement it within the existing Next.js
-runtime using typed, versioned editorial content and existing UI primitives.
-Initial Canadian EQ Bank/Tangerine/TD content is authored in EN/KO/JA with
-official citations, actual check dates and explicit hypothetical arithmetic.
-Do not introduce a CMS service for this bounded first article.
-
-Only authored blog URLs gain localized search discovery. Source-language
-product policy, private evidence, curated readiness, canonical financial data
-and existing comparison gates remain. Existing fixed-screen pageviews gain
-Blog/Blog article categories without slugs or new events. Release and observed
-search performance remain separate from local implementation.
-See FR-PUB-028 / WBS 5.74 and the [blog policy](../03-design/public-blog-policy.md).
 
 ## 2026-09-30 - D-089 Prepare catalog collection before creating a run
 

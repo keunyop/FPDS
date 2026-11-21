@@ -36,13 +36,13 @@ storage와 이를 운영하는 데 직접 필요한 외부 계정
 |---|---|---|---|---|---|---|
 | EXT-01 | Source control/CI | GitHub repository, GitHub Actions | 사용 중 | 소스, 이력, CI workflow. 원격 host는 github.com으로 확인했으나 조직·repository owner는 이 파일에 고정하지 않는다. | .git/config, .github/workflows/, README.md | 의뢰자 조직 소유 repository, branch protection, Actions 권한·비용·2인 관리자 확인 |
 | EXT-02 | Admin web compute | 현재 localhost 개발 실행 | 미구성 | app/admin은 현재 localhost:3001; Admin production web 배포는 확인되지 않았다. | app/admin/README.md, .env.dev.example | 의뢰자 소유 web host/project, production URL, deploy 권한과 rollback owner 결정 |
-| EXT-03 | Admin API compute | 로컬 FastAPI; Vercel switchabank-api는 Public-read 예외 | 부분 사용 | Vercel에는 FastAPI 전체 app이 있지만 현재 배포 목적은 Public-read이고 Admin web은 배포되지 않았다. Admin production으로 인수하지 않는다. | vercel.json, app.py, api/service/README.md | Admin API의 실제 production host를 별도로 확정하고 Public-read 예외와 분리 |
+| EXT-03 | Admin API compute | 로컬 FastAPI 및 별도 API 호스트 | 부분 사용 | Admin의 인증·수집 요청을 처리한다. |
 | EXT-04 | Long-running worker compute | 로컬/명시적 subprocess 실행 | 미구성 | 수동 collection의 장시간 worker와 browser fallback을 실행할 상시 host가 없다. Vercel function을 worker host로 간주하지 않는다. | worker/README.md, api/service/api_service/source_collection_runner.py | 의뢰자 소유 worker host, 실행 identity, timeout, 배포·재시작·용량 정책 결정 |
 | EXT-05 | Database | Supabase-hosted PostgreSQL, shared dev | 사용 중 | Admin auth, registry, run, evidence metadata, review, canonical, aggregate projection 저장. 현재 DB host가 Supabase pooler임을 비밀값 없이 확인했다. | FPDS_DATABASE_URL의 host 확인, db/, api/service/api_service/db.py | 의뢰자 소유 dev/prod project를 분리하고 DB owner, pool, backup/PITR, egress와 비용 확인 |
 | EXT-06 | Private object storage | AWS S3, shared dev | 사용 중 | raw snapshot과 parse/extraction/normalization/validation artifact의 private 저장. worker는 AWS CLI s3api put-object를 사용한다. | FPDS_OBJECT_STORAGE_DRIVER=s3, worker/discovery/fpds_snapshot/storage.py, storage/README.md | 의뢰자 소유 dev/prod bucket·IAM·region·encryption·lifecycle·restore 검증 |
-| EXT-07 | Domain/registrar | Admin domain 없음 | 미구성 | 현재 Admin origin은 localhost다. Public domain/brand domain은 Admin 인수 범위가 아니다. | .env.dev.example, .env.prod.example, Admin 플레이북 | 의뢰자 소유 Admin web/API domain과 registrar owner, 갱신·잠금·비상 연락처 결정 |
+| EXT-07 | Domain/registrar | Admin domain 없음 | 미구성 | 현재 Admin origin은 localhost다. | .env.dev.example, .env.prod.example, Admin 플레이북 | 의뢰자 소유 Admin web/API domain과 registrar owner, 갱신·잠금·비상 연락처 결정 |
 | EXT-08 | DNS | Admin DNS zone/record 없음 | 미구성 | production Admin web/API record와 변경 권한이 정의되지 않았다. | .env.prod.example의 placeholder origin | DNS provider, zone owner, record, TTL, change/rollback 승인자 결정 |
-| EXT-09 | TLS/certificate | Admin TLS 없음 | 미구성 | localhost 개발 외 Admin certificate/renewal 증거가 없다. Vercel Public-read TLS를 Admin TLS로 인수하지 않는다. | api/service/README.md, .env.prod.example | 발급 주체, 자동 갱신, 만료 경보, key 보관, certificate rollback 확인 |
+| EXT-09 | TLS/certificate | Admin TLS 없음 | 미구성 | localhost 개발 외 Admin certificate/renewal 증거가 없다. 별도 호스트 TLS를 Admin TLS로 인수하지 않는다. | api/service/README.md, .env.prod.example | 발급 주체, 자동 갱신, 만료 경보, key 보관, certificate rollback 확인 |
 | EXT-10 | LLM | OpenAI API, gpt-6-luna | 사용 중 | 은행 onboarding, source 판단, 공식-domain grounding, Review AI에 사용. API key가 없으면 일부 경로는 fail-safe/fallback으로 동작한다. | FPDS_LLM_PROVIDER=openai, FPDS_LLM_MODEL=gpt-6-luna, worker/pipeline/fpds_ai_runtime.py | 의뢰자 OpenAI organization/project, service account, model access, budget·rate limit·alert·data control 확인 |
 | EXT-11 | Monitoring/error tracking | dev disabled; Sentry는 production 선호 예시 | 설계만 | structured log/error contract는 있으나 Sentry SDK/runtime capture 연동은 확인되지 않았다. | shared/observability/, docs/03-design/monitoring-error-tracking-baseline.md, .env.prod.example | provider/project, DSN secret, sampling, retention, alert routing, on-call과 test alert 증거 확정 |
 | EXT-12 | Secret management | 전용 provider 확인 안 됨 | 미구성 | 현재 로컬은 untracked env, Vercel 예외는 platform environment variables를 사용한다. 이것만으로 Admin production secret manager 준비가 완료된 것은 아니다. | .gitignore, docs/03-design/dev-prod-environment-spec.md, api/service/README.md | 의뢰자 secret manager 선택, dev/prod 분리, rotation·break-glass·access review 구축 |
@@ -60,8 +60,7 @@ storage와 이를 운영하는 데 직접 필요한 외부 계정
 2. Admin production domain, DNS, TLS와 자동 갱신 경보가 없다.
 3. 전용 production PostgreSQL과 private object storage의 분리·복구 증거가
    없다.
-4. Vercel Public-read Preview/Production이 shared dev DB를 재사용하는 임시
-   예외가 남아 있다. production DB 분리 전에는 release-ready로 보지 않는다.
+4. Preview와 production의 DB 연결 범위를 확인한다.
 5. production monitoring provider/alert/on-call이 실제 runtime에 연결되지
    않았다.
 6. 의뢰자 secret manager와 신규 secret rotation/접근 회수 증거가 없다.
@@ -75,7 +74,7 @@ storage와 이를 운영하는 데 직접 필요한 외부 계정
 |---|---|---|---|---|---|---|---|---|---|
 | EXT-01 |  |  |  |  |  |  |  |  |  |
 | EXT-02 |  |  |  |  |  |  |  |  |  |
-| EXT-03 |  |  |  |  |  |  |  |  |  |
+| EXT-03 | Admin API compute | 로컬 FastAPI 및 별도 API 호스트 | 부분 사용 | Admin의 인증·수집 요청을 처리한다. |
 | EXT-04 |  |  |  |  |  |  |  |  |  |
 | EXT-05 |  |  |  |  |  |  |  |  |  |
 | EXT-06 |  |  |  |  |  |  |  |  |  |

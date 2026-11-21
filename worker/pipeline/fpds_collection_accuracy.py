@@ -10,12 +10,12 @@ from urllib.parse import urlsplit, urlunsplit
 
 from worker.country_defaults import default_currency_for_country
 from worker.pipeline.fpds_field_contract import field_contract, value_matches_contract
-from worker.pipeline.fpds_approval_policy import comparison_quality, security_meaning, withdrawal_consequences_usable
+from worker.pipeline.fpds_approval_policy import comparison_quality, security_meaning, withdrawal_access_meaning, withdrawal_consequences_usable
 from worker.pipeline.fpds_rate_safety import rate_component_only
 
-ACCURACY_VERSION = "collection-accuracy-2026-10-01-cost-access"
+ACCURACY_VERSION = "collection-accuracy-2026-11-21-withdrawal-access"
 # Earlier receipts retain digest compatibility, subject to the current comparison gate.
-_COMPATIBLE_RECEIPT_VERSIONS = {ACCURACY_VERSION, "collection-accuracy-2026-10-01", "collection-accuracy-2026-09-30"}
+_COMPATIBLE_RECEIPT_VERSIONS = {ACCURACY_VERSION, "collection-accuracy-2026-10-01-cost-access", "collection-accuracy-2026-10-01", "collection-accuracy-2026-09-30"}
 RECEIPT_KEY = "_collection_accuracy"
 # Registry/workflow metadata is not a collected financial attribute.
 CONTEXT_FIELDS = {"status", "last_verified_at", "bank_name", "subtype_code"}
@@ -486,44 +486,13 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
         if field_name == "secured_flag":
             return security_meaning(q) is value
         if field_name in {"redeemable_flag", "non_redeemable_flag"}:
-            anniversary = re.search(r"All or part of the GIC can be cashed in without penalty on the anniversary of the issue date[.]", q, re.I)
-            if anniversary:
-                conflict = re.search(r"non[- ]redeemable|cannot be|not cashable|only at maturity|except|unless", q, re.I)
-                return not conflict and value is (field_name == "redeemable_flag")
-            # An explicit labelled No is not absence. Preserve the entire
-            # product record and reject a competing permission/exception.
-            labelled_no = re.search(r"\b(?:cashable|redeemable)\s*:\s*no\b|\b(?:GICs?|certificates?) (?:are|is) not cashable\b", q, re.I)
-            if labelled_no:
-                conflict = re.search(r"\b(?:cashable|redeemable)\s*:\s*yes\b|\b(?:can|may) be (?:cashed|redeemed)\b|\b(?:except|unless|however)\b|(?:cashable|redeemable)\s+(?:after|before|upon|at)\b|(?:cashable|redeemable)\s*:\s*no\s+(?:until|for|during|only|before)\b|not cashable\s+(?:until|for|during|only|before)\b|early withdrawals? (?:are|is) (?:allowed|permitted)", q, re.I)
-                return not conflict and value is (field_name == "non_redeemable_flag")
-            maturity_only = re.search(
-                r"(?:^|[.!?]\s+)(?:Cashable|Redeemable) (?:upon|at) maturity only(?:[.](?:$|\s)|$)"
-                r"|(?:^|[.!?]\s+)Can only be (?:redeemed|cashed) at maturity(?:[.](?:$|\s)|$)", q, re.I)
-            if maturity_only:
-                if re.search(r"\b(?:except|unless|however|but)\b.{0,100}\b(?:withdraw|redeem|cash|maturity)", q, re.I):
-                    return False
-                if re.search(r"(?:can be|may be|is) (?:redeemed|cashed) before maturity|early (?:withdrawal|redemption) (?:is )?(?:allowed|permitted)", q, re.I):
-                    return False
-                return value is (field_name == "non_redeemable_flag")
-        # Absence of a positive statement never proves false.
-        patterns = {
-            "secured_flag": (r"(?<!un)\bsecured\b|\bcollateral (?:is )?required\b", r"\bunsecured\b|no collateral required|\bnot secured\b"),
-            "unlimited_transactions_flag": (_ORDINARY_UNLIMITED, r"\b(?:limited to|maximum of) \d+.{0,20}transactions?"),
-            "redeemable_flag": (r"(?<!non-)\bredeemable\b|can be (?:redeemed|cashed) before maturity", r"non[- ]redeemable|cannot be (?:redeemed|cashed) before maturity"),
-            "non_redeemable_flag": (r"non[- ]redeemable|cannot be (?:redeemed|cashed) before maturity", r"(?<!non-)\bredeemable\b"),
-        }
-        pair = patterns.get(field_name)
-        if re.search(r"\b(?:may|might|could|optional|depending)\b|not unsecured|not non[- ]redeemable", q, re.I):
+            access = withdrawal_access_meaning(q)
+            return access is not None and value is (access if field_name == "redeemable_flag" else not access)
+        if field_name != "unlimited_transactions_flag" or re.search(r"\b(?:may|might|could|optional|depending)\b", q, re.I):
             return False
-        if not pair:
-            return False
-        yes, no = (bool(re.search(p, q, re.I)) for p in pair)
-        # non-redeemable contains redeemable; resolve explicit negation first.
-        if field_name == "redeemable_flag" and no:
-            yes = False
-        if field_name == "non_redeemable_flag" and yes:
-            no = False
-        return (yes and not no) if value is True else (no and not yes)
+        unlimited = bool(re.search(_ORDINARY_UNLIMITED, q, re.I))
+        limited = bool(re.search(r"\b(?:limited to|maximum of) \d+.{0,20}transactions?\b", q, re.I))
+        return unlimited != limited and value is unlimited
     if contract.value_type == "json":
         if field_name != "term_rate_table" or not isinstance(value, list) or not value:
             return False
@@ -763,6 +732,10 @@ def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) ->
     p = payload if payload is not None else record.get("candidate_payload", {})
     receipt = p.get(RECEIPT_KEY, {}) if isinstance(p, Mapping) else {}
     if not isinstance(receipt, Mapping) or receipt.get("version") not in _COMPATIBLE_RECEIPT_VERSIONS:
+        return False
+    # Pre-change receipts could certify the opposite of the printed access
+    # condition. A pending term deposit needs validation under current rules.
+    if record.get("product_type") == "gic" and receipt.get("version") != ACCURACY_VERSION:
         return False
     quality = comparison_quality(product_type=record.get("product_type"), country_code=record.get("country_code"), expected_fields=list(p), candidate_payload=p)
     if not quality.complete:

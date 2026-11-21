@@ -17,34 +17,8 @@ class CountrySwitchRequest(BaseModel):
     country_code: str = Field(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
 
 
-class PublicEngagementRequest(BaseModel):
-    country_code: str = Field(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
-    product_id: str = Field(min_length=1, max_length=120)
-    event_type: Literal[
-        "finder_product_selected",
-        "official_bank_click",
-        "product_detail_click",
-    ]
 
 
-class PublicFeedbackRequest(BaseModel):
-    country_code: str = Field(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
-    submission_type: Literal["product_error", "site_feedback"]
-    category: Literal[
-        "accessibility_issue",
-        "broken_link",
-        "content_issue",
-        "feature_suggestion",
-        "incorrect_product_details",
-        "incorrect_rate_or_fee",
-        "missing_information",
-        "other",
-        "outdated_information",
-        "usability_issue",
-    ]
-    details: str | None = Field(default=None, max_length=2000)
-    locale: Literal["en", "ko", "ja", "fil"] = "en"
-    product_id: str | None = Field(default=None, min_length=1, max_length=120)
 
 
 class SignupRequestCreateRequest(BaseModel):

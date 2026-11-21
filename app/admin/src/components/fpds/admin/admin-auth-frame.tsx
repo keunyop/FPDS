@@ -7,17 +7,17 @@ import { cn } from "@/lib/utils";
 const FRAME_COPY = {
   en: {
     mode: "Evidence operations",
-    thesis: "Control the path from source evidence to public financial records.",
+    thesis: "Control the path from source evidence to verified product records.",
     note: "Authenticated workspace · actions are role-controlled and auditable",
   },
   ko: {
     mode: "증거 기반 운영",
-    thesis: "출처 증거에서 공개 금융 기록까지의 흐름을 통제합니다.",
+    thesis: "출처 증거에서 검증된 상품 기록까지의 흐름을 통제합니다.",
     note: "인증된 작업 공간 · 작업은 권한에 따라 통제되고 감사됩니다",
   },
   ja: {
     mode: "証跡ベースの運用",
-    thesis: "ソース証跡から公開金融記録までの流れを統制します。",
+    thesis: "ソース証跡から検証済みの商品記録までの流れを統制します。",
     note: "認証済みワークスペース · 操作は権限管理され監査されます",
   },
 } as const;

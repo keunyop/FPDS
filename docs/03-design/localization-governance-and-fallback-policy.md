@@ -1,49 +1,13 @@
 # FPDS Localization Governance and Fallback Policy
 
 
-## Public Filipino extension - 2026-10-13
-
-The Product Owner requested Public Philippines country selection and natural
-Filipino UI localization only. Public supports `en`, `ko`, `ja`, `fil`; Admin
-retains `en`, `ko`, `ja`, recorded in shared `surface_locales`. Filipino UI falls
-back to English; `fil-PH` is formatting, independent of product currency/country.
-Use familiar banking terms (savings account, credit card, loan, collateral), and
-preserve APY/annual-rate, fee waiver/zero, unknown/absent and withdrawal boundaries.
-Bank/product names and official conditions remain in the source language.
-
-PH is a selectable prepared Public market with a zero published-product count
-until actual publication. It is not a claim of collected coverage or supported
-collection profiles. Home PHP selection uses only products explicitly carrying
-PHP. Existing long-form blog/guide bodies retain their authored languages and
-Filipino detail requests resolve to English; do not emit Filipino article
-hreflang or index untranslated bodies as Filipino. Product detail UI retains
-English canonical/noindex policy. Feedback stores the actual `fil` UI locale
-under migration 0048, without changing authentication, active-country or product
-checks. These rules supersede the three-locale Public baseline below.
-
-Version: 1.0
-Date: 2026-04-06
-Status: Approved Baseline for WBS 1.7.5 - 1.7.7
-Source Documents:
-- `docs/03-design/domain-model-canonical-schema.md`
-- `docs/03-design/api-interface-contracts.md`
-- `docs/03-design/product-grid-information-architecture.md`
-- `docs/03-design/insight-dashboard-metric-definition.md`
-- `docs/03-design/product-type-visualization-principles.md`
-- `docs/03-design/admin-information-architecture.md`
-- `docs/03-design/security-access-control-design.md`
-- `docs/00-governance/decision-log.md`
-- `docs/00-governance/raid-log.md`
-
----
-
 ## 1. Purpose
 
 이 문서는 `WBS 1.7.5`, `1.7.6`, `1.7.7`의 기준 문서다.
 
 목적:
 - EN/KO/JA UI resource의 owner, authoring 흐름, review/approval 책임을 고정한다.
-- locale fallback 순서와 source-derived text 처리 원칙을 public/admin/API vocabulary와 맞춘다.
+- locale fallback 순서와 source-derived text 처리 원칙을 Admin/API vocabulary와 맞춘다.
 - Japanese glossary의 scope, owner, change rule을 정의해 Phase 2 확장 전에 terminology drift를 줄인다.
 
 이 문서는 구현 시작 신호가 아니다.
@@ -53,10 +17,10 @@ Post-MVP work follows the current Product Owner request and the development guid
 
 ## 2. Baseline Decisions Carried Forward
 
-1. Public/Admin UI는 `en`, `ko`, `ja`를 baseline locale로 지원한다.
+1. Admin UI는 `en`, `ko`, `ja`를 baseline locale로 지원한다.
 2. `product_name`, `description_short`, `eligibility_text`, `fee_waiver_condition`, `notes`, `source_subtype_label`, evidence excerpt 같은 source-derived content는 locale별 복수 번역 필드로 관리하지 않는다.
 3. locale은 label, help, methodology, status, badge, axis title, widget title 같은 display resource에만 영향을 준다.
-4. admin/public/API contract에서 locale-aware control이 필요한 대상은 code-based label과 helper text이며, source language content 자체를 기계 번역해 덮어쓰지 않는다.
+4. Admin/API contract에서 locale-aware control이 필요한 대상은 code-based label과 helper text이며, source language content 자체를 기계 번역해 덮어쓰지 않는다.
 5. 현재 팀 baseline은 Product Owner + Codex 2인 체제이므로 localization governance는 named person이 아니라 role-based ownership으로 설계한다.
 6. Phase 1 운영과 Phase 2 Japan 확장을 모두 고려하되, Japanese glossary는 현재 시점에서 "정책과 운영 모델"을 닫는 것이 목적이며 실제 대규모 용어집 구축 자체는 후속 운영으로 본다.
 
@@ -96,9 +60,9 @@ Post-MVP work follows the current Product Owner request and the development guid
 | Class | Localized by Resource | Why |
 |---|---|---|
 | navigation, menu, button, form label | O | UI chrome이기 때문이다 |
-| filter label, sort label, empty-state copy | O | public/admin UX readability에 직접 영향 |
+| filter label, sort label, empty-state copy | O | Admin UX readability에 직접 영향 |
 | product type / subtype / status / badge label | O | code-based display resource이기 때문이다 |
-| chart title, axis label, methodology note, freshness note | O | public/admin metric interpretation에 필요 |
+| chart title, axis label, methodology note, freshness note | O | Admin metric interpretation에 필요 |
 | admin widget title, validation issue display label, reason-code label | O | 운영 화면 readability에 필요 |
 | bank brand name | X | 기관 고유명사이므로 번역하지 않는다 |
 | product name | X | source-derived 상품명 그대로 유지 |
@@ -138,8 +102,6 @@ resource ownership은 아래 domain으로 구분한다.
 
 | Resource Class | Draft Author | Review / Approval | Notes |
 |---|---|---|---|
-| public navigation / CTA / empty state | Product Owner | Product Owner final | Frontend는 key와 placement 관리 |
-| public metric / methodology copy | Product Owner | Product Owner + Domain Reviewer consult | 숫자 의미 변경과 함께 검토 |
 | admin operations copy | Product Owner | Product Owner final | ops vocabulary 일관성 우선 |
 | taxonomy/status/badge/reason labels | Frontend initial registry + Product Owner wording | Product Owner final, Domain Reviewer consult when financial meaning changes | code-based label set |
 | system fallback / degraded notes | Frontend | Product Owner final | implementation-safe text 필요 |
@@ -170,7 +132,7 @@ resource 상태는 최소 아래 의미를 가져야 한다.
 | `approved` | fallback root 또는 locale target으로 사용자 노출 가능 |
 | `deprecated` | 새 key/resource로 대체 예정, 신규 사용 금지 |
 
-Phase 1 baseline에서는 `approved`만 public/admin 노출 대상으로 본다.
+Phase 1 baseline에서는 `approved`만 Admin 노출 대상으로 본다.
 `draft`는 내부 authoring 상태로만 유지한다.
 
 ### 5.5 Localization Health Visibility Baseline
@@ -258,8 +220,6 @@ number/date/currency formatting의 공식 fallback 순서는 아래와 같다.
 
 | Surface | Rule |
 |---|---|
-| Public Grid | product name은 source language 유지, badge/filter/sort는 locale fallback 적용 |
-| Public Insight Dashboard | KPI/methodology/axis label은 locale fallback 적용 |
 | Admin Console | ops label/status/reason은 locale fallback 적용, trace/evidence text는 source language 유지 |
 | External API Phase 2 | locale parameter는 enum/helper label에만 영향, source-derived product fields는 원문 유지 |
 
@@ -272,7 +232,7 @@ number/date/currency formatting의 공식 fallback 순서는 아래와 같다.
 Japanese glossary의 목적은 아래 3가지다.
 
 1. 금융 용어와 운영 용어의 Japanese label drift를 줄인다.
-2. public/admin 화면에서 같은 개념이 다른 일본어 표현으로 흩어지는 것을 막는다.
+2. Admin 화면에서 같은 개념이 다른 일본어 표현으로 흩어지는 것을 막는다.
 3. Phase 2 Japan 확장 시 UI/API 문서 terminology baseline을 재사용 가능하게 만든다.
 
 ### 7.2 Glossary Scope
@@ -314,7 +274,7 @@ glossary entry는 최소 아래 필드를 가져야 한다.
 | Field | Meaning |
 |---|---|
 | `term_key` | stable key |
-| `domain` | public/admin/shared taxonomy/system |
+| `domain` | admin/shared taxonomy/system |
 | `source_term_en` | English baseline term |
 | `term_ko` | Korean approved label |
 | `term_ja` | Japanese approved label |
@@ -340,8 +300,6 @@ glossary entry는 최소 아래 필드를 가져야 한다.
 ### 7.7 Country Name Localization
 
 - product country is a stable ISO 3166-1 alpha-2 code, not translated content
-- Public renders region names with runtime internationalization data for EN,
-  KO, and JA and falls back to the ISO code if a name is unavailable
 - language changes preserve country and current query state
 - country changes preserve language but clear country-owned product filters
 - country selection and language selection are separate controls; neither

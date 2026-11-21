@@ -1,7 +1,6 @@
 {
   "policy_version": "2026-04-07",
   "environment_keys": {
-    "public_origins": "FPDS_ALLOWED_PUBLIC_ORIGINS",
     "admin_origins": "FPDS_ALLOWED_ADMIN_ORIGINS",
     "headers_enabled": "FPDS_SECURITY_HEADERS_ENABLED",
     "cookie_secure": "FPDS_COOKIE_SECURE",
@@ -9,10 +8,6 @@
     "csrf_enabled": "FPDS_CSRF_PROTECTION_ENABLED"
   },
   "browser_surfaces": {
-    "public": {
-      "anonymous_read_only": true,
-      "allow_credentials": false
-    },
     "admin": {
       "session_backed": true,
       "allow_credentials": true,

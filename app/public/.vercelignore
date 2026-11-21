@@ -1,5 +1,0 @@
-.env*
-.next/
-.vercel/
-node_modules/
-*.tsbuildinfo

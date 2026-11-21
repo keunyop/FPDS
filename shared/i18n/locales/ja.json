@@ -2,22 +2,6 @@
   "locale": "ja",
   "resource_status": "draft",
   "domains": {
-    "public_navigation": {
-      "home": "ホーム",
-      "products": "商品",
-      "dashboard": "インサイトダッシュボード"
-    },
-    "public_filters": {
-      "bank": "銀行",
-      "product_type": "商品タイプ",
-      "target_customer_tag": "対象顧客",
-      "clear_filters": "フィルター解除"
-    },
-    "public_metrics": {
-      "freshness": "鮮度",
-      "recent_changes": "最近の変更",
-      "methodology": "算出基準"
-    },
     "admin_operations": {
       "login": "管理者ログイン",
       "overview": "概要",
@@ -29,7 +13,6 @@
       "audit": "監査ログ",
       "publish": "公開モニター",
       "usage": "LLM利用量",
-      "health_dashboard": "ダッシュボード健全性",
       "product_record": "商品レコード"
     },
     "shared_taxonomy": {

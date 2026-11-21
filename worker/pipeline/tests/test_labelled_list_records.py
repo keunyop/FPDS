@@ -59,18 +59,13 @@ class LabelledListProofTests(unittest.TestCase):
   summary=record['candidate_payload']['purchase_interest_rate_summary'];self.assertIn('late payment',summary);self.assertIn('15 months',summary)
   self.assertEqual(record['field_mapping_metadata']['purchase_interest_rate_summary']['official_web_sources'][0]['url'],'https://www.bmo.com/en-us/pdf/credit/standardcreditcards.pdf')
   self.assertNotIn('purchase_interest_rate',record['candidate_payload'])
- def test_older_receipt_cannot_hide_numbered_atm_scope_in_projection(self):
+ def test_older_receipt_cannot_hide_numbered_atm_scope(self):
   from worker.pipeline.fpds_collection_accuracy import payload_digest,acceptance_receipt_valid,ACCURACY_VERSION
-  from worker.pipeline.fpds_aggregate_refresh.models import CanonicalAggregateRow
-  from worker.pipeline.fpds_aggregate_refresh.service import AggregateRefreshService
   row={'country_code':'US','bank_code':'EXAMPLE','product_type':'chequing','product_name':'Example Checking','currency':'USD'}
   payload={'product_name':'Example Checking','monthly_fee':0,'unlimited_transactions_flag':True}
   payload['_collection_accuracy']={'version':ACCURACY_VERSION,'accepted':True,'digest':payload_digest(row,payload),'verified_fields':list(payload)}
   mapping={'unlimited_transactions_flag':{'official_evidence_quote':'Unlimited Transactions at 40,000+ fee-free ATMs nationwide'}}
   self.assertFalse(acceptance_receipt_valid({**row,'field_mapping_metadata':mapping},payload))
-  item=CanonicalAggregateRow(product_id='p',bank_name='Example',product_family='deposit',subtype_code=None,source_language='en',status='active',last_verified_at=None,last_changed_at=None,product_version_id='v',canonical_payload=payload,field_mapping_metadata=mapping,**row)
-  snapshot=AggregateRefreshService().build_snapshot(snapshot_id='s',refresh_scope='phase1_public',country_code='US',canonical_rows=[item])
-  self.assertEqual(snapshot.projection_rows,[])
 
  def test_explicit_equity_collateral_remains_required_despite_repayment_uncertainty(self):
   from worker.pipeline.fpds_approval_policy import security_meaning

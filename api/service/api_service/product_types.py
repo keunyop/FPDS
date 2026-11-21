@@ -563,17 +563,6 @@ def _cascade_product_type_code_update(connection: Connection, *, existing_code: 
     )
     connection.execute(
         """
-        UPDATE public_product_projection
-        SET product_type = %(updated_product_type_code)s
-        WHERE product_type = %(existing_product_type_code)s
-        """,
-        {
-            "existing_product_type_code": existing_code,
-            "updated_product_type_code": updated_code,
-        },
-    )
-    connection.execute(
-        """
         DELETE FROM taxonomy_registry
         WHERE product_type = %(existing_product_type_code)s
         """,

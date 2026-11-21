@@ -19,6 +19,20 @@ from worker.discovery.fpds_snapshot.storage import SnapshotStorageConfig
 
 
 class SnapshotCaptureTests(unittest.TestCase):
+    def test_redirect_scope_and_pdf_header_are_checked_before_storage(self):
+        from worker.discovery.fpds_snapshot.capture import _validate_fetched_payload
+        from worker.discovery.fpds_discovery.fetch import NonRetryableFetchError
+
+        source = CaptureSource.from_registry_source(self.registry.by_source_id("TD-SAV-007"))
+        fetched = _fetched_response(body=b"%PDF-1.4 test", content_type="text/html", final_url=source.resolved_url)
+        self.assertEqual(_validate_fetched_payload(source=source, fetched=fetched), "application/pdf")
+        for url in ["https://www.td.com/us/en/fees.pdf", "https://www.td.com/ca/fr/fees.pdf",
+                    "https://www.td.com/ca/fees.pdf?market=US"]:
+            with self.subTest(url=url), self.assertRaises(NonRetryableFetchError):
+                _validate_fetched_payload(source=source, fetched=replace(fetched, final_url=url))
+        with self.assertRaises(NonRetryableFetchError):
+            _validate_fetched_payload(source=source, fetched=replace(fetched, body=b"<html>Unavailable</html>", content_type="application/pdf"))
+
     def setUp(self) -> None:
         self.registry = load_registry(DEFAULT_REGISTRY_PATH)
         self.fetch_policy = DiscoveryFetchPolicy(allowed_domains=("td.com",), block_private_networks=False)

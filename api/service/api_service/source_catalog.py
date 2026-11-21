@@ -48,7 +48,10 @@ from worker.discovery.fpds_discovery.discovery import (
 from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy, fetch_text
 from worker.pipeline.fpds_approval_policy import collection_fields_for_product_type
 from worker.pipeline.fpds_market_profile import market_profile_metadata
-from worker.discovery.fpds_discovery.url_utils import host_matches_allowed_domains
+from worker.discovery.fpds_discovery.url_utils import (
+    host_matches_allowed_domains, url_country_scope_conflicts as _url_country_scope_conflicts,
+    url_locale_conflicts_source_language as _url_locale_conflicts_source_language,
+)
 from worker.pipeline.fpds_ai_runtime import (
     configured_model_id,
     estimated_cost_usd,
@@ -610,19 +613,13 @@ def normalize_source_catalog_filters(
     )
 
 
-def _published_product_counts(connection: Connection, *, country_code: str) -> dict[str, int]:
-    # Share Public's snapshot-pinned current accuracy gate; raw active canonical
-    # rows and historical projections are not published membership.
-    from api_service.public_common import load_latest_public_snapshot, load_public_projection_rows
-    snapshot = load_latest_public_snapshot(connection, country_code=country_code)
-    if not snapshot:
-        return {}
-    rows = load_public_projection_rows(connection, country_code=country_code,
-                                       snapshot_id=str(snapshot["snapshot_id"]))
-    ids_by_bank: dict[str, set[str]] = {}
-    for row in rows:
-        ids_by_bank.setdefault(str(row["bank_code"]), set()).add(str(row["product_id"]))
-    return {bank: len(ids) for bank, ids in ids_by_bank.items()}
+def _active_product_counts(connection: Connection, *, country_code: str) -> dict[str, int]:
+    rows = connection.execute(
+        """SELECT bank_code, COUNT(*) AS product_count FROM canonical_product
+           WHERE country_code = %(country_code)s AND status = 'active' GROUP BY bank_code""",
+        {"country_code": country_code},
+    ).fetchall()
+    return {str(row["bank_code"]): int(row["product_count"]) for row in rows}
 
 
 def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str, Any]:
@@ -748,9 +745,9 @@ def load_bank_list(connection: Connection, *, filters: BankFilters) -> dict[str,
             }
         )
 
-    published_counts = _published_product_counts(connection, country_code=filters.country_code) if bank_codes else {}
+    active_counts = _active_product_counts(connection, country_code=filters.country_code) if bank_codes else {}
     items = [
-        _serialize_bank_row({**row, "published_product_count": published_counts.get(str(row["bank_code"]), 0),
+        _serialize_bank_row({**row, "active_product_count": active_counts.get(str(row["bank_code"]), 0),
                              "catalog_items": catalog_items_by_bank.get(str(row["bank_code"]), [])})
         for row in rows
     ]
@@ -839,14 +836,14 @@ def load_bank_detail(connection: Connection, *, bank_code: str) -> dict[str, Any
         for item in generated_counts_by_type_rows
     }
     catalog_product_types = sorted(str(item["product_type"]) for item in catalog_rows)
-    published_counts = _published_product_counts(connection, country_code=str(row["country_code"]))
+    active_counts = _active_product_counts(connection, country_code=str(row["country_code"]))
 
     return {
         "bank": _serialize_bank_row(
             {
                 **row,
                 "catalog_item_count": len(catalog_rows),
-                "published_product_count": published_counts.get(str(row["bank_code"]), 0),
+                "active_product_count": active_counts.get(str(row["bank_code"]), 0),
                 "generated_source_count": int((generated_source_count_row or {}).get("generated_source_count") or 0),
                 "catalog_product_types": catalog_product_types,
             }
@@ -1091,6 +1088,8 @@ def delete_bank_profile(
     actor: dict[str, Any],
     request_context: dict[str, Any],
 ) -> dict[str, Any]:
+    from psycopg.errors import ForeignKeyViolation
+
     normalized_bank_code = _required_text(bank_code, "bank_code").upper()
     detail = load_bank_detail(connection, bank_code=normalized_bank_code)
     if detail is None:
@@ -1123,12 +1122,7 @@ def delete_bank_profile(
                 SELECT COUNT(*)
                 FROM canonical_product
                 WHERE bank_code = %(bank_code)s
-            ) AS canonical_product_count,
-            (
-                SELECT COUNT(*)
-                FROM public_product_projection
-                WHERE bank_code = %(bank_code)s
-            ) AS public_projection_count
+            ) AS canonical_product_count
         """,
         {"bank_code": normalized_bank_code},
     ).fetchone()
@@ -1138,7 +1132,6 @@ def delete_bank_profile(
             "source_document_count",
             "candidate_count",
             "canonical_product_count",
-            "public_projection_count",
         )
     )
     if blocking_dependency_total > 0:
@@ -1162,13 +1155,20 @@ def delete_bank_profile(
         """,
         {"bank_code": normalized_bank_code},
     )
-    connection.execute(
-        """
-        DELETE FROM bank
-        WHERE bank_code = %(bank_code)s
-        """,
-        {"bank_code": normalized_bank_code},
-    )
+    try:
+        connection.execute(
+            """
+            DELETE FROM bank
+            WHERE bank_code = %(bank_code)s
+            """,
+            {"bank_code": normalized_bank_code},
+        )
+    except ForeignKeyViolation as exc:
+        raise SourceRegistryError(
+            status_code=409,
+            code="bank_profile_in_use",
+            message="This bank has dependent records. Its history must be preserved.",
+        ) from exc
     _record_catalog_audit_event(
         connection,
         actor=actor,
@@ -2383,6 +2383,7 @@ def _generate_existing_detail_companion_rows(
     companions, notes = _discover_detail_companion_links(
         detail_rows=existing_detail_rows,
         country_code=country_code,
+        source_language=source_language,
         product_type=discovery_product_type,
         fetch_policy=DiscoveryFetchPolicy.from_env(allowed_domains=allowed_domains),
         hostname=hostname,
@@ -4034,6 +4035,7 @@ def _generate_sources_from_homepage(
     detail_companions, detail_companion_notes = _discover_detail_companion_links(
         detail_rows=detail_rows,
         country_code=country_code,
+        source_language=source_language,
         product_type=discovery_product_type,
         fetch_policy=fetch_policy,
         hostname=hostname,
@@ -5373,6 +5375,7 @@ def _discover_detail_companion_links(
     hostname: str,
     allowed_domains: tuple[str, ...],
     page_html_by_url: dict[str, str],
+    source_language: str = "",
 ) -> tuple[list[DetailCompanionLink], list[str]]:
     """Follow exact-product pricing/terms links from promoted detail pages.
 
@@ -5407,6 +5410,8 @@ def _discover_detail_companion_links(
             if link.normalized_url == parent_normalized_url:
                 continue
             if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
+                continue
+            if _url_locale_conflicts_source_language(source_language=source_language, normalized_url=link.normalized_url):
                 continue
             score = _detail_companion_link_score(
                 product_type=product_type,
@@ -5457,6 +5462,17 @@ def _discover_detail_companion_links(
     return list(by_url.values()), notes
 
 
+def _deposit_withdrawal_document(product_type: str, document_label: str) -> bool:
+    if _canonical_product_type_code(product_type) != "gic":
+        return False
+    label = re.sub(r"[-_]+", " ", document_label.casefold())
+    return bool(
+        re.search(r"\b(?:gics?|cds?|term deposits?|certificates? of deposit)\b", label)
+        and re.search(r"\b(?:redemption|early withdrawal)\s+(?:terms|conditions|penalt(?:y|ies)|rules)\b", label)
+        and not re.search(r"\b(?:loyalty|rewards?|points?|miles)\b", label)
+    )
+
+
 def _is_non_product_supporting_document(
     *,
     product_type: str,
@@ -5480,13 +5496,17 @@ def _is_non_product_supporting_document(
         return True
 
     # Insurance/benefit certificates do not supply core account or borrowing pricing.
-    if re.search(r"insurance|benefit[s]?[-_ ](?:guide|certificate)|redemption[-_ ]terms|checklists?", f"{path.rsplit('/', 1)[-1]} {anchor_text.lower()}"):
+    if re.search(r"insurance|benefit[s]?[-_ ](?:guide|certificate)|checklists?", f"{path.rsplit('/', 1)[-1]} {anchor_text.lower()}"):
+        return True
+    if re.search(r"redemption[-_ ]terms", document_label) and not _deposit_withdrawal_document(product_type, document_label):
         return True
 
     if re.search(r"(?:^|[/_-])(?:video[-_ ]transcripts?|testimonials?)(?:[/_.-]|$)", path):
         return True
 
     canonical_type = _canonical_product_type_code(product_type)
+    if canonical_type == "gic" and re.search(r"\b(?:rewards?|loyalty|points?|miles)\b", document_label) and re.search(r"redemption|redeem", document_label):
+        return True
     if canonical_type not in {"chequing", "savings", "gic"}:
         return False
     investment_path = any(
@@ -5528,6 +5548,10 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
         return 0
     path_and_query = " ".join(part for part in (parsed.path.lower(), parsed.query.lower()) if part)
     fingerprint = f"{path_and_query} {anchor}".strip()
+    if _source_scope_exclusion_reason(product_type=product_type, fingerprint=fingerprint) == "non_consumer_business_page":
+        return 0
+    if _canonical_product_type_code(product_type) == "gic" and _has_excluded_link_signal(normalized_url=normalized_url, anchor_text=anchor_text):
+        return 0
     if any(marker in fingerprint for marker in _DETAIL_COMPANION_EXCLUDED_MARKERS):
         return 0
     if _is_non_product_supporting_document(
@@ -5559,6 +5583,8 @@ def _detail_companion_link_score(*, product_type: str, normalized_url: str, anch
         and not re.search(r"visa|mastercard|credit[- ]cards?|savings|chequing|checking|\bgic\b", fingerprint))
     if unrelated and not shared_lending_schedule:
         return 0
+    if _deposit_withdrawal_document(product_type, fingerprint):
+        return 25
 
     # A selected deposit detail can delegate its exact withdrawal terms to
     # the linked family catalogue. Keep it as evidence-only within existing
@@ -6394,58 +6420,6 @@ def _seed_detail_has_hard_negative(page_evidence: PageEvidenceAssessment) -> boo
             "product_unavailable_for_new_customers",
         )
     )
-
-
-def _url_locale_conflicts_source_language(*, normalized_url: str, source_language: str) -> bool:
-    """Reject a clearly different locale host or path from an allowed domain."""
-
-    requested = str(source_language or "").strip().lower().replace("_", "-").split("-", 1)[0]
-    if not requested:
-        return False
-    known_languages = {"en", "fr", "es", "de", "it", "pt", "zh", "ja", "ko"}
-    parsed = urlparse(normalized_url)
-    hostname_labels = [item for item in str(parsed.hostname or "").lower().split(".") if item]
-    if hostname_labels:
-        host_locale = {"zt": "zh"}.get(hostname_labels[0], hostname_labels[0])
-        if host_locale in known_languages and host_locale != requested:
-            return True
-    for segment in [item for item in parsed.path.lower().split("/") if item]:
-        locale = segment.replace("_", "-").split("-", 1)[0]
-        if locale in known_languages and locale != requested:
-            return True
-    return False
-
-
-def _url_country_scope_conflicts(*, country_code: str, normalized_url: str) -> bool:
-    """Reject an explicit market route that conflicts with the collection country.
-
-    Some banks serve Canada and the United States from one registered domain.
-    Domain allowlisting therefore is not enough: `/ca/...` must never enter a
-    US run and `/us/...` must never enter a Canada run. Unmarked shared legal or
-    disclosure paths remain eligible as supporting evidence.
-    """
-
-    requested = str(country_code or "").strip().lower()
-    if requested not in {"ca", "us"}:
-        return False
-    parsed = urlparse(str(normalized_url or ""))
-    hostname = str(parsed.hostname or "").lower().strip(".")
-    segments = [segment.lower().replace("_", "-") for segment in parsed.path.split("/") if segment]
-    explicit_markets: set[str] = set()
-    host_labels = [label for label in hostname.split(".") if label]
-    if host_labels and host_labels[0] in {"ca", "us"}:
-        explicit_markets.add(host_labels[0])
-    if hostname.endswith(".ca"):
-        explicit_markets.add("ca")
-    if hostname.endswith(".us"):
-        explicit_markets.add("us")
-    for segment in segments[:3]:
-        if segment in {"ca", "us"}:
-            explicit_markets.add(segment)
-        locale_match = re.fullmatch(r"[a-z]{2}-(ca|us)", segment)
-        if locale_match:
-            explicit_markets.add(locale_match.group(1))
-    return bool(explicit_markets and requested not in explicit_markets)
 
 
 def _page_is_audience_offer_hub(page_evidence: PageEvidenceAssessment) -> bool:
@@ -8366,7 +8340,7 @@ def _serialize_bank_row(row: dict[str, Any]) -> dict[str, Any]:
         "catalog_product_types": catalog_product_types,
         "catalog_items": catalog_items,
         "generated_source_count": int(row.get("generated_source_count") or 0),
-        "published_product_count": int(row.get("published_product_count") or 0),
+        "active_product_count": int(row.get("active_product_count") or 0),
     }
 
 

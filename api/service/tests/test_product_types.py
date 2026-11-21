@@ -299,7 +299,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
         updated = dict(existing)
         updated["product_type_code"] = "savings"
         updated["display_name"] = "Savings"
-        connection = _QueuedConnection([existing, *([None] * 12), updated, None])
+        connection = _QueuedConnection([existing, *([None] * 11), updated, None])
 
         with (
             patch("api_service.product_types.new_id", return_value="audit-rename"),
@@ -327,7 +327,7 @@ class ProductTypeRegistryTests(unittest.TestCase):
             for sql, _ in connection.calls
             if "SET product_type = %(updated_product_type_code)s" in sql
         }
-        self.assertTrue({"source_registry_catalog_item", "source_registry_item", "normalized_candidate", "canonical_product", "public_product_projection"}.issubset(cascade_tables))
+        self.assertTrue({"source_registry_catalog_item", "source_registry_item", "normalized_candidate", "canonical_product"}.issubset(cascade_tables))
 
     def test_delete_product_type_definition_removes_registry_and_taxonomy_when_unused(self) -> None:
         connection = _QueuedConnection(

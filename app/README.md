@@ -1,11 +1,3 @@
-# Browser Apps
+# FPDS Admin
 
-FPDS keeps its browser surfaces in separate packages so public data exposure and
-operator authentication cannot drift into one runtime.
-
-- `admin/` — authenticated operator workflows on port `3001`.
-- `public/` — anonymous approved-data experience on port `3000`.
-
-Each live package owns its App Router routes, route manifest, dependencies,
-environment example, and verification commands. See the package README before
-changing a surface.
+The [Admin application](admin/README.md) serves authenticated operator workflows on port 3001. Its package owns the App Router routes, route manifest, environment example and verification commands.

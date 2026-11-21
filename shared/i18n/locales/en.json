@@ -2,22 +2,6 @@
   "locale": "en",
   "resource_status": "approved",
   "domains": {
-    "public_navigation": {
-      "home": "Home",
-      "products": "Products",
-      "dashboard": "Insight Dashboard"
-    },
-    "public_filters": {
-      "bank": "Bank",
-      "product_type": "Product Type",
-      "target_customer_tag": "Target Customer",
-      "clear_filters": "Clear Filters"
-    },
-    "public_metrics": {
-      "freshness": "Freshness",
-      "recent_changes": "Recent Changes",
-      "methodology": "Methodology"
-    },
     "admin_operations": {
       "login": "Admin Login",
       "overview": "Overview",
@@ -29,7 +13,6 @@
       "audit": "Audit Log",
       "publish": "Publish Monitor",
       "usage": "LLM Usage",
-      "health_dashboard": "Dashboard Health",
       "product_record": "Product Record"
     },
     "shared_taxonomy": {

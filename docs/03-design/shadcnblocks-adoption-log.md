@@ -55,18 +55,6 @@ Do not add an entry for:
 
 ## 4. Entries
 
-## 2026-08-31 - Public Feedback Dialog Primitives
-
-- Surface or Area: `app/public` product-detail Important note and global footer
-- Vendor Asset: shadcn-style Radix dialog and textarea primitives composed with the existing Public button and token baseline
-- Source: existing repository `radix-ui` dependency and generated primitive conventions
-- Install Method: repository-local primitive addition; no package or remote block install
-- Files Added or Changed: `app/public/src/components/ui/dialog.tsx`, `app/public/src/components/ui/textarea.tsx`, `app/public/src/components/fpds/public/public-feedback-dialog.tsx`
-- FPDS Wrappers or Overrides: one FPDS-owned EN/KO/JA feedback dialog owns category sets, bounded optional detail, product context, submission state, and footer/notice trigger variants
-- Direct Vendor Edits: no
-- Verification: `pnpm run typecheck` and `pnpm run build` in `app/public`; hydrated 1440px, 768px, and exact-390px browser checks
-- Notes: The modal retains 44px-or-larger actions, visible focus, semantic labels, error announcement, confirmation detail, reduced-motion-compatible token styling, and a bounded mobile viewport.
-
 ## 2026-04-13 - Admin Login and Shell Migration
 
 - Surface or Area: `app/admin` live runtime for `/admin/login` and protected `/admin`
@@ -258,26 +246,12 @@ Do not add an entry for:
   - `.venv\Scripts\python.exe -m unittest discover -s tests/regression -p "test_*.py"`
 - Notes: source-catalog modals still use the default wide no-panel width because their detail payload is denser
 
-## 2026-05-15 - Public Dashboard10 Revamp
-
-- Surface or Area: `app/public` public dashboard-first runtime
-- Vendor Asset: `@shadcnblocks/dashboard10` plus generated shadcn UI primitives for cards, charts, tables, inputs, select, sheet, scroll area, dropdown menu, and avatar
-- Source: authenticated `@shadcnblocks` registry in `app/public/components.json`
-- Install Method: `pnpm dlx shadcn add @shadcnblocks/dashboard10 -y -o` after loading `SHADCNBLOCKS_API_KEY` from local `.env.dev`
-- Files Added or Changed: `app/public/src/components/dashboard10.tsx`, `app/public/src/components/ui/*`, `app/public/src/components/fpds/public/dashboard-surface.tsx`, `app/public/src/components/fpds/public/public-dashboard-charts.tsx`, `app/public/src/components/fpds/public/product-grid-surface.tsx`, `app/public/src/app/methodology/page.tsx`, `app/public/src/app/page.tsx`, `app/public/src/app/globals.css`
-- FPDS Wrappers or Overrides: the vendor demo content was replaced by FPDS-owned public dashboard composition that uses public aggregate data, Recharts-backed chart primitives, ranking tables, and scope-preserving navigation
-- Direct Vendor Edits: yes; the generated `dashboard10.tsx` is retained only as a thin FPDS re-export so ecommerce demo content does not ship in the public app
-- Verification:
-  - `pnpm run typecheck`
-  - `pnpm run build`
-- Notes: first install attempt failed because `SHADCNBLOCKS_API_KEY` was not present in the shell; a second attempt passed after loading the local env value. `app/public/node_modules` also needed `pnpm install --config.confirmModulesPurge=false` because its virtual store was linked to `app/admin`.
-
 ## 2026-07-28 - Client Handoff Simplification
 
 - Surface or Area: `app/admin` shell and core daily workflows, plus unreachable Public vendor residue
 - Vendor Asset: existing `application-shell5`, `login2`, `offer-modal4`, `stats5`, and the historical `dashboard10` install
 - Install Method: no new vendor install; semantic relocation and reachability-backed cleanup
-- Files Added or Changed: `app/admin/src/components/fpds/admin/admin-shell.tsx`, `admin-login-form.tsx`, `admin-modal.tsx`, `admin-stat-strip.tsx`, Review/Run/Bank surfaces, and `app/public/src/components/ui/*`
+- Files Added or Changed: `app/admin/src/components/fpds/admin/admin-shell.tsx`, `admin-login-form.tsx`, `admin-modal.tsx`, `admin-stat-strip.tsx`, and Review/Run/Bank surfaces
 - FPDS Wrappers or Overrides: adapted Admin blocks now use handoff-readable FPDS names; the shell exposes direct daily work, list entrypoints disclose advanced controls, and Review Detail progressively discloses technical context
 - Direct Vendor Edits: yes; current adapted files remain repo-owned FPDS implementations
 - Cleanup: removed the unreachable `banner1` implementation, legacy Bank/Source Catalog page surfaces, the unused Public `dashboard10` re-export, and unused generated primitives; live routes, proxy handlers, and compatibility redirects remain

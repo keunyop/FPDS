@@ -14,14 +14,12 @@ Source Documents:
 ## Current Storage Supersession - 2026-08-13
 
 This document preserves the historical `0001` schema rationale. Decision `D044`
-and migration `0040_bounded_operational_storage.sql` are the current authority:
+and migrations 0040 and 0049 govern operational storage:
 
 - `audit_event` and `llm_usage_record` no longer retain rows; empty compatibility
   views temporarily absorb writes during rolling deployment.
 - `evidence_chunk_embedding` and the three dashboard snapshot tables are removed.
-- Public products and dashboard responses are derived from the latest successful
-  `public_product_projection`; only the latest two completed aggregate runs per
-  country/scope are retained.
+- Existing historical datasets remain in place. Admin retention uses `fpds_apply_admin_data_retention()` and does not process them.
 - evidence chunks are bounded to field-linked chunks, each source's latest
   snapshot, and active runs. Model executions and operational metadata use the
   bounded policy in `docs/03-design/bounded-data-retention-policy.md`.

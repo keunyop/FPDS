@@ -1,8 +1,7 @@
 # API Service
 
-The live FastAPI application is entirely under `service/`. It owns anonymous
-Public reads, authenticated Admin reads and mutations, session/CSRF/RBAC
-enforcement, aggregate refresh, and worker launch integration.
+The live FastAPI application is entirely under `service/`. It owns authenticated Admin reads and mutations, session/CSRF/RBAC
+enforcement and worker launch integration.
 
 Start with:
 

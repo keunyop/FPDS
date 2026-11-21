@@ -10,7 +10,7 @@ version and private `evidence_research` diagnostics. Inspect missing essentials,
 selected evidence, capture/parse failures and budget-stop reasons before retry.
 Never describe a preflight gap as bank nondisclosure. Optional gaps cause no retry.
 No recurring collection/recovery is added. Use a bounded normal Run after release;
-verify its final automatic outcome and ordinary Public projection separately.
+verify its final automatic outcome in the canonical product record.
 Diagnosis and verification (`e391c209d398:docs/00-governance/ordinary-collection-redesign-2026-10-05.md` in Git history).
 
 상태: 2026-10-03 현행 상품수집 정책 반영. 의뢰자 환경·담당자·복구 증거 반영 전.
@@ -22,7 +22,7 @@ Diagnosis and verification (`e391c209d398:docs/00-governance/ordinary-collection
 
 1. 승인된 환경 URL로 접속하고 업무 국가를 선택해 로그인한다. Header의 국가와
    Dev/Prod 표시를 확인한다. 미확인 표시는 정상 환경 확인으로 취급하지 않는다.
-2. Overview에서 실행 확인 필요, 공개 데이터 상태, 가입 요청을 본다.
+2. Overview에서 실행 오류와 가입 요청을 본다.
    확인 불가 값은 0건/정상으로 해석하지 않는다.
 3. 상품수집은 자동 승인·제외로 끝난다. 필수 근거 부족은 자동 제외 사유로 확인하고,
    선택 정보 부족은 누락 상태로 유지한다. More tools의 Review는 과거 결정과
@@ -46,7 +46,6 @@ Diagnosis and verification (`e391c209d398:docs/00-governance/ordinary-collection
 - Countries: admin 전용. 현재/마지막 활성 국가를 보호하며 비활성화는 역사 삭제가 아니다.
 - Review history: 과거 검토 결정·근거의 읽기 전용 조회.
 - Changes: 자동 승인과 canonical 변경의 업무 이력. 원문 evidence는 private 유지.
-- Public Health: aggregate 최신 상태·실패 진단 및 권한 있는 재시도.
 - admin은 설정·가입 승인·관리 작업을 맡고, reviewer는 과거 검토 이력과 관련 조회를,
   read_only는 조회를 맡는다. 버튼 비노출만으로 권한을 검증하지 말고 UAT에서
   서버의 거부도 확인한다.
@@ -102,7 +101,6 @@ pnpm run build
 | 403/CSRF 거부 | 현재 세션으로 새로고침·재로그인, 역할 확인 | CSRF/RBAC를 꺼서 우회하지 않음 |
 | collection partial/failed | run 상세의 stage/source/오류, 실제 지원 상품 범위 | 같은 원인의 반복 실패·DB/LLM 장애는 원인 해결 전 대량 retry 중지 |
 | 수집 필수 근거 누락·모순 | Runs 자동 제외 사유와 공식 source/evidence | 수동 승인 우회 금지. 원인 해결 후 필요한 범위만 다시 수집 |
-| Public Health 오래됨/실패 | aggregate 결과와 연결된 실행 | canonical을 직접 고쳐 숫자만 맞추지 않음 |
 | 로그아웃 오류 | 재시도, API 상태 | 세션 회수가 확인될 때까지 정상 종료로 기록하지 않음 |
 
 오류 보고에는 환경, 국가, 시간, run/review/request ID, 오류 종류, 영향 범위와
@@ -142,3 +140,66 @@ Monitoring provider, alert 수신자, on-call, 예산/quota는 의뢰자 환경 
 승인된 유지보수 시점에 수행한다. 전체 tmp·cache 폴더를 일괄 삭제하지 않는다.
 
 현재 소스 전달 경계는 [범위·전달 목록](../00-Scope/scope.md)을 따른다.
+
+
+## 8. Switchabank 서비스 일시중지 — 2026-10-19
+
+Product Owner 요청에 따라 서비스는 삭제하지 않고 재개 가능한 상태로 보존한다.
+추가 지시로 **Supabase는 계속 실행**한다. 로컬 Admin/API은 기존 Supabase를
+사용한다. 별도 로컬 PostgreSQL 구성은 진행하지 않으며 DB와 금융 사실은 변경하지 않는다.
+
+| 외부 서비스 | 확인된 용도와 실제 대상 | 처리 결과 / 남은 조치 |
+|---|---|---|
+| Vercel API | `switchabank-api`; `switchabank-api.vercel.app` | Pause 성공. `/healthz` 503 `DEPLOYMENT_PAUSED` 확인 |
+| Vercel Admin | `fpds`; `fpds-three.vercel.app` | Pause 성공. `/admin/login` 503 `DEPLOYMENT_PAUSED` 확인 |
+| Supabase PostgreSQL | `ejwcoynizneafofzdmyd`; 로컬/호스팅 공용 기존 DB, 조회 시 약 434 MB | 요청대로 계속 실행. 데이터·계정·권한·백업 설정 변경 없음. 현재 커넥터 계정에는 관리 권한 없음 |
+| AWS S3 | `fpds-dev-private`, `us-west-2`, `dev` prefix; 비공개 수집 근거 | 보존. 현재 객체 60,022개 / 5,787,266,752 bytes(약 5.39 GiB). 버전·삭제 표식 포함 청구량과는 다를 수 있음. 저장소에는 서버 Pause 개념이 없으므로 저장 비용은 남음 |
+| OpenAI API | `.env.dev`의 수집 provider 설정 | 자격증명 보존. 수집/모델 호출을 실행하지 않음. 현재 관련 수집 프로세스 없음. 별도 자동충전·유료 설정은 소유자가 확인 |
+| GitHub | `keunyop/FPDS`, 소스와 Actions CI, Vercel Git 연동 | 저장소·이력 보존. 현재 체크아웃의 Actions는 push/PR/수동 검사이며 schedule 없음. Git 자동 배포/빌드는 Pause와 별개로 아래 조치 필요 |
+| Shadcnblocks | 로컬 개발용 API key 설정 | 운영 서버 의존성과 별개. 유료 라이선스·갱신이 있다면 소유자가 확인 |
+
+Sentry/monitoring은 로컬 설정상 `disabled`, BX-PF는 `mock` 및 placeholder다.
+실제 운영 통합으로 집계하지 않는다. Vercel에서 조회된 integration configuration은 없다.
+Vercel 팀에는 다른 앱도 있으므로 팀 전체나 공용 요금제를 취소하지 않았다.
+AWS 자격증명은 `fpds-dev-storage` 사용자이며 EC2 조회는 권한 부족으로 거부됐다.
+별도 VM/다른 리전·서비스가 없다고 단정할 수 없으므로 AWS 콘솔 Billing/Cost Explorer에서
+Switchabank 관련 EC2/EBS/공인 IP 등 잔여 사용을 확인한다. 현재 저장소의 persistent-host
+문서는 설치 예시이며 실제 서버가 있다는 증거가 아니다.
+
+### 소유자 조치와 비용 경계
+
+- Vercel 각 프로젝트 Settings → Git에서 연결/자동 배포 설정을 확인한다.
+  Pause는 production 제공 중지이며 Git push 빌드나 과거 Preview 전체의 실행 중지까지
+  보장하지 않는다. 자동 빌드까지 중단하려면 현재 설정을 기록한 뒤 해당 프로젝트의
+  Git 저장소 연결을 해제하고, 재개 때 같은 저장소/Root Directory로 연결한다.
+  기존 Preview는 인증 보호가 있으나 모든 과거 배포의 중지까지 검증하지 않았다.
+  현재 도구의 프로젝트 조회에는 기존 빌드/Preview 제어 설정값이 제공되지 않아
+  복구할 원래 값을 확인할 수 없었다. 이 설정을 덮어쓰거나 Git 연결을 변경하지 않았다.
+- Vercel 기본 구독료, 유지하는 Supabase 요금, S3 저장료, 도메인 갱신료는
+  일시중지만으로 없어지지 않는다. 결제 계정은 사용자가 확인하며 공용 요금제를
+  해지하거나 도메인 자동 갱신을 끄지 않는다.
+- OpenAI/개발 도구의 Switchabank 전용 정액 구독이나 자동충전이 있다면 소유자가
+  확인한다. 로컬 수집에 필요한 키는 삭제·회수하지 않았다.
+- Supabase는 중지하지 않는다. 보존 데이터의 백업 정책은 소유자 계정에서 유지한다.
+
+### 로컬 기동과 재개
+
+로컬 실행 명령은 [Startup Guide](../README.md#5-start-locally)에 있다.
+현재 `.env.dev`의 DB/S3/provider 설정을 유지하고 Admin의 server-only upstream을
+`http://localhost:4000`으로 설정했다.
+원래 로컬 환경파일은 ignored `.tmp/suspension-20261019/before/`의 `.dpapi` 파일로 암호화 보존하고 복호화 일치를 확인했다. 복호화에는 같은 Windows 사용자 계정이 필요하다.
+로컬 앱은 Supabase·필요 시 S3/provider 연결이 필요하므로 완전 오프라인 구성이 아니다.
+로컬 Admin의 데이터 변경은 유지 중인 공유 DB에 반영된다.
+
+
+호스팅 재개 때는 [Vercel 프로젝트 설정](https://vercel.com/docs/projects/managing-projects)에서
+`switchabank-api`를 먼저 Resume하고 `/healthz`를 확인한다.
+다음 `fpds`를 Resume한다. 프로젝트를 삭제하거나 새로 만들지
+않았으므로 보존된 deployment/env/domain을 사용한다. 통상 재배포 없이 재개 가능하지만
+실제 동작과 데이터 최신성을 다시 확인한다. 금융상품을 과거 값으로 복원하지 않는다.
+Git 연동을 사용자가 해제했다면 API root는 저장소 루트,
+Admin은 `app/admin`으로 복원한다. 로컬 upstream은 계속 localhost를 유지한다.
+
+프로젝트 ID: API `prj_CyWm7Bby1p1J4nMuO6Ntb3uegnGf`,
+Admin `prj_erTsHzAK5jWixDQLb9M3kJfyd4cE`.
+팀 ID: `team_VSzA796D92aso5IuzUIiOdnb`.

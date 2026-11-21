@@ -62,7 +62,7 @@ This is an IA and operator-workflow baseline, not a UI implementation approval b
 ## 2. Baseline Decisions Carried Forward
 
 1. The admin console is a browser-based operator surface protected by server-side session auth.
-2. Review, runs, durable change history, and dashboard health are live operator surfaces. Publish Monitor remains a follow-on; generic audit and token/cost usage screens are removed.
+2. Review, runs and durable change history are live operator surfaces. Publish Monitor remains a follow-on; generic audit and token/cost usage screens are removed.
 3. Source registry management is an operations surface, not a hidden settings page.
 4. Banks owns setup and coverage. Generated sources are inspectable and allow admin-only `removed` transitions that preserve historical runs/candidates; D-044 does not retain a separate generic audit event.
 5. Bulk collection may start from the bank list as long as the collect action still resolves down to the existing bank-plus-product coverage items.
@@ -78,7 +78,7 @@ This is an IA and operator-workflow baseline, not a UI implementation approval b
 Included:
 - admin shell and primary navigation
 - contextual route ownership
-- live overview, review, runs, change history, dashboard health, bank registry, source catalog compatibility, source registry, Product Types, and Countries
+- live overview, review, runs, change history, bank registry, source catalog compatibility, source registry, Product Types, and Countries
 - design-only Product Record and Publish Monitor follow-ons
 - cross-surface drilldown rules
 - role-visibility baseline
@@ -106,7 +106,7 @@ Not included:
 - `run` lives primarily in Runs
 - canonical change continuity lives primarily in Change History and Product Record
 - publish tracking lives primarily in Publish Monitor
-- aggregate freshness lives primarily in Public Health; bounded model outcome context stays with the owning review/run
+- bounded model outcome context stays with the owning review/run
 - source registry ownership lives primarily in Source Registry
 - anonymous Public product reports and site feedback live only in the separate
   password-gated FPDS Public `/admin`, outside this operator IA
@@ -161,7 +161,6 @@ choose an abstract module before finding a task.
 | More tools | Product Types | `/admin/product-types` | collection taxonomy and fallback metadata |
 | More tools | Countries | `/admin/countries` | admin-only operational country activation |
 | More tools | Change History | `/admin/changes` | canonical change chronology |
-| More tools | Public Health | `/admin/health/dashboard` | public aggregate freshness and health |
 
 Publish Monitor remains approved follow-on scope but is not shown as a disabled
 navigation item until a live route exists.
@@ -479,7 +478,6 @@ the business chronology required by each workflow.
 ### 7.8 Publish Monitor (Not Implemented)
 
 No live Admin page or API is registered. WBS `6.4` remains a follow-on;
-Public Health monitors FPDS projection refresh, not BX-PF delivery.
 
 Purpose:
 - BX-PF publish tracking surface
@@ -500,26 +498,6 @@ Removed by Decision `D044` on 2026-08-13. `/admin/usage` is not a live route,
 and token/cost usage rows are not retained. The owning Review or Run surface may
 show bounded model completion/status context when needed for quality diagnosis.
 
-### 7.10 Dashboard Health
-
-Purpose:
-- public aggregate freshness and health visibility
-
-Minimum domain rows:
-- `public_product_projection`
-- `aggregate_refresh_run`
-
-Minimum information:
-- latest successful refresh time
-- latest attempted refresh time
-- refresh status
-- stale flag
-- missing-data ratio or equivalent completeness note
-- cache TTL
-- last error summary
-
----
-
 ## 8. Role Visibility Baseline
 
 | Surface / Action | `admin` | `reviewer` | `read_only` | Notes |
@@ -532,8 +510,7 @@ Minimum information:
 | Runs and run detail | O | O | O | diagnostic read |
 | Change history | O | O | O | diagnostic read; no standalone product record |
 | Publish monitor read (future) | O | O | O | intended visibility; not implemented |
-| Dashboard health read | O | O | O | aggregate health visibility |
-| Run retry / dashboard refresh retry | O | X | X | guarded admin mutation |
+| Run retry | O | X | X | guarded admin mutation |
 | Review AI verification | O | O | X | verification result; no direct approval |
 | Product Type definition writes | O | X | X | shared registry |
 | Countries / signup request administration | O | X | X | privileged configuration/access |

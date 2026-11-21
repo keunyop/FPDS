@@ -72,7 +72,7 @@ const BANK_COPY = {
     homepage: "Homepage",
     catalogs: "Coverage",
     generatedSources: "Generated sources",
-    publishedProducts: "Published products",
+    activeProducts: "Active products",
     selectBank: (name: string) => `Select ${name}`,
     noBanks: "No banks matched the current filter set.",
     selectBankFirst: "Select at least one bank with added coverage before starting collection.",
@@ -113,7 +113,7 @@ const BANK_COPY = {
     homepage: "홈페이지",
     catalogs: "수집 범위",
     generatedSources: "생성된 소스",
-    publishedProducts: "공개된 상품",
+    activeProducts: "활성 상품",
     selectBank: (name: string) => `${name} 선택`,
     noBanks: "현재 필터에 맞는 은행이 없습니다.",
     selectBankFirst: "수집을 시작하기 전에 coverage가 추가된 은행을 하나 이상 선택하세요.",
@@ -154,7 +154,7 @@ const BANK_COPY = {
     homepage: "ホームページ",
     catalogs: "収集範囲",
     generatedSources: "生成済みソース",
-    publishedProducts: "公開商品",
+    activeProducts: "有効な商品",
     selectBank: (name: string) => `${name}を選択`,
     noBanks: "現在のフィルターに該当する銀行はありません。",
     selectBankFirst: "Collection を開始する前に、coverage が追加された銀行を1件以上選択してください。",
@@ -520,7 +520,7 @@ export function BankRegistrySurface({
                 <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.bank}</th>
                 <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.catalogs}</th>
                 <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.generatedSources}</th>
-                <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.publishedProducts}</th>
+                <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.activeProducts}</th>
               </tr>
             </thead>
             <tbody>
@@ -573,7 +573,7 @@ export function BankRegistrySurface({
                     </td>
                     <td className="border-b border-border/70 px-3 py-4 text-right font-mono tabular-nums text-foreground">{item.generated_source_count}</td>
                     <td className="border-b border-border/70 px-3 py-4 text-right font-mono tabular-nums text-foreground">
-                      {typeof item.published_product_count === "number" ? item.published_product_count : "—"}
+                      {typeof item.active_product_count === "number" ? item.active_product_count : "—"}
                     </td>
                   </tr>
                 ))

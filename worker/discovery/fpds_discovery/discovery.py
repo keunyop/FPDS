@@ -553,20 +553,23 @@ class _LinkExtractor(HTMLParser):
         self._text_parts = []
 
     def _append_link(self, href: str, anchor_text: str, *, prefer_over_ordinary: bool = False) -> None:
-        href_path = urlparse(href).path.lower()
         if (
             not href
             or href.startswith("#")
             or href.startswith(IGNORED_SCHEMES)
-            or href_path.startswith(("/public-sites/", "/sitecore/"))
             or "{" in href
             or "}" in href
             or (len(self.links) >= _STRUCTURED_LINK_MAX and not prefer_over_ordinary)
             or (prefer_over_ordinary and self._direct_link_count >= _STRUCTURED_DIRECT_LINK_MAX)
         ):
             return
-        resolved_url = urljoin(self.base_url, href)
         try:
+            if urlparse(href).path.lower().startswith(("/public-sites/", "/sitecore/")):
+                return
+            resolved_url = urljoin(self.base_url, href)
+            parsed = urlparse(resolved_url)
+            if parsed.username is not None or parsed.password is not None:
+                return
             normalized_url = normalize_source_url(resolved_url)
         except ValueError:
             return
@@ -666,7 +669,10 @@ class _LinkExtractor(HTMLParser):
 def _canonicalize_structured_attribute_link(value: str) -> str:
     """Convert a public CMS content-tree alias into its canonical web route."""
 
-    parsed = urlparse(value)
+    try:
+        parsed = urlparse(value)
+    except ValueError:
+        return ""
     content_prefix = "/content/tdcom/"
     if not parsed.path.lower().startswith(content_prefix):
         return value

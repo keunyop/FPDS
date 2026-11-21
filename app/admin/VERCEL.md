@@ -24,13 +24,12 @@ Admin의 [vercel.json](vercel.json)을 사용한다. 저장소 루트의 `vercel
 이 가이드는 Git Import 배포를 기준으로 한다. 현재 루트 `.vercelignore`는 `app/`을
 제외하고 기존 루트 CLI 연결도 API용일 수 있으므로 루트에서 그대로 CLI 배포하지 않는다.
 
-Public은
-`app/public`을 사용하는 별도 프로젝트다. Admin은 패키지 밖의 소스를 import하지
+Admin은 패키지 밖의 소스를 import하지
 않으므로 외부 루트 소스 포함 옵션은 필요하지 않다.
 
 [Vercel 모노레포 문서](https://vercel.com/docs/monorepos)에 따라 프로젝트마다
 Root Directory를 지정한다. Git Import 방식으로 배포한다면 필요한 변경을 먼저
-배포 대상 브랜치에 반영한다. 기존 API/Public 프로젝트가 같은 브랜치에 연결되어
+배포 대상 브랜치에 반영한다. 기존 API 프로젝트가 같은 브랜치에 연결되어
 있으면 push가 그 프로젝트들의 자동 배포도 유발할 수 있으므로 연결 설정을 확인한다.
 
 ## 환경변수와 인증 연결
@@ -80,7 +79,7 @@ ingress 및 기존 전달 IP 해석을 따르므로 실제 환경의 기록을 s
 
 같은 호스트에서 브라우저 요청이 끝나므로 인증 프록시는 API의 브라우저 CORS 허용에
 의존하지 않는다. API의 명시적 Admin origin 목록은 새 주소와 일치시키되 기존에
-승인된 다른 Admin origin과 Public CORS 설정을 보존한다.
+승인된 다른 Admin origin 설정을 보존한다.
 API의 `FPDS_ADMIN_WEB_ORIGIN=https://fpds-three.vercel.app` 및
 `FPDS_ALLOWED_ADMIN_ORIGINS=https://fpds-three.vercel.app`로 맞추고,
 `FPDS_COOKIE_SECURE=true`, `FPDS_COOKIE_SAMESITE=Lax` 및 기존 환경별 secrets를
@@ -121,7 +120,7 @@ API 응답 이후에도 계속 실행되는 수집 프로세스를 시작한다.
 [Vercel Functions 실행 제한](https://vercel.com/docs/functions/limitations)과
 [Python runtime](https://vercel.com/docs/functions/runtimes/python)을 고려하면,
 현재 detached subprocess가 Vercel에서 수집 완료까지 지속된다고 보장할 수 없다.
-기존 API 배포도 최초 public-read 용도로 문서화되어 있다. 로그인·조회 검증을
+로그인·조회 검증을
 수집 운영 검증으로 취급하지 않는다.
 
 전체 수집 운영에는 현재 API/Worker를 실행할 지속 실행 서버의 HTTPS origin 또는

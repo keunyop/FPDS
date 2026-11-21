@@ -1,18 +1,6 @@
 # FPDS API and Interface Contracts
 
-## Anonymous Public read caching and detail HEAD
-
-The seven anonymous product/detail/filter/country/dashboard GET routes allow
-60-second Vercel CDN reuse of successful responses, separated by full URL.
-`fresh=1` bypasses this response cache for live comparisons. Errors, credentialed
-Admin/app endpoints and mutations remain `no-store`; browser caches revalidate.
-Product detail HEAD validates the same current snapshot, country and financial
-eligibility as GET, returning 200 or 404 with no product body. Cache generation
-and stored product verification remain separate timestamps. Existing Next and
-origin projection caches retain their own documented bounds.
-
-
-## Product Type fields and Banks publication counts - 2026-10-04
+## Product Type fields and Banks active product counts - 2026-10-04
 
 Authenticated Product Type GET returns `collection_fields` resolved for the
 session country: `country_code`, `configured`, `required_fields`,
@@ -25,10 +13,7 @@ validation. Locked alternatives are satisfied as groups under their explicit
 `required_when` condition, not as independently compulsory values.
 
 Country overrides merge atomically in `collection_field_policy` (migration
-`0047`), and normal collection pins them per run. New receipt prerequisites
-preserve typed proof without exposing private policy/evidence on Public. Bank
-list/detail adds `published_product_count`, the distinct latest completed
-snapshot membership after Public eligibility checks; absent snapshots count zero.
+`0047`), and normal collection pins them per run. Bank list and detail return `active_product_count` from the session country’s active canonical products, grouped by bank. Banks without active products return zero.
 
 
 ## Registered collection and Run states - 2026-10-02
@@ -63,7 +48,6 @@ Source Documents:
 - `docs/03-design/domain-model-canonical-schema.md`
 - `docs/03-design/workflow-state-ingestion-design.md`
 - `docs/03-design/review-run-publish-audit-state-design.md`
-- `docs/03-design/insight-dashboard-metric-definition.md`
 - `docs/00-governance/decision-log.md`
 
 ---
@@ -72,10 +56,7 @@ Source Documents:
 
 Decision `D044` removes `GET /api/admin/audit-log` and
 `GET /api/admin/llm-usage`. Run detail no longer returns a token/cost usage
-summary. Public dashboard endpoints remain unchanged, but all three derive
-their response from the latest successful `public_product_projection` rather
-than separate dashboard snapshot tables. Historical route/table sections below
-are marked as removed and must not be treated as live contracts.
+summary.
 
 ---
 
@@ -84,8 +65,8 @@ are marked as removed and must not be treated as live contracts.
 이 문서는 `WBS 1.5 API and Interface Contracts`를 닫기 위한 기준 문서다.
 
 목적:
-- `public`, `admin`, `internal orchestration`, `BX-PF`, `external API`의 경계를 구현 전 기준으로 고정한다.
-- `1.5.1 public API`, `1.5.2 admin API`, `1.5.3 internal orchestration interface`, `1.5.4 BX-PF write contract`, `1.5.5 external SaaS/Open API draft`를 하나의 문서 기준으로 정리한다.
+- `admin`, `internal orchestration`, `BX-PF`, `external API`의 경계를 구현 전 기준으로 고정한다.
+- `1.5.2 admin API`, `1.5.3 internal orchestration interface`, `1.5.4 BX-PF write contract`, `1.5.5 external SaaS/Open API draft`를 하나의 문서 기준으로 정리한다.
 - `1.6.x security`, `1.7.x UX`, `5.x/6.x/7.x implementation`이 같은 request/response vocabulary를 참조하도록 맞춘다.
 
 이 문서는 route/resource contract와 payload baseline을 닫는다. exact auth mechanism, exact RBAC matrix, exact CORS allowlist, exact BX-PF remote schema, exact external API quota는 후속 WBS에서 구체화한다.
@@ -96,13 +77,9 @@ are marked as removed and must not be treated as live contracts.
 
 본 문서는 아래 확정 사항을 반영한다.
 
-1. public product API는 익명 읽기 경계이며 evidence raw artifact를 노출하지
-   않는다. D-071의 세 가지 aggregate counter write와 private summary는
-   Public BFF의 server-only shared credential이 있어야 한다.
-2. admin API는 인증된 운영자 전용 경계이며 review, run, canonical change, publish, registry, aggregate-health 데이터를 조회하거나 변경한다.
+2. admin API는 인증된 운영자 전용 경계이며 review, run, canonical change, publish, registry 데이터를 조회하거나 변경한다.
 3. internal orchestration interface는 browser-facing route가 아니라 private worker/service boundary다.
 4. approved normalized product의 target master store는 BX-PF이며, FPDS는 publish/reconciliation metadata를 유지한다.
-5. public dashboard/grid는 latest successful aggregate snapshot을 기준으로 서빙한다.
 6. source-derived text는 source language 단일 값으로 유지하고, localized label은 display/resource layer에서 분리한다.
 7. external SaaS/Open API는 Phase 2 대상이지만 resource contract draft는 지금 고정한다.
 
@@ -114,7 +91,6 @@ are marked as removed and must not be treated as live contracts.
 
 | Surface | Base Path or Boundary | Intended Client |
 |---|---|---|
-| Public | `/api/public/*` | anonymous browser reads; credential-bound Public BFF for bounded engagement writes/private summary |
 | Admin | `/api/admin/*` | authenticated admin UI |
 | Internal | private service / queue / worker interface | API server, worker |
 | External SaaS/Open API | `/api/v1/*` | Phase 2 client/tenant consumer |
@@ -176,8 +152,6 @@ are marked as removed and must not be treated as live contracts.
 
 ### 3.4 Freshness and Cache Metadata Rules
 
-- public products/filter API는 `public_product_projection` freshness를 노출한다.
-- public dashboard summary/rankings/scatter API는 대응 aggregate snapshot freshness를 노출한다.
 - admin metric health API는 aggregate job status, latest successful snapshot, missing-data ratio를 함께 노출한다.
 - freshness metadata 예시는 아래와 같다.
 
@@ -194,360 +168,10 @@ are marked as removed and must not be treated as live contracts.
 
 ### 3.5 Security Boundary Rules
 
-- public product reads are anonymous. `POST /api/public/engagement` and
-  `GET /api/public/admin/engagement-summary` require the server-only
-  `X-FPDS-Public-App-Secret` value and must not be called directly by browser
-  code.
 - admin API는 authenticated actor context를 전제로 한다.
 - internal interface와 BX-PF contract는 browser에서 직접 호출하지 않는다.
 - external API는 Phase 2 credential-bound access를 전제로 한다.
 - exact session cookie vs token, tenant credential type, CORS allowlist, CSRF policy는 `1.6.x`에서 닫는다.
-
----
-
-## 4. Public API Contract
-
-### 4.1 Contract Scope
-
-이 섹션은 아래 WBS 범위를 닫는다.
-
-- `1.5.1 public API contract`
-
-대상 기능:
-- products grid
-- filters
-- dashboard summary
-- dashboard rankings
-- dashboard scatter
-
-### 4.2 Shared Query Model
-
-public API는 가능한 한 동일한 filter scope를 공유한다.
-
-권장 query field:
-
-| Query | Type | Notes |
-|---|---|---|
-| `locale` | string | `en`, `ko`, `ja`, default locale fallback 허용 |
-| `country_code` | string | Phase 1 baseline은 `CA` |
-| q | string | products/filters endpoint 전용, 최대 120자; bank/product name literal substring |
-| `product_name` | string | products endpoint 전용, 최대 120자; product name only literal substring |
-| `bank_code` | string or repeated | multi-select 허용 |
-| `product_type` | string or repeated | `chequing`, `savings`, `gic` |
-| `subtype_code` | string or repeated | optional |
-| `target_customer_tag` | string or repeated | optional |
-| `fee_bucket` | string | optional |
-| `minimum_balance_bucket` | string | optional |
-| `minimum_deposit_bucket` | string | optional |
-| `term_bucket` | string | optional |
-| `sort_by` | string | products endpoint 전용 |
-| `sort_order` | string | `asc`, `desc` |
-| `page` | integer | default `1` |
-| `page_size` | integer | default `20`, max `100` |
-
-Country rules:
-- `country_code` is uppercase ISO 3166-1 alpha-2 and defaults fail-safe to `CA`
-  on anonymous reads
-- country comes from bank/canonical ownership, never currency, locale, host, or
-  user geolocation inference
-- product, detail, filter, summary, ranking, and scatter reads use the latest
-  completed snapshot for the same country
-
-Name-search rules:
-- q is trimmed, internal whitespace is collapsed, and matching is
-  case-insensitive against only public bank_name and product_name
-- matching uses literal contains semantics; user-entered percent and
-  underscore do not become wildcards, and evidence/private fields are never
-  searched
-- `product_name` is independently normalized and searches only public
-  `product_name`. It works with no Bank or Product Type. An absent/blank value
-  combined with `sort_by=product_name&sort_order=asc` returns the complete
-  active product scope alphabetically through normal page/page_size bounds.
-
-### 4.3 `GET /api/public/products`
-
-목적:
-- public product grid를 위한 product list를 제공한다.
-- filter/sort/page 결과는 `public_product_projection` 기준으로 반환한다.
-- public evidence는 포함하지 않는다.
-
-응답 `data.items[]` baseline:
-
-| Field | Description |
-|---|---|
-| `product_id` | canonical continuity id |
-| `bank_code` | bank code |
-| `bank_name` | canonical bank display name |
-| `country_code` | country |
-| `product_family` | `deposit` baseline |
-| `product_type` | canonical type code |
-| `product_type_label` | localized label |
-| `subtype_code` | optional canonical subtype |
-| `subtype_label` | localized subtype label if available |
-| `product_name` | source-derived product name |
-| `product_url` | optional single official/public bank product page URL for user navigation; not a raw evidence URL list |
-| `source_language` | source language code |
-| `currency` | currency code |
-| `status` | product lifecycle status |
-| `standard_rate` | standard/source rate if available |
-| `base_12_month_rate` | base rate normalized for 12-month comparison if available |
-| `public_display_rate` | comparable full rate, or `null` when qualified/ambiguous; the stored projection is not rewritten by this read |
-| `card_display_rate` | compatibility alias of `rate.comparable_rate`; no range endpoint, spread, promotion or conditional rate |
-| `rate` | `{ kind, comparable_rate, source_text }`; `kind` is `absolute`, `range`, `reference`, `conditional`, `promotional`, or `unknown`; only `absolute` has a comparable finite 0–100 scalar, including zero; source text preserves approved conditions (term schedules may be rendered from approved rows) |
-| `public_display_fee` | display fee snapshot |
-| `minimum_balance` | minimum balance if available |
-| `minimum_deposit` | minimum deposit if available |
-| `eligibility_text` | source-derived eligibility text if approved into the public projection |
-| `application_method` | source-derived signup/application method if available |
-| `post_maturity_interest_rate` | source-derived post-maturity rate note if available |
-| `tax_benefits` | source-derived tax treatment note if available |
-| `deposit_insurance` | source-derived deposit insurance note if available |
-| `term_rate_table` | optional rows of `{ term_label, term_length_days, rate, minimum_deposit, notes }` |
-| `product_highlight_badge_code` | badge code |
-| `product_highlight_badge_label` | localized badge label |
-| `target_customer_tags` | normalized tag codes |
-| `target_customer_tag_labels` | localized tag labels |
-| `last_verified_at` | last verification timestamp |
-| `last_changed_at` | latest detected change if available |
-
-응답 `meta` 추가 field:
-
-- `applied_filters`
-- `sort`
-- `freshness`
-
-Numeric product fields are serialized as finite JSON numbers only. Missing, invalid, `NaN`, or infinite source values are returned as `null` so public sort/render paths can remain stable.
-As of 2026-09-16, `sort_by=display_rate`, dashboard rates and scatter use the
-same comparable full rate. Ineligible values sort after eligible numbers in
-both directions, with the existing stable name/id tie-break. No endpoint adds
-a benchmark, selects a range endpoint, or infers a promotional/conditional
-rate as an unqualified rate. Conflicting scalar/summary/standard rates fail
-closed. Original summary fields and explicit term rows remain available.
-The additive `rate` contract also applies to product detail. Public clients
-must require `kind=absolute` plus a finite comparable rate for rankings,
-finder differences and calculators; pre-contract cached responses fail closed.
-Deploy the API before Public and allow the existing cache TTLs to expire.
-
-### 4.4 `GET /api/public/products/{product_id}`
-
-목적:
-- public product detail page를 위한 단건 product fact payload를 제공한다.
-- serving baseline은 latest successful public aggregate snapshot이다.
-- public evidence trace, source excerpts, raw source URL list는 포함하지 않는다.
-- `product_url`은 사용자가 은행의 공개 상품 판매/안내 페이지로 이동하기 위한 단일 URL이다.
-- detail UI may additionally render a compact calculator, disclosure note, and term-rate table from the same `product` payload; evidence traces remain admin-only.
-
-응답 `data` baseline:
-
-| Field | Description |
-|---|---|
-| `product` | same baseline shape as `GET /api/public/products` item |
-| `applied_filters` | normalized public scope metadata |
-| `freshness` | public snapshot freshness metadata |
-
-### 4.5 `GET /api/public/filters`
-
-목적:
-- grid/dashboard 공통 filter option과 count를 제공한다.
-- client가 임의 option set을 하드코딩하지 않도록 한다.
-
-응답 `data` baseline:
-
-| Field | Description |
-|---|---|
-| `banks[]` | `{ code, label, count }` |
-| `product_types[]` | `{ code, label, count }` |
-| `subtypes[]` | `{ code, label, product_type, count }` |
-| `target_customer_tags[]` | `{ code, label, count }` |
-| `fee_buckets[]` | `{ code, label, count }` |
-| `minimum_balance_buckets[]` | `{ code, label, count }` |
-| `minimum_deposit_buckets[]` | `{ code, label, count }` |
-| `term_buckets[]` | `{ code, label, count }` |
-
-The response also includes `countries[]` with stable `code`, active product
-`count`, and distinct active `bank_count` values from each country's latest
-completed public snapshot.
-
-### 4.5A `GET /api/public/countries`
-
-Purpose:
-- provide the lightweight global option set used by the Public header
-- return only countries with at least one active public projection in that
-  country's latest completed `phase1_public` snapshot
-
-Response `data.countries[]`:
-
-| Field | Description |
-|---|---|
-| `code` | uppercase ISO 3166-1 alpha-2 code |
-| `count` | active public product count in the latest completed snapshot |
-| `bank_count` | distinct active `bank_code` count in that same snapshot |
-
-Localized country names are presentation data generated from the stable ISO
-code at the Public UI boundary. FPDS does not maintain duplicate translated
-country names in product records.
-
-### 4.6 `GET /api/public/dashboard-summary`
-
-목적:
-- KPI cards와 freshness note를 제공한다.
-- serving baseline은 latest successful public aggregate snapshot이다.
-- 구현은 latest successful `public_product_projection`에서 request-scope summary를 계산한다.
-- exact metric semantics는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
-
-응답 `data.metrics[]` baseline:
-
-| Field | Description |
-|---|---|
-| `metric_key` | `total_active_products`, `banks_in_scope`, `highest_display_rate`, `recently_changed_products_30d` |
-| `label` | localized metric label |
-| `value` | numeric or stringified scalar |
-| `unit` | `count`, `percent`, `currency`, `days`, etc. |
-| `scope_note` | optional localized note |
-
-응답 `data.breakdowns` baseline:
-
-| Field | Description |
-|---|---|
-| `products_by_bank[]` | `{ bank_code, bank_name, count, share_percent }` |
-| `products_by_product_type[]` | `{ product_type, product_type_label, count, share_percent }` |
-
-### 4.7 `GET /api/public/dashboard-rankings`
-
-목적:
-- ranking widget dataset을 제공한다.
-- serving baseline은 latest successful public aggregate snapshot이다.
-- 구현은 latest successful `public_product_projection`에서 shared filter vocabulary를 반영한 ranking을 계산한다.
-- exact ranking semantics는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
-
-응답 `data.widgets[]` baseline:
-
-| Field | Description |
-|---|---|
-| `ranking_key` | `highest_display_rate`, `lowest_monthly_fee`, `lowest_minimum_deposit`, `recently_changed_30d` |
-| `title` | localized widget title |
-| `metric_label` | localized metric label |
-| `items[]` | ranked product summary rows |
-| `window_days` | optional, currently used by `recently_changed_30d` |
-
-ranked row baseline:
-- `rank`
-- `product_id`
-- `bank_code`
-- `bank_name`
-- `product_name`
-- `product_type`
-- `product_url`
-- `metric_value`
-- `metric_unit`
-- `last_changed_at`
-
-### 4.8 `GET /api/public/dashboard-scatter`
-
-목적:
-- comparative scatter plot dataset을 제공한다.
-- serving baseline은 latest successful public aggregate snapshot이다.
-- 구현은 latest successful `public_product_projection`에서 shared filter vocabulary를 반영한 scatter points를 계산한다.
-- exact preset vocabulary는 `docs/03-design/insight-dashboard-metric-definition.md`를 참조한다.
-
-추가 query:
-
-| Query | Type | Notes |
-|---|---|---|
-| `axis_preset` | string | `chequing_fee_vs_minimum_balance`, `savings_rate_vs_minimum_balance`, `gic_rate_vs_minimum_deposit`, `gic_term_vs_rate` |
-
-응답 `data` baseline:
-
-| Field | Description |
-|---|---|
-| `chart_key` | scatter configuration key |
-| `title` | localized chart title |
-| `x_axis` | `{ key, label, unit }` |
-| `y_axis` | `{ key, label, unit }` |
-| `points[]` | product points |
-| `methodology_note` | localized note |
-
-point baseline:
-- `product_id`
-- `bank_code`
-- `bank_name`
-- `product_name`
-- `product_type`
-- `x_value`
-- `y_value`
-- `highlight_badge_code`
-
-### 4.9 Public API Explicit Exclusions
-
-- source URL raw list; the public product/detail/ranking payload may expose only a single official product-page `product_url` for user navigation
-- snapshot object path
-- parsed full text body
-- evidence chunk excerpt
-- internal validation issue detail
-- review decision history
-
-### 4.10 `POST /api/public/engagement`
-
-Purpose:
-- accept one best-effort product interaction from the same-origin Public BFF
-- increment a daily aggregate only when the product is active in the latest
-  completed Public snapshot
-
-Request body is exactly `country_code`, `product_id`, and `event_type`.
-`event_type` is limited to `product_detail_click`, `official_bank_click`, or
-`finder_product_selected`. The route requires the Public-app shared secret,
-uses constant-time credential comparison, enforces a process-bounded rate
-limit, and returns 202 only after the aggregate upsert. Arbitrary event names,
-unknown/inactive products, and invalid country/product values fail closed.
-
-No visitor identifier, IP address, cookie, free-text query, referrer,
-user-agent, balance, income, credit, eligibility, or application value is
-accepted or stored.
-
-### 4.11 `GET /api/public/admin/engagement-summary`
-
-Purpose:
-- provide the password-gated Public `/admin` server component with product,
-  bank, total, and 30-day daily aggregates
-- optionally scope results by a two-letter `country_code`
-
-The route requires the same server-only Public-app credential and is not an
-anonymous browser endpoint. It returns active published products with
-`product_detail_clicks`, `official_bank_clicks`, and
-`finder_product_selections`; bank rollups; totals/freshness; a 30-day daily
-series; and `retention_days=400`. Finder selections are usage counts, not
-unique visitors or verified account ownership.
-
-### 4.12 `POST /api/public/feedback`
-
-Purpose:
-- accept an anonymous product-error report or general site feedback from the
-  same-origin Public BFF
-- persist an immutable operator-review record without creating visitor identity
-
-The route requires the Public-app shared secret, fixed submission type/category
-pairs, ISO country, EN/KO/JA locale, at most 2,000 optional detail characters,
-and a process-bounded rate limit. A product report also requires a product ID;
-the API inserts it only when the ID is active in the country's latest completed
-Public snapshot and copies snapshot, bank, product name, and Product Type from
-that projection. Site feedback requires an active country and no product ID.
-
-The body does not accept contact information, visitor/session identifiers,
-browser display text, IP, cookie, query, profile, account, or financial values.
-
-### 4.13 `GET /api/public/admin/feedback`
-
-Purpose:
-- provide the password-gated FPDS Public `/admin` server component with product
-  reports and site feedback
-- support an optional two-letter `country_code`, submission type, category,
-  free-text search, and bounded pagination
-
-The route requires the same server-only Public-app credential and is not an
-anonymous browser endpoint. The response includes totals, stable submission
-IDs, submission time, locale, category/detail, snapshot ID, and authoritative
-product context when present. It is read-only and does not create a Review task
-or canonical mutation. FPDS Admin has no equivalent feedback-list API.
 
 ---
 
@@ -618,7 +242,7 @@ Switch rules:
 
 Country-owned Admin endpoints do not accept a client-selected country as their
 authority. Banks, generated sources, catalog coverage, collections, runs,
-review tasks, canonical change history, and dashboard health derive
+review tasks and canonical change history derive
 scope from the authenticated session. A conflicting explicit country returns a
 country-scope error, and a direct cross-country entity ID is returned as not
 found.
@@ -807,7 +431,7 @@ same contract. It reuses `POST .../ai-verify` service semantics, then:
 - requires verified `product_name`, an official source, no remaining correction,
   no hard product-boundary/taxonomy/partial-source blocker, and score `= 1.0`
   for automatic approval;
-- invokes the existing review decision and country aggregate-refresh contracts
+- invokes the existing review decision contract
   for eligible candidates; lower scores remain `queued`/`deferred`;
 - persists the bounded assessment in `model_execution.execution_metadata` and
   uses the normal review decision/change-history path for approval.
@@ -883,7 +507,7 @@ as of 2026-09-12. Current approved context is read through Review and Changes.
 ### 5.6 `GET /api/admin/products/:id` (Not Implemented)
 
 Reserved contract only: neither this API nor an Admin Product Record page is
-implemented. The anonymous Public product-detail API is a separate contract.
+implemented.
 
 목적:
 - canonical continuity record, current version, change summary, publish summary를 제공한다.
@@ -964,7 +588,7 @@ review decisions, canonical change history, run state, and publish state.
 ### 5.11 `GET /api/admin/bxpf-publish` (Not Implemented)
 
 Reserved BX-PF follow-on contract. There is no registered handler or live
-Publish Monitor page; Public aggregate refresh is already implemented and separate.
+Publish Monitor page.
 
 목적:
 - BX-PF publish monitor를 제공한다.
@@ -995,40 +619,6 @@ Publish Monitor page; Public aggregate refresh is already implemented and separa
 Removed by Decision `D044`. Standalone token/cost usage rows are not retained.
 Review and Run keep only bounded model outcome/source context needed for quality
 diagnosis.
-
-### 5.13 `GET /api/admin/dashboard-health`
-
-목적:
-- public dashboard aggregate freshness와 metric health를 제공한다.
-
-응답 `data` baseline:
-- `domains[]`
-
-domain row baseline:
-- `domain_key`
-- `latest_snapshot_id`
-- `latest_success_at`
-- `latest_failure_at`
-- `status`
-- `missing_data_ratio`
-- `cache_ttl_sec`
-- `serving_snapshot_id`
-- `queued_request_count`
-- `in_progress_request_count`
-- `retry_action`
-
-### 5.14 `POST /api/admin/dashboard-health/retry`
-
-목적:
-- manual operator retry를 통해 aggregate refresh request를 큐잉한다.
-- retry는 latest successful snapshot serving을 끊지 않고 background refresh만 다시 요청한다.
-
-응답 `data` baseline:
-- `aggregate_refresh_request_id`
-- `request_status`
-- `trigger_reason`
-- `already_pending`
-- `launch`
 
 ### 5.15 Admin API Notes
 
@@ -1476,7 +1066,7 @@ public/admin 전용 internal fields, evidence detail, review history는 포함�
 | External Auth | exact credential type and tenant isolation enforcement | `1.6.3` | external API resource model draft를 먼저 닫을 수 있다. |
 | CORS / CSRF | exact origin and browser policy | `1.6.4`, `1.6.6` | route/payload contract와 transport security detail은 후속 분리 가능하다. |
 | BX-PF Remote Schema | exact endpoint, header, remote field names | `6.1` | adapter-facing contract만 먼저 고정해도 connector 구현을 시작할 수 있다. |
-| Rate Limits | public/admin/external quota and abuse thresholds | `6.5`, `7.6` | functional route contract를 먼저 닫을 수 있다. |
+| Rate Limits | admin/external quota and abuse thresholds | `6.5`, `7.6` | functional route contract를 먼저 닫을 수 있다. |
 
 ---
 
@@ -1511,14 +1101,5 @@ public/admin 전용 internal fields, evidence detail, review history는 포함�
 | Date | Change |
 |---|---|
 | 2026-04-01 | Initial API and interface contract baseline created for WBS 1.5.1-1.5.5 |
-| 2026-04-13 | Added the admin audit-log route baseline alongside change history, publish, usage, and dashboard health contracts |
+| 2026-04-13 | Added the admin audit-log route baseline alongside change history, publish and usage contracts |
 | 2026-07-30 | Added the session-country, cited, atomic AI bank-onboarding mutation contract |
-
-
-## 2026-09-24 deposit comparison correction
-
-D-079 and the [deposit comparison policy](public-deposit-comparison-policy.md)
-supersede mixed Savings/GIC Home rankings and unconditional scalar estimates.
-Public products add `deposit_terms`; the Home/finder/calculator require explicit
-compatible basis, currency and GIC maturity before arithmetic. Existing
-card/loan metrics and private evidence boundaries remain intact.

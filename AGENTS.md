@@ -1,18 +1,20 @@
 # FPDS Codex Instructions
 
-## Mandatory product collection rule — 2026-09-30
+FPDS consists of the authenticated Admin application, its API, workers and storage. Collection ends at automatic exclusion or canonical promotion. Existing historical datasets are preserved and are outside service workflows. Dated requirements for consumer delivery are retired.
+
+## Bank product collection and acceptance
+
+Use the current [official-document and acceptance rules](docs/03-design/collection-accuracy-policy.md) and the [collection verification guide](descent/은행_상품_수집_검증_가이드.md). Reproduce changes against both a proved target and a misleading alternative. A missing document, an unreadable document and a document that contradicts the proposed fact require different diagnoses.
 
 - Accuracy takes priority over coverage. Collect fewer verified facts; omit
   uncertain optional attributes and automatically exclude candidates missing
   proven identity, currency or comparison essentials.
-- Required fields are the publication minimum, not a collection ceiling. Collect
+- Required fields are the automatic approval minimum, not a collection ceiling. Collect
   profile/registered typed optional facts when the same official evidence proves
   them. Omit uncertain optional facts; do not add searches, retries or human review
   solely for optional completeness. Preserve them through normalization.
-- Public lists, comparisons and Home Top 5 use current required decision facts.
-  Detail shows verified optional facts and omits unknown rows. Missing optional
-  information must not become zero/false or a ranking penalty; preserve actual
-  financial conditions and comparable-rate/term boundaries.
+- Preserve verified financial conditions and comparable rate and term boundaries.
+  Treat unknown optional values as missing.
 - Product collection must not depend on human review, edit-approval or a residual
   review queue. An AI confidence score cannot replace source evidence or bypass
   automatic validation. Preserve separate account/security approval controls.
@@ -29,19 +31,18 @@
   The Product Owner reports the prior changes deployed. For recovery, diagnose
   preserved evidence before paid collection; preflight essential evidence, reuse
   identical current inputs, and bound batches/retries. Never restore historical
-  facts merely to fill Public. Keep runtime deployment separate from data results.
+  facts to fill gaps. Keep runtime deployment separate from data results.
   Legacy recovery is a bounded one-off data operation. Do not add a permanent
   recovery feature, menu or scheduler without a separate Product Owner request.
 
-These instructions apply to the entire repository, including FPDS Admin and
-FPDS Public.
+These instructions apply to FPDS Admin and its supporting services.
 
 ## Post-MVP Scope And Authority
 
 - The MVP is complete. Work on the recipient's requested localization, fixes
   and features. The latest Product Owner instruction defines scope, acceptance
   and authorization; current financial/security contracts apply within it.
-- Do not add unrelated countries, product types, Public evidence exposure,
+- Do not add unrelated countries, product types,
   personalized recommendations or external integrations without an actual request.
 - Historical plans, WBS and MVP stage gates are not development prerequisites.
   If a current contract conflicts with the request, explain the concrete impact
@@ -53,7 +54,7 @@ FPDS Public.
 ## Read Only What The Task Needs
 
 1. Read the [development guide](descent/FPDS_Admin_개발_가이드.md).
-2. Read the README of each affected boundary: Admin, API, Worker, DB or Public.
+2. Read the README of each affected boundary: Admin, API, Worker or DB.
 3. Use [technical references](docs/README.md) for relevant contracts. Consult
    the journal, decision log and RAID log only when investigating related history,
    risks or previous decisions; do not read the entire history before each task.
@@ -74,9 +75,9 @@ FPDS Public.
   materially changes scope, security, external state or a costly decision.
 - Keep data units, currency, rate semantics, term boundaries, original language,
   freshness and field-level evidence intact. Preserve migrations and regression
-  fixtures. Never restore historical facts merely to fill Public.
+  fixtures. Never restore historical facts to fill gaps.
 - Keep Admin auth, roles, CSRF, country isolation, audit, safe-fetch/SSRF and
-  private evidence boundaries. Public receives only approved active projections.
+  private evidence boundaries.
 - Reuse semantic tokens and existing components. Preserve supported locales,
   keyboard access, visible focus, contrast, non-color state cues and reduced
   motion. Verify affected layouts at desktop, tablet and exact 390px width.

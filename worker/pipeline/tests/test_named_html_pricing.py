@@ -98,13 +98,3 @@ class NamedHtmlPricingTests(unittest.TestCase):
     if 'REV 070126' in text:text.replace_with(str(text).replace('REV 070126',''))
    soup.body.append(BeautifulSoup('<p>REV 070126</p>','html.parser'))
    self.assertFalse(named_html_pricing(soup))
-
- def test_verified_price_qualifier_survives_public_minimum_fields(self):
-  from worker.pipeline.fpds_aggregate_refresh.service import _build_product_refresh_metadata
-  value='The annual fee is waived if the account holder meets the disclosed wealth conditions.'
-  for product in ['credit-card','savings','personal-loan']:
-   for verified in [[],['fee_waiver_condition']]:
-    metadata=_build_product_refresh_metadata(payload={'fee_waiver_condition':value,'notes':'private internal notes','_collection_accuracy':{'verified_fields':verified}},product_version_id='v',product_url=None,allowed_field_names={'product_name'},product_type=product)
-    self.assertEqual(metadata.get('fee_waiver_condition'),value if verified else None)
-    self.assertNotIn('notes',metadata)
-    self.assertNotIn('_collection_accuracy',metadata)

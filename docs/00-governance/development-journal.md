@@ -4,6 +4,42 @@ Past completed work notes were removed at the Product Owner's request.
 Required cutover reports, current decisions/risks and unfinished goal ownership
 remain in the repository; previous journal revisions remain in Git history.
 
+## 2026-11-21 — Official bank documents and collection accuracy
+
+Compared the Floorplan with the actual document selection, snapshot, extraction and approval paths. Both discovery stages now recognize named GIC/CD withdrawal documents. Market and language checks cover document selection and the final response. Relative links use the captured directory, offer query spelling survives the request, and a shared document can retain both parent snapshots at the run URL limit. The snapshot and parser agree on PDF bytes.
+
+The withdrawal condition has one interpretation across extraction and financial verification. A conflicting permission or a qualified prohibition leaves access unverified. Parser v32 also handles the twice-encoded space in the captured TD Cash Back Visa card name. Local replay validated the purchase and cash-advance rates in their respective fields. Restored 23 historical test captures from verified source bytes. All 25 documents in the two affected fixture collections match the existing manifests.
+
+The [collection accuracy policy](../03-design/collection-accuracy-policy.md) states the active rules. The [Korean operator guide](../../descent/은행_상품_수집_검증_가이드.md) explains document and Run checks by product type. The Wells Fargo fixture verified the literal `FPID` and trailing slash used for requests independently of the normalized offer identity.
+
+Local verification passed all 1,045 Worker tests in four groups (335, 198, 185, 327), 594 API tests using disposable PostgreSQL, and 56 Admin tests. Repo Doctor passed on the repository files, as did the foundation baseline, current documentation references and diff checks. Production rollout and live bank collection were outside this local verification.
+
+## 2026-11-21 — Admin collection Floorplan
+
+Rebuilt the Korean collection walkthrough from the current Admin code in the local Floorplan. The 55 file cards and 19 routes cover Banks, selected source collection, official evidence, automatic acceptance and exclusion, canonical versions and Runs. The map and companion explanation are available in the local Floorplan directory.
+
+Verified file and guide links, all three guided flows in Chrome at 390, 768 and 1440 pixels, and the absence of browser errors or network requests from the offline viewer. The Floorplan scanner missed shared guards on Admin endpoints. Manual code verification covered 15 session guards and the role and CSRF guards on all four mapped mutation endpoints. Scope was the selected local code and documentation. The prior walkthrough entry records the earlier map.
+
+## 2026-11-20 — Admin service consolidation
+
+Admin counts active canonical products by country and bank. Collection ends at exclusion or canonical promotion. Removed the consumer web package, anonymous API, projection jobs and refresh monitoring. Migration 0049 registers a separate Admin retention function and preserves existing data.
+
+Local verification passed 592 API tests using disposable PostgreSQL, 56 Admin UI tests, eight maintenance tests and the Admin production build. Chrome exercised Banks and Runs with a fixture API in EN/KO/JA at 390, 768 and 1440 pixels. The retired endpoints returned 404. Of 953 Worker tests, 949 passed. The four failures reproduced on the pre-change revision (two fixture digests and two annual-card disclosure cases). Production services, databases and paid collection were outside this local change.
+
+## 2026-11-20 - Admin bank-product collection walkthrough
+
+- Traced the Banks request through `source_catalog.py`, `source_collection_runner.py`,
+  `fpds_collection_accuracy.py` and `candidate_auto_promotion.py` to the country
+  publication snapshot. The Korean Floorplan in `floorplan/index.html` covers
+  35 source files, 11 request routes and three guided flows.
+- Verified the local HTML at 1440, 768 and 390 pixels in Chrome and opened the
+  walkthrough at 390 pixels. Reviewed session checks on five Admin routes
+  flagged by the static scanner, plus role and CSRF checks on both write routes.
+- API 83/83 and Worker 25/26 passed offline. Retrying the existing Worker
+  hash test reproduced the failure. All 19 mismatched capture files matched
+  Git's stored bytes. For a specific Run, use its retained evidence and the
+  country publication status. Live execution and publication were outside scope.
+
 ## 2026-10-16 - Hosting costs, bounded retention and clone cleanup
 
 - Added anonymous API CDN caching, threaded read-only DB work, body-free detail
@@ -75,3 +111,37 @@ remain in the repository; previous journal revisions remain in Git history.
 - Markdown references, seven PowerShell snippets, strict UTF-8, CLI help, unchanged
   migration diff and git diff --check pass. No existing configured/production DB,
   user account, financial data or serving runtime was changed. Test server stopped.
+
+## 2026-10-19 - Reversible Switchabank suspension and local startup
+
+- Paused Vercel switchabank-public, switchabank-api and fpds (Admin) through
+  authenticated project controls. Final external checks on apex/www, Public alias,
+  API health and Admin login all return 503 DEPLOYMENT_PAUSED. Existing project IDs,
+  deployments, environment values, domains and unrelated team apps are retained.
+- Product Owner corrected scope to keep Supabase running. Kept the existing shared
+  DB, account/security controls and private S3 evidence unchanged. Read-only
+  inventory: DB about 434 MB; S3 60,022 current objects / 5,787,266,752 bytes.
+  Dedicated local DB setup was abandoned before installation after this correction.
+- Encrypted original ignored local env files with Windows CurrentUser DPAPI and
+  verified decryption equivalence; configured Admin/Public upstreams to
+  localhost:4000, matched a new local server-only Public/API credential, and left
+  local GA disabled. API4000/Admin3001/Public3000 remain running. README now covers
+  all three; descent/05-operations-handbook.md records provider inventory, actual
+  actions, billing/access limits, owner work and API-first resume order.
+- Verified local health, country reads and CA/US/PH API/BFF product responses; real
+  Public Home and Admin login in Chrome at 1440/768/390px return 200 without page
+  errors or horizontal overflow. Unauthenticated API session returns 401. Browser
+  writes/external requests were blocked. Existing-account login and collection or
+  feedback/engagement writes were not exercised; no app code changed. Initial cold
+  Admin compilation exceeded the first HTTP timeout; warm HTTP/browser checks pass.
+- Limits: Supabase project management is unavailable to the connected account;
+  project remains running as requested. AWS storage credentials cannot list EC2;
+  broader AWS/billing and paid subscriptions require owner-console checks. Vercel
+  Pause stops production serving; Git builds and every historical Preview are not
+  claimed stopped. Original build/Preview control settings are absent from connector
+  readbacks, so they were preserved and Git disconnect/reconnect is documented for
+  the owner. No termination, canonical writes, schema change, paid collection,
+  deployment or publication. UTF-8, changed references, PowerShell snippet syntax
+  and git diff --check verified; final diff/goal reviewed. Evidence stays ignored
+  under .tmp/suspension-20261019/. Next: owner checks remaining billable services;
+  resume hosted API, Public, Admin when service return is requested.

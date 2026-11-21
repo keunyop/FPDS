@@ -280,7 +280,6 @@ Run lifecycle must support per-stage counters or summaries for:
 - review routing
 - canonical upsert/change assessment
 - publish preparation
-- aggregate refresh
 
 This telemetry is operational metadata, not separate lifecycle states.
 

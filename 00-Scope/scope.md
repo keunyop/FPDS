@@ -37,7 +37,7 @@
 | 전체 실행 순서 | descent/README.md | 환경 준비, rehearsal, 교육, UAT, Cutover, Hypercare |
 | 환경변수 계약 | .env.dev.example, .env.prod.example | placeholder-only dev/prod 설정 목록 |
 | Admin web 운영 경계 | app/admin/README.md | 화면, route/code map, build 명령, 안전 경계 |
-| Admin API 운영 경계 | api/service/README.md | API, auth, Vercel Public-read 예외, test/실행 방법 |
+| Admin API 운영 경계 | api/service/README.md | API, auth, test/실행 방법 |
 | Worker 운영 경계 | worker/README.md | collection/pipeline 경계와 runtime invariant |
 | DB 원본 migration | db/migrations/, db/README.md | SQL 원본과 적용 순서 |
 | Private storage 계약 | storage/README.md, docs/03-design/object-storage-evidence-bucket-baseline.md | bucket/key/access 경계 |
@@ -68,8 +68,6 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
 - [ ] Product Owner, 인계 총괄, 의뢰자 시스템·운영·보안 책임자와
       Cutover/Hypercare 날짜를 기록했다.
 - [ ] 전달 release tag/commit과 Admin transfer 범위를 양측이 승인했다.
-- [ ] app/public과 Public 운영이 이번 Admin 인수 범위에서 제외됐음을
-      확인했다.
 - [ ] app/admin, Admin API, worker, DB migration, private storage 계약과
       운영 문서를 의뢰자 repository에서 열 수 있다.
 - [ ] Git/압축 산출물에 실제 secret, DB URL, private evidence가 없음을
@@ -92,8 +90,6 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
 - [ ] 의뢰자 secret manager에 dev/prod secret을 새로 만들고 전달자
       secret/접근을 Cutover 후 회수하도록 계획했다.
 - [ ] monitoring runtime 연동과 test alert가 실제 on-call 대상에게 도착했다.
-- [ ] Vercel Public-read 환경의 shared dev DB 재사용 예외를 production
-      인수 전에 제거했다.
 
 ### C. DB·storage·data recovery
 
@@ -120,7 +116,7 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
 - [ ] login 실패, logout, session 만료/회수, CSRF/CORS/security header와
       SSRF/private-network 차단을 확인했다.
 - [ ] 국가 선택·전환 후 다른 국가 데이터가 섞이지 않음을 확인했다.
-- [ ] raw evidence와 private object URL이 Public/browser에 직접 노출되지
+- [ ] raw evidence와 private object URL이 브라우저에 직접 노출되지
       않음을 확인했다.
 - [ ] collection과 retry가 인증된 운영자의 수동 action으로만 시작됨을
       확인했다.
@@ -149,8 +145,7 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
 
 ## 소스·문서 전달 목록 — 2026-10-03 정리
 
-현재 인계 방식은 Git clone입니다. 아래 경계는 Admin 인계 범위를 설명하며,
-같은 저장소의 Public 코드를 삭제하거나 서비스 구성을 변경하지 않습니다.
+현재 인계 방식은 Git clone입니다.
 
 | 구분 | 경로 | 전달·보존 기준 |
 |---|---|---|
@@ -161,7 +156,6 @@ recovery code와 private evidence 원문은 위 문서 폴더에도 저장하지
 | 현재 제품 계약 | `docs/03-design/` | 금융·보안·데이터·UI·환경 계약 유지. 변경 영역에 필요한 문서만 참조 |
 | 운영 이력 | `docs/00-governance/` | 실제 데이터 전환·공개·복구 보고서와 개발일지·결정·위험 기록 유지 |
 | 제거한 MVP 자료 | Git 이력에서 확인 | 완료된 계획·WBS·초기 요구사항·단계 승인·설계 초안·prototype·구 매뉴얼 및 자산 |
-| 별도 Public 영역 | `app/public/`, `app.py`, `vercel.json` | 저장소에는 유지. Admin 운영 호스트 또는 Public 인수 완료로 간주하지 않음 |
 | 실행 중 로컬 자료 | `tmp/`, `.tmp/`, `__pycache__/`, `*.pyc`, `.venv/`, `node_modules/`, `.next/` | 소스 전달에서 제외. 이번 정리에서는 기존 로컬 파일을 삭제하지 않음 |
 | 제한 인수 증거 | `FPDS-Admin-Handover/`, 실제 `.env` 파일 | Git 제외. 계정·backup·UAT·서명 증거는 의뢰자 제한 저장소/secret manager에서 관리 |
 

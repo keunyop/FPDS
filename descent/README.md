@@ -212,7 +212,7 @@ git diff --check
 데이터 안전 기준:
 
 - raw evidence는 private storage에만 둔다.
-- browser나 Public surface에 private object 접근권을 주지 않는다.
+- 브라우저에 private object 접근권을 주지 않는다.
 - row를 임의로 삭제하거나 현장에서 즉흥적인 destructive SQL을 실행하지 않는다.
 - backup 생성만으로 완료 처리하지 않고 restore와 reconciliation까지 확인한다.
 

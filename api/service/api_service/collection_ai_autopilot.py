@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any, TYPE_CHECKING
 
-from api_service.aggregate_refresh import queue_review_aggregate_refresh_request
 from api_service.ai_verification import build_ai_verification_payload, run_review_ai_verification
 from api_service.review_ai_correction import (
     apply_review_ai_corrections,
@@ -280,18 +279,6 @@ def remediate_collection_review_task(
             user_agent=str(request_context.get("user_agent") or "collection-ai-autopilot"),
         ),
     )
-    aggregate_refresh = None
-    if decision.get("product_id"):
-        aggregate_refresh = queue_review_aggregate_refresh_request(
-            connection,
-            actor=approval_actor,
-            request_context=request_context,
-            review_task_id=review_task_id,
-            product_id=str(decision["product_id"]),
-            action_type="approve",
-            change_event_types=[str(item) for item in decision.get("change_event_types", [])],
-            country_code=str(decision["country_code"]),
-        )
     return {
         "review_task_id": review_task_id,
         "model_execution_id": model_execution_id,
@@ -301,7 +288,6 @@ def remediate_collection_review_task(
         "changed_fields": list(correction_result.get("changed_fields") or []),
         "assessment": assessment,
         "decision": decision,
-        "aggregate_refresh": aggregate_refresh,
     }
 
 

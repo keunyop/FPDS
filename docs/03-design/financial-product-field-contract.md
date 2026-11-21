@@ -225,7 +225,7 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     their source-language assumptions in `interest_rate_summary` rather than
     becoming one scalar. An unknown dynamic type fails closed until expected
     fields provide at least one percentage field and another decision field.
-    Automatic promotion, human approval, and public projection each enforce the
+    Automatic promotion enforces the
     same completeness boundary.
     For a fixed Canadian card rate, an exact adjacent official label such as
     `Interest: Purchases 21.99%` may deterministically restore an AI-omitted
@@ -246,7 +246,7 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     Explicit zero money values and explicit boolean states are valid facts when
     evidence-grounded. Default collection does not request optional copy.
 49. D-035 resolves that executable contract by `(country_code, product_type)`
-    before any collection, validation, Review, approval, or Public decision.
+    before collection, validation or automatic approval.
     Canada retains rule 48. US Checking replaces transaction count with
     opening/minimum balance and a fee-waiver or qualifying-activity requirement
     when the grounded recurring fee is positive; explicit zero fee needs no
@@ -261,7 +261,7 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     Personal Loan keeps percentage-bearing APR/rate range, amount range, and
     term range as source-language text. US Credit Card and Line of Credit own
     explicit profiles even while their current minimum facts match rule 48, so
-    later market changes and essential-only Public projection remain isolated.
+    market changes remain isolated.
     Canada and country-less legacy calls retain rule 48, but any other explicit
     country fails closed until its profiles and fixtures are registered. A
     versioned declarative override may
@@ -297,16 +297,10 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     and ATM/ABM assessment-fee percentages are non-rate context and cannot
     populate a deposit or lending rate. A savings fallback percentage must be
     locally identified by an Interest Rate/APY label or structured rate-table
-    header. When Public displays the highest grounded savings tier, its
-    `minimum_balance` is the lowest balance that earns that displayed rate.
+    header. When recording a tiered savings rate, retain the minimum balance that earns that rate.
     An ongoing monthly-qualified Boosted Rate is a conditional tier, not an
     introductory promotion, and therefore does not set `promotional_rate`,
-    `introductory_rate_flag`, or `promotional_period_text`. For a
-    country-specific override, aggregate refresh
-    projects only its comparison fields plus product identity, status,
-    freshness, and official product link. Extra normalized copy remains in the
-    private candidate/evidence record for audit but cannot leak navigation,
-    calculator, transfer-limit, or misclassified eligibility text to Public.
+    `introductory_rate_flag`, or `promotional_period_text`. Preserve private candidate and evidence records for audit.
     Comparison-critical prose also uses a field-specific safe length and must
     end as a complete sentence or condition. Never satisfy a requirement with
     a fixed-width value cut mid-word or mid-clause; keep the full bounded value
@@ -318,15 +312,7 @@ A note does not replace evidence. `field_evidence_link` must still point to the 
     displayed lending rate includes a relationship or automatic-payment
     discount, the qualifying account/payment and existing-customer conditions
     remain attached as well.
-51. `card_display_rate` is a Public presentation derivative, not canonical
-    truth. Deposits reuse their approved `public_display_rate`. Lending and
-    Credit Card cards use the lowest explicit absolute rate available in the
-    current approved projection, including an explicit introductory APR or the
-    lower endpoint of a disclosed range. Down-payment, discount, fee, LTV/CLTV,
-    cap, and reference-rate component percentages are excluded; a formula such
-    as `Prime + 2%` is not converted into an absolute rate. Full qualified rate
-    summaries remain unchanged for comparison/detail, and card-rate derivation
-    never triggers recollection, Review, or canonical mutation.
+51. Keep disclosed introductory APRs, ranges and reference-rate formulas qualified in the approved record. Down-payment percentages, discounts, fees, LTV/CLTV, caps and reference-rate components do not establish an absolute lending rate. Preserve the full qualified rate summary.
 
 ## Runtime Validation
 
@@ -347,23 +333,20 @@ Each new false-positive or merge failure class requires a regression test. Repre
 - safe review routing for facts the source did not publish accessibly.
 
 
-## 2026-09-24 Public calculation qualifiers
+## 2026-09-24 Financial calculation qualifiers
 
 Approved deposit calculation/payment/compounding/payout, tier and promotion
 fields must survive aggregate projection in a bounded `deposit_conditions`
 object. These qualifiers restrict comparison even for essential-only country
-profiles. Public may recover this whitelist from the exact version already
-pinned by an old snapshot, never from a newer canonical version. Raw payloads,
-operator notes and evidence remain private. Unknown annual/APY basis is an
-explicit unavailable state under the [comparison policy](public-deposit-comparison-policy.md).
+profiles. Preserve verified qualifiers on the corresponding product version. Raw payloads, operator notes and evidence remain private. Unknown annual/APY basis stays unknown.
 
 
-## 2026-09-29 Public comparison qualifiers
+## 2026-09-29 Financial comparison qualifiers
 
 D-085 / WBS 5.72 retain the country-owned essential approval denominator while
 requesting bounded supplemental comparison facts from the existing evidence pass.
 These fields are optional for publication, but missing basis, maturity or other
-conditions still prevents the corresponding Public comparison/calculation.
+conditions still prevents the corresponding comparison or calculation.
 Do not add searches or AI retries solely for optional omissions. Explicit US
 profiles may project this same bounded financial set; marketing and private
 operator/evidence data remain outside it. Existing approved records are corrected

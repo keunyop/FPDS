@@ -27,6 +27,6 @@ UI 작업은 app/admin/README.md와 현재 디자인/언어 계약을, 시장 �
 
 ## 완료 증거
 
-추가/기존 locale의 success/empty/error/fallback·locale URL, 390px/tablet/desktop·keyboard를 확인한다. 새 국가의 login/switch와 다른 국가 ID 차단, typed 금융/통화/근거 회귀를 검증한다. Public 변경도 요청됐으면 해당 locale/projection/표시까지 확인한다.
+추가/기존 locale의 success/empty/error/fallback·locale URL, 390px/tablet/desktop·keyboard를 확인한다. 새 국가의 login/switch와 다른 국가 ID 차단, typed 금융/통화/근거 회귀를 검증한다.
 
 변경된 시장 계약·코드, 검증 결과와 미지원 조건을 보고하고 journal에 기록한다. live 국가 활성화/등록·유료 수집·DB writes·배포는 요청된 환경과 허용 범위에서만 수행한다.

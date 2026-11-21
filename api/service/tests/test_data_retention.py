@@ -23,7 +23,7 @@ class DataRetentionTests(unittest.TestCase):
                     "retention_summary": {
                         "evidence_chunks": 120,
                         "model_executions": 30,
-                        "aggregate_snapshots": 8,
+                        "auth_sessions": 8,
                     }
                 },
             ]
@@ -34,7 +34,7 @@ class DataRetentionTests(unittest.TestCase):
         self.assertEqual(result["status"], "completed")
         self.assertEqual(result["removed"]["evidence_chunks"], 120)
         self.assertEqual(len(connection.calls), 2)
-        self.assertIn("fpds_apply_data_retention()", connection.calls[1])
+        self.assertIn("fpds_apply_admin_data_retention()", connection.calls[1])
 
     def test_retired_usage_writers_do_not_require_view_conflict_indexes(self) -> None:
         repo_root = Path(__file__).resolve().parents[3]

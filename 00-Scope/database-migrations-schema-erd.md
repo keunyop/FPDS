@@ -1,5 +1,7 @@
 # FPDS Admin DB migration, schema, ERD 인수인계
 
+현재 서비스는 Admin의 상품 원본과 상품 버전을 사용한다. 0049 마이그레이션은 Admin용 보존 함수만 등록한다. 아래의 이전 스키마 목록은 과거 자료를 식별하기 위한 이력이다. 기존 데이터는 보존한다.
+
 ## 추가 로컬 target - 2026-10-13
 
 `0048_public_feedback_filipino.sql`은 Public 피드백의 locale 제약에 `fil`을

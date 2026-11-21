@@ -15,6 +15,8 @@ from worker.discovery.fpds_discovery.fetch import (
     fetch_rendered_response,
 )
 from worker.discovery.fpds_discovery.registry import RegistrySource
+from worker.source_content_validity import has_pdf_header, html_unavailable_reason
+from worker.discovery.fpds_discovery.url_utils import url_country_scope_conflicts, url_locale_conflicts_source_language
 
 from .storage import SnapshotObjectStore, SnapshotStorageConfig
 
@@ -260,12 +262,12 @@ class SnapshotCaptureService:
                         browser_fallback_format="pdf" if source.source_type == "pdf" else None)
                 else:
                     fetched = self.fetcher(source.resolved_url, self.fetch_policy)
-                _validate_fetched_payload(source=source, fetched=fetched)
+                content_type = _validate_fetched_payload(source=source, fetched=fetched)
                 fetch_warning_count = len(preflight_issues) + int(
                     fetched.headers.get("x-fpds-browser-fallback-attempted") == "true"
                 )
                 checksum = _build_checksum(fetched.body)
-                fingerprint = _build_fingerprint(fetched.body, fetched.content_type)
+                fingerprint = _build_fingerprint(fetched.body, content_type)
                 known = known_snapshots.get((source.source_document_id, fingerprint))
                 if known is not None:
                     return self._build_reused_result(
@@ -291,7 +293,7 @@ class SnapshotCaptureService:
                 self.object_store.put_object(
                     object_key=object_key,
                     data=fetched.body,
-                    content_type=fetched.content_type,
+                    content_type=content_type,
                 )
                 response_metadata = _build_response_metadata(
                     source=source,
@@ -302,7 +304,7 @@ class SnapshotCaptureService:
                     "snapshot_id": snapshot_id,
                     "source_document_id": source.source_document_id,
                     "object_storage_key": object_key,
-                    "content_type": fetched.content_type,
+                    "content_type": content_type,
                     "checksum": checksum,
                     "fingerprint": fingerprint,
                     "fetch_status": "fetched",
@@ -319,7 +321,7 @@ class SnapshotCaptureService:
                     object_storage_key=object_key,
                     checksum=checksum,
                     fingerprint=fingerprint,
-                    content_type=fetched.content_type,
+                    content_type=content_type,
                     fetch_status="fetched",
                     fetched_at=fetched.fetched_at,
                     error_summary=None,
@@ -335,7 +337,7 @@ class SnapshotCaptureService:
                         stage_metadata={
                             "snapshot_action": "stored",
                             "request_id": request_id,
-                            "content_type": fetched.content_type,
+                            "content_type": content_type,
                             "checksum": checksum,
                             "fingerprint": fingerprint,
                             "object_storage_key": object_key,
@@ -445,21 +447,19 @@ def _build_checksum(body: bytes) -> str:
     return sha256(body).hexdigest()
 
 
-def _validate_fetched_payload(*, source: CaptureSource, fetched: FetchedResponse) -> None:
+def _validate_fetched_payload(*, source: CaptureSource, fetched: FetchedResponse) -> str:
+    if (url_country_scope_conflicts(country_code=source.country_code, normalized_url=fetched.final_url)
+            or url_locale_conflicts_source_language(source_language=source.source_language, normalized_url=fetched.final_url)):
+        raise NonRetryableFetchError("Official document resolved outside the selected market or language.")
+    if has_pdf_header(fetched.body):
+        return "application/pdf"
+    if source.source_type.lower() == "pdf" or fetched.content_type.lower().startswith("application/pdf"):
+        raise NonRetryableFetchError("PDF source returned non-PDF content after bounded fetch recovery.")
     if fetched.content_type.lower().startswith("text/html"):
-        from worker.source_content_validity import html_unavailable_reason
         reason = html_unavailable_reason(fetched.body)
         if reason:
             raise NonRetryableFetchError(f"HTML source unavailable ({reason}): {source.resolved_url}")
-    if source.source_type.lower() != "pdf":
-        return
-    if fetched.content_type.lower().startswith("application/pdf") or fetched.body.startswith(b"%PDF"):
-        return
-    fallback_reason = fetched.headers.get("x-fpds-browser-fallback-reason", "none")
-    raise NonRetryableFetchError(
-        "PDF source returned non-PDF content after bounded fetch recovery for "
-        f"{source.resolved_url} ({fetched.content_type}; reason={fallback_reason})."
-    )
+    return fetched.content_type
 
 
 def _build_fingerprint(body: bytes, content_type: str) -> str:

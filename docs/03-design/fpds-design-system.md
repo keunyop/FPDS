@@ -5,10 +5,7 @@ Date: 2026-04-13
 Status: Approved Working Baseline after Shadcnblocks Template-First Overhaul
 
 Source Documents:
-- `docs/03-design/product-grid-information-architecture.md`
 - `docs/03-design/admin-information-architecture.md`
-- `docs/03-design/insight-dashboard-metric-definition.md`
-- `docs/03-design/product-type-visualization-principles.md`
 - `docs/03-design/fpds_design_system_stripe_benchmark.md`
 - `https://docs.stripe.com/stripe-apps/design`
 - `https://docs.stripe.com/stripe-apps/style`
@@ -32,7 +29,7 @@ Goals:
 - keep Stripe as the benchmark for structure, restraint, and state communication
 - use Shadcnblocks as the implementation base for shells, pages, sections, and generic UI primitives
 - preserve FPDS-owned domain behavior for product comparison, evidence workflows, operational status, and localization
-- provide implementation-ready direction for upcoming public and admin UI work without re-opening core design decisions
+- provide implementation-ready direction for Admin UI work without re-opening core design decisions
 
 This is a design-system and template-adoption baseline. It is not a backend architecture spec and it is not a route-by-route implementation diff.
 
@@ -74,7 +71,6 @@ Shadcnblocks is now the authority for:
 ### 3.3 FPDS Domain Authority
 
 FPDS remains the authority for:
-- Public Product Grid meaning
 - Insight Dashboard metrics and visualization rules
 - review, trace, run, publish, change-history, and health workflows
 - public evidence non-exposure
@@ -123,11 +119,9 @@ FPDS uses **`radix-nova`** as the global shadcn style baseline.
 Reason:
 - Nova is documented as tighter and better suited to data-heavy dashboards.
 - FPDS admin surfaces are compact by design.
-- Public surfaces can be relaxed through section spacing and card padding without fragmenting the component style system.
 
 ### Result
 - **Admin** uses Nova density almost directly.
-- **Public** uses the same style family with relaxed spacing wrappers.
 - FPDS does **not** mix Vega, Nova, Maia, Lyra, or Mira on a route-by-route basis.
 
 ## 4.4 Installation Baseline
@@ -157,7 +151,6 @@ Recommended structure:
 ```text
 src/
   app/
-    (public)/
     (admin)/
     globals.css
     layout.tsx
@@ -166,7 +159,6 @@ src/
     layout/
     sections/
     fpds/
-      public/
       admin/
       shared/
   lib/
@@ -273,55 +265,23 @@ The shared benchmark intent remains:
 - financial without looking old-fashioned
 - restrained rather than decorative
 
-The active Public direction, implemented on `2026-07-27`, gives that intent a
-distinctive verified-record expression:
-
-- warm record-paper canvas and paper-white reading surfaces
-- deep ink for structure and primary copy
-- evergreen for verified, fresh, and primary action states
-- maple red for selection and meaningful comparison differences
-- ochre for Loan-family identity and warning states
-- red reserved for destructive or unavailable/error states
-- fine ledger rules, reference numerals, and source-to-review-to-snapshot
-  sequencing instead of decorative gradients or universal card containers
-
-The signature Public composition is the **verified-record ledger**. It must use
-real aggregate values and show how official product records become a reviewed
-public snapshot without exposing evidence traces. A freshness state and date
-belong to the composition; an invented score, market claim, or illustration
-does not.
 
 Typography direction:
-- use a sturdy display treatment for the Public market thesis and section
-  statements, a clear UI sans for controls and product content, and a readable
-  mono for dates, rates, counts, and reference values
+- Use a legible UI font for controls and product content, and tabular numerals for dates, rates and counts.
 - preserve legibility and implementation simplicity; visual distinction comes
   from hierarchy, rhythm, rules, and semantic color rather than an ornamental
   font dependency
-- Admin retains the compact neutral operational treatment. Public and Admin
-  share semantic component architecture, not an obligation to look identical.
+- Use compact, neutral styling for Admin operations.
 
 ---
 
 ## 7. Surface Mapping
 
-## 7.1 Public Surfaces
-
-| Surface | Vendor Starting Point | FPDS-Owned Layer |
-|---|---|---|
-| `/` (legacy `/dashboard` redirects here) | public header and section rhythm | verified-record ledger, real snapshot thesis, coverage actions, rankings, composition, freshness |
-| `/products` | grid, toolbar, filter, and pagination patterns | Deposit identity, type-aware product records, shared scope, selection-led comparison |
-| `/cards` | shared catalog composition | credit-card identity, annual fee, purchase interest rate, selection-led comparison, review-approved public boundary |
-| `/loans` | shared catalog composition | lending scope, lending facts, Loan color cue, review-approved public boundary |
-| `/products/[productId]` | detail/article composition | available facts, conditions, official action, freshness, methodology, family-specific content |
-| `/methodology` | docs/article/content sections | FPDS metric definitions, freshness policy, evidence boundary |
-| `/admin` | private operations summary and responsive inbox | bounded engagement aggregates, anonymous feedback filters, immutable product context, noindex/password boundary |
-
 ## 7.2 Admin Surfaces
 
 | Surface | Vendor Starting Point | FPDS-Owned Layer |
 |---|---|---|
-| `/admin` | Admin Kit shell and dashboard structure | real-data Operational Attention Rail across Runs, Review, Public health, and access requests |
+| `/admin` | Admin Kit shell and dashboard structure | real-data Operational Attention Rail across Runs and access requests |
 | `/admin/reviews` | compact filters, responsive table/work cards, pagination | bank/product/problem-first scan order, review state, confidence, validation, bulk defer |
 | `/admin/reviews/:id` | domain workspace, sticky action rail, disclosure | recommendation, official-domain AI verification band, affected fields, cited evidence, correction staging, diff preview, alternative review actions, durable decision consequence |
 | `/admin/runs` | compact filters, joined summary, bounded table | failure and partial-completion triage, live state, source/candidate impact |
@@ -329,7 +289,6 @@ Typography direction:
 | `/admin/banks`, `/admin/product-types`, `/admin/sources` | registry tables and focused dialogs | identity, coverage, generated-source state, safe collection/update/delete workflows |
 | `/admin/changes` | chronology-first table | canonical time, change, outcome, and review/run traceability |
 | `/admin/publish` | Admin Kit tables and alert cards | retry/reconciliation behavior and publish risk messaging |
-| `/admin/health/dashboard` | serving-state band and diagnostic rows | snapshot served to Public, freshness gap, pending work, fallback, attempt state, guarded recovery |
 | `/admin/login`, `/admin/signup` | secure two-zone entrance and forms | anonymous access boundary, operator authentication/request states, live feedback |
 
 ---
@@ -364,7 +323,6 @@ FPDS should own business-specific components such as:
 - diff previews
 - publish risk and reconciliation panels
 - bounded model-stage diagnostics on the owning Review or Run surface
-- dashboard health domain summaries
 
 ## 8.3 Customization Boundary
 
@@ -390,25 +348,7 @@ When changing UI:
 
 ---
 
-## 9. Public and Admin Experience Rules
-
-### 9.1 Public
-
-Public remains dashboard-first.
-
-Key rules:
-- lead with a short market thesis grounded in the latest successful snapshot,
-  not a marketing promise
-- Product Grid and Insights remain sibling surfaces
-- methodology and freshness must remain reachable
-- evidence is never exposed publicly
-- catalog and selection-led comparisons expose grounded differences without a
-  winner, eligibility score, or recommendation
-- the Home same-type finder is the bounded `FR-PUB-021` exception: it may show
-  strict one-metric improvements only when the current and candidate values are
-  disclosed, while retaining the non-advice and non-eligibility boundary
-- use cards only when they establish a real grouping; do not make every number,
-  paragraph, and action a floating card
+## 9. Admin Experience Rules
 
 ### 9.2 Admin
 
@@ -439,7 +379,7 @@ Key rules:
 
 - public and admin share semantic primitives, domain vocabulary, localization,
   and accessibility rules while allowing purpose-specific visual treatments
-- public is balanced; admin is compact
+- Admin uses compact spacing
 - source-derived product text remains in the source language
 - translated UI labels follow locale-resource governance
 - UI copy stays task-focused and minimal across all surfaces
@@ -498,7 +438,7 @@ Required maintenance principles:
 - isolate FPDS custom logic from vendor primitives
 - record imported templates and blocks
 - document any direct edits to vendor-derived code
-- re-test public/admin shells after vendor updates
+- re-test Admin screens after vendor updates
 - keep locale, status, and evidence behaviors under regression coverage
 
 Recommended supporting artifacts:
@@ -518,8 +458,6 @@ This baseline does not by itself implement:
 - chart library selection details
 
 It does provide the approved starting point for:
-- public dashboard surfaces
-- public product grid
 - methodology surface
 - admin shell and operations pages
 - FPDS domain wrappers on top of Shadcnblocks
@@ -532,7 +470,7 @@ The next natural implementation artifacts are:
 - a Shadcnblocks adoption log
 - a frontend block inventory
 - a theme variable file aligned to `radix-nova`
-- public and admin layout scaffolds
+- Admin layout scaffolds
 - domain component inventory under `components/fpds`
 - locale label mapping for badge, status, and helper text
 

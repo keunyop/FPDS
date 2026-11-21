@@ -12,7 +12,6 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:  # pragma: no cover - import path guard for `uv run --directory api/service`
     sys.path.insert(0, str(REPO_ROOT))
 
-from api_service.aggregate_refresh import queue_auto_promotion_aggregate_refresh_request
 from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.review_detail import _apply_canonical_approval, _approved_product_name, _coerce_mapping
@@ -54,7 +53,6 @@ def promote_auto_validated_candidates(
     actor: dict[str, Any] | None = None,
     request_context: dict[str, Any] | None = None,
     limit: int | None = DEFAULT_AUTO_PROMOTION_LIMIT,
-    queue_aggregate_refresh: bool = True,
 ) -> dict[str, Any]:
     policy = _load_auto_promotion_policy(connection)
     rows = _load_candidate_rows(
@@ -391,29 +389,6 @@ def promote_auto_validated_candidates(
             }
         )
 
-    aggregate_refresh_requests: list[dict[str, Any]] = []
-    if queue_aggregate_refresh and promoted_items:
-        country_codes = sorted({str(item["country_code"]) for item in promoted_items})
-        for country_code in country_codes:
-            country_items = [item for item in promoted_items if item["country_code"] == country_code]
-            aggregate_refresh_requests.append(
-                queue_auto_promotion_aggregate_refresh_request(
-                    connection,
-                    actor=active_actor,
-                    request_context=active_context,
-                    promoted_count=len(country_items),
-                    product_ids=[str(item["product_id"]) for item in country_items],
-                    candidate_ids=[str(item["candidate_id"]) for item in country_items],
-                    run_ids=[str(item["run_id"]) for item in country_items],
-                    change_event_types=[
-                        str(change_type)
-                        for item in country_items
-                        for change_type in item["change_event_types"]
-                    ],
-                    country_code=country_code,
-                )
-            )
-
     return {
         "run_id": run_id,
         "examined_count": len(rows),
@@ -425,8 +400,6 @@ def promote_auto_validated_candidates(
             "auto_approve_min_confidence": policy["auto_approve_min_confidence"],
             "force_review_issue_codes": sorted(policy["force_review_issue_codes"]),
         },
-        "aggregate_refresh": aggregate_refresh_requests[0] if len(aggregate_refresh_requests) == 1 else None,
-        "aggregate_refreshes": aggregate_refresh_requests,
     }
 
 
@@ -1179,7 +1152,6 @@ def main() -> int:
     parser.add_argument("--run-id", help="Limit promotion to a single ingestion run.")
     parser.add_argument("--limit", type=int, default=DEFAULT_AUTO_PROMOTION_LIMIT)
     parser.add_argument("--request-id", default=None)
-    parser.add_argument("--no-aggregate-refresh", action="store_true")
     args = parser.parse_args()
 
     settings = Settings.from_env()
@@ -1189,7 +1161,6 @@ def main() -> int:
             run_id=args.run_id,
             request_context={"request_id": args.request_id},
             limit=args.limit,
-            queue_aggregate_refresh=not args.no_aggregate_refresh,
         )
     print(json.dumps(result, ensure_ascii=True, indent=2, sort_keys=True))
     return 0

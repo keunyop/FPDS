@@ -27,7 +27,7 @@ Repository URL·의뢰자 organization·전달 commit/tag는 양측 확정 대�
 | 화면/기능 | 판정 | 운영상 이유 |
 |---|---|---|
 | Login / Signup / Overview의 가입 승인 | 유지 | 국가 선택, 인증, 승인 전 접근 차단; 별도 가입 승인 화면을 추가할 필요 없음 |
-| Overview | 유지·집계 수정 | 일일 실행 오류, 검토, 공개 데이터 상태, 가입 요청의 진입점 |
+| Overview | 유지·집계 수정 | 일일 실행 오류, 검토 이력과 가입 요청의 진입점 |
 | Review / 상세 / AI verify / evidence | 유지 | 근거 확인과 승인·반려·보류·수정 승인. 원문과 UI 번역을 구분 |
 | Runs / 상세 / retry | 유지 | 단계·source 오류 진단과 승인된 재시도. 과거 실패 기록 삭제는 부적절 |
 | Banks / coverage / collection | 유지 | 은행 설정과 수동 collection의 단일 운영 진입점 |
@@ -35,7 +35,6 @@ Repository URL·의뢰자 organization·전달 commit/tag는 양측 확정 대�
 | Product Types | 관리자 보조 도구로 유지 | 수집 계약 설정. 새 유형의 안전한 공개를 자동 보장하지 않음 |
 | Countries | 관리자 전용 유지 | 로그인 국가 활성/비활성. 현재·마지막 국가 보호 |
 | Changes | 유지 | canonical 변경과 검토 결과의 업무 이력 |
-| Public Health | 유지 | 공개 aggregate 생성 상태·실패 복구 진단. Public UI 인계와 별개 |
 | 이전 bank/detail·source-catalog 화면 경로 | redirect 유지 | 기존 링크 호환. source-catalog mutation API는 Banks가 사용하므로 삭제하면 안 됨 |
 | disabled Account 메뉴 | 제거 | 실행할 수 있는 기능이 없음 |
 | 독립 Audit / Usage / 자동 예약 수집 | 복원하지 않음 | D-044/WBS 5.27 및 D-069/WBS 5.54의 명시적 제거 기준 |

@@ -8,6 +8,9 @@ from bs4 import BeautifulSoup, Tag
 def _literal_attribute_name(value):
     if len(value) > 1000:
         return None
+    # A CMS can escape a non-breaking space twice in a product-name attribute.
+    # Decode whitespace only. Other entities must not change product identity.
+    value = re.sub(r"&(?:nbsp|#0*160|#x0*a0);", " ", value, flags=re.I)
     if "<" not in value:
         return value
     label = BeautifulSoup(value, "html.parser")

@@ -8,7 +8,7 @@ def apply_data_retention(connection: Any) -> dict[str, Any]:
 
     row = connection.execute(
         """
-        SELECT to_regprocedure('fpds_apply_data_retention()') IS NOT NULL AS available
+        SELECT to_regprocedure('fpds_apply_admin_data_retention()') IS NOT NULL AS available
         """
     ).fetchone()
     if not row or not bool(row.get("available")):
@@ -16,7 +16,7 @@ def apply_data_retention(connection: Any) -> dict[str, Any]:
 
     result = connection.execute(
         """
-        SELECT fpds_apply_data_retention() AS retention_summary
+        SELECT fpds_apply_admin_data_retention() AS retention_summary
         """
     ).fetchone()
     summary = result.get("retention_summary") if result else None

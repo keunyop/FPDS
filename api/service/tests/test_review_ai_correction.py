@@ -360,7 +360,6 @@ class ReviewAiCorrectionTests(TestCase):
         audit_payload = json.loads(audit["event_payload"])
         self.assertTrue(audit_payload["review_state_preserved"])
         self.assertFalse(audit_payload["canonical_product_mutated"])
-        self.assertFalse(audit_payload["public_projection_mutated"])
 
     def test_ignores_correction_without_applyable_mismatch_and_source(self):
         connection = _RecordingConnection()

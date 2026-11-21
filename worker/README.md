@@ -1,5 +1,7 @@
 # Worker Boundary
 
+Use the [current document and approval rules](../docs/03-design/collection-accuracy-policy.md) for collection changes. The [operator guide](../descent/은행_상품_수집_검증_가이드.md) traces a missing field from capture through approval. Dated sections below record earlier implementations.
+
 ## Current native features and linked essential FAQs - 2026-10-13
 
 Parser v31/process `2026-10-13-linked-account-cost-conditions-v23`, market v8,
@@ -128,7 +130,7 @@ remain evidence. Actual masked prices and unresolved templates remain rejected
 by shared normalization and rate gates. Independent literal Annual Fee None
 proves zero only without conditional qualification. Positive base annual fees
 retain their full waiver conditions; typed optional waiver facts survive.
-Public projection also preserves an explicitly verified fee-waiver qualifier
+Canonical records preserve an explicitly verified fee-waiver qualifier
 across product types even when absent from the collection minimum. Unverified
 qualifiers and private evidence remain excluded. Existing field units, origins,
 ceilings, essential costs, security and automatic promotion gates remain unchanged. No bank-specific branches or review queue.
@@ -661,21 +663,7 @@ Runtime invariants:
   distinct so a nearby 22.99% cash rate cannot populate the purchase rate.
 
 
-## Deposit comparison conditions (2026-09-24)
-
-The [deposit comparison policy](../docs/03-design/public-deposit-comparison-policy.md) supersedes headline-only Savings/GIC
-comparison and implicit one-year calculation. Home scopes rankings by type,
-currency, rate basis and exact GIC term/redemption category. The finder uses
-those gates before its existing metric; the calculator uses disclosed annual
-basis and an explicit period, or a concise unavailable reason and official link.
-`deposit_terms` is additive. Public reads a bounded whitelist from the exact
-approved version pinned by the snapshot; aggregates preserve these qualifiers
-for future refreshes. Missing basis is never inferred from country. API release
-precedes Public; old cached contracts fail closed. No live refresh or migration
-is needed for the version-pinned bridge. See the policy for current data limits.
-
-
-## Public-aligned comparison collection (2026-09-29)
+## Evidence-backed comparison fields (2026-09-29)
 
 Market profile v5 retains the existing approval essentials and adds bounded
 comparison qualifiers from the same evidence pass: annual/APY basis, calculation,
@@ -689,8 +677,7 @@ grace and penalty days cannot supply maturity. US projections retain these
 approved financial qualifiers while continuing to omit private evidence/copy.
 
 See the bounded CA/US audit and correction report (`e391c209d398:docs/00-governance/public-collection-alignment-2026-09-29.md` in Git history) for six applied
-existing-product repairs, preserved verification dates, remaining gaps and the
-read-only `scripts/maintenance/public_collection_gap_report.py` command.
+existing-product repairs, preserved verification dates and remaining gaps.
 
 D-089 validates every browser HTML fallback result, including HTTP 403/429
 paths, for a remaining managed-access challenge. Cloudflare blocked-page

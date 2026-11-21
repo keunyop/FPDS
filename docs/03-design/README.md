@@ -1,5 +1,7 @@
 # FPDS Design References
 
+FPDS runs the authenticated Admin application, its API and collection workers. Collection completes at canonical promotion or automatic exclusion. Historical migrations and dated audit records identify previously stored data and do not define current service requirements.
+
 Read only the contracts affected by the task. The
 [development guide](../../descent/FPDS_Admin_개발_가이드.md) explains the usual
 country/localization and feature workflows.
@@ -34,21 +36,3 @@ country/localization and feature workflows.
   [current migration/schema inventory](../../00-Scope/database-migrations-schema-erd.md).
 - [Private evidence storage](object-storage-evidence-bucket-baseline.md).
 - [Monitoring](monitoring-error-tracking-baseline.md).
-
-## Public, When Included In The Request
-
-- [Product grid](product-grid-information-architecture.md),
-  [metrics](insight-dashboard-metric-definition.md) and
-  [visualization](product-type-visualization-principles.md).
-- [Deposit comparisons](public-deposit-comparison-policy.md),
-  [curated comparisons](public-curated-comparison-policy.md),
-  [comparison lists](public-comparison-list-policy.md) and
-  [scenario calculator](public-scenario-calculator-policy.md).
-- [Verification freshness](public-verification-freshness-policy.md) and
-  [bank handoff](public-bank-handoff-policy.md).
-- [Comparison guides](public-comparison-guides-policy.md) and
-  [blog](public-blog-policy.md).
-
-Dated updates in retained contracts override their earlier baseline sections.
-Use current source/tests to verify behavior when extending a contract; older
-WBS labels are historical references, not a new development gate.

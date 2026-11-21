@@ -41,7 +41,7 @@ class InitializerGuardTests(unittest.TestCase):
         invalid = [replace(settings, env='prod'), replace(settings, cookie_secure=True),
                    replace(settings, admin_web_origin='https://admin.example.com'),
                    replace(settings, allowed_admin_origins=('https://admin.example.com',)),
-                   replace(settings, public_api_origin='http://localhost.attacker.test:4000'),
+                   replace(settings, admin_api_origin='http://localhost.attacker.test:4000'),
                    replace(settings, admin_api_origin='http://user:pass@localhost:4000')]
         for value in invalid:
             with self.subTest(settings=value), patch.object(init_local_db.psycopg, 'connect') as connect:
@@ -122,6 +122,20 @@ class InitializerPostgresTests(unittest.TestCase):
             with self.assertRaises(LoginError):
                 authenticate_user(connection, login_id='admin', password='wrong', country_code=country,
                     ip_address=None, user_agent='initializer-test', request_id='setup-wrong', settings=self.settings)
+
+    def test_admin_retention_preserves_existing_archived_data(self):
+        self.initialize_available_migrations()
+        with psycopg.connect(self.dsn) as connection:
+            connection.execute(
+                """INSERT INTO aggregate_refresh_run
+                   (snapshot_id, refresh_scope, country_code, refresh_status, attempted_at)
+                   VALUES ('historic', 'phase1_public', 'CA', 'failed', now() - interval '1 year')"""
+            )
+            summary = connection.execute("SELECT fpds_apply_admin_data_retention()").fetchone()[0]
+            self.assertIn("login_attempts", summary)
+            self.assertEqual(connection.execute(
+                "SELECT count(*) FROM aggregate_refresh_run WHERE snapshot_id = 'historic'"
+            ).fetchone()[0], 1)
 
     def test_second_initialization_preserves_existing_account(self):
         self.initialize_available_migrations()

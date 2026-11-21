@@ -9,7 +9,7 @@ from dataclasses import asdict, dataclass, field
 from hashlib import sha256
 from pathlib import Path
 import re
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, unquote_plus, urlparse
 
 from api_service.source_catalog import (
     _detail_companion_link_score, _extract_allowed_links,
@@ -17,6 +17,7 @@ from api_service.source_catalog import (
     _url_country_scope_conflicts, _url_locale_conflicts_source_language, _source_scope_exclusion_reason,
 )
 from worker.discovery.fpds_discovery.registry import load_registry
+from worker.discovery.fpds_discovery.url_utils import host_matches_allowed_domains
 from worker.pipeline.fpds_ai_runtime import configured_model_id, invoke_openai_json_schema, llm_provider_configured
 from worker.pipeline.fpds_collection_accuracy import sanitize_candidate
 from worker.pipeline.fpds_collection_fields import metadata_collection_fields
@@ -56,6 +57,34 @@ class CapturedPage:
     checksum: str
     response_metadata: dict = field(default_factory=dict)
     parser_version: str | None = None
+
+
+def _document_base(page, registry, context):
+    """Relative hrefs resolve against the acquired page, including its trailing slash."""
+    base = page.response_metadata.get('final_url') or page.response_metadata.get('request_url') or page.source_url
+    if not isinstance(base, str):
+        return None
+    try:
+        parsed = urlparse(base)
+        if (parsed.scheme != 'https' or parsed.username is not None or parsed.password is not None
+                or parsed.port not in (None, 443) or not host_matches_allowed_domains(parsed.hostname or '', registry.allowed_domains)
+                or _url_country_scope_conflicts(country_code=context.country_code, normalized_url=base)
+                or _url_locale_conflicts_source_language(source_language=context.source_language, normalized_url=base)):
+            return None
+    except (TypeError, ValueError):
+        return None
+    return base
+
+
+def _document_request_url(link):
+    # The identity folds query key case and strips trailing slashes. Banks
+    # may require the original spelling for the HTTP request. Carry only
+    # identity keys, in their original wire representation, into the registry.
+    parsed = urlparse(link.resolved_url)
+    keys = {key for key, _ in parse_qsl(urlparse(link.normalized_url).query)}
+    query = '&'.join(pair for pair in parsed.query.split('&')
+                     if unquote_plus(pair.partition('=')[0]).strip().casefold() in keys)
+    return parsed._replace(query=query, fragment='').geturl()
 
 
 def assess_captured_essentials(item: ExtractionInput, *, run_id: str) -> dict:
@@ -274,8 +303,12 @@ class EvidenceResearchPlanner:
             if not missing:
                 diagnostic['stop_reason'] = 'no_essential_gap'
                 continue
-            budget = min(MAX_ADDITIONAL_PER_DETAIL - parent_counts.get(parent, 0),
-                         remaining_sources - len(sources))
+            new_slots = remaining_sources - len(sources)
+            parent_slots = MAX_ADDITIONAL_PER_DETAIL - parent_counts.get(parent, 0)
+            # A document already selected in this wave can serve another
+            # detail that independently links it, even at the run URL limit.
+            shared_only = new_slots == 0 and bool(sources)
+            budget = parent_slots if shared_only else min(parent_slots, new_slots)
             owned_page = pages.get(ctx.source_document_id)
             if owned_page and owned_page.snapshot_id == ctx.snapshot_id and owned_page.parsed_document_id == ctx.parsed_document_id and owned_page.source_url == parent:
                 version_gap = owned_page.parser_version and owned_page.parser_version != PARSER_VERSION
@@ -306,6 +339,8 @@ class EvidenceResearchPlanner:
                 continue
             candidates = {}
             owned_docs = {c.source_document_id for c in item.grounding_candidates}
+            from worker.pipeline.fpds_extraction.service import _captured_native_product_title
+            identity = _captured_native_product_title(ctx, item.grounding_candidates) or ""
             for doc in sorted(owned_docs):
                 page = pages.get(doc)
                 if not page:
@@ -315,18 +350,22 @@ class EvidenceResearchPlanner:
                 if not chunks or any(c.source_snapshot_id != page.snapshot_id or c.parsed_document_id != page.parsed_document_id
                     or c.retrieval_metadata.get('source_url') != page.source_url for c in chunks):
                     continue
-                for link in _extract_allowed_links(html_text=page.html, base_url=page.source_url,
+                base = _document_base(page, registry, ctx)
+                if base is None:
+                    continue
+                for link in _extract_allowed_links(html_text=page.html, base_url=base,
                         hostname=urlparse(page.source_url).hostname or '', allowed_domains=registry.allowed_domains):
                     url = link.normalized_url
+                    if shared_only and url not in sources:
+                        continue
                     if (url in attempted_urls or url == parent or _url_country_scope_conflicts(country_code=ctx.country_code, normalized_url=url)
                             or _url_locale_conflicts_source_language(normalized_url=url, source_language=ctx.source_language)):
                         continue
-                    from worker.pipeline.fpds_extraction.service import _captured_native_product_title
-                    identity = _captured_native_product_title(ctx, item.grounding_candidates) or ""
                     score = _link_relevance(product_type=registry.product_type, url=url, label=link.anchor_text, missing=missing, identity=identity)
                     if score <= 0:
                         continue
                     candidate = {'link_id': sha256(url.encode()).hexdigest()[:16], 'url': url,
+                        'request_url': _document_request_url(link),
                         'source_type': link.source_type, 'label': link.anchor_text[:240], 'score': score,
                         'observed_on_url': page.source_url, 'observed_snapshot_id': page.snapshot_id,
                         'observed_parsed_document_id': page.parsed_document_id, 'capture_checksum': page.checksum}
@@ -334,12 +373,13 @@ class EvidenceResearchPlanner:
                         candidates[url] = candidate
             options = sorted(candidates.values(), key=lambda c: (-c['score'], c['url']))[:MAX_LINKS_PER_DETAIL]
             if not options:
-                diagnostic['stop_reason'] = 'acquisition_actions_selected' if diagnostic.get('selected_actions') else 'no_unvisited_official_lead'
+                diagnostic['stop_reason'] = ('acquisition_actions_selected' if diagnostic.get('selected_actions')
+                    else 'research_budget_exhausted' if shared_only else 'no_unvisited_official_lead')
                 continue
             selected = options[:budget]
             # The planner chooses only supplied IDs. It cannot add a URL, prove
             # a value, widen the allowlist or choose an optional-completeness task.
-            if self.invoke_model is not None and calls < remaining_model_calls:
+            if not shared_only and self.invoke_model is not None and calls < remaining_model_calls:
                 calls += 1
                 try:
                     payload, usage = self.invoke_model(model_id=configured_model_id(), reasoning_effort='high',
@@ -355,7 +395,8 @@ class EvidenceResearchPlanner:
                             'lead exists. This plan is not approval. At most the capture_budget links may be selected.'),
                         payload={'product_type': registry.product_type, 'country_code': ctx.country_code,
                             'product_url': parent, 'identity': ctx.source_metadata.get('discovery_metadata', {}),
-                            'missing_required_fields': missing, 'capture_budget': budget, 'links': options,
+                            'missing_required_fields': missing, 'capture_budget': budget,
+                            'links': [{k: v for k, v in c.items() if k != 'request_url'} for c in options],
                             'captured_context': _research_context(item)},
                         require_web_search=False)
                     diagnostic['planner_usage'] = {k: usage.get(k) for k in ('model_id', 'prompt_tokens', 'completion_tokens', 'provider_request_id')}
@@ -397,7 +438,7 @@ class EvidenceResearchPlanner:
                     sources[url] = {'source_id': 'RES-' + ctx.bank_code + '-' + candidate['link_id'],
                         'priority': 'P1', 'seed_source_flag': False, 'source_type': candidate['source_type'],
                         'discovery_role': 'linked_pdf' if candidate['source_type'] == 'pdf' else 'supporting_html',
-                        'purpose': 'Essential evidence research', 'url': url,
+                        'purpose': 'Essential evidence research', 'url': candidate['request_url'],
                         'expected_fields': list(ctx.source_metadata.get('expected_fields') or []),
                         'source_language': ctx.source_language, 'product_family': ctx.source_metadata.get('product_family'),
                         'collection_field_policy': ctx.source_metadata.get('collection_field_policy', {}),
@@ -407,6 +448,9 @@ class EvidenceResearchPlanner:
                             'missing_required_fields': missing, **{k: candidate[k] for k in (
                                 'observed_on_url', 'observed_snapshot_id', 'observed_parsed_document_id', 'capture_checksum')}}}
                 diagnostic['selected_urls'].append(url)
+                sources[url]['discovery_metadata'].setdefault('parent_observations', {})[parent] = {
+                    key: candidate[key] for key in ('observed_on_url', 'observed_snapshot_id',
+                                                    'observed_parsed_document_id', 'capture_checksum')}
                 parent_counts[parent] = parent_counts.get(parent, 0) + 1
             diagnostic['stop_reason'] = 'capture_selected' if selected else 'planner_no_relevant_lead'
         return {'version': COLLECTION_PROCESS_VERSION, 'sources': list(sources.values()), 'actions': actions,

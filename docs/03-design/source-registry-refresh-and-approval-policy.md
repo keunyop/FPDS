@@ -110,7 +110,7 @@ The DB-backed bank profile should also retain screen-facing logo metadata:
 - `logo_alt_text`
 
 Logo presentation rule:
-- Admin and Public present bank marks without a surrounding card, border, or decorative background.
+- Admin presents bank marks without a surrounding card, border, or decorative background.
 - `logo_url` should use a verified official brand asset where one is publicly available. Favicon URLs are a narrowly scoped resilience fallback for a blocked, retired, or otherwise unavailable full official asset.
 - A migration refresh must not replace an operator-supplied custom logo URL.
 
@@ -196,7 +196,7 @@ Current live product-type onboarding note:
 - `/admin/product-types` now lets operators manage product type definitions with searchable name and description fields.
 - Bank coverage creation validates against that registry instead of a hard-coded canonical list.
 - Chequing, savings, GIC, and every later product type are all ordinary operator-managed DB rows. Collection must fail clearly when the requested product type row is missing or inactive.
-- Product type code is an operator-managed identity field. When a code is corrected from the Product Types detail modal, the backend renames the registry row and cascades source catalog, generated source, candidate, canonical product, public projection, and taxonomy references instead of relying on aliases.
+- Product type code is an operator-managed identity field. When a code is corrected from the Product Types detail modal, the backend renames the registry row and cascades source catalog, generated source, candidate, canonical product and taxonomy references instead of relying on aliases.
 - For the Phase 1 canonical deposit product types `chequing`, `savings`, and `gic`, product-type registry writes must keep the full approved subtype taxonomy synchronized, not only the generic `other` fallback. Dynamic or newly added product types still start with `other` unless a later approved subtype registry is introduced.
 - The Canada retail lending baseline is registered as `credit-card`, `mortgage`, `personal-loan`, and `line-of-credit` under `product_family=lending`. FPDS canonical product type codes use hyphens even when an operator enters spaces or underscores.
 - Homepage-first discovery now carries the stored product type definition into AI-assisted detail-source resolution.
@@ -225,9 +225,7 @@ Current live product-type onboarding note:
   ungrounded lending attributes are suppressed. Unknown dynamic types require
   a registry contract with a percentage field plus another decision field.
   Otherwise the candidate remains in Review.
-  Approved `mortgage`, `personal-loan`, and `line-of-credit` products are
-  included in the Public aggregate snapshot; unapproved candidates remain
-  non-public.
+  Successful automatic validation and promotion create a canonical product version.
 - Collection-field selection is market-profile driven. The executable profile
   key is `(country_code, product_type)` and its version/key are stored in
   generated source discovery metadata. Canada uses the approved baseline
@@ -281,8 +279,7 @@ For this policy, `collect` means:
    review tasks left by this run
 10. system-approve only candidates meeting the complete essential-field
     contract with no hard identity/boundary/taxonomy/type/range/conflict/
-    ambiguity blocker, and queue the normal
-    country aggregate refresh; retain every other candidate in Review
+    ambiguity blocker. Automatically exclude candidates missing an essential fact.
 11. when no eligible detail source remains, perform one bounded current-coverage
     repair. A verified current route is persisted and discovery is retried once;
     explicit official retirement evidence deactivates that catalog coverage.
@@ -312,7 +309,7 @@ candidate-producing scope even when their copy discusses the requested product.
 For dynamic/lending candidates, this grounding also produces a persisted
 decision-field eligibility assessment. A passing assessment removes the old
 blanket manual-review rule but does not remove any validator, force-review,
-source-role, product-boundary, canonical, audit, or aggregate-refresh guard.
+source-role, product-boundary, canonical or audit guard.
 Residual Review AI v7 uses identity plus one field for every mandatory
 comparison requirement as its denominator. It does not request or penalize
 absent optional marketing/operational fields, and it does not reuse earlier
@@ -384,7 +381,7 @@ Current repository state:
 - generated source detail lives in `source_registry_item`
 - the live DB tables are now respected as-is at runtime, including intentionally empty reset states; committed JSON baselines remain import/reference material rather than an automatic runtime bootstrap path
 - collection can now be started from the admin source catalog list and produces generated source rows, `normalized_candidate` rows, and normal review-routing side effects
-- collection now also invokes audited auto-promotion for validation-pass candidates that meet confidence and force-review policy; for Canada Big 5 deposit collection, validation-pass follows the golden fixture field contract; promoted candidates enqueue aggregate refresh, non-detail/non-product false positives are audit-logged and rejected, and an approved newer candidate resolves older active reviews from the same detail source as superseded
+- collection now also invokes audited auto-promotion for validation-pass candidates that meet confidence and force-review policy; for Canada Big 5 deposit collection, validation-pass follows the golden fixture field contract; non-detail/non-product false positives are audit-logged and rejected, and an approved newer candidate resolves older active reviews from the same detail source as superseded
 - detail promotion now requires independent product-identity evidence for a strong page override and honors AI support/not-detail veto reasons; the 2026-07-13 Alterna chequing verification rerun used two active product-detail sources, auto-validated two valid products, and created zero review tasks while three stale support/rates details were made inactive
 - the worker execution path is still file/catalog oriented under the hood, so the API-side runner currently materializes temporary grouped registry files for the selected source scope
 - candidate-producing scope is role-aware and limited to `detail`. Existing bank-specific merges remain supported, while generated product-matched supporting HTML can now provide generic savings or GIC rate evidence without becoming a candidate itself

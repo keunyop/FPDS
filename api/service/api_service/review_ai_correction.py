@@ -523,7 +523,6 @@ def _record_correction_audit(
                     "sources": sources,
                     "review_state_preserved": True,
                     "canonical_product_mutated": False,
-                    "public_projection_mutated": False,
                 },
                 ensure_ascii=True,
                 sort_keys=True,

@@ -24,7 +24,7 @@ Source Documents:
 이 문서는 FPDS의 `WBS 1.3.1 end-to-end ingestion flow 상세화`를 구현 가능한 수준으로 정의한다.
 
 목적:
-- source discovery부터 publish 준비, aggregate refresh, admin override까지의 공식 흐름을 한 장으로 고정한다.
+- source discovery부터 publish 준비, admin override까지의 공식 흐름을 한 장으로 고정한다.
 - 각 단계의 입력/출력, 저장물, 실패 처리, idempotency 기준을 명확히 한다.
 - 이후 `1.3.2 review state machine`, `1.3.3 run lifecycle`, `1.3.4 publish lifecycle`, `1.3.5 audit trail scope`의 기준 문서로 사용한다.
 - `1.4.x`, `1.5.3`, `1.8.2`가 같은 ingestion 흐름을 참조하도록 맞춘다.
@@ -73,7 +73,6 @@ Source Documents:
 | 9. Canonical Upsert & Change Assessment | approved candidate or auto-approved candidate | canonical continuity 판단, version/change event 생성 | canonical product version | canonical product, evidence links, change event | continuity 불명확 시 review/defer |
 | 10. Publish Preparation | approved canonical record | BX-PF payload 준비, publish eligibility 판단 | publish-ready item or pending | publish request draft, pending reason | pending/retry/reconciliation 상태로 이관 |
 | 11. Publish / Queue | publish-ready item | BX-PF publish 또는 queue 적재 | publish result | publish event, reconciliation metadata | publish retry queue 사용 |
-| 12. Aggregate Refresh | canonical/publish result | public/admin aggregate 갱신 | refreshed datasets | metric snapshots, ranking/scatter source | refresh failure는 run warning |
 | 13. Admin Inspection & Override | run, review, publish outputs | 운영자 확인, override, reason 기록 | review decision / manual override | review decision, override diff, audit log | override 후 change/audit 갱신 |
 
 ---
@@ -218,7 +217,7 @@ Current official-grounding baseline:
 Current cross-country deposit safeguards:
 - collection resolves the versioned `(country_code, product_type)` market
   profile once and carries its bounded fields through extraction, validation,
-  Review, approval, and Public eligibility. Canada uses the baseline contract;
+  validation and approval. Canada uses the baseline contract;
   US overrides checking transaction/redeemability assumptions with local
   balance, waiver, APY, and early-withdrawal-penalty semantics; any other
   explicitly named country fails closed until its profiles are registered;
@@ -288,7 +287,7 @@ discovery also recorded `product_identity_match=true`; an explicit mismatch or
 cross-product deposit page remains fail-closed.
 
 The type-specific requirement above is selected by country as well as Product
-Type. Manual approval and aggregate refresh resolve the same versioned profile;
+Type. Automatic approval resolves the same versioned profile;
 there is no separate UI or publication interpretation.
 
 - 입력: candidate, validation result, confidence score, routing config
@@ -376,21 +375,6 @@ there is no separate UI or publication interpretation.
   - publish는 ingestion run과 분리된 retry 모델을 가진다.
   - publish 실패가 canonical approval 자체를 되돌리지는 않는다.
 
-### 5.13 Stage 12. Aggregate Refresh
-
-- 입력: canonical product, change event, publish result
-- 처리:
-  - public product grid index를 갱신한다.
-  - dashboard summary/ranking/scatter용 aggregate dataset을 갱신한다.
-  - freshness timestamp를 기록한다.
-- 출력:
-  - refreshed aggregate views
-- 저장물:
-  - metric snapshot
-  - ranking/scatter source dataset
-- 규칙:
-  - aggregate refresh 실패는 warning으로 남길 수 있으나 canonical data commit 자체를 취소하지는 않는다.
-
 ### 5.14 Stage 13. Admin Inspection and Override
 
 - 입력: review task, canonical product, trace data, publish state
@@ -448,7 +432,7 @@ there is no separate UI or publication interpretation.
 - `1.3.3`: run 상태, stage별 집계, retry boundary 정의
 - `1.3.4`: publish pending/retry/reconciliation 상태 정의
 - `1.3.5`: review/auth/publish/audit event 저장 범위 정의
-- `1.4.1`: public/admin/api/worker/storage/BX-PF 경계도 작성
+- `1.4.1`: admin/api/worker/storage/BX-PF 경계도 작성
 - `1.4.2`: run, source, snapshot, chunk, candidate, review, publish, change 중심 ERD 작성
 - `1.4.4`: retrieval/vector backend 시작점 결정
 - `1.5.3`: internal orchestration interface 초안 작성

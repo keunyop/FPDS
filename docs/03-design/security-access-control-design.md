@@ -16,7 +16,7 @@ Source Documents:
 
 목적:
 - admin auth, RBAC, external API auth, CORS, crawler safe fetch, session/CSRF/security header, secret rotation 기준을 하나의 baseline으로 고정한다.
-- `public/admin/API/worker/storage/BX-PF` 경계가 같은 trust model을 참조하도록 만든다.
+- `admin/API/worker/storage/BX-PF` 경계가 같은 trust model을 참조하도록 만든다.
 
 이 문서는 구현 지시서가 아니라 설계 baseline이다.
 Post-MVP work follows the current Product Owner request and the development guide.
@@ -25,7 +25,6 @@ Post-MVP work follows the current Product Owner request and the development guid
 
 ## 2. Baseline Decisions
 
-1. public dashboard는 anonymous public surface다.
 2. admin surface는 browser 기반 human operator surface다.
 3. browser는 DB, object storage, vector metadata, BX-PF에 직접 접근하지 않는다.
 4. worker, crawler, publish adapter는 private boundary 안에서만 동작한다.
@@ -72,46 +71,6 @@ Country/type market profiles separately govern collection and publication.
 D-044 and requirements Section 0 supersede older generic audit/usage retention
 clauses; role, session, CSRF, and country checks remain enforced.
 
-### 3.3 Public Operations Admin Exception
-
-The Product Owner-approved Public `/admin` route is separate from the FPDS
-operator Admin/RBAC surface. It protects bounded product engagement aggregates
-and anonymous feedback review.
-
-- the password is read only from `FPDS_PUBLIC_ADMIN_PASSWORD` on the server;
-  its value must remain outside Git and must not enter client code
-- successful login issues an eight-hour signed HttpOnly, SameSite=Strict,
-  Secure-in-production cookie scoped to `/admin`
-- `FPDS_PUBLIC_ADMIN_SESSION_SECRET` signs that cookie; failed attempts receive
-  bounded best-effort per-origin throttling without database persistence
-- the page is `noindex` and excluded from GA initialization/page-view events
-- the server component reaches the API with
-  `FPDS_PUBLIC_APP_API_SECRET`; the browser never receives that credential
-- the credential-protected API validates active product IDs, allows only three
-  fixed engagement events, rate-limits writes, and reads feedback through
-  optional exact-country and bounded list filters; it exposes no private FPDS
-  evidence or visitor-level record
-
-### 3.4 Anonymous Public Feedback Boundary
-
-- the browser submits only to the same-origin Public feedback BFF; the BFF
-  forwards a bounded normalized body with the server-only Public-app credential
-- the API uses constant-time credential verification, fixed type/category
-  allowlists, strict country/locale/length validation, and a process-bounded
-  best-effort rate limit
-- product identity and display context are copied from the latest active Public
-  projection; browser-supplied bank/product labels are ignored
-- anonymous Public confirms only the current request and has no
-  submission-list route; the signed-session Public `/admin` server component
-  reads the inbox with the server-only Public-app credential
-- FPDS Admin sessions and browser query parameters grant no feedback-list
-  access; Public `/admin` may request all countries or one validated exact
-  country because its separate password session owns this operational view
-- no contact or visitor identity is collected, and free text is explicitly
-  warned against personal or account information
-
----
-
 ## 4. Human RBAC Baseline
 
 ### 4.1 Roles
@@ -155,7 +114,6 @@ human RBAC baseline은 아래 3개 역할이다.
 ## 6. CORS and Origin Policy
 
 - browser-facing API CORS는 allowlist-only다.
-- public API는 anonymous read 기준이지만 wildcard 정책은 기본값으로 두지 않는다.
 - admin API는 credentialed request이므로 exact origin allowlist만 허용한다.
 - environment별 origin 값은 config로 분리하고 hard-coded wildcard를 두지 않는다.
 
@@ -211,7 +169,6 @@ does not establish durable collection execution or a live deployment.
 - secret은 environment-separated owner/cadence 기준으로 관리한다.
 - rotation 대상:
   - admin auth/session secret
-  - Public Admin session and Public-app shared secrets
   - external API key material
   - BX-PF integration credential
   - storage/service secrets

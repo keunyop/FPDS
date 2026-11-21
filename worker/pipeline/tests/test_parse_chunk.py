@@ -16,6 +16,10 @@ from worker.pipeline.fpds_parse_chunk.storage import ParseChunkStorageConfig, bu
 
 
 class ParseChunkServiceTests(unittest.TestCase):
+    def test_pdf_bytes_reported_as_html_preserve_the_document_text(self):
+        pdf = _build_minimal_pdf(["Account fee schedule"])
+        self.assertIn("Account fee schedule", parse_snapshot_bytes(body=pdf, content_type="text/html").full_text)
+
     def test_html_parser_preserves_structured_component_evidence_behind_location_gate(self) -> None:
         payload = {
             "title": "Advantage Savings",
@@ -30,7 +34,7 @@ class ParseChunkServiceTests(unittest.TestCase):
             content_type="text/html",
         )
 
-        self.assertEqual(PARSER_VERSION, "fpds-parse-chunk-v31")
+        self.assertEqual(PARSER_VERSION, "fpds-parse-chunk-v32")
         self.assertIn("Advantage Savings", artifact.full_text)
         self.assertIn("$8 monthly maintenance fee", artifact.full_text)
         self.assertEqual(artifact.parser_metadata["structured_component_section_count"], 2)

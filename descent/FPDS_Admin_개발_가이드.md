@@ -16,9 +16,8 @@ FPDS Admin은 공식 금융상품 정보를 수집하고 자동 검증한 결과
 | db/migrations | PostgreSQL schema 변경 이력 |
 | shared | 언어·디자인·보안·공통 설정 계약 |
 | storage | 비공개 원문 저장소 계약 |
-| app/public | 별도 Public 앱; 공개 결과까지 변경할 때만 수정 |
 
-흐름은 **Admin → API → Worker/DB → 승인된 Public projection**이다. 브라우저가 DB나 원문 저장소에 직접 접근하지 않는다. 실제 화면 경로는 [Admin route 목록](../app/admin/routes.manifest.json), 운영 방법은 [사용자 매뉴얼](FPDS_Admin_사용자_매뉴얼.md)을 참고한다.
+흐름은 **Admin → API → Worker/DB → 승인된 상품 기록**이다. 브라우저가 DB나 원문 저장소에 직접 접근하지 않는다. 실제 화면 경로는 [Admin route 목록](../app/admin/routes.manifest.json), 운영 방법은 [사용자 매뉴얼](FPDS_Admin_사용자_매뉴얼.md)을 참고한다.
 
 ## 2. 처음 실행하기
 
@@ -74,6 +73,8 @@ API 확인: http://localhost:4000/healthz · Admin: http://localhost:3001/admin/
 
 
 ## 4. 기능 추가와 수정
+
+은행 상품 수집을 변경할 때는 [수집 결과와 실패 진단 가이드](은행_상품_수집_검증_가이드.md)로 재현 경로를 확인하고 [공식 문서·자동 승인 규칙](../docs/03-design/collection-accuracy-policy.md)으로 기대 결과를 정한다.
 
 | 작업 | 시작 위치 |
 |---|---|

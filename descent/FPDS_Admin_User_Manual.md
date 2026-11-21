@@ -31,12 +31,11 @@ Click a card marked **Needs attention** to open the relevant work.
 | Card | What to check |
 |---|---|
 | Run attention | Failed or partially completed collection runs |
-| Dashboard health | Stale, failed, or empty public data |
 | Signup requests | Operator registration requests awaiting approval — administrators only |
 
 **Clear** means that the check currently requires no action. An unavailable result or unknown value does not mean zero issues or a healthy state.
 
-Use **More tools → Public Health** to inspect public projection refresh status and failures. Historical product review records are available separately under **More tools → Review history**.
+Historical product review records are available separately under **More tools → Review history**.
 
 Product collection does not create manual approval tasks. Operator registration approval remains an administrator responsibility.
 
@@ -52,7 +51,7 @@ Product collection does not create manual approval tasks. Operator registration 
 
 **Coverage** means the product types to collect for a particular bank. For example, RBC Chequing and RBC Savings are separate collection scopes.
 
-The public product count in Banks reflects products currently eligible for display in Public. Find it next to **Generated sources** and refresh it with **Search**.
+Banks shows the number of active canonical products for each bank in the selected country. Find it next to **Generated sources** and refresh it with **Search**.
 
 ### Add Banks with AI
 
@@ -187,7 +186,7 @@ In the type's details, administrators can manage additional fields for the curre
 - Missing optional information does not trigger extra searches, recollection, manual review, or a ranking penalty.
 - Read-only users can inspect the settings.
 
-Adding a product type does not mean its products meet publication requirements. A type referenced by Coverage or sources cannot be deleted.
+Adding a product type does not mean its products meet automatic approval requirements. A type referenced by Coverage or sources cannot be deleted.
 
 ## 8. Countries — Managing Available Working Countries
 
@@ -213,14 +212,14 @@ Check which fields changed in an approved product, including their previous and 
 2. Official materials are discovered, collected, and parsed.
 3. AI extracts product facts and checks them against captured official evidence.
 4. The system normalizes values and validates product identity, currency, required facts, data types, and financial meaning.
-5. Candidates that pass are **automatically approved** and stored as canonical product data; approved eligible data is reflected through the Public projection.
+5. Candidates that pass are **automatically approved** and stored as canonical product data.
 6. Candidates that do not pass are **automatically excluded**, with reasons recorded in Runs.
 
 AI supports research, extraction, and comparison. Backend validation rules determine acceptance and store the results. An AI confidence score cannot replace official evidence or bypass those rules.
 
 Optional facts supported by the same evidence are preserved. Uncertain optional facts are omitted. Do not invent missing values or turn them into zero, false, or an arbitrary currency, rate, or term. Preserve the actual rate conditions, fee conditions, and term boundaries.
 
-Captures, evidence, and operational records are private. Public reads only approved active projections and does not expose original evidence or internal diagnostic information.
+Captures, evidence, and operational records are private.
 
 ## Reference — Permissions and Error Handling
 

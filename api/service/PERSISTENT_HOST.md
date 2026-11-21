@@ -3,7 +3,7 @@
 2026-10-08 · Admin: https://fpds-three.vercel.app
 
 현재 코드를 유지하는 구성은 **Vercel Admin → HTTPS API 서버 → 같은 서버의 Worker**다.
-기존 Public 앱/API는 계속 사용할 수 있다. API가 수집 프로세스를 직접 시작하므로
+API가 수집 프로세스를 직접 시작하므로
 Worker만 다른 서버에 설치해도 기존 Vercel API의 수집 요청이 그 서버로 전달되지는 않는다.
 별도 큐나 외부 실행 서비스는 이번 안내에 추가하지 않는다.
 
@@ -72,7 +72,7 @@ FPDS_SOURCE_BROWSER_EXECUTABLE=/usr/bin/google-chrome
 FPDS_SOURCE_COLLECTION_STAGE_TIMEOUT_SECONDS=1800
 ```
 
-이 블록만으로 실행할 수는 없다. DB URL, session/CSRF secret, 기존 Public origin/API 값,
+이 블록만으로 실행할 수는 없다. DB URL, session/CSRF secret, Admin origin,
 저장소 driver/bucket/endpoint/region/prefix, 공식 domain fetch allowlist와 provider 설정도
 production 예제 및 기존 승인 환경에 맞춰 채운다. country·통화·필수 금융 조건은 바꾸지 않는다.
 현재 승인된 model과 key를 사용하며 수집 전에 해당 환경의 provider 사용 권한을 확인한다.
@@ -83,7 +83,7 @@ API 대상을 바꾼 후에는 재로그인한다. 호스팅 전환을 이유로
 서로 다른 환경의 session/CSRF secrets를 복사하지 않는다.
 
 S3 사용 시 evidence는 기존 비공개 bucket에 보존하고, plan/log는 저장소의
-`tmp/source-catalog-collections`, `tmp/source-collections`, `tmp/aggregate-refresh`에 쓴다.
+`tmp/source-catalog-collections`, `tmp/source-collections`에 쓴다.
 이 디렉터리는 `fpds`가 쓸 수 있어야 하며 release 교체 때 삭제하지 않는다.
 Filesystem storage를 사용하는 기존 환경이면 각 stage의 filesystem root도 영구 디스크에
 지정하고 기존 object key/evidence를 보존한다. 새로 빈 저장소를 연결해 과거 근거를 잃지 않는다.
@@ -157,8 +157,7 @@ api.example.com {
 새 API의 HTTPS health와 인증 조회가 통과한 뒤 **Vercel Admin 프로젝트의 Production**에서
 `FPDS_ADMIN_API_ORIGIN=https://api.example.com`로 변경하고 Admin을 재배포한다.
 이 값에 Admin 주소를 넣지 않는다. Preview는 별도 격리 API를 유지한다.
-기존 Public의 API 대상은 이 작업을 이유로 바꾸지 않는다.
-기존 Vercel public-read API는 계속 운영할 수 있지만 같은 범위의 수집을 두 API에서
+같은 범위의 수집을 두 API에서
 동시에 시작하지 않는다. 새 API가 같은 DB를 쓰더라도 runtime version과 설정은 따로 확인한다.
 
 ## 6. 운영 전 확인과 rollback
@@ -171,7 +170,7 @@ api.example.com {
 3. 브라우저 binary, AWS CLI, 비공개 저장소 권한과 DB 연결을 확인한다.
 4. 실제 수집이 별도로 허용된 환경에서 소규모 scope 하나만 실행한다.
    API 응답 후에도 runner가 남아 있고 Runs가 terminal 상태가 되는지 확인한다.
-   plan/log, evidence 저장, 자동 승인/제외와 Public projection 결과를 각각 확인한다.
+   plan/log, evidence 저장, 자동 승인/제외 결과를 각각 확인한다.
    missing essential은 자동 제외하며 수동 상품 승인으로 해결하지 않는다.
 5. API restart, provider 실패, stage timeout, 저장 권한 오류는 격리 환경에서 확인한다.
    실제 수집 완료와 재부팅 후 자동 복구는 서로 다른 검증이다.

@@ -8,7 +8,6 @@ import {
   Building2,
   Database,
   FileClock,
-  Gauge,
   Globe2,
   History,
   LayoutDashboard,
@@ -71,8 +70,7 @@ type NavItem = {
     | "sources"
     | "productTypes"
     | "countries"
-    | "changes"
-    | "health";
+    | "changes";
   href: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
@@ -98,7 +96,6 @@ const toolItems: NavItem[] = [
   { key: "productTypes", href: "/admin/product-types", icon: Shapes },
   { key: "countries", href: "/admin/countries", icon: Globe2 },
   { key: "changes", href: "/admin/changes", icon: History },
-  { key: "health", href: "/admin/health/dashboard", icon: Gauge },
 ];
 
 const copyByLocale: Record<AdminLocale, ShellCopy> = {
@@ -116,7 +113,6 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
       sources: "Sources",
       productTypes: "Product types",
       changes: "Changes",
-      health: "Public health",
     },
   },
   ko: {
@@ -133,7 +129,6 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
       sources: "소스",
       productTypes: "상품 유형",
       changes: "변경 이력",
-      health: "공개 데이터 상태",
     },
   },
   ja: {
@@ -150,7 +145,6 @@ const copyByLocale: Record<AdminLocale, ShellCopy> = {
       sources: "ソース",
       productTypes: "商品タイプ",
       changes: "変更履歴",
-      health: "公開データ状態",
     },
   },
 };

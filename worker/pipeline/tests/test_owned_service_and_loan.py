@@ -130,7 +130,10 @@ class OwnedServiceAndLoanTests(unittest.TestCase):
   registry=SourceRegistry('fixture','WFBN','US','credit-card','en',('wellsfargo.com',),'detail',(source,))
   page=CapturedPage(item.context.source_document_id,item.context.snapshot_id,item.context.parsed_document_id,url,html,hashlib.sha256(html.encode()).hexdigest())
   plan=EvidenceResearchPlanner().plan(run_id='run',registry=registry,inputs=[item],captures=[page],attempted_urls={url},parent_counts={})
-  self.assertTrue(any('/active-cash/terms?' in r['url'] and 'fpid=' in r['url'] for r in plan['sources']),plan)
+  identity = 'https://www.wellsfargo.com/credit-cards/active-cash/terms?fpid=012686I6F40000&product_code=CC&subproduct_code=AC'
+  terms = [row for row in plan['sources'] if row['normalized_source_url'] == identity]
+  self.assertEqual([row['url'] for row in terms], [
+      'https://www.wellsfargo.com/credit-cards/active-cash/terms/?FPID=012686I6F40000&product_code=CC&subproduct_code=AC'])
   self.assertLessEqual(len(plan['sources']),2)
  def test_invalid_and_foreign_pricing_links_fail_closed(self):
   from worker.native_linked_card_pricing import normalized_link_url

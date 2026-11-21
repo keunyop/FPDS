@@ -1,7 +1,7 @@
 # FPDS Startup Guide
 
 FPDS collects and validates official financial-product information.
-This guide runs FPDS API and FPDS Admin locally.
+This guide runs FPDS Admin and its API locally.
 
 ## 1. Prerequisites
 
@@ -88,5 +88,12 @@ Use `localhost` consistently rather than mixing it with `127.0.0.1`.
 Press `Ctrl+C` in each terminal to stop the servers.
 
 For further work: [development guide](descent/FPDS_Admin_개발_가이드.md),
-[Admin](app/admin/README.md), [API](api/service/README.md),
-[Public app](app/public/README.md).
+[Admin](app/admin/README.md), [API](api/service/README.md).
+
+## Hosted service suspension - 2026-10-19
+
+The Admin and API production projects were paused on 2026-10-19. The existing Supabase database
+and private S3 evidence remain available by Product Owner direction. Local apps
+use that Supabase database and require network access; this is not an offline DB
+copy. Do not pause/delete Supabase, initialize/reset the existing database. Local Admin changes still affect the shared
+existing data. See the [service inventory and resume procedure](descent/05-operations-handbook.md).

@@ -16,9 +16,8 @@ FPDS Admin is a tool for managing the results of collecting and automatically va
 | db/migrations | PostgreSQL schema change history |
 | shared | Contracts for language, design, security, and shared configuration |
 | storage | Private source storage contract |
-| app/public | Separate Public app; modify only when the change also affects public results |
 
-The flow is **Admin → API → Worker/DB → approved Public projection**. The browser does not access the DB or source storage directly. See the [Admin route list](../app/admin/routes.manifest.json) for actual screen paths and the [User Manual](FPDS_Admin_사용자_매뉴얼.md) for operating instructions.
+The flow is **Admin → API → Worker/DB → canonical product**. The browser does not access the DB or source storage directly. See the [Admin route list](../app/admin/routes.manifest.json) for actual screen paths and the [User Manual](FPDS_Admin_사용자_매뉴얼.md) for operating instructions.
 
 ## 2. Running the Project for the First Time
 

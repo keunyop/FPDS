@@ -1,14 +1,13 @@
 import { adminEnvironmentLabel } from "@/lib/admin-auth-client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Activity, ArrowUpRight, Gauge, ShieldCheck } from "lucide-react";
+import { Activity, ArrowUpRight, ShieldCheck } from "lucide-react";
 
 import { AdminShell } from "@/components/fpds/admin/admin-shell";
 import { AdminPageHeader } from "@/components/fpds/admin/admin-page-header";
 import { SignupRequestReviewPanel } from "@/components/fpds/admin/signup-request-review-panel";
 import {
   fetchAdminSession,
-  fetchDashboardHealth,
   fetchRunStatusList,
   fetchSignupRequests,
   getAdminBrowserApiOrigin,
@@ -32,8 +31,6 @@ const OVERVIEW_COPY = {
     blocked: "Blocked",
     runAttention: "Run attention",
     runAttentionHint: "Failed or partial",
-    dashboardHealth: "Dashboard health",
-    dashboardHealthHint: "Stale, failed, or empty",
     signupRequests: "Signup requests",
     signupRequestsHint: "Pending approval",
     unavailable: "n/a",
@@ -56,8 +53,6 @@ const OVERVIEW_COPY = {
     blocked: "차단됨",
     runAttention: "실행 확인 필요",
     runAttentionHint: "실패 또는 부분 완료",
-    dashboardHealth: "Dashboard 상태",
-    dashboardHealthHint: "오래됨, 실패, 또는 비어 있음",
     signupRequests: "가입 요청",
     signupRequestsHint: "승인 대기",
     unavailable: "없음",
@@ -80,8 +75,6 @@ const OVERVIEW_COPY = {
     blocked: "ブロック中",
     runAttention: "実行の確認",
     runAttentionHint: "失敗または部分完了",
-    dashboardHealth: "Dashboard 健全性",
-    dashboardHealthHint: "古い、失敗、または空",
     signupRequests: "登録申請",
     signupRequestsHint: "承認待ち",
     unavailable: "なし",
@@ -105,8 +98,6 @@ const OVERVIEW_COPY = {
     blocked: string;
     runAttention: string;
     runAttentionHint: string;
-    dashboardHealth: string;
-    dashboardHealthHint: string;
     signupRequests: string;
     signupRequestsHint: string;
     unavailable: string;
@@ -156,17 +147,13 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
   }
 
   const activeSession = session!;
-  const [signupRequests, runs, dashboardHealth] = await Promise.all([
+  const [signupRequests, runs] = await Promise.all([
     activeSession.user.role === "admin" ? fetchOptional(fetchSignupRequests()) : Promise.resolve(null),
     fetchOptional(fetchRunStatusList(buildRunStatusParams())),
-    fetchOptional(fetchDashboardHealth()),
   ]);
 
   const envLabel = adminEnvironmentLabel(activeSession.environment);
   const runAttentionCount = runs?.summary.attention_items ?? null;
-  const dashboardIssueCount = dashboardHealth
-    ? dashboardHealth.summary.failed_domains + dashboardHealth.summary.stale_domains + dashboardHealth.summary.empty_domains
-    : null;
   const pendingSignupCount = activeSession.user.role === "admin" ? (signupRequests?.summary.pending_items ?? null) : null;
 
   const attentionItems: Array<{
@@ -186,15 +173,6 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
       available: runAttentionCount !== null,
       icon: Activity,
       href: buildAdminHref("/admin/runs", runLinkParams(), locale),
-    },
-    {
-      label: copy.dashboardHealth,
-      value: dashboardIssueCount === null ? copy.unavailable : dashboardIssueCount === 0 ? copy.healthy : copy.needsAttention,
-      hint: copy.dashboardHealthHint,
-      needsAttention: dashboardIssueCount !== null && dashboardIssueCount > 0,
-      available: dashboardIssueCount !== null,
-      icon: Gauge,
-      href: buildAdminHref("/admin/health/dashboard", new URLSearchParams(), locale),
     },
   ];
   if (activeSession.user.role === "admin") {
@@ -237,7 +215,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
             </p>
           </div>
 
-          <div className="mt-3 grid overflow-hidden rounded-lg border border-border bg-card sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-3 grid overflow-hidden rounded-lg border border-border bg-card sm:grid-cols-2">
             {attentionItems.map((item) => {
               const Icon = item.icon;
               const stateLabel = !item.available

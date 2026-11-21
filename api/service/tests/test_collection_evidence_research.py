@@ -52,6 +52,47 @@ def registry(sources):
 
 
 class EvidenceResearchTests(unittest.TestCase):
+    def test_capture_uses_observed_directory_and_document_key_spelling(self):
+        detail = source(url='https://examplebank.com/ca/deposits/everyday')
+        html = '<a href="pricing/?documentId=X%2f7&amp;utm_source=banner#fees">Account fee schedule</a>'
+        item, page = evidence(detail, html=html)
+        page = replace(page, response_metadata={'final_url': detail.url + '/'})
+        plan = self.plan(detail, inputs=[item], pages=[page])
+        companion, = plan['sources']
+        self.assertEqual(companion['url'], detail.url + '/pricing/?documentId=X%2f7')
+        self.assertEqual(companion['normalized_source_url'], detail.url + '/pricing?documentid=X%2F7')
+        for base in ['https://examplebank.com/us/', 'https://elsewhere.test/']:
+            bad = replace(page, response_metadata={'final_url': base})
+            self.assertEqual(self.plan(detail, inputs=[item], pages=[bad])['sources'], [])
+
+    def test_term_deposit_withdrawal_documents_survive_both_selection_stages(self):
+        from api_service.source_catalog import _discover_detail_companion_links
+        from worker.discovery.fpds_discovery.fetch import DiscoveryFetchPolicy
+
+        for country, label in [('CA', 'GIC redemption terms'), ('US', 'CD early withdrawal penalties')]:
+            with self.subTest(country=country):
+                detail = source(url=f'https://examplebank.com/{country.lower()}/term-deposit',
+                                country=country, product='gic', name='Fixed Term Deposit')
+                html = f'''<main>
+                    <a href="https://[invalid/">Broken link</a>
+                    <a href="/rewards/redemption-terms.pdf">Rewards points redemption terms</a>
+                    <a href="/gic/rewards/redemption-agreement">Rewards points redemption agreement</a>
+                    <a href="/business/gic-redemption-terms.pdf">Business GIC redemption terms</a>
+                    <a href="/login/gic-redemption-terms.pdf">GIC redemption terms</a>
+                    <a href="/fr-CA/notice.pdf">{label}</a>
+                    <a href="/disclosure?market=PH">{label}</a>
+                    <a href="/notice.pdf">{label}</a></main>'''
+                companions, _ = _discover_detail_companion_links(
+                    detail_rows=[{'normalized_url': detail.url}], country_code=country,
+                    product_type='gic', source_language='en', hostname='examplebank.com',
+                    allowed_domains=('examplebank.com',), fetch_policy=DiscoveryFetchPolicy(('examplebank.com',)),
+                    page_html_by_url={detail.url: html})
+                expected = ['https://examplebank.com/notice.pdf']
+                self.assertEqual([c.link.normalized_url for c in companions], expected)
+                plan = self.plan(detail, html=html)
+                self.assertEqual([s['url'] for s in plan['sources']], expected)
+                self.assertEqual(plan['sources'][0]['discovery_role'], 'linked_pdf')
+
     def plan(self, s=None, *, html=None, inputs=None, pages=None, attempted=None, counts=None, model=None, **kwargs):
         s = s or source()
         html = html or '<main><a href="/ca/account-fee-schedule">Account fee schedule</a></main>'
@@ -85,10 +126,11 @@ class EvidenceResearchTests(unittest.TestCase):
         s = source(url='https://examplebank.com/ca/credit-line', product='line-of-credit', name='Example Credit Line')
         html = '<a href="/current-rates.html">Current rates</a><a href="/line-of-credit-agreement.pdf">Line of credit agreement</a>'
         def model(**kw):
-            options = json.loads(kw['messages'][-1]['content'])['observed_links']
+            options = kw['payload']['links']
             choice = next(c['link_id'] for c in options if 'agreement' in c['url'])
             return {'stop': False, 'link_ids': [choice]}, {}
         result = self.plan(s, html=html, model=model)
+        self.assertNotIn('planner_failure', result['diagnostics'][0])
         self.assertEqual(result['sources'][0]['url'], 'https://examplebank.com/current-rates.html')
         self.assertLessEqual(len(result['sources']), MAX_ADDITIONAL_PER_DETAIL)
         self.assertEqual(result['diagnostics'][0]['required_rate_lead_reserved'], result['sources'][0]['url'])
@@ -246,9 +288,12 @@ class EvidenceResearchTests(unittest.TestCase):
         a, b = source(), source(url='https://examplebank.com/ca/other', source_id='other', name='Other Chequing Account')
         inputs, pages = zip(*(evidence(s, html='<a href="/ca/fees">Account fee schedule</a>') for s in [a, b]))
         result = EvidenceResearchPlanner().plan(run_id='run', registry=registry([a, b]), inputs=list(inputs),
-            captures=list(pages), attempted_urls={a.url, b.url}, parent_counts={})
+            captures=list(pages), attempted_urls={a.url, b.url}, parent_counts={}, remaining_sources=1)
         self.assertEqual(len(result['sources']), 1)
         self.assertEqual(set(result['sources'][0]['discovery_metadata']['parent_detail_urls']), {a.url, b.url})
+        origins = result['sources'][0]['discovery_metadata']['parent_observations']
+        self.assertEqual({key: row['observed_snapshot_id'] for key, row in origins.items()},
+                         {a.url: pages[0].snapshot_id, b.url: pages[1].snapshot_id})
 
     def test_current_bound_companion_supplies_second_hop_essential_lead(self):
         s = source()
@@ -558,7 +603,7 @@ class AcquisitionActionRunnerTests(unittest.TestCase):
 
 
 class CollectionOutcomeTests(unittest.TestCase):
-    def test_exact_source_field_loss_and_publication_boundaries_are_private_names_only(self):
+    def test_exact_source_field_loss_and_promotion_boundaries_are_private_names_only(self):
         result = runner._build_collection_outcome(
             extraction_output={'source_results': [{'source_id': 'detail', 'extracted_fields': [
                 {'field_name': 'standard_rate', 'candidate_value': 9.99, 'evidence_text_excerpt': 'PRIVATE QUOTE'},
@@ -571,18 +616,14 @@ class CollectionOutcomeTests(unittest.TestCase):
         self.assertEqual(result['field_flow'][0]['lost_during_normalization'], ['standard_rate'])
         self.assertEqual(result['excluded_source_count'], 1)
         self.assertEqual(result['canonical_promoted_candidate_count'], 0)
-        self.assertEqual(result['public_visibility'], 'not_verified')
-        self.assertEqual(result['projection_refresh_status'], 'not_requested_no_promotion')
         self.assertNotIn('PRIVATE QUOTE', json.dumps(result))
         self.assertNotIn('9.99', json.dumps(result))
 
-    def test_approval_does_not_claim_completed_public_projection(self):
+    def test_approval_reports_canonical_promotion(self):
         result = runner._build_collection_outcome(extraction_output={}, normalization_output={},
             validation_output={'source_results': [{'validation_action': 'auto_validated'}]}, promotion_result={'promoted_count': 1})
         self.assertEqual(result['auto_validated_source_count'], 1)
         self.assertEqual(result['canonical_promoted_candidate_count'], 1)
-        self.assertEqual(result['projection_refresh_status'], 'pending_launch')
-        self.assertEqual(result['public_visibility'], 'not_verified')
 
 if __name__ == "__main__":
     unittest.main()

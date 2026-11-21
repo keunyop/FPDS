@@ -227,6 +227,78 @@ class CollectionAccuracyTests(unittest.TestCase):
         self.assertFalse(quote_supports_value("term_rate_table", row, "1 year unavailable; 2 year 2.5% annual interest"))
         self.assertFalse(quote_supports_value("term_rate_table", row, "1 year -2.5% annual interest"))
 
+    def test_access_and_prohibition_have_opposite_meanings(self):
+        for quote, allowed in [
+            ("This GIC is not redeemable before maturity.", False),
+            ("This CD is not cashable until the maturity date.", False),
+            ("These deposits are non redeemable.", False),
+            ("Early withdrawals are not permitted.", False),
+            ("No early withdrawals are permitted.", False),
+            ("This deposit can be redeemed before maturity.", True),
+            ("This GIC is redeemable after 30 days without penalty on payable interest.", True),
+        ]:
+            for field, expected in [('redeemable_flag', allowed), ('non_redeemable_flag', not allowed)]:
+                with self.subTest(field=field, quote=quote):
+                    self.assertTrue(quote_supports_value(field, expected, quote))
+                    self.assertFalse(quote_supports_value(field, not expected, quote))
+
+    def test_term_deposit_awaiting_approval_needs_current_access_checks(self):
+        from worker.pipeline.fpds_collection_accuracy import ACCURACY_VERSION, payload_digest
+        row = {'country_code': 'CA', 'bank_code': 'EXAMPLE', 'product_type': 'gic',
+               'product_name': 'Fixed GIC', 'currency': 'CAD'}
+        payload = {'product_name': 'Fixed GIC', 'standard_rate': 3, 'term_length_text': '1 year',
+                   'non_redeemable_flag': True}
+        payload[RECEIPT_KEY] = {'accepted': True, 'version': 'collection-accuracy-2026-10-01-cost-access',
+                                'digest': payload_digest(row, payload)}
+        self.assertFalse(acceptance_receipt_valid(row, payload))
+        payload[RECEIPT_KEY]['version'] = ACCURACY_VERSION
+        self.assertTrue(acceptance_receipt_valid(row, payload))
+
+    def test_short_prohibition_quote_cannot_hide_exception_at_approval(self):
+        row, metadata, evidence = candidate_fixture()
+        row['product_type'] = 'gic'
+        row['product_name'] = row['candidate_payload']['product_name'] = 'Example GIC'
+        url = 'https://bank.example/fixed-gic'
+        for mapping in row['field_mapping_metadata'].values():
+            mapping['official_web_sources'] = [{'url': url}]
+        for chunk in evidence:
+            chunk['source_url'] = url
+        for field, value, quote in [
+            ('product_name', 'Example GIC', 'Example GIC in Canadian dollars'),
+            ('term_length_text', '1 year', 'Term: 1 year'),
+            ('non_redeemable_flag', True, 'This GIC is not redeemable before maturity.'),
+        ]:
+            mapping = dict(row['field_mapping_metadata']['product_name'], normalized_value=value,
+                           official_evidence_quote=quote, evidence_chunk_id=field)
+            row['field_mapping_metadata'][field] = mapping
+            row['candidate_payload'][field] = value
+            evidence = [chunk for chunk in evidence if chunk['evidence_chunk_id'] != field]
+            evidence.append({'evidence_chunk_id': field, 'source_url': url,
+                             'evidence_excerpt': quote})
+        clean, receipt = sanitize_candidate(row, source_metadata=metadata, evidence=evidence)
+        self.assertTrue(acceptance_receipt_valid(clean), receipt)
+        evidence[-1]['evidence_excerpt'] += ' However, early withdrawals are permitted in hardship cases.'
+        clean, receipt = sanitize_candidate(row, source_metadata=metadata, evidence=evidence)
+        self.assertEqual(receipt['omitted_fields']['non_redeemable_flag'], 'evidence_context_ambiguous')
+        self.assertFalse(acceptance_receipt_valid(clean))
+
+    def test_conflicting_or_qualified_prohibition_cannot_waive_penalty_proof(self):
+        for quote in [
+            "The CD is non-redeemable. The CD can be redeemed before maturity.",
+            "Non-redeemable except in the event of death.",
+            "The deposit is not redeemable during the first 30 days.",
+            "This GIC is not redeemable without a penalty.",
+            "The deposit is not non-redeemable.",
+            "If held in a registered plan, the deposit is not redeemable before maturity.",
+            "Cashable: No. Early withdrawal is permitted after 90 days.",
+            "Non-redeemable. The deposit may be withdrawn prior to maturity.",
+            "The deposit is cashable only upon death.",
+        ]:
+            for field in ['redeemable_flag', 'non_redeemable_flag']:
+                for value in [True, False]:
+                    with self.subTest(quote=quote, field=field, value=value):
+                        self.assertFalse(quote_supports_value(field, value, quote))
+
     def test_foreign_currency_fee_cannot_enter_domestic_product(self):
         for quote in ("Monthly fee $0 USD", "Monthly fee €0"):
             row, meta, evidence = candidate_fixture()
@@ -274,23 +346,12 @@ class CollectionAccuracyTests(unittest.TestCase):
         _,receipt=sanitize_candidate(row,source_metadata=meta,evidence=evidence)
         self.assertIn("source_is_not_product_detail",receipt["reasons"])
 
-    def test_new_projection_guard_preserves_legacy_and_hides_tampered_receipt(self):
-        from dataclasses import replace
-        from worker.pipeline.fpds_aggregate_refresh.models import CanonicalAggregateRow
-        from worker.pipeline.fpds_aggregate_refresh.service import AggregateRefreshService
-        row,meta,evidence=candidate_fixture()
-        accepted,_=sanitize_candidate(row,source_metadata=meta,evidence=evidence)
-        item=CanonicalAggregateRow(product_id="valid",bank_code="EXAMPLE",bank_name="Example Bank",country_code="CA",
-            product_family="deposit",product_type="savings",subtype_code="standard",product_name=row["product_name"],
-            source_language="en",currency="CAD",status="active",last_verified_at="2026-09-30T00:00:00Z",
-            last_changed_at=None,product_version_id="version-1",canonical_payload=accepted["candidate_payload"])
-        tampered=replace(item,product_id="tampered",canonical_payload={**item.canonical_payload,"monthly_fee":50})
-        legacy=replace(item,product_id="legacy",canonical_payload=row["candidate_payload"])
-        result=AggregateRefreshService().build_snapshot(snapshot_id="test",refresh_scope="all_active_products",country_code="CA",canonical_rows=[item,tampered,legacy])
-        self.assertEqual({r["product_id"] for r in result.projection_rows},{"valid","legacy"})
-        self.assertEqual(result.refresh_metadata["source_counts"]["excluded_accuracy_rows"],1)
-        import json
-        self.assertNotIn(RECEIPT_KEY,json.dumps(result.projection_rows))
+    def test_modified_financial_terms_invalidate_the_approved_receipt(self):
+        row, metadata, evidence = candidate_fixture()
+        accepted, _ = sanitize_candidate(row, source_metadata=metadata, evidence=evidence)
+        self.assertTrue(acceptance_receipt_valid(accepted))
+        payload = {**accepted["candidate_payload"], "monthly_fee": 50}
+        self.assertFalse(acceptance_receipt_valid(accepted, payload))
 
     def test_no_allowlist_and_fake_receipt_fail_closed(self):
         row,meta,evidence=candidate_fixture()

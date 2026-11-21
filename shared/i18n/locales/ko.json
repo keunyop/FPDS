@@ -2,22 +2,6 @@
   "locale": "ko",
   "resource_status": "draft",
   "domains": {
-    "public_navigation": {
-      "home": "홈",
-      "products": "상품",
-      "dashboard": "인사이트 대시보드"
-    },
-    "public_filters": {
-      "bank": "은행",
-      "product_type": "상품 유형",
-      "target_customer_tag": "대상 고객",
-      "clear_filters": "필터 초기화"
-    },
-    "public_metrics": {
-      "freshness": "최신성",
-      "recent_changes": "최근 변경",
-      "methodology": "산출 기준"
-    },
     "admin_operations": {
       "login": "관리자 로그인",
       "overview": "개요",
@@ -29,7 +13,6 @@
       "audit": "감사 로그",
       "publish": "배포 모니터",
       "usage": "LLM 사용량",
-      "health_dashboard": "대시보드 상태",
       "product_record": "상품 레코드"
     },
     "shared_taxonomy": {

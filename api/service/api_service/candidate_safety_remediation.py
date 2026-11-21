@@ -4,7 +4,6 @@ import argparse
 import json
 from typing import Any
 
-from api_service.aggregate_refresh import request_manual_aggregate_refresh
 from api_service.config import Settings
 from api_service.db import open_connection
 from api_service.security import new_id, utc_now
@@ -177,30 +176,10 @@ def retract_invalid_candidates(
         )
         items.append({"candidate_id": candidate_id, "product_id": product_id, "product_deactivated": product_deactivated})
 
-    aggregate_refreshes: list[dict[str, Any]] = []
-    if deactivated_product_ids:
-        country_codes = sorted(
-            {
-                str(row["country_code"] or "CA").strip().upper()
-                for row in rows
-                if row.get("product_id") and str(row.get("product_status")) == "active"
-            }
-        )
-        for country_code in country_codes:
-            aggregate_refreshes.append(
-                request_manual_aggregate_refresh(
-                    connection,
-                    actor=actor,
-                    request_context={**request_context, "remediation_candidate_ids": normalized_ids},
-                    country_code=country_code,
-                )
-            )
     return {
         "remediated_count": len(items),
         "deactivated_product_ids": sorted(set(deactivated_product_ids)),
         "items": items,
-        "aggregate_refresh": aggregate_refreshes[0] if len(aggregate_refreshes) == 1 else None,
-        "aggregate_refreshes": aggregate_refreshes,
     }
 
 

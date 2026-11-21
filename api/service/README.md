@@ -1,34 +1,6 @@
 # FPDS API Service
 
-## Public request cost controls
-
-Anonymous successful product, detail, filter, country and dashboard GET/HEAD
-responses allow a 60-second Vercel CDN cache keyed by full URL. Browser caches
-must revalidate. Errors, credential-bound endpoints, Admin routes, mutations and
-`fresh=1` reads remain `no-store`. CORS, security headers and country gates remain.
-
-Blocking read-only psycopg connection/query/close work runs together in worker
-threads. Completed-snapshot and latest-attempt context use one SQL round trip,
-retaining exact ordering and newer failed-attempt diagnostics. The existing
-60-second/64-entry validated projection cache still isolates DB role/options,
-country, snapshot and policy versions; new snapshots select a new origin key.
-
-The product detail HEAD route applies the same active-snapshot/financial gates
-as GET and returns no product body. Public pre-stream checks use HEAD; live
-comparison GETs send `fresh=1` to bypass the independent API CDN as well as Next
-Data Cache. Next's existing 300/900-second reads retain their separate bounds;
-cache generation dates never become new product verification dates.
-
-Release the API first so HEAD and fresh reads are ready, then release Public.
-If rolling back to an API without HEAD, roll back Public first. No data refresh
-or migration is required for these request controls.
-
-After rollout, verify a repeated anonymous URL becomes CDN HIT, the country/
-locale variants stay separate, fresh comparisons bypass it, and private/error
-responses remain uncached. Local tests do not establish serving deployment or
-billed savings. Retention maintenance is described in the
-[existing retention policy](../../docs/03-design/bounded-data-retention-policy.md).
-
+The [collection rules](../../docs/03-design/collection-accuracy-policy.md) describe the current document selection and acceptance contract. Use the [operator guide](../../descent/은행_상품_수집_검증_가이드.md) to interpret Runs and approval counts. Dated collection notes below describe earlier versions.
 
 ## Current native features and linked essential FAQs - 2026-10-13
 
@@ -109,52 +81,6 @@ the coordinated API/Worker code release for future collection; published data an
 serving runtime versions are distinct. See the PH diagnosis and publication report (`e391c209d398:docs/00-governance/ph-generic-collection-corrections-2026-10-13.md` in Git history).
 
 
-
-## Public Filipino locale - 2026-10-13
-
-Public queries, taxonomy, dashboard labels and feedback accept `fil`; unsupported
-locales still fall back to English for reads and fail validation for feedback.
-Source-derived product names, financial conditions and evidence remain unchanged.
-Apply `0048_public_feedback_filipino.sql` before releasing API and Public together.
-The additive locale constraint preserves existing feedback, product/country scope,
-retention and private boundaries. A code rollback can leave the expanded constraint
-in place; do not delete Filipino feedback to shrink it. Admin language/country
-activation and collection profiles are unchanged. No live migration is applied here.
-
-## Public database egress reduction - 2026-10-12
-
-Public GET routes open explicitly read-only database connections. Validated,
-locale-neutral projection rows are reused for 60 seconds in a process-local
-LRU of at most 64 entries, scoped by database host/port/name, database role and
-connection options, country, exact snapshot, and accuracy/market policy versions.
-New publication snapshots use a new key immediately. Same-key concurrent misses
-share one load and its result/error; another country's hits are not blocked.
-No failed load or expired fallback is cached. Writer connections bypass reuse.
-The cache is per serving process; cold starts/other instances still perform reads.
-
-Only validated rows enter the cache, after private approved payloads/mappings
-have been removed. Each caller receives an independent copy. Freshness and
-localized API responses are evaluated per request. Current receipt, digest,
-conditional cost/access/security, original values and optional-fact checks remain
-unchanged. The SQL reads the complete `unlimited_transactions_flag` evidence
-quote needed by receipt validation instead of the entire private field mapping.
-The full approved payload is retained for digest/financial validation.
-
-Cold product-detail reads include a parameterized exact product ID alongside
-country/snapshot/active filters; warm details reuse the validated country rows.
-Country counts, filters, list pages and dashboards reuse the same validated
-snapshot rows, preserving eligibility before counts, ranking and pagination.
-List filtering/pagination remains over those bounded shared rows; it does not
-page unvalidated database rows or change totals after excluding invalid products.
-
-Read-only same-snapshot comparison: CA120 products, 1,386,029 -> 388,909 JSON
-bytes (71.94% reduction); US85, 1,576,114 -> 574,188 (63.57%). All 205 validated
-rows were identical; sampled cold detail queries returned one row / 2,600-2,796
-bytes. Eleven repeated loads issued one full query; warm country counts issued
-none. These are local query-size/cache measurements, not deployed or billed-byte
-results. No schema, data, collection, billing or Worker change is required.
-Release the API through the existing release workflow and check serving query
-patterns/Shared Pooler Egress; the existing Public fetch caches may expire normally.
 
 ## Linked application prices, owned service costs and qualified loan terms - 2026-10-10
 
@@ -382,7 +308,7 @@ budgets remain; all browser attempts share a 48-per-Run allowance. Preflight
 uses direct HTTPS checks; capture owns browser rendering. Failed renders keep
 only an exact already-successful current-Run selection. No manual product review.
 Private Run receipts distinguish field omission/loss, automatic validation,
-canonical promotion and projection launch; Public visibility requires readback.
+canonical promotion and the approved version.
 [Implementation, regressions and separate release acceptance](../../docs/00-governance/admin-collection-parity-implementation-2026-10-06.md).
 
 Current captured official PDFs lacking discovery parent metadata bind only
@@ -433,7 +359,7 @@ bank/country/language, uses the immutable Run registry and verifies raw SHA-256.
 Private `run_metadata.evidence_research` retains gaps, origins, choices, stop and
 failure reasons plus bounded planner usage. No source-registry row, canonical
 mutation, manual review queue or schema migration is added by research itself.
-Final ordinary automatic promotion/Public refresh remain unchanged.
+Final automatic promotion remains in effect.
 Separately captured named annual-unit terms are explicit evidence links for the
 rate field in the extracted artifact. Ordinary origin lookup and normalization
 retain their complete anchor, URL, document and snapshot; optional/currency
@@ -462,10 +388,7 @@ registry. Extraction, normalization and automatic accuracy receipts retain that
 same run policy. Missing proven additional required facts exclude automatically;
 optional absence never blocks or starts extra searches/retries.
 
-Bank list/detail `published_product_count` counts distinct eligible products in
-the latest completed Public snapshot using the same Public accuracy gate. No
-snapshot yields zero; counts are not raw active canonical totals. No live data
-operation or deployment was performed for this local implementation.
+Bank list and detail return `active_product_count`, grouped by country and bank. A bank with no active canonical product returns zero.
 
 
 Coast Capital evidence correction (2026-10-03): shared fee classification and complete withdrawal consequences, parser v8 named legal panels, bounded GIC companions and static confirmation-dialog links are verified locally. Original input for two products plus current official companion terms for Better-than-Cash yield three ordinary automatic passes; missing terms and unverified issuer domains remain excluded. Worker 711 / API 580 pass. No live data writes or deployment; deploy API/source catalog and Worker together for future collection. Evidence and limits (`e391c209d398:docs/00-governance/coast-collection-evidence-corrections-2026-10-03.md` in Git history).
@@ -574,7 +497,7 @@ Current scope:
   uses bounded ranking discovery followed by server-pinned, one-bank-at-a-time
   official-evidence calls so one failed candidate cannot consume the batch
 - guarded bank deletion when no collected source document, candidate, canonical
-  product, or Public projection depends on the bank; remaining coverage and
+  or product depends on the bank; remaining coverage and
   generated-source rows are deleted with the profile
 - source catalog list/detail/create/update routes backed by `source_registry_catalog_item`
 - source catalog-selected collection launch backed by grouped `ingestion_run` creation and an API-side collection runner
@@ -591,17 +514,6 @@ Current scope:
 - bootstrap CLI for the first operator account
 
 Current routes:
-- `GET /api/public/countries`
-- `GET /api/public/products`
-- `GET /api/public/products/:productId`
-- `GET /api/public/filters`
-- `GET /api/public/dashboard-summary`
-- `GET /api/public/dashboard-rankings`
-- `GET /api/public/dashboard-scatter`
-- `POST /api/public/engagement`
-- `POST /api/public/feedback`
-- `GET /api/public/admin/engagement-summary`
-- `GET /api/public/admin/feedback`
 - `GET /api/admin/auth/countries`
 - `POST /api/admin/auth/login`
 - `POST /api/admin/auth/signup-requests`
@@ -620,8 +532,6 @@ Current routes:
 - `GET /api/admin/runs`
 - `GET /api/admin/runs/:runId`
 - `POST /api/admin/runs/:runId/retry`
-- `GET /api/admin/dashboard-health`
-- `POST /api/admin/dashboard-health/retry`
 - `GET /api/admin/change-history`
 - `GET /api/admin/banks`
 - `POST /api/admin/banks`
@@ -728,11 +638,8 @@ upload or copy `.env.dev` as a production environment file:
 - `FPDS_ENV=prod`
 - `FPDS_DATABASE_URL` for the selected database; a separate production database
   remains the default release posture
-- `FPDS_PUBLIC_WEB_ORIGIN` and `FPDS_ADMIN_WEB_ORIGIN`
-- `FPDS_PUBLIC_API_ORIGIN` and `FPDS_ADMIN_API_ORIGIN`
+- `FPDS_ADMIN_WEB_ORIGIN` and `FPDS_ADMIN_API_ORIGIN`
 - unique production `FPDS_ADMIN_SESSION_SECRET` and `FPDS_ADMIN_CSRF_SECRET`
-- a long random `FPDS_PUBLIC_APP_API_SECRET` shared only with the matching
-  Public app environment
 - `FPDS_COOKIE_SECURE=true`
 
 After Vercel authentication and environment configuration:
@@ -748,10 +655,7 @@ pnpm dlx vercel@latest link --yes --project switchabank-api
 pnpm dlx vercel@latest deploy --prod
 ```
 
-Verify `/healthz` first, then one country-scoped `/api/public/products` request.
-Public reads require the production schema/migrations and a completed aggregate
-snapshot. A healthy process alone does not prove that its database projection
-is release-ready.
+Verify `/healthz`, authenticate, and open the selected country’s Banks list.
 
 Temporary operating exception (2026-08-22): the Product Owner explicitly
 authorized both Vercel environments to reuse the current development database
@@ -770,41 +674,10 @@ cd api/service
 
 ## Notes
 
-- Public read routes now use the latest successful `aggregate_refresh_run` snapshot and read from `public_product_projection`.
-- GET /api/public/products and GET /api/public/filters accept an optional q
-  value up to 120 characters. It is normalized for surrounding/repeated
-  whitespace and matches bank_name or product_name case-insensitively as a
-  literal substring; percent and underscore are ordinary characters, not
-  query wildcards. The normalized value is returned as applied_filters.q.
-- GET /api/public/products also accepts product_name, which searches only the
-  public product name and does not require bank_code or product_type. A blank
-  value with product_name ascending sort returns all active products through
-  normal bounded pagination.
-- Public list pagination remains page/page_size API state so the web catalog
-  can load successive pages without exposing raw evidence or new data.
-- POST /api/public/engagement and GET
-  /api/public/admin/engagement-summary fail closed without the shared
-  Public-app credential. Writes accept only an active product ID plus one fixed
-  event type, are process-rate-limited, and persist only 400-day daily product
-  counts; no visitor-level or search value is stored.
-- POST /api/public/feedback requires the same Public-app credential, fixed
-  product/site category pairs, ISO country, EN/KO/JA locale, and at most 2,000
-  optional detail characters. Product reports are inserted only from an active
-  product in the latest completed Public snapshot. GET
-  /api/public/admin/feedback requires the server-only Public-app credential and
-  supports an optional exact country plus type/category/search/pagination
-  filters for the password-gated Public `/admin`; no visitor or contact
-  identity is stored.
 
 - Source-catalog collection starts only from authenticated Admin collection or
   retry actions. The collection runner still performs its bounded in-run
-  validation, automatic acceptance/exclusion, promotion and guarded aggregate refresh.
-- Public reads are country-scoped by bank-owned ISO alpha-2 codes.
-  `/api/public/countries` and `countries[]` in `/api/public/filters` expose only
-  countries with active products in their latest completed public snapshot.
-  Each country entry returns `code`, active product `count`, and
-  `bank_count`, the distinct active `bank_code` count from that same
-  snapshot.
+  validation, automatic acceptance or exclusion, and canonical promotion.
 - Admin login requires an enabled `country_code`. The selected country is
   persisted on `admin_auth_session`, returned by the session endpoint, and is
   the server authority for country-owned Admin reads and writes.
@@ -815,12 +688,8 @@ cd api/service
   (`product_id`, `candidate_id`, `run_id`, document/version IDs) remain stable;
   `product_type_code` remains a global semantic code while country-specific
   subtype taxonomy and bank coverage carry `country_code`.
-- Public product list/detail and dashboard-ranking responses may expose a single `product_url` for direct navigation to the bank's public product page; raw evidence traces, source excerpts, and source URL lists remain excluded from public responses.
 - Retired manual Review endpoints create no decisions, canonical writes or refresh requests.
-- Automatic promotion queues the accepted product's country,
-  and the runner claims pending work by country/scope instead of assuming
-  Canada.
-- Source collection runs the same guarded canonical upsert path for `auto_validated` pass candidates; promoted candidates queue `auto_promotion` aggregate refresh requests, while non-product page-title false positives are rejected before they can become public canonical products.
+- Source collection promotes validated candidates to canonical products and records their versions.
 - Exact-product discovery inspects selected detail pages for directly linked
   pricing, fee, rate, account-guide, and agreement companions. It keeps this
   relationship bounded (two per detail, 48 per scope), filters conflicting
@@ -828,9 +697,7 @@ cd api/service
   metadata. Product/document and market query keys remain part of source
   identity so query-addressed US disclosures do not collapse into one row;
   tracking, locale, and presentation keys are removed.
-- `/api/admin/dashboard-health` now exposes aggregate freshness, queue state, serving fallback, stale detection, and manual retry availability for the Canada public aggregate domain.
-- Public dashboard summary, ranking, and scatter responses currently derive request-time filtered results from the latest successful projection snapshot so they can share the same filter vocabulary as the product grid without requiring precomputed per-filter dashboard scopes.
-- The settings loader now reads both `FPDS_ALLOWED_PUBLIC_ORIGINS` and `FPDS_ALLOWED_ADMIN_ORIGINS`, and the live CORS middleware allows the combined origin set because the same FastAPI service now fronts both public and admin browser surfaces.
+- Credentialed requests accept only the configured Admin CORS origins.
 - Passwords are hashed with Python's built-in `scrypt`.
 - The session cookie is still `fpds_admin_session` per the shared auth contract.
 - Login throttling is DB-backed with per-account lockout and recent-attempt checks.
@@ -842,7 +709,7 @@ cd api/service
   Earlier Review AI/backfill contracts remain in historical model records and
   internal test fixtures. They are not an active collection or correction path.
   Recollect through the automatic accuracy gate to verify changed product facts.
-- Collection, automatic promotion and aggregate refresh resolve the same
+- Collection and automatic promotion resolve the same
   versioned `(country_code, product_type)` market profile. Generated source
   metadata records the profile key/version. US Checking does not inherit the
   Canadian transaction-count requirement, US CDs use an early-withdrawal
@@ -856,7 +723,6 @@ cd api/service
   stale generated details are inactivated through guarded state changes.
   Masked financial templates and unrelated percentages, including
   transaction/conversion and ATM/ABM assessment fees, cannot satisfy a rate fact,
-  country-specific Public projection omits optional Admin candidate copy, and
   comparison-critical prose is retained only within a field-specific safe bound
   that does not cut a condition mid-word or mid-clause.
   US personal/vehicle-loan representative APR summaries also preserve official
@@ -1158,49 +1024,7 @@ cd api/service
   country/state test data.
 
 
-## Public rate interpretation (2026-09-16)
-
-`api_service/public_rates.py` is the shared read-time interpretation for product
-list/detail, sorting, dashboard metrics/rankings/scatter. The additive `rate`
-object distinguishes absolute/range/reference/conditional/promotional/unknown.
-Only an absolute full rate supplies numeric comparison values. Legacy
-`public_display_rate` and `card_display_rate` responses are safe aliases of that
-value; stored data and source summaries remain intact. The interpreter never
-loads a prime rate or combines a benchmark and margin. Run the Public rate and
-product regression tests together. The separately reviewed, rollback-by-default
-single-record correction is documented in
-the rate correction audit (`e391c209d398:docs/00-governance/public-rate-correction-2026-09-16.md` in Git history).
-
-## Public verification freshness (2026-09-21)
-
-Snapshot generation and product verification are separate. Public product rows
-carry read-time verification state/deadlines; snapshot success is neutral and
-never substitutes for a missing product check. Catalog, comparison, Home/finder
-results and detail share the EN/KO/JA product status. Existing comparisons and
-product availability stay intact. Legacy clients retain fresh/stale/unavailable,
-with fresh restricted to known checks within their policy window.
-
-See [the freshness policy and operator report](../../docs/03-design/public-verification-freshness-policy.md)
-for contract details, the read-only overdue CLI, manual daily/weekly review and
-release order. Initial warning-only intervals are 7/30 days for rate-led products and 30/90 days for chequing/cards. D-069 collection
-is manual; these changes do not start collection, update facts or publish data.
-
-
-## Deposit comparison conditions (2026-09-24)
-
-The [deposit comparison policy](../../docs/03-design/public-deposit-comparison-policy.md) supersedes headline-only Savings/GIC
-comparison and implicit one-year calculation. Home scopes rankings by type,
-currency, rate basis and exact GIC term/redemption category. The finder uses
-those gates before its existing metric; the calculator uses disclosed annual
-basis and an explicit period, or a concise unavailable reason and official link.
-`deposit_terms` is additive. Public reads a bounded whitelist from the exact
-approved version pinned by the snapshot; aggregates preserve these qualifiers
-for future refreshes. Missing basis is never inferred from country. API release
-precedes Public; old cached contracts fail closed. No live refresh or migration
-is needed for the version-pinned bridge. See the policy for current data limits.
-
-
-## Public-aligned comparison collection (2026-09-29)
+## Evidence-backed comparison fields (2026-09-29)
 
 Market profile v5 retains the existing approval essentials and adds bounded
 comparison qualifiers from the same evidence pass: annual/APY basis, calculation,
@@ -1213,9 +1037,6 @@ and capped savings bonuses cannot supply full rates; CD rate-guarantee/funding,
 grace and penalty days cannot supply maturity. US projections retain these
 approved financial qualifiers while continuing to omit private evidence/copy.
 
-See the bounded CA/US audit and correction report (`e391c209d398:docs/00-governance/public-collection-alignment-2026-09-29.md` in Git history) for six applied
-existing-product repairs, preserved verification dates, remaining gaps and the
-read-only `scripts/maintenance/public_collection_gap_report.py` command.
 
 ## Approved collection policy update - 2026-10-01
 

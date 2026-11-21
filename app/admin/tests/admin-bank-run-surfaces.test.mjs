@@ -11,15 +11,15 @@ const {RunStatusSurface} = loadComponent("components/fpds/admin/run-status-surfa
 const render = (Component, props) => renderToStaticMarkup(React.createElement(Component, props));
 const coverage = {catalog_item_id:"qa-coverage", bank_code:"QA", bank_name:"QA Bank", country_code:"CA", product_type:"savings", status:"active", generated_source_count:8, has_completed_collection:true,
   collection_preparation:{status:"run_created",run_id:"private-run"}};
-const bank = {bank_code:"QA",bank_name:"QA Bank",country_code:"CA",status:"active",source_language:"en",catalog_product_types:["savings"],catalog_items:[coverage],generated_source_count:8,published_product_count:3};
+const bank = {bank_code:"QA",bank_name:"QA Bank",country_code:"CA",status:"active",source_language:"en",catalog_product_types:["savings"],catalog_items:[coverage],generated_source_count:8,active_product_count:3};
 const productTypes = [{product_type_code:"savings",display_name:"Savings",description:"Savings accounts",status:"active"}];
 const banksProps = locale => ({banks:{items:[bank],summary:{total_items:1},facets:{statuses:["active","inactive"]}},filters:{q:"",status:""},locale,csrfToken:null,activeBankCode:null,activeBankDetail:null,addModalOpen:false,aiAddModalOpen:false,countryCode:"CA",productTypes,userRole:"admin"});
 const filters = {q:"",states:["started","completed","failed"],runType:"",partialOnly:false,startedFrom:"",startedTo:"",sortBy:"started_at",sortOrder:"desc",page:1};
 const run = {run_id:"qa-run",run_status:"queued",run_type:"snapshot_capture",bank_code:"QA",product_type:"savings",trigger_type:"manual",started_at:"2026-10-04T16:00:00Z",source_item_count:8,success_count:0,failure_count:0,candidate_count:0,review_queued_count:0};
 const runs = {items:[run],summary:{run_type_counts:{}},page:1,page_size:20,total_items:21,total_pages:2,has_next_page:true};
 
-for (const [locale,label,refresh] of [["en","Published products","Auto refresh"],["ko","공개된 상품","자동 새로고침"],["ja","公開商品","自動更新"]]) {
-  test(`Banks ${locale}: published count alongside sources, no per-type Run status, locale-preserving search`, () => {
+for (const [locale,label,refresh] of [["en","Active products","Auto refresh"],["ko","활성 상품","자동 새로고침"],["ja","有効な商品","自動更新"]]) {
+  test(`Banks ${locale}: active count alongside sources, no per-type Run status, locale-preserving search`, () => {
     const html = render(BankRegistrySurface, banksProps(locale));
     assert.ok(html.includes(label));
     assert.match(html, new RegExp(`name="locale"[^>]*value="${locale}"`));
@@ -56,7 +56,7 @@ for (const [locale,label,refresh] of [["en","Published products","Auto refresh"]
 
 test("Banks distinguishes a proven zero count from an older API with no count", () => {
   for (const [count,expected] of [[0,"0"],[undefined,"—"]]) {
-    const props = banksProps("en");props.banks.items=[{...bank,published_product_count:count}];
+    const props = banksProps("en");props.banks.items=[{...bank,active_product_count:count}];
     const html=render(BankRegistrySurface,props);
     assert.equal([...html.matchAll(/<td\b[^>]*>(.*?)<\/td>/gs)].at(-1)[1].trim(),expected);
   }

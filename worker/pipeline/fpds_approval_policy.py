@@ -328,6 +328,58 @@ def security_meaning(value: object) -> bool | None:
     return None if secured == unsecured else secured
 
 
+_ACCESS_WORD = r"(?:redeemable|cashable)"
+_MATURITY = r"(?:the )?maturity(?: date)?"
+_EARLY_ACCESS = r"early (?:withdrawals?|redemptions?)"
+_PROHIBITED_ACCESS = re.compile(
+    rf"\b(?:non[- ]{_ACCESS_WORD}|not {_ACCESS_WORD}|{_ACCESS_WORD}\s*:\s*no)\b"
+    rf"|\b(?:cannot|can not|may not) be (?:redeemed|cashed|withdrawn) (?:before|until|prior to) {_MATURITY}\b"
+    rf"|\b{_EARLY_ACCESS} (?:is |are )?(?:prohibited|not (?:allowed|permitted))\b"
+    rf"|\bno {_EARLY_ACCESS} (?:is |are )?(?:allowed|permitted)\b"
+    rf"|\b(?:{_ACCESS_WORD} (?:only (?:upon|at) {_MATURITY}|(?:upon|at) {_MATURITY} only)"
+    rf"|can only be (?:redeemed|cashed) at {_MATURITY})\b",
+    re.I,
+)
+_PERMITTED_ACCESS = re.compile(
+    rf"\b{_ACCESS_WORD}\b|\b(?:can|may) be (?:redeemed|cashed|withdrawn) (?:before|prior to) {_MATURITY}\b"
+    rf"|\b{_EARLY_ACCESS} (?:(?:are |is )?(?:allowed|permitted)|can be made)\b"
+    r"|\bcan be cashed in without penalty on the anniversary of the issue date\b",
+    re.I,
+)
+
+
+def withdrawal_access_meaning(value: object) -> bool | None:
+    """Determine whether a declaration proves access before maturity."""
+    text = " ".join(str(value or "").split()).casefold()
+    denied = list(_PROHIBITED_ACCESS.finditer(text))
+    # Remove whole negative declarations before looking for an independent
+    # permission. The word “redeemable” is also present inside a prohibition.
+    remainder = _PROHIBITED_ACCESS.sub(" ", text)
+    allowed = _PERMITTED_ACCESS.search(remainder) is not None
+    if bool(denied) == allowed:
+        return None
+    for match in denied:
+        tail = text[match.end():]
+        tail = re.sub(r"^\s+(?:until|before|prior to)\s+" + _MATURITY + r"\b", "", tail)
+        if re.match(r"\s+(?:until|before|prior|for|during|within|without|after|unless|except|only|if|when|in|at|upon)\b", tail):
+            return None
+    if re.search(r"\b(?:except(?:ion)?s?|unless|however|but|subject to approval|in (?:the )?event of death)\b", text):
+        return None
+    for clause in re.split(r"[.!?;]", text):
+        if re.search(r"redeem|cashable|cash(?:ed)? in|early withdrawal", clause) and re.search(
+            r"\b(?:if|when|might|could|depending|optional|not necessarily|not non[- ]|not always)\b"
+            r"|\bmay\b(?! (?:not )?be (?:redeemed|cashed|withdrawn))|\bor before maturity\b|\bnot cashable upon maturity only\b"
+            r"|\b(?:only (?:upon|on|in case of) (?:the )?death|upon (?:the )?death)\b"
+            r"|\bnot (?:permitted|allowed|available|eligible|able) to\b|\bnot (?:a |an )?(?:fully )?redeemable option\b", clause
+        ):
+            return None
+    # A mere mention of maturity or a negated permission does not prove access.
+    if allowed and re.search(r"\b(?:not|cannot|can not|never)\b[^.!?;]{0,50}\b(?:redeem|cash)"
+                             r"|\b(?:cashable|redeemable)\s+(?:at|upon) maturity\b", remainder):
+        return None
+    return allowed
+
+
 def withdrawal_consequences_usable(value: object) -> bool:
     """Require an actual consequence, not access/grace days or a terms pointer."""
     if not isinstance(value, str):

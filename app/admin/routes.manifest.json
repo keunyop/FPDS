@@ -108,12 +108,6 @@
       "route_id": "admin.changes",
       "implementation_path": "src/app/admin/changes/page.tsx",
       "access": "authenticated"
-    },
-    {
-      "route": "/admin/health/dashboard",
-      "route_id": "admin.health_dashboard",
-      "implementation_path": "src/app/admin/health/dashboard/page.tsx",
-      "access": "authenticated"
     }
   ]
 }

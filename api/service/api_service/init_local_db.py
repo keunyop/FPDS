@@ -23,9 +23,9 @@ _TRANSACTION_COMMAND = re.compile(r"^\s*(?:BEGIN|COMMIT|ROLLBACK)\s*;", re.MULTI
 
 def validate_local_settings(settings: Settings) -> None:
     origins = (
-        settings.admin_web_origin, settings.public_web_origin,
-        settings.admin_api_origin, settings.public_api_origin,
-        *settings.allowed_admin_origins, *settings.allowed_public_origins,
+        settings.admin_web_origin,
+        settings.admin_api_origin,
+        *settings.allowed_admin_origins,
     )
     if settings.env != "dev" or settings.cookie_secure:
         raise ValueError("Local initialization requires FPDS_ENV=dev and FPDS_COOKIE_SECURE=false.")

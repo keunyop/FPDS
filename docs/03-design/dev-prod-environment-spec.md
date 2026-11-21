@@ -42,7 +42,7 @@ Rules:
 | Environment | Purpose | BX-PF | Source Fetch | Cookie Secure |
 |---|---|---|---|---|
 | `dev` | local or shared development, prototype unblock, rehearsal | `mock` or `disabled` | `controlled` by default | `false` |
-| `prod` | public and admin production runtime | `live` when integration is ready | `live` | `true` |
+| `prod` | Admin production runtime | `live` when integration is ready | `live` | `true` |
 
 Baseline notes:
 - the only official environment layers are `dev` and `prod`
@@ -64,9 +64,7 @@ Baseline notes:
 
 | Key | Meaning |
 |---|---|
-| `FPDS_PUBLIC_WEB_ORIGIN` | public browser origin |
 | `FPDS_ADMIN_WEB_ORIGIN` | admin browser origin |
-| `FPDS_PUBLIC_API_ORIGIN` | public API or BFF origin |
 | `FPDS_ADMIN_API_ORIGIN` | admin API or BFF origin |
 | `FPDS_INTERNAL_API_ORIGIN` | private internal control endpoint origin |
 
@@ -115,9 +113,6 @@ Rules:
 | `FPDS_ADMIN_AUTH_MODE` | admin auth baseline, currently `server-session` |
 | `FPDS_ADMIN_SESSION_SECRET` | session secret for admin authentication |
 | `FPDS_ADMIN_CSRF_SECRET` | CSRF secret for admin write protection |
-| `FPDS_PUBLIC_APP_API_SECRET` | shared server-only credential between Public BFF/server components and the bounded engagement API |
-| `FPDS_PUBLIC_ADMIN_PASSWORD` | server-only password for the separate Public analytics admin |
-| `FPDS_PUBLIC_ADMIN_SESSION_SECRET` | HMAC signing secret for the Public analytics admin cookie |
 | `FPDS_STORAGE_ACCESS_KEY` | storage access credential |
 | `FPDS_STORAGE_SECRET_KEY` | storage secret credential |
 | `FPDS_CRAWLER_SHARED_SECRET` | worker or crawler shared secret |
@@ -126,9 +121,6 @@ Rules:
 - browser surfaces must not receive these values
 - all secrets stay placeholder-only in tracked files
 - real secrets belong in a secret manager or untracked runtime env files
-- the Public app and API must receive matching
-  `FPDS_PUBLIC_APP_API_SECRET` values per environment; only the Public app
-  receives the Public Admin password/session secret
 
 ### 4.5 Fetch, LLM, and Publish Integration
 
@@ -186,7 +178,6 @@ Rules:
 
 | Key | Meaning |
 |---|---|
-| `FPDS_ALLOWED_PUBLIC_ORIGINS` | explicit public CORS allowlist |
 | `FPDS_ALLOWED_ADMIN_ORIGINS` | explicit admin CORS allowlist |
 | `FPDS_SECURITY_HEADERS_ENABLED` | baseline browser security header toggle |
 | `FPDS_COOKIE_SECURE` | production secure-cookie rule |
@@ -211,23 +202,6 @@ Rules:
 - `dev` may keep monitoring disabled during early scaffold work
 - `prod` should point at the real monitoring backend before release
 
-### 4.8 Public Analytics
-
-| Key | Meaning |
-|---|---|
-| `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` | optional non-sensitive GA4 web-stream measurement ID for the Public production build; valid values use the `G-...` format |
-
-Rules:
-- an absent or invalid value disables the Google tag
-- configure the Production stream only after the Product Owner supplies the exact ID; Preview remains unset unless separate traffic handling is approved
-- the value is embedded in the browser bundle at build time, so every change requires a new Public deployment
-- the tag loads automatically without consent UI (Product Owner instruction, 2026-09-28); legacy consent storage is ignored and advertising/personalization remain denied
-- page metadata uses fixed screen types and an empty referrer; queries, dynamic IDs and browser titles are excluded
-- the Public integration disables the tag's default page view and emits one explicit event for the initial screen and each Next.js client-side navigation; keep Enhanced Measurement history-change page views disabled to prevent duplicates
-- verify Production activation with live browser requests plus Tag Assistant and GA4 Realtime or DebugView when property access is available
-
----
-
 ## 5. Placeholder Policy
 
 The tracked example files intentionally keep these values unresolved:
@@ -250,7 +224,7 @@ Codex can:
 
 The Product Owner or infrastructure owner must:
 - provision real database, storage, monitoring, and secret-management targets
-- choose exact public and admin domains
+- choose exact Admin domains
 - store real secrets outside git
 - provide real BX-PF credentials only when production integration is ready
 

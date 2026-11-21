@@ -1,0 +1,2 @@
+# Reduced official captures have byte-level checksums in sources.json.
+*.html binary

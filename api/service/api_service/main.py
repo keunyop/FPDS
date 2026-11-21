@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from secrets import compare_digest
 from typing import Annotated
 from typing import Any
 from typing import Literal
@@ -11,7 +10,6 @@ from fastapi import FastAPI, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from starlette.concurrency import run_in_threadpool
 
 from api_service.auth import (
     LoginError,
@@ -23,12 +21,6 @@ from api_service.auth import (
     review_signup_request,
     revoke_session,
     switch_session_country,
-)
-from api_service.aggregate_refresh import (
-    AggregateRefreshError,
-    launch_aggregate_refresh_runner,
-    load_dashboard_health,
-    request_manual_aggregate_refresh,
 )
 from api_service.bank_ai_onboarding import run_bank_ai_onboarding
 from api_service.ai_verification import (
@@ -45,8 +37,6 @@ from api_service.models import BankWriteRequest
 from api_service.models import CountrySwitchRequest
 from api_service.models import LoginRequest
 from api_service.models import ProductTypeWriteRequest
-from api_service.models import PublicEngagementRequest
-from api_service.models import PublicFeedbackRequest
 from api_service.models import ReviewDecisionRequest
 from api_service.models import SignupRequestCreateRequest
 from api_service.models import SignupRequestReviewRequest
@@ -54,33 +44,6 @@ from api_service.models import SourceCatalogCollectionRequest
 from api_service.models import SourceCatalogWriteRequest
 from api_service.models import SourceCollectionRequest
 from api_service.models import SourceRegistryWriteRequest
-from api_service.public_dashboard import (
-    SUPPORTED_AXIS_PRESETS,
-    load_public_dashboard_rankings,
-    load_public_dashboard_scatter,
-    load_public_dashboard_summary,
-    normalize_public_dashboard_query,
-)
-from api_service.public_engagement import (
-    PublicEngagementRateLimiter,
-    load_public_product_engagement_summary,
-    record_public_product_engagement,
-)
-from api_service.public_feedback import (
-    PublicFeedbackRateLimiter,
-    create_public_feedback_submission,
-    is_feedback_category_allowed,
-    load_public_feedback_submissions,
-    normalize_public_feedback_filters,
-)
-from api_service.public_products import (
-    PRODUCT_SORT_OPTIONS,
-    load_available_public_countries,
-    load_public_filters,
-    load_public_product_detail,
-    load_public_products,
-    normalize_public_products_query,
-)
 from api_service.product_types import (
     create_product_type_definition,
     delete_product_type_definition,
@@ -190,45 +153,6 @@ app = FastAPI(
     redoc_url=None,
 )
 app.state.settings = settings
-app.state.public_engagement_rate_limiter = PublicEngagementRateLimiter()
-app.state.public_feedback_rate_limiter = PublicFeedbackRateLimiter()
-
-
-def _public_app_auth_error(request: Request) -> JSONResponse | None:
-    configured_secret = request.app.state.settings.public_app_api_secret
-    if not configured_secret:
-        return _error(
-            status_code=503,
-            code="public_app_credential_not_configured",
-            message="The Public app credential is not configured.",
-            request=request,
-        )
-    provided_secret = request.headers.get("x-fpds-public-app-secret", "")
-    if not provided_secret or not compare_digest(provided_secret, configured_secret):
-        return _error(
-            status_code=401,
-            code="invalid_public_app_credential",
-            message="A valid Public app credential is required.",
-            request=request,
-        )
-    return None
-
-
-PUBLIC_CACHE_ROUTES = frozenset({
-    "/api/public/products", "/api/public/products/{product_id}",
-    "/api/public/filters", "/api/public/countries",
-    "/api/public/dashboard-summary", "/api/public/dashboard-rankings",
-    "/api/public/dashboard-scatter",
-})
-
-
-async def _public_read(settings: Settings, loader, **kwargs):
-    # Own the connection and all blocking psycopg work in the same worker thread.
-    # This also allows simultaneous cache misses to coalesce across requests.
-    def read():
-        with open_connection(settings, read_only=True) as connection:
-            return loader(connection, **kwargs)
-    return await run_in_threadpool(read)
 
 
 @app.middleware("http")
@@ -237,17 +161,7 @@ async def request_context_middleware(request: Request, call_next):
     request.state.generated_at = datetime.now(UTC).isoformat()
     response = await call_next(request)
     response.headers["x-request-id"] = request.state.request_id
-    # Cache only anonymous, successful projection reads, keyed by full URL.
-    # Fresh comparison checks, errors and credentialed endpoints stay uncached.
-    route = request.scope.get("route")
     response.headers["Cache-Control"] = "no-store"
-    if (request.method in {"GET", "HEAD"}
-            and getattr(route, "path", None) in PUBLIC_CACHE_ROUTES
-            and response.status_code == 200
-            and request.query_params.get("fresh") != "1"
-            and "set-cookie" not in response.headers):
-        response.headers["Cache-Control"] = "public, max-age=0, must-revalidate"
-        response.headers["Vercel-CDN-Cache-Control"] = "public, s-maxage=60"
 
     settings: Settings = request.app.state.settings
     if settings.security_headers_enabled:
@@ -279,11 +193,6 @@ async def source_registry_error_handler(request: Request, exc: SourceRegistryErr
     return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
 
 
-@app.exception_handler(AggregateRefreshError)
-async def aggregate_refresh_error_handler(request: Request, exc: AggregateRefreshError):
-    return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
-
-
 @app.exception_handler(RunRetryError)
 async def run_retry_error_handler(request: Request, exc: RunRetryError):
     return _error(status_code=exc.status_code, code=exc.code, message=exc.message, request=request)
@@ -301,7 +210,7 @@ async def unhandled_error_handler(request: Request, exc: Exception):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=sorted({*settings.allowed_public_origins, *settings.allowed_admin_origins}),
+    allow_origins=list(settings.allowed_admin_origins),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-CSRF-Token", "X-Request-ID"],
@@ -1179,380 +1088,6 @@ async def delete_product_type(request: Request, product_type_code: str) -> JSONR
     return _success({"product_type": product_type}, request)
 
 
-@app.get("/api/public/products")
-async def public_products(
-    request: Request,
-    locale: str | None = None,
-    country_code: str | None = "CA",
-    bank_code: Annotated[list[str] | None, Query()] = None,
-    product_type: Annotated[list[str] | None, Query()] = None,
-    subtype_code: Annotated[list[str] | None, Query()] = None,
-    target_customer_tag: Annotated[list[str] | None, Query()] = None,
-    fee_bucket: str | None = None,
-    minimum_balance_bucket: str | None = None,
-    minimum_deposit_bucket: str | None = None,
-    term_bucket: str | None = None,
-    q: Annotated[str | None, Query(max_length=120)] = None,
-    product_name: Annotated[str | None, Query(max_length=120)] = None,
-    sort_by: str = "default",
-    sort_order: Literal["asc", "desc"] = "desc",
-    page: Annotated[int, Query(ge=1)] = 1,
-    page_size: Annotated[int, Query(ge=1, le=100)] = 20,
-) -> JSONResponse:
-    query = normalize_public_products_query(
-        locale=locale,
-        country_code=country_code,
-        bank_codes=bank_code,
-        product_types=product_type,
-        subtype_codes=subtype_code,
-        target_customer_tags=target_customer_tag,
-        fee_bucket=fee_bucket,
-        minimum_balance_bucket=minimum_balance_bucket,
-        minimum_deposit_bucket=minimum_deposit_bucket,
-        term_bucket=term_bucket,
-        search_query=q,
-        product_name_query=product_name,
-        sort_by=sort_by,
-        sort_order=sort_order,
-        page=page,
-        page_size=page_size,
-    )
-    settings: Settings = request.app.state.settings
-    payload = await _public_read(settings, load_public_products, query=query)
-    return _success(
-        payload,
-        request,
-        meta_extra={
-            "locale": query.filters.locale,
-            "page": payload["page"],
-            "page_size": payload["page_size"],
-            "total_items": payload["total_items"],
-        },
-    )
-
-
-@app.post("/api/public/engagement")
-async def public_engagement(request: Request, payload: PublicEngagementRequest) -> JSONResponse:
-    auth_error = _public_app_auth_error(request)
-    if auth_error:
-        return auth_error
-    limiter: PublicEngagementRateLimiter = request.app.state.public_engagement_rate_limiter
-    if not limiter.allow():
-        return _error(
-            status_code=429,
-            code="public_engagement_rate_limited",
-            message="Public engagement recording is temporarily rate limited.",
-            request=request,
-        )
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
-        recorded = record_public_product_engagement(
-            connection,
-            country_code=payload.country_code,
-            product_id=payload.product_id,
-            event_type=payload.event_type,
-        )
-    if not recorded:
-        return _error(
-            status_code=404,
-            code="public_product_not_found",
-            message="The product is not active in the latest Public snapshot.",
-            request=request,
-        )
-    return _success({"recorded": True}, request, status_code=202)
-
-
-@app.post("/api/public/feedback")
-async def public_feedback(request: Request, payload: PublicFeedbackRequest) -> JSONResponse:
-    auth_error = _public_app_auth_error(request)
-    if auth_error:
-        return auth_error
-    if (
-        not is_feedback_category_allowed(
-            submission_type=payload.submission_type,
-            category=payload.category,
-        )
-        or (payload.submission_type == "product_error" and not payload.product_id)
-        or (payload.submission_type == "site_feedback" and payload.product_id is not None)
-    ):
-        return _error(
-            status_code=400,
-            code="invalid_feedback_payload",
-            message="The feedback category or product context is invalid.",
-            request=request,
-        )
-    limiter: PublicFeedbackRateLimiter = request.app.state.public_feedback_rate_limiter
-    if not limiter.allow():
-        return _error(
-            status_code=429,
-            code="public_feedback_rate_limited",
-            message="Public feedback submission is temporarily rate limited.",
-            request=request,
-        )
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
-        submission = create_public_feedback_submission(
-            connection,
-            country_code=payload.country_code,
-            submission_type=payload.submission_type,
-            category=payload.category,
-            details=payload.details,
-            locale=payload.locale,
-            product_id=payload.product_id,
-        )
-    if not submission:
-        return _error(
-            status_code=404,
-            code=(
-                "public_product_not_found"
-                if payload.submission_type == "product_error"
-                else "public_country_not_found"
-            ),
-            message="The selected Public product or country is not available.",
-            request=request,
-        )
-    return _success({"submission": submission}, request, status_code=201)
-
-
-@app.get("/api/public/admin/feedback")
-async def public_admin_feedback(
-    request: Request,
-    country_code: Annotated[
-        str | None,
-        Query(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$"),
-    ] = None,
-    submission_type: Literal["product_error", "site_feedback"] | None = None,
-    category: Literal[
-        "accessibility_issue",
-        "broken_link",
-        "content_issue",
-        "feature_suggestion",
-        "incorrect_product_details",
-        "incorrect_rate_or_fee",
-        "missing_information",
-        "other",
-        "outdated_information",
-        "usability_issue",
-    ] | None = None,
-    q: Annotated[str | None, Query(max_length=200)] = None,
-    page: Annotated[int, Query(ge=1)] = 1,
-    page_size: Annotated[int, Query(ge=1, le=100)] = 50,
-) -> JSONResponse:
-    auth_error = _public_app_auth_error(request)
-    if auth_error:
-        return auth_error
-    filters = normalize_public_feedback_filters(
-        country_code=country_code,
-        submission_type=submission_type,
-        category=category,
-        search=q,
-        page=page,
-        page_size=page_size,
-    )
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
-        payload = load_public_feedback_submissions(connection, filters=filters)
-    return _success(payload, request)
-
-
-@app.get("/api/public/admin/engagement-summary")
-async def public_engagement_summary(
-    request: Request,
-    country_code: Annotated[str | None, Query(min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")] = None,
-) -> JSONResponse:
-    auth_error = _public_app_auth_error(request)
-    if auth_error:
-        return auth_error
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
-        summary = load_public_product_engagement_summary(
-            connection,
-            country_code=country_code,
-        )
-    return _success(summary, request)
-
-
-@app.head("/api/public/products/{product_id}")
-@app.get("/api/public/products/{product_id}")
-async def public_product_detail(
-    request: Request,
-    product_id: str,
-    locale: str | None = None,
-    country_code: str | None = "CA",
-) -> JSONResponse:
-    filters = normalize_public_products_query(
-        locale=locale,
-        country_code=country_code,
-        bank_codes=None,
-        product_types=None,
-        subtype_codes=None,
-        target_customer_tags=None,
-        fee_bucket=None,
-        minimum_balance_bucket=None,
-        minimum_deposit_bucket=None,
-        term_bucket=None,
-        sort_by="default",
-        sort_order="desc",
-        page=1,
-        page_size=1,
-    ).filters
-    settings: Settings = request.app.state.settings
-    payload = await _public_read(settings, load_public_product_detail, product_id=product_id, filters=filters)
-    if request.method == "HEAD":
-        return Response(status_code=404 if payload is None else 200)
-    if payload is None:
-        return _error(
-            status_code=404,
-            code="not_found",
-            message="Public product was not found in the latest active snapshot.",
-            request=request,
-        )
-    return _success(payload, request, meta_extra={"locale": filters.locale, "product_id": product_id})
-
-
-@app.get("/api/public/filters")
-async def public_filters(
-    request: Request,
-    locale: str | None = None,
-    country_code: str | None = "CA",
-    bank_code: Annotated[list[str] | None, Query()] = None,
-    product_type: Annotated[list[str] | None, Query()] = None,
-    subtype_code: Annotated[list[str] | None, Query()] = None,
-    target_customer_tag: Annotated[list[str] | None, Query()] = None,
-    fee_bucket: str | None = None,
-    minimum_balance_bucket: str | None = None,
-    minimum_deposit_bucket: str | None = None,
-    term_bucket: str | None = None,
-    q: Annotated[str | None, Query(max_length=120)] = None,
-) -> JSONResponse:
-    query = normalize_public_products_query(
-        locale=locale,
-        country_code=country_code,
-        bank_codes=bank_code,
-        product_types=product_type,
-        subtype_codes=subtype_code,
-        target_customer_tags=target_customer_tag,
-        fee_bucket=fee_bucket,
-        minimum_balance_bucket=minimum_balance_bucket,
-        minimum_deposit_bucket=minimum_deposit_bucket,
-        term_bucket=term_bucket,
-        search_query=q,
-        sort_by="default",
-        sort_order="desc",
-        page=1,
-        page_size=20,
-    )
-    settings: Settings = request.app.state.settings
-    payload = await _public_read(settings, load_public_filters, filters=query.filters,
-        search_query=query.search_query,
-    )
-    return _success(payload, request, meta_extra={"locale": query.filters.locale})
-
-
-@app.get("/api/public/countries")
-async def public_countries(request: Request) -> JSONResponse:
-    settings: Settings = request.app.state.settings
-    countries = await _public_read(settings, load_available_public_countries)
-    return _success({"countries": countries}, request)
-
-
-@app.get("/api/public/dashboard-summary")
-async def public_dashboard_summary(
-    request: Request,
-    locale: str | None = None,
-    country_code: str | None = "CA",
-    bank_code: Annotated[list[str] | None, Query()] = None,
-    product_type: Annotated[list[str] | None, Query()] = None,
-    subtype_code: Annotated[list[str] | None, Query()] = None,
-    target_customer_tag: Annotated[list[str] | None, Query()] = None,
-    fee_bucket: str | None = None,
-    minimum_balance_bucket: str | None = None,
-    minimum_deposit_bucket: str | None = None,
-    term_bucket: str | None = None,
-) -> JSONResponse:
-    query = normalize_public_dashboard_query(
-        locale=locale,
-        country_code=country_code,
-        bank_codes=bank_code,
-        product_types=product_type,
-        subtype_codes=subtype_code,
-        target_customer_tags=target_customer_tag,
-        fee_bucket=fee_bucket,
-        minimum_balance_bucket=minimum_balance_bucket,
-        minimum_deposit_bucket=minimum_deposit_bucket,
-        term_bucket=term_bucket,
-        axis_preset=None,
-    )
-    settings: Settings = request.app.state.settings
-    payload = await _public_read(settings, load_public_dashboard_summary, query=query)
-    return _success(payload, request, meta_extra={"locale": query.filters.locale})
-
-
-@app.get("/api/public/dashboard-rankings")
-async def public_dashboard_rankings(
-    request: Request,
-    locale: str | None = None,
-    country_code: str | None = "CA",
-    bank_code: Annotated[list[str] | None, Query()] = None,
-    product_type: Annotated[list[str] | None, Query()] = None,
-    subtype_code: Annotated[list[str] | None, Query()] = None,
-    target_customer_tag: Annotated[list[str] | None, Query()] = None,
-    fee_bucket: str | None = None,
-    minimum_balance_bucket: str | None = None,
-    minimum_deposit_bucket: str | None = None,
-    term_bucket: str | None = None,
-) -> JSONResponse:
-    query = normalize_public_dashboard_query(
-        locale=locale,
-        country_code=country_code,
-        bank_codes=bank_code,
-        product_types=product_type,
-        subtype_codes=subtype_code,
-        target_customer_tags=target_customer_tag,
-        fee_bucket=fee_bucket,
-        minimum_balance_bucket=minimum_balance_bucket,
-        minimum_deposit_bucket=minimum_deposit_bucket,
-        term_bucket=term_bucket,
-        axis_preset=None,
-    )
-    settings: Settings = request.app.state.settings
-    payload = await _public_read(settings, load_public_dashboard_rankings, query=query)
-    return _success(payload, request, meta_extra={"locale": query.filters.locale})
-
-
-@app.get("/api/public/dashboard-scatter")
-async def public_dashboard_scatter(
-    request: Request,
-    locale: str | None = None,
-    country_code: str | None = "CA",
-    bank_code: Annotated[list[str] | None, Query()] = None,
-    product_type: Annotated[list[str] | None, Query()] = None,
-    subtype_code: Annotated[list[str] | None, Query()] = None,
-    target_customer_tag: Annotated[list[str] | None, Query()] = None,
-    fee_bucket: str | None = None,
-    minimum_balance_bucket: str | None = None,
-    minimum_deposit_bucket: str | None = None,
-    term_bucket: str | None = None,
-    axis_preset: str | None = None,
-) -> JSONResponse:
-    query = normalize_public_dashboard_query(
-        locale=locale,
-        country_code=country_code,
-        bank_codes=bank_code,
-        product_types=product_type,
-        subtype_codes=subtype_code,
-        target_customer_tags=target_customer_tag,
-        fee_bucket=fee_bucket,
-        minimum_balance_bucket=minimum_balance_bucket,
-        minimum_deposit_bucket=minimum_deposit_bucket,
-        term_bucket=term_bucket,
-        axis_preset=axis_preset,
-    )
-    settings: Settings = request.app.state.settings
-    payload = await _public_read(settings, load_public_dashboard_scatter, query=query)
-    return _success(payload, request, meta_extra={"locale": query.filters.locale})
-
-
 @app.get("/api/admin/review-tasks")
 async def review_tasks(
     request: Request,
@@ -1709,36 +1244,6 @@ async def retry_run(request: Request, run_id: str) -> JSONResponse:
                 "user_agent": request.headers.get("user-agent"),
             },
         )
-    return _success(payload, request, status_code=202)
-
-
-@app.get("/api/admin/dashboard-health")
-async def dashboard_health(request: Request) -> JSONResponse:
-    _actor, session_info = _resolve_session(request)
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
-        payload = load_dashboard_health(connection, country_code=_session_country(session_info))
-    return _success(payload, request)
-
-
-@app.post("/api/admin/dashboard-health/retry")
-async def retry_dashboard_health(request: Request) -> JSONResponse:
-    actor, session_info = _resolve_session(request)
-    _require_admin_role(actor)
-    _require_csrf(request, session_info=session_info)
-    settings: Settings = request.app.state.settings
-    with open_connection(settings) as connection:
-        payload = request_manual_aggregate_refresh(
-            connection,
-            actor=actor,
-            country_code=_session_country(session_info),
-            request_context={
-                "request_id": request.state.request_id,
-                "ip_address": _request_ip(request),
-                "user_agent": request.headers.get("user-agent"),
-            },
-        )
-    payload["launch"] = launch_aggregate_refresh_runner()
     return _success(payload, request, status_code=202)
 
 

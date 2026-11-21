@@ -61,14 +61,10 @@ class CurrentAccountFeaturesTests(unittest.TestCase):
  def test_original_fixture_hashes(self):
   for row in MANIFEST:self.assertEqual(hashlib.sha256(gzip.decompress((FIX/row['file']).read_bytes())).hexdigest(),row['sha256'])
 
- def test_interest_earning_balance_survives_as_noncomparable_qualified_rate(self):
-  from api_service.public_rates import public_rate
+ def test_interest_earning_balance_preserves_source_qualified_terms(self):
   from worker.pipeline.fpds_collection_accuracy import quote_supports_value
   row=next(x for x in MANIFEST if 'savings-account-with-atm' in x['url'])
   r,v,_=run_services([ordinary(row)]);p=r['candidate_payload']
-  projected={'product_family':'deposit','product_type':'savings','public_display_rate':p['standard_rate'],'refresh_metadata':p}
-  self.assertEqual(public_rate(projected)['kind'],'conditional')
-  self.assertIsNone(public_rate(projected)['comparable_rate'])
   quote=r['field_mapping_metadata']['interest_rate_summary']['official_evidence_quote']
   self.assertIn('Required Daily Balance To Earn Interest',quote)
   self.assertTrue(quote_supports_value('interest_rate_summary',p['interest_rate_summary'],quote))

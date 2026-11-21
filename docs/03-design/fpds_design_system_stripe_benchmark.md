@@ -4,9 +4,6 @@ Version: 3.0
 Date: 2026-04-22
 Status: Active current benchmark
 Source Documents:
-- `docs/03-design/product-grid-information-architecture.md`
-- `docs/03-design/insight-dashboard-metric-definition.md`
-- `docs/03-design/product-type-visualization-principles.md`
 - `docs/03-design/admin-information-architecture.md`
 - `docs/03-design/fpds-design-system.md`
 
@@ -20,7 +17,7 @@ Use it to answer:
 - what visual benchmark FPDS follows
 - what Shadcnblocks is responsible for
 - what FPDS must still own directly
-- how public and admin surfaces should feel today
+- how Admin screens should feel today
 
 If this document and `fpds-design-system.md` differ on current frontend direction, follow this document.
 
@@ -62,7 +59,6 @@ Start from vendor assets first. Wrap or edit only where FPDS needs domain-specif
 ### 3.3 FPDS-Owned Layer
 
 FPDS still owns:
-- product-type-aware public comparisons
 - methodology and freshness messaging
 - evidence-aware admin review flows
 - review, run, audit, usage, and health semantics
@@ -71,24 +67,6 @@ FPDS still owns:
 ---
 
 ## 4. Surface Direction
-
-### 4.1 Public
-
-Public surfaces should feel:
-- balanced
-- professional
-- comparison-oriented
-- lighter than the admin shell
-
-Current public priority:
-- `/products`
-- `/` Home (with legacy `/dashboard` redirect)
-
-Public UI should emphasize:
-- filter clarity
-- product-type-aware comparison
-- freshness and methodology transparency
-- navigation that preserves query scope
 
 ### 4.2 Admin
 
@@ -116,7 +94,7 @@ Admin UI should optimize for triage speed and evidence readability, not marketin
 1. Prefer Shadcnblocks templates or blocks over bespoke base components.
 2. Keep FPDS-specific behavior in repo-owned wrappers or route code.
 3. Track direct vendor edits in the override and adoption docs.
-4. Keep admin density tighter than public density.
+4. Use compact spacing for Admin workflows.
 5. Keep the current baseline light-first unless a later decision says otherwise.
 6. Do not let visual work weaken evidence boundaries or review clarity.
 7. Keep screen copy minimal and action-oriented; remove internal implementation detail unless the operator needs it to act safely.

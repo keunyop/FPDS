@@ -23,8 +23,6 @@ class LinkedAccountCategoryCostsTests(unittest.TestCase):
   self.assertIn('PHP100,000',p['interest_rate_summary']);self.assertIn('Minimum balance to earn interest:',p['interest_rate_summary'])
   self.assertIn('two (2) consecutive months',p['fee_waiver_condition'])
   self.assertNotIn('For All-Access Account',p['fee_waiver_condition'])
-  from api_service.public_rates import public_rate
-  self.assertEqual(public_rate({'product_family':'deposit','product_type':'savings','public_display_rate':0.05,'refresh_metadata':p})['kind'],'conditional')
  def test_other_issuer_uses_same_complete_source_contract(self):
   r,v,_=run_services(self.inputs(lambda t:t.replace('securitybank.com','examplebank.com').replace('Security Bank','Example Bank'),bank='EXAMPLE'))
   self.assertEqual(v.validation_action,'auto_validated')

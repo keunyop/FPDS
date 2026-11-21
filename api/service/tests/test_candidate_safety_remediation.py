@@ -28,7 +28,7 @@ class _Connection:
 
 
 class CandidateSafetyRemediationTests(unittest.TestCase):
-    def test_retracts_candidate_inactivates_current_product_and_queues_refresh(self) -> None:
+    def test_retracts_candidate_inactivates_current_product(self) -> None:
         connection = _Connection(
             [
                 {
@@ -49,10 +49,6 @@ class CandidateSafetyRemediationTests(unittest.TestCase):
         decided_at = datetime(2026, 7, 14, 6, 0, tzinfo=UTC)
         with (
             patch("api_service.candidate_safety_remediation.utc_now", return_value=decided_at),
-            patch(
-                "api_service.candidate_safety_remediation.request_manual_aggregate_refresh",
-                return_value={"request_status": "queued"},
-            ) as queue_refresh,
         ):
             result = retract_invalid_candidates(
                 connection,
@@ -66,8 +62,6 @@ class CandidateSafetyRemediationTests(unittest.TestCase):
         self.assertEqual(result["deactivated_product_ids"], ["prod-bad"])
         self.assertTrue(any("status = 'inactive'" in sql for sql, _params in connection.calls))
         self.assertTrue(any("candidate_safety_retracted" in sql for sql, _params in connection.calls))
-        queue_refresh.assert_called_once()
-        self.assertEqual(queue_refresh.call_args.kwargs["country_code"], "US")
 
 
 if __name__ == "__main__":

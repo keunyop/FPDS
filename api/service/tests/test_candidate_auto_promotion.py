@@ -189,7 +189,7 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         )
         self.assertFalse(any("INSERT INTO canonical_product" in sql for sql, _params in connection.calls))
 
-    def test_pass_candidate_promotes_to_canonical_with_audit_and_refresh(self) -> None:
+    def test_pass_candidate_promotes_to_canonical_with_audit(self) -> None:
         decided_at = datetime(2026, 5, 13, 12, 0, tzinfo=UTC)
         connection = _Connection(
             [
@@ -234,11 +234,6 @@ class CandidateAutoPromotionTests(unittest.TestCase):
         self.assertEqual(audit_call["product_id"], result["promoted_items"][0]["product_id"])
         self.assertIn('"auto_approve_min_confidence": 0.82', str(audit_call["event_payload"]))
 
-        refresh_call = next(params for sql, params in connection.calls if "INSERT INTO aggregate_refresh_request" in sql)
-        self.assertEqual(refresh_call["trigger_reason"], "auto_promotion")
-        self.assertEqual(refresh_call["country_code"], "CA")
-        self.assertIn('"candidate_ids": ["cand-001"]', str(refresh_call["request_metadata"]))
-        self.assertEqual(result["aggregate_refreshes"], [result["aggregate_refresh"]])
 
     def test_dynamic_candidate_with_eligible_ai_assessment_can_promote(self) -> None:
         candidate = _candidate_row()

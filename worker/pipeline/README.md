@@ -7,8 +7,7 @@ Current scope:
 - `fpds_evidence_retrieval/` implements `WBS 3.4` metadata-only candidate chunk retrieval with field-aware scoring and DB reads
 - `fpds_extraction/` implements `WBS 3.5` sparse extracted draft generation, extracted artifact storage, and bounded `model_execution` persistence
 - `fpds_normalization/` implements `WBS 3.6` canonical candidate mapping, `normalized_candidate` persistence, `field_evidence_link` persistence, and normalized artifact storage
-- `fpds_validation_routing/` implements `WBS 3.7` candidate validation recheck, confidence recomputation, prototype review-task routing, and validation artifact storage
-- `fpds_aggregate_refresh/` implements `WBS 5.6` the retained aggregate source dataset in `public_product_projection`; dashboard metrics, rankings, and scatter are derived from it at read time
+- `fpds_validation_routing/` rechecks the candidate's financial evidence and records automatic validation or exclusion. The Admin runner submits validated candidates for canonical promotion.
 
 Shared AI runtime note:
 - `fpds_ai_runtime.py` keeps the default web-search ceiling at four tool calls;
@@ -16,8 +15,7 @@ Shared AI runtime note:
   1 through 20. AI bank onboarding uses a requested-count-based ceiling from
   8 through 20 without changing other model workflows.
 
-Planned follow-on scope:
-- canonical upsert and change assessment
+For current evidence requirements and Run diagnostics, use the [approval rules](../../docs/03-design/collection-accuracy-policy.md) and the [operator guide](../../descent/은행_상품_수집_검증_가이드.md).
 - publish preparation
 
 Big 5 source-id note:
@@ -84,15 +82,6 @@ python -m worker.pipeline.fpds_validation_routing `
   --source-id TD-SAV-007
 ```
 
-Run aggregate refresh against the current canonical dataset in dev:
-
-```powershell
-python -m worker.pipeline.fpds_aggregate_refresh `
-  --env-file .env.dev `
-  --persist-db `
-  --snapshot-id agg_20260413_5601 `
-  --country-code CA
-```
 
 What `WBS 3.5` stores today:
 - extracted draft JSON artifact per parsed document in object storage
@@ -177,14 +166,6 @@ Current boundary:
 - Prototype routing mode sends every candidate to review even when validation passes
 - review decisions, canonical upsert, and change history still belong to later stages
 
-What `WBS 5.6` stores today:
-- one `aggregate_refresh_run` row per attempted snapshot
-- flattened `public_product_projection` rows with the shared filter vocabulary and approved bucket codes
-- no duplicate dashboard snapshot rows; API reads derive summary, ranking, and scatter payloads from the latest retained projection
-
-Current boundary:
-- this slice builds aggregate source datasets only; it does not implement the public products API, dashboard APIs, or public UI
-- later public API work can now read from persisted aggregate rows instead of joining live canonical tables directly
 
 Reliability note:
 - DB-backed worker stages now run `psql` with `ON_ERROR_STOP=1` so SQL errors abort the stage instead of being reported as false-positive success

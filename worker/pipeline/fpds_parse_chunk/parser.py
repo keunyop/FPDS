@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
 from worker.discovery.fpds_discovery.discovery import extract_structured_text_sections
+from worker.source_content_validity import has_pdf_header
 
 from .models import ParsedArtifact, ParsedSegment
 from .version import PARSER_NAME, PARSER_VERSION
@@ -26,10 +27,10 @@ class _RawSegment:
 
 def parse_snapshot_bytes(*, body: bytes, content_type: str) -> ParsedArtifact:
     normalized_content_type = content_type.lower().strip()
+    if has_pdf_header(body):
+        return _parse_pdf(body)
     if normalized_content_type.startswith("text/html"):
         return _parse_html(body)
-    if normalized_content_type.startswith("application/pdf") or body.startswith(b"%PDF"):
-        return _parse_pdf(body)
     raise ValueError(f"Unsupported snapshot content type for parsing: {content_type}")
 
 

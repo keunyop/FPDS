@@ -12,7 +12,7 @@ Current scaffold:
 Rules:
 - Keep the auth scaffold human-operator focused. Browser admin auth uses server-side sessions, not browser-held bearer tokens.
 - Keep runtime provider choice open. Do not lock an auth vendor or web framework in this folder.
-- Treat public, admin, internal, and worker boundaries as separate trust zones.
+- Treat Admin, internal service and worker boundaries as separate trust zones.
 - Keep raw object paths, storage keys, and private network fetches out of browser-facing surfaces.
 
 WBS follow-on:

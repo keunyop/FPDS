@@ -11,7 +11,7 @@ FPDS clone의 AGENTS.md, descent/FPDS_Admin_개발_가이드.md, api/service/REA
 
 ## 재현하고 수정
 
-같은 Run의 capture → parse/chunk → retrieval/extraction → normalization → validation → promotion/projection을 따라 최초 값·조건·origin 차이를 찾는다. exclusion reason만으로 은행 미공개나 모델 품질을 단정하지 않는다. 원문 SHA-256와 process/parser/cache identity를 확인한다.
+같은 Run의 문서 선택 → 캡처와 파싱 → 추출 → 정규화 → 검증 → 상품 원본 반영 순서로 최초의 차이를 찾는다. 은행 상세에서 직접 관찰한 링크, 실제 요청 주소, 최종 도착 주소, 원문 SHA-256과 파서 버전을 확인한다. 문서를 찾지 못한 경우, 읽지 못한 경우, 읽고도 상품 조건을 입증하지 못한 경우를 구분한다. 자세한 예시는 [운영 가이드](../../은행_상품_수집_검증_가이드.md)를 따른다.
 
 실제 parent/저장 artifact/current-origin을 재현하는 공식 source fixture와 독립 기대값을 먼저 만든다. 다른 상품·은행·국가·언어, 조건부 fee/금리 column/만료·충돌·origin mismatch의 부정 사례를 포함한다. 예상 hash를 통과 목적으로 바꾸지 않는다.
 
@@ -27,6 +27,6 @@ trusted origin은 해당 Run의 성공 selected snapshot/parse DB join에서 얻
 
 ## 검증과 결과
 
-source-backed 회귀 후 영향 Worker/독립 API suite, promotion/Public eligibility를 확인한다. 실제 PostgreSQL 쓰기·유료 provider·배포 검증은 허용된 환경에서만 수행한다.
+source-backed 회귀 후 영향 Worker/독립 API suite, 자동 승인 결과를 확인한다. 실제 PostgreSQL 쓰기·유료 provider·배포 검증은 허용된 환경에서만 수행한다.
 
-최초 결함, 공식 기대값, 누락 optional/제외 essential, 실제 테스트·비용·종료 사유를 보고한다. local replay, serving version, live Run, canonical, projection, Public readback을 구분한다. replay 통과 수를 공개 상품 수로 표시하지 않는다. journal과 이번 goal을 갱신한다.
+최초 결함, 공식 기대값, 누락 optional/제외 essential, 실제 테스트·비용·종료 사유를 보고한다. local replay, serving version, live Run, canonical 상품 기록을 구분한다. 재생 테스트 통과와 실제 상품 승인을 구분한다. journal과 이번 goal을 갱신한다.

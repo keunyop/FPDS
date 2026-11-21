@@ -1,5 +1,39 @@
 # Current work and unfinished ownership
 
+## Official bank documents and collection accuracy — 2026-11-21
+
+Trace Admin acquisition and acceptance against the Floorplan and stored fixtures. Reproduce missed or misattributed official evidence, correct shared selection and verification paths, and write an operator-facing guide and rules. Verify separately what was reproduced locally and what needs a live collection to measure.
+
+Status: Complete locally. Verified all 1,045 Worker tests in four groups, 594 API tests with disposable PostgreSQL and 56 Admin tests. Both historical fixture collections match their manifests. The current rules and Korean guide are linked from the development guide. Live collection success rates and rollout remain unmeasured.
+
+## Admin-only repository
+
+Scope: retire the consumer app, its endpoints, projection jobs and operating rules. Verify Admin collection, auth, canonical records, tests and build. Keep external environments and migration history under their existing ownership.
+
+Status: Implemented locally. Existing data is preserved. Earlier plans for consumer delivery or publication are superseded. Verification and the four pre-existing Worker failures are recorded in the development journal.
+
+## FPDS Admin Floorplan refresh — 2026-11-21
+
+Rebuild the Korean interactive map for the current Admin collection path. Cover the bank and source entry points, scope selection, capture, evidence, validation, canonical records and Run outcomes. Check the map against local code and test readability at 390, 768 and 1440 pixels. Use offline analysis only.
+
+Status: Complete. The interactive map describes 55 selected files, 19 routes and three guided flows. The Korean guide links to the source. Chrome exercised every guided step at 390, 768 and 1440 pixels. The review checked all mapped API routes for the shared session guard and all four mutations for role and CSRF guards.
+
+## FPDS collection walkthrough - 2026-11-20
+
+Status: Complete for the local source walkthrough and offline Floorplan.
+Scope: Trace the local Admin bank-product collection path and present it in
+plain Korean with a Floorplan map for the affected path. Keep all earlier work.
+Acceptance: Explain collection modes, source ownership, field proof, automatic
+exclusion and the distinction between Run completion and Public visibility.
+Verification: Cross-check current code and contracts, verify the generated map
+and inspect the workspace diff. Analysis uses local source and offline checks.
+Outcome: The map covers 35 source files, 11 request routes and three guided
+flows. Chrome rendered it at 1440, 768 and 390 pixels and opened the collection
+walkthrough at 390 pixels. API tests passed 83/83. Worker tests passed 25/26.
+The existing hash test failed again on retry. The bytes of all 19 mismatched
+test captures matched their tracked Git versions. Live Runs and publication
+were outside this analysis.
+
 ## Hosting cost reduction and clone handover cleanup - 2026-10-16
 
 Status: Local code, DB cleanup and handover cleanup verified. Authorized
@@ -209,84 +243,6 @@ routes, and diagnosis/journal record known limits and GSC follow-up. No runtime
 fix was justified by the observed responses. Preserve this root goal for the
 unresolved Admin scope above; SEO completion does not close that ownership.
 
-## Independent slice: 2026-09-24 bounded Home Top 5 data completion
-
-Ownership: preserve the unresolved Admin goal and all earlier slices.
-Objective: investigate short Deposit/Loan condition lists and supplement only
-the official-bank facts/products needed to fill existing Home Top 5 conditions.
-Authorization: Product Owner requested official-page research and bounded
-product-data completion; no full-catalog research or unrelated release.
-Scope: existing CA/US countries and Deposit/Loan types, existing canonical
-products first, evidence-backed corrections and audited publication.
-Exclusions: invented rates, relaxed comparison gates, new countries/types,
-account operations, general collection sweeps, UI redesign and deployment.
-Acceptance:
-- [x] Record current condition counts and why records are excluded.
-- [x] Research a bounded shortlist on official bank pages; preserve financial
-      basis, currency, term, qualifiers and field-level evidence.
-- [ ] Apply verified additions/corrections through an audited, reversible path;
-      stop each condition at five or document a concrete evidence limitation.
-- [x] Verify Public eligibility/counts, unchanged unrelated records, relevant
-      regressions, final diff and journal outcome.
-Verification: read-only baseline, official-source review, rollback rehearsal,
-bounded apply and live readback; preserve immutable history.
-
-Progress: nine existing-product corrections are committed and verified; CA
-Savings presets reach five. US three-candidate manual review approval remains
-pending; Loan/GIC evidence limits are recorded in the dated data report. No
-blanket Top 5 completion is claimed. Preserve this goal and prior ownership.
-
-## Independent slice: 2026-09-25 persistent and shareable Public comparisons
-
-Ownership: preserve unresolved Admin and bounded-data goals and the Product
-Owner's proposal edits. Implement only the explicitly requested P1-2.
-Objective: retain up to four selections through catalog/detail navigation,
-public-ID sharing, explicit device-only saving and current projection rechecks.
-Scope: Public shared state, catalog/curated/detail entry, noindex compare route,
-bounded read-only BFF, EN/KO/JA, compact mobile access, documentation and QA.
-Exclusions: new analytics events, financial-input persistence, recommendations,
-comparison arithmetic, public history, API/DB writes, collection or deployment.
-Acceptance:
-- [x] Preserve selections across search, filters, sorting, pagination, detail
-      and locale; isolate countries and consistently enforce the four-item cap.
-- [x] Restore ID/country/locale-only URLs; explicit local save/delete and fresh
-      projection rechecks with unavailable/changed/retry states.
-- [x] Identify incompatible types/currencies without misleading differences.
-- [x] Detail add/other-bank same-type links; fixed mobile comparison access.
-- [x] Public regressions, lint/typecheck/build, EN/KO/JA at 1440/768/390px,
-      existing-flow regression, metadata, documentation/journal and diff checks.
-Verification: state/URL/storage/fetch boundary tests and browser scenarios with
-analytics/feedback writes blocked; read-only real data; git diff --check.
-No passing check is a zero-bug guarantee. Retain this goal for prior owners.
-
-
-Completion: the requested P1-2 slice is implemented and verified. Public 52 tests,
-lint/typecheck/production build, repo doctor/foundation (including Admin 5 tests
-and build), 63 production-build browser scenarios and 4 SEO HTTP checks pass.
-Final corrected bundle rechecked 29 localized/live cases. No observed remaining
-runtime regression within the tested scope; no deployment or canonical mutation.
-The user-edited proposal and earlier unresolved Admin/data goals are preserved;
-this file remains because those separately owned acceptance items are still open.
-
-## Independent slice: 2026-09-28 automatic Public analytics
-
-Preserve earlier goal ownership and unresolved acceptance.
-Objective: remove consent UI while continuing configured GA4, as explicitly requested.
-Scope: Public analytics, obsolete consent copy/styles, active documentation.
-Exclusions: deployment, analytics-account changes, new events, Admin tracking.
-Acceptance: no prompt/footer choice; automatic Public page views independent of
-legacy storage; invalid/missing ID stays disabled; advertising stays denied.
-Verification: Public tests, lint/typecheck/build; browser checks for fresh/legacy
-choices, navigation, Admin exclusion and EN/KO/JA at 390/768/1440px; final diff
-and journal. Keep this file for earlier open goals.
-
-Completion: requested consent UI removal and automatic analytics are implemented.
-74 tests, typecheck/build and 28 local browser scenarios pass; Google requests
-were stubbed. Metadata is restricted to fixed screen types after automatic review
-rejected full URL/title transmission. No deployment or live Analytics verification.
-Final full Public lint and git diff --check pass. All acceptance items for this
-slice are satisfied. Preserve this goal for earlier unresolved ownership.
-
 ## Active independent slice: 2026-09-29 Public-aligned collection and bounded repair
 
 Ownership: preserve earlier Admin/data goals and their separate acceptance.
@@ -492,3 +448,32 @@ Acceptance:
 Limits: no server restart/deploy, schema/code changes, unrelated failed/partial
 retries, permanent scheduler, historical fact filling or repeated paid retries.
 Operational completion of the background collection remains distinct from handoff.
+
+
+## Authorized slice: reversible Switchabank service suspension - 2026-10-19
+
+Scope: inventory actual Switchabank/FPDS external services; pause verified dedicated
+hosted services without deleting projects, data, domains or credentials; preserve
+and verify local Admin/API/Public with the existing Supabase database retained.
+User correction: Supabase must remain running; no pause/termination or DB mutation.
+Separate local PostgreSQL setup is no longer required and was abandoned.
+Preserve all earlier goal ownership and unrelated applications.
+Acceptance:
+- [x] Identify actual hosting, database, storage, providers and scheduled workloads.
+- [x] Preserve recoverability and local configuration/data before pausing dependencies.
+- [x] Execute supported reversible stops and independently verify results.
+- [x] Verify local Admin/API/Public startup and data flow; document exact commands.
+- [x] Record user actions, billing limits and restoration order; journal and diff check.
+Verification: provider readback and external HTTP; local DB and API/BFF reads;
+process/startup checks; secret-free inventory/runbook; git diff --check.
+No termination, data purge, shared-service cancellation or paid collection.
+Status: complete for accessible reversible suspension and local startup. Three
+Vercel projects paused; five external URLs independently return DEPLOYMENT_PAUSED.
+Supabase kept running per correction; existing financial data and S3 preserved.
+Local health and CA/US/PH API/BFF reads pass; Public/Admin login browser checks at
+1440/768/390px pass. Local servers remain running. Existing-account login and
+write/collection flows were not run. Git auto-build/old Preview controls, billing,
+subscriptions and broader AWS inventory remain documented owner actions because
+original project controls are not exposed and AWS compute access is denied.
+No DB migration, paid collection, publication, project deletion or deployment.
+Preserve this shared goal and all earlier unfinished ownership.

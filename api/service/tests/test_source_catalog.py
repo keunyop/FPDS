@@ -3489,7 +3489,7 @@ class SourceCatalogTests(unittest.TestCase):
             filters=normalize_bank_filters(country_code="CA", search=None, status=None),
         )
 
-        self.assertEqual(result["items"][0]["published_product_count"], 0)
+        self.assertEqual(result["items"][0]["active_product_count"], 0)
         self.assertEqual(result["items"][0]["catalog_product_types"], ["gic", "savings"])
         self.assertEqual(
             [item["catalog_item_id"] for item in result["items"][0]["catalog_items"]],
@@ -3584,7 +3584,6 @@ class SourceCatalogTests(unittest.TestCase):
                     "source_document_count": 0,
                     "candidate_count": 0,
                     "canonical_product_count": 0,
-                    "public_projection_count": 0,
                     "dashboard_ranking_count": 0,
                     "dashboard_scatter_count": 0,
                 },
@@ -3621,6 +3620,19 @@ class SourceCatalogTests(unittest.TestCase):
         self.assertTrue(any("DELETE FROM source_registry_catalog_item" in sql for sql, _ in connection.calls))
         self.assertTrue(any("DELETE FROM bank" in sql for sql, _ in connection.calls))
 
+    def test_delete_bank_profile_reports_conflict_for_a_preserved_reference(self):
+        from psycopg.errors import ForeignKeyViolation
+
+        connection = MagicMock()
+        counts = MagicMock()
+        counts.fetchone.return_value = {}
+        connection.execute.side_effect = [counts, None, None, ForeignKeyViolation()]
+        with patch("api_service.source_catalog.load_bank_detail", return_value={"bank": {"bank_code": "ATL"}}):
+            with self.assertRaises(SourceRegistryError) as caught:
+                delete_bank_profile(connection, bank_code="ATL", actor={}, request_context={})
+        self.assertEqual(caught.exception.status_code, 409)
+        self.assertEqual(caught.exception.code, "bank_profile_in_use")
+
     def test_delete_bank_profile_rejects_bank_with_downstream_runtime_data(self) -> None:
         connection = _QueuedConnection(
             [
@@ -3630,7 +3642,6 @@ class SourceCatalogTests(unittest.TestCase):
                     "source_document_count": 1,
                     "candidate_count": 0,
                     "canonical_product_count": 0,
-                    "public_projection_count": 0,
                     "dashboard_ranking_count": 0,
                     "dashboard_scatter_count": 0,
                 },

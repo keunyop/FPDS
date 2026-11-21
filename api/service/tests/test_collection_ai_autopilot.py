@@ -164,10 +164,6 @@ class CollectionAiAutopilotTests(TestCase):
                     "change_event_types": ["New"],
                 },
             ) as decide,
-            patch(
-                "api_service.collection_ai_autopilot.queue_review_aggregate_refresh_request",
-                return_value={"aggregate_refresh_request_id": "aggreq-001"},
-            ) as queue_refresh,
         ):
             result = remediate_collection_review_task(
                 connection,
@@ -190,7 +186,6 @@ class CollectionAiAutopilotTests(TestCase):
         self.assertEqual(approval_actor["actor_type"], "system")
         self.assertEqual(approval_actor["ai_model_execution_id"], "modelexec-001")
         self.assertEqual(approval_actor["ai_auto_approval_assessment"], assessment)
-        queue_refresh.assert_called_once()
 
     def test_ineligible_assessment_keeps_review_without_approval(self):
         assessment = {

@@ -172,7 +172,6 @@ class AdminCollectionParityTests(unittest.TestCase):
              patch.object(promotion, "_mark_candidate_auto_promoted"), \
              patch.object(promotion, "_record_candidate_auto_promotion_audit_event"), \
              patch.object(promotion, "_supersede_stale_reviews_for_source", return_value=[]), \
-             patch.object(promotion, "queue_auto_promotion_aggregate_refresh_request"), \
              patch.object(promotion, "_queue_candidate_for_review") as review:
             result = promotion.promote_auto_validated_candidates(MagicMock(), run_id="run")
         self.assertEqual(result["promoted_count"], 1, result)

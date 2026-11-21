@@ -3460,6 +3460,8 @@ def _append_gic_redeemability_fallback(
 ) -> None:
     """Recover an exact product-level non-redeemability statement."""
 
+    from worker.pipeline.fpds_approval_policy import withdrawal_access_meaning
+
     missing = {
         field_name
         for field_name in ("redeemable_flag", "non_redeemable_flag")
@@ -3481,13 +3483,7 @@ def _append_gic_redeemability_fallback(
             context=context,
             excerpt=candidate.evidence_excerpt,
         )
-        if identity_score <= 0 or not re.search(
-            r"(?i)\b(?:cannot\s+be\s+redeemed\s+before|"
-            r"(?:is\s+)?not\s+redeemable\s+until|"
-            r"may\s+not\s+be(?:\s+negotiated,\s+transferred\s+or)?\s+redeemed\s+until|"
-            r"non[- ]redeemable)\b",
-            scoped_excerpt,
-        ):
+        if identity_score <= 0 or withdrawal_access_meaning(scoped_excerpt) is not False:
             continue
         ranked.append((identity_score, -candidate.chunk_index, candidate, scoped_excerpt))
     if not ranked:
@@ -7089,22 +7085,12 @@ def _extract_boolean_flag(
         ):
             return True
         return None
-    if field_name == "redeemable_flag":
-        if any(token in lowered for token in ("non-redeemable", "non redeemable", "non cashable", "non-cashable")):
-            return False
-        if _cashable_only_at_maturity(lowered):
-            return False
-        if any(token in lowered for token in ("redeemable", "cashable", "early redemption")):
-            return True
-        return None
-    if field_name == "non_redeemable_flag":
-        if any(token in lowered for token in ("non-redeemable", "non redeemable", "non cashable", "non-cashable")):
-            return True
-        if _cashable_only_at_maturity(lowered):
-            return True
-        if "redeemable" in lowered or "cashable" in lowered:
-            return False
-        return None
+    if field_name in {"redeemable_flag", "non_redeemable_flag"}:
+        from worker.pipeline.fpds_approval_policy import withdrawal_access_meaning
+        access = withdrawal_access_meaning(text)
+        if access is None:
+            return None
+        return access if field_name == "redeemable_flag" else not access
     if field_name == "registered_plan_supported":
         if _source_is_registered_product(context) or _has_registered_product_availability_context(lowered):
             return True
@@ -8288,10 +8274,6 @@ def _has_registered_product_availability_context(lowered: str) -> bool:
         r"(?:an?\s+)?(?:tfsa|rrsp|rrif|resp|registered(?:\s+(?:plan|account))?)\b",
         lowered,
     ) is not None
-
-
-def _cashable_only_at_maturity(lowered: str) -> bool:
-    return re.search(r"\b(?:cashable|redeemable)\s+(?:only\s+)?(?:at|upon)\s+maturity\b", lowered) is not None
 
 
 def _extract_tier_definition_text(text: str) -> str | None:

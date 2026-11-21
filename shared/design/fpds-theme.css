@@ -82,15 +82,11 @@
 
   --fpds-layout-admin-nav-width: 248px;
   --fpds-layout-admin-topbar-height: 64px;
-  --fpds-layout-content-max-public: 1440px;
   --fpds-layout-content-max-reading: 840px;
   --fpds-layout-panel-gap: 24px;
   --fpds-layout-panel-padding: 24px;
   --fpds-layout-panel-padding-compact: 16px;
 
-  --fpds-density-public-base-text: 14px;
-  --fpds-density-public-panel-padding: 24px;
-  --fpds-density-public-control-height: 40px;
   --fpds-density-admin-base-text: 13px;
   --fpds-density-admin-panel-padding: 16px;
   --fpds-density-admin-control-height: 36px;

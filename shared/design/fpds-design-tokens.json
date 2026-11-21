@@ -3,7 +3,7 @@
     "name": "FPDS Design Tokens",
     "version": "2.0.0",
     "updated_at": "2026-04-12",
-    "benchmark_note": "Stripe-benchmarked FPDS design refresh with light-only surfaces, public balanced density, and compact admin operations."
+    "benchmark_note": "Stripe-benchmarked FPDS design refresh with light-only surfaces, compact admin operations."
   },
   "color": {
     "canvas": "#F7F8FC",
@@ -97,16 +97,12 @@
   "layout": {
     "admin_nav_width": "248px",
     "admin_topbar_height": "64px",
-    "content_max_public": "1440px",
     "content_max_reading": "840px",
     "panel_gap": "24px",
     "panel_padding": "24px",
     "panel_padding_compact": "16px"
   },
   "density": {
-    "public_base_text": "14px",
-    "public_panel_padding": "24px",
-    "public_control_height": "40px",
     "admin_base_text": "13px",
     "admin_panel_padding": "16px",
     "admin_control_height": "36px",

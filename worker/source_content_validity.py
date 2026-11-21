@@ -2,6 +2,10 @@
 import re
 from bs4 import BeautifulSoup
 
+def has_pdf_header(body: bytes) -> bool:
+    header = body[:1024].removeprefix(b"\xef\xbb\xbf").lstrip()
+    return re.match(rb"%PDF-\d\.\d\b", header) is not None
+
 def html_unavailable_reason(body):
     soup=BeautifulSoup(body.decode('utf-8',errors='replace'),'html.parser')
     main=soup.find('main') or soup

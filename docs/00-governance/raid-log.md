@@ -1,5 +1,7 @@
 # FPDS RAID Log
 
+From 2026-11-20 only Admin is supported. Earlier consumer-site decisions and risks are retained as history and impose no current delivery or collection requirements.
+
 ## Native proof and environment parity follow-through - 2026-10-05
 
 Laurentian retained-input normal services now accept three products and exclude

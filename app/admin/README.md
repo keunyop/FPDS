@@ -15,7 +15,7 @@ start collection, publish data or deploy the runtime.
 
 
 
-Current optional collection rule (2026-10-01): required facts determine publication;
+Current optional collection rule (2026-10-01): required facts determine automatic approval;
 profile and explicitly registered typed optional facts are also extracted when
 proven by the same captured/consulted official evidence. Missing optional entries
 are omitted without extra searches, retries or human review. Normalization preserves
@@ -32,8 +32,7 @@ Earlier reviewer workflow descriptions are historical for product collection.
 See [policy](../../docs/03-design/collection-accuracy-policy.md).
 
 This package is the authenticated operator workspace. It keeps collection,
-review, and canonical-change context private while the Public package
-reads only approved projections.
+review, and canonical-change context private.
 
 For current operator flows, read the
 [Admin manual](../../descent/FPDS_Admin_사용자_매뉴얼.md). For localization, feature
@@ -44,7 +43,7 @@ changes and AI skills, start with the
 
 Daily work is Overview, Runs and Banks:
 
-1. **Overview** — inspect collection failures, public-data health and signup requests.
+1. **Overview** — inspect collection failures and signup requests.
 2. **Runs** — inspect queued/discovering/collecting and terminal outcomes, automatic
    exclusions and source errors. Use Search or safe 15-second Auto refresh;
    Advanced filters start collapsed.
@@ -58,14 +57,13 @@ same language, so country-owned detail/filter context does not cross countries.
 Authenticated locale selection and logout live in the sidebar Account menu.
 
 More tools contains read-only Review history, Sources, Product Types, Changes,
-Countries and Public Health. Countries and signup approval are admin-only.
+Countries. Countries and signup approval are admin-only.
 Historical Review list/detail preserve private evidence and decisions but offer
 no approve/reject/defer/edit-approve, AI Verify or bulk actions. New collection
 automatically accepts or excludes candidates without creating review tasks.
 
 Existing Bank/Source Catalog page URLs remain compatibility redirects; their
-proxy APIs are still used by Banks. Anonymous Public feedback belongs to the
-separate Public application.
+proxy APIs are still used by Banks.
 
 ## Code Map
 
@@ -98,7 +96,7 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
   review, and product data. Market approval profiles are country/type-specific.
 - Keep `Add banks with AI` admin-only and tied to the displayed server-session
   country. Its result must retain clickable ranking/homepage/coverage evidence
-  and must not imply that product collection or Public release has occurred.
+  and must not imply that product collection has occurred.
 - Keep Banks workflow logos on the shared fixed-footprint mark; do not size
   individual bank assets ad hoc or reintroduce a visible logo frame.
 - Treat country removal as reversible deactivation. Never physically delete a
@@ -107,7 +105,7 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
   query parameter names, and mutation timeout behavior.
 - Keep Review Queue query fields allowlisted and accept detail return context
   only for the same-origin `/admin/reviews` route.
-- Do not expose evidence, review state, or private source traces to Public.
+- Do not expose evidence, review state, or private source traces to unauthenticated users.
 - Keep `/admin/source-catalog/*` proxy handlers: Banks collection uses them even
   though the matching page routes redirect.
 - Treat `has_completed_collection` as server-owned history. Offer explicit
@@ -124,13 +122,13 @@ ratio inside the same unframed `48x24` image viewport and `56x40` layout slot.
 
 ## Current Capability Boundaries
 
-- API mutations for registries, collection, Runs retry and Public Health retry
+- API mutations for registries, collection, Runs retry
   require `admin`; `read_only` has no mutation rights. Countries and signup
   approval are admin-only. Historical product-review mutations are retired.
 - Sources are inspectable and support admin-only soft removal. Their direct
   create/update APIs return `405`; bank coverage owns configuration.
 - Collection is operator-initiated. Evidence validation, qualified candidate
-  promotion and aggregate refresh run automatically within that workflow.
+  promotion runs automatically within that workflow.
   No human product review, Review AI autopilot or recurring collection scheduler
   is part of current collection.
 - There is no standalone Product Record, Publish Monitor, Audit, Usage, global
@@ -226,5 +224,3 @@ was performed in this implementation slice.
 ## Conditional transaction, withdrawal and security requirements - 2026-10-01
 
 The shared market profile v7 restores checking transaction costs, GIC/CD early-access rules and consequences, and line-of-credit security. Unlimited checking needs no excess fee; explicitly blocked early withdrawal needs no penalty value; explicit unsecured status is valid. Collection prompts expose grouped alternatives and conditions. Automatic acceptance/exclusion remains the only product workflow; no new Admin action or review queue is added.
-
-The Public API rechecks affected snapshot-pinned versions under the current contract, including older receipts, and exposes numeric `transaction_fee`/`additional_transaction_fee`. Country counts use the same eligible products. Shared Public metrics show checking transaction costs and both GIC access and consequences in all supported locales. Deploy API/worker before Public; previous cached responses can remain until normal expiry. Read-only current-data assessment: 5 eligible of 24 active products, 19 needing evidence. No live mutations, paid collection or deployment were performed in this implementation slice.

@@ -184,7 +184,7 @@ _COUNTRY_OVERRIDES: dict[tuple[str, str], tuple[ComparisonRequirement, ...]] = {
         _requirement("early_withdrawal_penalty", "early_withdrawal_penalty"),
     ),
     # Keep explicit US ownership even where today's minimum matches the global
-    # baseline. That makes Public projection essential-only now and lets a
+    # baseline. Keeping each market explicit lets a
     # future market change remain isolated to this registry.
     ("US", "credit-card"): (
         _requirement("annual_fee", "annual_fee"),
@@ -278,7 +278,7 @@ _COUNTRY_SUPPLEMENTAL_FIELDS: dict[tuple[str, str], tuple[str, ...]] = {
     ("PH", "personal-loan"): ("loan_amount_text",),
     ("PH", "line-of-credit"): ("credit_limit_text",),
     # A simple APY needs no prose, but a new-customer, balance-qualified, or
-    # relationship APY must carry its material conditions into Public.
+    # relationship APY must carry its material conditions into the approved record.
     ("US", "savings"): ("interest_rate_summary",),
     # Keep the scalar available for fixed-rate cards and numeric consumers; it
     # is not required when the exact source-language range is present.
@@ -313,7 +313,7 @@ def country_product_profile(
     if requirements is None and normalized_country in {"", "CA"}:
         requirements = _DEFAULT_REQUIREMENTS.get(normalized_type)
         # `*` marks the backward-compatible Canada/legacy baseline to callers
-        # that distinguish explicit market overrides for Public projection.
+        # that distinguish explicit market overrides for collection.
         resolved_country = "*"
     if requirements is None:
         return None

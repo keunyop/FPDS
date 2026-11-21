@@ -15,11 +15,8 @@ class SettingsTests(unittest.TestCase):
             "\n".join(
                 [
                     "FPDS_DATABASE_URL=postgres://user:pass@localhost:5432/fpds",
-                    "FPDS_PUBLIC_WEB_ORIGIN=http://localhost:3000",
                     "FPDS_ADMIN_WEB_ORIGIN=http://localhost:3001",
-                    "FPDS_PUBLIC_API_ORIGIN=http://localhost:4000",
                     "FPDS_ADMIN_API_ORIGIN=http://localhost:4000",
-                    "FPDS_ALLOWED_PUBLIC_ORIGINS=http://localhost:3000,http://127.0.0.1:3000",
                     "FPDS_ALLOWED_ADMIN_ORIGINS=http://localhost:3001,http://127.0.0.1:3001",
                     "FPDS_ADMIN_SESSION_SECRET=dev-secret",
                     "FPDS_ADMIN_CSRF_SECRET=csrf-secret",
@@ -27,7 +24,6 @@ class SettingsTests(unittest.TestCase):
                     "FPDS_COOKIE_SAMESITE=Lax",
                     "FPDS_AUTOMATION_SCHEDULER_ENABLED=true",
                     "FPDS_AUTOMATION_POLL_SECONDS=60",
-                    "FPDS_PUBLIC_APP_API_SECRET=public-app-secret",
                 ]
             ),
             encoding="utf-8",
@@ -40,11 +36,8 @@ class SettingsTests(unittest.TestCase):
             # override the explicit temporary env file through os.environ.
             for key in (
                 "FPDS_DATABASE_URL",
-                "FPDS_PUBLIC_WEB_ORIGIN",
                 "FPDS_ADMIN_WEB_ORIGIN",
-                "FPDS_PUBLIC_API_ORIGIN",
                 "FPDS_ADMIN_API_ORIGIN",
-                "FPDS_ALLOWED_PUBLIC_ORIGINS",
                 "FPDS_ALLOWED_ADMIN_ORIGINS",
                 "FPDS_ADMIN_SESSION_SECRET",
                 "FPDS_ADMIN_CSRF_SECRET",
@@ -52,7 +45,6 @@ class SettingsTests(unittest.TestCase):
                 "FPDS_COOKIE_SAMESITE",
                 "FPDS_AUTOMATION_SCHEDULER_ENABLED",
                 "FPDS_AUTOMATION_POLL_SECONDS",
-                "FPDS_PUBLIC_APP_API_SECRET",
             ):
                 os.environ.pop(key, None)
             settings = Settings.from_env(env_path)
@@ -62,16 +54,12 @@ class SettingsTests(unittest.TestCase):
             os.environ.clear()
             os.environ.update(previous)
 
-        self.assertEqual(settings.public_web_origin, "http://localhost:3000")
         self.assertEqual(settings.admin_web_origin, "http://localhost:3001")
-        self.assertEqual(settings.public_api_origin, "http://localhost:4000")
-        self.assertEqual(settings.allowed_public_origins, ("http://localhost:3000", "http://127.0.0.1:3000"))
         self.assertEqual(settings.allowed_admin_origins, ("http://localhost:3001", "http://127.0.0.1:3001"))
         self.assertFalse(settings.cookie_secure)
         self.assertEqual(settings.cookie_same_site, "lax")
         self.assertFalse(hasattr(settings, "automation_scheduler_enabled"))
         self.assertFalse(hasattr(settings, "automation_poll_seconds"))
-        self.assertEqual(settings.public_app_api_secret, "public-app-secret")
 
     def test_settings_loads_repo_root_env_file_when_process_runs_under_api_service(self) -> None:
         previous = os.environ.copy()
@@ -85,7 +73,5 @@ class SettingsTests(unittest.TestCase):
             os.environ.clear()
             os.environ.update(previous)
 
-        self.assertEqual(settings.public_web_origin, "http://localhost:3000")
         self.assertEqual(settings.admin_web_origin, "http://localhost:3001")
-        self.assertEqual(settings.public_api_origin, "http://localhost:4000")
         self.assertEqual(settings.admin_api_origin, "http://localhost:4000")

@@ -11,7 +11,6 @@ import sys
 from typing import Any
 from urllib.parse import urlparse
 
-from api_service.aggregate_refresh import launch_aggregate_refresh_runner
 from api_service.ai_verification import llm_provider_configured
 from api_service.candidate_auto_promotion import promote_auto_validated_candidates
 from api_service.collection_ai_autopilot import (
@@ -222,7 +221,6 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
     )
     _persist_end_to_end_source_summary(run_id=run_id, summary=run_summary)
     promotion_result = _promote_auto_validated_candidates_for_run(run_id=run_id, plan=plan)
-    ai_autopilot_result = {"approved_count": 0}  # New collections have no human review phase.
     approved_duplicate_review_count = _supersede_reviews_covered_by_approved_candidates_for_run(
         run_id=run_id,
         plan=plan,
@@ -239,24 +237,6 @@ def _run_group(*, plan: dict[str, Any], group: dict[str, Any]) -> None:
         normalization_output=normalization_output, validation_output=validation_output,
         promotion_result=promotion_result)
     _persist_collection_outcome(run_id=run_id, outcome=outcome)
-    if promotion_result["promoted_count"] or ai_autopilot_result["approved_count"]:
-        try:
-            launch_result = launch_aggregate_refresh_runner()
-        except Exception:
-            outcome["projection_refresh_status"] = "launch_failed"
-            _persist_collection_outcome(run_id=run_id, outcome=outcome)
-            raise
-        outcome["projection_refresh_status"] = "worker_started" if launch_result["launched"] else "worker_not_started"
-        _persist_collection_outcome(run_id=run_id, outcome=outcome)
-        print(
-            (
-                f"[source-collection-runner] run {run_id} auto-promoted "
-                f"{promotion_result['promoted_count']} validation candidate(s), AI-approved "
-                f"{ai_autopilot_result['approved_count']} review candidate(s); "
-                f"aggregate refresh launch={launch_result['launched']}"
-            ),
-            flush=True,
-        )
     print(f"[source-collection-runner] run {run_id} completed downstream stages", flush=True)
 
 
@@ -1175,7 +1155,7 @@ def args_temp_dir(plan_path: Path | None) -> Path:
 
 
 def _build_collection_outcome(*, extraction_output, normalization_output, validation_output, promotion_result):
-    """Private bounded field-name diagnostics; stage completion is not Public proof."""
+    """Return bounded field-name diagnostics and the canonical promotion outcome."""
     from worker.pipeline.fpds_field_contract import field_contract
     from worker.pipeline.fpds_normalization.models import normalization_field_flow
     extracted = {r.get("source_id"): r for r in extraction_output.get("source_results", [])}
@@ -1204,8 +1184,7 @@ def _build_collection_outcome(*, extraction_output, normalization_output, valida
         "canonical_promoted_candidate_count": promoted,
         "promotion_skipped": [{k: r.get(k) for k in ("candidate_id", "skip_reason", "action")}
                               for r in promotion_result.get("skipped_items", [])[:256]],
-        "projection_refresh_status": "pending_launch" if promoted else "not_requested_no_promotion",
-        "public_visibility": "not_verified", "field_flow": flow, "field_flow_truncated": len(rows) > 256}
+        "field_flow": flow, "field_flow_truncated": len(rows) > 256}
 
 
 def _persist_collection_outcome(*, run_id, outcome):
