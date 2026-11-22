@@ -689,6 +689,13 @@ def _strip_embedded_html(value: str) -> str:
 def extract_links(html_text: str, *, base_url: str) -> list[ExtractedLink]:
     parser = _LinkExtractor(base_url=base_url)
     parser.feed(html_text)
+    from .disclosure_tables import disclosure_labels
+    labels = disclosure_labels(html_text)
+    if labels:
+        present = {(link.href, link.anchor_text) for link in parser.links}
+        for (href, size), name in labels.items():
+            if (href, size) not in present and infer_source_type(href) == "pdf":
+                parser._append_link(href, name, prefer_over_ordinary=True)
     from .modal_links import literal_modal_links
     for href, label in literal_modal_links(html_text):
         parser._append_link(href, label, prefer_over_ordinary=True)
@@ -701,6 +708,8 @@ def extract_links(html_text: str, *, base_url: str) -> list[ExtractedLink]:
     by_identity: dict[tuple[str, str], ExtractedLink] = {}
     for link in parser.links:
         href = link.href
+        if link.source_type == "pdf" and (href, link.anchor_text) in labels:
+            link = replace(link, anchor_text=labels[href, link.anchor_text])
         if (href in parser._structured_hrefs and not urlparse(href).scheme
                 and not href.startswith(("/", "?", "#", "."))
                 and tuple(href.split("/")[:2]) in prefixes):

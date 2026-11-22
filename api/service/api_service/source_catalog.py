@@ -3643,6 +3643,13 @@ def _generate_sources_from_homepage(
             f"Excluded {rejected_registry_seed_count} registry seed(s) that failed official-domain, country, language, or Product Type scope checks."
         )
 
+    jp_indexes = []
+    if country_code == "JP" and source_language == "ja" and verified_coverage_source_url:
+        from worker.discovery.fpds_discovery.jp_disclosures import disclosure_indexes
+        jp_indexes = disclosure_indexes(bank_code, product_type, verified_coverage_source_url)
+        for index in jp_indexes:
+            if normalize_source_url(index) != normalized_coverage_source_url:
+                hub_pages.append((900, normalize_source_url(index), index))
     unique_hub_pages = _dedupe_page_candidates(hub_pages)
     selected_hub_pages = unique_hub_pages[:_DISCOVERY_HUB_PAGE_MAX]
     primary_hub_page_attempt_count = 0
@@ -4044,6 +4051,24 @@ def _generate_sources_from_homepage(
     )
     discovery_notes.extend(detail_companion_notes)
 
+    if jp_indexes:
+        from worker.discovery.fpds_discovery.jp_disclosures import current_disclosures
+        for index in jp_indexes:
+            index_html = prefetched_page_html_by_url.get(normalize_source_url(index))
+            if not index_html:
+                continue
+            for link in current_disclosures(bank_code=bank_code, product_type=product_type,
+                    index_url=index, html=index_html):
+                detail_rows.append(_build_generated_source_row(
+                    bank_code=bank_code, country_code=country_code, product_type=product_type,
+                    source_language=source_language, normalized_url=link.normalized_url,
+                    raw_url=link.resolved_url, source_name=link.anchor_text, discovery_role="detail",
+                    priority="P0", purpose="Product disclosure linked by the current official product list",
+                    expected_fields=expected_fields, discovery_metadata={
+                        "selection_path": "named_official_disclosure",
+                        "listing_url": index, "listing_name": link.anchor_text,
+                    }))
+
     should_emit_context_rows = bool(detail_rows) or bool(seed_entry_url)
     if should_emit_context_rows:
         source_rows.append(
@@ -4387,6 +4412,8 @@ def _generate_sources_from_homepage(
                 f"Excluded {locale_mismatch_supporting_count} supporting HTML source(s) that conflicted with the run source language."
             )
         for _, link in unique_pdf_links:
+            if link.normalized_url in promoted_detail_urls:
+                continue
             if _url_country_scope_conflicts(country_code=country_code, normalized_url=link.normalized_url):
                 continue
             if not _link_is_relevant_supporting_source(
@@ -6779,7 +6806,9 @@ def _identity_term_hits(text: str, terms: list[str]) -> int:
     def normalize(value: str) -> str:
         return " ".join(plural_forms.get(token, token) for token in re.findall(r"[a-z0-9]+", value.lower()))
     normalized = " " + normalize(text) + " "
-    return sum(bool(normalize(term)) and (" " + normalize(term) + " ") in normalized for term in terms)
+    return sum((term in text if re.search(r"[ぁ-ヿ一-龯]", term)
+                else bool(normalize(term)) and (" " + normalize(term) + " ") in normalized)
+               for term in terms)
 
 
 def _term_hits(text: str, terms: list[str]) -> int:
@@ -7739,6 +7768,10 @@ def _has_unrelated_product_path_signal(*, product_type: str, normalized_url: str
 
 def _source_scope_exclusion_reason(*, product_type: str, fingerprint: str) -> str | None:
     normalized_fingerprint = fingerprint.lower()
+    if re.search(r"新規(?:のお?取[り]?扱い|申込受付)(?:は)?(?:終了|中止)", fingerprint):
+        return "product_unavailable_for_new_customers"
+    if product_type == "credit-card" and "カードローン" in fingerprint:
+        return "unrelated_product_type"
     source_url = normalized_fingerprint.split(" ", 1)[0]
     source_path = urlparse(source_url).path.lower()
     source_slug = source_path.rstrip("/").rsplit("/", 1)[-1]
@@ -8214,6 +8247,8 @@ def _product_type_identity_keywords(product_type: str, product_type_definition: 
         [
             *curated_hints,
             *definition_hints,
+            *(term for term in _product_type_keywords(product_type_definition)
+              if re.search(r"[ぁ-ヿ一-龯]", term)),
         ]
     )
 

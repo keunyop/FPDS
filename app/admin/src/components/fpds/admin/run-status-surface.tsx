@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Activity, ArrowRight, CircleCheck, CircleMinus, CircleX, Clock3, RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { AdminTableAutoRefresh } from "@/components/fpds/admin/admin-table-auto-refresh";
@@ -266,15 +267,14 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
 
   return (
     <section className="grid min-w-0 gap-5">
-      <AdminTableAutoRefresh locale={locale} />
-
       <AdminPageHeader
+        badges={<AdminTableAutoRefresh locale={locale} />}
         description={copy.headerDescription}
         path={copy.path}
         title={copy.title}
       />
 
-      <article className="min-w-0 border border-border bg-card p-4">
+      <article className="min-w-0 rounded-lg border border-border bg-card p-4">
         <form
           action={buildAdminHref("/admin/runs", new URLSearchParams(), locale)}
           className="grid gap-4"
@@ -413,7 +413,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
         </form>
       </article>
 
-      <article className="min-w-0 overflow-hidden border border-border bg-card">
+      <article className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-tight text-foreground">{copy.tableTitle}</h2>
@@ -424,7 +424,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
 
           <div className="flex flex-wrap gap-2">
             {filters.states.map((state) => (
-              <span className={cn("rounded-full px-3 py-1 text-xs font-medium", runStateBadgeClasses(state))} key={state}>
+              <span className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground" key={state}>
                 {translateRunState(locale, state)}
               </span>
             ))}
@@ -458,23 +458,25 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
           </div>
         ) : (
           <>
-            <div aria-label={copy.tableTitle} className="max-w-full overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
-              <table className="w-full min-w-[820px] border-separate border-spacing-0">
+            <div aria-label={copy.tableTitle} className="ledger-region" role="region">
+              <table className="ledger-table run-ledger" role="table">
                 <thead>
                   <tr className="text-left text-xs text-muted-foreground">
                     <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.status}</th>
                     <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.run}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.sourceSummary}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.candidateSummary}</th>
-                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.action}</th>
+                    <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.startedTime}</th>
+                    <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.sourceSummary}</th>
+                    <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.candidateSummary}</th>
+                    <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.action}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {runs.items.map((item) => (
                     <tr className="align-top" key={item.run_id}>
-                      <td className="border-b border-border/70 px-3 py-4">
+                      <td className="ledger-state px-3">
                         <div className="grid gap-2">
-                          <span className={cn("inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium", runStateBadgeClasses(item.run_status))}>
+                          <span className={cn("inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold", runStateBadgeClasses(item.run_status))}>
+                            <RunStateIcon state={item.run_status} />
                             {translateRunState(locale, item.run_status)}
                           </span>
                           {item.preparation_reason_codes?.length ? <p className="max-w-xs text-xs text-muted-foreground">{collectionPreparationMessage(locale, { status: "skipped", reason_codes: item.preparation_reason_codes })}</p> : null}
@@ -488,18 +490,21 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                           ) : null}
                         </div>
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <div className="grid gap-2">
-                          <Link className="font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
+                      <td className="ledger-identity px-3">
+                        <div className="grid gap-1">
+                          <Link className="font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
                             {item.bank_code ? `${item.bank_code} · ${translateProductType(locale, item.product_type ?? "")}` : item.run_id}
                           </Link>
                           {item.bank_code ? <p className="text-xs text-muted-foreground">{item.run_id}</p> : null}
-                          <span className="w-fit rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                          <span className="text-xs font-medium text-muted-foreground">
                             {toTitleCase(item.run_type)}
                           </span>
-                          <span className="text-xs text-muted-foreground">
-                            {formatAdminDateTime(locale, item.started_at)} · {copy.trigger} {toTitleCase(item.trigger_type)}
-                          </span>
+                        </div>
+                      </td>
+                      <td className="ledger-time px-3">
+                        <div className="grid gap-1 text-xs text-muted-foreground">
+                          <span className="text-sm font-medium text-foreground">{formatAdminDateTime(locale, item.started_at)}</span>
+                          <span>{copy.trigger} {toTitleCase(item.trigger_type)}</span>
                           {item.completed_at ? (
                             <span className="text-xs text-muted-foreground">
                               {copy.completed} {formatAdminDateTime(locale, item.completed_at)}
@@ -507,7 +512,7 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                           ) : null}
                         </div>
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4">
+                      <td className="ledger-sources px-3 text-right">
                         <div className="grid gap-1 text-sm">
                           <span className="font-medium text-foreground">{item.source_item_count} {copy.sourceItems}</span>
                           <span className="text-muted-foreground">
@@ -515,16 +520,16 @@ export function RunStatusSurface({ filters, runs, locale }: RunStatusSurfaceProp
                           </span>
                         </div>
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4">
+                      <td className="ledger-products px-3 text-right">
                         <div className="grid gap-1 text-sm">
                           <span className="font-medium text-foreground">{item.candidate_count} {copy.candidates}</span>
                           <span className="text-muted-foreground">{item.review_queued_count} {copy.queuedForReview}</span>
                         </div>
                       </td>
-                      <td className="border-b border-border/70 px-3 py-4">
-                        <Button asChild variant="outline">
-                          <Link href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>{copy.openDetail}</Link>
-                        </Button>
+                      <td className="ledger-action px-3 text-right">
+                        <Link className="inline-flex min-h-10 items-center justify-end gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline" href={buildAdminHref(`/admin/runs/${item.run_id}`, new URLSearchParams(), locale)}>
+                          {copy.openDetail}<ArrowRight aria-hidden="true" className="size-4 shrink-0" />
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -606,6 +611,13 @@ function toTitleCase(value: string) {
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+const stateIcons = { queued: Clock3, discovering: Activity, started: Activity, completed: CircleCheck, failed: CircleX, skipped: CircleMinus, retried: RotateCw };
+
+function RunStateIcon({ state }: { state: string }) {
+  const Icon = Object.hasOwn(stateIcons, state) ? stateIcons[state as keyof typeof stateIcons] : null;
+  return Icon ? <Icon aria-hidden="true" className="size-3.5 shrink-0" /> : null;
 }
 
 function runStateBadgeClasses(state: string) {

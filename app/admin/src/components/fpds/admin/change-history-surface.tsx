@@ -302,9 +302,8 @@ export function ChangeHistorySurface({ filters, changes, locale, productTypes }:
 
   return (
     <section className="grid min-w-0 gap-6">
-      <AdminTableAutoRefresh locale={locale} />
-
       <AdminPageHeader
+        badges={<AdminTableAutoRefresh locale={locale} />}
         description={copy.description}
         path={copy.path}
         title={copy.title}

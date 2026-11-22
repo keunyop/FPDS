@@ -1,5 +1,23 @@
 # Current work and unfinished ownership
 
+## Higo and Kagoshima collection readiness — 2026-11-21
+
+Scope: both banks' own financial products for individuals and businesses,
+including sole proprietors. Exclude distribution of third-party products.
+Reconcile official Japanese listings with discovery, contracts and evidence.
+Acceptance: inventory the source coverage and gaps, exercise real positive and
+misleading inputs, and distinguish local readiness from deployed or collected data.
+Verification: offline regressions with official examples, scope/isolation tests,
+source-reference checks and final diff. Preserve other work below.
+
+Status: Development registration and the local readiness assessment are complete.
+Japan, both banks and 16 catalog scopes are active in the connected dev DB.
+The full Kagoshima directory replay recovered 26 named PDFs across six types.
+One credit line passed the normal offline extraction, normalization and routing
+path. The live Higo acquisition block and uncovered financial contracts remain
+open for full collection. No deployment or Japanese collection Run was started.
+See the [readiness report](docs/00-governance/jp-higo-kagoshima-readiness-2026-11-21.md).
+
 ## Official bank documents and collection accuracy — 2026-11-21
 
 Trace Admin acquisition and acceptance against the Floorplan and stored fixtures. Reproduce missed or misattributed official evidence, correct shared selection and verification paths, and write an operator-facing guide and rules. Verify separately what was reproduced locally and what needs a live collection to measure.

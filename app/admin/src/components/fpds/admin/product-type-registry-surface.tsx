@@ -218,9 +218,8 @@ export function ProductTypeRegistrySurface({
 
   return (
     <section className="grid min-w-0 max-w-full gap-5">
-      <AdminTableAutoRefresh locale={locale} />
-
       <AdminPageHeader
+        badges={<AdminTableAutoRefresh locale={locale} />}
         path={copy.path}
         title={copy.title}
       />

@@ -324,9 +324,8 @@ export function ReviewQueueSurface({ queue, filters, locale, banks, productTypes
 
   return (
     <section className="grid min-w-0 gap-4">
-      <AdminTableAutoRefresh locale={locale} onRefresh={handleAutoRefresh} />
-
       <AdminPageHeader
+        badges={<AdminTableAutoRefresh locale={locale} onRefresh={handleAutoRefresh} />}
         description={copy.headerDescription}
         path={copy.path}
         title={copy.title}

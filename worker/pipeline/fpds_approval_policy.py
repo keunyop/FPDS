@@ -73,7 +73,8 @@ def comparison_quality(
     if profile is None:
         if not normalized_type:
             return ComparisonQuality(False, True, True, (), (), ())
-        if str(country_code or "").strip() and market_profile_product_type_is_known(normalized_type):
+        if (str(country_code or "").strip().upper() == "JP"
+                or (str(country_code or "").strip() and market_profile_product_type_is_known(normalized_type))):
             # A known product in a new market must not inherit another
             # country's semantics. Register its country profile first.
             return ComparisonQuality(True, False, False, (), (), ())
@@ -129,7 +130,7 @@ def comparison_quality(
         else:
             satisfied_fields.append(satisfied)
     # Contradictory alternatives cannot waive a conditional requirement.
-    if normalized_type == "line-of-credit":
+    if normalized_type in {"line-of-credit", "business-line-of-credit"}:
         meanings = [security_meaning(candidate_payload.get(k)) for k in ("security_requirement", "collateral_text")]
         flag = candidate_payload.get("secured_flag")
         if isinstance(flag, bool):
@@ -312,6 +313,8 @@ def security_meaning(value: object) -> bool | None:
     """Require an explicit security statement, never a generic approval clause."""
     if not isinstance(value, str):
         return None
+    if re.fullmatch(r"(?:[0-9０-９]+[.．]\s*)?担保(?:・保証人)?\s*必要ございません。?", value.strip()):
+        return False
     # A later repayment amount may vary independently of a definite collateral
     # requirement. No security qualification or alternative is removed.
     value = re.sub(r"your payments will include both principal and interest, and may be higher than during the first phase[.]", "Repayment amount consequence.", value, flags=re.I)

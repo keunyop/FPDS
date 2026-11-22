@@ -14,6 +14,7 @@ from worker.pipeline.fpds_approval_policy import comparison_quality, security_me
 from worker.pipeline.fpds_rate_safety import rate_component_only
 
 ACCURACY_VERSION = "collection-accuracy-2026-11-21-withdrawal-access"
+JP_ACCURACY_VERSION = "collection-accuracy-2026-11-21-jp-v1"
 # Earlier receipts retain digest compatibility, subject to the current comparison gate.
 _COMPATIBLE_RECEIPT_VERSIONS = {ACCURACY_VERSION, "collection-accuracy-2026-10-01-cost-access", "collection-accuracy-2026-10-01", "collection-accuracy-2026-09-30"}
 RECEIPT_KEY = "_collection_accuracy"
@@ -35,6 +36,26 @@ CURRENCY_PATTERNS.update({
 for _code in CURRENCY_PATTERNS:
     CURRENCY_PATTERNS[_code] = CURRENCY_PATTERNS[_code].replace(
         rf"\b{_code}\b", rf"\b{_code}(?=\b|\d)")
+
+# Denomination or a labelled principal/limit. Yen conversion and service fees
+# can occur on a foreign-currency account and cannot denominate that account.
+# Native denominations only participate in currency proof. A suffix amount
+# such as 10万円 must never become a generic prefix for the following number.
+_NATIVE_DENOMINATIONS = {
+    "JPY": r"(?:日本)?円建(?:て)?(?=$|[）)、・。\s])|(?:ご利用限度額|お借入金額|お預入れ金額)\s*[:：]?\s*"
+           r"[0-9０-９][0-9０-９,，.．]*\s*[万億]?円(?:以上|以内|以下|から)",
+    "USD": r"米ドル(?=建|・)", "AUD": r"豪ドル(?=建|・)", "EUR": r"ユーロ(?=建|・)",
+    "GBP": r"英ポンド(?=建|・)", "NZD": r"(?:NZ|ニュージーランド)ドル(?=建|・)",
+    "CAD": r"カナダドル(?=建|・)", "CHF": r"スイスフラン(?=建|・)",
+    "HKD": r"香港ドル(?=建|・)", "SGD": r"シンガポールドル(?=建|・)", "CNY": r"人民元(?=建|・)",
+}
+
+
+def _currency_codes(quote):
+    codes = {code for code, pattern in CURRENCY_PATTERNS.items() if re.search(pattern, quote, re.I)}
+    codes.update(code for code, pattern in _NATIVE_DENOMINATIONS.items() if re.search(pattern, quote))
+    return codes
+
 _MONEY_PREFIX = r"(?:[$€£]|" + "|".join(CURRENCY_PATTERNS.values()) + r")\s*"
 _MONEY_AMOUNT = _MONEY_PREFIX + r"(\d[\d,]*(?:\.\d+)?)(?![\w%]|\.\d)"
 _MONEY_SUFFIX = r"(\d[\d,]*(?:\.\d+)?)\s*(?:dollars?|" + "|".join(CURRENCY_PATTERNS) + r"|Philippine pesos?)\b"
@@ -389,8 +410,10 @@ def quote_supports_value(field_name: str, value: object, quote: str) -> bool:
     if field_name == "currency":
         # File extensions and URL query/path tokens are not denomination facts.
         q = re.sub(r"https?://\S+", "", q, flags=re.I)
-        return value in CURRENCY_PATTERNS and bool(re.search(CURRENCY_PATTERNS[value], q, re.I)) and not any(
-            code != value and re.search(pattern, q, re.I) for code, pattern in CURRENCY_PATTERNS.items())
+        if re.search(r"円換算|相当額|手数料.{0,20}(?:建|[¥￥]|円|USD|JPY)", q) or (
+                value == "JPY" and "外貨建" in q):
+            return False
+        return _currency_codes(q) == {value}
     if field_name == "term_length_text" and re.search(r"investment horizon|cash (?:in|out) after|redeem(?:able)? after|waiting period", q, re.I):
         own_term = re.search(r"\b(?:term|maturity)\s*[:\n]?\s*" + re.escape(text(value)) + r"(?!\w)", q, re.I)
         if not own_term:
@@ -731,11 +754,12 @@ def _unlimited_is_channel_only(quote: str) -> bool:
 def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) -> bool:
     p = payload if payload is not None else record.get("candidate_payload", {})
     receipt = p.get(RECEIPT_KEY, {}) if isinstance(p, Mapping) else {}
-    if not isinstance(receipt, Mapping) or receipt.get("version") not in _COMPATIBLE_RECEIPT_VERSIONS:
+    versions = {JP_ACCURACY_VERSION} if record.get("country_code") == "JP" else _COMPATIBLE_RECEIPT_VERSIONS
+    if not isinstance(receipt, Mapping) or receipt.get("version") not in versions:
         return False
     # Pre-change receipts could certify the opposite of the printed access
     # condition. A pending term deposit needs validation under current rules.
-    if record.get("product_type") == "gic" and receipt.get("version") != ACCURACY_VERSION:
+    if record.get("country_code") != "JP" and record.get("product_type") == "gic" and receipt.get("version") != ACCURACY_VERSION:
         return False
     quality = comparison_quality(product_type=record.get("product_type"), country_code=record.get("country_code"), expected_fields=list(p), candidate_payload=p)
     if not quality.complete:
@@ -827,7 +851,7 @@ def country_currency_fallback(record: Mapping, evidence: list[dict]) -> str | No
         evidence = [e for e in evidence if str(e.get("evidence_chunk_id")) in bound]
     context = " ".join([str(record.get("product_name") or ""),
                         *(product_currency_context(record, str(e.get("evidence_excerpt") or "")) for e in evidence)])
-    if any(re.search(pattern, context, re.I) for pattern in CURRENCY_PATTERNS.values()):
+    if _currency_codes(context):
         return None
     declared = str(record.get("currency") or "")
     if re.fullmatch(r"[A-Z]{3}", declared) and declared != "XXX" and re.search(r"\b" + re.escape(declared) + r"\b", context):
@@ -885,6 +909,14 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         result["field_mapping_metadata"] = mappings
     record = result
     chunks = {str(e.get("evidence_chunk_id")): e for e in evidence}
+    detail_origin = canonical_url(source_metadata.get("normalized_source_url") or source_metadata.get("source_url"))
+    japanese_scope = {}
+    if record.get("country_code") == "JP":
+        from worker.discovery.fpds_discovery.jp_disclosures import ISSUERS, confirmed_product
+        if record.get("bank_code") in ISSUERS:
+            for origin in {detail_origin, *(canonical_url(e.get("source_url")) for e in evidence)}:
+                japanese_scope[origin] = confirmed_product(record["bank_code"], record.get("product_type"),
+                    str(record.get("product_name") or ""), origin, evidence)
     omitted = {}
     verified = []
     for name, value in list(payload.items()):
@@ -912,6 +944,18 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
             reason = "evidence_source_mismatch"
         elif not exact_quote(quote, e.get("evidence_excerpt")):
             reason = "exact_evidence_missing"
+        elif japanese_scope and not japanese_scope.get(origin):
+            reason = "japanese_product_scope_unverified"
+        elif str(e.get("anchor_type") or "").startswith("jp_disclosure_") and (
+            record.get("country_code") != "JP" or e.get("anchor_value") != record.get("product_name")
+            or canonical_url(source_metadata.get("normalized_source_url") or source_metadata.get("source_url")) != origin
+        ):
+            reason = "native_product_mismatch"
+        elif record.get("country_code") == "JP" and name in {"interest_rate", "interest_rate_summary"} and (
+            "お借入利率（年利）" in str(e.get("evidence_excerpt")) and "ご利用限度額" in str(e.get("evidence_excerpt"))
+        ) and (e.get("anchor_type") != "jp_disclosure_annual_rates" or name != "interest_rate_summary"
+               or text(quote) != text(e.get("evidence_excerpt")) or text(value) != text(quote)):
+            reason = "native_rate_conditions_incomplete"
         elif (e.get("anchor_type") == "linked_card_pricing_terms" and not stored_link_belongs(
                     record, m, evidence, source_metadata, origin)):
             reason = "current_detail_pricing_link_unproven"
@@ -919,8 +963,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
                 and not _native_record_belongs(record, e, source_metadata)):
             reason = "native_product_mismatch"
         elif field_contract(name).unit in {"currency_amount", "percentage_points", "structured_rows"} and (
-            any(code != record.get("currency") and re.search(pattern, product_currency_context(record, str(e.get("evidence_excerpt") or "")), re.I)
-                for code, pattern in CURRENCY_PATTERNS.items())
+            _currency_codes(product_currency_context(record, str(e.get("evidence_excerpt") or ""))) - {record.get("currency")}
             or ("€" in str(quote) and record.get("currency") != "EUR")
             or ("£" in str(quote) and record.get("currency") != "GBP")
         ):
@@ -985,6 +1028,8 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         reasons.append(identity_reason)
     if not identity_verified:
         reasons.append("product_identity_unverified")
+    if japanese_scope and not japanese_scope.get(detail_origin):
+        reasons.append("japanese_product_scope_unverified")
     if source_metadata.get("discovery_role") != "detail":
         reasons.append("source_is_not_product_detail")
     # Explicit official evidence takes precedence over a traced country default.
@@ -1000,6 +1045,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
         and currency_mapping.get("official_verification_status") in ("match", "mismatch")
         and currency_mapping.get("normalized_value") == currency
         and _official_url(currency_origin, source_metadata.get("official_domain_allowlist"))
+        and (not japanese_scope or japanese_scope.get(currency_origin))
         and any(isinstance(source, dict) and canonical_url(source.get("url")) == currency_origin for source in currency_mapping.get("official_web_sources", []))
         and exact_quote(currency_mapping.get("official_evidence_quote"), currency_evidence.get("evidence_excerpt"))
         and quote_supports_value("currency", currency, str(currency_mapping.get("official_evidence_quote") or ""))):
@@ -1020,7 +1066,8 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     additional_missing = missing_additional_required_fields(resolved_fields, payload)
     if additional_missing:
         reasons.append("required_collection_fields_missing")
-    receipt = {"version": ACCURACY_VERSION, "accepted": not reasons, "verified_fields": sorted(set(verified)), "omitted_fields": omitted, "reasons": reasons, "missing_fields": list(dict.fromkeys([*([] if identity_verified else ["product_name"]), *([] if currency_verified else ["currency"]), *quality.missing_fields, *additional_missing]))}
+    version = JP_ACCURACY_VERSION if record.get("country_code") == "JP" else ACCURACY_VERSION
+    receipt = {"version": version, "accepted": not reasons, "verified_fields": sorted(set(verified)), "omitted_fields": omitted, "reasons": reasons, "missing_fields": list(dict.fromkeys([*([] if identity_verified else ["product_name"]), *([] if currency_verified else ["currency"]), *quality.missing_fields, *additional_missing]))}
     if resolved_fields["configured"]:
         receipt["additional_required_fields"] = additional_required_fields(resolved_fields)
         receipt["collection_field_country"] = resolved_fields["country_code"]

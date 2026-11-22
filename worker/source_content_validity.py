@@ -6,7 +6,15 @@ def has_pdf_header(body: bytes) -> bool:
     header = body[:1024].removeprefix(b"\xef\xbb\xbf").lstrip()
     return re.match(rb"%PDF-\d\.\d\b", header) is not None
 
+
+def is_access_denied_html(body: bytes) -> bool:
+    sample = body[:16384].lower()
+    return (b"errors.edgesuite.net/" in sample and b"don't have permission to access" in sample
+            and re.search(rb"<(?:title|h1)>\s*access denied\s*</(?:title|h1)>", sample) is not None)
+
 def html_unavailable_reason(body):
+    if is_access_denied_html(body):
+        return "access_denied"
     soup=BeautifulSoup(body.decode('utf-8',errors='replace'),'html.parser')
     main=soup.find('main') or soup
     candidates=[soup.title,main.find('h1')]

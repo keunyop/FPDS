@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { collectionPreflightMessage } from "@/lib/admin-collection-feedback";
-import { Sparkles } from "lucide-react";
+import { ListPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -420,8 +420,8 @@ export function BankRegistrySurface({
         title={copy.title}
       />
 
-      <article className="border border-border bg-card p-4">
-        <form action={buildAdminHref("/admin/banks", new URLSearchParams(), locale)} className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,220px)_auto]">
+      <article className="ledger-frame">
+        <form action={buildAdminHref("/admin/banks", new URLSearchParams(), locale)} className="grid min-w-0 gap-3 border-b border-border p-4 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,12rem)_auto]">
           <input name="locale" type="hidden" value={locale} />
           <label className="grid min-w-0 gap-2 text-sm">
             <span className="font-medium text-foreground">{copy.search}</span>
@@ -437,9 +437,6 @@ export function BankRegistrySurface({
             </Link>
           </div>
         </form>
-      </article>
-
-      <article className="min-w-0 border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-foreground">
@@ -448,8 +445,8 @@ export function BankRegistrySurface({
           </div>
           <div className="flex flex-wrap gap-2">
             {userRole === "admin" ? (
-              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90" onClick={openAiModal} type="button">
-                <Sparkles aria-hidden="true" className="size-4" />
+              <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-foreground hover:border-primary hover:text-primary" onClick={openAiModal} type="button">
+                <ListPlus aria-hidden="true" className="size-4" />
                 {copy.addBanksWithAi}
               </button>
             ) : null}
@@ -500,12 +497,12 @@ export function BankRegistrySurface({
             {error}
           </p>
         ) : null}
-        <div aria-label={copy.bankList} className="overflow-x-auto px-4 py-3" role="region" tabIndex={0}>
-          <table className="w-full min-w-[800px] border-separate border-spacing-0">
+        <div aria-label={copy.bankList} role="region">
+          <table className="ledger-table bank-ledger" role="table">
             <thead>
               <tr className="text-left text-xs text-muted-foreground">
                 {canManage ? (
-                  <th className="border-b border-border px-3 py-3 font-medium" scope="col">
+                  <th className="ledger-select w-14 border-b border-border px-2 font-medium" scope="col">
                     <label className="inline-flex size-10 cursor-pointer items-center justify-center">
                       <input
                         aria-label={copy.selectAllBanks}
@@ -517,7 +514,7 @@ export function BankRegistrySurface({
                     </label>
                   </th>
                 ) : null}
-                <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.bank}</th>
+                <th className="ledger-identity border-b border-border px-3 py-3 font-medium" scope="col">{copy.bank}</th>
                 <th className="border-b border-border px-3 py-3 font-medium" scope="col">{copy.catalogs}</th>
                 <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.generatedSources}</th>
                 <th className="border-b border-border px-3 py-3 text-right font-medium" scope="col">{copy.activeProducts}</th>
@@ -532,9 +529,9 @@ export function BankRegistrySurface({
                 </tr>
               ) : (
                 banks.items.map((item) => (
-                  <tr className="align-top text-sm" key={item.bank_code}>
+                  <tr className="text-sm" data-selected={selectedBankCodes.includes(item.bank_code) || undefined} key={item.bank_code}>
                     {canManage ? (
-                      <td className="border-b border-border/70 px-3 py-4">
+                      <td className="ledger-select px-2">
                         <label className="inline-flex size-10 cursor-pointer items-center justify-center">
                           <input
                             aria-label={copy.selectBank(item.bank_name)}
@@ -546,16 +543,16 @@ export function BankRegistrySurface({
                         </label>
                       </td>
                     ) : null}
-                    <td className="border-b border-border/70 px-3 py-4">
-                      <div className="flex min-w-0 items-start gap-3">
+                    <td className="ledger-identity px-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <BankLogoMark
                           alt={item.logo_alt_text}
                           bankCode={item.bank_code}
                           bankName={item.bank_name}
                           logoUrl={item.logo_url}
                         />
-                        <div className="grid min-w-0 gap-1">
-                          <button className="min-h-10 min-w-0 bg-transparent p-0 text-left font-medium text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
+                        <div className="grid min-w-0">
+                          <button className="min-h-10 min-w-0 bg-transparent p-0 text-left font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline" onClick={() => openBankModal(item.bank_code)} type="button">
                             {item.bank_name}
                           </button>
                           <span className="text-xs text-muted-foreground">
@@ -564,15 +561,15 @@ export function BankRegistrySurface({
                         </div>
                       </div>
                     </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-foreground">
+                    <td className="ledger-scope px-3 text-foreground" data-label={copy.catalogs}>
                       {item.catalog_product_types.length > 0 ? (
                         formatProductTypeList(item.catalog_product_types, productTypeLabelMap)
                       ) : (
                         <span className="text-muted-foreground">{copy.none}</span>
                       )}
                     </td>
-                    <td className="border-b border-border/70 px-3 py-4 text-right font-mono tabular-nums text-foreground">{item.generated_source_count}</td>
-                    <td className="border-b border-border/70 px-3 py-4 text-right font-mono tabular-nums text-foreground">
+                    <td className="ledger-sources px-3 text-right tabular-nums text-foreground" data-label={copy.generatedSources}>{item.generated_source_count}</td>
+                    <td className="ledger-products px-3 text-right font-semibold tabular-nums text-foreground" data-label={copy.activeProducts}>
                       {typeof item.active_product_count === "number" ? item.active_product_count : "—"}
                     </td>
                   </tr>

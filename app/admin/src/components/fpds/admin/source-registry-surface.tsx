@@ -145,9 +145,8 @@ export function SourceRegistrySurface({ filters, registry, locale }: SourceRegis
 
   return (
     <section className="grid min-w-0 gap-5">
-      <AdminTableAutoRefresh locale={locale} />
-
       <AdminPageHeader
+        badges={<AdminTableAutoRefresh locale={locale} />}
         description={copy.description}
         path={copy.path}
         title={copy.title}

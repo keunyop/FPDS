@@ -1382,12 +1382,8 @@ def _filter_sources_to_allowed_domains(
 
 
 def _url_country_scope_conflicts(*, url: str, country_code: str) -> bool:
-    requested = str(country_code or "").strip().lower()
-    if requested not in {"ca", "us"}:
-        return False
-    segments = [segment for segment in urlsplit(url).path.lower().split("/") if segment][:3]
-    explicit_market = next((segment for segment in segments if segment in {"ca", "us"}), None)
-    return explicit_market is not None and explicit_market != requested
+    from worker.discovery.fpds_discovery.url_utils import url_country_scope_conflicts
+    return url_country_scope_conflicts(country_code=country_code, normalized_url=url)
 
 
 def _url_locale_conflicts(*, url: str, source_language: str) -> bool:

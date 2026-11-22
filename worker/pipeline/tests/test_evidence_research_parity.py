@@ -46,7 +46,7 @@ def input_from_segments(*, bank, url, product, name, segments, role='detail', pa
     return ExtractionInput(ctx, chunks)
 
 
-def run_services(inputs, *, provider=False):
+def run_services(inputs, *, provider=False, taxonomy_registry=None):
     """Use ordinary services and the actual captured full-context origin map."""
     detail = inputs[0]
     ctx = detail.context
@@ -71,7 +71,7 @@ def run_services(inputs, *, provider=False):
         artifact = json.loads(build_object_store(ecfg).get_object_bytes(object_key=extraction.extracted_storage_key))
         lookup = NormalizationArtifactLookup(ctx.source_document_id, ctx.snapshot_id, ctx.parsed_document_id,
             extraction.model_execution_id, extraction.extracted_storage_key, None, ctx.bank_code, ctx.country_code,
-            ctx.source_type, 'en', ctx.source_metadata, ctx.source_metadata['normalized_source_url'])
+            ctx.source_type, ctx.source_language, ctx.source_metadata, ctx.source_metadata['normalized_source_url'])
         item = _build_normalization_input(source_id=ctx.source_id, lookup=lookup, artifact=artifact)
         repo = PsqlNormalizationRepository(NormalizationDatabaseConfig('postgresql://fixture', 'public'))
         repo._resolved_schema = 'public'
@@ -95,11 +95,12 @@ def run_services(inputs, *, provider=False):
         evidence_links = [ValidationEvidenceLink(**row) for row in normalization.field_evidence_link_records]
         vi = ValidationInput(ctx.source_id, ctx.source_document_id, ctx.snapshot_id, ctx.parsed_document_id,
             record['candidate_id'], 'run', normalization.normalization_model_execution_id,
-            normalization.normalized_storage_key, None, ctx.bank_code, ctx.country_code, ctx.source_type, 'en',
+            normalization.normalized_storage_key, None, ctx.bank_code, ctx.country_code, ctx.source_type, ctx.source_language,
             ctx.source_metadata, record, evidence_links, [])
         vcfg = ValidationRoutingStorageConfig('filesystem', 'test', 'validated', 'hot', filesystem_root=tmp)
         validation = ValidationRoutingService(storage_config=vcfg, object_store=build_object_store(vcfg)).validate_and_route_inputs(
-            run_id='run', inputs=[vi], taxonomy_registry={str(record['product_type']): {str(record['subtype_code'])}},
+            run_id='run', inputs=[vi], taxonomy_registry=(taxonomy_registry if taxonomy_registry is not None
+                else {str(record['product_type']): {str(record['subtype_code'])}}),
             routing_config=ValidationRoutingConfig('phase1', .85, .6, set())).source_results[0]
         return record, validation, extraction
 

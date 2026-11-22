@@ -2032,7 +2032,7 @@ def _canonical_product_type_family(product_type: str | None) -> str | None:
         return "chequing"
     if "mortgage" in normalized:
         return "mortgage"
-    if "personal" in normalized and "loan" in normalized:
+    if normalized == "business-loan" or ("personal" in normalized and "loan" in normalized):
         return "personal-loan"
     if "line" in normalized and "credit" in normalized:
         return "line-of-credit"

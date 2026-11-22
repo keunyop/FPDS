@@ -4,6 +4,32 @@ Past completed work notes were removed at the Product Owner's request.
 Required cutover reports, current decisions/risks and unfinished goal ownership
 remain in the repository; previous journal revisions remain in Git history.
 
+## 2026-11-21 — Desktop Admin ledger
+
+Applied the operator-selected desktop ledger direction using Damir Sokolovsky's
+[Unslop](https://github.com/heydamir/unslop) design skill (CC BY 4.0).
+The shared shell now has one desktop navigation area. The bank registry joins
+search and selection with its counts. The run ledger aligns status, identity,
+start time and outcomes. Live refresh sits beside the page heading. Updated
+the Admin design system and information architecture to match.
+
+The local production build, typecheck and all 56 Admin tests passed. Chrome
+exercised bank and run lists in English, Korean and Japanese at 1440, 768 and
+390 pixels against a local fixture API. All 18 combinations fit their available
+width. Checked selection, detail loading and Escape, advanced filters, dirty
+refresh pause, read-only access, empty results and API failure. The fixture
+recorded zero writes and Chrome reported zero uncaught exceptions. Screenshots
+and the measurement report are under `tmp/admin-ledger-design/`. Deployment
+remains a separate release step.
+
+## 2026-11-21 — Higo and Kagoshima readiness
+
+Registered JP, both Japanese-language banks, eight JP taxonomy entries and 16 catalog scopes in the authorized development database. A second connection verified the configuration and zero JP Runs or canonical products. Rehearsing the registration again showed zero changes. A disposable PostgreSQL test covered initial setup, conflicting ownership rollback, repeated execution and JP login.
+
+The [source inventory](../../worker/discovery/data/jp_higo_kagoshima_listings.csv) has 149 entries from the personal and business directories. The [readiness report](jp-higo-kagoshima-readiness-2026-11-21.md) records source dispositions, the development boundary, and gaps for debit, structured deposits, FX and guarantees. Higo returned a 403 or an access-denied HTML body in the tested environment. Kagoshima's full HTML snapshot yielded 26 scoped PDF leads. A checksum-pinned credit-line disclosure passed ordinary local extraction, normalization and automatic routing including its eight annual brackets and revision terms. The alternate account, corporate scope, removed rate and wrong-document evidence were rejected.
+
+The API suite passed 596 tests with disposable PostgreSQL. The Worker suite ran in four groups (375, 214, 302 and 161 tests). Its obsolete parser version assertion was updated and passed on rerun. Two pre-existing Canadian fixture checksum tests also fail against the committed HEAD bytes (19 National Bank captures and four Oaken captures). The final focused Worker run passed 53 tests. The JP directory and PDF matched their pinned hashes. The foundation baseline, source domains, documentation links and diff checks passed. Runtime deployment and paid collection are pending.
+
 ## 2026-11-21 — Official bank documents and collection accuracy
 
 Compared the Floorplan with the actual document selection, snapshot, extraction and approval paths. Both discovery stages now recognize named GIC/CD withdrawal documents. Market and language checks cover document selection and the final response. Relative links use the captured directory, offer query spelling survives the request, and a shared document can retain both parent snapshots at the run URL limit. The snapshot and parser agree on PDF bytes.

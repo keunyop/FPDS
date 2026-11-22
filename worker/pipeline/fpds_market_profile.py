@@ -250,6 +250,38 @@ _COUNTRY_OVERRIDES.update({
     ),
 })
 
+# The Japanese lending documents distinguish a repayment period from a
+# credit-line renewal and a credit limit from a disbursed loan amount.
+_JP_REQUIREMENTS = {
+    "chequing": (_requirement("monthly_fee", "monthly_fee", "public_display_fee"),),
+    "savings": (
+        _requirement("ongoing_rate", "standard_rate", "public_display_rate"),
+        _requirement("monthly_fee", "monthly_fee", "public_display_fee"),
+    ),
+    "gic": (
+        _requirement("rate", "term_rate_table", "interest_rate_summary", "standard_rate"),
+        _requirement("term", "term_length_text", "term_rate_table"),
+        _requirement("opening_amount", "minimum_deposit"),
+    ),
+    "mortgage": (
+        _requirement("rate", "interest_rate_summary", "mortgage_rate"),
+        _requirement("rate_type", "rate_type"),
+        _requirement("term", "term_length_text"),
+    ),
+}
+for _kind in ("personal-loan", "business-loan"):
+    _JP_REQUIREMENTS[_kind] = (
+        _requirement("rate", "interest_rate_summary", "interest_rate"),
+        _requirement("amount", "loan_amount_text"),
+        _requirement("term", "term_length_text"),
+    )
+for _kind in ("line-of-credit", "business-line-of-credit"):
+    _JP_REQUIREMENTS[_kind] = (
+        _requirement("rate", "interest_rate_summary", "interest_rate"),
+        _requirement("limit", "credit_limit_text"),
+    )
+_COUNTRY_OVERRIDES.update({("JP", kind): fields for kind, fields in _JP_REQUIREMENTS.items()})
+
 
 # Opportunistic comparison qualifiers: extract from the same bounded evidence
 # pass, without making an undisclosed fact a new publication requirement.
@@ -270,6 +302,9 @@ _TYPE_SUPPLEMENTAL_FIELDS = {
 }
 
 _COUNTRY_SUPPLEMENTAL_FIELDS: dict[tuple[str, str], tuple[str, ...]] = {
+    ("JP", "line-of-credit"): ("eligibility_text", "interest_calculation_method"),
+    ("JP", "business-loan"): ("eligibility_text", "fees_text", "security_requirement"),
+    ("JP", "business-line-of-credit"): ("eligibility_text", "fees_text", "interest_calculation_method"),
     # Retain proved decision qualifiers from the same pass, without turning
     # opening balances/amounts into PH publication prerequisites.
     ("PH", "chequing"): ("minimum_balance", "minimum_deposit"),
@@ -317,8 +352,10 @@ def country_product_profile(
         resolved_country = "*"
     if requirements is None:
         return None
-    optional_requirements = tuple(r for r in requirements if r.key not in _REQUIRED_COMPARISON_KEYS[normalized_type])
-    requirements = tuple(r for r in requirements if r.key in _REQUIRED_COMPARISON_KEYS[normalized_type])
+    required_keys = ({r.key for r in requirements} if normalized_country == "JP"
+                     else _REQUIRED_COMPARISON_KEYS[normalized_type])
+    optional_requirements = tuple(r for r in requirements if r.key not in required_keys)
+    requirements = tuple(r for r in requirements if r.key in required_keys)
     if normalized_type == "chequing":
         requirements += (
             _requirement("transaction_structure", "unlimited_transactions_flag", "included_transactions", "transaction_fee"),
@@ -329,12 +366,12 @@ def country_product_profile(
             _requirement("withdrawal_access", "redeemable_flag", "non_redeemable_flag"),
             _requirement("withdrawal_consequences", "early_withdrawal_penalty", required_when="early_access_not_prohibited"),
         )
-    elif normalized_type == "line-of-credit":
+    elif normalized_type in {"line-of-credit", "business-line-of-credit"}:
         requirements += (_requirement("security", "secured_flag", "security_requirement", "collateral_text"),)
     return CountryProductProfile(
         country_code=resolved_country,
         product_type=normalized_type,
-        profile_version=MARKET_PROFILE_VERSION,
+        profile_version="2026-11-21-jp-v1" if normalized_country == "JP" else MARKET_PROFILE_VERSION,
         requirements=requirements,
         supplemental_fields=tuple(field for field in dict.fromkeys((
             *(field for r in optional_requirements for field in r.alternatives),
@@ -345,7 +382,8 @@ def country_product_profile(
 
 
 def market_profile_product_type_is_known(product_type: str | None) -> bool:
-    return str(product_type or "").strip().lower() in _DEFAULT_REQUIREMENTS
+    kind = str(product_type or "").strip().lower()
+    return kind in _DEFAULT_REQUIREMENTS or kind in _JP_REQUIREMENTS
 
 
 def market_profile_metadata(

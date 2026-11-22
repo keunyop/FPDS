@@ -33,7 +33,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
@@ -171,10 +170,6 @@ function isActive(pathname: string | null, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function currentItem(pathname: string | null) {
-  return [...primaryItems, ...toolItems].find((item) => isActive(pathname, item.href)) ?? primaryItems[0];
-}
-
 function AdminNavLink({
   item,
   locale,
@@ -191,7 +186,7 @@ function AdminNavLink({
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild className="bg-transparent" isActive={active} tooltip={label}>
+      <SidebarMenuButton asChild className="rounded-md bg-transparent data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold data-[active=true]:text-sidebar-accent-foreground data-[active=true]:[&_svg]:text-sidebar-primary" isActive={active} tooltip={label}>
         <Link
           aria-current={active ? "page" : undefined}
           href={buildAdminHref(item.href, new URLSearchParams(), locale)}
@@ -201,40 +196,6 @@ function AdminNavLink({
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
-  );
-}
-
-function PrimaryNav({
-  locale,
-  pathname,
-}: {
-  locale: AdminLocale;
-  pathname: string | null;
-}) {
-  const copy = copyByLocale[locale];
-
-  return (
-    <nav aria-label={copy.dailyWork} className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex">
-      {primaryItems.map((item) => {
-        const active = isActive(pathname, item.href);
-
-        return (
-          <Link
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "inline-flex min-h-10 items-center border-b-2 px-3 text-sm font-semibold transition-colors",
-              active
-                ? "border-sidebar-primary text-sidebar-foreground"
-                : "border-transparent text-sidebar-foreground/60 hover:border-sidebar-border hover:text-sidebar-foreground",
-            )}
-            href={buildAdminHref(item.href, new URLSearchParams(), locale)}
-            key={item.key}
-          >
-            {navItemLabel(copy, locale, item.key)}
-          </Link>
-        );
-      })}
-    </nav>
   );
 }
 
@@ -300,14 +261,8 @@ function AppSidebar({
 
   return (
     <Sidebar className="top-14 h-[calc(100svh-3.5rem)]! border-r bg-sidebar" collapsible="icon">
-      <SidebarHeader className="px-2 py-2">
-        <div className="flex items-center justify-end">
-          <SidebarTrigger aria-label={copy.toggleNavigation} className="hidden size-10 md:inline-flex" />
-        </div>
-      </SidebarHeader>
-
       <SidebarContent>
-        <SidebarGroup className="px-2 py-2">
+        <SidebarGroup className="px-2 pt-5 pb-2">
           <SidebarGroupLabel>{copy.dailyWork}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-1">
@@ -395,21 +350,18 @@ function AdminShell({
 }: AdminShellProps) {
   const pathname = usePathname();
   const copy = copyByLocale[locale];
-  const selectedItem = currentItem(pathname);
 
   return (
     <SidebarProvider className={cn("min-h-screen bg-transparent", className)}>
       <div className="flex min-h-screen w-full flex-col">
         <header className="sticky top-0 z-40 border-b border-sidebar-border bg-sidebar text-sidebar-foreground">
           <div className="flex h-14 items-center gap-3 px-4 md:px-6">
-            <SidebarTrigger aria-label={copy.toggleNavigation} className="size-10 md:hidden" />
+            <SidebarTrigger aria-label={copy.toggleNavigation} className="size-10 shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" />
             <p className="shrink-0 text-base font-semibold tracking-[-0.02em] text-sidebar-foreground">{copy.brand}</p>
-
-            <PrimaryNav locale={locale} pathname={pathname} />
 
             <div className="ml-auto flex items-center gap-2">
               <AdminCountrySwitcher countryCode={countryCode} csrfToken={csrfToken} locale={locale} />
-              <span className="hidden min-h-8 items-center border border-sidebar-border bg-sidebar-accent px-2.5 text-[11px] font-semibold text-sidebar-foreground/75 sm:inline-flex">
+              <span className="border-l border-sidebar-border pl-3 font-mono text-xs text-sidebar-foreground/80">
                 {environmentLabel}
               </span>
             </div>
@@ -427,15 +379,6 @@ function AdminShell({
 
           <SidebarInset className="min-w-0 bg-transparent pb-20 md:pb-0">
             <div className="flex min-h-[calc(100vh-3.5rem)] min-w-0 flex-col">
-              <div className="border-b border-border bg-card px-4 py-2.5 md:hidden">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-foreground">{navItemLabel(copy, locale, selectedItem.key)}</p>
-                  <span className="inline-flex min-h-8 items-center border border-border bg-muted px-2.5 text-[11px] font-semibold text-muted-foreground">
-                    {environmentLabel}
-                  </span>
-                </div>
-              </div>
-
               <main className="min-w-0 max-w-full flex-1 overflow-x-hidden px-4 py-6 md:px-6 lg:px-8">
                 {children}
               </main>

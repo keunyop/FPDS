@@ -27,6 +27,8 @@ def source_block_reason(row: dict[str, Any], *, revalidate: bool = False) -> str
         return None
     if str(row.get("latest_stage_status") or "").lower() == "failed":
         error = str(row.get("latest_error_summary") or "").lower()
+        if "official html access denied" in error or "(access_denied)" in error:
+            return "source_access_denied"
         # The format-aware probe/capture now supports real PDF responses on
         # HTML registry hints. Recheck this precise old format mismatch once
         # through normal bounded preflight, without relaxing other failures.

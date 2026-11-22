@@ -526,8 +526,9 @@ show bounded model completion/status context when needed for quality diagnosis.
 - review detail and source detail may use split-pane layouts on desktop
 - tablet/mobile collapse heavy diagnostic panes into stacked sections,
   progressive disclosure, or a dedicated work-card representation
-- dense desktop tables remain inside labelled, keyboard-focusable horizontal
-  scroll regions instead of widening the document
+- Bank and run ledgers align comparable figures and dates in desktop columns.
+  Compact workspaces reflow those records with their controls and detail links.
+  Other wide tables use labelled, keyboard-focusable scroll regions.
 - state badges, confidence, validation status, and role/status controls remain
   visible on smaller screens
 - interactive targets are at least 40px in compact Admin contexts; anonymous

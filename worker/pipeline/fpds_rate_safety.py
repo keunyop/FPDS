@@ -239,6 +239,9 @@ def contains_explicit_rate_percentage(value: object) -> bool:
     text = str(value or "")
     if contains_unresolved_financial_placeholder(text):
         return False
+    if "お借入利率" in text:
+        from worker.native_japanese_disclosure import annual_limit_schedule
+        return annual_limit_schedule(text)
     for pattern in _EXPLICIT_RATE_PERCENTAGE_PATTERNS:
         for match in pattern.finditer(text):
             percentage = re.search(_NUMERIC_PERCENTAGE, match.group())

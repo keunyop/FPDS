@@ -245,12 +245,12 @@ export function AdminTableAutoRefresh({
   }, [lastRefreshAt, locale, messages.lastRefresh, messages.waiting]);
 
   return (
-    <div className="-mb-4 flex min-h-8 justify-end">
+    <div className="flex min-h-8 min-w-0 items-center">
       <span aria-atomic="true" aria-live="polite" className="sr-only" role="status">
         {stateLabel}
         {detail ? `: ${detail}` : ""}
       </span>
-      <div className="inline-flex min-h-8 max-w-full flex-wrap items-center justify-end gap-x-2 gap-y-1 border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground">
+      <div className="inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
         <span
           aria-hidden="true"
           className={

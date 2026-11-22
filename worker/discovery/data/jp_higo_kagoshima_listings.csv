@@ -1,0 +1,150 @@
+bank_code,index_url,listing_label_ja,document_url,discovery_type,disposition
+HIGO,https://www.higobank.co.jp/individual/description.html,空き家対策支援ローン,https://www.higobank.co.jp/individual/pdf/loan_vacant_house.pdf,personal-loan,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,総合口座,https://www.higobank.co.jp/individual/pdf/kouza_sougou.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,国債総合口座（※新規のお取扱いは中止しております。）,https://www.higobank.co.jp/individual/pdf/kouza_sougou_kokusai.pdf,,closed
+HIGO,https://www.higobank.co.jp/individual/description.html,普通預金,https://www.higobank.co.jp/individual/pdf/yokin_futsuu.pdf,chequing,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,決済用普通預金,https://www.higobank.co.jp/individual/pdf/yokin_futsuu_kessaiyou.pdf,chequing,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,"普通預金""教育応援口座まごっこ""※新規のお取り扱いは終了いたしました。",https://www.higobank.co.jp/individual/pdf/yokin_magokko.pdf,,closed
+HIGO,https://www.higobank.co.jp/individual/description.html,出生祝い金付普通預金ひごっこ口座,https://www.higobank.co.jp/upload/individual_higokko.pdf,chequing,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,（WEB口座）普通預金,https://www.higobank.co.jp/individual/pdf/yokin_futsuu_web.pdf,chequing,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,納税準備預金※新規のお取り扱いは終了いたしました。,https://www.higobank.co.jp/individual/pdf/yokin_nouzeijunbi.pdf,,closed
+HIGO,https://www.higobank.co.jp/individual/description.html,当座預金※新規のお取り扱いは終了いたしました。,https://www.higobank.co.jp/individual/pdf/yokin_touza.pdf,,closed
+HIGO,https://www.higobank.co.jp/individual/description.html,貯蓄預金,https://www.higobank.co.jp/individual/pdf/yokin_chochiku.pdf,savings,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,通知預金※新規のお取り扱いは終了いたしました。,https://www.higobank.co.jp/individual/pdf/yokin_tsuuchi.pdf,,closed
+HIGO,https://www.higobank.co.jp/individual/description.html,スーパー定期,https://www.higobank.co.jp/individual/pdf/teiki_super.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,スーパー定期 300,https://www.higobank.co.jp/individual/pdf/teiki_super300.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,期日指定定期預金※新規のお取り扱いは終了いたしました。,https://www.higobank.co.jp/individual/pdf/teiki_kijitsushitei.pdf,,closed
+HIGO,https://www.higobank.co.jp/individual/description.html,大口定期,https://www.higobank.co.jp/individual/pdf/teiki_ooguchi.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,一般財形預金,https://www.higobank.co.jp/individual/pdf/zaikei_ippan.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,財形住宅預金,https://www.higobank.co.jp/individual/pdf/zaikei_jutaku.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,財形年金預金,https://www.higobank.co.jp/individual/pdf/zaikei_nenkin.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,変動金利定期預金,https://www.higobank.co.jp/individual/pdf/teiki_hendoukinri.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,変動金利定期預金300,https://www.higobank.co.jp/individual/pdf/teiki_hendoukinri300.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,変動金利定期預金 1000,https://www.higobank.co.jp/individual/pdf/teiki_hendoukinri1000.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,"積立定期預金""たむたむ""",https://www.higobank.co.jp/individual/pdf/teiki_tamutamu.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,定期積金※新規のお取り扱いは終了いたしました。,https://www.higobank.co.jp/individual/pdf/teiki_tsumikin.pdf,,closed
+HIGO,https://www.higobank.co.jp/individual/description.html,譲渡性預金（NCD）,https://www.higobank.co.jp/individual/pdf/yokin_joutosei.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,肥後ねんきん定期,https://www.higobank.co.jp/upload/nenkinteiki.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,肥後福祉年金定期預金,https://www.higobank.co.jp/individual/pdf/nenkinteiki_fukushi.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,肥後優育定期預金※新規のお取り扱いは終了いたしました。,https://www.higobank.co.jp/individual/pdf/teiki_higoyuuiku.pdf,,closed
+HIGO,https://www.higobank.co.jp/individual/description.html,後見支援預金,https://www.higobank.co.jp/individual/pdf/yokin_kouken.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,年金受取スタートプラン,https://www.higobank.co.jp/upload/teiki_nenkinuketoristartplan_individual.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,サステナビリティ定期預金（法人）,https://www.higobank.co.jp/upload/teiki_sustainability2024_individual.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,インターネット定期預金,https://www.higobank.co.jp/individual/pdf/teiki_net.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,外貨普通預金,https://www.higobank.co.jp/individual/pdf/gaika_futsuu.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,外貨貯蓄預金,https://www.higobank.co.jp/individual/pdf/gaika_chochiku.pdf,savings,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,オープン外貨定期預金,https://www.higobank.co.jp/individual/pdf/gaika_teiki_open.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,スワップ（先物予約）付外貨定期預金,https://www.higobank.co.jp/individual/pdf/gaika_teiki_swap.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,肥後銀行住宅ローン,https://www.higobank.co.jp/individual/pdf/loan_housing.pdf,mortgage,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,肥後銀行住宅ローン「プレミアムプラン」,https://www.higobank.co.jp/individual/pdf/loan_housing_premium.pdf,mortgage,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,ホームローン,https://www.higobank.co.jp/individual/pdf/loan_home.pdf,mortgage,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,肥後銀行 住宅金融支援機構証券化住宅ローン「ひごフラット35」,https://www.higobank.co.jp/individual/pdf/loan_home_higoflat35.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,不動産活用ローン（リバースモーゲージ型ローン）,https://www.higobank.co.jp/individual/pdf/loan_revmortgage.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/description.html,住宅ローン「親子2世代プラン」,https://www.higobank.co.jp/individual/pdf/loan_juutaku_oyako.pdf,mortgage,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,リフォームローン,https://www.higobank.co.jp/individual/pdf/loan_reform.pdf,personal-loan,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,教育ローン,https://www.higobank.co.jp/individual/pdf/loan_kyouiku.pdf,personal-loan,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,マイローン,https://www.higobank.co.jp/individual/pdf/loan_my_n.pdf,personal-loan,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,マイローン（レディースプラン）,https://www.higobank.co.jp/individual/pdf/loan_my_l.pdf,personal-loan,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,WEBフリーローン,https://www.higobank.co.jp/individual/pdf/loan_webfree.pdf,personal-loan,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,マイカーローン,https://www.higobank.co.jp/individual/pdf/loan_mycar.pdf,personal-loan,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,カードローン BEST ASSIST,https://www.higobank.co.jp/individual/pdf/loan_card_bestassist.pdf,line-of-credit,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,カードローン Back Up®,https://www.higobank.co.jp/individual/pdf/loan_card_backup.pdf,line-of-credit,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,WEBカードローン,https://www.higobank.co.jp/individual/pdf/loan_webcard.pdf,line-of-credit,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,教育カードローン,https://www.higobank.co.jp/individual/pdf/loan_card_kyouiku.pdf,line-of-credit,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,住宅ローン（災害復旧ローン）,https://www.higobank.co.jp/individual/pdf/loan_juutaku_saigai.pdf,mortgage,listed
+HIGO,https://www.higobank.co.jp/individual/description.html,ホームローン（災害復旧ローン）,https://www.higobank.co.jp/individual/pdf/loan_home_saigai.pdf,mortgage,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,総合口座,https://www.kagin.co.jp/library/100_kojin/pdf/2026/02_sougou_kouza.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,普通預金,https://www.kagin.co.jp/library/100_kojin/pdf/2026/01_futu_yokin.pdf,chequing,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,決済用普通預金,https://www.kagin.co.jp/library/100_kojin/pdf/2023/03_kessan_futu_20230110.pdf,chequing,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん貯蓄預金メルヘン,https://www.kagin.co.jp/library/100_kojin/pdf/2026/04_neruhen.pdf,savings,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん積立定期預金ポケット,https://www.kagin.co.jp/library/100_kojin/pdf/07_moomin_poket_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,期日指定定期預金,https://www.kagin.co.jp/library/100_kojin/pdf/05_kijitsushitei_yokin_20191001.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん積立定期預金マイフォト通帳,https://www.kagin.co.jp/library/100_kojin/pdf/myphot_2019.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん旅行積立らくらく,https://www.kagin.co.jp/library/100_kojin/pdf/12_tumitate_rakuraku_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,積立定期預金「年輪」,https://www.kagin.co.jp/library/100_kojin/pdf/09_teiki_nenrin_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,一般財形預金,https://www.kagin.co.jp/library/100_kojin/pdf/22_ippan_zaikei_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,財形年金預金,https://www.kagin.co.jp/library/100_kojin/pdf/23_nenkin_zaikei_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,財形住宅預金,https://www.kagin.co.jp/library/100_kojin/pdf/25_zeikei_juutaku_02_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん教育資金贈与専用口座 「孫ん貯め（まごんため）」,https://www.kagin.co.jp/library/100_kojin/pdf/2026/mago.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,通知預金,https://www.kagin.co.jp/library/100_kojin/pdf/11_tuuti_yokin_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,後見支援預金,https://www.kagin.co.jp/library/100_kojin/pdf/2025/kokensienyokin.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,譲渡性預金(NCD),https://www.kagin.co.jp/library/100_kojin/pdf/13_NCD_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,当座預金,https://www.kagin.co.jp/library/100_kojin/pdf/10_touza_yokin_20191001.pdf,chequing,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎんゆうゆう定期,https://www.kagin.co.jp/library/100_kojin/pdf/19_yuyu_teiki_3010.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,納税準備預金,https://www.kagin.co.jp/library/100_kojin/pdf/14_nouzei_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,スーパー定期(複利型),https://www.kagin.co.jp/library/100_kojin/pdf/16_super_fukuri_20191001.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,大口定期預金,https://www.kagin.co.jp/library/100_kojin/pdf/21_ooguti_yokin_20191001.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,変動金利定期預金(複利型),https://www.kagin.co.jp/library/100_kojin/pdf/18_hendou_fukuri_20191001.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,スーパー定期(単利型),https://www.kagin.co.jp/library/100_kojin/pdf/15_super_tanri_20191001.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,屋久島ボランティア預金,https://www.kagin.co.jp/library/100_kojin/pdf/06_yakushima_yokin_20191001.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,変動金利定期預金(単利型),https://www.kagin.co.jp/library/100_kojin/pdf/17_hendou_tanri_20191001.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん年金定期,https://www.kagin.co.jp/library/100_kojin/pdf/20_nenkin_teiki_202106.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,外貨普通預金,https://www.kagin.co.jp/library/100_kojin/pdf/2026/gaika_hutsuuyokin.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,自動継続外貨定期預金 (米ドル建),https://www.kagin.co.jp/library/100_kojin/pdf/2026/jidoukeizoku_gaikateikiyokin_beidoru.pdf,gic,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,自動継続外貨定期預金 (豪ドル建・ユーロ建),https://www.kagin.co.jp/library/100_kojin/pdf/2026/jidoukeizoku_gaikateikiyokin.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん住宅ローン（プロパーコース）,https://www.kagin.co.jp/library/100_kojin/pdf/2026/list_home_proper.pdf,mortgage,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん住宅ローン (全国保証Vスマート),https://www.kagin.co.jp/library/100_kojin/pdf/2026/list_loan_homezen_smart.pdf,mortgage,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎんリフォームローン,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/04/reformloan.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん空き家対策支援ローン （リフォームローン）,https://www.kagin.co.jp/library/kojin/loan/pdf/2025/akiyataisakuloan.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎんリフォームローン 令和8年熊本地震被災者向け特別金利,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/reform_tokubetsu_2.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん空き家対策支援ローン （リフォームローン） 令和8年熊本地震被災者向け特別金利,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/akiya_tokubetsu_2.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん住まいるサポート,https://www.kagin.co.jp/library/100_kojin/pdf/loan_2022/list_loan_smilesup_20220401.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,住宅関連融資つなぎ融資制度,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/list_loan_tunagi.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん住宅資金借換ローン (無担保コース),https://www.kagin.co.jp/library/100_kojin/pdf/list_loan_karikae_20200401.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん賃貸マンションローン,https://www.kagin.co.jp/library/100_kojin/pdf/loan_2022/list_loan_tintaim_20220401.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎんフリーローン,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/04/freeloan.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎんマイカーローン,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/04/mycarloan.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎんマイカーローン 令和8年熊本地震被災者向け特別金利,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/mycar_tokubetsu_2.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん教育ローン (証書貸付型・無担保),https://www.kagin.co.jp/library/kojin/loan/pdf/2026/04/educationloan_shogashi.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎん教育ローン (当座貸越型),https://www.kagin.co.jp/library/kojin/loan/pdf/2026/04/educationloan_togashi.pdf,line-of-credit,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,中小企業勤労者福祉サービスセンターローン,https://www.kagin.co.jp/library/100_kojin/pdf/loan_2023/list_loan_servicesl_202204.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎんカードローンS（エス） （返済用口座不要型）,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/cardloanS_huyo.pdf,line-of-credit,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,かぎんカードローンS（エス） （返済用口座引落型）,https://www.kagin.co.jp/library/kojin/loan/pdf/2026/cardloanS_hikiotoshi.pdf,line-of-credit,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,MOZECAローン ※新規申込受付終了,https://www.kagin.co.jp/library/kojin/loan/pdf/2025/MOZECAloan.pdf,,closed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,輸出信用状取引,https://www.kagin.co.jp/library/100_kojin/pdf/list_gaika_yusyutu.056.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,輸入信用状取引,https://www.kagin.co.jp/library/100_kojin/pdf/list_gaika_yunyu_20221003.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,外国送金事前申込サービス,https://www.kagin.co.jp/library/100_kojin/pdf/2026/jizenmoushikomiservice.pdf,,service
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,外国被仕向送金,https://www.kagin.co.jp/library/100_kojin/pdf/2026/list_gaika_hisoukin.pdf,,service
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,外国為替先物予約,https://www.kagin.co.jp/library/100_kojin/pdf/2024/list_gaika_sakimono.pdf,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/kojin/savings/100_016.html,外貨両替,https://www.kagin.co.jp/library/100_kojin/pdf/2025/list_gaika_ryougae.pdf,,service
+KAGOSHIMA,https://www.kagin.co.jp/kojin/loan/housing/loan_list.html,かぎん住宅ローン（みのり信用保証Ⅴ）,https://www.kagin.co.jp/library/100_kojin/pdf/2024/list_loan_homeminori.pdf,mortgage,listed
+KAGOSHIMA,https://www.kagin.co.jp/kojin/loan/housing/loan_list.html,かぎん「長期固定金利型住宅ローン(機構買取型)」,https://www.kagin.co.jp/library/100_kojin/102_kariru/pdf/2026/list_loan_koteikinrihome.pdf,,issuer_check
+HIGO,https://www.higobank.co.jp/business/service/funding/,事業者カードローン,https://www.higobank.co.jp/business/service/funding/funds/detail_g.html?anc=a08,business-line-of-credit,listed
+HIGO,https://www.higobank.co.jp/business/service/funding/,当貸ローン,https://www.higobank.co.jp/business/service/funding/funds/detail_g.html?anc=a09,business-line-of-credit,listed
+HIGO,https://www.higobank.co.jp/business/service/funding/,サステナビリティ・リンク・ローン,https://www.higobank.co.jp/business/service/funding/funds/sll.html,business-loan,listed
+HIGO,https://www.higobank.co.jp/business/service/funding/,ポジティブ・インパクト・ファイナンス,https://www.higobank.co.jp/business/service/funding/funds/pif.html,business-loan,listed
+HIGO,https://www.higobank.co.jp/business/service/funding/,ひぎんSDGsサポートローン,https://www.higobank.co.jp/business/service/funding/funds/support.html,business-loan,listed
+HIGO,https://www.higobank.co.jp/business/service/funding/,ひぎん環境サポートローン,https://www.higobank.co.jp/business/service/funding/funds/clean.html,business-loan,listed
+HIGO,https://www.higobank.co.jp/business/service/funding/,ひぎん健康企業おうえん融資制度,https://www.higobank.co.jp/business/service/funding/funds/health.html,business-loan,listed
+HIGO,https://www.higobank.co.jp/business/service/funding/,ひぎんアグリサポートローン,https://www.higobank.co.jp/business/service/funding/funds/agriculture.html,business-loan,listed
+HIGO,https://www.higobank.co.jp/business/service/funding/,熊本県制度融資,https://www.higobank.co.jp/business/service/funding/funds/?anc=a01,,issuer_check
+HIGO,https://www.higobank.co.jp/business/service/funding/,熊本市制度融資,https://www.higobank.co.jp/business/service/funding/funds/?anc=a02,,issuer_check
+HIGO,https://www.higobank.co.jp/business/service/funding/,熊本県信用保証協会保証制度,https://www.higobank.co.jp/business/service/funding/funds/?anc=a03,,issuer_check
+HIGO,https://www.higobank.co.jp/business/service/funding/,私募債,https://www.higobank.co.jp/business/service/funding/other.html?anc=a01,,issuer_check
+HIGO,https://www.higobank.co.jp/business/service/funding/,ひぎんSDGs私募債,https://www.higobank.co.jp/business/service/funding/sdgsppb/,,issuer_check
+HIGO,https://www.higobank.co.jp/business/service/funding/,シンジケートローン,https://www.higobank.co.jp/business/service/funding/other.html?anc=a03,,issuer_check
+HIGO,https://www.higobank.co.jp/business/service/funding/,アセットファイナンス（不動産流動化）,https://www.higobank.co.jp/business/service/funding/other.html?anc=a1,,issuer_check
+KAGOSHIMA,https://www.kagin.co.jp/houjin/202_support.html,かぎん事業者カードローン,https://www.kagin.co.jp/houjin/202_support/202_002_3.html,business-line-of-credit,listed
+KAGOSHIMA,https://www.kagin.co.jp/houjin/202_support.html,事業者カードローン700,https://www.kagin.co.jp/houjin/202_support/202_002_3.html,business-line-of-credit,listed
+KAGOSHIMA,https://www.kagin.co.jp/houjin/202_support.html,かぎんビジネスライン,https://www.kagin.co.jp/houjin/202_support/202_004.html,business-line-of-credit,listed
+KAGOSHIMA,https://www.kagin.co.jp/houjin/202_support.html,団信付事業者ローン,https://www.kagin.co.jp/houjin/202_support/202_007.html,business-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/houjin/202_support.html,設備投資・雇用拡大サポート,https://www.kagin.co.jp/houjin/202_support/investment.html,,issuer_check
+KAGOSHIMA,https://www.kagin.co.jp/houjin/202_support.html,創業・事業承継サポート,https://www.kagin.co.jp/houjin/202_support/succession.html,,issuer_check
+KAGOSHIMA,https://www.kagin.co.jp/houjin/202_support.html,継続型短期サポート保証,https://www.kagin.co.jp/houjin/202_support/continuation.html,,issuer_check
+HIGO,https://www.higobank.co.jp/business/service/operation/,スーパー定期,https://www.higobank.co.jp/individual/pdf/teiki_super.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/business/service/operation/,スーパー定期300,https://www.higobank.co.jp/individual/pdf/teiki_super300.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/business/service/operation/,大口定期,https://www.higobank.co.jp/individual/pdf/teiki_ooguchi.pdf,gic,listed
+HIGO,https://www.higobank.co.jp/business/service/operation/,譲渡性預金,https://www.higobank.co.jp/individual/pdf/yokin_joutosei.pdf,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/business/service/operation/,定期積金,https://www.higobank.co.jp/individual/pdf/teiki_tsumikin.pdf,,conflicting_availability
+HIGO,https://www.higobank.co.jp/business/service/operation/,通知預金,https://www.higobank.co.jp/individual/pdf/yokin_tsuuchi.pdf,,conflicting_availability
+HIGO,https://www.higobank.co.jp/landing/jcbdebit/,肥後銀行JCBデビット（一般）,https://www.higobank.co.jp/landing/jcbdebit/,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/landing/jcbdebit/,肥後銀行JCBデビット（ゴールド）,https://www.higobank.co.jp/landing/jcbdebit/,,contract_or_identity_check
+KAGOSHIMA,https://www.kagin.co.jp/jcbdebit_kagin/index.html,かぎんJCBデビット,https://www.kagin.co.jp/jcbdebit_kagin/index.html,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/business/service/support/international/exchange.html,外貨建ご融資（インパクトローン）,https://www.higobank.co.jp/business/service/support/international/exchange.html,business-loan,listed
+HIGO,https://www.higobank.co.jp/business/service/support/international/exchange.html,輸出取引,https://www.higobank.co.jp/business/service/support/international/exchange.html,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/business/service/support/international/exchange.html,輸入取引,https://www.higobank.co.jp/business/service/support/international/exchange.html,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/business/service/support/international/exchange.html,貿易関係保証等,https://www.higobank.co.jp/business/service/support/international/exchange.html,,contract_or_identity_check
+HIGO,https://www.higobank.co.jp/individual/loan/omatome/,ひぎん おまとめライフサポートローン,https://www.higobank.co.jp/individual/loan/omatome/pdf/pdf_product.pdf,personal-loan,listed
+KAGOSHIMA,https://www.kagin.co.jp/library/pdf_release/2025/news20250701_121.pdf,グリーンローン,https://www.kagin.co.jp/library/pdf_release/2025/news20250701_121.pdf,business-loan,announcement
+KAGOSHIMA,https://www.kagin.co.jp/library/pdf_release/2025/news20250701_121.pdf,ソーシャルローン,https://www.kagin.co.jp/library/pdf_release/2025/news20250701_121.pdf,business-loan,announcement
+KAGOSHIMA,https://www.kagin.co.jp/library/pdf_release/2025/news20250701_121.pdf,サステナビリティ・リンク・ローン,https://www.kagin.co.jp/library/pdf_release/2025/news20250701_121.pdf,business-loan,announcement

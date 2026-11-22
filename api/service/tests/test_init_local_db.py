@@ -5,6 +5,7 @@ from contextlib import redirect_stdout
 from dataclasses import replace
 import io
 import os
+import runpy
 from pathlib import Path
 import tempfile
 import unittest
@@ -98,6 +99,25 @@ class InitializerPostgresTests(unittest.TestCase):
     def initialize_available_migrations(self):
         with patch.object(init_local_db, 'MIGRATIONS', Path(self.folder.name)), redirect_stdout(io.StringIO()):
             init_local_db.initialize(self.settings)
+
+    def test_japan_bank_registration_is_atomic_repeatable_and_country_scoped(self):
+        self.initialize_available_migrations()
+        register = runpy.run_path(str(REPO_ROOT / "db/market-packs/jp-higo-kagoshima/register.py"))["register"]
+        with psycopg.connect(self.dsn, row_factory=dict_row) as connection:
+            connection.execute("INSERT INTO bank (bank_code,country_code,bank_name,status) VALUES ('KAGOSHIMA','CA','Existing','active')")
+            connection.commit()
+            with self.assertRaisesRegex(ValueError, "conflicts with KAGOSHIMA"), connection.transaction():
+                register(connection)
+            self.assertIsNone(connection.execute("SELECT 1 FROM bank WHERE bank_code='HIGO'").fetchone())
+            self.assertIsNone(connection.execute("SELECT 1 FROM country_registry WHERE country_code='JP'").fetchone())
+            connection.execute("DELETE FROM bank WHERE bank_code='KAGOSHIMA'")
+            self.assertIn("bank/HIGO", register(connection))
+            self.assertEqual(register(connection), [])
+            self.assertEqual(connection.execute("SELECT count(*) AS n FROM source_registry_catalog_item WHERE country_code='JP'").fetchone()["n"], 16)
+            self.assertEqual(connection.execute("SELECT count(*) AS n FROM ingestion_run").fetchone()["n"], 0)
+            _, session, _ = authenticate_user(connection, login_id="admin", password="admin", country_code="JP",
+                ip_address=None, user_agent="jp-test", request_id="jp-login", settings=self.settings)
+            self.assertEqual(session["country_code"], "JP")
 
     def test_minimal_seed_and_real_admin_login(self):
         self.initialize_available_migrations()

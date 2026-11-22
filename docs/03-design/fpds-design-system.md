@@ -44,7 +44,7 @@ The new baseline is different:
 - **Shadcnblocks becomes the implementation base** for templates, blocks, and generic interface patterns.
 - **FPDS owns only the domain layer**: product-type-aware comparison rules, evidence-aware admin workflows, public methodology/freshness communication, domain status semantics, and trilingual behavior.
 
-In practical terms, FPDS no longer starts by inventing new generic cards, tables, badges, dialogs, or shell layouts. It starts from vendor template assets and only customizes what is product-specific.
+Use existing primitives for controls, dialogs and navigation behavior. For the authenticated Admin, choose the layout from the operator's task. The desktop bank and run lists use a ledger with aligned figures, readable identities and visible status text.
 
 ---
 
@@ -352,7 +352,9 @@ When changing UI:
 
 ### 9.2 Admin
 
-Admin remains triage-first and diagnosis-oriented.
+Design the daily Admin workspace for desktop scanning. The bank and run ledgers
+lead with comparable records. The overview highlights items that need attention,
+and the detail views carry the diagnosis.
 
 Key rules:
 - overview is not a giant everything-dashboard
@@ -369,10 +371,10 @@ Key rules:
   relationships; cards are reserved for a real semantic group
 - list refresh is visible and pauses for hidden windows, focused editing, open
   dialogs, dirty state, and in-progress mutations
-- desktop module tabs and mobile bottom navigation are real route links with
+- desktop sidebar links and mobile bottom navigation are real route links with
   current-location semantics
 - controls are at least 40px in compact Admin contexts, global keyboard focus is
-  visible, tables scroll inside labelled regions, and all motion stays within
+  visible, the bank and run tables reflow within a narrow workspace, other wide tables scroll inside labelled regions, and motion stays within
   150–250ms while respecting reduced-motion
 
 ### 9.3 Shared Rules

@@ -242,7 +242,8 @@ class NormalizationService:
             from worker.pipeline.fpds_collection_accuracy import sanitize_candidate
             normalized_candidate_record, accuracy = sanitize_candidate(
                 normalized_candidate_record,
-                source_metadata=item.source_metadata,
+                source_metadata={**item.source_metadata, **({"normalized_source_url": item.normalized_source_url}
+                                 if item.normalized_source_url else {})},
                 evidence=_accuracy_evidence(item=item, run_id=run_id),
             )
             accepted_fields = set(accuracy["verified_fields"])
@@ -2928,7 +2929,7 @@ def _canonical_product_type_family(product_type: str | None) -> str | None:
         return "credit-card"
     if "mortgage" in normalized:
         return "mortgage"
-    if "line of credit" in normalized or "heloc" in normalized:
+    if normalized == "business-line-of-credit" or "line of credit" in normalized or "heloc" in normalized:
         return "line-of-credit"
     if "loan" in normalized:
         return "personal-loan"
@@ -4484,6 +4485,7 @@ def _looks_like_unsupported_security_value(*, field_name: str, context: str) -> 
             "security requirement",
             "collateral",
             "guarantor",
+            "担保・保証人",
             "co-signer",
             "cosigner",
             "pledge",
@@ -4593,6 +4595,7 @@ def _looks_like_broad_page_copy(*, field_name: str, value: str, grounding_metada
             "paid monthly",
             "paid annually",
             "daily closing balance",
+            "お利息の計算方法",
             "rate paid depends",
         )
     ):
@@ -5261,6 +5264,10 @@ def _infer_subtype_code(
 ) -> tuple[str | None, str | None]:
     if product_type is None:
         return None, None
+    if country_code == "JP":
+        # The JP pack registers the neutral subtype. Preserve the exact name
+        # and contract instead of assigning another country's deposit subtype.
+        return "other", _coalesce_string(candidate_payload.get("product_name"))
     text = " ".join(
         str(candidate_payload.get(field_name, ""))
         for field_name in (

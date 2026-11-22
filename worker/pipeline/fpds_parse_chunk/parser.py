@@ -764,6 +764,8 @@ def _parse_pdf(body: bytes) -> ParsedArtifact:
     from worker.native_single_card_pdf import single_card_purchase_records
     pages = [s.text for s in raw_segments if s.anchor_type == "page"]
     if len(pages) == len(reader.pages):
+        from worker.native_japanese_disclosure import numbered_sections
+        raw_segments.extend(_RawSegment(*row) for row in numbered_sections(pages))
         raw_segments.extend(_RawSegment(kind, owner, 1, record)
                             for kind, owner, record in single_card_purchase_records(pages))
 

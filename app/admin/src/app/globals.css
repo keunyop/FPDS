@@ -5,11 +5,11 @@
 
 :root {
   --font-ui: "Aptos", "Segoe UI Variable Text", "Noto Sans", "Malgun Gothic", "Yu Gothic UI", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-code: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 
-  --background: #edf1f2;
-  --foreground: #17272f;
-  --card: #f8faf9;
+  --background: #f5f6f5;
+  --foreground: #18272b;
+  --card: #ffffff;
   --card-foreground: #17272f;
   --popover: #ffffff;
   --popover-foreground: #17272f;
@@ -17,13 +17,13 @@
   --primary-foreground: #ffffff;
   --secondary: #dce9e7;
   --secondary-foreground: #154f4a;
-  --muted: #e1e8e9;
+  --muted: #edf0ee;
   --muted-foreground: #52636b;
   --accent: #d5e7e4;
   --accent-foreground: #154f4a;
   --destructive: #b33a43;
   --destructive-foreground: #ffffff;
-  --border: #c6d1d4;
+  --border: #d7ddda;
   --input: #bcc9cc;
   --ring: #0f6f65;
 
@@ -94,7 +94,7 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   --font-sans: var(--font-ui);
-  --font-mono: var(--font-mono);
+  --font-mono: var(--font-code);
   --radius-sm: calc(var(--radius) - 0.25rem);
   --radius-md: calc(var(--radius) - 0.125rem);
   --radius-lg: var(--radius);
@@ -152,6 +152,135 @@
 
   table tbody tr:hover {
     background: color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+}
+
+@layer components {
+  .ledger-frame {
+    @apply min-w-0 rounded-lg border border-border bg-card;
+    container-type: inline-size;
+  }
+
+  .ledger-region {
+    container-type: inline-size;
+  }
+
+  .ledger-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .ledger-table tbody td {
+    padding-block: .75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ledger-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .bank-ledger tr[data-selected] {
+    background-color: var(--accent);
+  }
+
+  .bank-ledger tr[data-selected] .ledger-select {
+    box-shadow: inset 3px 0 var(--primary);
+  }
+
+  .bank-ledger input[type="checkbox"] {
+    accent-color: var(--primary);
+  }
+
+  .run-ledger .ledger-state { width: 18%; }
+  .run-ledger .ledger-identity { width: 24%; }
+  .run-ledger .ledger-time { width: 22%; }
+
+  /* Adapt to the available workspace, including a tablet with its sidebar open. */
+  @container (max-width: 43rem) {
+    .ledger-table,
+    .ledger-table thead,
+    .ledger-table tbody {
+      display: block;
+    }
+
+    .ledger-table tr {
+      display: grid;
+      align-items: start;
+      gap: .5rem 1rem;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ledger-table tbody tr:last-child {
+      border-bottom: 0;
+    }
+
+    .ledger-table tbody td,
+    .ledger-table th {
+      min-width: 0;
+      width: auto;
+      padding: 0;
+      border: 0;
+    }
+
+    .bank-ledger tr {
+      grid-template-columns: auto 1fr 1fr;
+      grid-template-areas:
+        "select identity identity"
+        "scope scope scope"
+        "sources sources products";
+    }
+
+    .bank-ledger thead tr {
+      grid-template-areas: "select identity identity";
+      align-items: center;
+      padding-block: .25rem;
+    }
+
+    .ledger-select { grid-area: select; }
+    .ledger-identity { grid-area: identity; }
+    .ledger-scope { grid-area: scope; }
+    .ledger-state { grid-area: state; }
+    .ledger-time { grid-area: time; }
+    .ledger-sources { grid-area: sources; }
+    .ledger-products { grid-area: products; }
+    .ledger-action { grid-area: action; }
+    .ledger-table td[colspan] { grid-column: 1 / -1; }
+
+    .bank-ledger td[data-label]::before {
+      content: attr(data-label);
+      content: attr(data-label) / "";
+      display: block;
+      margin-bottom: .125rem;
+      color: var(--muted-foreground);
+      font: 500 .75rem/1rem var(--font-ui);
+    }
+
+    .bank-ledger td[data-label],
+    .run-ledger td {
+      text-align: start;
+    }
+
+    .bank-ledger thead th:not(.ledger-identity, .ledger-select),
+    .run-ledger thead {
+      @apply sr-only;
+    }
+
+    .run-ledger tr {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        "state state"
+        "identity identity"
+        "time time"
+        "sources products"
+        "action action";
+    }
+
+    .run-ledger :is(.ledger-state, .ledger-identity, .ledger-time) {
+      width: auto;
+    }
   }
 }
 

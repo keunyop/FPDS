@@ -538,6 +538,16 @@ def _captured_native_product_title(context, candidates):
     discovery = context.source_metadata.get("discovery_metadata") or {}
     url = _canonical_official_source_url(context.source_metadata.get("normalized_source_url") or context.source_metadata.get("source_url"))
     identity = None
+    if context.country_code == "JP" and context.source_language == "ja":
+        from worker.discovery.fpds_discovery.jp_disclosures import ISSUERS, confirmed_product
+        titles = {c.anchor_value for c in candidates if c.anchor_type == "jp_disclosure_identity"
+                  and c.source_document_id == context.source_document_id and c.source_snapshot_id == context.snapshot_id
+                  and c.parsed_document_id == context.parsed_document_id and c.bank_code == context.bank_code
+                  and c.country_code == "JP" and c.source_language == "ja" and c.anchor_value
+                  and context.bank_code in ISSUERS and confirmed_product(context.bank_code, _infer_product_type(context),
+                      c.anchor_value, url, [{"source_url": url, "evidence_excerpt": c.evidence_excerpt}])}
+        if len(titles) == 1:
+            return next(iter(titles))
     # Literal H1 ownership and independently corroborating SEO/URL tokens,
     # not confidence or mutable metadata alone, establish the native name.
     from worker.native_information_records import name_key, names_match
@@ -1487,6 +1497,19 @@ def _append_captured_decision_facts(*, context, candidates, fields, requested_fi
                 if penalty:
                     values["early_withdrawal_penalty"] = penalty
                     field_quotes["early_withdrawal_penalty"] = penalty
+        if own and context.country_code == "JP" and c.anchor_value == identity and c.anchor_type.startswith("jp_disclosure_"):
+            if c.anchor_type == "jp_disclosure_identity":
+                values["product_name"] = identity
+            elif c.anchor_type == "jp_disclosure_limit":
+                values.update(credit_limit_text=quote, currency="JPY")
+            elif c.anchor_type == "jp_disclosure_annual_rates":
+                values["interest_rate_summary"] = quote
+            elif c.anchor_type == "jp_disclosure_security":
+                values["security_requirement"] = quote
+            elif c.anchor_type == "jp_disclosure_eligibility":
+                values["eligibility_text"] = quote
+            elif c.anchor_type == "jp_disclosure_calculation":
+                values["interest_calculation_method"] = quote
         for name,value in values.items():
             field_quote = field_quotes.get(name, quote)
             # These registered optional facts are obtained from the SAME
@@ -5746,6 +5769,10 @@ def _extract_official_fields_with_ai(
                 "reference-rate formula, or representative example together with all disclosed assumptions such as term, "
                 "credit quality, discount, date, LTV, and rate lock; when a discount affects the displayed rate, also state "
                 "the disclosed qualifying account, automatic-payment, relationship, and existing-customer conditions. "
+                "For Japan preserve the exact issuer, Japanese variant, eligibility, rate and amount bands. "
+                "Distinguish revolving カードローン and business 事業資金. A discount, guarantee fee, "
+                "tax or exchange equivalent cannot establish the rate or denomination of principal. "
+                "Exclude closed offers and intermediary-only products. "
                 "For a conditional deposit APY, preserve new-customer eligibility, qualifying balance and timing, the "
                 "fallback rate outcome, the as-of date, and variability when the official source states them. "
                 "Do not collapse a conditional example to one scalar. "

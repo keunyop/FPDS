@@ -183,6 +183,8 @@ class SnapshotCaptureService:
         known_snapshots = {
             record.dedupe_key: record for record in (existing_snapshots or [])
         }
+        from worker.discovery.fpds_discovery.jp_disclosures import check_capture_listings
+        listing_errors, listing_responses = check_capture_listings(sources, self.fetch_policy, self.fetcher)
         if self.max_concurrency <= 1 or len(sources) <= 1:
             source_results = [
                 self._capture_single_source(
@@ -192,6 +194,8 @@ class SnapshotCaptureService:
                     request_id=request_id,
                     known_snapshots=known_snapshots,
                     preflight_result=preflight_result,
+                    listing_error=listing_errors.get(source.source_id),
+                    listing_response=listing_responses.get(source.resolved_url),
                 )
                 for source in sources
             ]
@@ -206,6 +210,8 @@ class SnapshotCaptureService:
                         request_id=request_id,
                         known_snapshots=dict(known_snapshots),
                         preflight_result=preflight_result,
+                        listing_error=listing_errors.get(source.source_id),
+                        listing_response=listing_responses.get(source.resolved_url),
                     )
                     for source in sources
                 ]
@@ -238,6 +244,8 @@ class SnapshotCaptureService:
         request_id: str | None,
         known_snapshots: dict[tuple[str, str], ExistingSnapshotRecord],
         preflight_result: PreflightDriftResult | None,
+        listing_error: str | None = None,
+        listing_response: FetchedResponse | None = None,
     ) -> SnapshotSourceResult:
         attempt_count = 0
         last_error: str | None = None
@@ -250,6 +258,8 @@ class SnapshotCaptureService:
         while attempt_count < (1 if action else self.max_attempts):
             attempt_count += 1
             try:
+                if listing_error:
+                    raise NonRetryableFetchError(listing_error)
                 if action:
                     observed = next((s for s in known_snapshots.values() if s.source_document_id == source.source_document_id
                         and s.snapshot_id == action.get("observed_snapshot_id") and s.checksum == action.get("capture_checksum")), None)
@@ -257,6 +267,8 @@ class SnapshotCaptureService:
                         raise NonRetryableFetchError("Unbound evidence acquisition action")
                 if forced and self.fetcher is None:
                     fetched = fetch_rendered_response(source.resolved_url, self.fetch_policy)
+                elif listing_response is not None:
+                    fetched = listing_response
                 elif self.fetcher is None:
                     fetched = fetch_response(source.resolved_url, self.fetch_policy,
                         browser_fallback_format="pdf" if source.source_type == "pdf" else None)
@@ -448,6 +460,10 @@ def _build_checksum(body: bytes) -> str:
 
 
 def _validate_fetched_payload(*, source: CaptureSource, fetched: FetchedResponse) -> str:
+    discovery = source.source_metadata.get("discovery_metadata")
+    if (isinstance(discovery, dict) and discovery.get("selection_path") == "named_official_disclosure"
+            and fetched.final_url != source.resolved_url):
+        raise NonRetryableFetchError("Named disclosure redirected away from its listed document.")
     if (url_country_scope_conflicts(country_code=source.country_code, normalized_url=fetched.final_url)
             or url_locale_conflicts_source_language(source_language=source.source_language, normalized_url=fetched.final_url)):
         raise NonRetryableFetchError("Official document resolved outside the selected market or language.")

@@ -25,13 +25,13 @@ export function BankLogoMark({
 
   return (
     <span
-      className="flex h-10 w-14 shrink-0 items-center justify-center"
+      className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-card"
       data-bank-logo
     >
       {showLogo ? (
         <img
           alt={alt ?? `${bankName} logo`}
-          className="block h-6 w-12 object-contain"
+          className="block h-6 w-8 object-contain"
           decoding="async"
           height={24}
           loading="lazy"
@@ -40,7 +40,7 @@ export function BankLogoMark({
           width={48}
         />
       ) : (
-        <span className="text-[10px] font-semibold tracking-tight text-foreground">
+        <span aria-hidden="true" className="font-mono text-[10px] font-semibold text-muted-foreground">
           {bankCode.slice(0, 4)}
         </span>
       )}

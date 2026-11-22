@@ -164,7 +164,7 @@ def url_country_scope_conflicts(*, country_code: str, normalized_url: str) -> bo
     requested = str(country_code or "").strip().lower()
     if not requested:
         return False
-    known_markets = {"ca", "us", "ph"}
+    known_markets = {"ca", "us", "ph", "jp"}
     parsed = urlparse(str(normalized_url or ""))
     hostname = str(parsed.hostname or "").lower().strip(".")
     segments = [segment.lower().replace("_", "-") for segment in parsed.path.split("/") if segment]
@@ -180,7 +180,7 @@ def url_country_scope_conflicts(*, country_code: str, normalized_url: str) -> bo
     for segment in segments[:3]:
         if segment in known_markets:
             explicit_markets.add(segment)
-        locale_match = re.fullmatch(r"[a-z]{2}-(ca|us|ph)", segment)
-        if locale_match:
+        locale_match = re.fullmatch(r"[a-z]{2}-([a-z]{2})", segment)
+        if locale_match and locale_match.group(1) in known_markets:
             explicit_markets.add(locale_match.group(1))
     return bool(explicit_markets - {requested})

@@ -42,6 +42,18 @@ _US_DISCOVERY_OVERRIDES: dict[str, dict[str, object]] = {
 }
 
 
+_JP_DISCOVERY_KEYWORDS = {
+    "chequing": ("普通預金", "決済用普通預金", "当座預金"),
+    "savings": ("貯蓄預金",),
+    "gic": ("定期預金", "スーパー定期", "大口定期", "変動金利定期"),
+    "mortgage": ("住宅ローン", "ホームローン"),
+    "personal-loan": ("フリーローン", "マイカーローン", "マイローン", "証書貸付型"),
+    "line-of-credit": ("カードローン", "当座貸越型"),
+    "business-loan": ("事業性融資", "事業者ローン", "事業資金融資", "サポートローン"),
+    "business-line-of-credit": ("事業者カードローン", "当貸ローン", "ビジネスライン"),
+}
+
+
 def localize_product_type_definition(
     *,
     country_code: str,
@@ -50,7 +62,15 @@ def localize_product_type_definition(
     """Return discovery-only vocabulary without changing the canonical type code."""
 
     localized = dict(definition)
-    if str(country_code or "").strip().upper() != "US":
+    country = str(country_code or "").strip().upper()
+    if country == "JP":
+        kind = str(definition.get("product_type_code") or "").strip().lower()
+        keywords = _JP_DISCOVERY_KEYWORDS.get(kind)
+        if keywords:
+            localized.update(display_name=keywords[0], discovery_keywords=list(keywords),
+                             description=" / ".join(keywords))
+        return localized
+    if country != "US":
         return localized
 
     product_type_code = str(definition.get("product_type_code") or "").strip().lower()

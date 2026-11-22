@@ -215,7 +215,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
             </p>
           </div>
 
-          <div className="mt-3 grid overflow-hidden rounded-lg border border-border bg-card sm:grid-cols-2">
+          <div className="mt-3 grid overflow-hidden rounded-lg border border-border bg-card sm:auto-cols-fr sm:grid-flow-col">
             {attentionItems.map((item) => {
               const Icon = item.icon;
               const stateLabel = !item.available
@@ -226,7 +226,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
 
               return (
                 <Link
-                  className="group min-w-0 border-b border-border p-4 transition-colors last:border-b-0 hover:bg-accent/45 md:border-r md:even:border-r-0 xl:border-b-0 xl:even:border-r xl:last:border-r-0"
+                  className="group min-w-0 border-b border-border p-5 transition-colors last:border-b-0 hover:bg-accent/35 focus-visible:-outline-offset-2 sm:border-r sm:border-b-0 sm:last:border-r-0"
                   href={item.href}
                   key={item.label}
                 >
@@ -246,7 +246,7 @@ export default async function AdminOverviewPage({ searchParams }: AdminOverviewP
                     </div>
                     <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
                   </div>
-                  <p className="mt-4 break-words font-mono text-xl font-semibold tracking-[-0.02em] text-foreground">{item.value}</p>
+                  <p className="mt-3 break-words text-3xl font-semibold tracking-tight text-foreground">{item.value}</p>
                   <div className="mt-3 flex items-center justify-between gap-3 text-xs">
                     <span className="text-muted-foreground">{item.hint}</span>
                     <span

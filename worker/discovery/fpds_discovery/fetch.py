@@ -200,6 +200,8 @@ def fetch_response(
                 redirect_count=redirect_handler.redirect_count,
             )
             access_challenge_kind = _html_access_challenge_kind(fetched_response)
+            if access_challenge_kind == "access_denied":
+                raise NonRetryableFetchError(f"Official HTML access denied for {final_url}.")
             rate_fallback_requested = _should_try_browser_rendered_rate_fallback(
                 fetched_response,
                 policy,
@@ -662,6 +664,9 @@ def _html_access_challenge_kind(response: FetchedResponse) -> str | None:
 
     if not response.content_type.lower().startswith(("text/html", "application/xhtml+xml")):
         return None
+    from worker.source_content_validity import is_access_denied_html
+    if is_access_denied_html(response.body):
+        return "access_denied"
     decoded = response.body[:512_000].decode(
         _get_charset(response.headers.get("content-type", "")),
         errors="replace",
