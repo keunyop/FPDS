@@ -751,6 +751,10 @@ def _unlimited_is_channel_only(quote: str) -> bool:
         r"(?:public transit|ATM(?:\s+s)?s?|ABMs?|wire|e[- ]?transfer)\b", text(quote), re.I))
 
 
+def current_receipt_version(country_code: str | None) -> str:
+    return JP_ACCURACY_VERSION if country_code == "JP" else ACCURACY_VERSION
+
+
 def acceptance_receipt_valid(record: Mapping, payload: Mapping | None = None) -> bool:
     p = payload if payload is not None else record.get("candidate_payload", {})
     receipt = p.get(RECEIPT_KEY, {}) if isinstance(p, Mapping) else {}
@@ -1066,7 +1070,7 @@ def sanitize_candidate(record: dict, *, source_metadata: Mapping, evidence: list
     additional_missing = missing_additional_required_fields(resolved_fields, payload)
     if additional_missing:
         reasons.append("required_collection_fields_missing")
-    version = JP_ACCURACY_VERSION if record.get("country_code") == "JP" else ACCURACY_VERSION
+    version = current_receipt_version(record.get("country_code"))
     receipt = {"version": version, "accepted": not reasons, "verified_fields": sorted(set(verified)), "omitted_fields": omitted, "reasons": reasons, "missing_fields": list(dict.fromkeys([*([] if identity_verified else ["product_name"]), *([] if currency_verified else ["currency"]), *quality.missing_fields, *additional_missing]))}
     if resolved_fields["configured"]:
         receipt["additional_required_fields"] = additional_required_fields(resolved_fields)

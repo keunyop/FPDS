@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 import unittest
 from unittest.mock import patch
 
-from worker.pipeline.fpds_collection_accuracy import ACCURACY_VERSION, RECEIPT_KEY, payload_digest
+from worker.pipeline.fpds_collection_accuracy import ACCURACY_VERSION, JP_ACCURACY_VERSION, RECEIPT_KEY, payload_digest
 
 from api_service.candidate_auto_promotion import (
     _has_ambiguous_product_boundary,
@@ -90,6 +90,30 @@ def _candidate_row(*, validation_issue_codes: list[str] | None = None) -> dict[s
 
 
 class CandidateAutoPromotionTests(unittest.TestCase):
+    def test_japan_promotion_requires_matching_receipt_and_assessment(self):
+        for receipt_version, assessment_version, expected in [
+            (JP_ACCURACY_VERSION, JP_ACCURACY_VERSION, "promoted"),
+            (JP_ACCURACY_VERSION, ACCURACY_VERSION, "ai_grounding_insufficient"),
+            (ACCURACY_VERSION, ACCURACY_VERSION, "legacy_accuracy_not_assessed"),
+        ]:
+            with self.subTest(receipt_version=receipt_version, assessment_version=assessment_version):
+                candidate = _candidate_row()
+                candidate.update(country_code="JP", bank_code="HIGO", currency="JPY",
+                                 product_name="貯蓄預金", source_language="ja", legacy_fixture=True)
+                payload = candidate["candidate_payload"]
+                payload.update(product_name="貯蓄預金", currency="JPY")
+                payload[RECEIPT_KEY] = {"version": receipt_version, "accepted": True,
+                                        "digest": payload_digest(candidate, payload)}
+                candidate["collection_ai_assessment"]["contract_version"] = assessment_version
+                connection = _Connection([_policy_rows(), [candidate], None, None, [], None,
+                                          None, None, None, None, [], None])
+                result = promote_auto_validated_candidates(connection)
+                if expected == "promoted":
+                    self.assertEqual(result["promoted_count"], 1, result)
+                else:
+                    self.assertEqual(result["skipped_items"][0]["skip_reason"], expected)
+                    self.assertFalse(any("INSERT INTO review_task" in sql for sql, _ in connection.calls))
+
     def test_legacy_candidate_is_unchanged_without_implicit_migration(self):
         candidate = _candidate_row()
         candidate["legacy_fixture"] = True

@@ -17,7 +17,7 @@ from api_service.db import open_connection
 from api_service.review_detail import _apply_canonical_approval, _approved_product_name, _coerce_mapping
 from api_service.security import new_id, utc_now
 from worker.pipeline.fpds_approval_policy import comparison_quality
-from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid, RECEIPT_KEY, ACCURACY_VERSION
+from worker.pipeline.fpds_collection_accuracy import acceptance_receipt_valid, current_receipt_version, RECEIPT_KEY
 
 if TYPE_CHECKING:
     from psycopg import Connection
@@ -69,7 +69,8 @@ def promote_auto_validated_candidates(
     for row in rows:
         candidate_id = str(row["candidate_id"])
         receipt = _coerce_mapping(_coerce_mapping(row.get("candidate_payload")).get(RECEIPT_KEY))
-        if receipt.get("version") != ACCURACY_VERSION:
+        version = current_receipt_version(row.get("country_code"))
+        if receipt.get("version") != version:
             # Historical candidates are left untouched. No implicit migration.
             skipped_items.append({"candidate_id": candidate_id, "skip_reason": "legacy_accuracy_not_assessed", "action": "unchanged"})
             continue
@@ -161,7 +162,7 @@ def promote_auto_validated_candidates(
             continue
         collection_ai_assessment = _coerce_mapping(row.get("collection_ai_assessment"))
         if _requires_collection_ai_grounding(row) and not _collection_ai_assessment_is_eligible(
-            collection_ai_assessment
+            collection_ai_assessment, version
         ):
             reason_code = "ai_grounding_insufficient"
             review_task_id = _queue_candidate_for_review(
@@ -586,8 +587,8 @@ def _requires_collection_ai_grounding(row: dict[str, Any]) -> bool:
     return True
 
 
-def _collection_ai_assessment_is_eligible(assessment: dict[str, Any]) -> bool:
-    return (assessment.get("contract_version") == ACCURACY_VERSION
+def _collection_ai_assessment_is_eligible(assessment: dict[str, Any], version: str) -> bool:
+    return (assessment.get("contract_version") == version
             and assessment.get("required") is True
             and assessment.get("eligible") is True
             and assessment.get("product_identity_verified") is True
@@ -836,7 +837,7 @@ def _queue_candidate_for_review(
     decided_at: datetime,
 ) -> str | None:
     receipt = _coerce_mapping(_coerce_mapping(row.get("candidate_payload")).get(RECEIPT_KEY))
-    if receipt.get("version") == ACCURACY_VERSION:
+    if receipt.get("version") == current_receipt_version(row.get("country_code")):
         # Only a new, explicitly versioned collection can enter this branch.
         _mark_candidate_auto_rejected(connection, candidate_id=str(row["candidate_id"]),
                                       reason_code=queue_reason_code, decided_at=decided_at)

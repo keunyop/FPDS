@@ -3,26 +3,33 @@ import re
 import unicodedata
 
 
-def annual_limit_schedule(value):
-    """Require a contiguous limit-tier schedule, including its revision rules."""
+def annual_limit_tiers(value):
+    """Return the validated rate rows in JPY and annual percentage points."""
     text = unicodedata.normalize("NFKC", value)
     if "お借入利率(年利)" not in text or "金利改定ルール" not in text:
-        return False
+        return []
     match = re.search(r"ご利用限度額\s+金利\s*\n(.*?)\n8[.]\s*金利改定ルール", text, re.S)
     if not match:
-        return False
+        return []
     rows = match[1].splitlines()
     previous = None
+    tiers = []
     for index, row in enumerate(rows):
         tier = re.fullmatch(r"\s*(?:(\d[\d,]*)\s*万円超)?\s*(?:(\d[\d,]*)\s*万円以下)?\s+(\d+(?:\.\d+)?)\s*%\s*", row)
         if not tier:
-            return False
+            return []
         low, high = (int(x.replace(",", "")) if x else None for x in tier.groups()[:2])
         if (low != previous or (high is None) != (index == len(rows) - 1)
                 or (high is not None and high <= (low or 0))):
-            return False
+            return []
         previous = high
-    return len(rows) >= 2 and "変動金利" in text and "上限金利" in text
+        tiers.append((low * 10000 if low is not None else None,
+                      high * 10000 if high is not None else None, tier[3]))
+    return tiers if len(rows) >= 2 and "変動金利" in text and "上限金利" in text else []
+
+
+def annual_limit_schedule(value):
+    return bool(annual_limit_tiers(value))
 
 
 def numbered_sections(pages):

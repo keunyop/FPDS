@@ -4,6 +4,39 @@ Past completed work notes were removed at the Product Owner's request.
 Required cutover reports, current decisions/risks and unfinished goal ownership
 remain in the repository; previous journal revisions remain in Git history.
 
+## 2026-11-27 — FPDS 승인 상품의 PF 준비 데이터와 수집 pre-flight
+
+개발 DB에 0050을 적용해 공통 정의와 버전별 조회 뷰를 만들고 은행별 읽기 명령을 추가했다. 일본 승인 증표 버전 불일치를 수정했다. API 61건과 Worker 8건이 통과했다. 별도 DB 스키마에 표본을 넣어 0과 누락, 이전 버전·타기관 근거 제외, 비활성 상태 및 다른 국가 제외, JSON 변환을 검증 후 롤백했다. 두 은행의 실행 결과와 카드론 S 실제 원문 8구간 대조는 [저장 분석](../03-design/일본_두_은행_상품팩토리_저장_분석.md)에 기록했다. 배포 Worker의 히고 원문 접근과 가고시마 한도대출 첫 실행은 후속 검증이다.
+
+## 2026-11-27 — 상품팩토리 독립 기관 등록
+
+FPDS 선행 점검에서 개발 DB의 JP 실행·두 은행의 상세 출처·정식 상품이 각각 0건임을 확인했다. 현재 가고시마 목록에서 개인 6개 유형의 26개 링크를 재확인했고 카드론 S 원문 체크섬이 테스트 입력과 일치했다. 히고 목록과 표본 PDF는 접근이 거부됐다. 일본 Worker·API 테스트 9건이 통과했다. 배포 Worker의 접근 확인과 가고시마 한도대출 첫 실행이 남아 있다. [점검 결과](../03-design/일본_두_은행_상품팩토리_저장_분석.md)
+
+肥後銀行(Higo)을 HIGO, 鹿児島銀行(Kagoshima)를 KAGO로 등록했다. PF 기관 관리에서 자기 기관을 모기관으로 지정한 두 행을 재조회하고 로그인 목록 표시를 확인했다. 기존 기관의 재조회 결과도 등록 전과 대조했다. 첫 저장의 AFE0008은 신규 행의 수정자에 인증된 계정을 지정해 해결했다. [저장 분석](../03-design/일본_두_은행_상품팩토리_저장_분석.md)에 확정 코드를 기록했다.
+
+## 2026-11-27 — 두 은행 상품팩토리 저장 분석
+
+독립 기관 운영 결정을 반영했다. 관리자 매뉴얼 §8.1과 관리자 오퍼레이션가이드 §2.1~2.2·§3을 대조해 [저장 분석](../03-design/일본_두_은행_상품팩토리_저장_분석.md)에 자기 모기관 입력, 코드 길이, 초기 권한 및 공통 정의 관리 방식을 기록했다. 기관코드 제안은 발급 전이며 다음 단계는 실제 기관 등록과 은행별 로그인 확인이다.
+
+STDA 인증 조회에서 보통예금·정기예금·주택대출의 실제 템플릿 코드와 연결 항목을 확인했다. [저장 분석](../03-design/일본_두_은행_상품팩토리_저장_분석.md)에 별도 은행 기관과 공통 조건그룹·템플릿, 승인 버전 기반 금리 구간 및 재전송 처리를 정리했다. FPDS 일본 수집 회귀 테스트 3건이 통과했다. 상품팩토리 쓰기는 실행하지 않았다. 후속 검증은 두 기관의 상위기관 참조와 실제 저장·재조회다.
+
+## 2026-11-22 — 두 은행 상품·조건 코드화
+
+[예상표](히고은행_가고시마은행_FPDS_상품수집_예상표_2026-11-22.xlsx)의 기존 Yes 73개에 공통 수신·여신 유형, 8개 상품템플릿과 L/R/I/F 조건 64개를 연결했다. 공식 설명서·11월 금리표·채널 공지에서 확인한 1,404개 값에 단위, 적용조건과 출처를 달았다. 원래 네 시트의 값·링크를 대조하고, 저장본의 참조, 선택코드, 숫자 범위 및 템플릿별 동일 조건 집합을 검사했다. 같은 공시 페이지에 있는 사업자카드론의 2,000만 엔·700만 엔 상한과 카드론 S의 상환계좌 유형별 접수 채널을 별도로 검증했다. 후속 수집은 실행 시점의 원문 및 필수조건을 검증해야 한다.
+
+## 2026-11-22 — Higo and Kagoshima collection forecast
+
+The [Korean workbook](히고은행_가고시마은행_FPDS_상품수집_예상표_2026-11-22.xlsx)
+reconciles 190 public listing and supplementary source entries into 184
+product variants, plans, and exclusion decisions. The current forecast
+includes 43 Higo and 30 Kagoshima candidates across eight configured types.
+Explicit offer periods and closure notices override stale directory entries.
+Reopened the XLSX, checked its archive and hyperlinks, reconciled every bank
+and type subtotal, and accounted for all 149 rows of the original inventory.
+The forecast uses the November 21 development registration record. No
+collection or database mutation was needed. Live evidence checks remain part
+of any subsequent collection run.
+
 ## 2026-11-21 — Desktop Admin ledger
 
 Applied the operator-selected desktop ledger direction using Damir Sokolovsky's

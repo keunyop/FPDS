@@ -1,5 +1,7 @@
 # FPDS Database Setup
 
+Migration 0050 adds the private PF channel dictionary and the `pf_channel_product` and `pf_channel_fact` views. The views read current active approved versions for configured country/bank/template combinations. Version evidence is joined by field and source bank. The dictionary contains common FPDS codes for both institutions. Actual PF template and condition IDs must be reconciled per institution. The migration seeds definitions only. Bank product values come from collection. See the [private preparation command](../api/service/README.md#pf-collection-channel).
+
 Migration 0049 registers the Admin-only retention function. It preserves every existing row and leaves historical tables in place. Deploy the migration before enabling routine Admin retention.
 
 Create a **new, empty development PostgreSQL database** with pgvector available

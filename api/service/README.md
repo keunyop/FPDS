@@ -1,5 +1,18 @@
 # FPDS API Service
 
+## PF collection channel
+
+With migration 0050 applied, run the private read-only export from `api/service`:
+
+```powershell
+uv run python -m api_service.pf_channel --env-file ../../.env.dev --country JP --bank HIGO
+uv run python -m api_service.pf_channel --env-file ../../.env.dev --country JP --bank KAGOSHIMA
+```
+
+Each JSON line identifies a current active approved product, its FPDS product/version IDs, PF institution, common template and contract revision. Read the entire stream successfully before using the result. Zero lines means no in-scope current products. Missing rows do not authorize withdrawal. Use approved lifecycle changes when implementing the PF writer.
+
+The conditions array currently maps evidenced currency (L02), minimum deposit (R01), term-deposit rate tables (I01) and supported Kagoshima credit-line limits and annual rate tiers (R09/R10/I02). Decimal values can be exact decimal strings. Term labels, notes, interval endpoints and inclusivity stay with their values. The `source_facts` object contains the other version-linked verified values with their FPDS field type, unit and private evidence IDs. `conditions_without_value` lists template conditions with no prepared value, including unimplemented mappings. Keep the output internal. The PF writer must resolve the common codes and applicable context against the institution's PF definitions.
+
 The [collection rules](../../docs/03-design/collection-accuracy-policy.md) describe the current document selection and acceptance contract. Use the [operator guide](../../descent/은행_상품_수집_검증_가이드.md) to interpret Runs and approval counts. Dated collection notes below describe earlier versions.
 
 ## Current native features and linked essential FAQs - 2026-10-13
